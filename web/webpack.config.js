@@ -9,7 +9,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "public"),
-    filename: '[name].[chunkhash].js'
+    filename: '[name].[chunkhash].js',
+    publicPath: "/"
   },
   module: {
     rules: [
@@ -42,6 +43,7 @@ module.exports = {
     })
   ],
   devServer: {
-    open: true
+    open: true,
+    contentBase: path.join(__dirname, "src"),
   },
 };
