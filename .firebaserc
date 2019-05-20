@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "cactus-app-stage"
+    "default": "cactus-app-stage",
+    "stage": "cactus-app-stage",
+    "prod": "cactus-app-prod"
   }
 }
