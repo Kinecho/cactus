@@ -6,10 +6,9 @@ module.exports = {
   mode: "development",
   entry: {
     main: "./src/scripts/index.js",
-    // styles: "./src/styles/index.scss"
   },
   output: {
-    path: path.resolve(__dirname, "build"),
+    path: path.resolve(__dirname, "public"),
     filename: '[name].[chunkhash].js'
   },
   module: {
