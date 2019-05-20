@@ -1,5 +1,8 @@
 import "./../styles/index.scss"
 
+//this is replaced by webpack
+console.log("analyticsId", __GOOGLE_ANALYTICS_ID__)
+
 document.addEventListener('DOMContentLoaded', function() {
     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
     // // The Firebase SDK is initialized and available here!
