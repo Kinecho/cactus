@@ -1,0 +1,13 @@
+{
+  "name": "cactus-web",
+  "version": "1.0.0",
+  "description": "Static website for cactus app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "cp ./src/* ./public && cp ./assets/* ./public",
+    "open": "npm run predeploy && open ./public/index.html"
+  },
+  "author": "Neil Poulin | Kinecho",
+  "license": "ISC"
+}
