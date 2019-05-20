@@ -1,0 +1,189 @@
+:root {
+  font-size: 62.5%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: #07454C;
+  font: 1.8rem "Lato", sans-serif;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.page {
+  margin: 0 auto;
+  text-align: center;
+}
+@media (min-width: 1140px) {
+  .page {
+    max-width: 1200px;
+    text-align: left;
+  }
+}
+
+header {
+  padding: 2.4rem;
+}
+
+#hero h1 {
+  font-weight: bold;
+  margin: 0.8rem 2.4rem 0;
+}
+#hero .subtext {
+  margin: 3.2rem 2.4rem;
+}
+
+#phoneContainer {
+  background: url(images/yellowBlob.svg) center top 155px no-repeat;
+  background-size: 745px;
+  height: 34rem;
+  max-height: 50vh;
+  overflow: hidden;
+}
+#phoneContainer img {
+  display: block;
+  margin-left: -240px;
+  transform: translateX(50%);
+}
+
+form {
+  display: flex;
+  flex-flow: column wrap;
+}
+
+input[type=email] {
+  border: 1px solid #33CCAB;
+  border-radius: 3rem;
+  display: block;
+  font-size: 1.8rem;
+  margin: 0 2.4rem 1.6rem;
+  padding: 1.2rem 1.6rem;
+  transition: border-color 0.3s ease-in;
+}
+input[type=email]:hover {
+  border-color: #29A389;
+}
+
+button {
+  background-color: #33CCAB;
+  border: 0;
+  border-bottom: 4px solid #29A389;
+  border-radius: 3rem;
+  color: white;
+  font-size: 1.8rem;
+  margin: 0 2.4rem 5.6rem;
+  padding: 1.6rem 2.4rem;
+}
+
+.list h2 {
+  color: #7A3814;
+}
+.list .subtext {
+  display: none;
+}
+@media (min-width: 1140px) {
+  .list .subtext {
+    display: block;
+  }
+}
+
+#why {
+  background-color: #FFE4DA;
+  padding: 5.6rem 2.4rem 0;
+}
+#why h2 {
+  margin: 0 0 4rem;
+}
+#why .benefit {
+  padding-bottom: 5.6rem;
+}
+#why img {
+  margin-bottom: 2.4rem;
+}
+#why p {
+  color: #444;
+  margin: 0;
+}
+
+@media (min-width: 1140px) {
+  .flexContainer {
+    display: flex;
+  }
+}
+
+#how {
+  padding: 5.6rem 2.4rem 1.6rem;
+}
+#how h2 {
+  margin: 0 0 3.2rem;
+}
+#how .flexContainer {
+  background: url(images/lineMobile.svg) no-repeat 18px center;
+}
+#how .benefit {
+  align-items: flex-start;
+  display: flex;
+  margin-bottom: 4rem;
+  text-align: left;
+}
+#how .icon {
+  background-color: #B9EFE9;
+  border-radius: 4rem;
+  display: flex;
+  flex-shrink: 0;
+  height: 4.8rem;
+  justify-content: center;
+  margin-right: 1.6rem;
+  width: 4.8rem;
+}
+#how img {
+  overflow: visible;
+  padding: 0.8rem;
+}
+#how p {
+  margin: 0;
+}
+
+#email {
+  background: url(images/yellowNeedles.svg) #F9EB91;
+  background-size: 80%;
+  padding: 3.2rem 0;
+}
+#email h2 {
+  margin: 0 0 0.8rem;
+  padding: 0 2.4rem;
+}
+#email p {
+  margin: 0 0 2.4rem;
+  padding: 0 2.4rem;
+}
+#email input[type=email] {
+  border-color: #F4DD48;
+}
+#email input[type=email]:hover {
+  border-color: #F4DD48;
+}
+
+/*
+    / \
+   |v  |
+ _ |  v|
+/ ||v  |  _.
+|v||  v|/_/
+| ||v  | _
+|v||  v|| \
+ \||v  ||v |
+   |  v||  |
+   |v  ||v |
+   |  v||  |
+   |v  ||v |
+   |  v||_/
+   |v  |
+   \   |
+    \__|
+*/
+
+/*# sourceMappingURL=compiled.css.map */

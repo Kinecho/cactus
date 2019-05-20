@@ -15,15 +15,78 @@
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
 
+    <meta name="description" content="">
+    <!--link rel="apple-touch-icon" href="icon.png"-->
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#33CCAB">
+
     <!--note CSS is included via webpack-->
   </head>
-  <body>
-    <div id="message">
-      <img src="assets/images/cactus-square.png" alt="logo"/>
-      <h1>Welcome to Cactus</h1>
-      <!--<p>Get ready to feel happier</p>-->
+
+<body>
+  <div class="page">
+    <header><img src="assets/images/logo.svg" alt="Cactus logo" /></header>
+    <section id="hero">
+      <h1>See yourself and the world more positively.</h1>
+      <aside id="phoneContainer">
+        <img src="assets/images/phone.png" alt="Demo of Cactus" />
+      </aside>
+      <p class="subtext">Questions to help you become more mindful</p>
+      <form>
+        <input type="email" name="email" placeholder="Enter your email address">
+        <button type="button" onclick="alert('Hello World!')">Sign Up Free</button>
+      </form>
+    </section>
+    <section class="list" id="why">
+      <h2>The Importance of Self Reflection</h2>
+      <p class="subtext">Frequently reflecting on things you’re grateful for alters your brain to make you happier.</p>
+      <div class="flexContainer">
+        <div class="benefit">
+          <img src="assets/images/balloons.svg" alt="Happy with some balloons" />
+          <p>Alters your brain to make you happier</p>
+        </div>
+        <div class="benefit">
+          <img src="assets/images/friends.svg" alt="Picture with my friends" />
+          <p>Fortifies relationships between friends, family, and romantic partners</p>
+        </div>
+        <div class="benefit">
+          <img src="assets/images/leaves.svg" alt="Swinging in the leaves" />
+          <p>Helps you become more optimistic and feel better about your life</p>
+        </div>
+      </div>
+    </section>
+    <section class="list" id="how">
+      <h2>How It Works</h2>
+      <p class="subtext">Once you sign up, we’ll greet you each morning to help set a positive tone to your day.</p>
+      <div class="flexContainer">
+        <div class="benefit">
+          <span class="icon"><img src="assets/images/rooster.svg" alt="" /></span>
+          <p>You receive a new question every morning.</p>
+        </div>
+        <div class="benefit">
+          <span class="icon"><img src="assets/images/hourglass.svg" alt="" /></span>
+          <p>Reflect and reply when you’re done.</p>
+        </div>
+        <div class="benefit">
+          <span class="icon"><img src="assets/images/bell.svg" alt="" /></span>
+          <p>We’ll send you a reminder email in the evening.</p>
+        </div>
+        <div class="benefit">
+          <span class="icon"><img src="assets/images/cactus.svg" alt="" /></span>
+          <p>Positivity radiates through you in unexpected ways.</p>
+        </div>
+      </div>
+    </section>
+    <section id="email">
+      <h2>A Reflection a Day…</h2>
+      <p class="subtext">Mindfulness doesn’t get much simpler.</p>
+      <form>
+        <input type="email" name="email" placeholder="Enter your email address">
+        <button type="button" onclick="alert('Hello World!')">Sign Up Free</button>
+      </form>
+    </section>
+    <footer></footer>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
 
     <!--Note: JS is included via webpack-->
 
