@@ -15,3 +15,8 @@ The pre-deployment hook (`npm run predeploy`) has 3 steps:
 3) build javascript and css assets via webpack (`npm run build`). Webpack outputs the built files into the output directory (`/public`). Files generated from webpack have the hash of the contents of the file in it's name to help with caching on the CDN.     
  
 Once the pre-deployment step is completed, all the contents of the `/public` directory are uploaded to firebase and your changes will be live.
+
+
+## Analytics
+
+Apparently, universal analytics has been replaced by google tag script. See here for documentation on events: https://developers.google.com/analytics/devguides/collection/gtagjs/events

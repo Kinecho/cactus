@@ -29,4 +29,13 @@ function createGTag(){
     return _gtag
 }
 
+
+/**
+ * gtag('event', <action>, {
+      'event_category': <category>,
+      'event_label': <label>,
+      'value': <value>
+    });
+ * @type {_gtag|*}
+ */
 export const gtag = createGTag()
