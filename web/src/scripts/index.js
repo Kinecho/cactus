@@ -90,6 +90,7 @@ function setupFormListener(formId){
             event_label: `${formId} - ${emailAddress}`
         });
 
+        alert(`Success! Signed up with email ${emailAddress}`)
 
         // You must return false to prevent the default form behavior
         return false;
