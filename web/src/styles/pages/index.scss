@@ -35,11 +35,13 @@ body {
   margin: 0;
 
   @include r(768) {
-    background-position: right -155px top -155px;
+    background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
+    background-position: left 56vw top -300px, left 67vw top -110px;
+    background-size: 720px, 740px;
   }
 }
 
-.page {
+.centered {
   margin: 0 auto;
   text-align: center;
 
@@ -49,11 +51,40 @@ body {
 }
 
 header {
-  padding: 2.4rem;
+  align-items: center;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 1.6rem 2.4rem;
+  position: sticky;
+  text-align: left;
+  top: 0;
+  z-index: 1;
 
   @include r(768) {
-    padding-bottom: 0;
-    text-align: left;
+    background-color: transparent;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 2.4rem 2.4rem 0;
+    position: static;
+  }
+
+  button {
+    flex-grow: 0;
+    font-size: 1.6rem;
+    margin: 0;
+    padding: 1.2rem 2rem;
+
+    @include r(768) {
+      display: none;
+    }
+  }
+}
+
+.logo {
+  @include r(768) {
+    height: 8.8rem;
+    width: 17.8rem;
   }
 }
 
@@ -65,7 +96,7 @@ header {
      "form";
 
   @include r(768) {
-    grid-template-columns: 60% auto;
+    grid-template-columns: 66% auto;
     grid-template-areas:
       "header   demo"
       "form     demo"
@@ -96,37 +127,37 @@ header {
 
   form {
     align-self: start;
+    background-color: white;
     grid-area: form;
 
     @include r(768) {
+      background-color: transparent;
       margin: 0 2.4rem;
+      max-width: 70rem;
     }
   }
 }
 
 .phoneContainer {
   grid-area: demo;
-  height: 34rem;
-  max-height: 50vh;
+  height: 49rem;
   overflow: hidden;
+  position: relative;
   text-align: center;
+
+  &:after {
+    background: url(assets/images/device.png) center top no-repeat;
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
 
   @include r(768) {
     height: auto;
-    max-height: none;
-    order: 4;
-    position: relative;
-
-    &:after {
-      background: url(assets/images/device.png) center top no-repeat;
-      content: "";
-      display: block;
-      height: 100%;
-      left: 0;
-      position: absolute;
-      top: 0;
-      width: 100%;
-    }
   }
 
   video {
@@ -137,7 +168,7 @@ header {
 form {
   display: flex;
   flex-flow: row wrap;
-  margin-bottom: 4rem;
+  padding-bottom: 4rem;
 
   &.lower {
     @include r(768) {
@@ -169,14 +200,24 @@ input[type=email] {
 button {
   background-color: $green;
   border: 0;
-  border-bottom: 4px solid $darkGreen;
   border-radius: 3rem;
+  box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.2);
   color: white;
+  cursor: pointer;
   flex-grow: 1;
   font-size: 1.8rem;
   margin: 0 2.4rem 1.6rem;
   max-width: 28rem;
   padding: 1.6rem 2.4rem;
+  transition: box-shadow .2s ease-in, background-color .2s ease-in;
+
+  &:hover {
+    background-color: darken($green, 5%);
+  }
+
+  &:active {
+    box-shadow: none;
+  }
 
   @include r(768) {
     margin: 0 0 1.6rem;
@@ -233,6 +274,12 @@ button {
 
   img {
     margin-bottom: 2.4rem;
+  }
+
+  @include r(768) {
+    .friends img {
+      margin-top: 23px;
+    }
   }
 
   p {
