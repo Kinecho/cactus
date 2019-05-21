@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Welcome to Cactus</title>
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/6.0.2/firebase-app.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/6.0.2/firebase-auth.js"></script>
-    <script defer src="/__/firebase/6.0.2/firebase-database.js"></script>
-    <script defer src="/__/firebase/6.0.2/firebase-messaging.js"></script>
-    <script defer src="/__/firebase/6.0.2/firebase-storage.js"></script>
-    <!-- initialize the SDK after all desired features are loaded -->
-    <script defer src="/__/firebase/init.js"></script>
 
     <meta name="description" content="">
     <!--link rel="apple-touch-icon" href="icon.png"-->
@@ -22,6 +13,9 @@
 
     <!--note CSS is included via webpack-->
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
+    <!-- Load Stripe.js on your website. -->
+    <script src="https://js.stripe.com/v3"></script>
+
   </head>
 
 <body>
@@ -59,6 +53,28 @@
         </div>
       </div>
     </section>
+
+
+    <!--
+      feel free to customize any of this.
+      Just leave the ID of the button the same and the ID of the error message the same :)
+      Error message can go anywhere on the page
+    -->
+    <section class="checkout">
+      <!-- Create a button that your customers click to complete their purchase. Customize the styling to suit your branding. -->
+      <button
+              style="background-color:#6772E5;color:#FFF;padding:8px 12px;border:0;border-radius:4px;font-size:1em"
+              id="checkout-button-plan_F6oBhRX9L4WKMB"
+              role="link"
+      >
+        Checkout
+      </button>
+
+      <div id="stripe-error-message"></div>
+
+    </section>
+  <!--Placeholder checkout stuff-->
+
     <section class="how list">
       <h2>How It Works</h2>
       <p class="subtext">Once you sign up, we’ll greet you each morning to help set a positive tone to your day.</p>

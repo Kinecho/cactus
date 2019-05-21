@@ -1,0 +1,28 @@
+
+:root {
+  font-size: 62.5%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: $darkestGreen;
+  font: 1.8rem $font-stack;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.page {
+  margin: 0 auto;
+  text-align: center;
+
+  @include r(768) {
+    max-width: 1200px;
+  }
+}
+
+header {
+  padding: 2.4rem;
+}

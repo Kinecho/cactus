@@ -1,16 +1,18 @@
-import "styles/index.scss"
+import "styles/pages/index.scss"
 import {Config} from "scripts/config.js"
-import {init as initAnalytics, gtag} from 'scripts/analytics'
+// import {init as initAnalytics, gtag} from 'scripts/analytics'
+import {configureStripe} from 'scripts/checkout'
 
 
-console.log("Config", Config)
+// console.log("Config", Config)
 
-initAnalytics()
+// initAnalytics()
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("index.js loadeds")
     setupFormListener("email-form-top")
     setupFormListener("email-form-bottom")
-
+    configureStripe()
 
     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
     // // The Firebase SDK is initialized and available here!

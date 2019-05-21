@@ -21,8 +21,20 @@
     ],
     "rewrites": [
       {
-        "source": "**",
+        "source": "/success",
+        "destination": "/payment_success.html"
+      },
+      {
+        "source": "/cancel",
+        "destination": "/payment_cancel.html"
+      },
+      {
+        "source": "/",
         "destination": "/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/404.html"
       }
     ]
   },

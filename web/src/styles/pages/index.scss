@@ -1,44 +1,7 @@
-@import "mixins";
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
 
-$font-stack:    'Lato', sans-serif;
-$darkText:      #444;
-$lightGreen:    #B9EFE9;
-$green:         #33CCAB;
-$darkGreen:     #29A389;
-$darkestGreen:  #07454C;
-$lightPink:     #FFE4DA;
-$darkestPink:   #7A3814;
-$yellow:        #F9EB91;
-$darkYellow:    #F4DD48;
-$darkestYellow: #F4DD48;
-
-:root {
-  font-size: 62.5%;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  color: $darkestGreen;
-  font: 1.8rem $font-stack;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.page {
-  margin: 0 auto;
-  text-align: center;
-
-  @include r(768) {
-    max-width: 1200px;
-  }
-}
-
-header {
-  padding: 2.4rem;
-}
 
 .hero {
   @include r(768) {
@@ -67,7 +30,7 @@ header {
 }
 
 .phoneContainer {
-  background: url(assets/images/yellowBlob.svg) center top 155px no-repeat;
+  background: url(../../assets/images/yellowBlob.svg) center top 155px no-repeat;
   background-size: 745px;
   /* height: 34rem; */
   /* max-height: 50vh; */
@@ -215,10 +178,10 @@ button {
   }
 
   .flexContainer {
-    background: url(assets/images/lineMobile.svg) no-repeat 18px center;
+    background: url(../../assets/images/lineMobile.svg) no-repeat 18px center;
 
     @include r(768) {
-      background: url(assets/images/lineDesktop.svg) no-repeat center top;
+      background: url(../../assets/images/lineDesktop.svg) no-repeat center top;
     }
   }
 
@@ -268,7 +231,7 @@ button {
 }
 
 .email {
-  background: url(assets/images/yellowNeedles.svg) $yellow;
+  background: url(../../assets/images/yellowNeedles.svg) $yellow;
   background-size: 80%;
   padding: 3.2rem 0;
 
