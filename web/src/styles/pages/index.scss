@@ -52,6 +52,7 @@ header {
   padding: 2.4rem;
 
   @include r(768) {
+    padding-bottom: 0;
     text-align: left;
   }
 }
@@ -112,6 +113,7 @@ header {
 
   @include r(768) {
     height: auto;
+    max-height: none;
     order: 4;
     position: relative;
 
@@ -122,14 +124,13 @@ header {
       height: 100%;
       left: 0;
       position: absolute;
-      top: -40px;
+      top: 0;
       width: 100%;
     }
   }
 
   video {
-    margin: 0 auto;
-
+    margin: 70px auto;
   }
 }
 
