@@ -10,6 +10,15 @@ let isProd = projectId === "cactus-app-prod"
 console.log("isProduction", isProd)
 // console.log("NODE_ENV", process.env.NODE_ENV)
 
+
+
+let pages = {
+  index: {title: "Home", path: "/", pattern: /^\/$/},
+  payment_success: {title: "Success!", path: "/success", pattern: /^\/success$/},
+  payment_cancel: {title: "Payment Canceled", path: "/cancel", pattern: /^\/cancel$/},
+  "404": {title: "Not Found"},
+}
+
 let minimizers = []
 let config = isProd ? require("./config.prod.js") : require("./config.stage.js")
 
@@ -30,15 +39,22 @@ if (isProd) {
   }))
 }
 
+let jsEntries = Object.keys(pages).reduce((entries, title) => {
+  entries[title] = `./src/scripts/pages/${title}.js`
+  return entries
+}, {common: "./src/scripts/common.js"})
 
+console.log("jsEntries", jsEntries)
 
 let webpackConfig = {
   mode: isProd ? "production" : "development",
-  entry: {
-    main: "./src/scripts/index.js",
-  },
+  // entry: {
+  //   main: "./src/scripts/index.js",
+  // },
+  entry: jsEntries,
   output: {
     path: path.resolve(__dirname, "public"),
+    chunkFilename: "[name].js",
     filename: isProd ? "[name].js" : '[name].[chunkhash].js',
     // publicPath: ""
   },
@@ -93,17 +109,37 @@ let webpackConfig = {
       filename: isProd ? 'style.[contenthash].css' : 'style.[name].css',
       chunkFilename: isProd ? "[id].[hash].css" : "[id].css"
     }),
-    new HtmlWebpackPlugin({
-      // inject: false,
-      // hash: true,
-      template: './src/index.html',
-      filename: 'index.html'
-    }),
+      ...Object.keys(pages).map(title => {
+        return new HtmlWebpackPlugin({
+          // inject: false,
+          // hash: true,
+          chunks: ["common", title],
+          template: `./src/${title}.html`,
+          filename: `${title}.html`
+        })
+      }),
       new webpack.DefinePlugin(config)
   ],
   devServer: {
-    open: true,
+    open: false,
     contentBase: path.join(__dirname, "src"),
+    historyApiFallback: {
+      disableDotRule: true,
+      rewrites: [
+        // { from: /^\/$/, to: '/index.html' },
+        // { from: /^\/success/, to: '/payment_success.html' },
+        // { from: /^\/cancel/, to: '/payment_cancel.html' },
+
+          ...Object.keys(pages).filter(page => {
+            return pages[page].pattern
+          }).map(page => {
+            // let pattern = "^" + pages[page].path
+            console.log("adding page", page)
+            return {from: pages[page].pattern, to: `/${page}.html`}
+          }),
+        { from: /./, to: '/404.html' }
+      ]
+    }
   },
 };
 
