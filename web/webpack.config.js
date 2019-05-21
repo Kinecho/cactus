@@ -38,6 +38,13 @@ module.exports = {
     filename: '[name].[chunkhash].js',
     publicPath: "/"
   },
+  resolve: {
+    modules: [ "styles", "assets", "images", "scripts", "node_modules"],
+    alias: {
+      // Component: 'app/components/Component.jsx',
+    },
+    extensions: ['.js', '.jsx', ".scss", ".css", ".svg", ".jpg", ".png", ".html"],
+  },
   devtool: isProd ? 'source-map' : 'inline-source-map',
   module: {
     rules: [
@@ -63,7 +70,16 @@ module.exports = {
             },
           },
         ]
-      }
+      },
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {},
+          },
+        ],
+      },
     ]
   },
   plugins: [

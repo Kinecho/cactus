@@ -1,7 +1,7 @@
 import "./../styles/index.scss"
-
+import {Config} from "./config.js"
 //this is replaced by webpack
-console.log("analyticsId", __GOOGLE_ANALYTICS_ID__)
+console.log("analyticsId", Config)
 
 document.addEventListener('DOMContentLoaded', function() {
     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
