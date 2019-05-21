@@ -69,11 +69,12 @@ header {
 .phoneContainer {
   background: url(assets/images/yellowBlob.svg) center top 155px no-repeat;
   background-size: 745px;
-  height: 34rem;
-  max-height: 50vh;
+  /* height: 34rem; */
+  /* max-height: 50vh; */
   overflow: hidden;
 
   @include r(768) {
+    height: auto;
     order: 4;
   }
 
