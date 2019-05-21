@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run logo && webpack --config webpack.config.js",
+    "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod webpack --config webpack.config.js",
     "clean": "rm -rf ./public",
     "copy": "mkdir ./public ; rsync -a ./src/assets ./public",
     "dev": "npm run logo && webpack-dev-server --config webpack.config.js",
@@ -12,7 +13,9 @@
     "deploy:prod": "npx firebase deploy --only hosting -P prod && open https://cactus-app-prod.web.app",
     "logo": "cat ./../cactus.txt",
     "open": "npm run predeploy && open ./public/index.html",
+    "open:prod": "npm run predeploy:prod && open ./public/index.html",
     "predeploy": "npm run clean && npm run copy && npm run build",
+    "predeploy:prod": "npm run clean && npm run copy && npm run build:prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Neil Poulin | Kinecho",
