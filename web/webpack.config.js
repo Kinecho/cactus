@@ -13,6 +13,11 @@ console.log("isProduction", isProd)
 let minimizers = []
 let config = isProd ? require("./config.prod.js") : require("./config.stage.js")
 
+
+Object.keys(config).forEach(key => {
+  config[key] = JSON.stringify(config[key])
+})
+
 console.log("using config", JSON.stringify(config, null, 2))
 
 if (isProd) {
