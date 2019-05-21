@@ -1,3 +1,3 @@
 export const Config = {
-    googleAnalyticsID: __GOOGLE_ANALYTICS_ID__
+    googleAnalyticsID: "__GOOGLE_ANALYTICS_ID__"
 }

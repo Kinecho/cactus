@@ -8,12 +8,12 @@ const TerserPlugin = require("terser-webpack-plugin");
 let projectId = process.env.GCLOUD_PROJECT
 let isProd = projectId === "cactus-app-prod"
 console.log("isProduction", isProd)
-console.log("NODE_ENV", process.env.NODE_ENV)
+// console.log("NODE_ENV", process.env.NODE_ENV)
 
 let minimizers = []
 let config = isProd ? require("./config.prod.js") : require("./config.stage.js")
 
-console.log("using config", config)
+console.log("using config", JSON.stringify(config, null, 2))
 
 if (isProd) {
   minimizers.push(new OptimizeCSSAssetsPlugin({sourceMap: true}))
@@ -22,21 +22,20 @@ if (isProd) {
     terserOptions: {
       safari10: true,
     },
-  }),)
+  }))
 }
 
-module.exports = {
+
+
+let webpackConfig = {
   mode: isProd ? "production" : "development",
-  optimization: {
-    minimizer: minimizers
-  },
   entry: {
     main: "./src/scripts/index.js",
   },
   output: {
     path: path.resolve(__dirname, "public"),
-    filename: '[name].[chunkhash].js',
-    publicPath: "/"
+    filename: isProd ? "[name].js" : '[name].[chunkhash].js',
+    // publicPath: ""
   },
   resolve: {
     modules: [ "styles", "assets", "images", "scripts", "node_modules"],
@@ -45,7 +44,9 @@ module.exports = {
     },
     extensions: ['.js', '.jsx', ".scss", ".css", ".svg", ".jpg", ".png", ".html"],
   },
-  devtool: isProd ? 'source-map' : 'inline-source-map',
+  // devtool: isProd ? 'source-map' : 'inline-source-map',
+  devtool: "inline-source-map",
+
   module: {
     rules: [
       {
@@ -84,7 +85,7 @@ module.exports = {
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: isProd ? 'style.[contenthash].css' : '[name].css',
+      filename: isProd ? 'style.[contenthash].css' : 'style.[name].css',
       chunkFilename: isProd ? "[id].[hash].css" : "[id].css"
     }),
     new HtmlWebpackPlugin({
@@ -100,3 +101,13 @@ module.exports = {
     contentBase: path.join(__dirname, "src"),
   },
 };
+
+if (isProd) {
+  webpackConfig.optimization = {
+    minimizer: minimizers
+  }
+}
+
+console.log(JSON.stringify(webpackConfig, null, 2))
+
+module.exports = webpackConfig
