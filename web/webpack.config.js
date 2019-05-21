@@ -66,13 +66,13 @@ let webpackConfig = {
           MiniCssExtractPlugin.loader,
           {
             loader: "css-loader",
-            options: {sourceMap: true},
+            options: {sourceMap: true, url: false},
           },
           {
             loader: "sass-loader",
             options: {
               sourceMap: true,
-              // includePaths: path.join(__dirname, 'frontend', 'src', 'index.scss')
+              sourceMapContents: false
             },
           },
         ]

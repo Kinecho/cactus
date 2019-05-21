@@ -4,7 +4,7 @@
   "description": "Static website for cactus app",
   "main": "index.js",
   "scripts": {
-    "build": "npm run logo && webpack --config webpack.config.js",
+    "build": "npm run clean && npm run logo && webpack --config webpack.config.js",
     "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod webpack --config webpack.config.js",
     "clean": "rm -rf ./public",
     "copy": "mkdir ./public ; rsync -a ./src/assets ./public",
@@ -14,8 +14,8 @@
     "logo": "cat ./../cactus.txt",
     "open": "npm run predeploy && open ./public/index.html",
     "open:prod": "npm run predeploy:prod && open ./public/index.html",
-    "predeploy": "npm run clean && npm run copy && npm run build",
-    "predeploy:prod": "npm run clean && npm run copy && npm run build:prod",
+    "predeploy": " npm run build && npm run copy",
+    "predeploy:prod": "npm run build:prod && npm run copy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Neil Poulin | Kinecho",
