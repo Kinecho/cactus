@@ -1,7 +1,6 @@
 import "styles/pages/index.scss"
-import {Config} from "scripts/config.js"
-// import {init as initAnalytics, gtag} from 'scripts/analytics'
 import {configureStripe} from 'scripts/checkout'
+import {gtag} from 'scripts/analytics'
 
 
 // console.log("Config", Config)
