@@ -43,7 +43,7 @@ let webpackConfig = {
     // publicPath: ""
   },
   resolve: {
-    modules: [ "styles", "assets", "images", "scripts", "node_modules"],
+    modules: ["src", "styles", "assets", "images", "scripts", "node_modules"],
     alias: {
       // Component: 'app/components/Component.jsx',
     },

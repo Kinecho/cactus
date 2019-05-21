@@ -1,16 +1,11 @@
-import "./../styles/index.scss"
-import {Config} from "./config.js"
-//this is replaced by webpack
+import "styles/index.scss"
+import {Config} from "scripts/config.js"
+import {init as initAnalytics, gtag} from 'scripts/analytics'
+
+
 console.log("Config", Config)
 
-
-
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-
-gtag('config', Config.googleAnalyticsID);
-
+initAnalytics()
 
 document.addEventListener('DOMContentLoaded', function() {
     // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
@@ -31,4 +26,10 @@ document.addEventListener('DOMContentLoaded', function() {
     //     console.error(e);
     //     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     // }
+
+    gtag('event', "document loaded", {
+        'event_category': "test category",
+        'event_label': "test label",
+        'value': "test value"
+    });
 });
