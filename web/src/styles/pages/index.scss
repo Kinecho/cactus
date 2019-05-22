@@ -92,14 +92,14 @@ header {
 .hero {
   display: grid;
   grid-template-areas:
-     "header"
+     "heroText"
      "demo"
      "form";
 
   @include r(768) {
     grid-template-columns: 50% auto;
     grid-template-areas:
-      "header   demo"
+      "heroText demo"
       "form     demo"
       "form     demo";
     text-align: left;
@@ -108,24 +108,27 @@ header {
     grid-template-columns: 66% auto;
   }
 
+  .heroText {
+    align-self: end;
+    grid-area: heroText;
+  }
+
   h1 {
-    font-size: 2.4rem;
+    font-size: 2.8rem;
     font-weight: bold;
-    grid-area: header;
-    margin: .8rem 2.4rem 0;
+    margin: .8rem 2.4rem 1.6rem;
 
     @include r(768) {
-      align-self: end;
       font-size: 4.8rem;
-      margin: 0 2.4rem;
+      margin: 0 2.4rem 2.4rem;
     }
   }
 
   .subtext {
-    margin: 3.2rem 2.4rem;
+    margin: 0 2.4rem;
 
     @include r(768) {
-      margin: 2.4rem 0 4.8rem;
+      margin-bottom: 2.4rem;
     }
   }
 
@@ -134,11 +137,13 @@ header {
     background-color: white;
     grid-area: form;
     justify-content: center;
+    padding-top: 3.2rem;
 
     @include r(768) {
       background-color: transparent;
       justify-content: flex-start;
       max-width: 70rem;
+      padding-top: 0;
     }
   }
 }
@@ -198,7 +203,7 @@ input[type=email] {
   margin: 0 2.4rem 1.6rem;
   max-width: 53rem;
   padding: 1.2rem 1.6rem;
-  transition: border-color .3s ease-in;
+  transition: border-color .3s ease-in-out;
 
   @include r(480) {
     margin: 0 1.6rem 1.6rem 2.4rem;
@@ -224,7 +229,7 @@ button {
   font-size: 1.8rem;
   margin: 0 2.4rem 1.6rem;
   padding: 1.6rem 2.4rem;
-  transition: box-shadow .2s ease-in, background-color .2s ease-in;
+  transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out;
 
   @include r(480) {
     margin: 0 2.4rem 1.6rem 0;
@@ -354,7 +359,7 @@ button {
 
     @include r(768) {
       align-items: center;
-      flex-basis: 23%;
+      flex-basis: 25%;
       flex-flow: column wrap;
       text-align: center;
     }
