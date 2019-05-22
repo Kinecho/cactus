@@ -20,11 +20,16 @@
   },
   "author": "Neil Poulin | Kinecho",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "firebase": "^6.0.2",
+    "firebase-app": "0.0.1",
+    "firebase-functions": "^2.3.1"
+  },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "axios": "^0.18.0",
     "babel-loader": "^8.0.6",
     "css-loader": "^2.1.1",
     "file-loader": "^3.0.1",
