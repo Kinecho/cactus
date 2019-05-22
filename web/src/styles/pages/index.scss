@@ -203,7 +203,7 @@ form {
   flex-flow: column wrap;
   padding: 0 2.4rem 4rem;
 
-  @include r(480) {
+  @include r(600) {
     flex-direction: row;
   }
 
@@ -225,7 +225,7 @@ input[type=email] {
   padding: 1.2rem 1.6rem;
   transition: border-color .3s ease-in-out;
 
-  @include r(480) {
+  @include r(600) {
     margin: 0 1.6rem 1.6rem 0;
   }
   @include r(768) {
@@ -250,7 +250,7 @@ button {
   padding: 1.6rem 2.4rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out;
 
-  @include r(480) {
+  @include r(600) {
     margin: 0 0 1.6rem;
   }
   @include r(768) {
@@ -484,7 +484,7 @@ footer {
   grid-template-areas:
      "logo text"
      "logo text";
-  grid-template-columns: 4.4rem auto;
+  grid-template-columns: 3.2rem auto;
   margin: 0 auto;
   max-width: 1200px;
 
@@ -492,7 +492,7 @@ footer {
     align-self: center;
     grid-area: logo;
     height: 4.4rem;
-    width: 4.4rem;
+    width: 2.4rem;
   }
 
   p {
