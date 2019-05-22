@@ -3,6 +3,8 @@
 web/public/
 web/build
 
+.runtimeconfig.json
+
 # Logs
 logs
 *.log

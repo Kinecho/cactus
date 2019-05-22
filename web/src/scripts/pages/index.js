@@ -1,7 +1,11 @@
 import "styles/pages/index.scss"
 import {configureStripe} from 'scripts/checkout'
+import {Config} from "scripts/config"
 import {gtag} from 'scripts/analytics'
-
+import * as firebase from "firebase/app"
+import "firebase/functions"
+import {submitEmail} from 'scripts/mailchimp'
+// import functions from "firebase-functions"
 
 // console.log("Config", Config)
 
@@ -9,28 +13,28 @@ import {gtag} from 'scripts/analytics'
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loadeds")
-    setupFormListener("email-form-top")
-    setupFormListener("email-form-bottom")
-    configureStripe()
 
-    // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-    // // The Firebase SDK is initialized and available here!
-    //
+
+
     // firebase.auth().onAuthStateChanged(user => { });
     // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
     // firebase.messaging().requestPermission().then(() => { });
     // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-    //
-    // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-    // try {
-    //     let app = firebase.app();
-    //     let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
-    //     document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
-    // } catch (e) {
-    //     console.error(e);
-    //     document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
-    // }
+
+    try {
+        let app = firebase.initializeApp(Config.firebase);
+            let features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof app[feature] === 'function');
+            console.log(`Firebase SDK loaded with ${features.join(', ')}`)
+            // document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
+    } catch (e) {
+        console.error('FAILED TO GET FIREBASE', e);
+        document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
+    }
+
+    setupFormListener("email-form-top")
+    setupFormListener("email-form-bottom")
+    configureStripe()
 
 });
 
@@ -91,7 +95,11 @@ function setupFormListener(formId){
             event_label: `${formId} - ${emailAddress}`
         });
 
-        alert(`Success! Signed up with email ${emailAddress}`)
+        submitEmail({email: emailAddress, referrerEmail: null}).then(response => {
+            alert(`Success! Signed up with email ${emailAddress}`)
+        }).catch(error => {
+            alert("error signing up")
+        })
 
         // You must return false to prevent the default form behavior
         return false;
