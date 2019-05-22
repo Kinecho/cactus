@@ -27,15 +27,16 @@ html {
 }
 
 body {
-  background: white url(assets/images/yellowBlob.svg) center 365px no-repeat;
-  background-size: 745px;
+  background: white no-repeat;
+  background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
+  background-position: center 365px, center 285px;
+  background-size: 745px, 740px;
   color: $darkestGreen;
   font: 1.8rem $font-stack;
   line-height: 1.4;
   margin: 0;
 
   @include r(768) {
-    background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
     background-position: left 56vw top -300px, left 67vw top -110px;
     background-size: 720px, 740px;
   }
@@ -96,12 +97,15 @@ header {
      "form";
 
   @include r(768) {
-    grid-template-columns: 66% auto;
+    grid-template-columns: 50% auto;
     grid-template-areas:
       "header   demo"
       "form     demo"
       "form     demo";
     text-align: left;
+  }
+  @include r(1024) {
+    grid-template-columns: 66% auto;
   }
 
   h1 {
@@ -129,10 +133,11 @@ header {
     align-self: start;
     background-color: white;
     grid-area: form;
+    justify-content: center;
 
     @include r(768) {
       background-color: transparent;
-      margin: 0 2.4rem;
+      justify-content: flex-start;
       max-width: 70rem;
     }
   }
@@ -140,7 +145,7 @@ header {
 
 .phoneContainer {
   grid-area: demo;
-  height: 49rem;
+  height: 47rem;
   overflow: hidden;
   position: relative;
   text-align: center;
@@ -167,8 +172,15 @@ header {
 
 form {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: column wrap;
   padding-bottom: 4rem;
+
+  @include r(480) {
+    flex-direction: row;
+  }
+  @include r(768) {
+    margin: 0 2.4rem;
+  }
 
   &.lower {
     @include r(768) {
@@ -188,8 +200,12 @@ input[type=email] {
   padding: 1.2rem 1.6rem;
   transition: border-color .3s ease-in;
 
+  @include r(480) {
+    margin: 0 1.6rem 1.6rem 2.4rem;
+  }
   @include r(768) {
     margin: 0 1.6rem 1.6rem 0;
+    min-width: 32rem;
   }
 
   &:hover {
@@ -207,9 +223,16 @@ button {
   flex-grow: 1;
   font-size: 1.8rem;
   margin: 0 2.4rem 1.6rem;
-  max-width: 28rem;
   padding: 1.6rem 2.4rem;
   transition: box-shadow .2s ease-in, background-color .2s ease-in;
+
+  @include r(480) {
+    margin: 0 2.4rem 1.6rem 0;
+  }
+  @include r(768) {
+    margin: 0 0 1.6rem;
+    max-width: 28rem;
+  }
 
   &:hover {
     background-color: darken($green, 5%);
@@ -217,10 +240,6 @@ button {
 
   &:active {
     box-shadow: none;
-  }
-
-  @include r(768) {
-    margin: 0 0 1.6rem;
   }
 }
 
@@ -268,7 +287,17 @@ button {
     padding-bottom: 5.6rem;
 
     @include r(768) {
-      flex-basis: 28%;
+      flex-basis: 33%;
+    }
+
+    p {
+      color: $darkText;
+      margin: 0 auto;
+      max-width: 40rem;
+
+      @include r(768) {
+        padding: 0 2.4rem;
+      }
     }
   }
 
@@ -279,15 +308,6 @@ button {
   @include r(768) {
     .friends img {
       margin-top: 23px;
-    }
-  }
-
-  p {
-    color: $darkText;
-    margin: 0;
-
-    @include r(768) {
-      padding: 0 2.4rem;
     }
   }
 }
@@ -312,9 +332,17 @@ button {
 
   .flexContainer {
     background: url(../../assets/images/lineMobile.svg) no-repeat 18px center;
+    margin: 0 auto;
+    max-width: 40rem;
 
     @include r(768) {
-      background: url(../../assets/images/lineDesktop.svg) no-repeat center top;
+      background: url(../../assets/images/lineDesktop.svg) no-repeat center top 11px;
+      background-size: 70vw;
+      max-width: none;
+    }
+    @include r(1140) {
+      background-position: center top;
+      background-size: auto;
     }
   }
 
