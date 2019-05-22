@@ -261,6 +261,26 @@ button {
   &:active {
     box-shadow: none;
   }
+
+  &:disabled {
+    background-color: #ccc;
+    box-shadow: none;
+    color: $darkText;
+    cursor: default;
+
+    &:before {
+      animation: rotate 1s linear infinite;
+      background: url(assets/images/loading.svg) no-repeat;
+      background-size: 2rem;
+      content:'';
+      display: block;
+      height: 2rem;
+      position: absolute;
+      transform-origin: center;
+      width: 2rem;
+      z-index: 1;
+    }
+  }
 }
 
 .list {
@@ -351,12 +371,12 @@ button {
   }
 
   .flexContainer {
-    background: url(../../assets/images/lineMobile.svg) no-repeat 18px center;
+    background: url(assets/images/lineMobile.svg) no-repeat 18px center;
     margin: 0 auto;
     max-width: 40rem;
 
     @include r(768) {
-      background: url(../../assets/images/lineDesktop.svg) no-repeat center top 11px;
+      background: url(assets/images/lineDesktop.svg) no-repeat center top 11px;
       background-size: 70vw;
       max-width: none;
     }
@@ -455,13 +475,17 @@ footer {
 }
 
 @keyframes slideDown {
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
 
 
