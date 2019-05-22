@@ -14,7 +14,7 @@ export function submitEmail({email, referrerEmail}){
 
     })
 
-    let data = {email, referrerEmail};
+    let data = {email, referredByEmail: referrerEmail};
     let context = {}
     return signup(data, context).then(result => {
         if (result.data.success){

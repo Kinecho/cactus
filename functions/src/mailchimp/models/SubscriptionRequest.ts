@@ -31,7 +31,7 @@ export default class SubscriptionRequest {
 
 
     static fromRequest(request: Request): SubscriptionRequest{
-        const data = request.body;
+        const data = request.body.data || request.body;
         return new SubscriptionRequest(data.email, data.firstName, data.lastName, data.referredByEmail);
     }
 }
