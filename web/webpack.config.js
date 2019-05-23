@@ -4,20 +4,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
+const pages = require("./pages")
 
 let projectId = process.env.GCLOUD_PROJECT
 let isProd = projectId === "cactus-app-prod"
 console.log("isProduction", isProd)
 // console.log("NODE_ENV", process.env.NODE_ENV)
 
-
-
-let pages = {
-  index: {title: "Home", path: "/", pattern: /^\/$/},
-  payment_success: {title: "Success!", path: "/success", pattern: /^\/success$/},
-  payment_cancel: {title: "Payment Canceled", path: "/cancel", pattern: /^\/cancel$/},
-  "404": {title: "Not Found"},
-}
 
 let minimizers = []
 let config = isProd ? require("./config.prod.js") : require("./config.stage.js")
@@ -126,16 +119,13 @@ let webpackConfig = {
     historyApiFallback: {
       disableDotRule: true,
       rewrites: [
-        // { from: /^\/$/, to: '/index.html' },
-        // { from: /^\/success/, to: '/payment_success.html' },
-        // { from: /^\/cancel/, to: '/payment_cancel.html' },
-
           ...Object.keys(pages).filter(page => {
-            return pages[page].pattern
-          }).map(page => {
-            // let pattern = "^" + pages[page].path
-            console.log("adding page", page)
-            return {from: pages[page].pattern, to: `/${page}.html`}
+            return pages[page].path
+          }).map(filename => {
+            console.log("adding page", filename)
+            let page = pages[filename]
+            let pattern = new RegExp("^" + page.path + "$")
+            return {from: pattern, to: `/${filename}.html`}
           }),
         { from: /./, to: '/404.html' }
       ]
