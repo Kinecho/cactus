@@ -45,3 +45,30 @@
 		}
 	}
 }
+
+/*height*/
+@mixin h( $point ) {
+	@if $point==480 {
+		@media ( min-height: 480px ) {
+			@content;
+		}
+	}
+	@if $point==768 {
+		@media ( min-height: 768px ) {
+			@content;
+		}
+	}
+}
+
+@keyframes slideDown {
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
