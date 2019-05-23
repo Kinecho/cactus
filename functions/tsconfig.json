@@ -7,14 +7,13 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2015",
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "rootDirs": ["src", "../shared/src"],
     "paths": {
-      "@cactus/*": ["./*"]
-//      "@cactus/*": ["./src/*"]
-//      "slack": ["slack"],
-//      "config": ["co/nfig"]
-//      "mailchimp": ["mailchimp"]
-//      "slack/*": ["slack/*"]
+      "@cactus/*": [
+        "src/*"
+      ],
+      "@shared/*": ["../shared/src/*"]
     }
   },
   "compileOnSave": true,

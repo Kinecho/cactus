@@ -1,6 +1,13 @@
-import {Config} from 'scripts/config'
+import {Config} from './config'
 
 let _gtag = null;
+
+declare global {
+    interface Window { dataLayer: Array<any>; }
+}
+
+// window.dataLayer = window.dataLayer || {};
+
 
 /**
  * set up the analytics function
@@ -8,20 +15,20 @@ let _gtag = null;
  * returns function
  */
 export function init(){
-    console.log("setting up analytics")
-    createGTag()
+    console.log("setting up analytics");
+    createGTag();
     gtag('js', new Date());
     gtag('config', Config.googleAnalyticsID);
 }
 
 function createGTag(){
-    console.log("calling create gtag")
+    console.log("calling create gtag");
     if (!_gtag){
-        console.log("setting up gtag")
+        console.log("setting up gtag");
         window.dataLayer = window.dataLayer || [];
         _gtag = function(){
-            console.log("pushing arguments to datalayer", arguments)
-            dataLayer.push(arguments)
+            console.log("pushing arguments to datalayer", arguments);
+            window.dataLayer.push(arguments)
         }
     } else {
         console.log("gtag already created")
@@ -38,4 +45,4 @@ function createGTag(){
     });
  * @type {_gtag|*}
  */
-export const gtag = createGTag()
+export const gtag = createGTag();

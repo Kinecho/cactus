@@ -1,9 +1,17 @@
+// import * as Stripe from "stripe";
+import Stripe = stripe.Stripe;
+
+interface NewStripe extends  Stripe {
+    redirectToCheckout(options?: any);
+}
+
 
 export function configureStripe(){
     // noinspection JSUnresolvedFunction
-    var stripe = Stripe('pk_test_cFV6bK7YpxB2QrTRYOJie00B');
 
-    var checkoutButton = document.getElementById('checkout-button-plan_F6oBhRX9L4WKMB');
+    const stripe = Stripe('pk_test_cFV6bK7YpxB2QrTRYOJie00B') as NewStripe;
+
+    const checkoutButton = document.getElementById('checkout-button-plan_F6oBhRX9L4WKMB');
     checkoutButton.addEventListener('click', function () {
         // When the customer clicks on the button, redirect
         // them to Checkout.

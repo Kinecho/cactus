@@ -33,9 +33,9 @@ if (isProd) {
 }
 
 let jsEntries = Object.keys(pages).reduce((entries, title) => {
-  entries[title] = `./src/scripts/pages/${title}.js`
+  entries[title] = `./src/scripts/pages/${title}.ts`
   return entries
-}, {common: "./src/scripts/common.js"})
+}, {common: "./src/scripts/common.ts"})
 
 console.log("jsEntries", jsEntries)
 
@@ -55,18 +55,28 @@ let webpackConfig = {
     modules: ["src", "styles", "assets", "images", "scripts", "node_modules"],
     alias: {
       // Component: 'app/components/Component.jsx',
+      '@shared': path.resolve(__dirname, "..", "shared", "src"),
+      '@cactus': path.resolve(__dirname, "src", "scripts")
     },
-    extensions: ['.js', '.jsx', ".scss", ".css", ".svg", ".jpg", ".png", ".html"],
+    extensions: ['.js', '.ts', '.tsx', '.jsx', ".scss", ".css", ".svg", ".jpg", ".png", ".html"],
   },
   // devtool: isProd ? 'source-map' : 'inline-source-map',
   devtool: "inline-source-map",
 
   module: {
     rules: [
+      // {
+      //   test: /\.js$/,
+      //   exclude: /node_modules/,
+      //   loader: "babel-loader"
+      // },
       {
-        test: /\.js$/,
+        test: /\.(t|j)s$/,
         exclude: /node_modules/,
-        loader: "babel-loader"
+        loader: "awesome-typescript-loader",
+        // options: {
+        //   useCache: false
+        // }
       },
       {
         test: /\.scss$/,
@@ -139,6 +149,6 @@ if (isProd) {
   }
 }
 
-console.log(JSON.stringify(webpackConfig, null, 2))
+// console.log(JSON.stringify(webpackConfig, null, 2))
 
 module.exports = webpackConfig

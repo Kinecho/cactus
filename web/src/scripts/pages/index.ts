@@ -1,10 +1,10 @@
 import "styles/pages/index.scss"
-import {configureStripe} from 'scripts/checkout'
-import {Config} from "scripts/config"
-import {gtag} from 'scripts/analytics'
+import {configureStripe} from '@cactus/checkout'
+import {Config} from "@cactus/config"
+import {gtag} from '@cactus/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
-import {submitEmail} from 'scripts/mailchimp'
+import {submitEmail} from '@cactus/mailchimp'
 // import functions from "firebase-functions"
 
 // console.log("Config", Config)
@@ -12,7 +12,7 @@ import {submitEmail} from 'scripts/mailchimp'
 // initAnalytics()
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("index.js loadeds")
+    console.log("index.js loaded");
 
 
 
@@ -32,9 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     }
 
-    setupFormListener("email-form-top")
-    setupFormListener("email-form-bottom")
-    configureStripe()
+    setupFormListener("email-form-top");
+    setupFormListener("email-form-bottom");
+    configureStripe();
 
 });
 
@@ -58,7 +58,7 @@ function setupFormListener(formId){
         gtag("event", "exception", {
             description: "no form found on page for formId" + formId,
             fatal: false
-        })
+        });
         return
     }
 
@@ -72,22 +72,22 @@ function setupFormListener(formId){
             event_label: `${formId}`
         });
 
-        let emailInput = form.children.namedItem("email")
+        let emailInput = <HTMLInputElement>form.children.namedItem("email");
         if (!emailInput) {
             //handle error
-            console.warn("no email input was found")
+            console.warn("no email input was found");
             gtag("event", "exception", {
                 description: "email input field was found for form " + formId,
                 fatal: false
-            })
+            });
 
-            alert("Please enter an email")
+            alert("Please enter an email");
             return false;
         }
 
-        let emailAddress = emailInput.value || ""
-        emailAddress = emailAddress.trim().toLowerCase()
-        console.log("submitting email", emailAddress)
+        let emailAddress = emailInput.value || "";
+        emailAddress = emailAddress.trim().toLowerCase();
+        console.log("submitting email", emailAddress);
 
 
         gtag('event', 'email_signup_success', {
@@ -95,20 +95,15 @@ function setupFormListener(formId){
             event_label: `${formId} - ${emailAddress}`
         });
 
-        submitEmail({email: emailAddress, referrerEmail: null}).then(response => {
+        submitEmail(emailAddress, null).then(response => {
             alert(`Success! Signed up with email ${emailAddress}`)
         }).catch(error => {
             alert("error signing up")
-        })
+        });
 
         // You must return false to prevent the default form behavior
         return false;
     }
 
-
-    if (form && form.attachEvent) {
-        form.attachEvent("submit", processForm);
-    } else {
-        form.addEventListener("submit", processForm);
-    }
+    form.addEventListener("submit", processForm);
 }
