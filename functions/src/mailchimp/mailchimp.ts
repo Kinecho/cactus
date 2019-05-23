@@ -1,8 +1,8 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification} from "../slack/slack";
-import SubscriptionRequest from "./models/SubscriptionRequest";
+import {sendActivityNotification} from "@cactus/slack/slack"
+import SubscriptionRequest from "@cactus/mailchimp/models/SubscriptionRequest";
 
 const app = express();
 

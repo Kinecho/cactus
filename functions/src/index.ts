@@ -1,5 +1,5 @@
 import * as functions from 'firebase-functions';
-import mailchimpHandler from "./mailchimp/mailchimp";
+import mailchimpHandler from "@cactus/mailchimp/mailchimp";
 // // Start writing Firebase Functions
 // // https://firebase.google.com/docs/functions/typescript
 //

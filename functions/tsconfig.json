@@ -6,7 +6,16 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2015"
+    "target": "es2015",
+    "baseUrl": "./src",
+    "paths": {
+      "@cactus/*": ["./*"]
+//      "@cactus/*": ["./src/*"]
+//      "slack": ["slack"],
+//      "config": ["co/nfig"]
+//      "mailchimp": ["mailchimp"]
+//      "slack/*": ["slack/*"]
+    }
   },
   "compileOnSave": true,
   "include": [
