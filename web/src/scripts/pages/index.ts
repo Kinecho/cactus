@@ -28,12 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormListener("email-form-bottom");
     configureStripe();
     setupJumpToForm();
-
-
-
-    let modalId = "test-modal";
-    addModal(modalId, {title: "Success!", message: `Check your inbox for ...`});
-    showModal(modalId)
 });
 
 
