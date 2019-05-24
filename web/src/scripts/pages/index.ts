@@ -5,6 +5,7 @@ import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
 import {submitEmail} from '@web/mailchimp'
+import {validateEmail} from "../../util";
 // import functions from "firebase-functions"
 
 // console.log("Config", Config)
@@ -87,7 +88,19 @@ function setupFormListener(formId){
 
         let modalDiv = <HTMLDivElement>document.getElementById("signup-success-modal");
 
-        button.disabled = true;
+
+        function showError(message: string){
+            if (errorDiv){
+                errorDiv.innerText = message;
+                errorDiv.classList.remove("hidden")
+            }
+        }
+
+        function hideError(){
+            if (errorDiv){
+                errorDiv.classList.add("hidden")
+            }
+        }
 
         if (!emailInput) {
             //handle error
@@ -97,7 +110,7 @@ function setupFormListener(formId){
                 fatal: false
             });
 
-            alert("Please enter an email");
+            showError("Oops, we are unable to process your request. Please try again later");
             return false;
         }
 
@@ -105,6 +118,17 @@ function setupFormListener(formId){
         emailAddress = emailAddress.trim().toLowerCase();
         console.log("submitting email", emailAddress);
 
+
+        if (!validateEmail(emailAddress)){
+
+            if (errorDiv){
+                showError(`"${emailAddress}" is not a valid email.`);
+            }
+            return false
+        }
+
+
+        button.disabled = true;
 
         gtag('event', 'email_signup_success', {
             event_category: "email_signup",
@@ -114,19 +138,13 @@ function setupFormListener(formId){
         submitEmail(emailAddress, null).then(response => {
             // alert(`Success! Signed up with email ${emailAddress}`)
             button.disabled = false;
-            if (errorDiv && errorDiv.classList.contains("hidden")){
-                errorDiv.classList.add("hidden")
-            }
+            hideError();
             modalDiv.classList.remove("hidden");
-            modalDiv.classList.add("open")
-
+            modalDiv.classList.add("open");
+            emailInput.value = "";
 
         }).catch(error => {
-            alert("error signing up");
-            if (errorDiv){
-                errorDiv.classList.remove("hidden")
-            }
-
+            showError("Sorry, it looks like we're having issues.");
         });
 
         // You must return false to prevent the default form behavior
