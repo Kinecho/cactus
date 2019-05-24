@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/",
+        "allowJs": true,
+        "checkJs": false,
+        "module": "commonjs",
+        "target": "es5",
+        "sourceMap": true,
+        //        "moduleResolution": "node"
+        "lib": ["es2015", "dom"],
+        "baseUrl": ".",
+        "rootDirs": ["./src", "../shared/src"],
+        "paths": {
+            "@cactus/*": [
+                "./src/scripts/*"
+            ],
+            "@shared/*": ["../shared/src/*"]
+        }
+    },
+    "compileOnSave": false,
+    "include": ["src"]
+}

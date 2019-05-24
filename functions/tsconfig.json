@@ -1,14 +1,23 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2015"
+    "target": "es2015",
+    "baseUrl": ".",
+    "rootDirs": ["src", "../shared/src"],
+    "paths": {
+      "@cactus/*": [
+        "./src/*"
+      ],
+      "@shared/*": ["../shared/src/*"]
+    }
   },
-  "compileOnSave": true,
+  "compileOnSave": false,
   "include": [
     "src"
   ]
