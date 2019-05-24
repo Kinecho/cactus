@@ -1,3 +1,5 @@
+@import "~styles/variables";
+
 .modal-window {
   position: fixed;
   background-color: rgba(0, 0, 0, 0.5);
@@ -11,6 +13,9 @@
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
   transition: all 0.3s;
+
+
+
   &.open {
     opacity: 1;
     pointer-events: auto;
@@ -34,16 +39,11 @@
 }
 
 .modal-close {
-  color: #aaa;
-  line-height: 50px;
   font-size: 80%;
   position: absolute;
-  right: 0;
+  right: 1rem;
   text-align: center;
-  top: 0;
-  width: 70px;
+  top: 1rem;
   text-decoration: none;
-  &:hover {
-    color: black;
-  }
+
 }

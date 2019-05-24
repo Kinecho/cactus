@@ -31,7 +31,7 @@ function addModalCloseListener(){
  * @returns {boolean} success - if the modal was successfully closed
  */
 export function closeModal(modalId:string): boolean{
-    let modalDiv = <HTMLDivElement>document.getElementById("signup-success-modal");
+    let modalDiv = <HTMLDivElement>document.getElementById(modalId);
     if (modalDiv) {
         modalDiv.classList.remove("open");
         return true;
@@ -42,7 +42,6 @@ export function closeModal(modalId:string): boolean{
 export function showModal(modalId: string){
     let modalDiv = <HTMLDivElement>document.getElementById(modalId);
     if (modalDiv) {
-        modalDiv.classList.remove("hidden");
         modalDiv.classList.add("open");
         return true;
     }
@@ -57,14 +56,14 @@ export function addModal(modalId: string, options: {
 
     let existingModal = <HTMLDivElement>document.getElementById("signup-success-modal");
     if (existingModal){
-        console.warn("a modal with this id already exists, removing it");
+        console.warn(`a modal with id ${modalId} already exists, removing it`);
         existingModal.remove()
     }
 
     let $button = createElementFromString(`<button  title="Close" class="modal-close">Close</button>`);
 
     $button.addEventListener("click", () => {
-        closeModal(modalId)
+        closeModal(modalId);
     });
 
     let $content = document.createElement("div");
@@ -87,7 +86,7 @@ export function addModal(modalId: string, options: {
 
     let modal = document.createElement("div");
     modal.id = modalId;
-    modal.classList.add("modal-window", "hidden");
+    modal.classList.add("modal-window");
     modal.appendChild($content);
 
 

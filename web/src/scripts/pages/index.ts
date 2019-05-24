@@ -27,8 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
     configureStripe();
-    // addModalCloseListener()
 
+
+    let modalId = "test-modal";
+    addModal(modalId, {title: "Success!", message: `Check your inbox for ...`});
+    showModal(modalId)
 });
 
 
