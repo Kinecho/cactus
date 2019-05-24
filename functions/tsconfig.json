@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
@@ -11,12 +12,12 @@
     "rootDirs": ["src", "../shared/src"],
     "paths": {
       "@cactus/*": [
-        "src/*"
+        "./src/*"
       ],
       "@shared/*": ["../shared/src/*"]
     }
   },
-  "compileOnSave": true,
+  "compileOnSave": false,
   "include": [
     "src"
   ]

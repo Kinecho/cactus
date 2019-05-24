@@ -1,3 +1,4 @@
+require("module-alias/register");
 import * as functions from 'firebase-functions';
 import mailchimpHandler from "@cactus/mailchimp/mailchimp";
 // // Start writing Firebase Functions
