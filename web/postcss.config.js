@@ -1,5 +1,14 @@
+const autoprefixer = require("autoprefixer");
+
 module.exports = {
     plugins: [
-        require("autoprefixer")
-    ]
+        autoprefixer({
+            grid: "autoplace",
+            browsers: [
+                "> 1%",
+                "last 4 versions"
+            ]
+        }),
+    ],
+
 }

@@ -34,6 +34,7 @@ export async function signup(subscription: SubscriptionRequest): Promise<Subscri
     console.log("created member", JSON.stringify(member, null, 2));
 
     let result = new SubscriptionResult();
+    result.member = member;
     result.success = false;
     return Promise.resolve(result);
 }
