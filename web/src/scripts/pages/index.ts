@@ -1,4 +1,5 @@
 import "styles/pages/index.scss"
+
 import {configureStripe} from '@web/checkout'
 import {Config} from "@web/config"
 import {gtag} from '@web/analytics'

@@ -36,7 +36,7 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
           const slackResult = await sendActivityNotification(slackMessage);
           console.log("slack result", slackResult);
       } else if (!signupResult.success){
-          await sendActivityNotification(`An error occurred while signing up ${subscription.email}. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
+          await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
       }
 
       return res.send({data: signupResult});
