@@ -276,6 +276,7 @@ input[type=email] {
   }
 
   .icon {
+    align-items: center;
     background-color: $lightGreen;
     border-radius: 4rem;
     display: flex;
@@ -293,8 +294,15 @@ input[type=email] {
   }
 
   .iconImg {
+    height: 4rem;
     overflow: visible;
     padding: .8rem;
+    width: 4rem;
+
+    @include r(768) {
+      height: 4.8rem;
+      width: 4.8rem;
+    }
   }
 
   .text {
@@ -365,7 +373,8 @@ input[type=email] {
   }
 
   .avatarImg {
-    width: 8rem;
+    height: 8.7rem;
+    width: 8.2rem;
   }
 
   .name {
