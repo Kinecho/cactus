@@ -27,9 +27,22 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
     configureStripe();
+    addModalCloseListener()
 
 });
 
+
+function addModalCloseListener(){
+    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("modal-close");
+    Array.from(buttons).forEach(button => {
+        button.addEventListener("click", () => {
+            let modalId = button.dataset.for;
+            let modal = <HTMLDivElement> document.getElementById(modalId);
+            modal.classList.add("hidden");
+            modal.classList.remove("open");
+        })
+    })
+}
 
 //listen for email form submissions
 // document.documentElement.addEventListener("click", (event) => {
@@ -67,7 +80,13 @@ function setupFormListener(formId){
         let emailInput = <HTMLInputElement>form.children.namedItem("email");
         let button = <HTMLButtonElement>form.children.namedItem("submit");
         let errors = <HTMLCollection>form.getElementsByClassName("error")
-        let errorDiv = null;
+        let errorDiv:HTMLDivElement = null;
+        if (errors && errors.length > 0){
+            errorDiv = <HTMLDivElement>errors.item(0)
+        }
+
+        let modalDiv = <HTMLDivElement>document.getElementById("signup-success-modal");
+
         button.disabled = true;
 
         if (!emailInput) {
@@ -95,8 +114,18 @@ function setupFormListener(formId){
         submitEmail(emailAddress, null).then(response => {
             // alert(`Success! Signed up with email ${emailAddress}`)
             button.disabled = false;
+            if (errorDiv && errorDiv.classList.contains("hidden")){
+                errorDiv.classList.add("hidden")
+            }
+            modalDiv.classList.remove("hidden");
+            modalDiv.classList.add("open")
+
+
         }).catch(error => {
-            alert("error signing up")
+            alert("error signing up");
+            if (errorDiv){
+                errorDiv.classList.remove("hidden")
+            }
 
         });
 
@@ -106,3 +135,4 @@ function setupFormListener(formId){
 
     form.addEventListener("submit", processForm);
 }
+
