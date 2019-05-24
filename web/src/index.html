@@ -39,7 +39,7 @@
 <body>
   <header>
     <img class="logo" src="assets/images/logo.svg" alt="Cactus logo" />
-    <button class="jump-to-form" type="button" href="#">Sign Up Free</button>
+    <a class="jump-to-form button" type="button" href="#sign-up">Sign Up Free</a>
   </header>
   <div class="centered">
     <section class="hero">
@@ -53,10 +53,11 @@
           <img src="assets/images/phone.png" alt="Demo of Cactus" />
         </video>
       </aside>
-      <form id="email-form-top">
+      <div class="" id="sign-up"></div>
+      <form id="sign-up-top">
         <div class="alert error hidden">Sorry, looks like we have issues.</div>
         <input type="email" name="email" placeholder="Enter your email address">
-        <button type="submit" class="email-submit-button">Sign Up Free</button>
+        <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
       </form>
     </section>
   </div>
@@ -127,7 +128,7 @@
       <p class="subtext">Mindfulness doesn’t get much simpler.</p>
       <form id="email-form-bottom" class="lower">
         <input type="email" name="email" placeholder="Enter your email address">
-        <button disabled type="submit" class="email-submit-button">Sign Up Free</button>
+        <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
       </form>
     </section>
   </div>

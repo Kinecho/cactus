@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     }
 
-    setupFormListener("email-form-top");
+    setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
     configureStripe();
 
@@ -57,7 +57,7 @@ function setupFormListener(formId){
     function processForm(e) {
         if (e.preventDefault) e.preventDefault();
         /* do what you want with the form */
-        console.log("form submitted", formId)
+        console.log("form submitted", formId);
 
         gtag('event', 'email_signup_clicked', {
             event_category: "email_signup",
@@ -65,6 +65,11 @@ function setupFormListener(formId){
         });
 
         let emailInput = <HTMLInputElement>form.children.namedItem("email");
+        let button = <HTMLButtonElement>form.children.namedItem("submit");
+        let errors = <HTMLCollection>form.getElementsByClassName("error")
+        let errorDiv = null;
+        button.disabled = true;
+
         if (!emailInput) {
             //handle error
             console.warn("no email input was found");
@@ -88,9 +93,11 @@ function setupFormListener(formId){
         });
 
         submitEmail(emailAddress, null).then(response => {
-            alert(`Success! Signed up with email ${emailAddress}`)
+            // alert(`Success! Signed up with email ${emailAddress}`)
+            button.disabled = false;
         }).catch(error => {
             alert("error signing up")
+
         });
 
         // You must return false to prevent the default form behavior

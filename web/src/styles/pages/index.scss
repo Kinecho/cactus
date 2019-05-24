@@ -15,11 +15,22 @@ body {
   }
 }
 
+//This is the target for the sign-up jump button
+#sign-up {
+  position: relative;
+  top: -6rem;
+  height: 0;
+  width: 100%;
+  grid-area: target;
+}
+
+
 .hero {
   display: grid;
   grid-template-areas:
      "heroText"
      "demo"
+     "target"
      "form";
 
   @include r(768) {
