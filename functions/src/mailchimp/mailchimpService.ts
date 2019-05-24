@@ -1,8 +1,9 @@
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {getConfig} from "@api/config/configService";
-import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
-// import axios from "axios";
+import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import axios from "axios";
 import ListMember, {MergeField} from "@api/mailchimp/models/ListMember"
+import ApiError from "@shared/ApiError";
 
 
 const config = getConfig();
@@ -22,19 +23,64 @@ function getListURL():String{
 }
 
 export async function signup(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
-    let url = getListURL();
-    console.log("mailchimp url is", url);
-
-
-    let member = new ListMember(subscription.email);
+    const member = new ListMember(subscription.email);
     if (subscription.referredByEmail){
         member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
     }
 
     console.log("created member", JSON.stringify(member, null, 2));
 
-    let result = new SubscriptionResult();
+    const result = new SubscriptionResult();
     result.member = member;
-    result.success = false;
-    return Promise.resolve(result);
+
+    try {
+        const response = await axios.post(
+            `${getListURL()}/members/`,
+            member,
+            {auth: {username: `cactus`, password: api_key}}
+        );
+        console.log("mailchimp response", response.data);
+        result.success = true;
+        result.status = SubscriptionResultStatus.new_subscriber;
+    } catch (error){
+        const apiError = new ApiError();
+        if (error && error.response && error.response.data){
+            const data = error.response.data;
+
+            switch (data.title) {
+                case "Member Exists":
+                    console.warn("User is already on list. Treating as a successful signup", data)
+                    result.success = true;
+                    result.status = SubscriptionResultStatus.existing_subscriber;
+                    break;
+                case "Invalid Resource":
+                    console.warn("unable to sign up user", data);
+                    result.success = false;
+                    result.status = SubscriptionResultStatus.unknown;
+                    apiError.friendlyMessage = data.detail || "Please provide a valid email address.";
+                    apiError.code = data.status;
+                    apiError.error = error.response.data;
+                    break;
+                default:
+                    console.error("failed to create new member. Response data", data);
+                    apiError.friendlyMessage = "Oops, we're unable to sign you up right now. Please try again later.";
+                    apiError.error = error.response.data;
+                    apiError.code = data.status;
+                    result.success = false;
+                    result.status = SubscriptionResultStatus.unknown;
+                    break;
+            }
+
+        }
+        else {
+            console.error("Failed to update mailchimp list", error);
+            apiError.code = 500;
+            apiError.error = error;
+            apiError.friendlyMessage = "An unexpected error occurred. Please try again later";
+            result.success = false;
+        }
+        result.error = apiError;
+    }
+
+    return result;
 }
