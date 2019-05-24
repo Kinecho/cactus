@@ -37,6 +37,7 @@ body {
 
   @include r(768) {
     grid-template-columns: 50% auto;
+    grid-template-rows: auto auto;
     grid-template-areas:
       "heroText demo"
       "form     demo";
