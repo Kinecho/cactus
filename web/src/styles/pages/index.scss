@@ -33,12 +33,12 @@ body {
      "demo"
      "target"
      "form";
+  position: relative;
 
   @include r(768) {
     grid-template-columns: 50% auto;
     grid-template-areas:
       "heroText demo"
-      "form     demo"
       "form     demo";
     text-align: left;
   }
@@ -82,6 +82,12 @@ body {
       padding-top: 0;
     }
   }
+}
+
+#signupAnchor {
+  left: 0;
+  position: absolute;
+  top: 32rem;
 }
 
 .phoneContainer {
