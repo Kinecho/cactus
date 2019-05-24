@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
     configureStripe();
+    setupJumpToForm();
+
 
 
     let modalId = "test-modal";
@@ -34,6 +36,40 @@ document.addEventListener('DOMContentLoaded', function() {
     showModal(modalId)
 });
 
+
+function setupJumpToForm(){
+    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("jump-to-form");
+
+    Array.from(buttons).forEach(button => {
+        if (!button){
+            return
+        }
+
+        let scrollToId = button.dataset.scrollTo;
+        let doFocus = Boolean(button.dataset.focusForm);
+
+        console.log("scrolling to", scrollToId);
+        let content = document.getElementById(scrollToId);
+
+        button.addEventListener("click", () => {
+            gtag("event", "scroll_to", {formId: scrollToId});
+            content.scrollIntoView();
+            if (doFocus){
+                let form = document.getElementById(button.dataset.focusForm);
+                if (form){
+                    let input = form.getElementsByTagName("input").item(0);
+                    if (input) {
+                        input.focus()
+                    }
+                }
+            }
+
+        })
+    })
+
+
+
+}
 
 function setupFormListener(formId){
     let form = document.getElementById(formId);
