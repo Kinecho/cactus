@@ -68,7 +68,7 @@ body {
     }
   }
 
-  form {
+  .heroForm {
     align-self: start;
     background-color: white;
     grid-area: form;
@@ -156,11 +156,11 @@ input[type=email] {
   }
 }
 
-.list {
-  h2 {
-    color: $darkestPink;
-  }
+.listHeader {
+  color: $darkestPink;
+}
 
+.list {
   .subtext {
     display: none;
 
@@ -198,7 +198,7 @@ input[type=email] {
     }
   }
 
-  h2 {
+  .listHeader {
     margin: 0 0 4rem;
 
     @include r(768) {
@@ -219,7 +219,7 @@ input[type=email] {
       flex-basis: 33%;
     }
 
-    p {
+    .text {
       color: $darkText;
       margin: 0 auto;
       max-width: 40rem;
@@ -230,14 +230,8 @@ input[type=email] {
     }
   }
 
-  img {
+  .illustration {
     margin-bottom: 2.4rem;
-  }
-
-  @include r(768) {
-    .friends img {
-      margin-top: 23px;
-    }
   }
 }
 
@@ -298,12 +292,12 @@ input[type=email] {
     }
   }
 
-  img {
+  .iconImg {
     overflow: visible;
     padding: .8rem;
   }
 
-  p {
+  .text {
     margin: 0;
 
     @include r(768) {
@@ -396,7 +390,7 @@ input[type=email] {
     background-size: 30%;
   }
 
-  h2 {
+  .emailHeader {
     font-size: 2.4rem;
     margin: 0 0 .8rem;
     padding: 0 2.4rem;
@@ -406,7 +400,7 @@ input[type=email] {
     }
   }
 
-  p {
+  .subtext {
     margin: 0 0 2.4rem;
     padding: 0 2.4rem;
   }
