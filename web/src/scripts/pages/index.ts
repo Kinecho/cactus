@@ -5,7 +5,7 @@ import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
 import {submitEmail} from '@web/mailchimp'
-import {validateEmail} from "../../util";
+import {validateEmail, addModal, showModal} from "@web/util";
 // import functions from "firebase-functions"
 
 // console.log("Config", Config)
@@ -24,26 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('FAILED TO GET FIREBASE', e);
         document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     }
-
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
     configureStripe();
-    addModalCloseListener()
+    // addModalCloseListener()
 
 });
 
-
-function addModalCloseListener(){
-    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("modal-close");
-    Array.from(buttons).forEach(button => {
-        button.addEventListener("click", () => {
-            let modalId = button.dataset.for;
-            let modal = <HTMLDivElement> document.getElementById(modalId);
-            modal.classList.add("hidden");
-            modal.classList.remove("open");
-        })
-    })
-}
 
 //listen for email form submissions
 // document.documentElement.addEventListener("click", (event) => {
@@ -86,7 +73,7 @@ function setupFormListener(formId){
             errorDiv = <HTMLDivElement>errors.item(0)
         }
 
-        let modalDiv = <HTMLDivElement>document.getElementById("signup-success-modal");
+
 
 
         function showError(message: string){
@@ -127,7 +114,6 @@ function setupFormListener(formId){
             return false
         }
 
-
         button.disabled = true;
 
         gtag('event', 'email_signup_success', {
@@ -135,12 +121,16 @@ function setupFormListener(formId){
             event_label: `${formId} - ${emailAddress}`
         });
 
+        let modalId = "signup-success-modal";
+
+        addModal(modalId, {title: "Success!", message: `Check your inbox for ${emailAddress}`});
+
         submitEmail(emailAddress, null).then(response => {
             // alert(`Success! Signed up with email ${emailAddress}`)
             button.disabled = false;
             hideError();
-            modalDiv.classList.remove("hidden");
-            modalDiv.classList.add("open");
+            showModal(modalId);
+
             emailInput.value = "";
 
         }).catch(error => {
