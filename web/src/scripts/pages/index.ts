@@ -35,16 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-//listen for email form submissions
-// document.documentElement.addEventListener("click", (event) => {
-//     // event.target.
-//     if (!event.target.matches('.email-submit-button')) return;
-//     console.log("email submit button pressed")
-//
-//     // alert("Hello javascript!")
-// })
-
-
 function setupFormListener(formId){
     let form = document.getElementById(formId);
 
@@ -75,9 +65,6 @@ function setupFormListener(formId){
         if (errors && errors.length > 0){
             errorDiv = <HTMLDivElement>errors.item(0)
         }
-
-
-
 
         function showError(message: string){
             if (errorDiv){
@@ -110,8 +97,9 @@ function setupFormListener(formId){
 
 
         if (!validateEmail(emailAddress)){
-
-            if (errorDiv){
+            if (emailAddress.trim().length === 0) {
+                showError("Please enter an email address.")
+            } else {
                 showError(`"${emailAddress}" is not a valid email.`);
             }
             return false
