@@ -1,17 +1,10 @@
 import "styles/pages/index.scss"
-
-import {configureStripe} from '@web/checkout'
 import {Config} from "@web/config"
 import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
 import {submitEmail} from '@web/mailchimp'
 import {validateEmail, addModal, showModal} from "@web/util";
-// import functions from "firebase-functions"
-
-// console.log("Config", Config)
-
-// initAnalytics()
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loaded");
@@ -20,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let app = firebase.initializeApp(Config.firebase);
             let features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof app[feature] === 'function');
             console.log(`Firebase SDK loaded with ${features.join(', ')}`)
-            // document.getElementById('load').innerHTML = `Firebase SDK loaded with ${features.join(', ')}`;
     } catch (e) {
         console.error('FAILED TO GET FIREBASE', e);
         document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
@@ -58,12 +50,8 @@ function setupJumpToForm(){
                     }
                 }
             }
-
         })
     })
-
-
-
 }
 
 function setupFormListener(formId){
