@@ -31,7 +31,7 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
       console.log("slack result", slackResult);
       console.log("new thing");
 
-      return res.send({data: {success: true, message: `processed ${subscription.email}`, subscription}});
+      return res.send({data: {success: true, message: `processed ${subscription.email}`, signupResult}});
 
   } catch (error){
     return res.send({data: {success: false, message: `unable to process subscription for ${subscription.email}`, subscription, error}})
