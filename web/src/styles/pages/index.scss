@@ -44,6 +44,7 @@ body {
 
     @include r(768) {
       margin: 0 2.4rem 2.4rem;
+      max-width: 65rem;
     }
   }
 
@@ -161,7 +162,7 @@ input[type=email] {
     &:before {
       background: no-repeat;
       background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
-      background-position: 10rem 10rem, 0 0;
+      background-position: 5rem 8rem, 0 0;
       background-size: 44.5rem, 44rem;
       content: "";
       display: block;
@@ -175,7 +176,7 @@ input[type=email] {
   @include r(1500) {
     &:before {
       left: -25rem;
-      top: -19rem;
+      top: -24rem;
     }
   }
 
@@ -231,14 +232,6 @@ input[type=email] {
 
 .how {
   padding: 5.6rem 2.4rem 1.6rem;
-
-  h2 {
-    margin: 0 0 3.2rem;
-
-    @include r(768) {
-      margin-bottom: 1.6rem;
-    }
-  }
 
   .flexContainer {
     background: url(assets/images/lineMobile.svg) no-repeat 18px center;
@@ -301,6 +294,79 @@ input[type=email] {
   }
 }
 
+.how h2,
+.testimonials h2 {
+  margin: 0 0 3.2rem;
+
+  @include r(768) {
+    margin-bottom: 1.6rem;
+  }
+}
+
+.testimonials {
+  padding: 5.6rem 0 7.2rem;
+
+  @include r(768) {
+    background: no-repeat;
+    background-image: url(assets/images/greenVs.svg), url(assets/images/pinkBlob.svg);
+    background-position: right -16rem center, right -24rem center;
+    background-size: 39rem, 45rem;
+  }
+
+  .flexContainer {
+    display: flex;
+    margin: 0;
+    overflow-x: auto;
+    padding: .8rem 2.4rem;
+    scroll-snap-type: x mandatory;
+
+    @include r(768) {
+      flex-flow: row wrap;
+    }
+  }
+
+  .quote {
+    align-items: flex-start;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
+    margin: 0 3.2rem 4rem 0;
+    max-width: 45rem;
+    min-width: 80vw;
+    padding: 3.2rem;
+    scroll-snap-align: center;
+    text-align: left;
+
+    @include r(600) {
+      flex-basis: 44%;
+      margin: 0 1.6rem 3.2rem;
+      min-width: 32rem;
+    }
+    @include r(1024) {
+      margin: 0 2vw 6.4rem;
+    }
+  }
+
+  .avatar {
+    margin-bottom: 1.6rem;
+    text-align: center;
+  }
+
+  .avatarImg {
+    width: 8rem;
+  }
+
+  .name {
+    font-size: 1.6rem;
+    margin: 0;
+    opacity: .5;
+  }
+
+  .quoteText {
+    margin: 0;
+  }
+}
+
 .email {
   background: url(assets/images/yellowNeedles.svg) $yellow;
   background-size: 80%;
@@ -335,8 +401,6 @@ input[type=email] {
     }
   }
 }
-
-
 
 
 /*
