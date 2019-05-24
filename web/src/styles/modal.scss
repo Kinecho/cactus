@@ -1,8 +1,9 @@
 @import "~styles/variables";
+@import "~styles/mixins";
 
 .modal-window {
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   top: 0;
   right: 0;
   bottom: 0;
@@ -10,41 +11,49 @@
   z-index: 999;
   opacity: 0;
   pointer-events: none;
-  -webkit-transition: all 0.3s;
-  -moz-transition: all 0.3s;
-  transition: all 0.3s;
-
-
+  transition: opacity 0.3s ease-in-out;
 
   &.open {
     opacity: 1;
     pointer-events: auto;
   }
   &>div {
-    width: 400px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: #000 0 11px 28px -8px;
+    width: 56rem;
     max-width: 90vw;
     position: absolute;
     top: 50%;
     left: 50%;
+    text-align: center;
     transform: translate(-50%, -50%);
-    padding: 2em;
-    background: #ffffff;
+    padding: 3.2rem;
+
+    @include r(768) {
+      text-align: left;
+    }
   }
-  header {
-    font-weight: bold;
+
+  h2 {
+    margin: 1.6rem 0 .8rem;
+
+    @include r(768) {
+      margin: 0 0 .8rem;
+    }
   }
-  h1 {
-    font-size: 150%;
-    margin: 0 0 15px;
+
+  img {
+    width: 100%;
   }
 }
 
 .modal-close {
-  font-size: 80%;
   position: absolute;
-  right: 1rem;
-  text-align: center;
-  top: 1rem;
-  text-decoration: none;
+  right: 1.6rem;
+  top: 1.6rem;
 
+  svg {
+    display: block;
+  }
 }

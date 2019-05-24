@@ -119,6 +119,17 @@ button, a.button {
       z-index: 1;
     }
   }
+
+  &.secondary {
+    background-color: transparent;
+    box-shadow: none;
+    color: $green;
+    padding: .8rem 1.2rem;
+
+    &:hover {
+      background-color: $lightGreen;
+    }
+  }
 }
 
 h1 {
