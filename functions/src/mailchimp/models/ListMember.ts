@@ -11,10 +11,14 @@ export enum MergeField {
     REF_EMAIL = "REF_EMAIL",
 }
 
+export type MergeFields = {
+    [s in MergeField]?: String|Number;
+};
+
 export default class ListMember {
     email_address: String;
     status = ListMemberStatus.subscribed;
-    merge_fields = new Map<MergeField, String|Number|undefined>();
+    merge_fields: MergeFields = {};
 
     constructor(email:String){
         this.email_address = email;
@@ -23,11 +27,12 @@ export default class ListMember {
 
     addMergeField(field:MergeField, value?:String|Number){
         console.log("setting merge field", field, value);
-        this.merge_fields.set(field, value);
+        // this.merge_fields.set(field, value);
+        this.merge_fields[field] = value;
         console.log("merge fields to json", JSON.stringify(this.merge_fields));
     }
 
     removeMergeField(field:MergeField){
-        this.merge_fields.delete(field);
+        delete this.merge_fields[field];
     }
 }
