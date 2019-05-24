@@ -11,7 +11,7 @@
         "baseUrl": ".",
         "rootDirs": ["./src", "../shared/src"],
         "paths": {
-            "@cactus/*": [
+            "@web/*": [
                 "./src/scripts/*"
             ],
             "@shared/*": ["../shared/src/*"]

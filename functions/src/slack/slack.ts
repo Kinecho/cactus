@@ -1,4 +1,4 @@
-import {getConfig} from "@cactus/config/configService";
+import {getConfig} from "@api/config/configService";
 import {IncomingWebhook} from "@slack/client";
 
 const config = getConfig();

@@ -1,7 +1,7 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification} from "@cactus/slack/slack"
+import {sendActivityNotification} from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 

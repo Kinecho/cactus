@@ -1,10 +1,10 @@
 import "styles/pages/index.scss"
-import {configureStripe} from '@cactus/checkout'
-import {Config} from "@cactus/config"
-import {gtag} from '@cactus/analytics'
+import {configureStripe} from '@web/checkout'
+import {Config} from "@web/config"
+import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
-import {submitEmail} from '@cactus/mailchimp'
+import {submitEmail} from '@web/mailchimp'
 // import functions from "firebase-functions"
 
 // console.log("Config", Config)
@@ -13,14 +13,6 @@ import {submitEmail} from '@cactus/mailchimp'
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loaded");
-
-
-
-    // firebase.auth().onAuthStateChanged(user => { });
-    // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-    // firebase.messaging().requestPermission().then(() => { });
-    // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-
 
     try {
         let app = firebase.initializeApp(Config.firebase);

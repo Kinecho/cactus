@@ -49,7 +49,7 @@ let webpackConfig = {
         modules: ['src', 'styles', 'assets', 'images', 'scripts', 'node_modules'],
         alias: {
             '@shared': path.resolve(__dirname, '..', 'shared', 'src'),
-            '@cactus': path.resolve(__dirname, 'src', 'scripts'),
+            '@web': path.resolve(__dirname, 'src', 'scripts'),
         },
         extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html'],
     },

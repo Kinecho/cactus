@@ -17,7 +17,7 @@
   },
   "main": "lib/functions/src/index.js",
   "_moduleAliases": {
-    "@cactus": "lib/functions/src",
+    "@api": "lib/functions/src",
     "@shared": "lib/shared/src"
   },
   "dependencies": {
