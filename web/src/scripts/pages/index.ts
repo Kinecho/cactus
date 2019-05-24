@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
-    configureStripe();
+    // configureStripe("'checkout-button-plan_F6oBhRX9L4WKMB'");
     setupJumpToForm();
 });
 

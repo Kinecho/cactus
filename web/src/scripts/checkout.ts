@@ -10,13 +10,13 @@
 // }
 //
 
-export function configureStripe(){
+export function configureStripe(checkoutButtonId){
     // noinspection JSUnresolvedFunction
 
     // @ts-ignore
     const stripe = Stripe('pk_test_cFV6bK7YpxB2QrTRYOJie00B');
 
-    const checkoutButton = document.getElementById('checkout-button-plan_F6oBhRX9L4WKMB');
+    const checkoutButton = document.getElementById(checkoutButtonId);
     checkoutButton.addEventListener('click', function () {
         // When the customer clicks on the button, redirect
         // them to Checkout.
