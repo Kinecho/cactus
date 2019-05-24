@@ -17,7 +17,7 @@ export type MergeFields = {
 
 export default class ListMember {
     email_address: String;
-    status = ListMemberStatus.subscribed;
+    status = ListMemberStatus.pending;
     merge_fields: MergeFields = {};
 
     constructor(email:String){

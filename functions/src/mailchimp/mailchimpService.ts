@@ -2,7 +2,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {getConfig} from "@api/config/configService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import axios from "axios";
-import ListMember, {MergeField} from "@api/mailchimp/models/ListMember"
+import ListMember, {ListMemberStatus, MergeField} from "@api/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 
 
@@ -24,6 +24,8 @@ function getListURL():String{
 
 export async function signup(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
     const member = new ListMember(subscription.email);
+    member.status = ListMemberStatus.pending;
+
     if (subscription.referredByEmail){
         member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
     }
