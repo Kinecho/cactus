@@ -6,6 +6,7 @@
     "noUnusedLocals": true,
     "outDir": "lib",
     "sourceMap": true,
+    "inlineSources": true,
     "strict": true,
     "target": "es2015",
     "baseUrl": ".",

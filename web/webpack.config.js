@@ -71,6 +71,9 @@ let webpackConfig = {
                         options: {sourceMap: true, url: false},
                     },
                     {
+                      loader: "postcss-loader"
+                    },
+                    {
                         loader: 'sass-loader',
                         options: {
                             sourceMap: true,

@@ -29,24 +29,20 @@ export function enabled() {
 /**
  *
  * @param {*} message - the message to pass to the webhook
- * @returns {Promise<SlackWebhookResponse>}
+ * @returns {Promise<SlackMessageResult>}
  */
-export function sendActivityNotification(message:string):Promise<SlackMessageResult> {
+export async function sendActivityNotification(message:string):Promise<SlackMessageResult> {
     const isEnabled = enabled();
     console.log("slack enabled: ", isEnabled);
     if (!isEnabled) {
         return Promise.resolve({enabled: false, success: true});
     }
 
-    const sendResult = webhook.send(message);
-
-    return sendResult.then(result => {
-        console.log("Slack Message sent: ", result.text);
+    try {
+        const result = await webhook.send(message);
         return {enabled: true, success: true, response: result.text};
-    }).catch(error => {
-        console.error("Error sending slack webhook notification", error);
+    } catch (error) {
         return {enabled: true, success: false, error: error};
-    });
-
+    }
 }
 
