@@ -22,7 +22,7 @@ function buildConfig():CactusConfig {
 
 function buildMockConfig():CactusConfig {
     return {
-        mailchimp: {api_key: "fake_key"},
+        mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
         slack: {
             webhooks: {
                 cactus_activity: "https://cactus_activity_webhook.test.com"
