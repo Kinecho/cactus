@@ -46,7 +46,7 @@ header {
     position: static;
   }
 
-  button {
+  button, a.button {
     flex-grow: 0;
     font-size: 1.6rem;
     margin: 0;
@@ -68,7 +68,11 @@ header {
   }
 }
 
-button {
+a.button {
+  text-decoration: none;
+}
+
+button, a.button {
   background-color: $green;
   border: 0;
   border-radius: 3rem;
@@ -183,4 +187,9 @@ footer {
   p {
     grid-area: text;
   }
+}
+
+
+.hidden {
+  display: none;
 }

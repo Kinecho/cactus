@@ -8,6 +8,8 @@ Run `npm run dev` from the `/web` directory to run the local dev server. It will
 
 Since static assets (images, etc) are served from the `src` directory, all changes should be available immediately
 
+> This project uses TypeScript. All new javascript files should be added as `.ts` (not .js). .js files will no longer compile. 
+
 ## Add a new webpage
 Since we're not running a single page app, we have no routing layer. We need to create and set up routes manually. There are a few steps to this process (someday I may write a script to help automate this... but don't hold your breath).
 
@@ -54,13 +56,13 @@ You may want to import common styles, so add the following:
 ```
 
 
-### 3) Create the javascript file
-in `web/src/scripts/pages` create a file with the same name as the `html` file you created. So, for this tutorial: `tutorial.js`
+### 3) Create the TypeScript file
+in `web/src/scripts/pages` create a file with the same name as the `html` file you created. So, for this tutorial: `tutorial.ts`
 
 Add the following snippet of javascript to includes your page's stylesheet and a generic page load handler:
 
-```javascript
-//tutorial.js
+```typescript
+//tutorial.ts
 import "styles/pages/tutorial.scss"
 
 
@@ -82,7 +84,7 @@ cactus/
 │   │   └───assets/ 
 │   │   └───scripts/
 │   │   │   └───pages/
-│   │   │      tutorial.js* <-- Your new javascript file  
+│   │   │      tutorial.ts* <-- Your new TypeScript file  
 │   │   └───styles/
 │   │       └───pages/
 │   │           tutorial.scss* <-- Your new stylesheet
@@ -90,7 +92,7 @@ cactus/
 │   │       404.html
 │   │       ...
 │   │       tutorial.html* <-- Your new html file
-│   │   webpack.config.js
+│   │   webpack.config.ts
 │   │   package.json
 │   │   config.stage.js
 │   │   config.prod.js

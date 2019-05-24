@@ -1,8 +1,9 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification} from "../slack/slack";
-import SubscriptionRequest from "./models/SubscriptionRequest";
+import {sendActivityNotification} from "@api/slack/slack"
+
+import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 
 const app = express();
 
@@ -11,7 +12,7 @@ app.use(cors({ origin: true }));
 
 app.post("/", (req: express.Request, res: express.Response ) => {
   console.log("request params", req.body);
-  let subscription = SubscriptionRequest.fromRequest(req);
+  let subscription = SubscriptionRequest.fromData(req.body);
   res.contentType("application/json");
 
   let slackMessage = `${subscription.email} signed up!`;
