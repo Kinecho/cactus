@@ -4,14 +4,14 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
-const pages = require('./pages')
+const pages = require('webpack/pages')
 
 let projectId = process.env.GCLOUD_PROJECT
 let isProd = projectId === 'cactus-app-prod'
 console.log('isProduction', isProd)
 
 let minimizers = []
-let config = isProd ? require('./config.prod.js') : require('./config.stage.js')
+let config = isProd ? require('webpack/config.prod') : require('webpack/config.stage')
 
 
 Object.keys(config).forEach(key => {
@@ -110,6 +110,12 @@ let webpackConfig = {
     devServer: {
         open: false,
         contentBase: path.join(__dirname, 'src'),
+        proxy: {
+            "/api/**": {
+                target: "http://localhost:5000/cactus-app-stage/us-central1",
+                pathRewrite: {'^/api' : ''}
+            }
+        },
         historyApiFallback: {
             disableDotRule: true,
             rewrites: [

@@ -33,10 +33,16 @@ cactus/
 │   │       404.html
 │   │       ...
 │   │       tutorial.html* <-- Your new file  
-│   │   webpack.config.js
+│   │   └───webpack/   
+│   │       pages.js
+│   │       config.dev.js
+│   │       config.stage.js
+│   │       config.prod.js
+│   │       webpack.config.common.js
+│   │       webpack.config.dev.js
+│   │       webpack.config.stage.js
+│   │       webpack.config.prod.js
 │   │   package.json
-│   │   config.stage.js
-│   │   config.prod.js
 │   │   ...
 │
 │   README.md             
@@ -92,10 +98,16 @@ cactus/
 │   │       404.html
 │   │       ...
 │   │       tutorial.html* <-- Your new html file
-│   │   webpack.config.ts
+│   │   └───webpack/   
+│   │       pages.js
+│   │       config.dev.js
+│   │       config.stage.js
+│   │       config.prod.js
+│   │       webpack.config.common.js
+│   │       webpack.config.dev.js
+│   │       webpack.config.stage.js
+│   │       webpack.config.prod.js
 │   │   package.json
-│   │   config.stage.js
-│   │   config.prod.js
 │   │   ...
 │
 │   README.md             
@@ -106,12 +118,12 @@ cactus/
 ### 4) Register the new page & route with webpack
 Since this project is not a single page app, we need to tell webpack that we have another entry point that needs to get processed. We also need to tell webpack-dev-server about the new route we want to create.
 
-Open `web/pages.js`. Add a new entry for your page, like the example below. Update the values for `path` to be the URL path you would like to use. Ensure it has preceeding `/`. This value will be used to match the url exactly via regex. 
+Open `web/webpack/pages.js`. Add a new entry for your page, like the example below. Update the values for `path` to be the URL path you would like to use. Ensure it has preceeding `/`. This value will be used to match the url exactly via regex. 
 
 > `NOTE`: we do not currently have support for nested routes (i.e. `/tutorial/subpage`) or dynamic routes (i.e. `/:id`)
 
 ```javascript
-//pages.js
+//webpack/pages.js
 module.exports = {
     index: {title: "Home", path: "/"},
     // ... other routes here
@@ -154,6 +166,10 @@ Under `hosting.rewrites` add your new route + filename. Notice that you do *NOT=
 
 Once you deploy (to stage first, hopefully!!), you should be able to hit your new page with the route specified. Obviously, you will want to keep the route in `firebase.json` consistent with what you set up in `pages.js` or else dev and stage/prod will have different behavior. 
 
+## Frontend Environment Variables (Config)
+At build time, we inject environment variables into a config file: `src/scripts/config.ts`. The values here should begin and end with double underscores as they are replaced by webpack at build-time. Example parameter is `__MY_PARAM__`.  In the `config.ts` file, we declare these variables so that typescript doesn't complain about them. We can then leverage any of of these variables at runtime by importing the config file.
+
+To add a new variable, upadte all three config files located in `/web/webpack`. There is a config for `prod`, `stage`, and `dev`.   
 
 ## Deployments
 Run `npm run deploy:stage` or `npm run deploy:prod`. Configuration in `firestore.json` has a predeploy hook that runs the npm script to build the assets needed. 
@@ -165,6 +181,10 @@ The pre-deployment hook (`npm run predeploy`) has 3 steps:
  
 Once the pre-deployment step is completed, all the contents of the `/public` directory are uploaded to firebase and your changes will be live.
 
+### Deployment Build Script
+There is a special webpack config file called `webpack.deploy.config.js` that reads the environment variable `GCLOUD_PROJECT`, which the firebase CLI provides at runtime for the current project (usually set with the `-P` flag, or uses the default foudn in `.firebaserc`). The webpack script then checks if the projectID is equal to prod or stage, and returns the appropriate webpack config (`webpack.config.prod` or `webpack.config.stage`). If the environment flag `GCLOUD_PROJECT` is not present at runtime, the program crashes.
+
+If you want to test the build script for stage or prod manually, you can run `npm run predeploy:stage` or `npm predeploy:prod` to force the projectID environment variable.   
 
 ## Analytics
 

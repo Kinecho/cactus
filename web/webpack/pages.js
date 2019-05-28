@@ -1,4 +1,5 @@
 module.exports = {
+    "404": {title: "Not Found"}, //404 is special. don't touch.
     index: {
         title: "Home",
         path: "/"
@@ -11,7 +12,6 @@ module.exports = {
         title: "Payment Canceled",
         path: "/cancel"
     },
-    "404": {title: "Not Found"}, //404 is special. don't touch.
     subscription_confirmed: {
         title: "Subscription Confirmed",
         path: "/confirmed"

@@ -12,6 +12,10 @@ const app = express();
 // Automatically allow cross-origin requests
 app.use(cors({ origin: true }));
 
+app.get("/", async (req: express.Request, res: express.Response) => {
+    return res.send({success: true, message: "got the get request"})
+});
+
 app.post("/", async (req: express.Request, res: express.Response ) => {
   console.log("request params", req.body);
   const subscription = SubscriptionRequest.fromData(req.body);

@@ -4,23 +4,27 @@
     "description": "Static website for cactus app",
     "main": "index.js",
     "scripts": {
-        "build": "npm run clean && npm run logo && webpack --config webpack.config.js",
-        "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod webpack --config webpack.config.js",
+        "_dontuse:build": "npm run clean && npm run logo && webpack --config webpack/webpack.config.js",
+        "build:deploy": "npm run clean && npm run logo && webpack --config webpack/webpack.deploy.config.js",
+        "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod webpack --config webpack/webpack.deploy.config.js",
+        "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage webpack --config webpack/webpack.deploy.config.js",
         "clean": "rm -rf ./public",
         "copy": "mkdir ./public ; rsync -a ./src/assets ./public",
-        "dev": "npm run logo && webpack-dev-server --config webpack.config.js",
+        "dev": "npm run logo && webpack-dev-server --config webpack/webpack.config.dev.js",
         "deploy:stage": "npx firebase deploy --only hosting -P stage && open https://cactus-app-stage.web.app",
         "deploy:prod": "npx firebase deploy --only hosting -P prod && open https://cactus-app-prod.web.app",
         "logo": "cat ./../cactus.txt",
         "open": "npm run predeploy && open ./public/index.html",
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
-        "predeploy": " npm run build && npm run copy",
+        "predeploy": "npm run build:deploy && npm run copy",
         "predeploy:prod": "npm run build:prod && npm run copy",
+        "predeploy:stage": "npm run build:stage && npm run copy",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Neil Poulin | Kinecho",
     "license": "ISC",
     "dependencies": {
+        "axios": "^0.18.0",
         "firebase": "^6.0.2",
         "firebase-app": "0.0.1",
         "firebase-functions": "^2.3.1"
@@ -46,6 +50,7 @@
         "typescript": "^3.4.5",
         "webpack": "^4.32.0",
         "webpack-cli": "^3.3.2",
-        "webpack-dev-server": "^3.4.1"
+        "webpack-dev-server": "^3.4.1",
+        "webpack-merge": "^4.2.1"
     }
 }
