@@ -1,3 +1,4 @@
-import {init as initAnalytics, gtag} from '@web/analytics'
+import {init as initAnalytics, startFullstory} from '@web/analytics'
 
 initAnalytics();
+startFullstory();

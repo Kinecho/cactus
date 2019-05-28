@@ -1,6 +1,7 @@
 module.exports = {
     __GOOGLE_ANALYTICS_ID__: "UA-127159143-6",
     __API_DOMAIN__: "https://us-central1-cactus-app-stage.cloudfunctions.net",
+    __FULL_STORY_TEAM_ID__: "",
     __FIREBASE_CONFIG__: {
         apiKey: "AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0",
         authDomain: "cactus-app-stage.firebaseapp.com",

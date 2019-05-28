@@ -17,6 +17,18 @@ app.get("/", async (req: express.Request, res: express.Response) => {
     return res.send({success: true, message: "got the get request"})
 });
 
+
+app.get("/webhook", async (req: express.Request, res: express.Response) => {
+
+    res.send({success: true})
+});
+
+app.post("/webhook", async (req: express.Request, res: express.Response) => {
+    const data = req.body;
+    console.log("webhook data", data);
+    res.send({success: true})
+});
+
 app.post("/", async (req: express.Request, res: express.Response ) => {
   console.log("request params", req.body);
   const subscription = SubscriptionRequest.fromData(req.body);
