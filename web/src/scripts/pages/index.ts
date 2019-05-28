@@ -126,11 +126,6 @@ function setupFormListener(formId){
 
         button.disabled = true;
 
-
-
-
-
-
         try {
             const signupResult = await submitEmail(emailAddress, null);
 
@@ -140,7 +135,7 @@ function setupFormListener(formId){
                 addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
                 gtag('event', 'email_signup_success', {
                     event_category: "email_signup",
-                    event_label: `${formId} - ${emailAddress}`
+                    event_label: `${formId}`
                 });
                 showModal(modalId);
 
@@ -149,14 +144,14 @@ function setupFormListener(formId){
             } else if (signupResult.error){
                 gtag('event', 'email_signup_error', {
                     event_category: "email_signup",
-                    event_label: `${formId} - ${emailAddress}`
+                    event_label: `${formId}`
                 });
                 showError(signupResult.error.friendlyMessage || "Sorry, it looks like we're having issues. Please try again later.")
             } else {
 
                 gtag('event', 'email_signup_error', {
                     event_category: "email_signup",
-                    event_label: `${formId} - ${emailAddress}`
+                    event_label: `${formId}`
                 });
                 showError("Sorry, it looks like we're having issues. Please try again later");
             }
