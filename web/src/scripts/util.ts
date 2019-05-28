@@ -1,6 +1,6 @@
 export function validateEmail(email:string)
 {
-    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+    return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
 }
 
 function createElementFromString(htmlString:string):ChildNode{
