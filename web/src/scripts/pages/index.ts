@@ -133,7 +133,7 @@ function setupFormListener(formId){
 
         let modalId = "signup-success-modal";
 
-        addModal(modalId, {title: "Success!", message: `Check your inbox for ${emailAddress}`});
+        addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
 
         submitEmail(emailAddress, null).then(response => {
             // alert(`Success! Signed up with email ${emailAddress}`)
@@ -153,4 +153,3 @@ function setupFormListener(formId){
 
     form.addEventListener("submit", processForm);
 }
-
