@@ -1,4 +1,4 @@
-import ListMember from "@api/mailchimp/models/ListMember";
+import ListMember from "@shared/mailchimp/models/ListMember";
 import ApiError from "@shared/ApiError";
 
 export enum SubscriptionResultStatus {

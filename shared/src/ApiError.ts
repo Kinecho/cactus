@@ -1,5 +1,5 @@
 export default class ApiError {
-    friendlyMessage?: String;
+    friendlyMessage?: string;
     error?: Error;
     code?: Number;
 

@@ -2,7 +2,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {getConfig} from "@api/config/configService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import axios from "axios";
-import ListMember, {ListMemberStatus, MergeField} from "@api/mailchimp/models/ListMember"
+import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 
 

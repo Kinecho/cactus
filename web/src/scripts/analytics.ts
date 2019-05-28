@@ -27,7 +27,6 @@ function createGTag(){
         console.log("setting up gtag");
         window.dataLayer = window.dataLayer || [];
         _gtag = function(){
-            console.log("pushing arguments to datalayer", arguments);
             window.dataLayer.push(arguments)
         }
     } else {

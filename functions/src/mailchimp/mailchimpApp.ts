@@ -5,7 +5,8 @@ import {sendActivityNotification} from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {signup} from "@api/mailchimp/mailchimpService";
-import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import ApiError from "@shared/ApiError";
 
 const app = express();
 
@@ -43,10 +44,22 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
           await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
       }
 
-      return res.send({data: signupResult});
+      return res.send(signupResult);
 
   } catch (error){
-    return res.send({data: {success: false, message: `unable to process subscription for ${subscription.email}`, subscription, error}})
+      let result = new SubscriptionResult();
+      result.success = false;
+      let apiError = new ApiError();
+      apiError.code = 500;
+      apiError.friendlyMessage = "Unable to process your subscription. Please try again later";
+      apiError.error = error;
+      result.error = apiError;
+
+      // result.member = null;
+      result.status = SubscriptionResultStatus.unknown;
+
+
+    return res.send(result)
   }
 });
 

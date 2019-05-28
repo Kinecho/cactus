@@ -1,7 +1,7 @@
-import * as firebase from "firebase/app"
 import "firebase/functions"
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-
+import {request} from "@web/requestUtils";
+import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 /**
  *
  * @param {String} email
@@ -9,22 +9,17 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
  *
  * @returns Promise
  */
-export function submitEmail(email: String, referredByEmail: String){
-    let signup = firebase.functions().httpsCallable("mailchimp");
-
+export async function submitEmail(email: String, referredByEmail: String): Promise<SubscriptionResult>{
     let subscription = new SubscriptionRequest(email);
     subscription.referredByEmail = referredByEmail;
     // subscription.as
     console.log("submitting subscription", subscription);
-    return signup(subscription).then(result => {
-        if (result.data.success){
-            console.log("success!!", result)
-        } else {
-            console.warn("not successful getting data from endpoint", result)
-        }
-        return result
-    }).catch( error => {
-        console.error("failed to signup", error);
-        return error
-    })
+
+    let result = (await request.post("/mailchimp", subscription)).data as SubscriptionResult;
+    if (result.success){
+        console.log("Signup successful", result)
+    } else {
+        console.warn("not successful getting data from endpoint", result)
+    }
+    return result
 }

@@ -1,29 +1,31 @@
-const helpers = require("./helpers");
+const helpers = require('./helpers')
 const pages = require('./pages')
 
-module.exports = {
-    devServer: {
-        open: false,
-        contentBase: helpers.srcDir,
-        proxy: {
-            '/api/**': {
-                target: 'http://localhost:5000/cactus-app-stage/us-central1',
-                pathRewrite: {'^/api': ''},
+module.exports = function (config) {
+    return {
+        devServer: {
+            open: false,
+            contentBase: helpers.srcDir,
+            // proxy: {
+            //     '/api/**': {
+            //         target: config.__API_DOMAIN__,
+            //         pathRewrite: {'^/api': ''},
+            //     },
+            // },
+            historyApiFallback: {
+                disableDotRule: true,
+                rewrites: [
+                    ...Object.keys(pages).filter(page => {
+                        return pages[page].path
+                    }).map(filename => {
+                        console.log('adding page', filename)
+                        let page = pages[filename]
+                        let pattern = new RegExp('^' + page.path + '$')
+                        return {from: pattern, to: `/${filename}.html`}
+                    }),
+                    {from: /./, to: '/404.html'},
+                ],
             },
         },
-        historyApiFallback: {
-            disableDotRule: true,
-            rewrites: [
-                ...Object.keys(pages).filter(page => {
-                    return pages[page].path
-                }).map(filename => {
-                    console.log('adding page', filename)
-                    let page = pages[filename]
-                    let pattern = new RegExp('^' + page.path + '$')
-                    return {from: pattern, to: `/${filename}.html`}
-                }),
-                {from: /./, to: '/404.html'},
-            ],
-        },
-    },
+    }
 }

@@ -67,7 +67,7 @@ function setupFormListener(formId){
         return
     }
 
-    function processForm(e) {
+    async function processForm(e) {
         if (e.preventDefault) e.preventDefault();
         /* do what you want with the form */
         console.log("form submitted", formId);
@@ -126,26 +126,46 @@ function setupFormListener(formId){
 
         button.disabled = true;
 
-        gtag('event', 'email_signup_success', {
-            event_category: "email_signup",
-            event_label: `${formId} - ${emailAddress}`
-        });
 
-        let modalId = "signup-success-modal";
 
-        addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
 
-        submitEmail(emailAddress, null).then(response => {
-            // alert(`Success! Signed up with email ${emailAddress}`)
-            button.disabled = false;
-            hideError();
-            showModal(modalId);
 
-            emailInput.value = "";
 
-        }).catch(error => {
+        try {
+            const signupResult = await submitEmail(emailAddress, null);
+
+            if (signupResult.success){
+                let modalId = "signup-success-modal";
+                hideError();
+                addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
+                gtag('event', 'email_signup_success', {
+                    event_category: "email_signup",
+                    event_label: `${formId} - ${emailAddress}`
+                });
+                showModal(modalId);
+
+
+                emailInput.value = "";
+            } else if (signupResult.error){
+                gtag('event', 'email_signup_error', {
+                    event_category: "email_signup",
+                    event_label: `${formId} - ${emailAddress}`
+                });
+                showError(signupResult.error.friendlyMessage || "Sorry, it looks like we're having issues. Please try again later.")
+            } else {
+
+                gtag('event', 'email_signup_error', {
+                    event_category: "email_signup",
+                    event_label: `${formId} - ${emailAddress}`
+                });
+                showError("Sorry, it looks like we're having issues. Please try again later");
+            }
+        } catch (error){
+            console.error("failed to process form", error);
             showError("Sorry, it looks like we're having issues.");
-        });
+        } finally {
+            button.disabled = false
+        }
 
         // You must return false to prevent the default form behavior
         return false;
