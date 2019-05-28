@@ -29,6 +29,10 @@
         "destination": "/payment_cancel.html"
       },
       {
+        "source": "/confirmed",
+        "destination": "/subscription_confirmed.html"
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       },

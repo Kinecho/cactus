@@ -12,4 +12,8 @@ module.exports = {
         path: "/cancel"
     },
     "404": {title: "Not Found"}, //404 is special. don't touch.
+    subscription_confirmed: {
+        title: "Subscription Confirmed",
+        path: "/confirmed"
+    },
 }
