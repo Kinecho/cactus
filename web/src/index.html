@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Cactus</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
 
     <!--
       Mailchimp style sheet - might not need it, but is useful for error responses from form validation, etc
@@ -24,10 +24,12 @@
     <meta name="twitter:site" content="@itscalledcactus">
     <meta name="twitter:title" content="Cactus">
     <meta name="twitter:description" content="See yourself and the world more positively. Cactus asks you questions that make you more mindful and help you know yourself better.">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+
     <meta name="theme-color" content="#33CCAB">
 
     <!--note CSS is included via webpack-->

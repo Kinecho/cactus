@@ -1,11 +1,11 @@
 module.exports = {
-    "404": {title: "Not Found"}, //404 is special. don't touch.
+    "404": {title: "Page Not Found"}, //404 is special. don't touch.
     index: {
-        title: "Home",
+        title: "Welcome to Cactus",
         path: "/"
     },
     payment_success: {
-        title: "Success!",
+        title: "Payment Success",
         path: "/success"
     },
     payment_cancel: {

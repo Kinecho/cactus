@@ -9,7 +9,7 @@
         "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod webpack --config webpack/webpack.deploy.config.js",
         "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage webpack --config webpack/webpack.deploy.config.js",
         "clean": "rm -rf ./public",
-        "copy": "mkdir ./public ; rsync -a ./src/assets ./public",
+        "copy": "mkdir ./public ; rsync -a ./src/assets ./public ; cp ./src/favicon* ./public",
         "fe": "npm run logo && webpack-dev-server --config webpack/webpack.config.fe.js",
         "dev": "npm run logo && webpack-dev-server --config webpack/webpack.config.dev.js",
         "deploy:stage": "npx firebase deploy --only hosting -P stage && open https://cactus-app-stage.web.app",

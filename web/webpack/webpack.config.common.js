@@ -79,10 +79,13 @@ module.exports = function(config){
                 chunkFilename: '[id].[hash].css',
             }),
             ...Object.keys(pages).map(title => {
+                const page = pages[title]
                 return new HtmlWebpackPlugin({
                     chunks: ['common', title],
+                    title: page.title,
                     template: `${helpers.srcDir}/${title}.html`,
                     filename: `${title}.html`,
+                    favicon: `${helpers.srcDir}/favicon.ico`
                 })
             }),
             new webpack.DefinePlugin(parsedConfig),
