@@ -113,8 +113,13 @@ body {
     height: auto;
   }
 
-  video {
+  video, img {
     margin: 70px auto;
+  }
+
+  img {
+    max-height: 569px;
+    max-width: 264px;
   }
 }
 
