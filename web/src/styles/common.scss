@@ -177,29 +177,63 @@ footer {
   padding: 8rem 2.4rem 3.2rem;
   position: relative;
   z-index: 0;
+
+  .centered {
+    @include r(600) {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
 }
 
 .footerInfo {
-  display: grid;
-  grid-template-areas:
-     "logo text"
-     "logo text";
-  grid-template-columns: 3.2rem auto;
-  margin: 0 auto;
-  max-width: 1200px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.6rem;
+  text-align: left;
 
-  img {
-    align-self: center;
-    grid-area: logo;
+  @include r(600) {
+    margin-bottom: 0;
+  }
+
+  .logomark {
     height: 4.4rem;
+    margin-right: .8rem;
     width: 2.4rem;
   }
 
-  p {
-    grid-area: text;
+  .copyright {
+    margin: 0;
   }
 }
 
+.socialLinks {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+
+  @include r(600) {
+    justify-content: flex-end;
+  }
+
+  .link {
+    display: flex;
+    opacity: .5;
+    padding: 1.2rem;
+    transition: opacity .3s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .icon {
+    height: 2.4rem;
+    width: 2.4rem;
+  }
+}
 
 .hidden {
   display: none;
