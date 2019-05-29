@@ -102,7 +102,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
             console.log();
             console.log("Processed email", JSON.stringify(email, null, 2));
 
-            await sendActivityNotification(`Processed inbound email reply from ${email.from ? email : "unknown"}\n \`\`\`${JSON.stringify(email, null, 2)}\`\`\``)
+            await sendActivityNotification(`Processed inbound email reply from ${email.from && email.from.email ? email.from.email : "unknown"}\n \`\`\`${JSON.stringify({subject: email.subject}, null, 2)}\`\`\``)
             res.send(email);
         });
 
