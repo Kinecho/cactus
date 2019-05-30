@@ -108,14 +108,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
         // The raw bytes of the upload will be in req.rawBody.  Send it to busboy, and get
         // a callback when it's finished.
-
-
         busboy.end(req.rawBody || req.body);
-        // console.log("=================== raw body below ===================");
-        // console.log();
-        // console.log(req.rawBody || req.body);
-        // console.log();
-        // console.log("==================== end raw body ============+========")
     } catch (error){
         console.error("failed to process email", error);
         await sendActivityNotification("ERROR: Failed to process incoming email");
