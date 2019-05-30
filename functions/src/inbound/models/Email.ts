@@ -2,9 +2,16 @@ import AttachmentInfo from "@api/inbound/models/EmailAttachment"
 import * as parseEmail from "email-addresses";
 import ParsedMailbox = emailAddresses.ParsedMailbox;
 import EmailAddress from "@api/inbound/models/EmailAddress";
+import EmailHeaders from "@api/inbound/models/EmailHeaders";
+
+export interface InboundEmailFiles {
+    [fieldName: string]: {
+        [filename: string]: string
+    }
+}
 
 export interface InboundEmail {
-    headers?: {[key: string]: string};
+    headers?: EmailHeaders;
     toRaw?: string;
     fromRaw?: string;
     text?: string;
@@ -14,7 +21,7 @@ export interface InboundEmail {
 }
 
 export default class Email implements Email{
-    headers: {[key: string]: string};
+    headers: EmailHeaders;
     to?: EmailAddress;
     from?: EmailAddress;
     text?: string;

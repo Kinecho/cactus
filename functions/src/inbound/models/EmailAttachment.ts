@@ -1,4 +1,7 @@
 
+export interface InboundEmailAttachments {
+    [key: string]: InboundAttachmentInfo
+}
 
 export interface InboundAttachmentInfo {
     filename?: string;
