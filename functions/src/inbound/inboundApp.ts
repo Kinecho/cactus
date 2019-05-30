@@ -4,6 +4,9 @@ import {sendActivityNotification} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
+import {updateMergeFields, UpdateMergeFieldRequest} from "@api/mailchimp/mailchimpService";
+import {MergeFieldBoolean, MergeField} from "@shared/mailchimp/models/ListMember";
+
 const app = express();
 const Busboy = require("busboy");
 app.use(cors({ origin: true }));
@@ -17,20 +20,6 @@ app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
  * ref: Doug Stevenson's answer here: https://stackoverflow.com/questions/47242340/how-to-perform-an-http-file-upload-using-express-on-cloud-functions-for-firebase/47319614#47319614
  */
 app.post("/",  async (req: express.Request|any, res: express.Response) => {
-    console.log("Starting email inbound hook");
-    console.log();
-    console.log("========= HEADERS ==========");
-    console.log(JSON.stringify(req.headers));
-    console.log("========= END HEADERS ==========");
-    console.log();
-
-    console.log();
-    console.log("========= BODY ==========");
-    console.log(req.body);
-    console.log("========= END BODY ==========");
-    console.log();
-
-
     const date = new Date();
     const dateId = date.getTime();
 
@@ -59,6 +48,20 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
             await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
             await sendActivityNotification(`Processed inbound email from ${email.from && email.from.email ? email.from.email : "unknown"}\n > ${email.subject}`)
+
+            if (email.from && email.from.email){
+                console.log("updating merge tag for user", email.mailchimpMemberId);
+                const mergeRequest:UpdateMergeFieldRequest = {
+                    email: email.from.email,
+                    mergeFields: {
+                        [MergeField.DO_REMIND]: MergeFieldBoolean.NO
+                    }
+                };
+                await updateMergeFields(mergeRequest);
+            } else {
+                console.warn("No mailchimp Member ID found on email, can't update merge fields");
+            }
+
             res.send(email);
         });
 

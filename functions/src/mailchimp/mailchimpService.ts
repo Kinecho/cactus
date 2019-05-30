@@ -1,9 +1,14 @@
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {getConfig} from "@api/config/configService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
-import axios from "axios";
-import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember"
+import axios, {AxiosError} from "axios";
+import ListMember, {
+    ListMemberStatus,
+    MergeField,
+    MergeFields
+} from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
+import * as md5 from "md5";
 
 
 const config = getConfig();
@@ -85,4 +90,49 @@ export async function signup(subscription: SubscriptionRequest): Promise<Subscri
     }
 
     return result;
+}
+
+export interface UpdateMergeFieldRequest {
+    email: string,
+    mergeFields: MergeFields
+
+}
+
+/**
+ * Get the hashed version of the user's email, which is used as the id for the mailchip amp
+ * see: https://developer.mailchimp.com/documentation/mailchimp/guides/manage-subscribers-with-the-mailchimp-api/
+ * @param {string} email
+ * @return {string}
+ */
+export function getMemberIdFromEmail(email:string):string {
+    const hashed = md5(email.toLowerCase().trim());
+    return hashed;
+}
+
+export async function updateMergeFields(request: UpdateMergeFieldRequest){
+    try {
+        const memberPatch = {merge_fields: request.mergeFields};
+        const memberId = getMemberIdFromEmail(request.email);
+
+        console.log("Updating member with patch", memberPatch);
+        const response = await axios.patch(
+            `${getListURL()}/members/${memberId}`,
+            memberPatch,
+            {auth: {username: `cactus`, password: api_key}}
+        );
+
+        console.log("update merge field response", response.data);
+
+        return true;
+    } catch (error){
+        console.error("error updating member", error);
+        const axiosError = error as AxiosError;
+        console.log("error updating member: code", axiosError.code);
+
+        if (axiosError.response && axiosError.response.data){
+            const data = axiosError.response.data;
+            console.log("error data:", JSON.stringify(data));
+        }
+        return false
+    }
 }

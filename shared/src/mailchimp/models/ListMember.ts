@@ -9,10 +9,17 @@ export enum MergeField {
     FNAME = "FNAME",
     LNAME = "LNAME",
     REF_EMAIL = "REF_EMAIL",
+    DO_REMIND = "DO_REMIND"
 }
 
+export enum MergeFieldBoolean {
+    YES = "YES",
+    NO = "NO"
+}
+
+
 export type MergeFields = {
-    [s in MergeField]?: String|Number;
+    [s in MergeField]?: String|Number|MergeFieldBoolean;
 };
 
 export default class ListMember {

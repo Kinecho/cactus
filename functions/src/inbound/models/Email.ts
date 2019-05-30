@@ -2,7 +2,10 @@ import AttachmentInfo from "@api/inbound/models/EmailAttachment"
 import * as parseEmail from "email-addresses";
 import ParsedMailbox = emailAddresses.ParsedMailbox;
 import EmailAddress from "@api/inbound/models/EmailAddress";
-import EmailHeaders from "@api/inbound/models/EmailHeaders";
+import EmailHeaders, {MailchimpMemberId} from "@api/inbound/models/EmailHeaders";
+
+
+
 
 export interface InboundEmailFiles {
     [fieldName: string]: {
@@ -18,6 +21,7 @@ export interface InboundEmail {
     html?: string;
     subject?: string;
     attachments?: Array<AttachmentInfo>;
+
 }
 
 export default class Email implements Email{
@@ -28,6 +32,7 @@ export default class Email implements Email{
     html?: string;
     subject?: string;
     attachments?: Array<AttachmentInfo>;
+    mailchimpMemberId?: string|undefined|null;
 
     constructor(input:InboundEmail){
         this.headers = input.headers || {};
@@ -35,7 +40,8 @@ export default class Email implements Email{
         this.text = input.text;
         this.html = input.html;
         this.subject = input.subject;
-
+        this.mailchimpMemberId = this.headers[MailchimpMemberId];
+        
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {
