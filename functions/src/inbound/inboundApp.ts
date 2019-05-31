@@ -10,7 +10,7 @@ import {
     updateTags,
     UpdateTagsRequest
 } from "@api/mailchimp/mailchimpService";
-import {MergeField, MergeFieldBoolean, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 
 const app = express();
 const Busboy = require("busboy");
@@ -82,7 +82,6 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                 const mergeRequest:UpdateMergeFieldRequest = {
                     email: email.from.email,
                     mergeFields: {
-                        [MergeField.DO_REMIND]: MergeFieldBoolean.NO,
                         [MergeField.LAST_REPLY]: (new Date()).toISOString()
                     }
                 };
@@ -91,17 +90,9 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                     email: email.from.email,
                     tags: [
                         {
-                            name: TagName.NEEDS_REMINDER,
-                            status: TagStatus.INACTIVE
-                        },
-                        {
                             name: TagName.NEEDS_ONBOARDING_REMINDER,
                             status: TagStatus.INACTIVE
                         },
-                        {
-                            name: TagName.NEEDS_DAILY_REMINDER,
-                            status: TagStatus.INACTIVE
-                        }
                     ]
                 };
 

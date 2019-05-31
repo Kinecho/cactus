@@ -9,14 +9,11 @@ export enum MergeField {
     FNAME = "FNAME",
     LNAME = "LNAME",
     REF_EMAIL = "REF_EMAIL",
-    DO_REMIND = "DO_REMIND",
     LAST_REPLY = "LAST_REPLY",
 }
 
 export enum TagName {
-    NEEDS_REMINDER = "needs_reminder",
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
-    NEEDS_DAILY_REMINDER = "needs_daily_reminder"
 }
 
 export enum TagStatus {
