@@ -76,7 +76,7 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
           }
 
           const attachmentSummary = {
-              color: "#29A389",
+              color: "#33CCAB",
               fields: fields
           };
 

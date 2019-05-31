@@ -99,7 +99,7 @@ export interface UpdateMergeFieldRequest {
 
 export interface UpdateTagsRequest {
     email: string,
-    tags: [Tag]
+    tags: Tag[]
 }
 
 /**

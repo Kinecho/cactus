@@ -87,10 +87,20 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
                 const tagRequest: UpdateTagsRequest = {
                     email: email.from.email,
-                    tags: [{
-                        name: TagName.NEEDS_REMINDER,
-                        status: TagStatus.INACTIVE
-                    }]
+                    tags: [
+                        {
+                            name: TagName.NEEDS_REMINDER,
+                            status: TagStatus.INACTIVE
+                        },
+                        {
+                            name: TagName.NEEDS_ONBOARDING_REMINDER,
+                            status: TagStatus.INACTIVE
+                        },
+                        {
+                            name: TagName.NEEDS_DAILY_REMINDER,
+                            status: TagStatus.INACTIVE
+                        }
+                    ]
                 };
 
                 await updateMergeFields(mergeRequest);

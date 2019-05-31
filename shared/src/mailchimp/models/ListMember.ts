@@ -13,7 +13,9 @@ export enum MergeField {
 }
 
 export enum TagName {
-    NEEDS_REMINDER = "needs_reminder"
+    NEEDS_REMINDER = "needs_reminder",
+    NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
+    NEEDS_DAILY_REMINDER = "needs_daily_reminder"
 }
 
 export enum TagStatus {
