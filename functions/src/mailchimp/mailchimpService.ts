@@ -5,7 +5,7 @@ import axios, {AxiosError} from "axios";
 import ListMember, {
     ListMemberStatus,
     MergeField,
-    MergeFields
+    MergeFields, Tag
 } from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 import * as md5 from "md5";
@@ -95,7 +95,11 @@ export async function signup(subscription: SubscriptionRequest): Promise<Subscri
 export interface UpdateMergeFieldRequest {
     email: string,
     mergeFields: MergeFields
+}
 
+export interface UpdateTagsRequest {
+    email: string,
+    tags: [Tag]
 }
 
 /**
@@ -126,6 +130,34 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
         return true;
     } catch (error){
         console.error("error updating member", error);
+        const axiosError = error as AxiosError;
+        console.log("error updating member: code", axiosError.code);
+
+        if (axiosError.response && axiosError.response.data){
+            const data = axiosError.response.data;
+            console.log("error data:", JSON.stringify(data));
+        }
+        return false
+    }
+}
+
+export async function updateTags(request: UpdateTagsRequest){
+    try {
+        const memberPatch = {tags: request.tags};
+        const memberId = getMemberIdFromEmail(request.email);
+
+        console.log("Updating member with patch", memberPatch);
+        const response = await axios.post(
+            `${getListURL()}/members/${memberId}/tags`,
+            memberPatch,
+            {auth: {username: `cactus`, password: api_key}}
+        );
+
+        console.log("update tags response", response.data);
+
+        return true;
+    } catch (error){
+        console.error("error updating tags", error);
         const axiosError = error as AxiosError;
         console.log("error updating member: code", axiosError.code);
 

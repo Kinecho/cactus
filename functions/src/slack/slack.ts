@@ -1,5 +1,5 @@
 import {getConfig} from "@api/config/configService";
-import {IncomingWebhook} from "@slack/client";
+import {IncomingWebhook,IncomingWebhookSendArguments} from "@slack/client";
 
 const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
@@ -31,7 +31,7 @@ export function enabled() {
  * @param {*} message - the message to pass to the webhook
  * @returns {Promise<SlackMessageResult>}
  */
-export async function sendActivityNotification(message:string):Promise<SlackMessageResult> {
+export async function sendActivityNotification(message:string|IncomingWebhookSendArguments):Promise<SlackMessageResult> {
     const isEnabled = enabled();
     console.log("slack enabled: ", isEnabled);
     if (!isEnabled) {

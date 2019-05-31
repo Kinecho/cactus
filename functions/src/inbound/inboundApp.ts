@@ -1,11 +1,17 @@
 import * as express from "express";
 import * as cors from "cors";
+import {IncomingWebhookSendArguments} from "@slack/client";
 import {sendActivityNotification} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
-import {updateMergeFields, UpdateMergeFieldRequest} from "@api/mailchimp/mailchimpService";
-import {MergeFieldBoolean, MergeField} from "@shared/mailchimp/models/ListMember";
+import {
+    UpdateMergeFieldRequest,
+    updateMergeFields,
+    updateTags,
+    UpdateTagsRequest
+} from "@api/mailchimp/mailchimpService";
+import {MergeField, MergeFieldBoolean, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 
 const app = express();
 const Busboy = require("busboy");
@@ -47,7 +53,28 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
             console.log("Processed email", JSON.stringify(email, null, 2));
 
             await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
-            await sendActivityNotification(`Processed inbound email from ${email.from && email.from.email ? email.from.email : "unknown"}\n > ${email.subject}`)
+
+
+            const msg:IncomingWebhookSendArguments = {};
+            const fromEmail = email.from && email.from.email ? email.from.email : "unknown";
+            msg.text = `Processed inbound email from ${fromEmail}`;
+
+            msg.attachments = [{
+                fields: [
+                    {
+                        title: "subject",
+                        value: email.subject || "unknown",
+                        short: false,
+                    },
+                    {
+                        title: "from",
+                        value: fromEmail,
+                        short: false,
+                    }
+                ],
+            }];
+
+            await sendActivityNotification(msg);
 
             if (email.from && email.from.email){
                 console.log("updating merge tag for user", email.mailchimpMemberId);
@@ -57,7 +84,17 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                         [MergeField.DO_REMIND]: MergeFieldBoolean.NO
                     }
                 };
+
+                const tagRequest: UpdateTagsRequest = {
+                    email: email.from.email,
+                    tags: [{
+                        name: TagName.NEEDS_REMINDER,
+                        status: TagStatus.INACTIVE
+                    }]
+                };
+
                 await updateMergeFields(mergeRequest);
+                await updateTags(tagRequest);
             } else {
                 console.warn("No mailchimp Member ID found on email, can't update merge fields");
             }

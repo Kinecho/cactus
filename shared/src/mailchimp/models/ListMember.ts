@@ -12,11 +12,25 @@ export enum MergeField {
     DO_REMIND = "DO_REMIND"
 }
 
+export enum TagName {
+    NEEDS_REMINDER = "needs_reminder"
+}
+
+export enum TagStatus {
+    ACTIVE = "active",
+    INACTIVE = "inactive",
+}
+
+export interface Tag {
+    name: TagName,
+    status: TagStatus
+}
+
+
 export enum MergeFieldBoolean {
     YES = "YES",
     NO = "NO"
 }
-
 
 export type MergeFields = {
     [s in MergeField]?: String|Number|MergeFieldBoolean;
