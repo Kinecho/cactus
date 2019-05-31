@@ -77,6 +77,7 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
 
           const attachmentSummary = {
               color: "#33CCAB",
+              ts: `${(new Date()).getTime()/1000}`,
               fields: fields
           };
 

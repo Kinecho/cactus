@@ -9,7 +9,7 @@ import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
  *
  * @returns Promise
  */
-export async function submitEmail(email: String, referredByEmail: String): Promise<SubscriptionResult>{
+export async function submitEmail(email: string, referredByEmail: string): Promise<SubscriptionResult>{
     let subscription = new SubscriptionRequest(email);
     subscription.referredByEmail = referredByEmail;
     // subscription.as

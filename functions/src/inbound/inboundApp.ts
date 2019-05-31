@@ -57,9 +57,11 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
             const msg:IncomingWebhookSendArguments = {};
             msg.text = `Got a reply!`;
+
             const fromEmail = email.from && email.from.email ? email.from.email : "unknown";
             msg.attachments = [{
-                color: "#F4DD48",
+                color: "#F9EB91",
+                ts: `${(new Date()).getTime()/1000}`,
                 fields: [
                     {
                         title: "from",
@@ -81,7 +83,8 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                 const mergeRequest:UpdateMergeFieldRequest = {
                     email: email.from.email,
                     mergeFields: {
-                        [MergeField.DO_REMIND]: MergeFieldBoolean.NO
+                        [MergeField.DO_REMIND]: MergeFieldBoolean.NO,
+                        [MergeField.LAST_REPLY]: (new Date()).toISOString()
                     }
                 };
 

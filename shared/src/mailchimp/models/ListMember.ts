@@ -9,7 +9,8 @@ export enum MergeField {
     FNAME = "FNAME",
     LNAME = "LNAME",
     REF_EMAIL = "REF_EMAIL",
-    DO_REMIND = "DO_REMIND"
+    DO_REMIND = "DO_REMIND",
+    LAST_REPLY = "LAST_REPLY",
 }
 
 export enum TagName {
