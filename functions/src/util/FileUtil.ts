@@ -13,7 +13,7 @@ const fs = require("fs");
 export async function writeToFile(filePath:string, data: any): Promise<boolean>{
 
     const folder = path.dirname(filePath);
-    let fullPath = path.resolve(filePath);
+    const fullPath = path.resolve(filePath);
     console.log("fullPath is", fullPath);
     console.log("folder is", folder);
     try {

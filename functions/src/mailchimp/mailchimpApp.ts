@@ -98,9 +98,9 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
       return res.send(signupResult);
 
   } catch (error){
-      let result = new SubscriptionResult();
+      const result = new SubscriptionResult();
       result.success = false;
-      let apiError = new ApiError();
+      const apiError = new ApiError();
       apiError.code = 500;
       apiError.friendlyMessage = "Unable to process your subscription. Please try again later";
       apiError.error = error;
