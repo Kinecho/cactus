@@ -1,9 +1,15 @@
 
+export interface SubscriptionFormLocation {
+    page: string,
+    formId: string,
+}
+
 export default class SubscriptionRequest {
     email: string;
     firstName?: string;
     lastName?: string;
     referredByEmail?: string;
+    subscriptionLocation?: SubscriptionFormLocation;
 
     constructor(email: string,){
         this.email = email;

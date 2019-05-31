@@ -2,16 +2,13 @@ import "firebase/functions"
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
+
 /**
  *
- * @param {String} email
- * @param {String} [referredByEmail]
- *
- * @returns Promise
+ * @param {SubscriptionRequest} subscription
+ * @return {Promise<SubscriptionResult>}
  */
-export async function submitEmail(email: string, referredByEmail: string): Promise<SubscriptionResult>{
-    let subscription = new SubscriptionRequest(email);
-    subscription.referredByEmail = referredByEmail;
+export async function submitEmail(subscription:SubscriptionRequest): Promise<SubscriptionResult>{
     // subscription.as
     console.log("submitting subscription", subscription);
 
