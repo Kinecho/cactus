@@ -57,19 +57,19 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
             const msg:IncomingWebhookSendArguments = {};
             const fromEmail = email.from && email.from.email ? email.from.email : "unknown";
-            msg.text = `Processed inbound email from ${fromEmail}`;
+            msg.text = `Got a reply from ${fromEmail}!`;
 
             msg.attachments = [{
                 fields: [
                     {
                         title: "subject",
                         value: email.subject || "unknown",
-                        short: false,
+                        short: true,
                     },
                     {
                         title: "from",
                         value: fromEmail,
-                        short: false,
+                        short: true,
                     }
                 ],
             }];
