@@ -1,11 +1,11 @@
 
 export default class SubscriptionRequest {
-    email: String;
-    firstName?: String;
-    lastName?: String;
-    referredByEmail?: String;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    referredByEmail?: string;
 
-    constructor(email: String, ){
+    constructor(email: string,){
         this.email = email;
     }
 

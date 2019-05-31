@@ -5,6 +5,10 @@ const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
 const webhook = new IncomingWebhook(appNotificationsWebhookUrl);
 
+export interface SlackMessage extends IncomingWebhookSendArguments {
+
+}
+
 export interface SlackMessageResult {
     enabled: boolean,
     success: boolean,
