@@ -1,13 +1,12 @@
 import {getConfig} from "@api/config/configService";
-import {IncomingWebhook,IncomingWebhookSendArguments} from "@slack/client";
+import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment} from "@slack/client";
 
 const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
 const webhook = new IncomingWebhook(appNotificationsWebhookUrl);
 
-export interface SlackMessage extends IncomingWebhookSendArguments {
-
-}
+export type SlackMessage = IncomingWebhookSendArguments
+export type SlackAttachment = MessageAttachment
 
 export interface SlackMessageResult {
     enabled: boolean,

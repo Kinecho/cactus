@@ -1,7 +1,7 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification, SlackMessage} from "@api/slack/slack"
+import {sendActivityNotification, SlackMessage, SlackAttachment} from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {signup} from "@api/mailchimp/mailchimpService";
@@ -44,13 +44,6 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
 
       if (signupResult.status === SubscriptionResultStatus.new_subscriber){
           console.log("new user signed up successfully");
-
-
-
-          // if (subscription.referredByEmail){
-          //     slackMessage += ` Referred by ${subscription.referredByEmail}`
-          // }
-
           const fields = [
               {
                   title: "Email",
@@ -58,6 +51,13 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
                   short: true
               }
           ];
+
+
+          const attachmentSummary:SlackAttachment = {
+              color: "#33CCAB",
+              ts: `${(new Date()).getTime()/1000}`,
+              fields: fields
+          };
 
           if (subscription.firstName || subscription.lastName) {
               fields.push({
@@ -75,11 +75,14 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
               })
           }
 
-          const attachmentSummary = {
-              color: "#33CCAB",
-              ts: `${(new Date()).getTime()/1000}`,
-              fields: fields
-          };
+
+          console.log("subscription", JSON.stringify(subscription, null, 2));
+          if (subscription.subscriptionLocation){
+              console.log("adding footer to message");
+              attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
+          } else {
+              console.log("Not adding footer to message");
+          }
 
           const message:SlackMessage = {
               text: "Got a new signup!",

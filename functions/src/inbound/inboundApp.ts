@@ -1,7 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
-import {IncomingWebhookSendArguments} from "@slack/client";
-import {sendActivityNotification} from "@api/slack/slack";
+import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
@@ -55,7 +54,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
             await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
 
 
-            const msg:IncomingWebhookSendArguments = {};
+            const msg:SlackMessage = {};
             msg.text = `Got a reply!`;
 
             const fromEmail = email.from && email.from.email ? email.from.email : "unknown";
