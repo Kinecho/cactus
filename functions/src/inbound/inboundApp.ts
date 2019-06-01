@@ -11,6 +11,7 @@ import {
     UpdateTagsRequest
 } from "@api/mailchimp/mailchimpService";
 import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import {getMailchimpDateString} from "@api/util/DateUtil";
 
 const app = express();
 const Busboy = require("busboy");
@@ -82,7 +83,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                 const mergeRequest:UpdateMergeFieldRequest = {
                     email: email.from.email,
                     mergeFields: {
-                        [MergeField.LAST_REPLY]: (new Date()).toISOString()
+                        [MergeField.LAST_REPLY]: getMailchimpDateString()
                     }
                 };
 
