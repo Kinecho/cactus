@@ -1,12 +1,13 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification} from "@api/slack/slack"
+import {sendActivityNotification, SlackMessage, SlackAttachment} from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {signup} from "@api/mailchimp/mailchimpService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
+import {writeToFile} from "@api/util/FileUtil";
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.get("/webhook", async (req: express.Request, res: express.Response) => {
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const data = req.body;
     console.log("webhook data", data);
+    const date = new Date();
+    const dateId = date.getTime();
+    await writeToFile(`output/webhook/${dateId}-mailchimp.json`, data);
     res.send({success: true})
 });
 
@@ -40,17 +44,52 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
 
       if (signupResult.status === SubscriptionResultStatus.new_subscriber){
           console.log("new user signed up successfully");
+          const fields = [
+              {
+                  title: "Email",
+                  value: subscription.email,
+                  short: true
+              }
+          ];
 
 
-          let slackMessage = `${subscription.email} signed up!`;
-          if (subscription.firstName || subscription.lastName){
-              slackMessage = `${subscription.firstName} ${subscription.lastName}`.trim() + " " + `(${subscription.email}) signed up!`
+          const attachmentSummary:SlackAttachment = {
+              color: "#33CCAB",
+              ts: `${(new Date()).getTime()/1000}`,
+              fields: fields
+          };
+
+          if (subscription.firstName || subscription.lastName) {
+              fields.push({
+                  title: "Name",
+                  value: `${subscription.firstName} ${subscription.lastName}`.trim(),
+                  short: true
+              });
           }
+
           if (subscription.referredByEmail){
-              slackMessage += ` Referred by ${subscription.referredByEmail}`
+              fields.push({
+                  title: "Referred By",
+                  value: subscription.referredByEmail,
+                  short: true,
+              })
           }
 
-          const slackResult = await sendActivityNotification(slackMessage);
+
+          console.log("subscription", JSON.stringify(subscription, null, 2));
+          if (subscription.subscriptionLocation){
+              console.log("adding footer to message");
+              attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
+          } else {
+              console.log("Not adding footer to message");
+          }
+
+          const message:SlackMessage = {
+              text: "Got a new signup!",
+              attachments: [attachmentSummary],
+          };
+
+          const slackResult = await sendActivityNotification(message);
           console.log("slack result", slackResult);
       } else if (!signupResult.success){
           await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
@@ -59,9 +98,9 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
       return res.send(signupResult);
 
   } catch (error){
-      let result = new SubscriptionResult();
+      const result = new SubscriptionResult();
       result.success = false;
-      let apiError = new ApiError();
+      const apiError = new ApiError();
       apiError.code = 500;
       apiError.friendlyMessage = "Unable to process your subscription. Please try again later";
       apiError.error = error;

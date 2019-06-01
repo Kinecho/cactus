@@ -5,6 +5,7 @@ import * as firebase from "firebase/app"
 import "firebase/functions"
 import {submitEmail} from '@web/mailchimp'
 import {validateEmail, addModal, showModal} from "@web/util";
+import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loaded");
@@ -127,7 +128,16 @@ function setupFormListener(formId){
         button.disabled = true;
 
         try {
-            const signupResult = await submitEmail(emailAddress, null);
+
+            let subscription = new SubscriptionRequest(emailAddress);
+            subscription.subscriptionLocation = {page: "home", formId};
+
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("ref")){
+                subscription.referredByEmail = params.get("ref");
+            }
+
+            const signupResult = await submitEmail(subscription);
 
             if (signupResult.success){
                 let modalId = "signup-success-modal";

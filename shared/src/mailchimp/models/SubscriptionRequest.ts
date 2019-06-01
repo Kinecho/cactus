@@ -1,11 +1,17 @@
 
-export default class SubscriptionRequest {
-    email: String;
-    firstName?: String;
-    lastName?: String;
-    referredByEmail?: String;
+export interface SubscriptionFormLocation {
+    page: string,
+    formId: string,
+}
 
-    constructor(email: String, ){
+export default class SubscriptionRequest {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    referredByEmail?: string;
+    subscriptionLocation?: SubscriptionFormLocation;
+
+    constructor(email: string,){
         this.email = email;
     }
 
@@ -28,14 +34,6 @@ export default class SubscriptionRequest {
 
     static fromData(body: any): SubscriptionRequest{
         const data = body.data || body || {};
-        let {email, referredByEmail, firstName, lastName} = data;
-
-
-        let subscription = new SubscriptionRequest(email);
-        subscription.referredByEmail = referredByEmail;
-        subscription.firstName = firstName;
-        subscription.lastName = lastName;
-
-        return subscription
+        return data as SubscriptionRequest;
     }
 }
