@@ -76,25 +76,47 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             const campaignData = event.data as CampaignEventData;
             const campaign = await getCampaign(campaignData.id);
 
+            const fields = [
+                {
+                    title: "Subject",
+                    value: campaignData.subject,
+                    short: true,
+                },
+                {
+                    title: "Campaign ID",
+                    value: campaignData.id,
+                    short: true,
+                },
+            ];
+
+            if (campaign){
+                fields.push(
+                {
+                    title: "Send Type",
+                        value: campaign.type,
+                    short: true,
+                },
+                {
+                    title: "Email URL",
+                        value: campaign.archive_url,
+                    short: true,
+                },
+                {
+                    title: "Emails Sent",
+                        value: `${campaign.emails_sent}`,
+                    short: true,
+                })
+            }
+
             message = {
                 attachments: [{
                     title: `:email: An email campaign was sent!`,
                     color: "#29A389",
-                    fields: [
-                        {
-                            title: "Subject",
-                            value: campaignData.subject,
-                            short: true,
-                        },
-                        {
-                            title: "Emails Sent",
-                            value: campaign ? `${campaign.emails_sent}` : "Unknown",
-                            short: true,
-                        }
-                    ],
+                    fields: fields,
                     ts: campaign ?`${(new Date(campaign.send_time )).getTime()/1000}` : undefined,
                 }]
             };
+
             break;
     }
 
