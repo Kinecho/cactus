@@ -1,6 +1,5 @@
 import * as express from "express";
 import * as cors from "cors";
-import {DateTime} from "luxon";
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
@@ -12,6 +11,7 @@ import {
     UpdateTagsRequest
 } from "@api/mailchimp/mailchimpService";
 import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import {getMailchimpDateString} from "@api/util/DateUtil";
 
 const app = express();
 const Busboy = require("busboy");
@@ -83,7 +83,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                 const mergeRequest:UpdateMergeFieldRequest = {
                     email: email.from.email,
                     mergeFields: {
-                        [MergeField.LAST_REPLY]: DateTime.local().setZone("America/Denver").toISODate()
+                        [MergeField.LAST_REPLY]: getMailchimpDateString()
                     }
                 };
 
