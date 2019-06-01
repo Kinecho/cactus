@@ -1,5 +1,5 @@
 import {getConfig} from "@api/config/configService";
-import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment, } from "@slack/client";
+import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment} from "@slack/client";
 
 const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
