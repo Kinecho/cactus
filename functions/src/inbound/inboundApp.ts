@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
+import {DateTime} from "luxon";
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
@@ -82,7 +83,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
                 const mergeRequest:UpdateMergeFieldRequest = {
                     email: email.from.email,
                     mergeFields: {
-                        [MergeField.LAST_REPLY]: (new Date()).toISOString()
+                        [MergeField.LAST_REPLY]: DateTime.local().setZone("America/Denver").toISODate()
                     }
                 };
 
