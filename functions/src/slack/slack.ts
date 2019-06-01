@@ -1,5 +1,5 @@
 import {getConfig} from "@api/config/configService";
-import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment} from "@slack/client";
+import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment, } from "@slack/client";
 
 const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
@@ -7,6 +7,11 @@ const webhook = new IncomingWebhook(appNotificationsWebhookUrl);
 
 export type SlackMessage = IncomingWebhookSendArguments
 export type SlackAttachment = MessageAttachment
+export type SlackAttachmentField = {
+    title: string;
+    value: string;
+    short?: boolean;
+}
 
 export interface SlackMessageResult {
     enabled: boolean,
@@ -49,3 +54,42 @@ export async function sendActivityNotification(message:string|IncomingWebhookSen
     }
 }
 
+export function getAttachmentForObject(data:any):SlackAttachment{
+    const fields: SlackAttachmentField[] = [];
+    Object.keys(data)
+        .filter(key => {
+            return data[key] || "";
+        })
+        .forEach((key) => {
+            function processField(title: string, field:any){
+                if (typeof field === "object" && !Array.isArray(field)) {
+                    Object.entries(field).forEach(([objectKey, value]) => {
+                       processField(objectKey, value);
+                    })
+                }
+                else if (Array.isArray(field)){
+                    fields.push({
+                        title: title,
+                        value: JSON.stringify(field),
+                        short: true,
+                    })
+                }
+                else {
+                    fields.push({
+                        title: title,
+                        value: `${field}`,
+                        short: true,
+                    })
+                }
+            }
+
+            const merge = data[key] || "";
+            processField(key, merge);
+        });
+
+    const attachment:SlackAttachment = {
+        fields: fields
+    };
+
+    return attachment;
+}

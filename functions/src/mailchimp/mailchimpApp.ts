@@ -1,13 +1,25 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {sendActivityNotification, SlackMessage, SlackAttachment} from "@api/slack/slack"
+import {
+    sendActivityNotification,
+    SlackMessage,
+    SlackAttachment,
+    getAttachmentForObject
+} from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {signup} from "@api/mailchimp/mailchimpService";
+import {getCampaign, signup} from "@api/mailchimp/mailchimpService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
 import {writeToFile} from "@api/util/FileUtil";
+import {
+    CampaignEventData,
+    CleanedEmailEventData, EmailChangeEventData,
+    EventType, ProfileUpdateEventData,
+    UnsubscribeEventData,
+    WebhookEvent
+} from "@api/mailchimp/models/MailchimpTypes";
 
 const app = express();
 
@@ -25,11 +37,69 @@ app.get("/webhook", async (req: express.Request, res: express.Response) => {
 });
 
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
-    const data = req.body;
-    console.log("webhook data", data);
+    const event = req.body as WebhookEvent;
+    console.log("webhook event", JSON.stringify(event));
     const date = new Date();
     const dateId = date.getTime();
-    await writeToFile(`output/webhook/${dateId}-mailchimp.json`, data);
+    await writeToFile(`output/webhook/${dateId}-mailchimp.json`, JSON.stringify(event));
+
+    let message: string|SlackMessage = "";
+    // let data = event.data;
+    switch (event.type) {
+        case EventType.unsubscribe:
+            // const unsub = data as Uns
+            const unsub = event.data as UnsubscribeEventData;
+            message = `${unsub.email} has unsubscribed. Campaign ID: ${unsub.campaign_id}. Reason = ${unsub.reason}`;
+            break;
+        case EventType.subscribe:
+            //already have a hook for this
+            console.log("webhook received for subscribe");
+            break;
+        case EventType.profile:
+            const profile = event.data as ProfileUpdateEventData;
+            const attachment = getAttachmentForObject(profile.merges);
+            attachment.color = "#FFE4DA";
+            message = {
+                text: `${profile.email} updated their profile`,
+                attachments: [attachment]
+            };
+            break;
+        case EventType.upemail:
+            const update = event.data as EmailChangeEventData;
+            message = `${update.old_email} changed their email to ${update.new_email} on list_id = ${update.list_id}`;
+            break;
+        case EventType.cleaned:
+            const cleaned = event.data as CleanedEmailEventData;
+            message = `Cleaned email ${cleaned.email} from list. Reason = ${cleaned.reason}`;
+            break;
+        case EventType.campaign:
+            const campaignData = event.data as CampaignEventData;
+            const campaign = await getCampaign(campaignData.id);
+
+            message = {
+                attachments: [{
+                    title: `:email: An email campaign was sent!`,
+                    color: "#29A389",
+                    fields: [
+                        {
+                            title: "Subject",
+                            value: campaignData.subject,
+                            short: true,
+                        },
+                        {
+                            title: "Emails Sent",
+                            value: campaign ? `${campaign.emails_sent}` : "Unknown",
+                            short: true,
+                        }
+                    ],
+                    ts: campaign ?`${(new Date(campaign.send_time )).getTime()/1000}` : undefined,
+                }]
+            };
+            break;
+    }
+
+    await sendActivityNotification(message);
+
     res.send({success: true})
 });
 

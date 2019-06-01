@@ -9,6 +9,7 @@ import ListMember, {
 } from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 import * as md5 from "md5";
+import {Campaign} from "@api/mailchimp/models/MailchimpTypes";
 
 
 const config = getConfig();
@@ -17,6 +18,10 @@ const audienceId = config.mailchimp.audience_id;
 const datacenter = getDataCenterFromApiKey();
 const mailchimpDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
 
+interface MailchimpAuth {
+    username: string,
+    password: string,
+}
 
 function getDataCenterFromApiKey():string{
     const split = api_key.split("-");
@@ -25,6 +30,14 @@ function getDataCenterFromApiKey():string{
 
 function getListURL():String{
     return `${mailchimpDomain}/lists/${audienceId}`;
+}
+
+function getCampaignURL(id:string):string {
+    return `${mailchimpDomain}/campaigns/${id}`;
+}
+
+function getAuthConfig(): {auth: MailchimpAuth}{
+    return {auth: {username: `cactus`, password: api_key}}
 }
 
 export async function signup(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
@@ -122,7 +135,7 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
         const response = await axios.patch(
             `${getListURL()}/members/${memberId}`,
             memberPatch,
-            {auth: {username: `cactus`, password: api_key}}
+            getAuthConfig()
         );
 
         console.log("update merge field response", response.data);
@@ -150,7 +163,7 @@ export async function updateTags(request: UpdateTagsRequest){
         const response = await axios.post(
             `${getListURL()}/members/${memberId}/tags`,
             memberPatch,
-            {auth: {username: `cactus`, password: api_key}}
+            getAuthConfig()
         );
 
         console.log("update tags response", response.data);
@@ -167,4 +180,15 @@ export async function updateTags(request: UpdateTagsRequest){
         }
         return false
     }
+}
+
+export async function getCampaign(id:string):Promise<Campaign|null> {
+    try{
+        const response = await axios.get(getCampaignURL(id), getAuthConfig());
+        return response.data as Campaign;
+    } catch (e){
+        console.error(e.data);
+        return null;
+    }
+
 }
