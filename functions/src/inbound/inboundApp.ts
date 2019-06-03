@@ -95,7 +95,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
 
             await sendActivityNotification(msg);
 
-            const mailchimpEmail = fromEnvelope || fromEmail;
+            const mailchimpEmail = fromEmail;
             if (mailchimpEmail) {
                 console.log("updating merge tag for user", email.mailchimpMemberId);
                 const mergeRequest: UpdateMergeFieldRequest = {
