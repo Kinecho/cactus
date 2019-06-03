@@ -77,12 +77,22 @@ export function getFieldHandler(email: InboundEmail){
             case "from":
                 email.fromRaw = val;
                 break;
+            case "cc":
+                email.ccRaw = val;
+                break;
             case "text":
                 email.text = val;
                 break;
             case "sender_ip":
                 break;
             case "envelope":
+                // console.log("ENVELOPE: ", val);
+                try {
+                    email.envelope = JSON.parse(val);
+                } catch (e){
+                    console.error(`Unable to process the envelope field ${val}`, e);
+                }
+
                 break;
             case "attachment-info":
                 email.attachments = processAttachments(val);

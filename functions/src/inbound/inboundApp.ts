@@ -15,7 +15,7 @@ import {getMailchimpDateString} from "@api/util/DateUtil";
 
 const app = express();
 const Busboy = require("busboy");
-app.use(cors({ origin: true }));
+app.use(cors({origin: true}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
 
@@ -25,7 +25,7 @@ app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
  * or have faith that rawBody will be there when deployed.
  * ref: Doug Stevenson's answer here: https://stackoverflow.com/questions/47242340/how-to-perform-an-http-file-upload-using-express-on-cloud-functions-for-firebase/47319614#47319614
  */
-app.post("/",  async (req: express.Request|any, res: express.Response) => {
+app.post("/", async (req: express.Request | any, res: express.Response) => {
     const date = new Date();
     const dateId = date.getTime();
 
@@ -36,10 +36,10 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
 
     try {
         const busboy = new Busboy({headers: req.headers});
-        const emailFiles:InboundEmailFiles = {};
+        const emailFiles: InboundEmailFiles = {};
         const emailInput: InboundEmail = {};
 
-        busboy.on("error", (error:any) => {
+        busboy.on("error", (error: any) => {
             console.error("failed to process something", error);
         });
 
@@ -49,46 +49,64 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
         // This callback will be invoked after all uploaded files are saved.
         busboy.on('finish', async () => {
             const email = await createEmailFromInputs(emailInput, emailFiles);
+            let messageColor = "#83ecf9";
             console.log();
             console.log("Processed email", JSON.stringify(email, null, 2));
 
             await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
 
 
-            const msg:SlackMessage = {};
+            const msg: SlackMessage = {};
             msg.text = `Got a reply!`;
 
-            const fromEmail = email.from && email.from.email ? email.from.email : "unknown";
+            const fromEmail = email.from && email.from.email ? email.from.email : null;
+            const fromEnvelope = email.envelope && email.envelope.from && email.envelope.from.email ? email.envelope.from.email : null;
+
+            const fields = [
+                {
+                    title: "from",
+                    value: fromEmail || "unknown",
+                    short: false,
+                },
+                {
+                    title: "subject",
+                    value: email.subject || "unknown",
+                    short: false,
+                },
+            ];
+
+            if (fromEnvelope && fromEnvelope !== fromEmail) {
+                messageColor = "#7A3814";
+                msg.text = `:warning: ${msg.text}`;
+                fields.push(
+                    {
+                        title: "Envelope Email",
+                        value: fromEnvelope || "unknown",
+                        short: false,
+                    })
+            }
+
             msg.attachments = [{
-                color: "#F9EB91",
-                ts: `${(new Date()).getTime()/1000}`,
-                fields: [
-                    {
-                        title: "from",
-                        value: fromEmail,
-                        short: false,
-                    },
-                    {
-                        title: "subject",
-                        value: email.subject || "unknown",
-                        short: false,
-                    },
-                ],
+                color: messageColor,
+                ts: `${(new Date()).getTime() / 1000}`,
+                fields,
             }];
+
 
             await sendActivityNotification(msg);
 
-            if (email.from && email.from.email){
+            const mailchimpEmail = fromEnvelope || fromEmail;
+            if (mailchimpEmail) {
                 console.log("updating merge tag for user", email.mailchimpMemberId);
-                const mergeRequest:UpdateMergeFieldRequest = {
-                    email: email.from.email,
+                const mergeRequest: UpdateMergeFieldRequest = {
+                    email: mailchimpEmail,
                     mergeFields: {
                         [MergeField.LAST_REPLY]: getMailchimpDateString()
                     }
                 };
 
                 const tagRequest: UpdateTagsRequest = {
-                    email: email.from.email,
+                    email: mailchimpEmail,
                     tags: [
                         {
                             name: TagName.NEEDS_ONBOARDING_REMINDER,
@@ -109,7 +127,7 @@ app.post("/",  async (req: express.Request|any, res: express.Response) => {
         // The raw bytes of the upload will be in req.rawBody.  Send it to busboy, and get
         // a callback when it's finished.
         busboy.end(req.rawBody || req.body);
-    } catch (error){
+    } catch (error) {
         console.error("failed to process email", error);
         await sendActivityNotification("ERROR: Failed to process incoming email");
         res.sendStatus(500);

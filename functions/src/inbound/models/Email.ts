@@ -17,9 +17,11 @@ export interface InboundEmail {
     headers?: EmailHeaders;
     toRaw?: string;
     fromRaw?: string;
+    ccRaw?: string;
     text?: string;
     html?: string;
     subject?: string;
+    envelope?: {to: string[], from: string}
     attachments?: Array<AttachmentInfo>;
 
 }
@@ -27,7 +29,9 @@ export interface InboundEmail {
 export default class Email implements Email{
     headers: EmailHeaders;
     to?: EmailAddress;
+    cc?: EmailAddress;
     from?: EmailAddress;
+    envelope?: {to: EmailAddress[], from: EmailAddress}
     text?: string;
     html?: string;
     subject?: string;
@@ -61,5 +65,41 @@ export default class Email implements Email{
                 domain: toParsed.domain
             }
         }
+        if (input.ccRaw){
+            const ccParsed = parseEmail.parseOneAddress(input.ccRaw) as ParsedMailbox;
+            this.cc = {
+                email: ccParsed.address,
+                name: ccParsed.name,
+                local: ccParsed.local,
+                domain: ccParsed.domain
+            }
+        }
+
+        if (input.envelope){
+            const env = input.envelope;
+
+            const parsedFrom = parseEmail.parseOneAddress(env.from) as ParsedMailbox;
+
+            const envTo = !env.to ? [] : env.to.map(raw => {
+                const parsed = parseEmail.parseOneAddress(raw) as ParsedMailbox;
+                return  {
+                    email: parsed.address,
+                    name: parsed.name,
+                    local: parsed.local,
+                    domain: parsed.domain
+                }
+            });
+
+            this.envelope = {
+                to: envTo,
+                from:  {
+                    email: parsedFrom.address,
+                    name: parsedFrom.name,
+                    local: parsedFrom.local,
+                    domain: parsedFrom.domain
+                },
+            };
+        }
+
     }
 }
