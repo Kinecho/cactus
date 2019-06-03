@@ -78,7 +78,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
 
             if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
                 messageColor = "#7A3814";
-                msg.text = `:warning: ${msg.text}`;
+                msg.text = `:warning: ${msg.text} (we are still using the original email, will update if we see that the smtp.mailfrom is consistently correct)`;
                 fields.push(
                     {
                         title: "smtp.mailfrom (from address)",
