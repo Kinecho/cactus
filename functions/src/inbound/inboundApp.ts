@@ -2,7 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
-import {createEmailFromInputs, getFieldHandler, getFileHandler} from "@api/inbound/EmailProcessor"
+import {createEmailFromInputs, getFieldHandler, getFileHandler, getSenderFromHeaders} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
 import {
     UpdateMergeFieldRequest,
@@ -13,6 +13,7 @@ import {
 import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import {getMailchimpDateString} from "@api/util/DateUtil";
 
+const forwardedGmailEmail = "hello+caf_=forwarded=inbound.cactus.app@kinecho.com";
 const app = express();
 const Busboy = require("busboy");
 app.use(cors({origin: true}));
@@ -60,7 +61,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             msg.text = `Got a reply!`;
 
             const fromEmail = email.from && email.from.email ? email.from.email : null;
-            const fromEnvelope = email.envelope && email.envelope.from && email.envelope.from.email ? email.envelope.from.email : null;
+            const fromHeader = getSenderFromHeaders(email.headers);
 
             const fields = [
                 {
@@ -75,13 +76,13 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
                 },
             ];
 
-            if (fromEnvelope && fromEnvelope !== fromEmail) {
+            if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
                 messageColor = "#7A3814";
                 msg.text = `:warning: ${msg.text}`;
                 fields.push(
                     {
-                        title: "Envelope Email",
-                        value: fromEnvelope || "unknown",
+                        title: "smtp.mailfrom (from address)",
+                        value: fromHeader || "unknown",
                         short: false,
                     })
             }

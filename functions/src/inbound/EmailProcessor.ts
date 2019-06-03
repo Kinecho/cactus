@@ -5,10 +5,12 @@ const os = require("os");
 const fs = require("fs");
 import {InboundAttachmentInfo, InboundEmailAttachments} from "@api/inbound/models/EmailAttachment";
 import {splitOnFirst} from "@api/util/StringUtil";
-import EmailHeaders from "@api/inbound/models/EmailHeaders";
+import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
 
 
-export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles):Promise<Email> {
+
+
+    export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles):Promise<Email> {
     console.log();
     console.log("email files", JSON.stringify(fileInput));
     console.log();
@@ -125,6 +127,21 @@ export function processBodyHeaders(input:string):EmailHeaders {
 
     console.log("processed headers into", aggregated);
     return aggregated
+}
+
+export function getSenderFromHeaders(headers:EmailHeaders):string|null {
+    const header = headers[Header.AUTHENTICATION_RESULTS];
+    if (!header){
+        return null;
+    }
+
+    let [, mailfrom]= header.split("smtp.mailfrom=");
+    if (!mailfrom){
+        return null;
+    }
+
+    [mailfrom]= mailfrom.split(" ");
+    return mailfrom ? mailfrom.trim().toLowerCase() : null;
 }
 
 export function processAttachments(input:InboundEmailAttachments):Array<InboundAttachmentInfo> {
