@@ -59,4 +59,18 @@ describe("Get sender from headers", () => {
         };
         expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
     });
+
+    test("with semicolon", () => {
+        const headers:EmailHeaders = {
+            [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com;  "
+        };
+        expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
+    });
+
+    test("Authentication with shit at the end of the string", () => {
+        const headers:EmailHeaders = {
+            [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com; alkdfj a alkjdflaksjdflj"
+        };
+        expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
+    });
 });

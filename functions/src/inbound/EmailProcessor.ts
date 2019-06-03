@@ -130,18 +130,25 @@ export function processBodyHeaders(input:string):EmailHeaders {
 }
 
 export function getSenderFromHeaders(headers:EmailHeaders):string|null {
-    const header = headers[Header.AUTHENTICATION_RESULTS];
-    if (!header){
+    try {
+        const header = headers[Header.AUTHENTICATION_RESULTS];
+        if (!header){
+            return null;
+        }
+
+        let [, mailfrom]= header.split("smtp.mailfrom=");
+        if (!mailfrom){
+            return null;
+        }
+
+        [mailfrom]= mailfrom.split(new RegExp(/\s*(;|\s)/));
+
+        return mailfrom ? mailfrom.trim().toLowerCase() : null;
+    } catch (error) {
+        console.error("error processing sender headers", error);
         return null;
     }
 
-    let [, mailfrom]= header.split("smtp.mailfrom=");
-    if (!mailfrom){
-        return null;
-    }
-
-    [mailfrom]= mailfrom.split(" ");
-    return mailfrom ? mailfrom.trim().toLowerCase() : null;
 }
 
 export function processAttachments(input:InboundEmailAttachments):Array<InboundAttachmentInfo> {
