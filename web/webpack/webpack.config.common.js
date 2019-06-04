@@ -3,7 +3,7 @@ const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const pages = require('./../pages')
-const helpers = require("./helpers")
+const helpers = require("./../helpers")
 
 
 let jsEntries = Object.keys(pages).reduce((entries, title) => {
@@ -25,6 +25,7 @@ module.exports = function(config){
             path: helpers.publicDir,
             chunkFilename: '[name].js',
             filename: '[name].[hash].js',
+            publicPath: "/"
         },
         resolve: {
             modules: ['src', 'styles', 'assets', 'images', 'scripts', 'node_modules'],

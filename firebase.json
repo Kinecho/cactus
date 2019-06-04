@@ -34,7 +34,7 @@
       },
       {
         "source": "/checkout",
-        "destination": "/checkout_monthly.html"
+        "destination": "/checkout_redirect.html"
       },
       {
         "source": "/",

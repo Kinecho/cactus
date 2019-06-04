@@ -16,7 +16,7 @@ module.exports = {
         title: "Subscription Confirmed",
         path: "/confirmed"
     },
-    checkout_monthly: {
+    checkout_redirect: {
         title: "Checkout | Cactus",
         path: "/checkout"
     }

@@ -1,0 +1,17 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+
+.page {
+  text-align: center;
+  height: 100vh;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  img {
+    width: 250px;
+  }
+  margin-bottom: 5rem;
+}

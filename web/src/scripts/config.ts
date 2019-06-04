@@ -2,6 +2,7 @@
 export interface StripeConfig {
     apiKey: string,
     monthlyPlanId: string,
+    yearlyPlanId: string,
 }
 
 export interface FirebaseConfig {

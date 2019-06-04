@@ -32,7 +32,7 @@ export async function redirectToCheckout(planId:string=Config.stripe.monthlyPlan
         // Instead use one of the strategies described in
         // https://stripe.com/docs/payments/checkout/fulfillment
         successUrl: `${Config.domain}/success`,
-        cancelUrl: `${Config.domain}/cancel`,
+        cancelUrl: `${Config.domain}`,
     };
 
     const email = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);

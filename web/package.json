@@ -17,6 +17,7 @@
         "logo": "cat ./../cactus.txt",
         "open": "npm run predeploy && open ./public/index.html",
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
+        "page": "node createPage.js",
         "predeploy": "npm run build:deploy && npm run copy",
         "predeploy:prod": "npm run build:prod && npm run copy",
         "predeploy:stage": "npm run build:stage && npm run copy",
@@ -28,7 +29,8 @@
         "axios": "^0.18.0",
         "firebase": "^6.0.2",
         "firebase-app": "0.0.1",
-        "firebase-functions": "^2.3.1"
+        "firebase-functions": "^2.3.1",
+        "luxon": "^1.16.0"
     },
     "devDependencies": {
         "@types/stripe-checkout": "^1.0.3",
@@ -42,6 +44,7 @@
         "optimize-css-assets-webpack-plugin": "^5.0.1",
         "postcss-loader": "^3.0.0",
         "postcss-preset-env": "^6.6.0",
+        "prompts": "^2.1.0",
         "sass": "^1.20.1",
         "sass-loader": "^7.1.0",
         "source-map-loader": "^0.2.4",

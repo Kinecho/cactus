@@ -1,4 +1,4 @@
-const helpers = require('./helpers')
+const helpers = require('./../helpers')
 const pages = require('./../pages')
 
 module.exports = function (config) {
@@ -6,12 +6,6 @@ module.exports = function (config) {
         devServer: {
             open: false,
             contentBase: helpers.srcDir,
-            // proxy: {
-            //     '/api/**': {
-            //         target: config.__API_DOMAIN__,
-            //         pathRewrite: {'^/api': ''},
-            //     },
-            // },
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [
