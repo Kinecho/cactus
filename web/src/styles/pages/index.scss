@@ -343,6 +343,7 @@ input[type=email] {
   .flexContainer {
     display: flex;
     margin: 0;
+    -webkit-overflow-scrolling: touch;
     overflow-x: auto;
     padding: .8rem 2.4rem;
     scroll-snap-type: x mandatory;
