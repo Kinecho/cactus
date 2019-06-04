@@ -1,6 +1,6 @@
-import "styles/pages/$PAGE_TITLE$.scss"
+import "styles/pages/$PAGE_NAME$.scss"
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("$PAGE_TITLE$ loaded")
+    console.log("$PAGE_NAME$ loaded")
 })

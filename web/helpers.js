@@ -2,6 +2,7 @@ const path = require("path");
 const webRoot = path.resolve(__dirname);
 
 module.exports = {
+    projectRoot: path.resolve(webRoot, ".."),
     webRoot: webRoot,
     srcDir: path.resolve(webRoot, "src"),
     pagesDir: path.resolve(webRoot, "src"),

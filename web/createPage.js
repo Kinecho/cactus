@@ -6,7 +6,16 @@ const path = require("path");
 
 console.log('Let\'s crate a static page.')
 
-let inputs;
+/**
+ * @type {{
+ *     pageName: string,
+ *     title: string,
+ *     pagePath: string,
+ *     isDateBased: boolean,
+ *     pageDate: [boolean]
+ * }} Response
+ */
+let response;
 
 const questions = [
     {
@@ -61,7 +70,7 @@ function getFilenameFromDate(date, extension){
 
 
 (async () => {
-    const response = await prompts(questions)
+    response = await prompts(questions)
     const {isDateBased, pageDate, pageName, pagePath, title} = response
     console.log("page path is: ", pagePath)
     console.log("title ", title)
@@ -74,40 +83,63 @@ function getFilenameFromDate(date, extension){
         baseName = `${pageName.trim().toLowerCase().replace(/\s+/g, '_')}`
     }
 
+    if (response.pagePath && !response.pagePath.startsWith("/")){
+        response.pagePath = `/${response.pagePath}`;
+    }
+
     console.log('creating pages for ', baseName);
+    response.pageName = baseName;
 
-    inputs = response;
-
-    createHtml(baseName);
-    createJS(baseName);
-    createScss(baseName);
+    createHtml();
+    createJS();
+    createScss();
+    updateFirebaseJson();
 })()
 
-function createHtml(baseName) {
-    let dir = `${helpers.pagesDir}/${baseName}.html`
+function updateFirebaseJson(){
+    let config = require(`${helpers.projectRoot}/firebase.json`);
+    let rewrites = config.hosting.rewrites;
+
+    let newPage = {
+        source: `${response.pagePath}`,
+        destination: `${response.pageName}.html`
+    }
+
+    rewrites.unshift(newPage);
+
+    console.log("updated rewrites", rewrites);
+
+    //TODO: actually write to file;
+
+}
+
+function createHtml() {
+    let dir = `${helpers.pagesDir}/${response.pageName}.html`
     console.log("creating", dir)
 }
 
-function createJS(baseName) {
-    let outputFilePath = `${helpers.pagesScriptsDir}/${baseName}.ts`
+function createJS() {
+    let outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`
+    console.log("creating js file with response = ", response);
     console.log("creating", outputFilePath)
 
-    let templateFile = path.resolve(__dirname, "templates/page_script.js")
+    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.js")
 
     fs.readFile(templateFile, 'utf8', function (err,data) {
         if (err) {
             return console.log(err);
         }
-        const result = data.replace("$PAGE_TITLE$", inputs.pageTitle );
+        const result = data.replace(/\$PAGE_NAME\$/g, response.pageName );
 
-        fs.writeFile(outputFilePath, result, 'utf8', function (err) {
-            if (err) return console.log(err);
-        });
+        console.log("\n\nJS File Contents\n\n", result, "\n\n");
+        // fs.writeFile(outputFilePath, result, 'utf8', function (err) {
+        //     if (err) return console.log(err);
+        // });
     });
 
 }
 
-function createScss(baseName) {
-    let dir = `${helpers.pagesStylesDir}/${baseName}.scss`
+function createScss() {
+    let dir = `${helpers.pagesStylesDir}/${response.pageName}.scss`
     console.log("creating", dir)
 }
