@@ -14,8 +14,8 @@ module.exports = {
     },
     __STRIPE_CONFIG__: {
         apiKey: "pk_live_5jwkYz17Bg1IKuXQvfnbmyGg", //this is the test id. update for prod
-        monthlyPlanId: "prod_FC3VVMFnsFZp4t",
-        yearlyPlanId: "prod_FC3VVMFnsFZp4t" //no yearly - this is just monthly
+        monthlyPlanId: "plan_FC3gAPGeHs0wCY",
+        yearlyPlanId: "plan_FC3gAPGeHs0wCY" //no yearly - this is just monthly
     },
 
 }
