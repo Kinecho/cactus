@@ -4,8 +4,9 @@ import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
 import {submitEmail} from '@web/mailchimp'
-import {validateEmail, addModal, showModal} from "@web/util";
+import {addModal, getQueryParam, showModal, validateEmail} from "@web/util";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import {QueryParam} from "@web/queryParams";
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loaded");
@@ -20,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     setupFormListener("sign-up-top");
     setupFormListener("email-form-bottom");
-    // configureStripe("'checkout-button-plan_F6oBhRX9L4WKMB'");
     setupJumpToForm();
 });
 
@@ -132,9 +132,9 @@ function setupFormListener(formId){
             let subscription = new SubscriptionRequest(emailAddress);
             subscription.subscriptionLocation = {page: "home", formId};
 
-            const params = new URLSearchParams(window.location.search);
-            if (params.get("ref")){
-                subscription.referredByEmail = params.get("ref");
+            let referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+            if (referredParam){
+                subscription.referredByEmail = referredParam;
             }
 
             const signupResult = await submitEmail(subscription);

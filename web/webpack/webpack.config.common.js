@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const pages = require('./pages')
+const pages = require('./../pages')
 const helpers = require("./helpers")
 
 

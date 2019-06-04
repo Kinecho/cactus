@@ -16,4 +16,8 @@ module.exports = {
         title: "Subscription Confirmed",
         path: "/confirmed"
     },
+    checkout_monthly: {
+        title: "Checkout | Cactus",
+        path: "/checkout"
+    }
 }

@@ -1,3 +1,5 @@
+import {QueryParam} from "@web/queryParams";
+
 export function validateEmail(email:string)
 {
     return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
@@ -97,4 +99,10 @@ export function addModal(modalId: string, options: {
 
 
     return document.body.appendChild(modal);
+}
+
+
+export function getQueryParam(name:QueryParam):string|null {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
 }
