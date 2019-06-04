@@ -13,9 +13,9 @@ module.exports = {
         appId: "1:654981460803:web:183ae7005e0dd805"
     },
     __STRIPE_CONFIG__: {
-        apiKey: "pk_test_cFV6bK7YpxB2QrTRYOJie00B", //this is the test id. update for prod
-        monthlyPlanId: "plan_F6oBhRX9L4WKMB", //this is no longer valid - this is a test id
-        yearlyPlanId: "plan_FC2EkJJoDXBzCO"
+        apiKey: "pk_live_5jwkYz17Bg1IKuXQvfnbmyGg", //this is the test id. update for prod
+        monthlyPlanId: "prod_FC3VVMFnsFZp4t",
+        yearlyPlanId: "prod_FC3VVMFnsFZp4t" //no yearly - this is just monthly
     },
 
 }

@@ -6,6 +6,8 @@ const path = require("path");
 
 console.log('Let\'s crate a static page.')
 
+let inputs;
+
 const questions = [
     {
         type: 'toggle',
@@ -26,7 +28,17 @@ const questions = [
     {
         type: prev => !(prev instanceof Date) ? 'text' : null,
         name: 'pageName',
-        message: 'What is the name of the page?',
+        message: 'What should we name the files? Don\'t include a file extension.',
+    },
+    {
+        type: "text",
+        name: 'title',
+        message: 'What is the title of this page?',
+    },
+    {
+        type: 'text',
+        name: 'pagePath',
+        message: 'What is the path (url) for this page? Don\'t include the leading slash',
     },
 ];
 
@@ -50,10 +62,11 @@ function getFilenameFromDate(date, extension){
 
 (async () => {
     const response = await prompts(questions)
-    const {isDateBased, pageDate, pageName} = response
-    // => response => { username, age, about }
+    const {isDateBased, pageDate, pageName, pagePath, title} = response
+    console.log("page path is: ", pagePath)
+    console.log("title ", title)
     let baseName = ""
-    // let date = DateTime.fromFormat(isDateBased)
+
 
     if (isDateBased && pageDate) {
         baseName = getFilenameFromDate(pageDate)
@@ -62,6 +75,9 @@ function getFilenameFromDate(date, extension){
     }
 
     console.log('creating pages for ', baseName);
+
+    inputs = response;
+
     createHtml(baseName);
     createJS(baseName);
     createScss(baseName);
@@ -73,8 +89,22 @@ function createHtml(baseName) {
 }
 
 function createJS(baseName) {
-    let dir = `${helpers.pagesScriptsDir}/${baseName}.ts`
-    console.log("creating", dir)
+    let outputFilePath = `${helpers.pagesScriptsDir}/${baseName}.ts`
+    console.log("creating", outputFilePath)
+
+    let templateFile = path.resolve(__dirname, "templates/page_script.js")
+
+    fs.readFile(templateFile, 'utf8', function (err,data) {
+        if (err) {
+            return console.log(err);
+        }
+        const result = data.replace("$PAGE_TITLE$", inputs.pageTitle );
+
+        fs.writeFile(outputFilePath, result, 'utf8', function (err) {
+            if (err) return console.log(err);
+        });
+    });
+
 }
 
 function createScss(baseName) {
