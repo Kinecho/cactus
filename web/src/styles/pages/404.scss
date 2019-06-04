@@ -1,44 +1,4 @@
 @import "~styles/mixins";
 @import "~styles/variables";
 @import "~styles/common";
-
-body {
-  background-color: $lightPink;
-
-  @include h(768) {
-    align-items: center;
-    display: flex;
-    height: 100vh;
-    justify-content: center;
-  }
-}
-
-header {
-  background-color: transparent;
-  justify-content: center;
-  margin-bottom: 2.4rem;
-  position: static;
-}
-
-.centered {
-  overflow-x: hidden;
-  width: 100%;
-}
-
-section {
-  padding: 2.4rem;
-}
-
-.desert {
-  margin-bottom: 3.2rem;
-  max-width: 100%;
-  width: 50rem;
-}
-
-h1 {
-  margin: 0;
-}
-
-p {
-  margin: .8rem auto 4rem;
-}
+@import "~styles/simplyCentered";
