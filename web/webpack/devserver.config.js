@@ -1,5 +1,5 @@
 const helpers = require('./helpers')
-const pages = require('./pages')
+const pages = require('./../pages')
 
 module.exports = function (config) {
     return {

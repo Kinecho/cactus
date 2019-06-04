@@ -33,6 +33,10 @@
         "destination": "/subscription_confirmed.html"
       },
       {
+        "source": "/checkout",
+        "destination": "/checkout_monthly.html"
+      },
+      {
         "source": "/",
         "destination": "/index.html"
       },
