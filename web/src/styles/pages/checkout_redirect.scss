@@ -2,9 +2,28 @@
 @import "~styles/variables";
 @import "~styles/common";
 
+@keyframes show_content {
+  from {
+    opacity: 0;
+    top: 2rem;
+  }
+  to   {
+    opacity: 1;
+    top: 0;
+  }
+}
+
 .page {
   text-align: center;
+
   height: 100vh;
+
+
+
+  .content {
+    position: relative;
+    animation: show_content 1s ease-out;
+  }
 }
 
 header {

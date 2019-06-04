@@ -14,7 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         planId = Config.stripe.yearlyPlanId;
     }
 
-    configureStripe('checkout-button', planId);
 
-    await redirectToCheckout(planId);
+    configureStripe('checkout-button', planId);
+    setTimeout(async () => {
+        await redirectToCheckout(planId);
+    }, 1000)
 });
