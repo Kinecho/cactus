@@ -1,36 +1,10 @@
 @import "~styles/mixins";
 @import "~styles/variables";
 @import "~styles/common";
+@import "~styles/simplyCentered";
 
-@keyframes show_content {
-  from {
-    opacity: 0;
-    top: 2rem;
-  }
-  to   {
-    opacity: 1;
-    top: 0;
-  }
-}
-
-.page {
-  text-align: center;
-
-  height: 100vh;
-
-
-
-  .content {
-    position: relative;
-    animation: show_content 1s ease-out;
-  }
-}
-
-header {
-  display: flex;
-  justify-content: center;
-  img {
-    width: 250px;
-  }
-  margin-bottom: 5rem;
+section {
+  animation: slide 1s ease-in-out forwards;
+  opacity: 0;
+  transform: translateY(3.2rem);
 }

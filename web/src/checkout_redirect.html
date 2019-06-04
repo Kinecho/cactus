@@ -19,23 +19,18 @@
 </head>
 
 <body>
-<div class="page">
-    <header><img src="assets/images/logo.svg" alt="Cactus logo"/></header>
-    <div class="content">
-        <h2>Loading...</h2>
-        <p>You should be redirected momentarily. If that doesn't happen, please click the button below.</p>
-        <div>
-            <button
-                    style="background-color:#6772E5;color:#FFF;padding:8px 12px;border:0;border-radius:4px;font-size:1em"
-                    id="checkout-button"
-                    role="link"
-            >
-                Go to Checkout
-            </button>
-
-        </div>
-    </div>
-</div>
+  <div class="centered">
+    <header>
+      <a href="/"><img class="logo" src="/assets/images/logo.svg" alt="Cactus logo" /></a>
+    </header>
+    <section>
+      <h1>Loading checkout...</h1>
+      <p>You should be redirected momentarily. If that doesn't happen, please tap the button below.</p>
+      <button id="checkout-button" role="link">
+          Go to Checkout
+      </button>
+    </section>
+  </div>
 
 <!--Note: JS is included via webpack-->
 </body>
