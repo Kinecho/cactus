@@ -71,6 +71,7 @@ h1 {
 
 .gridContainer {
   padding: 0 2.4rem 5.6rem;
+  position: relative;
   text-align: left;
 
   @include r(768) {
@@ -83,26 +84,27 @@ h1 {
     justify-items: center;
     padding: 5.6rem 4.8rem;
 
-    /* &:after {
+    &:after {
       background: no-repeat;
       background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
-      background-position: 5rem 8rem, 0 0;
-      background-size: 44.5rem, 44rem;
+      background-position: -13rem 0, 4rem 14rem;
+      background-size: 34rem;
       bottom: -12rem;
       content: "";
       display: block;
-      height: 47rem;
+      height: 52rem;
       left: -30rem;
       position: absolute;
-      width: 55rem;
-    } */
+      width: 42rem;
+      z-index: 0;
+    }
   }
   @include r(1500) {
     padding: 5.6rem 5.6rem 6.4rem;
 
     &:after {
-      left: -30rem;
-      bottom: -12rem;
+      left: -24rem;
+      bottom: -20rem;
     }
   }
 
@@ -131,6 +133,8 @@ h1 {
   .content {
     align-self: start;
     grid-area: content;
+    position: relative;
+    z-index: 1;
 
     @include r(768) {
       justify-self: start;
