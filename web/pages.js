@@ -23,5 +23,9 @@ module.exports = {
     what_spiritual_experience_are_you_grateful_for: {
         title: "What spiritual experience are you grateful for? | Cactus",
         path: "/what-spiritual-experience-are-you-grateful-for"
+    },
+    how_do_you_celebrate: {
+        title: "How do you celebrate? | Cactus",
+        path: "/how-do-you-celebrate"
     }
 }

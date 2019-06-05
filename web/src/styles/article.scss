@@ -1,3 +1,4 @@
+@import "~styles/variables";
 @import "~styles/mixins";
 
 //This is the target for the sign-up jump button
@@ -17,13 +18,26 @@
 
 /* HERO */
 
+.logo {
+  height: 5.8rem;
+  width: 11.7rem;
+}
+
+header {
+  border-bottom: 1px solid lighten($darkText, 90%);
+
+  a.button {
+    display: block;
+  }
+}
+
 h1 {
   margin: 3.2rem 2.4rem 4rem;
   text-align: center;
 
   @include r(768) {
     margin: 3.2rem auto 4rem;
-    max-width: 60rem;
+    max-width: 64rem;
   }
 }
 
@@ -55,10 +69,6 @@ h1 {
 
 /* CONTENT */
 
-p:not(:last-child) {
-  margin-bottom: 1.6rem;
-}
-
 .gridContainer {
   padding: 0 2.4rem 5.6rem;
   text-align: left;
@@ -68,9 +78,10 @@ p:not(:last-child) {
     grid-template-areas:
       "quote header"
       "quote content";
-    grid-template-columns: 40% auto;
+    grid-template-columns: max-content auto;
     grid-template-rows: auto auto;
-    padding: 5.6rem 3.2rem;
+    justify-items: center;
+    padding: 5.6rem 4.8rem;
 
     /* &:after {
       background: no-repeat;
@@ -96,15 +107,23 @@ p:not(:last-child) {
   }
 
   h2 {
-    color: $green;
+    color: $darkGreen;
     margin: 4.8rem 0 1.6rem;
 
     @include r(768) {
+      &:first-child {
+        justify-self: start;
+        grid-area: header;
+        margin-top: 0;
+        max-width: 60rem;
+      }
+    }
+    @include r(1024) {
       max-width: 60rem;
 
       &:first-child {
-        grid-area: header;
-        margin-top: 0;
+        justify-self: center;
+        width: 60rem;
       }
     }
   }
@@ -112,7 +131,14 @@ p:not(:last-child) {
   .content {
     align-self: start;
     grid-area: content;
-    max-width: 60rem;
+
+    @include r(768) {
+      justify-self: start;
+      max-width: 60rem;
+    }
+    @include r(1024) {
+      justify-self: center;
+    }
   }
 
   .quote {
@@ -120,25 +146,25 @@ p:not(:last-child) {
 
     @include r(768) {
       grid-area: quote;
-      margin-top: 5.3rem;
+      margin-top: 5.7rem;
+      max-width: 32rem;
       padding-right: 3.2rem;
     }
     @include r(1024) {
-      justify-self: center;
-      max-width: 32rem;
+      padding-right: 0;
     }
   }
 }
 
 .quoteText {
-  font-size: 2.4rem;
+  font-size: 2.1rem;
   margin-bottom: .8rem;
 }
 
 .source {
   align-items: center;
   display: flex;
-  margin-bottom: 3.2rem;
+  margin-bottom: 4.8rem;
   text-align: left;
 
   .avatarImg {
@@ -159,33 +185,6 @@ p:not(:last-child) {
 
     &:empty {
       display: none;
-    }
-  }
-}
-
-.flexContainer {
-  padding: 5.6rem 2.4rem;
-  text-align: left;
-
-  @include r(768) {
-    display: flex;
-    justify-content: center;
-  }
-
-
-
-  section {
-    &:first-child {
-      margin-bottom: 4.8rem;
-
-      @include r(768) {
-        margin-bottom: 0;
-      }
-    }
-
-    @include r(768) {
-      flex: 0 0 33.3%;
-      padding: 5.6rem 3.2rem;
     }
   }
 }

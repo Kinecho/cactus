@@ -3,8 +3,6 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-/* some styles moved to common.scss and variables.scss */
-
 body {
   background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
   background-position: center 365px, center 285px;
@@ -25,6 +23,18 @@ body {
   grid-area: target;
 }
 
+header {
+  @include r(768) {
+    padding: 2.4rem 2.4rem 0;
+  }
+}
+
+.logo {
+  @include r(768) {
+    height: 8.8rem;
+    width: 17.8rem;
+  }
+}
 
 .hero {
   display: grid;
@@ -186,7 +196,7 @@ input[type=email] {
   @include r(1024) {
     &:before {
       background: no-repeat;
-      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
+      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/darkGreenBlob.svg);
       background-position: 5rem 8rem, 0 0;
       background-size: 44.5rem, 44rem;
       content: "";

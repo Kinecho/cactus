@@ -17,7 +17,7 @@ body {
   background: white no-repeat;
   color: $darkestGreen;
   font: 1.8rem $font-stack;
-  line-height: 1.4;
+  line-height: 1.43;
   margin: 0;
 }
 
@@ -45,7 +45,7 @@ header {
     background-color: transparent;
     margin: 0 auto;
     max-width: 1200px;
-    padding: 2.4rem 2.4rem 0;
+    padding: 2.4rem;
     position: static;
   }
 
@@ -64,11 +64,6 @@ header {
 .logo {
   height: 5.8rem;
   width: 11.7rem;
-
-  @include r(768) {
-    height: 8.8rem;
-    width: 17.8rem;
-  }
 }
 
 a.button {
