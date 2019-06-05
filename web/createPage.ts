@@ -26,12 +26,12 @@ const questions = [
     {
         type: "text",
         name: 'title',
-        message: 'What is the title of this page?',
+        message: 'Page Title',
     },
     {
         type: "text",
         name: 'pageName',
-        message: 'What should we name the files? Don\'t include a file extension.',
+        message: 'File Name (without the extension)',
         initial: (prev, values) => formatFilename(values.title),
         validate: validatePageName,
         format: formatFilename,
@@ -39,12 +39,12 @@ const questions = [
     {
         type: "confirm",
         name: "writeUrls",
-        message: `Do you want to register a URL for this page?`
+        message: `Register a path for this page?`
     },
     {
         type: prev => prev === true ? 'text' : null,
         name: 'pagePath',
-        message: 'What is the path (url) for this page?',
+        message: 'Page Path: https://cactus.app',
         initial: (prev, values) => getUrlFromInput(values.title),
         validate: value => validateUrl(value),
         format: value => getUrlFromInput(value)
@@ -52,16 +52,17 @@ const questions = [
     {
         type: "confirm",
         name: "looksGood",
-        message: (prev, values) => `Here's the current configuration:
+        message: (prev, values) => `\n\nHere's the current configuration:
         
-${chalk.blue("title")}: \t${values.title}
-${chalk.blue("path")}: ${values.pagePath || "<none>"}
-${chalk.blue("filenames")}: 
+${chalk.blue("Page Title")}: ${values.title}
+${chalk.blue("Page URL")}: ${values.pagePath ? values.pagePath : chalk.gray("<none>")}
+${chalk.blue("Files to create")}: 
  • ${helpers.htmlDir}/${values.pageName}.html
  • ${helpers.pagesStylesDir}/${values.pageName}.ts
  • ${helpers.pagesScriptsDir}/${values.pageName}.scss 
+${values.pagePath ? `${chalk.blue("Files to update")}: \n • ${helpers.webRoot}/pages.js \n • ${helpers.projectRoot}/firebase.json` : ''}
  
-Continue with creating files?`
+All Good?`
     },
 ];
 
@@ -152,7 +153,7 @@ function updateFirebaseJson() {
     rewrites.unshift(newPage);
 
     //TODO: actually write to file;
-    console.log("Adding page to Firebase Config:\n", chalk.yellow(JSON.stringify(newPage, null, 4)))
+    console.log("Adding page to Firebase Config:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
     fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
         if (err) return console.log(err);
     });
@@ -169,7 +170,7 @@ function updatePagesFile() {
 
     pages[response.pageName] = newPage;
 
-    console.log("Adding new page to pages.js", chalk.yellow(JSON.stringify(newPage, null, 4)));
+    console.log("\nAdding new page to pages.js:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
 
     let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
@@ -238,21 +239,15 @@ function createScss() {
 
 async function start(): Promise<void> {
     response = await prompts(questions);
-    const {pageName, pagePath, title} = response;
+    const {pagePath, title, looksGood} = response;
 
-    if (!response.looksGood) {
-        console.warn("Not creating pages... exiting");
+    if (!looksGood) {
+        console.warn("Not creating pages.");
         return;
     }
 
     console.log("page path is: ", pagePath);
     console.log("title ", title);
-
-
-    if (response.pagePath && !response.pagePath.startsWith("/")) {
-        response.pagePath = `/${response.pagePath}`;
-    }
-
 
     createHtml();
     createJS();
@@ -270,7 +265,7 @@ async function start(): Promise<void> {
 
 
 start().then(() => {
-    console.log("Finished creating page")
+    console.log("Done")
 }).catch(error => {
     console.error("Failed to create page", error);
 });
