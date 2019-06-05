@@ -6,7 +6,7 @@ const path = require("path");
 
 console.log('Let\'s crate a static page.');
 
-const doWrite = false;
+const doWrite = true;
 
 export interface InputResponse {
     pageName: string,
@@ -118,8 +118,23 @@ function updatePagesFile(){
 }
 
 function createHtml() {
-    let dir = `${helpers.htmlDir}/${response.pageName}.html`;
-    console.log("creating HTML from template", dir);
+    let htmlOutputPath = `${helpers.htmlDir}/${response.pageName}.html`;
+    let templateFile = path.resolve(helpers.srcDir, "templates", "page.html");
+    console.log("creating HTML from template", htmlOutputPath);
+
+    fs.readFile(templateFile, 'utf8', function (err,data) {
+        if (err) {
+            return console.log(err);
+        }
+        const content = data.replace(/\$PAGE_NAME\$/g, response.pageName );
+
+        console.log("\n\nHTML File Contents\n\n", content);
+        if (doWrite){
+            fs.writeFile(htmlOutputPath, content, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        }
+    });
 }
 
 function createJS() {
@@ -147,9 +162,7 @@ function createJS() {
 function createScss() {
     let templateFile = path.resolve(helpers.srcDir, "templates", "page_style.scss");
     let scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
-    console.log("creating scss file", scssFilePath);
-
-
+    console.log("creating SCSS file", scssFilePath);
 
     fs.readFile(templateFile, 'utf8', function (err,data) {
         if (err) {
