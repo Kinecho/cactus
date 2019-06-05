@@ -214,7 +214,6 @@ function createJS() {
         fs.writeFile(outputFilePath, content, 'utf8', function (err) {
             if (err) return console.log(err);
         });
-
     });
 }
 

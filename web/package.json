@@ -18,6 +18,7 @@
         "open": "npm run predeploy && open ./public/index.html",
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
         "page": "ts-node createPage.ts",
+        "page:delete": "ts-node deletePage.ts",
         "predeploy": "npm run build:deploy && npm run copy",
         "predeploy:prod": "npm run build:prod && npm run copy",
         "predeploy:stage": "npm run build:stage && npm run copy",
