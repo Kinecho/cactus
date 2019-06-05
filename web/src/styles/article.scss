@@ -1,0 +1,264 @@
+@import "~styles/mixins";
+
+//This is the target for the sign-up jump button
+#sign-up {
+  position: relative;
+  top: -6rem;
+  height: 0;
+  width: 100%;
+  grid-area: target;
+}
+
+#signupAnchor {
+  left: 0;
+  position: absolute;
+  top: 32rem;
+}
+
+/* HERO */
+
+h1 {
+  margin: 3.2rem 2.4rem 4rem;
+  text-align: center;
+
+  @include r(768) {
+    margin: 3.2rem auto 4rem;
+    max-width: 60rem;
+  }
+}
+
+.graphicContainer {
+  background-image: url(assets/images/pinkBlob2.svg);
+  background-position: center 10rem;
+  background-repeat: no-repeat;
+  background-size: 110vw;
+}
+
+.graphic {
+  display: block;
+  margin: 0 auto;
+  max-height: 50rem;
+  max-width: 90%;
+
+  @include r(768) {
+    max-width: 100%;
+    @include h(768) {
+      max-height: 48vh;
+    }
+  }
+  @include r(1024) {
+    @include h(768) {
+      max-height: 56vh;
+    }
+  }
+}
+
+/* CONTENT */
+
+p:not(:last-child) {
+  margin-bottom: 1.6rem;
+}
+
+.gridContainer {
+  padding: 0 2.4rem 5.6rem;
+  text-align: left;
+
+  @include r(768) {
+    display: grid;
+    grid-template-areas:
+      "quote header"
+      "quote content";
+    grid-template-columns: 40% auto;
+    grid-template-rows: auto auto;
+    padding: 5.6rem 3.2rem;
+
+    /* &:after {
+      background: no-repeat;
+      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
+      background-position: 5rem 8rem, 0 0;
+      background-size: 44.5rem, 44rem;
+      bottom: -12rem;
+      content: "";
+      display: block;
+      height: 47rem;
+      left: -30rem;
+      position: absolute;
+      width: 55rem;
+    } */
+  }
+  @include r(1500) {
+    padding: 5.6rem 5.6rem 6.4rem;
+
+    &:after {
+      left: -30rem;
+      bottom: -12rem;
+    }
+  }
+
+  h2 {
+    color: $green;
+    margin: 4.8rem 0 1.6rem;
+
+    @include r(768) {
+      max-width: 60rem;
+
+      &:first-child {
+        grid-area: header;
+        margin-top: 0;
+      }
+    }
+  }
+
+  .content {
+    align-self: start;
+    grid-area: content;
+    max-width: 60rem;
+  }
+
+  .quote {
+    max-width: 60rem;
+
+    @include r(768) {
+      grid-area: quote;
+      margin-top: 5.3rem;
+      padding-right: 3.2rem;
+    }
+    @include r(1024) {
+      justify-self: center;
+      max-width: 32rem;
+    }
+  }
+}
+
+.quoteText {
+  font-size: 2.4rem;
+  margin-bottom: .8rem;
+}
+
+.source {
+  align-items: center;
+  display: flex;
+  margin-bottom: 3.2rem;
+  text-align: left;
+
+  .avatarImg {
+    height: 5.6rem;
+    margin-right: .8rem;
+    width: 5.1rem;
+  }
+
+  .name {
+    font-weight: bold;
+    margin: 0;
+  }
+
+  .byline {
+    display: block;
+    font-size: 1.6rem;
+    opacity: .5;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+.flexContainer {
+  padding: 5.6rem 2.4rem;
+  text-align: left;
+
+  @include r(768) {
+    display: flex;
+    justify-content: center;
+  }
+
+
+
+  section {
+    &:first-child {
+      margin-bottom: 4.8rem;
+
+      @include r(768) {
+        margin-bottom: 0;
+      }
+    }
+
+    @include r(768) {
+      flex: 0 0 33.3%;
+      padding: 5.6rem 3.2rem;
+    }
+  }
+}
+
+/* FORM */
+
+form {
+  display: flex;
+  flex-flow: column wrap;
+  padding: 0 2.4rem 4rem;
+
+  @include r(600) {
+    flex-direction: row;
+  }
+  @include r(768) {
+    justify-content: center;
+  }
+}
+
+input[type=email] {
+  border: 1px solid $green;
+  border-radius: 3rem;
+  display: block;
+  flex-grow: 1;
+  font-size: 1.8rem;
+  margin: 0 0 1.6rem;
+  max-width: 53rem;
+  padding: 1.2rem 1.6rem;
+  transition: border-color .3s ease-in-out;
+
+  @include r(600) {
+    margin: 0 1.6rem 1.6rem 0;
+  }
+  @include r(768) {
+    min-width: 32rem;
+  }
+
+  &:hover {
+    border-color: $darkGreen;
+  }
+}
+
+.email {
+  background: url(assets/images/yellowNeedles.svg) $yellow;
+  background-size: 80%;
+  padding: 5.6rem 0 .8rem;
+  position: relative;
+  z-index: 1;
+
+  @include r(768) {
+    background-size: 30%;
+  }
+
+  .emailHeader {
+    font-size: 2.4rem;
+    margin: 0 0 .8rem;
+    padding: 0 2.4rem;
+
+    @include r(768) {
+      font-size: 3.2rem;
+    }
+  }
+
+  .subtext {
+    margin: 0 0 2.4rem;
+    padding: 0 2.4rem;
+  }
+
+  input[type=email] {
+    border-color: $darkYellow;
+
+    &:hover {
+      border-color: $darkestYellow;
+    }
+  }
+}
