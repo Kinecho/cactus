@@ -203,7 +203,7 @@ function createJS() {
     // console.log("creating js file with response = ", response);
     console.log("creating javascript file from template:\n", chalk.blue(outputFilePath), "\n");
 
-    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.js");
+    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.ts");
 
     fs.readFile(templateFile, 'utf8', function (err, data) {
         if (err) {
