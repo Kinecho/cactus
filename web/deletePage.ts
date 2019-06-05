@@ -193,7 +193,6 @@ async function start(): Promise<void> {
         },
     ];
 
-
     response = await prompts(questions, {
         onCancel: () => {
             console.log("Canceled deletion");
@@ -213,21 +212,6 @@ async function start(): Promise<void> {
     } else {
         console.log("cancel success");
     }
-
-
-    //
-    // createHtml();
-    // createJS();
-    // createScss();
-    //
-    //
-    // if (response.writeUrls) {
-    //     updateFirebaseJson();
-    //     updatePagesFile();
-    // } else {
-    //     console.log("Not writing urls to pages.js or firebase.json");
-    // }
-
 }
 
 
