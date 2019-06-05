@@ -19,6 +19,11 @@ describe("get filename from input", () => {
 
 
 describe("get url from input", () => {
+    test("My Awesome Page! With Questions", () => {
+        const input = 'My Awesome Page! With Questions';
+        expect(getUrlFromInput(input)).toEqual("/my-awesome-page-with-questions")
+    });
+
     test("all lowercase, valid", () => {
         const input = "hello";
         expect(getUrlFromInput(input)).toEqual("/hello");
@@ -57,6 +62,11 @@ describe("get url from input", () => {
     test("with other random characters", () => {
         const input = "The dos/dont's of $@!**${}[]|,, racing ";
         expect(getUrlFromInput(input)).toEqual("/the-dos-donts-of-racing");
+    });
+
+    test("with other random characters", () => {
+        const input = "henrys_page_is_awesome";
+        expect(getUrlFromInput(input)).toEqual("/henrys-page-is-awesome");
     });
 
     test("null value", () => {

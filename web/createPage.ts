@@ -6,6 +6,8 @@ const path = require("path");
 
 console.log('Let\'s crate a static page.');
 
+const doWrite = false;
+
 export interface InputResponse {
     pageName: string,
     title: string,
@@ -42,7 +44,7 @@ export function getInitialPageName(prev:string, values:any){
 
 export function validatePageName(input):boolean|string{
     console.log("validate page name", input);
-    let exists = fs.existsSync(path.join(`${helpers.srcDir}`, getFilenameFromInput(input, "html")))
+    let exists = fs.existsSync(path.join(`${helpers.srcDir}`, getFilenameFromInput(input, "html")));
 
     if (!exists){
         return true;
@@ -72,7 +74,7 @@ export function getUrlFromInput(input:string):string{
 export function removeSpecialCharacters(input:string, replacement:string):string {
     return input.trim().toLowerCase()
         .replace(/[^a-z0-9-_\s\\\/]/g, "") //remove special characters
-        .replace(/[-_\\\/]/, " ") //replace underscores or hyphens with space
+        .replace(/[-_\\\/]/g, " ") //replace underscores or hyphens with space
         .replace(/(\s+)/g, replacement); //replace all spaces with hyphen
 }
 
@@ -104,9 +106,12 @@ function updatePagesFile(){
 
     console.log("printing Pages data \n\n", data);
 
-    fs.writeFile(`${helpers.webRoot}/pages.js`, data, 'utf8', function (err) {
-        if (err) return console.log(err);
-    });
+    if (doWrite){
+        fs.writeFile(`${helpers.webRoot}/pages.js`, data, 'utf8', function (err) {
+            if (err) return console.log(err);
+        });
+    }
+
 
 }
 
@@ -129,9 +134,12 @@ function createJS() {
         const result = data.replace(/\$PAGE_NAME\$/g, response.pageName );
 
         console.log("\n\nJS File Contents\n\n", result, "\n\n");
-        // fs.writeFile(outputFilePath, result, 'utf8', function (err) {
-        //     if (err) return console.log(err);
-        // });
+        if (doWrite){
+            fs.writeFile(outputFilePath, result, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        }
+
     });
 
 }
@@ -148,7 +156,7 @@ async function start(): Promise<void> {
     console.log("title ", title);
 
 
-    const baseName = `${pageName.trim().toLowerCase().replace(/\s+/g, '_')}`
+    const baseName = getFilenameFromInput(pageName);
 
 
     if (response.pagePath && !response.pagePath.startsWith("/")) {
