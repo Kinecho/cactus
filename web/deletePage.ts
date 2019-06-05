@@ -1,4 +1,3 @@
-import {file} from "@babel/types";
 import chalk from "chalk";
 
 const prompts = require('prompts');
@@ -36,7 +35,6 @@ async function listAllPageNames(): Promise<string[]> {
 }
 
 export function validatePageExists(input): boolean | string {
-    // let htmlName = getFilenameFromInput(input, "html");
     let baseName = input.split(".")[0];
     let htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, baseName));
     let pagesExists = !!pages[baseName];
@@ -65,9 +63,6 @@ async function updateFirebaseJson() {
         return
     }
 
-    // console.log("Removing page to Firebase Config:\n", chalk.yellow(JSON.stringify(foundPage, null, 4)));
-    // prompts.a
-
     const {remove} = await prompts({
         name: "remove",
         message: `Remove from firebase config? \n ${chalk.yellow(JSON.stringify(foundPage, null, 2))}`,
@@ -92,7 +87,6 @@ async function updatePagesFile() {
         console.warn(`No page with name ${response.pageName} exists in pages.js`);
     }
 
-
     const {remove} = await prompts({
         name: "remove",
         message: `Remove configuration from pages.js? \n${chalk.yellow(JSON.stringify(existingPage, null, 4))}`,
@@ -105,8 +99,6 @@ async function updatePagesFile() {
     }
 
     delete pages[response.pageName];
-
-    // console.log("Removing page from pages.js:\n", chalk.yellow(JSON.stringify(existingPage, null, 4)));
 
     let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
@@ -132,7 +124,6 @@ async function removeHtml() {
         return;
     }
 
-
     console.log(chalk.green("removing HTML"));
     fs.unlinkSync(htmlPath);
 }
@@ -151,12 +142,8 @@ async function removeJS() {
         return;
     }
 
-
     console.log(chalk.green("removing TS file"));
     fs.unlinkSync(tsPath)
-    // console.log("creating js file with response = ", response);
-
-
 }
 
 async function removeScss() {

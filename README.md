@@ -10,6 +10,9 @@ Since static assets (images, etc) are served from the `src` directory, all chang
 
 > This project uses TypeScript. All new javascript files should be added as `.ts` (not .js). .js files will no longer compile. 
 
+## Delete a webpage
+If you want to remove a webpage and all of it's associated mappings, use the script `npm run page:delete`. It will provide you with a list of HTML files to choose from. Pick one and follow the prompts. It will give you a chance to skip deleting any aspect of the deletion process.  
+
 ## Add a new webpage
 
 > NOTE: this process has been updated! You can use `npm run page` to do the following steps automatically.
