@@ -5,7 +5,7 @@ const path = require("path");
 
 const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
-const pages = require(pagesPath);
+const pages = require(pagesPath) as {[name: string]: {title:string, path:string}};
 
 console.log('Let\'s create a static page.');
 
@@ -63,14 +63,15 @@ export function validatePageName(input):boolean|string{
     return `A page with this name already exists. Please pick a new value`;
 }
 
-
 export function validateUrl(input):boolean|string{
-    let urlExists = getFirebaseConfig().hosting.rewrites.find(rewrite => rewrite.source == input);
-    if (!urlExists){
+    let firebaseUrl = getFirebaseConfig().hosting.rewrites.find(rewrite => rewrite.source === input);
+    let pagesUrl = Object.values(pages).find(page => page.path === input);
+
+    if (!firebaseUrl && !pagesUrl){
         return true;
     }
 
-    return `This URL is already mapped in firebase.json. Please choose a new URL.`;
+    return `This URL is already mapped. Please choose a new URL.`;
 }
 
 export function getFilenameFromInput(input:string, extension:string|undefined=undefined):string{
@@ -116,7 +117,7 @@ function updateFirebaseJson(){
 
     rewrites.unshift(newPage);
 
-    console.log("updated Firebase Config", JSON.stringify(config, null, 4));
+    console.log("Adding page to Firebase Config", JSON.stringify(newPage, null, 4));
 
     //TODO: actually write to file;
 
@@ -131,11 +132,14 @@ function updatePagesFile(){
     if (pages[response.pageName]) {
         console.warn("A Page with the same key already exists in pages.js");
     }
-
-    pages[response.pageName] = {
+    const newPage = {
         title: response.title,
         path: response.pagePath,
     };
+
+    pages[response.pageName] = newPage;
+
+    console.log("Adding new page to pages.js", JSON.stringify(newPage, null, 4));
 
     let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
