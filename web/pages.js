@@ -29,5 +29,9 @@ module.exports = {
     "how_do_you_celebrate": {
         "title": "How do you celebrate? | Cactus",
         "path": "/how-do-you-celebrate"
+    },
+    "neils_test_page": {
+        "title": "Neil's Test Page",
+        "path": "/neils-test-page"
     }
 }
