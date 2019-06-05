@@ -41,6 +41,10 @@
         "destination": "/index.html"
       },
       {
+        "source": "/what-spiritual-experience-are-you-grateful-for",
+        "destination": "/what_spiritual_experience_are_you_grateful_for.html"
+      },
+      {
         "source": "**",
         "destination": "/404.html"
       }
