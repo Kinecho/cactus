@@ -30,8 +30,4 @@ module.exports = {
         "title": "How do you celebrate? | Cactus",
         "path": "/how-do-you-celebrate"
     },
-    "neils_test_page": {
-        "title": "Neil's Test Page",
-        "path": "/neils-test-page"
-    }
 }

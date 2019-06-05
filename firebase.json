@@ -21,10 +21,6 @@
         ],
         "rewrites": [
             {
-                "source": "/neils-test-page",
-                "destination": "/neils_test_page.html"
-            },
-            {
                 "source": "/what-spiritual-experience-are-you-grateful-for",
                 "destination": "/what_spiritual_experience_are_you_grateful_for.html"
             },
