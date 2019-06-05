@@ -79,13 +79,13 @@ module.exports = function(config){
                 filename: '[id].[hash].css',
                 chunkFilename: '[id].[hash].css',
             }),
-            ...Object.keys(pages).map(title => {
-                const page = pages[title]
+            ...Object.keys(pages).map(filename => {
+                const page = pages[filename]
                 return new HtmlWebpackPlugin({
-                    chunks: ['common', title],
+                    chunks: ['common', filename],
                     title: page.title,
-                    template: `${helpers.srcDir}/${title}.html`,
-                    filename: `${title}.html`,
+                    template: `${helpers.htmlDir}/${filename}.html`,
+                    filename: `${filename}.html`,
                     favicon: `${helpers.srcDir}/favicon.ico`
                 })
             }),

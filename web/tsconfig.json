@@ -6,7 +6,6 @@
         "module": "commonjs",
         "target": "es5",
         "sourceMap": true,
-        //        "moduleResolution": "node"
         "lib": ["es2015", "dom"],
         "baseUrl": ".",
         "rootDirs": ["./src", "../shared/src"],
@@ -17,6 +16,5 @@
             "@shared/*": ["../shared/src/*"]
         }
     },
-    "compileOnSave": false,
-    "include": ["src"]
+    "compileOnSave": false
 }
