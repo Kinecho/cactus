@@ -1,3 +1,6 @@
+import {file} from "@babel/types";
+import chalk from "chalk";
+
 const prompts = require('prompts');
 const helpers = require("./helpers");
 const fs = require("fs");
@@ -15,6 +18,8 @@ export interface InputResponse {
     pageName: string,
     title: string,
     pagePath: string,
+    writeUrls: boolean,
+    looksGood: boolean,
 }
 
 let response:InputResponse;
@@ -29,15 +34,36 @@ const questions = [
         type: "text",
         name: 'pageName',
         message: 'What should we name the files? Don\'t include a file extension.',
-        initial: getInitialPageName,
-        validate: validatePageName
+        initial: (prev, values) => formatFilename(values.title),
+        validate: validatePageName,
+        format: formatFilename,
     },
     {
-        type: 'text',
+        type: "confirm",
+        name: "writeUrls",
+        message: `Do you want to register a URL for this page?`
+    },
+    {
+        type: prev => prev === true ? 'text' : null,
         name: 'pagePath',
         message: 'What is the path (url) for this page?',
-        initial: getUrlFromInput,
-        validate: validateUrl,
+        initial: (prev, values) => getUrlFromInput(values.title),
+        validate: value => validateUrl(value),
+        format: value => getUrlFromInput(value)
+    },
+    {
+        type: "confirm",
+        name: "looksGood",
+        message: (prev, values) => `Here's the current configuration:
+        
+${chalk.blue("title")}: \t${values.title}
+${chalk.blue("path")}: ${values.pagePath || "<none>"}
+${chalk.blue("filenames")}: 
+ • ${helpers.htmlDir}/${values.pageName}.html
+ • ${helpers.pagesStylesDir}/${values.pageName}.ts
+ • ${helpers.pagesScriptsDir}/${values.pageName}.scss 
+ 
+Continue with creating files?`
     },
 ];
 
@@ -46,9 +72,9 @@ function getFirebaseConfig():{hosting: {rewrites: {source:string, destination:st
     return require(`${helpers.projectRoot}/firebase.json`);
 }
 
-export function getInitialPageName(prev:string, values:any){
-    console.log("Creating page:", prev);
-    return getFilenameFromInput(prev)
+export function formatFilename(value:string){
+    let filename = getFilenameFromInput(value);
+    return filename;
 }
 
 export function validatePageName(input):boolean|string{
@@ -84,7 +110,17 @@ export function getFilenameFromInput(input:string, extension:string|undefined=un
 }
 
 export function getUrlFromInput(input:string):string{
-    const name = removeSpecialCharacters(input, "-");
+    let toProcess = input;
+
+    if (!toProcess){
+        return "";
+    }
+
+    if (toProcess && toProcess.indexOf("/") === 0){
+        toProcess = toProcess.slice(1);
+    }
+
+    const name = removeSpecialCharacters(toProcess, "-");
     if (!name.startsWith("/")){
         return `/${name}`;
     }
@@ -212,24 +248,35 @@ function createScss() {
 async function start(): Promise<void> {
     response = await prompts(questions);
     const {pageName, pagePath, title} = response;
+
+    if (!response.looksGood){
+        console.warn("Not creating pages... exiting");
+        return;
+    }
+
     console.log("page path is: ", pagePath);
     console.log("title ", title);
 
 
-    const baseName = getFilenameFromInput(pageName);
+
 
     if (response.pagePath && !response.pagePath.startsWith("/")) {
         response.pagePath = `/${response.pagePath}`;
     }
 
-    console.log('creating pages for ', baseName);
-    response.pageName = baseName;
 
     createHtml();
     createJS();
     createScss();
-    updateFirebaseJson();
-    updatePagesFile();
+
+
+    if (response.writeUrls){
+        updateFirebaseJson();
+        updatePagesFile();
+    } else {
+        console.log("Not writing urls to pages.js or firebase.json");
+    }
+
 }
 
 
