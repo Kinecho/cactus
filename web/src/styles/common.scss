@@ -53,7 +53,7 @@ header {
     flex-grow: 0;
     font-size: 1.6rem;
     margin: 0;
-    padding: 1.2rem 2rem;
+    padding: 1.2rem 2rem 1.6rem;
 
     @include r(768) {
       display: none;
@@ -83,9 +83,9 @@ button, a.button {
   color: white;
   cursor: pointer;
   flex-grow: 1;
-  font-size: 1.8rem;
+  font: 1.8rem $font-stack;
   margin: 0 0 1.6rem;
-  padding: 1.6rem 2.4rem;
+  padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out;
 
   @include r(600) {
@@ -135,6 +135,10 @@ button, a.button {
   }
 }
 
+h1, h2, p {
+  margin: 0;
+}
+
 h1 {
   font-size: 2.8rem;
   font-weight: bold;
@@ -180,10 +184,11 @@ footer {
   position: relative;
   z-index: 0;
 
-  &.lifted{
+  &.lifted {
     margin-top: -4.8rem;
     padding: 8rem 2.4rem 3.2rem;
   }
+
   .centered {
     @include r(600) {
       align-items: center;
