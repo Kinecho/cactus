@@ -1,10 +1,13 @@
 const prompts = require('prompts');
-const {DateTime} = require('luxon');
 const helpers = require("./helpers");
 const fs = require("fs");
 const path = require("path");
 
-console.log('Let\'s crate a static page.');
+const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
+const pagesPath = `${helpers.webRoot}/pages.js`;
+const pages = require(pagesPath);
+
+console.log('Let\'s create a static page.');
 
 const doWrite = true;
 
@@ -33,23 +36,41 @@ const questions = [
         type: 'text',
         name: 'pagePath',
         message: 'What is the path (url) for this page?',
-        initial: getUrlFromInput
+        initial: getUrlFromInput,
+        validate: validateUrl,
     },
 ];
 
+
+function getFirebaseConfig():{hosting: {rewrites: {source:string, destination:string}[]}}{
+    return require(`${helpers.projectRoot}/firebase.json`);
+}
+
 export function getInitialPageName(prev:string, values:any){
-    console.log("Crating page:", prev);
+    console.log("Creating page:", prev);
     return getFilenameFromInput(prev)
 }
 
 export function validatePageName(input):boolean|string{
-    let exists = fs.existsSync(path.join(`${helpers.srcDir}`, getFilenameFromInput(input, "html")));
+    let htmlName = getFilenameFromInput(input, "html");
+    let htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, htmlName));
+    let pagesExists = !!pages[htmlName];
 
-    if (!exists){
+    if (!htmlExists && !pagesExists){
         return true;
     }
 
     return `A page with this name already exists. Please pick a new value`;
+}
+
+
+export function validateUrl(input):boolean|string{
+    let urlExists = getFirebaseConfig().hosting.rewrites.find(rewrite => rewrite.source == input);
+    if (!urlExists){
+        return true;
+    }
+
+    return `This URL is already mapped in firebase.json. Please choose a new URL.`;
 }
 
 export function getFilenameFromInput(input:string, extension:string|undefined=undefined):string{
@@ -77,14 +98,21 @@ export function removeSpecialCharacters(input:string, replacement:string):string
 }
 
 function updateFirebaseJson(){
-    const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
-    let config = require(firebaseConfigPath);
+    let config = getFirebaseConfig();
     let rewrites = config.hosting.rewrites;
 
     let newPage = {
         source: `${response.pagePath}`,
         destination: `${response.pageName}.html`
     };
+
+
+    let existing = rewrites.find(page => page.source === newPage.source || page.destination === newPage.source);
+    if (existing){
+        console.warn("A page with the same source or destination was found in firebase.json");
+        console.warn("NOT UPDATING FIREBASE.JSON");
+        return;
+    }
 
     rewrites.unshift(newPage);
 
@@ -100,7 +128,10 @@ function updateFirebaseJson(){
 }
 
 function updatePagesFile(){
-    let pages = require(`${helpers.webRoot}/pages.js`);
+    if (pages[response.pageName]) {
+        console.warn("A Page with the same key already exists in pages.js");
+    }
+
     pages[response.pageName] = {
         title: response.title,
         path: response.pagePath,
@@ -108,10 +139,8 @@ function updatePagesFile(){
 
     let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-    console.log("printing Pages data \n\n", data);
-
     if (doWrite){
-        fs.writeFile(`${helpers.webRoot}/pages.js`, data, 'utf8', function (err) {
+        fs.writeFile(pagesPath, data, 'utf8', function (err) {
             if (err) return console.log(err);
         });
     }
@@ -126,9 +155,8 @@ function createHtml() {
         if (err) {
             return console.log(err);
         }
-        const content = data.replace(/\$PAGE_NAME\$/g, response.pageName );
+        const content = data.replace(/\$PAGE_TITLE\$/g, response.title );
 
-        console.log("\n\nHTML File Contents\n\n", content);
         if (doWrite){
             fs.writeFile(htmlOutputPath, content, 'utf8', function (err) {
                 if (err) return console.log(err);
@@ -150,7 +178,6 @@ function createJS() {
         }
         const content = data.replace(/\$PAGE_NAME\$/g, response.pageName );
 
-        console.log("\n\nJS File Contents\n\n", content);
         if (doWrite){
             fs.writeFile(outputFilePath, content, 'utf8', function (err) {
                 if (err) return console.log(err);
@@ -170,7 +197,6 @@ function createScss() {
         }
         const content = data;
 
-        console.log("\n\nSCSS File Contents\n\n", content);
         if (doWrite){
             fs.writeFile(scssFilePath, content, 'utf8', function (err) {
                 if (err) return console.log(err);
