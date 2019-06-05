@@ -85,9 +85,9 @@ h1 {
 
     &:after {
       background: no-repeat;
-      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
-      background-position: -13rem 0, 4rem 14rem;
-      background-size: 34rem;
+      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/lightGreenBlob.svg);
+      background-position: -13rem 11rem, 13rem 27rem;
+      background-size: 34rem, 23rem;
       bottom: -12rem;
       content: "";
       display: block;
@@ -125,6 +125,14 @@ h1 {
       &:first-child {
         justify-self: center;
         width: 60rem;
+      }
+    }
+
+    &.onlyMobile {
+      display: block;
+
+      @include r(768) {
+        display: none;
       }
     }
   }
