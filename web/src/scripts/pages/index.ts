@@ -1,9 +1,8 @@
 import "styles/pages/index.scss"
 import {Config} from "@web/config"
-import {gtag} from '@web/analytics'
 import * as firebase from "firebase/app"
 import "firebase/functions"
-import {configureSignupForm, submitEmail} from '@web/mailchimp'
+import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("index.js loaded");
@@ -20,35 +19,4 @@ document.addEventListener('DOMContentLoaded', function() {
     configureSignupForm("email-form-bottom");
     setupJumpToForm();
 });
-
-
-function setupJumpToForm(){
-    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("jump-to-form");
-
-    Array.from(buttons).forEach(button => {
-        if (!button){
-            return
-        }
-
-        let scrollToId = button.dataset.scrollTo;
-        let doFocus = Boolean(button.dataset.focusForm);
-
-        console.log("scrolling to", scrollToId);
-        let content = document.getElementById(scrollToId);
-
-        button.addEventListener("click", () => {
-            gtag("event", "scroll_to", {formId: scrollToId});
-            content.scrollIntoView();
-            if (doFocus){
-                let form = document.getElementById(button.dataset.focusForm);
-                if (form){
-                    let input = form.getElementsByTagName("input").item(0);
-                    if (input) {
-                        input.focus()
-                    }
-                }
-            }
-        })
-    })
-}
 

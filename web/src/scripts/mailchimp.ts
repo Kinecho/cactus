@@ -146,3 +146,35 @@ export function configureSignupForm(formId:string){
 
     form.addEventListener("submit", processForm);
 }
+
+
+
+export function setupJumpToForm(buttonClass:string="jump-to-form"){
+    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName(buttonClass);
+
+    Array.from(buttons).forEach(button => {
+        if (!button){
+            return
+        }
+
+        let scrollToId = button.dataset.scrollTo;
+        let doFocus = Boolean(button.dataset.focusForm);
+
+        console.log("scrolling to", scrollToId);
+        let content = document.getElementById(scrollToId);
+
+        button.addEventListener("click", () => {
+            gtag("event", "scroll_to", {formId: scrollToId});
+            content.scrollIntoView();
+            if (doFocus){
+                let form = document.getElementById(button.dataset.focusForm);
+                if (form){
+                    let input = form.getElementsByTagName("input").item(0);
+                    if (input) {
+                        input.focus()
+                    }
+                }
+            }
+        })
+    })
+}
