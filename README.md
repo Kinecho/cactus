@@ -18,6 +18,8 @@ Since we're not running a single page app, we have no routing layer. We need to 
 
 I recommend using the `npm run page` script to create files, but if you insist on doing it it manually, follow the instructions below. This is exactly what the script does under the hood.
 
+The script will pull from template files located in `web/src/templates`. If you want to include anything additional to the templates, feel free to update! Just note that changes to the template will _not_ be reflected in existing pages. 
+
 Webpack will do some fancy injection into your html file to include your bundled javascript + stylesheet. 
 
 
