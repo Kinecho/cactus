@@ -11,12 +11,20 @@ Since static assets (images, etc) are served from the `src` directory, all chang
 > This project uses TypeScript. All new javascript files should be added as `.ts` (not .js). .js files will no longer compile. 
 
 ## Add a new webpage
-Since we're not running a single page app, we have no routing layer. We need to create and set up routes manually. There are a few steps to this process (someday I may write a script to help automate this... but don't hold your breath).
+
+> NOTE: this process has been updated! You can use `npm run page` to do the following steps automatically.
+
+Since we're not running a single page app, we have no routing layer. We need to create and set up routes manually. You can either do this manually, or use the automated script.
+
+I recommend using the `npm run page` script to create files, but if you insist on doing it it manually, follow the instructions below. This is exactly what the script does under the hood.
 
 Webpack will do some fancy injection into your html file to include your bundled javascript + stylesheet. 
 
+
+
+
 ### 1) Create your html file
-in `web/src`, create a new `.html` file. Name it something descriptive for what the page represents. This name is _not_ customer facing (as long as you do all of the steps listed). For the sake of this example, let's assume the page is called `tutorial.html`. 
+in `web/src/html`, create a new `.html` file. Name it something descriptive for what the page represents. This name is _not_ customer facing (as long as you do all of the steps listed). For the sake of this example, let's assume the page is called `tutorial.html`. 
 So, we should now have 
 
 ```
@@ -26,13 +34,14 @@ cactus/
 │   └───node_modules/
 │   └───public/    
 │   └───src/   
-│   │   └───assets/ 
+│   │   └───assets/
+│   │   └───html/ 
+│   │           index.html
+│   │           404.html
+│   │           ...
+│   │           tutorial.html* <-- Your new file  
 │   │   └───scripts/
 │   │   └───styles/
-│   │       index.html
-│   │       404.html
-│   │       ...
-│   │       tutorial.html* <-- Your new file  
 │   │   └───webpack/   
 │   │       pages.js
 │   │       config.dev.js
@@ -88,16 +97,17 @@ cactus/
 │   └───public/    
 │   └───src/   
 │   │   └───assets/ 
+│   │   └───html/ 
+│   │           index.html
+│   │           404.html
+│   │           ...
+│   │           tutorial.html* <-- Your new file  
 │   │   └───scripts/
 │   │   │   └───pages/
 │   │   │      tutorial.ts* <-- Your new TypeScript file  
 │   │   └───styles/
 │   │       └───pages/
 │   │           tutorial.scss* <-- Your new stylesheet
-│   │       index.html
-│   │       404.html
-│   │       ...
-│   │       tutorial.html* <-- Your new html file
 │   │   └───webpack/   
 │   │       pages.js
 │   │       config.dev.js
