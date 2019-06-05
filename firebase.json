@@ -29,18 +29,6 @@
                 "destination": "/how_do_you_celebrate.html"
             },
             {
-                "source": "/my-adventure3",
-                "destination": "this_is_a_new_page.html"
-            },
-            {
-                "source": "/my-adventure2",
-                "destination": "my_adventure2.html"
-            },
-            {
-                "source": "/my-adventure",
-                "destination": "my_adventure.html"
-            },
-            {
                 "source": "/success",
                 "destination": "/payment_success.html"
             },

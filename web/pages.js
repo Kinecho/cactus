@@ -22,14 +22,6 @@ module.exports = {
         "title": "Checkout | Cactus",
         "path": "/checkout"
     },
-    "my_adventure": {
-        "title": "my adventure",
-        "path": "/my-adventure"
-    },
-    "this_is_a_new_page": {
-        "title": "THis is a new page",
-        "path": "/my-adventure3"
-    },
     "what_spiritual_experience_are_you_grateful_for": {
         "title": "What spiritual experience are you grateful for? | Cactus",
         "path": "/what-spiritual-experience-are-you-grateful-for"
