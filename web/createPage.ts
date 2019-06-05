@@ -38,12 +38,11 @@ const questions = [
 ];
 
 export function getInitialPageName(prev:string, values:any){
-    console.log("get initial page name", prev, values);
+    console.log("Crating page:", prev);
     return getFilenameFromInput(prev)
 }
 
 export function validatePageName(input):boolean|string{
-    console.log("validate page name", input);
     let exists = fs.existsSync(path.join(`${helpers.srcDir}`, getFilenameFromInput(input, "html")));
 
     if (!exists){
@@ -52,7 +51,6 @@ export function validatePageName(input):boolean|string{
 
     return `A page with this name already exists. Please pick a new value`;
 }
-
 
 export function getFilenameFromInput(input:string, extension:string|undefined=undefined):string{
     const name = removeSpecialCharacters(input, "_");
@@ -79,7 +77,8 @@ export function removeSpecialCharacters(input:string, replacement:string):string
 }
 
 function updateFirebaseJson(){
-    let config = require(`${helpers.projectRoot}/firebase.json`);
+    const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
+    let config = require(firebaseConfigPath);
     let rewrites = config.hosting.rewrites;
 
     let newPage = {
@@ -89,20 +88,25 @@ function updateFirebaseJson(){
 
     rewrites.unshift(newPage);
 
-    console.log("updated rewrites", rewrites);
+    console.log("updated Firebase Config", JSON.stringify(config, null, 4));
 
     //TODO: actually write to file;
 
+    if (doWrite){
+        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
+            if (err) return console.log(err);
+        });
+    }
 }
 
 function updatePagesFile(){
-    let pages = require(`${helpers.webRoot}/pages.js`)
+    let pages = require(`${helpers.webRoot}/pages.js`);
     pages[response.pageName] = {
         title: response.title,
         path: response.pagePath,
     };
 
-    let data = `module.exports = ${JSON.stringify(pages, null, 4)}`
+    let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
     console.log("printing Pages data \n\n", data);
 
@@ -111,42 +115,55 @@ function updatePagesFile(){
             if (err) return console.log(err);
         });
     }
-
-
 }
 
 function createHtml() {
-    let dir = `${helpers.pagesDir}/${response.pageName}.html`
-    console.log("creating", dir)
+    let dir = `${helpers.htmlDir}/${response.pageName}.html`;
+    console.log("creating HTML from template", dir);
 }
 
 function createJS() {
-    let outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`
-    console.log("creating js file with response = ", response);
-    console.log("creating", outputFilePath)
+    let outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
+    // console.log("creating js file with response = ", response);
+    console.log("creating javascript file from template", outputFilePath);
 
-    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.js")
+    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.js");
 
     fs.readFile(templateFile, 'utf8', function (err,data) {
         if (err) {
             return console.log(err);
         }
-        const result = data.replace(/\$PAGE_NAME\$/g, response.pageName );
+        const content = data.replace(/\$PAGE_NAME\$/g, response.pageName );
 
-        console.log("\n\nJS File Contents\n\n", result, "\n\n");
+        console.log("\n\nJS File Contents\n\n", content);
         if (doWrite){
-            fs.writeFile(outputFilePath, result, 'utf8', function (err) {
+            fs.writeFile(outputFilePath, content, 'utf8', function (err) {
                 if (err) return console.log(err);
             });
         }
-
     });
-
 }
 
 function createScss() {
-    let dir = `${helpers.pagesStylesDir}/${response.pageName}.scss`
-    console.log("creating", dir)
+    let templateFile = path.resolve(helpers.srcDir, "templates", "page_style.scss");
+    let scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
+    console.log("creating scss file", scssFilePath);
+
+
+
+    fs.readFile(templateFile, 'utf8', function (err,data) {
+        if (err) {
+            return console.log(err);
+        }
+        const content = data;
+
+        console.log("\n\nSCSS File Contents\n\n", content);
+        if (doWrite){
+            fs.writeFile(scssFilePath, content, 'utf8', function (err) {
+                if (err) return console.log(err);
+            });
+        }
+    });
 }
 
 async function start(): Promise<void> {
@@ -157,7 +174,6 @@ async function start(): Promise<void> {
 
 
     const baseName = getFilenameFromInput(pageName);
-
 
     if (response.pagePath && !response.pagePath.startsWith("/")) {
         response.pagePath = `/${response.pagePath}`;

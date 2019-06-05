@@ -5,9 +5,10 @@ module.exports = {
     projectRoot: path.resolve(webRoot, ".."),
     webRoot: webRoot,
     srcDir: path.resolve(webRoot, "src"),
-    pagesDir: path.resolve(webRoot, "src"),
     scriptDir: path.resolve(webRoot, "src", "scripts"),
     pagesScriptsDir: path.resolve(webRoot, "src", "scripts", "pages"),
+
+    htmlDir: path.resolve(webRoot, "src", "html"),
 
     stylesDir: path.resolve(webRoot, "src", "styles"),
     pagesStylesDir: path.resolve(webRoot, "src", "styles", "pages"),
