@@ -57,5 +57,9 @@ module.exports = {
     "what_actions_do_you_take_to_show_someone_you_love_them": {
         "title": "What actions do you take to show someone you love them?",
         "path": "/what-actions-do-you-take-to-show-someone-you-love-them"
+    },
+    "when_has_being_open_minded_enriched_your_life": {
+        "title": "When has being open-minded enriched your life?",
+        "path": "/when-has-being-open-minded-enriched-your-life"
     }
 }
