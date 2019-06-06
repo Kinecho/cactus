@@ -41,5 +41,9 @@ module.exports = {
     "what_food_brings_you_the_most_joy": {
         "title": "What food brings you the most joy?",
         "path": "/what-food-brings-you-the-most-joy"
+    },
+    "who_is_a_friend_you_can_always_rely_on": {
+        "title": "Who is a friend you can always rely on?",
+        "path": "/who-is-a-friend-you-can-always-rely-on"
     }
 }
