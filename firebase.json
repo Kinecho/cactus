@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way",
+                "destination": "/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.html"
+            },
+            {
                 "source": "/what-experiences-or-activities-make-you-lose-track-of-time",
                 "destination": "/what_experiences_or_activities_make_you_lose_track_of_time.html"
             },

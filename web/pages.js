@@ -33,5 +33,9 @@ module.exports = {
     "what_experiences_or_activities_make_you_lose_track_of_time": {
         "title": "What experiences or activities make you lose track of time?",
         "path": "/what-experiences-or-activities-make-you-lose-track-of-time"
+    },
+    "what_makes_your_body_and_mind_feel_connected_in_a_positive_way": {
+        "title": "What makes your body and mind feel connected in a positive way?",
+        "path": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way"
     }
 }
