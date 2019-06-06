@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-makes-you-cry-tears-of-joy",
+                "destination": "/what_makes_you_cry_tears_of_joy.html"
+            },
+            {
                 "source": "/who-is-a-friend-you-can-always-rely-on",
                 "destination": "/who_is_a_friend_you_can_always_rely_on.html"
             },

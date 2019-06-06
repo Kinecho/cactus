@@ -45,5 +45,9 @@ module.exports = {
     "who_is_a_friend_you_can_always_rely_on": {
         "title": "Who is a friend you can always rely on?",
         "path": "/who-is-a-friend-you-can-always-rely-on"
+    },
+    "what_makes_you_cry_tears_of_joy": {
+        "title": "What makes you cry tears of joy?",
+        "path": "/what-makes-you-cry-tears-of-joy"
     }
 }

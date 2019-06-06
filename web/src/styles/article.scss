@@ -199,6 +199,10 @@ h1 {
     height: 5.6rem;
     margin-right: .8rem;
     width: 5.1rem;
+
+    &.double {
+      width: 10rem;
+    }
   }
 
   .name {
