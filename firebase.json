@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-makes-you-feel-self-confident",
+                "destination": "/what_makes_you_feel_self_confident.html"
+            },
+            {
                 "source": "/what-makes-you-cry-tears-of-joy",
                 "destination": "/what_makes_you_cry_tears_of_joy.html"
             },

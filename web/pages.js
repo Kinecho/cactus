@@ -49,5 +49,9 @@ module.exports = {
     "what_makes_you_cry_tears_of_joy": {
         "title": "What makes you cry tears of joy?",
         "path": "/what-makes-you-cry-tears-of-joy"
+    },
+    "what_makes_you_feel_self_confident": {
+        "title": "What makes you feel self-confident?",
+        "path": "/what-makes-you-feel-self-confident"
     }
 }
