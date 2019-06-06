@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-food-brings-you-the-most-joy",
+                "destination": "/what_food_brings_you_the_most_joy.html"
+            },
+            {
                 "source": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way",
                 "destination": "/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.html"
             },

@@ -1,0 +1,9 @@
+import "styles/pages/what_food_brings_you_the_most_joy.scss"
+import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("what_food_brings_you_the_most_joy loaded");
+    setupJumpToForm();
+    configureSignupForm("email-form-bottom");
+});

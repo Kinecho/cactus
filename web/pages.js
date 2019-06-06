@@ -37,5 +37,9 @@ module.exports = {
     "what_makes_your_body_and_mind_feel_connected_in_a_positive_way": {
         "title": "What makes your body and mind feel connected in a positive way?",
         "path": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way"
+    },
+    "what_food_brings_you_the_most_joy": {
+        "title": "What food brings you the most joy?",
+        "path": "/what-food-brings-you-the-most-joy"
     }
 }
