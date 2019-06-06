@@ -53,5 +53,9 @@ module.exports = {
     "what_makes_you_feel_self_confident": {
         "title": "What makes you feel self-confident?",
         "path": "/what-makes-you-feel-self-confident"
+    },
+    "what_actions_do_you_take_to_show_someone_you_love_them": {
+        "title": "What actions do you take to show someone you love them?",
+        "path": "/what-actions-do-you-take-to-show-someone-you-love-them"
     }
 }
