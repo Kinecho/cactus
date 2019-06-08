@@ -69,5 +69,9 @@ module.exports = {
     "whats_your_favorite_aspect_of_your_home": {
         "title": "What’s your favorite aspect of your home?",
         "path": "/whats-your-favorite-aspect-of-your-home"
+    },
+    "what_is_your_most_cherished_memory_you_have_with_another_person": {
+        "title": "What is your most cherished memory you have with another person?",
+        "path": "/what-is-your-most-cherished-memory-you-have-with-another-person"
     }
 }
