@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/whats-your-favorite-aspect-of-your-home",
+                "destination": "/whats_your_favorite_aspect_of_your_home.html"
+            },
+            {
                 "source": "/what-do-you-appreciate-most-about-your-best-friend",
                 "destination": "/what_do_you_appreciate_most_about_your_best_friend.html"
             },

@@ -65,5 +65,9 @@ module.exports = {
     "what_do_you_appreciate_most_about_your_best_friend": {
         "title": "What do you appreciate most about your best friend?",
         "path": "/what-do-you-appreciate-most-about-your-best-friend"
+    },
+    "whats_your_favorite_aspect_of_your_home": {
+        "title": "What’s your favorite aspect of your home?",
+        "path": "/whats-your-favorite-aspect-of-your-home"
     }
 }
