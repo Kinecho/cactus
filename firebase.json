@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-provides-you-with-a-sense-of-belonging",
+                "destination": "/what_provides_you_with_a_sense_of_belonging.html"
+            },
+            {
                 "source": "/what-piece-of-music-are-you-grateful-for",
                 "destination": "/what_piece_of_music_are_you_grateful_for.html"
             },

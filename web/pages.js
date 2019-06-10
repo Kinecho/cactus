@@ -85,5 +85,9 @@ module.exports = {
     "what_piece_of_music_are_you_grateful_for": {
         "title": "What piece of music are you grateful for?",
         "path": "/what-piece-of-music-are-you-grateful-for"
+    },
+    "what_provides_you_with_a_sense_of_belonging": {
+        "title": "What provides you with a sense of belonging?",
+        "path": "/what-provides-you-with-a-sense-of-belonging"
     }
 }
