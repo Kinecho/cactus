@@ -81,5 +81,9 @@ module.exports = {
     "who_empowers_you_to_be_your_authentic_self": {
         "title": "Who empowers you to be your authentic self?",
         "path": "/who-empowers-you-to-be-your-authentic-self"
+    },
+    "what_piece_of_music_are_you_grateful_for": {
+        "title": "What piece of music are you grateful for?",
+        "path": "/what-piece-of-music-are-you-grateful-for"
     }
 }

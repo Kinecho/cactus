@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-piece-of-music-are-you-grateful-for",
+                "destination": "/what_piece_of_music_are_you_grateful_for.html"
+            },
+            {
                 "source": "/who-empowers-you-to-be-your-authentic-self",
                 "destination": "/who_empowers_you_to_be_your_authentic_self.html"
             },
