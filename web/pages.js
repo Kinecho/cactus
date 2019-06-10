@@ -77,5 +77,9 @@ module.exports = {
     "what_activity_gives_you_the_most_physical_energy": {
         "title": "What activity gives you the most physical energy?",
         "path": "/what-activity-gives-you-the-most-physical-energy"
+    },
+    "who_empowers_you_to_be_your_authentic_self": {
+        "title": "Who empowers you to be your authentic self?",
+        "path": "/who-empowers-you-to-be-your-authentic-self"
     }
 }
