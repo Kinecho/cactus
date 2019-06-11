@@ -23,6 +23,7 @@ export interface InboundEmail {
     subject?: string;
     envelope?: {to: string[], from: string}
     attachments?: Array<AttachmentInfo>;
+    mailchimpEmailId?: string;
 
 }
 
@@ -31,7 +32,7 @@ export default class Email implements Email{
     to?: EmailAddress;
     cc?: EmailAddress;
     from?: EmailAddress;
-    envelope?: {to: EmailAddress[], from: EmailAddress}
+    envelope?: {to: EmailAddress[], from: EmailAddress};
     text?: string;
     html?: string;
     subject?: string;

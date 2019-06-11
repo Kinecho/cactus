@@ -5,6 +5,7 @@ import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {createEmailFromInputs, getFieldHandler, getFileHandler, getSenderFromHeaders} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
 import {
+    getMemberByEmailId,
     UpdateMergeFieldRequest,
     updateMergeFields,
     updateTags,
@@ -63,6 +64,8 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             const fromEmail = email.from && email.from.email ? email.from.email : null;
             const fromHeader = getSenderFromHeaders(email.headers);
 
+
+
             const fields = [
                 {
                     title: "from",
@@ -87,12 +90,23 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
                     })
             }
 
+            if (emailInput.mailchimpEmailId){
+                const sentToMember = await getMemberByEmailId(emailInput.mailchimpEmailId);
+                console.log("sent to member found to be", sentToMember);
+
+                fields.push(
+                    {
+                        title: ":merperson: List Member Email (from link)",
+                        value: sentToMember ? sentToMember.email_address : "not found",
+                        short: false,
+                    })
+            }
+
             msg.attachments = [{
                 color: messageColor,
                 ts: `${(new Date()).getTime() / 1000}`,
                 fields,
             }];
-
 
             await sendActivityNotification(msg);
 

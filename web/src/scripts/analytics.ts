@@ -55,7 +55,7 @@ export function startFullstory(){
         return;
     }
 
-    console.log("Fullstory is enabled. Starting full sttory");
+    // console.log("Fullstory is enabled. Starting FullStory");
 
     const _fs_host = 'fullstory.com';
     // noinspection UseOfBracketNotationInspection

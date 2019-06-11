@@ -1,16 +1,18 @@
 import Email, {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
 import {inspect} from "util";
+
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const getUrls = require('get-urls');
+const queryString = require('query-string');
+
 import {InboundAttachmentInfo, InboundEmailAttachments} from "@api/inbound/models/EmailAttachment";
 import {splitOnFirst} from "@api/util/StringUtil";
 import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
+const MAILCHIMP_USER_EMAIL_PARAM = "e";
 
-
-
-
-    export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles):Promise<Email> {
+export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles): Promise<Email> {
     console.log();
     console.log("email files", JSON.stringify(fileInput));
     console.log();
@@ -27,7 +29,7 @@ import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
  * @param {InboundEmail} emailFiles
  * @return {(fieldname: string, file: NodeJS.ReadableStream, filename: string, encoding: string, mimetype: string) => void}
  */
-export function getFileHandler(emailFiles:InboundEmailFiles){
+export function getFileHandler(emailFiles: InboundEmailFiles) {
     console.log("getting file handler for email inpout");
     return (fieldname: string,
             file: NodeJS.ReadableStream,
@@ -35,7 +37,7 @@ export function getFileHandler(emailFiles:InboundEmailFiles){
             encoding: string,
             mimetype: string) => {
 
-        file.on("error", (error:any) => {
+        file.on("error", (error: any) => {
             console.error("failed to process file", error);
 
         });
@@ -53,14 +55,14 @@ export function getFileHandler(emailFiles:InboundEmailFiles){
 }
 
 
-export function getFieldHandler(email: InboundEmail){
+export function getFieldHandler(email: InboundEmail) {
     console.log("field handler for email", email);
     return function (fieldname: string,
                      val: any,
                      fieldnameTruncated: boolean,
                      valTruncated: boolean,
                      encoding: string,
-                     mimetype: string){
+                     mimetype: string) {
 
         console.log('Field [' + fieldname + ']: value: ' + inspect(val));
 
@@ -72,6 +74,7 @@ export function getFieldHandler(email: InboundEmail){
                 break;
             case "html":
                 email.html = val;
+                email.mailchimpEmailId = getMailchimpEmailIdFromBody(val);
                 break;
             case "to":
                 email.toRaw = val;
@@ -91,7 +94,7 @@ export function getFieldHandler(email: InboundEmail){
                 // console.log("ENVELOPE: ", val);
                 try {
                     email.envelope = JSON.parse(val);
-                } catch (e){
+                } catch (e) {
                     console.error(`Unable to process the envelope field ${val}`, e);
                 }
 
@@ -113,12 +116,12 @@ export function getFieldHandler(email: InboundEmail){
     }
 }
 
-export function processBodyHeaders(input:string):EmailHeaders {
+export function processBodyHeaders(input: string): EmailHeaders {
     const lines = input.split("\n");
 
-    const aggregated = lines.reduce((headers, line:string) => {
+    const aggregated = lines.reduce((headers, line: string) => {
         const [key, value] = splitOnFirst(line, ":");
-        if (key){
+        if (key) {
             headers[key] = value;
         }
 
@@ -129,19 +132,19 @@ export function processBodyHeaders(input:string):EmailHeaders {
     return aggregated
 }
 
-export function getSenderFromHeaders(headers:EmailHeaders):string|null {
+export function getSenderFromHeaders(headers: EmailHeaders): string | null {
     try {
         const header = headers[Header.AUTHENTICATION_RESULTS];
-        if (!header){
+        if (!header) {
             return null;
         }
 
-        let [, mailfrom]= header.split("smtp.mailfrom=");
-        if (!mailfrom){
+        let [, mailfrom] = header.split("smtp.mailfrom=");
+        if (!mailfrom) {
             return null;
         }
 
-        [mailfrom]= mailfrom.split(new RegExp(/\s*(;|\s)/));
+        [mailfrom] = mailfrom.split(new RegExp(/\s*(;|\s)/));
 
         return mailfrom ? mailfrom.trim().toLowerCase() : null;
     } catch (error) {
@@ -151,13 +154,42 @@ export function getSenderFromHeaders(headers:EmailHeaders):string|null {
 
 }
 
-export function processAttachments(input:InboundEmailAttachments):Array<InboundAttachmentInfo> {
+export function processAttachments(input: InboundEmailAttachments): Array<InboundAttachmentInfo> {
     try {
         console.log("processing attachments");
         inspect(input);
         return Object.values(input)
-    } catch (error){
+    } catch (error) {
         console.error("failed to parse attachments");
         return [];
     }
+}
+
+
+export function getLinks(body:string):Set<string>{
+    return getUrls(body);
+}
+
+export function getMailchimpEmailIdFromBody(body:string):string|undefined{
+    const u = getLinks(body);
+    if (!u){
+        return undefined;
+    }
+
+    const urls = Array.from(u);
+
+    let mailchimpParam:string|undefined = undefined;
+    const urlWithUserParam = urls.find(url => {
+        const {query} = queryString.parseUrl(url);
+        if (query && query[MAILCHIMP_USER_EMAIL_PARAM]){
+            mailchimpParam = query[MAILCHIMP_USER_EMAIL_PARAM];
+            return true
+        }
+        return false;
+    });
+
+    console.log("url that has param is", urlWithUserParam);
+
+    return mailchimpParam;
+
 }

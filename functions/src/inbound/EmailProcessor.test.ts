@@ -1,4 +1,9 @@
-import {getSenderFromHeaders, processAttachments, processBodyHeaders} from "@api/inbound/EmailProcessor";
+import {
+    getSenderFromHeaders,
+    getMailchimpEmailIdFromBody,
+    processAttachments,
+    processBodyHeaders
+} from "@api/inbound/EmailProcessor";
 import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
 
 describe("processAttachments", () => {
@@ -72,5 +77,25 @@ describe("Get sender from headers", () => {
             [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com; alkdfj a alkjdflaksjdflj"
         };
         expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
+    });
+});
+
+describe("get userId from body", () => {
+    test("simple string body with param", () => {
+        const body = "this is a body https://cactus.app/test?e=myid&t=test";
+
+        expect(getMailchimpEmailIdFromBody(body)).toBe("myid");
+    });
+
+    test("multiple urls in body  string body with param", () => {
+        const body = "this is a body \n \t http://google.com/test/p=testing \n <br/> https://cactus.app/test?e=myid&t=test";
+
+        expect(getMailchimpEmailIdFromBody(body)).toBe("myid");
+    });
+
+    test("no param found", () => {
+        const body = "this is a body \n \t http://google.com/test/p=testing \n <br/> https://cactus.app/test?ei=myid&t=test";
+
+        expect(getMailchimpEmailIdFromBody(body)).toBeNull();
     });
 });
