@@ -38,6 +38,7 @@ export default class Email implements Email{
     subject?: string;
     attachments?: Array<AttachmentInfo>;
     mailchimpMemberId?: string|undefined|null;
+    mailchimpUniqueEmailId?: string|undefined|null;
 
     constructor(input:InboundEmail){
         this.headers = input.headers || {};
@@ -46,7 +47,7 @@ export default class Email implements Email{
         this.html = input.html;
         this.subject = input.subject;
         this.mailchimpMemberId = this.headers[MailchimpMemberId];
-        
+        this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {
