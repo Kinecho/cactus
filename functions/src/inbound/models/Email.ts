@@ -23,6 +23,8 @@ export interface InboundEmail {
     subject?: string;
     envelope?: {to: string[], from: string}
     attachments?: Array<AttachmentInfo>;
+    mailchimpEmailId?: string;
+    mailchimpCampaignId?:string;
 
 }
 
@@ -31,12 +33,14 @@ export default class Email implements Email{
     to?: EmailAddress;
     cc?: EmailAddress;
     from?: EmailAddress;
-    envelope?: {to: EmailAddress[], from: EmailAddress}
+    envelope?: {to: EmailAddress[], from: EmailAddress};
     text?: string;
     html?: string;
     subject?: string;
     attachments?: Array<AttachmentInfo>;
     mailchimpMemberId?: string|undefined|null;
+    mailchimpUniqueEmailId?: string|undefined|null;
+    mailchimpCampaignId?:string;
 
     constructor(input:InboundEmail){
         this.headers = input.headers || {};
@@ -45,7 +49,8 @@ export default class Email implements Email{
         this.html = input.html;
         this.subject = input.subject;
         this.mailchimpMemberId = this.headers[MailchimpMemberId];
-        
+        this.mailchimpUniqueEmailId = input.mailchimpEmailId;
+        this.mailchimpCampaignId = input.mailchimpCampaignId;
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {

@@ -22,10 +22,10 @@ export enum TagStatus {
 }
 
 export interface Tag {
-    name: TagName,
-    status: TagStatus
+    name?: TagName,
+    id?: string,
+    status?: TagStatus
 }
-
 
 export enum MergeFieldBoolean {
     YES = "YES",
@@ -37,13 +37,19 @@ export type MergeFields = {
 };
 
 export default class ListMember {
-    email_address: String;
+    email_address: string;
+    unique_email_id?: string;
     status = ListMemberStatus.pending;
     merge_fields: MergeFields = {};
+    stats?: {
+        avg_open_rate: number,
+        avg_click_rate: number,
+    };
+    tags: Tag[] = [];
+    list_id?: string;
 
-    constructor(email:String){
+    constructor(email:string){
         this.email_address = email;
-
     }
 
     addMergeField(field:MergeField, value?:String|Number){

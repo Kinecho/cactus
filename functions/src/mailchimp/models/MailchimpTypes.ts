@@ -104,5 +104,24 @@ export interface Campaign {
         segment_text: string,
         recipient_count: number,
         segment_options: any,
+    },
+    settings: {
+        subject_line: string,
+        preview_text: string,
+        title: string,
+        from_name: string,
+        reply_to: string,
+        use_conversation: boolean,
+        to_name: string,
+        template_id: string,
+    },
+    report_summary: {
+        opens: number,
+        unique_opens: number,
+        open_rate: number,
+        clicks: number,
+        subscriber_clicks: number,
+        click_rate: number,
+
     }
 }

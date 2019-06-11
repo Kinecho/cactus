@@ -28,7 +28,7 @@ function getDataCenterFromApiKey():string{
     return split[split.length - 1] || "";
 }
 
-function getListURL():String{
+function getListURL():string{
     return `${mailchimpDomain}/lists/${audienceId}`;
 }
 
@@ -132,13 +132,11 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
         const memberId = getMemberIdFromEmail(request.email);
 
         console.log("Updating member with patch", memberPatch);
-        const response = await axios.patch(
+        await axios.patch(
             `${getListURL()}/members/${memberId}`,
             memberPatch,
             getAuthConfig()
         );
-
-        console.log("update merge field response", response.data);
 
         return true;
     } catch (error){
@@ -151,6 +149,25 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
             console.log("error data:", JSON.stringify(data));
         }
         return false
+    }
+}
+
+export async function getMemberByEmailId(emailId:string): Promise<ListMember|null>{
+    console.log("getting member id: ", emailId);
+    try {
+        const response = await axios.get(`${getListURL()}/members`, {...getAuthConfig(), params: {unique_email_id: emailId}});
+
+        console.log("get member response is", response.data);
+
+        if (response && response.data && response.data.members && response.data.members.length > 0){
+            const members = response.data.members as ListMember[];
+            return members[0]
+        } else {
+            return null;
+        }
+    } catch (error){
+        console.error("Unable to get list member by unique email id", error);
+        return null;
     }
 }
 
@@ -190,5 +207,4 @@ export async function getCampaign(id:string):Promise<Campaign|null> {
         console.error(e.data);
         return null;
     }
-
 }

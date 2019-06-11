@@ -2,9 +2,17 @@ import * as express from "express";
 import * as cors from "cors";
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
-import {createEmailFromInputs, getFieldHandler, getFileHandler, getSenderFromHeaders} from "@api/inbound/EmailProcessor"
+import {
+    createEmailFromInputs,
+    getFieldHandler,
+    getFileHandler, getMailchimpCampaignIdFromBody,
+    getMailchimpEmailIdFromBody,
+    getSenderFromHeaders
+} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
 import {
+    getCampaign,
+    getMemberByEmailId,
     UpdateMergeFieldRequest,
     updateMergeFields,
     updateTags,
@@ -31,7 +39,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     const dateId = date.getTime();
 
     await writeToFile(`./output/${dateId}_body.txt`, req.body);
-    await writeToFile(`./output/raw_body-${dateId}_raw_body.txt`, req.rawBody);
+    await writeToFile(`./output/${dateId}_raw_body.txt`, req.rawBody || req.body);
     await writeToFile(`./output/${dateId}_headers.txt`, JSON.stringify(req.headers));
     await writeToFile(`./output/${dateId}_raw_headers.txt`, JSON.stringify(req.rawHeaders));
 
@@ -52,7 +60,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             const email = await createEmailFromInputs(emailInput, emailFiles);
             let messageColor = "#83ecf9";
             console.log();
-            console.log("Processed email", JSON.stringify(email, null, 2));
+            // console.log("Processed email", JSON.stringify(email, null, 2));
 
             await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
 
@@ -62,6 +70,8 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
 
             const fromEmail = email.from && email.from.email ? email.from.email : null;
             const fromHeader = getSenderFromHeaders(email.headers);
+
+            const campaign = email.mailchimpCampaignId ? await getCampaign(email.mailchimpCampaignId) : null;
 
             const fields = [
                 {
@@ -74,6 +84,26 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
                     value: email.subject || "unknown",
                     short: false,
                 },
+                {
+                    title: "Campaign Id",
+                    value: email.mailchimpCampaignId || "unknown",
+                    short: true,
+                },
+                {
+                    title: "Campaign Title",
+                    value: campaign ? campaign.settings.title : "",
+                    short: false
+                },
+                {
+                    title: "Campaign Subject",
+                    value: campaign ? campaign.settings.subject_line : "",
+                    short: false
+                },
+                {
+                    title: "Campaign Send Date",
+                    value: campaign ? getMailchimpDateString(new Date(campaign.send_time)) : "unknown",
+                    short: true
+                }
             ];
 
             if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
@@ -87,12 +117,33 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
                     })
             }
 
+            if (email.mailchimpUniqueEmailId) {
+                console.log("loooking for member on list with unique email id = ", email.mailchimpUniqueEmailId);
+                const sentToMember = await getMemberByEmailId(email.mailchimpUniqueEmailId);
+                console.log("sent to member found to be", sentToMember);
+
+                fields.unshift(
+                    {
+                        title: ":merperson: List Member Email (from link)",
+                        value: sentToMember ? sentToMember.email_address : "not found",
+                        short: true,
+                    },
+                    {
+                        title: "Unique Email Id from body",
+                        value: email.mailchimpUniqueEmailId,
+                        short: true,
+                    })
+            } else {
+                console.log("unable to find email id on processed email");
+            }
+
+
+
             msg.attachments = [{
                 color: messageColor,
                 ts: `${(new Date()).getTime() / 1000}`,
                 fields,
             }];
-
 
             await sendActivityNotification(msg);
 
@@ -127,10 +178,27 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
 
         // The raw bytes of the upload will be in req.rawBody.  Send it to busboy, and get
         // a callback when it's finished.
-        busboy.end(req.rawBody || req.body);
+        const body = req.rawBody || req.body;
+        try {
+            const mailchimpUniqueId = getMailchimpEmailIdFromBody(String(body));
+            console.log("raw body mailchimp email id", mailchimpUniqueId);
+            emailInput.mailchimpEmailId = mailchimpUniqueId;
+        } catch (error){
+            console.error("failed to get mailchimp email id from raw body", error);
+        }
+
+        try {
+            const campaignId = getMailchimpCampaignIdFromBody(String(body));
+            console.log("raw body mailchimp campaign id", campaignId);
+            emailInput.mailchimpCampaignId = campaignId;
+        } catch (error){
+            console.error("failed to get mailchimp campaign id from raw body", error);
+        }
+
+        busboy.end(body);
     } catch (error) {
         console.error("failed to process email", error);
-        await sendActivityNotification("ERROR: Failed to process incoming email");
+        await sendActivityNotification("ERROR: Failed to process incoming email" +  `${error}`);
         res.sendStatus(500);
     }
 });
