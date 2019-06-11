@@ -11,6 +11,7 @@ import {InboundAttachmentInfo, InboundEmailAttachments} from "@api/inbound/model
 import {splitOnFirst} from "@api/util/StringUtil";
 import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
 const MAILCHIMP_USER_EMAIL_PARAM = "e";
+const CAMPAIGN_PARAM = "c";
 
 export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles): Promise<Email> {
     // console.log();
@@ -174,6 +175,16 @@ export function getLinks(body:string):Set<string>{
 }
 
 export function getMailchimpEmailIdFromBody(body:string):string|undefined{
+    return getUrlParamFromString(body, MAILCHIMP_USER_EMAIL_PARAM);
+}
+
+
+export function getMailchimpCampaignIdFromBody(body:string):string|undefined{
+    return getUrlParamFromString(body, CAMPAIGN_PARAM);
+}
+
+
+function getUrlParamFromString(body:string, param:string, acceptedDomains=["list-manage.com"]):string|undefined{
     const u = getLinks(body);
     if (!u){
         return undefined;
@@ -182,17 +193,24 @@ export function getMailchimpEmailIdFromBody(body:string):string|undefined{
     const urls = Array.from(u);
 
     let mailchimpParam:string|undefined = undefined;
-    const urlWithUserParam = urls.find(url => {
+    const urlWithCampaignParam = urls.find(url => {
+
+        const acceptedDomain = acceptedDomains.find(domain => url.toLowerCase().includes(domain.toLowerCase()));
+
+        if (!acceptedDomain){
+            return false;
+        }
+
         const {query} = queryString.parseUrl(url);
-        if (query && query[MAILCHIMP_USER_EMAIL_PARAM]){
-            mailchimpParam = query[MAILCHIMP_USER_EMAIL_PARAM];
+        if (query && query[param]){
+            mailchimpParam = query[param];
             mailchimpParam = (mailchimpParam || "").replace(/[^a-zA-Z0-9 -]/, "");
             return true
         }
         return false;
     });
 
-    console.log("url that has param is", urlWithUserParam);
+    console.log("url that has param is", urlWithCampaignParam);
 
     return mailchimpParam;
 
