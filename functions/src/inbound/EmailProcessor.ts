@@ -170,8 +170,13 @@ export function processAttachments(input: InboundEmailAttachments): Array<Inboun
 }
 
 
-export function getLinks(body:string):Set<string>{
-    return getUrls(body);
+export function getLinks(body:string, removeNewline:boolean=false):Set<string>{
+    let parsedBody = body.replace(/&amp;/g, "&");
+
+    if (removeNewline) {
+        parsedBody = parsedBody.replace(/\n/g, "");
+    }
+    return getUrls(parsedBody, {sortQueryParameters: false});
 }
 
 export function getMailchimpEmailIdFromBody(body:string):string|undefined{
@@ -184,8 +189,8 @@ export function getMailchimpCampaignIdFromBody(body:string):string|undefined{
 }
 
 
-function getUrlParamFromString(body:string, param:string, acceptedDomains=["list-manage.com"]):string|undefined{
-    const u = getLinks(body);
+function getUrlParamFromString(body:string, param:string, {acceptedDomains=["list-manage.com"], removeNewlineInBody=false}={}):string|undefined{
+    const u = getLinks(body, removeNewlineInBody);
     if (!u){
         return undefined;
     }
@@ -211,6 +216,11 @@ function getUrlParamFromString(body:string, param:string, acceptedDomains=["list
     });
 
     console.log("url that has param is", urlWithCampaignParam);
+
+
+    if ((mailchimpParam === undefined || mailchimpParam === null) && !removeNewlineInBody){
+        return getUrlParamFromString(body, param, {acceptedDomains, removeNewlineInBody: true})
+    }
 
     return mailchimpParam;
 
