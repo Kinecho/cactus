@@ -89,5 +89,9 @@ module.exports = {
     "what_provides_you_with_a_sense_of_belonging": {
         "title": "What provides you with a sense of belonging?",
         "path": "/what-provides-you-with-a-sense-of-belonging"
+    },
+    "what_makes_you_feel_rested_and_renewed": {
+        "title": "What makes you feel rested and renewed?",
+        "path": "/what-makes-you-feel-rested-and-renewed"
     }
 }
