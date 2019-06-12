@@ -1,0 +1,38 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "cmd": "ts-node -r tsconfig-paths/register src/run.ts"
+  },
+  "_moduleAliases": {
+    "@scripts": "lib/scripts/src",
+    "@shared": "lib/shared/src"
+  },
+  "author": "Neil Poulin",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "firebase-admin": "^8.1.0",
+    "firebase-functions": "^3.0.0",
+    "firebase-tools": "^7.0.0",
+    "module-alias": "^2.2.0",
+    "prompts": "^2.1.0",
+    "yesno": "^0.2.0"
+  },
+  "engines": {
+    "ndoe": "8"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/node": "^12.0.8",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.2.0",
+    "tsconfig-paths": "^3.8.0",
+    "tslint": "^5.17.0",
+    "typescript": "^3.5.1"
+  }
+}

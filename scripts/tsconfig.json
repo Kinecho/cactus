@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "outDir": "lib",
+        "sourceMap": true,
+        "inlineSources": true,
+        "strict": true,
+        "target": "es2015",
+        "baseUrl": ".",
+        "rootDirs": ["src", "../shared/src"],
+        "paths": {
+            "@scripts/*": [
+                "./src/*"
+            ],
+            "@shared/*": ["../shared/src/*"]
+        }
+    },
+    "compileOnSave": false,
+    "include": [
+        "src"
+    ]
+}

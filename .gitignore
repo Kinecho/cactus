@@ -2,8 +2,12 @@
 .firebase/
 web/public/
 web/build
+scripts/lib/
 
 .runtimeconfig.json
+
+applicationCredentials.json
+applicationCredentials*.json
 
 # Logs
 logs

@@ -204,3 +204,6 @@ If you want to test the build script for stage or prod manually, you can run `np
 ## Analytics
 
 Apparently, universal analytics has been replaced by google tag script. See here for documentation on events: https://developers.google.com/analytics/devguides/collection/gtagjs/events
+
+# Admin Credentials 
+If you need programmatic access to admin credentials, please let Neil know. This is used if you need to run things in the `/scripts` directory. The credentials file is stored in 1password and should be saved as a file named `applicationCredentials_prod.json` and `applicationCredentials_stage.json` in the root of this project. This file should NEVER be checked into source control (the above filename is listed in gitignore).  
