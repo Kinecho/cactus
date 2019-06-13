@@ -198,6 +198,17 @@ function createHtml() {
     });
 }
 
+function addToSitemap() {
+    let sitemapFile = path.resolve(helpers.projectRoot, "web", "src", "assets", "sitemaps", "questions.txt");
+    console.log("appending new page URL to Questions Sitemap\n");
+
+    const newUrl = "\n" + "https://cactus.app" + response.pagePath;
+
+    fs.appendFile(sitemapFile, newUrl, 'utf8', function (err) {
+        if (err) return console.log(err);
+    });
+}
+
 function createJS() {
     let outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
     // console.log("creating js file with response = ", response);
@@ -251,6 +262,7 @@ async function start(): Promise<void> {
     createHtml();
     createJS();
     createScss();
+    addToSitemap();
 
 
     if (response.writeUrls) {
