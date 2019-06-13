@@ -93,5 +93,9 @@ module.exports = {
     "what_makes_you_feel_rested_and_renewed": {
         "title": "What makes you feel rested and renewed?",
         "path": "/what-makes-you-feel-rested-and-renewed"
+    },
+    "when_do_you_feel_deep_satisfaction": {
+        "title": "When do you feel deep satisfaction?",
+        "path": "/when-do-you-feel-deep-satisfaction"
     }
 }

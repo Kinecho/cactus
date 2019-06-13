@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/when-do-you-feel-deep-satisfaction",
+                "destination": "/when_do_you_feel_deep_satisfaction.html"
+            },
+            {
                 "source": "/what-makes-you-feel-rested-and-renewed",
                 "destination": "/what_makes_you_feel_rested_and_renewed.html"
             },
