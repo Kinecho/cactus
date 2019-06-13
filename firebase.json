@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-experiences-bring-out-your-harmonious-passions",
+                "destination": "/what_experiences_bring_out_your_harmonious_passions.html"
+            },
+            {
                 "source": "/when-do-you-feel-deep-satisfaction",
                 "destination": "/when_do_you_feel_deep_satisfaction.html"
             },

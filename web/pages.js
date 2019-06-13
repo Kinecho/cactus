@@ -97,5 +97,9 @@ module.exports = {
     "when_do_you_feel_deep_satisfaction": {
         "title": "When do you feel deep satisfaction?",
         "path": "/when-do-you-feel-deep-satisfaction"
+    },
+    "what_experiences_bring_out_your_harmonious_passions": {
+        "title": "What experiences bring out your harmonious passions?",
+        "path": "/what-experiences-bring-out-your-harmonious-passions"
     }
 }
