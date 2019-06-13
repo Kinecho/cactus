@@ -105,5 +105,13 @@ module.exports = {
     "what_brings_you_joy": {
         "title": "What brings you joy?",
         "path": "/what-brings-you-joy"
+    },
+    "what_are_three_benefits_or_gifts_you_have_received_this_past_week_which_you_are_grateful_for": {
+        "title": "What are three benefits or gifts you have received this past week, which you are grateful for?",
+        "path": "/what-are-three-benefits-or-gifts-you-have-received-this-past-week-which-you-are-grateful-for"
+    },
+    "what_gifts_does_nature_provide_you": {
+        "title": "What gifts does nature provide you?",
+        "path": "/what-gifts-does-nature-provide-you"
     }
 }
