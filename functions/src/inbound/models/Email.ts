@@ -34,6 +34,7 @@ export default class Email implements Email{
     cc?: EmailAddress;
     from?: EmailAddress;
     envelope?: {to: EmailAddress[], from: EmailAddress};
+    replyText?: string;
     text?: string;
     html?: string;
     subject?: string;
@@ -51,6 +52,7 @@ export default class Email implements Email{
         this.mailchimpMemberId = this.headers[MailchimpMemberId];
         this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         this.mailchimpCampaignId = input.mailchimpCampaignId;
+
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {

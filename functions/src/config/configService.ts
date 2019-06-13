@@ -17,11 +17,16 @@ export function getConfig():CactusConfig{
 }
 
 function buildConfig():CactusConfig {
-    return functions.config() as CactusConfig
+    const config = functions.config() as CactusConfig;
+
+    config.isEmulator = process.env.IS_EMULATOR === "true";
+
+    return config;
 }
 
 function buildMockConfig():CactusConfig {
     return {
+        isEmulator: true,
         mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
         slack: {
             webhooks: {

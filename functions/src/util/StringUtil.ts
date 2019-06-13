@@ -9,7 +9,7 @@ export function splitOnFirst(input:string, delimiter:string, trimValues: boolean
 
     const firstIndex = input.indexOf(delimiter);
     if (firstIndex < 0) {
-        console.warn(`Unable to find a ${delimiter} in the string ${input}`);
+        // console.warn(`Unable to find a ${delimiter} in the string ${input}`);
         return [];
     }
 

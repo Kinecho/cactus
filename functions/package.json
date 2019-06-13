@@ -8,7 +8,7 @@
     "emulator:start": "firebase emulators:start --only functions",
     "lint": "tslint --project tsconfig.json",
     "logs": "firebase functions:log",
-    "serve": "npm run config:get && npm run build && firebase serve --only functions",
+    "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase serve --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "test": "jest",
@@ -41,7 +41,9 @@
     "md5": "^2.2.1",
     "module-alias": "^2.2.0",
     "multer": "^1.4.1",
-    "query-string": "^6.7.0"
+    "node-email-reply-parser": "^0.1.1",
+    "query-string": "^6.7.0",
+    "raw-body": "^2.4.0"
   },
   "devDependencies": {
     "@types/busboy": "^0.2.3",

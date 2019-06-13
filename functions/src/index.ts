@@ -1,7 +1,11 @@
 require("module-alias/register");
 import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin'
+
 import mailchimpApp from "@api/mailchimp/mailchimpApp";
 import inboundApp from "@api/inbound/inboundApp";
+
+admin.initializeApp();
 
 /**
  * Handle mailchimp related things. This is a full express app/routing tier

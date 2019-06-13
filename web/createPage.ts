@@ -1,4 +1,3 @@
-import {file} from "@babel/types";
 import chalk from "chalk";
 
 const prompts = require('prompts');

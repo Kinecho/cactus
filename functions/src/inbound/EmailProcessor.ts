@@ -6,12 +6,70 @@ const os = require("os");
 const fs = require("fs");
 const getUrls = require('get-urls');
 const queryString = require('query-string');
+const replyParser = require("node-email-reply-parser");
 
 import {InboundAttachmentInfo, InboundEmailAttachments} from "@api/inbound/models/EmailAttachment";
 import {splitOnFirst} from "@api/util/StringUtil";
 import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
+import * as Busboy from "busboy";
 const MAILCHIMP_USER_EMAIL_PARAM = "e";
 const CAMPAIGN_PARAM = "c";
+
+export const forwardedGmailEmail = "hello+caf_=forwarded=inbound.cactus.app@kinecho.com";
+
+export async function processEmail(headers:any, body:any):Promise<Email|null> {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const busboy = new Busboy({headers: headers});
+            const emailFiles: InboundEmailFiles = {};
+            const emailInput: InboundEmail = {};
+
+            busboy.on("error", (error: any) => {
+                console.error("failed to process something", error);
+            });
+
+            busboy.on("file", getFileHandler(emailFiles));
+            busboy.on('field', getFieldHandler(emailInput));
+
+            // This callback will be invoked after all uploaded files are saved.
+            busboy.on('finish', async () => {
+                const email = await createEmailFromInputs(emailInput, emailFiles);
+
+                email.replyText = getReplyTextContent(email);
+
+                resolve(email);
+                return;
+            });
+
+            // The raw bytes of the upload will be in req.rawBody.  Send it to busboy, and get
+            // a callback when it's finished.
+            // const body = req.rawBody || req.body;
+            try {
+                const mailchimpUniqueId = getMailchimpEmailIdFromBody(String(body));
+                console.log("raw body mailchimp email id", mailchimpUniqueId);
+                emailInput.mailchimpEmailId = mailchimpUniqueId;
+            } catch (error){
+                console.error("failed to get mailchimp email id from raw body", error);
+            }
+
+            try {
+                const campaignId = getMailchimpCampaignIdFromBody(String(body));
+                console.log("raw body mailchimp campaign id", campaignId);
+                emailInput.mailchimpCampaignId = campaignId;
+            } catch (error){
+                console.error("failed to get mailchimp campaign id from raw body", error);
+            }
+
+            //this is the method that actually passes in the body to the busboy processor
+            busboy.end(body);
+        } catch (error) {
+            console.error("failed to process email", error);
+            reject(error);
+            return;
+        }
+    })
+}
+
 
 export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles): Promise<Email> {
     // console.log();
@@ -31,7 +89,7 @@ export async function createEmailFromInputs(emailInput: InboundEmail, fileInput:
  * @return {(fieldname: string, file: NodeJS.ReadableStream, filename: string, encoding: string, mimetype: string) => void}
  */
 export function getFileHandler(emailFiles: InboundEmailFiles) {
-    console.log("getting file handler for email inpout");
+    console.log("getting file handler for email input");
     return (fieldname: string,
             file: NodeJS.ReadableStream,
             filename: string,
@@ -132,7 +190,7 @@ export function processBodyHeaders(input: string): EmailHeaders {
         return headers;
     }, {} as EmailHeaders);
 
-    console.log("processed headers into", aggregated);
+    // console.log("processed headers into", aggregated);
     return aggregated
 }
 
@@ -189,6 +247,18 @@ export function getMailchimpCampaignIdFromBody(body:string):string|undefined{
 }
 
 
+export function getReplyTextContent(email:Email):string {
+    try {
+        const parsedBody = replyParser(email.text);
+        const visibleText = parsedBody.getVisibleText() || "";
+        return visibleText.trim();
+    } catch (error){
+        console.error("failed to process reply", error);
+        return "";
+    }
+
+}
+
 function getUrlParamFromString(body:string, param:string, {acceptedDomains=["list-manage.com"], removeNewlineInBody=false}={}):string|undefined{
     const u = getLinks(body, removeNewlineInBody);
     if (!u){
@@ -198,7 +268,7 @@ function getUrlParamFromString(body:string, param:string, {acceptedDomains=["lis
     const urls = Array.from(u);
 
     let mailchimpParam:string|undefined = undefined;
-    const urlWithCampaignParam = urls.find(url => {
+    urls.find(url => {
 
         const acceptedDomain = acceptedDomains.find(domain => url.toLowerCase().includes(domain.toLowerCase()));
 
@@ -214,9 +284,6 @@ function getUrlParamFromString(body:string, param:string, {acceptedDomains=["lis
         }
         return false;
     });
-
-    console.log("url that has param is", urlWithCampaignParam);
-
 
     if ((mailchimpParam === undefined || mailchimpParam === null) && !removeNewlineInBody){
         return getUrlParamFromString(body, param, {acceptedDomains, removeNewlineInBody: true})

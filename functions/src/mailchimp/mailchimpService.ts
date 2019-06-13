@@ -157,7 +157,7 @@ export async function getMemberByEmailId(emailId:string): Promise<ListMember|nul
     try {
         const response = await axios.get(`${getListURL()}/members`, {...getAuthConfig(), params: {unique_email_id: emailId}});
 
-        console.log("get member response is", response.data);
+        // console.log("get member response is", response.data);
 
         if (response && response.data && response.data.members && response.data.members.length > 0){
             const members = response.data.members as ListMember[];
