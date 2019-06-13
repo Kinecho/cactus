@@ -13,7 +13,7 @@ import * as admin from "firebase-admin";
 export async function writeToFile(filePath:string, data: any): Promise<boolean>{
     const config = getConfig();
     if (!config.isEmulator){
-        return writeToStorage("uploads/emails/" + path.parse(filePath).name, data)
+        return writeToStorage("inbound/emails/" + path.parse(filePath).name, data)
     }
 
     const folder = path.dirname(filePath);
