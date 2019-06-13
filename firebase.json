@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-are-three-benefits-or-gifts-you-have-received-this-past-week-which-you-are-grateful-for",
+                "destination": "/what_are_three_benefits_or_gifts_you_have_received_this_past_week_which_you_are_grateful_for.html"
+            },
+            {
                 "source": "/what-brings-you-joy",
                 "destination": "/what_brings_you_joy.html"
             },

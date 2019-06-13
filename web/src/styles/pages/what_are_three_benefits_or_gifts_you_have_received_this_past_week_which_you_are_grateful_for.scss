@@ -1,0 +1,61 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+@import "~styles/article";
+
+.graphicContainer {
+  background-position: center top 2rem;
+
+  @include r(960) {
+    background-position: center top;
+  }
+}
+
+.flexContainer {
+  @include r(960) {
+    align-items: center;
+    display: flex;
+    flex-flow: row-reverse;
+    justify-content: center;
+  }
+
+  a {
+    @include fancyLink;
+  }
+}
+
+.heroQuote {
+  padding: 7.2rem 2.4rem 0;
+  text-align: left;
+
+  @include r(768) {
+    padding: 9.6rem 4.8rem 0;
+  }
+  @include r(960) {
+    flex-basis: 50%;
+    max-width: 60rem;
+    padding: 8.8rem 4.8rem 4.8rem;
+  }
+  @include r(1024) {
+    padding: 8.8rem 4.8rem 4.8rem 2.4rem;
+  }
+
+  h2 {
+    margin-bottom: 1.6rem;
+  }
+}
+
+.graphic {
+  @include r(960) {
+    max-width: 50%;
+  }
+}
+
+.gridContainer {
+  padding-top: 0;
+
+  @include r(960) {
+    padding-top: 5.6rem;
+  }
+}
