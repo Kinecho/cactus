@@ -21,6 +21,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-brings-you-joy",
+                "destination": "/what_brings_you_joy.html"
+            },
+            {
                 "source": "/what-experiences-bring-out-your-harmonious-passions",
                 "destination": "/what_experiences_bring_out_your_harmonious_passions.html"
             },
