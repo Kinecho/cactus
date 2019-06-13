@@ -24,24 +24,28 @@ export interface BaseCommandConstructorArgs {
     useAdmin: boolean;
 }
 
-export class BaseCommand implements Command {
+export abstract class BaseCommand implements Command {
     project: Project = Project.STAGE;
     app?: admin.app.App;
     useAdmin:boolean;
 
-    constructor(opts:BaseCommandConstructorArgs={useAdmin:false}){
+    abstract async run():Promise<void>;
+
+    protected constructor(opts:BaseCommandConstructorArgs={useAdmin:false}){
         this.useAdmin = opts.useAdmin;
     }
 
-     async run() {
+     async getFirebaseApp():Promise<admin.app.App> {
+        if (this.app){
+            return this.app;
+        }
+
         const questions = [
             {
                 type: "select",
                 name: 'project',
                 message: 'Choose environment',
-                // initial: Project.STAGE,
-                // format: formatFilename,
-                choices: [{title: "Stage", value: Project.STAGE}, {title: "Prod", value: Project.PROD}],
+                choices: [{title: "Cactus Stage", value: Project.STAGE}, {title: "Cactus Prod", value: Project.PROD}],
                 limit: 20,
             },
         ];
@@ -56,7 +60,14 @@ export class BaseCommand implements Command {
         this.project = response.project;
         this.app = await getAdmin(this.project, {useAdmin: this.useAdmin})
 
-        return;
+         if (!this.app){
+             console.error("Failed to get the firebase app");
+             process.exit(1);
+         }
+
+         console.log("Got app", this.app.options.projectId);
+
+        return this.app;
     }
 }
 
