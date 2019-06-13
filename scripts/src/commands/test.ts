@@ -1,16 +1,23 @@
-import {getAdmin, Project} from "@scripts/config";
-import {Command} from "@scripts/run";
+import {BaseCommand} from "@scripts/run";
 
-export default class Test implements Command {
+export default class Test extends BaseCommand {
+
+    constructor(){
+        super({useAdmin: true});
+    }
+
     async run():Promise<any>{
+        await super.run();
         console.log("Hello!");
 
-        const app = await getAdmin(Project.STAGE, {useAdmin: true});
+        if (!this.app){
+            console.error("Unable to use admin app");
+            return;
+        }
 
-        console.log("Got app", app.name);
+        console.log("Got app", this.app.name);
 
-        const db = app.firestore();
-
+        const db = this.app.firestore();
         const collections = await db.listCollections();
         const ids = collections.map((collection) => {
             return collection.id

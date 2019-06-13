@@ -1,14 +1,63 @@
 // require("module-alias/register");
 import {promisify} from "util";
+import * as admin from "firebase-admin";
 import helpers from "@scripts/helpers";
 const prompts = require("prompts");
 const path = require("path");
 const fs = require("fs");
 import chalk from "chalk";
+import {getAdmin, Project} from "@scripts/config";
+
 import "@shared/mailchimp/models/ListMember"
 
 export interface Command {
+    app?: admin.app.App,
+    project: Project,
     run: () => Promise<void>,
+}
+
+export interface ProjectInput {
+    project: Project,
+}
+
+export interface BaseCommandConstructorArgs {
+    useAdmin: boolean;
+}
+
+export class BaseCommand implements Command {
+    project: Project = Project.STAGE;
+    app?: admin.app.App;
+    useAdmin:boolean;
+
+    constructor(opts:BaseCommandConstructorArgs={useAdmin:false}){
+        this.useAdmin = opts.useAdmin;
+    }
+
+     async run() {
+        const questions = [
+            {
+                type: "select",
+                name: 'project',
+                message: 'Choose environment',
+                // initial: Project.STAGE,
+                // format: formatFilename,
+                choices: [{title: "Stage", value: Project.STAGE}, {title: "Prod", value: Project.PROD}],
+                limit: 20,
+            },
+        ];
+
+        const response:ProjectInput = await prompts(questions, {
+            onCancel: () => {
+                console.log("Canceled command");
+                return process.exit(0);
+            }
+        });
+
+        this.project = response.project;
+        this.app = await getAdmin(this.project, {useAdmin: this.useAdmin})
+
+        return;
+    }
 }
 
 export interface InputResponse {
