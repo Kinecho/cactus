@@ -19,8 +19,10 @@ import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMembe
 import {getMailchimpDateString} from "@api/util/DateUtil";
 import * as getRawBody from 'raw-body';
 import {logEmailReply} from "@api/services/emailService";
-import {getById} from "@api/services/firestoreService";
+import {getById, save} from "@api/services/firestoreService";
 import TestModel from "@shared/models/TestModel";
+import {fromJSON} from "@shared/util/FirebaseUtil";
+import bodyParser = require("body-parser");
 
 const app = express();
 
@@ -37,7 +39,28 @@ app.get('/testModel/:id', async (req, res) => {
 
     const model = await getById(id, TestModel);
 
-    return res.status(200).json({status: 'ok', data: model})
+    if (!model){
+        return res.sendStatus(404);
+    }
+
+
+    return res.status(200).json({status: 'ok', data: model.toJSON()})
+
+});
+
+app.post("/testModel", bodyParser.json(), async (req, res) => {
+
+    try {
+        console.log("body", JSON.stringify(req.body));
+        const model = await fromJSON(req.body, TestModel);
+        console.log("model", JSON.stringify(model));
+        const saved = await save(model);
+        console.log("saved object", saved);
+        res.send({data: await saved.toJSON()})
+    } catch (e){
+        res.status(500).send({error: e});
+    }
+
 
 });
 

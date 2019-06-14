@@ -7,4 +7,10 @@ export default class TestModel extends BaseModel {
     description?: string;
 
 
+    static fromJSON(json:any):TestModel {
+        const model = new TestModel();
+        model.decodeJSON(json);
+
+        return model;
+    }
 }

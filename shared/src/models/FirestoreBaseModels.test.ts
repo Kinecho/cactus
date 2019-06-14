@@ -1,6 +1,6 @@
 import {Collection, BaseModel} from "@shared/models/FirestoreBaseModels";
 import * as firebase from "firebase";
-import {fromDocumentSnapshot, fromFirestoreData, setTimestamp} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot, fromFirestoreData, fromJSON, setTimestamp} from "@shared/util/FirebaseUtil";
 import DocumentSnapshot = firebase.firestore.DocumentSnapshot;
 import DocumentReference = firebase.firestore.DocumentReference;
 import SnapshotMetadata = firebase.firestore.SnapshotMetadata;
@@ -14,6 +14,7 @@ class TestModel extends BaseModel {
     name?: string;
     age?: number;
 
+
     constructor(){
         super();
         this.createdAt = testDate;
@@ -21,6 +22,12 @@ class TestModel extends BaseModel {
 
     sayHi() {
         return `Hi ${this.name}`
+    }
+
+    decodeJSON(json:any){
+        super.decodeJSON(json);
+
+        this.name = json.name.toUpperCase();
     }
 
 }
@@ -42,9 +49,24 @@ describe("to firestore data", () => {
             createdAt: firebase.firestore.Timestamp.fromDate(testDate),
             age: 1,
             name: "Test",
-            collection: Collection.testModels,
             deleted: false
         })
+    });
+
+    test("undefined should not be present on result", async () => {
+        const model = new TestModel();
+        model.age = 1;
+        model.id = "123";
+        model.name = undefined;
+
+        const data = await model.toFirestoreData();
+        expect(data).toEqual({
+            createdAt: firebase.firestore.Timestamp.fromDate(testDate),
+            age: 1,
+            deleted: false,
+        });
+
+        expect(Object.keys(data).includes("name")).toBeFalsy()
     });
 
     test("convert Test object to firestore data, don't exclude id", async () => {
@@ -147,3 +169,26 @@ describe("from firestore document snapshot", () => {
 });
 
 
+describe("fromJSON", () => {
+    test("test model", () => {
+        const json = {createdAt: testDate.getTime(), updatedAt: testDate.getTime(), name: "my name", id: "4"};
+
+        const model = fromJSON(json, TestModel);
+
+        expect(model.createdAt).toEqual(testDate);
+        expect(model.updatedAt).toEqual(testDate);
+        expect(model.deletedAt).toBeUndefined();
+        expect(model.id).toEqual("4");
+        expect(model.name).toEqual("MY NAME");
+    })
+});
+
+describe("toJSON", () => {
+    test("test model", async () => {
+        const json = {createdAt: testDate.getTime(), updatedAt: testDate.getTime(), name: "my name", id: "4"};
+        const output = {createdAt: testDate.getTime(), updatedAt: testDate.getTime(), name: "MY NAME", id: "4", deleted: false};
+        const model = fromJSON(json, TestModel);
+
+        expect(await model.toJSON()).toEqual(output);
+    })
+});

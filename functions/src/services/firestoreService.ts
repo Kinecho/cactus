@@ -3,32 +3,38 @@ import CollectionReference = admin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/models/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 
-export function getCollectionRef(collectionName:Collection):CollectionReference{
+export function getCollectionRef(collectionName: Collection): CollectionReference {
     return admin.firestore().collection(collectionName);
 }
 
-export async function save<T extends BaseModel>(model:T):Promise<T> {
+export async function save<T extends BaseModel>(model: T): Promise<T> {
+    try {
+        const collectionRef = getCollectionRef(model.collection);
+        let doc = collectionRef.doc();
+        if (model.id) {
+            doc = collectionRef.doc(model.id);
+        } else {
+            model.id = doc.id;
+            model.createdAt = new Date();
+        }
 
-    const collectionRef = getCollectionRef(model.collection);
-    let doc = collectionRef.doc();
-    if (model.id){
-        doc = collectionRef.doc(model.id);
-    } else {
-        model.id = doc.id;
-        model.createdAt = new Date();
+        model.updatedAt = new Date();
+
+        const data = await model.toFirestoreData();
+        console.log("Data to save:", JSON.stringify(data));
+
+        const writeResult = await doc.set(data, {merge: true});
+
+        console.log("writeResult", writeResult);
+
+        return model;
+    } catch (e) {
+        console.error("failed to save firestore document", e);
+        throw e;
     }
-
-    model.updatedAt = new Date();
-
-    const data = model.toFirestoreData();
-    const writeResult = await doc.set(data, {merge: true});
-
-    console.log("writeResult", writeResult);
-
-    return model;
 }
 
-export async function getById<T extends BaseModel>(id:string, Type: {new(): T}):Promise<T|null> {
+export async function getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | null> {
     const type = new Type();
 
     const collection = getCollectionRef(type.collection);
@@ -37,7 +43,7 @@ export async function getById<T extends BaseModel>(id:string, Type: {new(): T}):
 
     const doc = await collection.doc(id).get();
 
-    if (!doc){
+    if (!doc) {
         return null;
     }
 

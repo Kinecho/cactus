@@ -39,6 +39,17 @@ export async function convertDateToTimestamp(input: any): Promise<any> {
     })
 }
 
+export async function convertDateToJSON(input: any): Promise<any> {
+    const copy = Object.assign({}, input);
+
+    return await transformObject(copy, (value) => {
+        if (isDate(value)) {
+            return (value as Date).getTime();
+        }
+        return value;
+    })
+}
+
 export async function convertTimestampToDate(input: any): Promise<any> {
     const copy = Object.assign({}, input);
 
@@ -49,6 +60,7 @@ export async function convertTimestampToDate(input: any): Promise<any> {
         return value;
     })
 }
+
 
 
 export async function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): Promise<T|null> {
@@ -65,4 +77,10 @@ export async function fromFirestoreData<T extends BaseModel>(data: any, Type: { 
     let transformed = await convertTimestampToDate(data);
     const model = new Type();
     return Object.assign(model, transformed) as T;
+}
+
+export function fromJSON<T extends BaseModel>(json:any, Type: {new(): T}):T{
+    const model = new Type();
+    model.decodeJSON(json);
+    return model;
 }
