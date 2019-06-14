@@ -3,8 +3,14 @@ import CollectionReference = admin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/models/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 
+let _admin:admin.app.App;
+
+export function setAdmin(newAdmin: admin.app.App){
+    _admin = newAdmin;
+}
+
 export function getCollectionRef(collectionName: Collection): CollectionReference {
-    return admin.firestore().collection(collectionName);
+    return _admin.firestore().collection(collectionName);
 }
 
 export async function save<T extends BaseModel>(model: T): Promise<T> {

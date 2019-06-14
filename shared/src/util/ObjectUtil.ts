@@ -39,22 +39,22 @@ export function isNumber(input:any){
  * @param {(value: any) => Promise<void>} transform
  * @return {Promise<any>}
  */
-export async function transformObject(input:any, transform:(value:any) => Promise<void>):Promise<any> {
+export async function transformObject(input:any, transform:(value:any) => Promise<any>):Promise<any> {
     if (isArray(input)){
-        let tasks = input.map((entry:any) => transformObject(entry, transform));
+        const tasks = input.map((entry:any) => transformObject(entry, transform));
         return await Promise.all(tasks);
         // input.forEach(async (entry:any) => await transformObject(entry, transform))
     }
 
     // input = await (transform(input))
-    const transformed = await transform(input);
+    const rootTransform = await transform(input);
 
-    if (transformed !== input){
-        return transformed;
+    if (rootTransform !== input){
+        return rootTransform;
     }
 
     if (isNonEmptyObject(input)) {
-        let tasks = Object.keys(input).map(async key => {
+        const tasks = Object.keys(input).map(async key => {
             let value = input[key];
             const transformed = await transform(value);
 

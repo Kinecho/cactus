@@ -74,7 +74,7 @@ export async function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnap
 }
 
 export async function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): Promise<T> {
-    let transformed = await convertTimestampToDate(data);
+    const transformed = await convertTimestampToDate(data);
     const model = new Type();
     return Object.assign(model, transformed) as T;
 }

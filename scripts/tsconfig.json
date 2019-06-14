@@ -10,12 +10,13 @@
         "strict": true,
         "target": "es2015",
         "baseUrl": ".",
-        "rootDirs": ["src", "../shared/src"],
+        "rootDirs": ["src", "../shared/src", "../functions/src"],
         "paths": {
             "@scripts/*": [
                 "./src/*"
             ],
-            "@shared/*": ["../shared/src/*"]
+            "@shared/*": ["../shared/src/*"],
+            "@api/*": ["../functions/src/*"]
         }
     },
     "compileOnSave": false,

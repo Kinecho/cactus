@@ -4,8 +4,10 @@ import * as admin from 'firebase-admin'
 import {setTimestamp} from "@shared/util/FirebaseUtil";
 import mailchimpApp from "@api/mailchimp/mailchimpApp";
 import inboundApp from "@api/inbound/inboundApp";
+import {setAdmin} from "@api/services/firestoreService";
 
 admin.initializeApp();
+setAdmin(admin.app());
 setTimestamp(admin.firestore.Timestamp);
 
 /**
