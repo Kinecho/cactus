@@ -1,0 +1,22 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "shared modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.14",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "ts-node": "^8.2.0",
+    "tsconfig-paths": "^3.8.0",
+    "typescript": "^3.5.2"
+  }
+}

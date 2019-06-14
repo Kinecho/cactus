@@ -1,7 +1,7 @@
 import AttachmentInfo from "@api/inbound/models/EmailAttachment"
 import * as parseEmail from "email-addresses";
 import ParsedMailbox = emailAddresses.ParsedMailbox;
-import EmailAddress from "@api/inbound/models/EmailAddress";
+import EmailAddress from "@shared/models/EmailAddress";
 import EmailHeaders, {MailchimpMemberId} from "@api/inbound/models/EmailHeaders";
 
 
