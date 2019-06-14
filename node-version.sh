@@ -23,4 +23,7 @@ if [ ! -d ~/.nvm ]; then
     fi
 fi
 
-nvm install 8.13.0
+
+echo "current node version is $(node -v)"
+nvm install 8.15.0
+nvm alias default 8.15.0

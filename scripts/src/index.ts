@@ -6,7 +6,7 @@ import * as admin from "firebase-admin";
 setTimestamp(admin.firestore.Timestamp);
 
 start().then(() => {
-    console.log(chalk.green("complete"));
+    console.log(chalk.dim("\nDone"));
 }).catch(error => {
     console.error(chalk.red("error", error));
 });
