@@ -1,4 +1,4 @@
-import "styles/pages/what_provides_you_with_a_sense_of_belonging.scss"
+import "@styles/pages/what_provides_you_with_a_sense_of_belonging.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

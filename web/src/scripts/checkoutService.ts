@@ -42,7 +42,7 @@ export async function redirectToCheckout(planId:string=Config.stripe.monthlyPlan
 
     console.log("stripe options:", stripeOptions);
 
-    let result = await stripe.redirectToCheckout(stripeOptions);
+    const result = await stripe.redirectToCheckout(stripeOptions);
 
     if (result.error) {
         // If `redirectToCheckout` fails due to a browser or network

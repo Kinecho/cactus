@@ -1,4 +1,4 @@
-import "styles/pages/when_do_you_feel_deep_satisfaction.scss"
+import "@styles/pages/when_do_you_feel_deep_satisfaction.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

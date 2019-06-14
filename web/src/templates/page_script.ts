@@ -1,4 +1,5 @@
-import "styles/pages/$PAGE_NAME$.scss"
+// tslint:disable-next-line:no-implicit-dependencies
+import "@styles/pages/$PAGE_NAME$.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

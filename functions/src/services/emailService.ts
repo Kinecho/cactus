@@ -1,6 +1,6 @@
 import {getCollectionRef} from "@api/services/firestoreService";
 import Email from "@api/inbound/models/Email";
-import {Collection} from "@shared/models/FirestoreBaseModels";
+import {Collection} from "@shared/FirestoreBaseModels";
 
 
 export async function logEmailReply(email:Email):Promise<boolean>{

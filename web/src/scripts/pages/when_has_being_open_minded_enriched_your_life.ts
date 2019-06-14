@@ -1,4 +1,4 @@
-import "styles/pages/when_has_being_open_minded_enriched_your_life.scss"
+import "@styles/pages/when_has_being_open_minded_enriched_your_life.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

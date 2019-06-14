@@ -32,6 +32,7 @@ module.exports = function(config){
             alias: {
                 '@shared': helpers.sharedDir,
                 '@web': helpers.scriptDir,
+                '@styles': helpers.stylesDir,
             },
             extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html'],
         },

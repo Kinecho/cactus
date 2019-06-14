@@ -1,4 +1,4 @@
-import "styles/pages/how_do_you_celebrate.scss"
+import "@styles/pages/how_do_you_celebrate.scss"
 import {configureSignupForm, setupJumpToForm} from "@web/mailchimp";
 
 document.addEventListener('DOMContentLoaded', function() {

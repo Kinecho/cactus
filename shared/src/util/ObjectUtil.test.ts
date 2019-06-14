@@ -112,7 +112,7 @@ describe("transform object", () => {
     });
 
     test("plain object, no transformation", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             return value;
         });
@@ -122,7 +122,7 @@ describe("transform object", () => {
     });
 
     test("single entry object", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             return value;
         });
@@ -132,7 +132,7 @@ describe("transform object", () => {
     });
 
     test("single entry array", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             return value;
         });
@@ -142,7 +142,7 @@ describe("transform object", () => {
     });
 
     test("nested object", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             return value;
         });
@@ -152,7 +152,7 @@ describe("transform object", () => {
     });
 
     test("nested object with array", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             return value;
         });
@@ -162,7 +162,7 @@ describe("transform object", () => {
     });
 
     test("nested object with array and a transform", async () => {
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             //none
             if (value === 1){
                 return 2;
@@ -180,7 +180,7 @@ describe("transform object", () => {
     });
 
     test("nested object with array and a transform to null", async () => {
-        let transform = jest.fn((value:any) => {
+        const transform = jest.fn((value:any) => {
             //none
             if (value === 1){
                 return null;
@@ -197,7 +197,7 @@ describe("transform object", () => {
     });
 
     test("nested object with array and a transform to array", async () => {
-        let transform = jest.fn((value:any) => {
+        const transform = jest.fn((value:any) => {
             //none
             if (value === 1){
                 return [1,2,3,4];
@@ -218,7 +218,7 @@ describe("transform object", () => {
         const date = new Date(1548084587000);
         const timestamp = Timestamp.fromDate(date);
 
-        let transform = jest.fn((value:any) => {
+        const transform = jest.fn((value:any) => {
             if (isDate(value) ){
                 return firebase.firestore.Timestamp.fromDate(value);
             }
@@ -238,7 +238,7 @@ describe("transform object", () => {
         const date = new Date(1548084587000);
         const timestamp = Timestamp.fromDate(date);
 
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             if (isDate(value) ){
                 return firebase.firestore.Timestamp.fromDate(value);
             }
@@ -259,7 +259,7 @@ describe("transform object", () => {
         const date = new Date(1548084587000);
         const timestamp = Timestamp.fromDate(date);
 
-        let transform = jest.fn(async (value:any) => {
+        const transform = jest.fn(async (value:any) => {
             if (isDate(value) ){
                 return firebase.firestore.Timestamp.fromDate(value);
             }

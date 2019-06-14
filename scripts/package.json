@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "start": "npm run cmd",
+    "lint": "tslint --project tsconfig.json",
     "cmd": "ts-node -r tsconfig-paths/register src/index.ts"
   },
   "_moduleAliases": {

@@ -126,7 +126,7 @@ describe("from firestore data", () => {
         expect(model.createdAt).toEqual(testDate);
         expect(model.sayHi()).toEqual("Hi Test");
         expect(model.collection).toEqual(Collection.testModels);
-        expect(model.id).toEqual("123")
+        expect(model.id).toEqual("123");
         expect(model.deleted).toBeFalsy();
     });
 });
@@ -148,7 +148,9 @@ describe("from firestore document snapshot", () => {
             id: "123",
             exists: true,
             ref: {} as DocumentReference,
-            get() {},
+            get() {
+                //no op
+            },
             metadata: {} as SnapshotMetadata,
             isEqual(other): boolean {return true}
         };

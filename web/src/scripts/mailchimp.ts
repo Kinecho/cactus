@@ -15,7 +15,7 @@ export async function submitEmail(subscription:SubscriptionRequest): Promise<Sub
     // subscription.as
     console.log("submitting subscription", subscription);
 
-    let result = (await request.post("/mailchimp", subscription)).data as SubscriptionResult;
+    const result = (await request.post("/mailchimp", subscription)).data as SubscriptionResult;
     if (result.success){
         console.log("Signup successful", result)
     } else {
@@ -25,7 +25,7 @@ export async function submitEmail(subscription:SubscriptionRequest): Promise<Sub
 }
 
 export function configureSignupForm(formId:string){
-    let form = document.getElementById(formId);
+    const form = document.getElementById(formId);
 
     if (!form){
         console.error("no form found in document for id", formId);
@@ -46,9 +46,9 @@ export function configureSignupForm(formId:string){
             event_label: `${formId}`
         });
 
-        let emailInput = <HTMLInputElement>form.children.namedItem("email");
-        let button = <HTMLButtonElement>form.children.namedItem("submit");
-        let errors = <HTMLCollection>form.getElementsByClassName("error")
+        const emailInput = <HTMLInputElement>form.children.namedItem("email");
+        const button = <HTMLButtonElement>form.children.namedItem("submit");
+        const errors = <HTMLCollection>form.getElementsByClassName("error");
         let errorDiv:HTMLDivElement = null;
         if (errors && errors.length > 0){
             errorDiv = <HTMLDivElement>errors.item(0)
@@ -97,10 +97,10 @@ export function configureSignupForm(formId:string){
 
         try {
 
-            let subscription = new SubscriptionRequest(emailAddress);
+            const subscription = new SubscriptionRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
-            let referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+            const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
             if (referredParam){
                 subscription.referredByEmail = referredParam;
             }
@@ -108,7 +108,7 @@ export function configureSignupForm(formId:string){
             const signupResult = await submitEmail(subscription);
 
             if (signupResult.success){
-                let modalId = "signup-success-modal";
+                const modalId = "signup-success-modal";
                 hideError();
                 addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
                 gtag('event', 'email_signup_success', {
@@ -150,26 +150,26 @@ export function configureSignupForm(formId:string){
 
 
 export function setupJumpToForm(buttonClass:string="jump-to-form"){
-    let buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName(buttonClass);
+    const buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName(buttonClass);
 
     Array.from(buttons).forEach(button => {
         if (!button){
             return
         }
 
-        let scrollToId = button.dataset.scrollTo;
-        let doFocus = Boolean(button.dataset.focusForm);
+        const scrollToId = button.dataset.scrollTo;
+        const doFocus = Boolean(button.dataset.focusForm);
 
         console.log("scrolling to", scrollToId);
-        let content = document.getElementById(scrollToId);
+        const content = document.getElementById(scrollToId);
 
         button.addEventListener("click", () => {
             gtag("event", "scroll_to", {formId: scrollToId});
             content.scrollIntoView();
             if (doFocus){
-                let form = document.getElementById(button.dataset.focusForm);
+                const form = document.getElementById(button.dataset.focusForm);
                 if (form){
-                    let input = form.getElementsByTagName("input").item(0);
+                    const input = form.getElementsByTagName("input").item(0);
                     if (input) {
                         input.focus()
                     }

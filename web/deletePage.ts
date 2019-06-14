@@ -24,7 +24,7 @@ function getFirebaseConfig(): { hosting: { rewrites: { source: string, destinati
 }
 
 async function listAllPageNames(): Promise<string[]> {
-    let files = await promisify(fs.readdir)(helpers.htmlDir);
+    const files = await promisify(fs.readdir)(helpers.htmlDir);
 
     const fileNames = [];
     files.forEach(file => {
@@ -35,9 +35,9 @@ async function listAllPageNames(): Promise<string[]> {
 }
 
 export function validatePageExists(input): boolean | string {
-    let baseName = input.split(".")[0];
-    let htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, baseName));
-    let pagesExists = !!pages[baseName];
+    const baseName = input.split(".")[0];
+    const htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, baseName));
+    const pagesExists = !!pages[baseName];
 
     if (htmlExists || pagesExists) {
         return true;
@@ -47,8 +47,8 @@ export function validatePageExists(input): boolean | string {
 }
 
 async function updateFirebaseJson() {
-    let config = getFirebaseConfig();
-    let rewrites = config.hosting.rewrites;
+    const config = getFirebaseConfig();
+    const rewrites = config.hosting.rewrites;
 
     let htmlName = `${response.pageName}.html`;
 
@@ -56,7 +56,7 @@ async function updateFirebaseJson() {
         htmlName = `/${htmlName}`;
     }
 
-    let foundPage = rewrites.find((page) => page.destination === htmlName);
+    const foundPage = rewrites.find((page) => page.destination === htmlName);
 
     if (!foundPage) {
         console.log("No page found in firebase config with name", htmlName);
@@ -73,7 +73,9 @@ async function updateFirebaseJson() {
         config.hosting.rewrites = rewrites.filter((page) => page.destination !== htmlName);
 
         fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
-            if (err) return console.log(err);
+            if (err) {
+                console.log(err);
+            }
         });
         console.log(chalk.green("Removed config from firebase.json"))
     } else {
@@ -82,7 +84,7 @@ async function updateFirebaseJson() {
 }
 
 async function updatePagesFile() {
-    let existingPage = pages[response.pageName];
+    const existingPage = pages[response.pageName];
     if (!existingPage) {
         console.warn(`No page with name ${response.pageName} exists in pages.js`);
     }
@@ -100,18 +102,18 @@ async function updatePagesFile() {
 
     delete pages[response.pageName];
 
-    let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
+    const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
     fs.writeFile(pagesPath, data, 'utf8', function (err) {
         if (err) {
-            return console.log(err)
+            console.log(err)
         }
     });
     console.log(chalk.green("Removed configuration from pages.js"));
 }
 
 async function removeHtml() {
-    let htmlPath = `${helpers.htmlDir}/${response.pageName}.html`;
+    const htmlPath = `${helpers.htmlDir}/${response.pageName}.html`;
 
     const {remove} = await prompts({
         name: "remove",
@@ -129,7 +131,7 @@ async function removeHtml() {
 }
 
 async function removeJS() {
-    let tsPath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
+    const tsPath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
 
     const {remove} = await prompts({
         name: "remove",
@@ -147,7 +149,7 @@ async function removeJS() {
 }
 
 async function removeScss() {
-    let scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
+    const scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
     const {remove} = await prompts({
         name: "remove",
         message: `Remove ${scssFilePath}?`,
@@ -163,9 +165,9 @@ async function removeScss() {
     fs.unlinkSync(scssFilePath);
 }
 
-async function start(): Promise<void> {
+export async function start(): Promise<void> {
     console.log("Loading pages...");
-    let files = (await listAllPageNames()).map(file => ({title: file}));
+    const files = (await listAllPageNames()).map(file => ({title: file}));
     let canceled = false;
     const questions = [
         {
@@ -200,11 +202,3 @@ async function start(): Promise<void> {
         console.log("cancel success");
     }
 }
-
-
-start().then(() => {
-    console.log("Done")
-}).catch(error => {
-    console.error("Failed to create page", error);
-});
-

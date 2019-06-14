@@ -1,1 +1,1 @@
-import "styles/pages/404.scss"
+import "@styles/pages/404.scss"
