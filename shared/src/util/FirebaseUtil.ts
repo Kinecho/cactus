@@ -1,15 +1,39 @@
-import * as firebase from "firebase"
+
 import {isDate, isNotNull, transformObject} from "@shared/util/ObjectUtil";
-import Timestamp = firebase.firestore.Timestamp;
 import {BaseModel} from "@shared/models/FirestoreBaseModels";
-import DocumentSnapshot = firebase.firestore.DocumentSnapshot;
+
+
+let TimestampClass:TimestampInterface|any;
+
+export interface TimestampInterface {
+    fromMillis<T extends TimestampInterface>(milliseconds: number): T;
+    fromDate(date: Date): TimestampInterface;
+    now(): TimestampInterface;
+    seconds: number;
+    nanoseconds: number;
+    toDate(): Date;
+    toMillis(): number;
+    isEqual(other: TimestampInterface): boolean;
+}
+
+export function setTimestamp(timestamp:any){
+    TimestampClass = timestamp;
+}
+
+export type DocumentData = { [field: string]: any };
+
+export interface DocumentSnapshot {
+    data(): DocumentData|undefined;
+    readonly id: string;
+    readonly exists: boolean;
+}
 
 export async function convertDateToTimestamp(input: any): Promise<any> {
     const copy = Object.assign({}, input);
 
     return await transformObject(copy, (value) => {
         if (isDate(value)) {
-            return firebase.firestore.Timestamp.fromDate(value);
+            return TimestampClass.fromDate(value);
         }
         return value;
     })
@@ -19,7 +43,7 @@ export async function convertTimestampToDate(input: any): Promise<any> {
     const copy = Object.assign({}, input);
 
     return await transformObject(copy, (value) => {
-        if (isNotNull(value) && value instanceof Timestamp) {
+        if (isNotNull(value) && value instanceof TimestampClass) {
             return value.toDate();
         }
         return value;

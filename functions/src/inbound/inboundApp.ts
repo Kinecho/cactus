@@ -19,12 +19,27 @@ import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMembe
 import {getMailchimpDateString} from "@api/util/DateUtil";
 import * as getRawBody from 'raw-body';
 import {logEmailReply} from "@api/services/emailService";
+import {getById} from "@api/services/firestoreService";
+import TestModel from "@shared/models/TestModel";
 
 const app = express();
 
 app.use(cors({origin: true}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
+
+app.get('/testModel/:id', async (req, res) => {
+
+    const id = req.params.id;
+    if (!id) {
+        return res.status(400);
+    }
+
+    const model = await getById(id, TestModel);
+
+    return res.status(200).json({status: 'ok', data: model})
+
+});
 
 /**
  * NOTE: turns out cloud functions request middleware isn't the plain, standard express app you might think. As a result, often the body may be different than expected, or not exist at all.

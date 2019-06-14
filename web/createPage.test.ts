@@ -70,6 +70,6 @@ describe("get url from input", () => {
     });
 
     test("null value", () => {
-        expect(() => getUrlFromInput(null)).toThrow(TypeError);
+        expect(getUrlFromInput(null)).toEqual("");
     });
 });

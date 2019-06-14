@@ -24,6 +24,15 @@ export function isDate(input:any){
     return isNotNull(input) && input instanceof Date;
 }
 
+export function isNumber(input:any){
+    try {
+        const number = Number(input);
+        return isNotNull(number) && typeof(input) === "number";
+    } catch (error){
+        return false;
+    }
+}
+
 /**
  * Transform object keys based on provided transform function
  * @param {any} input

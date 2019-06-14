@@ -2,8 +2,6 @@ import {isArray, isNull, isNonEmptyObject, transformObject, isDate} from "@share
 import * as firebase from "firebase";
 import Timestamp = firebase.firestore.Timestamp;
 
-
-
 describe("isObject", () => {
     test("string input", () => {
         expect(isNonEmptyObject("string")).toBeFalsy()

@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import CollectionReference = admin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/models/FirestoreBaseModels";
+import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 
 export function getCollectionRef(collectionName:Collection):CollectionReference{
     return admin.firestore().collection(collectionName);
@@ -24,7 +25,21 @@ export async function save<T extends BaseModel>(model:T):Promise<T> {
 
     console.log("writeResult", writeResult);
 
-
-
     return model;
+}
+
+export async function getById<T extends BaseModel>(id:string, Type: {new(): T}):Promise<T|null> {
+    const type = new Type();
+
+    const collection = getCollectionRef(type.collection);
+
+    console.log(`Fetching ${type.collection} with ID = ${id}`);
+
+    const doc = await collection.doc(id).get();
+
+    if (!doc){
+        return null;
+    }
+
+    return await fromDocumentSnapshot(doc, Type);
 }
