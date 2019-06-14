@@ -4,6 +4,7 @@ import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUt
 export enum Collection {
     emailReply = "emailReply",
     testModels = "testModels",
+    sentCampaigns = "sentCampaigns",
     users = "users",
 }
 

@@ -8,8 +8,6 @@ export default class TestTwo extends BaseCommand {
     }
 
     async run(app: admin.app.App):Promise<any>{
-        console.log("Second Test!");
-
         const db = app.firestore();
         const collections = await db.listCollections();
         const ids = collections.map((collection) => {

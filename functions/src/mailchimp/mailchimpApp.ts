@@ -19,7 +19,8 @@ import {
     EventType, ProfileUpdateEventData,
     UnsubscribeEventData,
     WebhookEvent
-} from "@api/mailchimp/models/MailchimpTypes";
+} from "@shared/mailchimp/models/MailchimpTypes";
+import {saveSentCampaign} from "@api/services/sentCampaignService";
 
 const app = express();
 
@@ -75,7 +76,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
         case EventType.campaign:
             const campaignData = event.data as CampaignEventData;
             const campaign = await getCampaign(campaignData.id);
-
+            await saveSentCampaign(campaign, campaignData);
             const fields = [
                 {
                     title: "Subject",

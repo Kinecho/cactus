@@ -1,6 +1,6 @@
 
 import {isDate, isNotNull, transformObject} from "@shared/util/ObjectUtil";
-import {BaseModel} from "@shared/models/FirestoreBaseModels";
+import {BaseModel} from "@shared/FirestoreBaseModels";
 
 
 let TimestampClass:TimestampInterface|any;

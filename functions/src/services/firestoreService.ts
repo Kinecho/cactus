@@ -1,6 +1,6 @@
 import * as admin from "firebase-admin";
 import CollectionReference = admin.firestore.CollectionReference;
-import {BaseModel, Collection} from "@shared/models/FirestoreBaseModels";
+import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 
 let _admin:admin.app.App;

@@ -1,4 +1,4 @@
-import {Collection, BaseModel} from "@shared/models/FirestoreBaseModels";
+import {Collection, BaseModel} from "@shared/FirestoreBaseModels";
 
 export default class TestModel extends BaseModel {
     collection = Collection.testModels;
