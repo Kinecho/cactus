@@ -5,6 +5,7 @@ export enum Collection {
     emailReply = "emailReply",
     testModels = "testModels",
     sentCampaigns = "sentCampaigns",
+    reflectionResponses = "reflectionResponses",
     users = "users",
 }
 

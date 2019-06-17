@@ -1,13 +1,14 @@
-import {getCollectionRef} from "@api/services/firestoreService";
-import Email from "@api/inbound/models/Email";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {save} from "@api/services/firestoreService";
+import EmailReply from "@shared/models/EmailReply";
+// import {Collection} from "@shared/FirestoreBaseModels";
 
 
-export async function logEmailReply(email:Email):Promise<boolean>{
-    const replies = getCollectionRef(Collection.emailReply);
+export async function logEmailReply(email:EmailReply):Promise<boolean>{
+    // const replies = getCollectionRef(Collection.emailReply);
 
     try {
-        const result = await replies.add(JSON.parse(JSON.stringify(email)));
+        // const result = await replies.add(JSON.parse(JSON.stringify(email)));
+        const result = save(email);
         console.log("saved email to firestore", result);
         return true;
     } catch (error){

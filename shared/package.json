@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "email-addresses": "^3.0.3",
     "firebase": "^6.2.0"
   },
   "devDependencies": {

@@ -1,11 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
-import {
-    forwardedGmailEmail,
-    getSenderFromHeaders,
-    processEmail
-} from "@api/inbound/EmailProcessor"
+import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
 import {writeToFile} from "@api/util/FileUtil";
 import {
     getCampaign,
@@ -22,6 +18,7 @@ import {logEmailReply} from "@api/services/emailService";
 import {getById, save} from "@api/services/firestoreService";
 import TestModel from "@shared/models/TestModel";
 import {fromJSON} from "@shared/util/FirebaseUtil";
+import {EmailStoragePath} from "@shared/models/EmailReply";
 import bodyParser = require("body-parser");
 
 const app = express();
@@ -92,19 +89,24 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         console.error(e);
     }
 
-    await writeToFile(`./output/${dateId}_body.txt`, req.body);
-    await writeToFile(`./output/${dateId}_raw_body.txt`, req.rawBody || req.body);
-    await writeToFile(`./output/${dateId}_headers.txt`, JSON.stringify(req.headers));
-    await writeToFile(`./output/${dateId}_raw_headers.txt`, JSON.stringify(req.rawHeaders));
+    const bodyStoragePath = await writeToFile(`./output/${dateId}_body.txt`, req.body);
+    const rawBodyStoragePath = await writeToFile(`./output/${dateId}_raw_body.txt`, req.rawBody || req.body);
+    const headersStoragePath = await writeToFile(`./output/${dateId}_headers.txt`, JSON.stringify(req.headers));
+    const rawHeadersStoragePath = await writeToFile(`./output/${dateId}_raw_headers.txt`, JSON.stringify(req.rawHeaders));
 
     try {
         const email = await processEmail(req.headers, req.rawBody || req.body);
 
         if (!email){
-            await sendActivityNotification("ERROR: Failed to process incoming email");
+            await sendActivityNotification("ERROR: Failed to process incoming email: no email was returned");
             res.sendStatus(500);
             return;
         }
+
+        email.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
+        email.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
+        email.setStoragePath(EmailStoragePath.RAW_BODY, rawBodyStoragePath);
+        email.setStoragePath(EmailStoragePath.RAW_HEADERS, rawHeadersStoragePath);
 
         //Log to firestore
         await logEmailReply(email);
@@ -222,170 +224,13 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         } else {
             console.warn("No mailchimp Member ID found on email, can't update merge fields");
         }
-        res.send(email);
+        let responseBody = {email: await email.toJSON()};
+        res.send(responseBody);
     } catch(error) {
-        await sendActivityNotification("ERROR: Failed to process incoming email" +  `${error}`);
+        await sendActivityNotification("ERROR: Failed to process incoming email: " +  `${error}`);
         res.sendStatus(500);
     }
 
-    // try {
-    //     const busboy = new Busboy({headers: req.headers});
-    //     const emailFiles: InboundEmailFiles = {};
-    //     const emailInput: InboundEmail = {};
-    //
-    //     busboy.on("error", (error: any) => {
-    //         console.error("failed to process something", error);
-    //     });
-    //
-    //     busboy.on("file", getFileHandler(emailFiles));
-    //     busboy.on('field', getFieldHandler(emailInput));
-    //
-    //     // This callback will be invoked after all uploaded files are saved.
-    //     busboy.on('finish', async () => {
-    //         const email = await createEmailFromInputs(emailInput, emailFiles);
-    //         let messageColor = "#83ecf9";
-    //         console.log();
-    //         // console.log("Processed email", JSON.stringify(email, null, 2));
-    //
-    //         await writeToFile(`./output/${dateId}_processed_email.json`, JSON.stringify(email));
-    //
-    //
-    //         const msg: SlackMessage = {};
-    //         msg.text = `Got a reply!`;
-    //
-    //         const fromEmail = email.from && email.from.email ? email.from.email : null;
-    //         const fromHeader = getSenderFromHeaders(email.headers);
-    //
-    //         const campaign = email.mailchimpCampaignId ? await getCampaign(email.mailchimpCampaignId) : null;
-    //
-    //         const fields = [
-    //             {
-    //                 title: "from",
-    //                 value: fromEmail || "unknown",
-    //                 short: false,
-    //             },
-    //             {
-    //                 title: "subject",
-    //                 value: email.subject || "unknown",
-    //                 short: false,
-    //             },
-    //             {
-    //                 title: "Campaign Id",
-    //                 value: email.mailchimpCampaignId || "unknown",
-    //                 short: true,
-    //             },
-    //             {
-    //                 title: "Campaign Title",
-    //                 value: campaign ? campaign.settings.title : "",
-    //                 short: false
-    //             },
-    //             {
-    //                 title: "Campaign Subject",
-    //                 value: campaign ? campaign.settings.subject_line : "",
-    //                 short: false
-    //             },
-    //             {
-    //                 title: "Campaign Send Date",
-    //                 value: campaign ? getMailchimpDateString(new Date(campaign.send_time)) : "unknown",
-    //                 short: true
-    //             }
-    //         ];
-    //
-    //         if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
-    //             messageColor = "#7A3814";
-    //             msg.text = `:warning: ${msg.text} (we are still using the original email, will update if we see that the smtp.mailfrom is consistently correct)`;
-    //             fields.push(
-    //                 {
-    //                     title: "smtp.mailfrom (from address)",
-    //                     value: fromHeader || "unknown",
-    //                     short: false,
-    //                 })
-    //         }
-    //
-    //         if (email.mailchimpUniqueEmailId) {
-    //             console.log("loooking for member on list with unique email id = ", email.mailchimpUniqueEmailId);
-    //             const sentToMember = await getMemberByEmailId(email.mailchimpUniqueEmailId);
-    //             console.log("sent to member found to be", sentToMember);
-    //
-    //             fields.unshift(
-    //                 {
-    //                     title: ":merperson: List Member Email (from link)",
-    //                     value: sentToMember ? sentToMember.email_address : "not found",
-    //                     short: true,
-    //                 },
-    //                 {
-    //                     title: "Unique Email Id from body",
-    //                     value: email.mailchimpUniqueEmailId,
-    //                     short: true,
-    //                 })
-    //         } else {
-    //             console.log("unable to find email id on processed email");
-    //         }
-    //
-    //
-    //
-    //         msg.attachments = [{
-    //             color: messageColor,
-    //             ts: `${(new Date()).getTime() / 1000}`,
-    //             fields,
-    //         }];
-    //
-    //         await sendActivityNotification(msg);
-    //
-    //         const mailchimpEmail = fromEmail;
-    //         if (mailchimpEmail) {
-    //             console.log("updating merge tag for user", email.mailchimpMemberId);
-    //             const mergeRequest: UpdateMergeFieldRequest = {
-    //                 email: mailchimpEmail,
-    //                 mergeFields: {
-    //                     [MergeField.LAST_REPLY]: getMailchimpDateString()
-    //                 }
-    //             };
-    //
-    //             const tagRequest: UpdateTagsRequest = {
-    //                 email: mailchimpEmail,
-    //                 tags: [
-    //                     {
-    //                         name: TagName.NEEDS_ONBOARDING_REMINDER,
-    //                         status: TagStatus.INACTIVE
-    //                     },
-    //                 ]
-    //             };
-    //
-    //             await updateMergeFields(mergeRequest);
-    //             await updateTags(tagRequest);
-    //         } else {
-    //             console.warn("No mailchimp Member ID found on email, can't update merge fields");
-    //         }
-    //
-    //         res.send(email);
-    //     });
-    //
-    //     // The raw bytes of the upload will be in req.rawBody.  Send it to busboy, and get
-    //     // a callback when it's finished.
-    //     const body = req.rawBody || req.body;
-    //     try {
-    //         const mailchimpUniqueId = getMailchimpEmailIdFromBody(String(body));
-    //         console.log("raw body mailchimp email id", mailchimpUniqueId);
-    //         emailInput.mailchimpEmailId = mailchimpUniqueId;
-    //     } catch (error){
-    //         console.error("failed to get mailchimp email id from raw body", error);
-    //     }
-    //
-    //     try {
-    //         const campaignId = getMailchimpCampaignIdFromBody(String(body));
-    //         console.log("raw body mailchimp campaign id", campaignId);
-    //         emailInput.mailchimpCampaignId = campaignId;
-    //     } catch (error){
-    //         console.error("failed to get mailchimp campaign id from raw body", error);
-    //     }
-    //
-    //     busboy.end(body);
-    // } catch (error) {
-    //     console.error("failed to process email", error);
-    //     await sendActivityNotification("ERROR: Failed to process incoming email" +  `${error}`);
-    //     res.sendStatus(500);
-    // }
 });
 
 export default app;

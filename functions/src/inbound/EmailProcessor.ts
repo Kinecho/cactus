@@ -1,5 +1,9 @@
-import Email, {InboundEmail, InboundEmailFiles} from "@api/inbound/models/Email";
+import EmailReply, {InboundEmail, InboundEmailFiles} from "@shared/models/EmailReply";
 import {inspect} from "util";
+import {InboundAttachmentInfo, InboundEmailAttachments} from "@shared/models/EmailAttachment";
+import {splitOnFirst} from "@api/util/StringUtil";
+import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
+import * as Busboy from "busboy";
 
 const path = require("path");
 const os = require("os");
@@ -8,16 +12,12 @@ const getUrls = require('get-urls');
 const queryString = require('query-string');
 const replyParser = require("node-email-reply-parser");
 
-import {InboundAttachmentInfo, InboundEmailAttachments} from "@api/inbound/models/EmailAttachment";
-import {splitOnFirst} from "@api/util/StringUtil";
-import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
-import * as Busboy from "busboy";
 const MAILCHIMP_USER_EMAIL_PARAM = "e";
 const CAMPAIGN_PARAM = "c";
 
 export const forwardedGmailEmail = "hello+caf_=forwarded=inbound.cactus.app@kinecho.com";
 
-export async function processEmail(headers:any, body:any):Promise<Email|null> {
+export async function processEmail(headers:any, body:any):Promise<EmailReply|null> {
     return new Promise(async (resolve, reject) => {
         try {
             const busboy = new Busboy({headers: headers});
@@ -71,16 +71,8 @@ export async function processEmail(headers:any, body:any):Promise<Email|null> {
 }
 
 
-export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles): Promise<Email> {
-    // console.log();
-    // console.log("email files", JSON.stringify(fileInput));
-    // console.log();
-    // console.log("Finished processing body. email input", JSON.stringify(emailInput, null, 2));
-
-
-    const email = new Email(emailInput);
-    // console.log("need to handle input files still. Files = ", inspect(fileInput));
-    return email;
+export async function createEmailFromInputs(emailInput: InboundEmail, fileInput: InboundEmailFiles): Promise<EmailReply> {
+    return new EmailReply(emailInput);
 }
 
 /**
@@ -247,7 +239,7 @@ export function getMailchimpCampaignIdFromBody(body:string):string|undefined{
 }
 
 
-export function getReplyTextContent(email:Email):string {
+export function getReplyTextContent(email:EmailReply):string {
     try {
         const parsedBody = replyParser(email.text);
         const visibleText = parsedBody.getVisibleText() || "";

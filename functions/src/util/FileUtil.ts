@@ -10,36 +10,42 @@ import * as admin from "firebase-admin";
  * @param {any} data
  * @returns Promise<boolean> - boolean if the operation was successful
  */
-export async function writeToFile(filePath:string, data: any): Promise<boolean>{
-    const config = getConfig();
-    if (!config.isEmulator){
-        return writeToStorage("inbound/emails/" + path.parse(filePath).name, data)
+export async function writeToFile(filePath:string, data: any): Promise<string|boolean>{
+    try {
+        const config = getConfig();
+        if (!config.isEmulator){
+            return writeTextToStorage("inbound/emails/" + path.parse(filePath).name + path.parse(filePath).ext, data)
+        }
+
+        const folder = path.dirname(filePath);
+        try {
+            await promisify(fs.mkdir)(folder, {recursive: true});
+        } catch (error){
+            // console.debug("Unable to create folder " + folder, error);
+        }
+
+        try {
+            await promisify(fs.writeFile)(filePath, data);
+            return true;
+        } catch (error){
+            console.error("Failed to write to file", filePath, error);
+            return false
+        }
+    } catch (e){
+        console.error("Failed to write to file/storage", e);
+        return false;
     }
 
-    const folder = path.dirname(filePath);
-    try {
-        await promisify(fs.mkdir)(folder, {recursive: true});
-    } catch (error){
-        // console.debug("Unable to create folder " + folder, error);
-    }
-
-    try {
-        await promisify(fs.writeFile)(filePath, data);
-        return true;
-    } catch (error){
-        console.error("Failed to write to file", filePath, error);
-        return false
-    }
 }
 
-export async function writeToStorage(filePath:string, data:any): Promise<boolean> {
+export async function writeTextToStorage(filePath:string, data:any): Promise<string|boolean> {
     const bucket = admin.storage().bucket();
     const file = bucket.file(filePath);
-
+    // await file.setMetadata({contentType: "text/plain"});
     try{
         await file.save(data);
         console.log("Upload success. File: ", filePath);
-        return true;
+        return filePath;
     } catch (error){
         console.error("Failed to upload to cloud storage", error);
         return false;

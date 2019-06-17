@@ -1,4 +1,16 @@
 {
+    "emulators": {
+        "hosting": {
+            "port": "8888"
+        },
+        "firestore": {
+            "port": "5005"
+        },
+        "functions": {
+            "port": "5001"
+        }
+    },
+
     "firestore": {
         "rules": "firestore.rules",
         "indexes": "firestore.indexes.json"

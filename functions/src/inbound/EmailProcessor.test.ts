@@ -4,12 +4,12 @@ import {
     processAttachments,
     processBodyHeaders, getMailchimpCampaignIdFromBody, getLinks, getReplyTextContent, processEmail
 } from "@api/inbound/EmailProcessor";
-import EmailHeaders, {Header} from "@api/inbound/models/EmailHeaders";
+import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
 
 import realBody from "./test_data/emailBody1";
 import scottEmail from "./test_data/emailBody2";
 import * as nonMailchimp from "./test_data/email3";
-import Email from "@api/inbound/models/Email";
+import EmailReply from "@shared/models/EmailReply";
 
 describe("processAttachments", () => {
     test("no attachments", () => {
@@ -144,7 +144,7 @@ describe("get links test", () => {
 
 describe('parse reply', () => {
     test("with replies", () => {
-        const email = new Email({});
+        const email = new EmailReply({});
         email.text = "\n" +
             "fewer replies\n" +
             "\n" +

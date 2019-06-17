@@ -25,7 +25,7 @@ const questions = [
     {
         type: "text",
         name: 'title',
-        message: 'Page Title',
+        message: 'Question',
     },
     {
         type: "text",
@@ -35,13 +35,9 @@ const questions = [
         validate: validatePageName,
         format: formatFilename,
     },
+
     {
-        type: "confirm",
-        name: "writeUrls",
-        message: `Register a path for this page?`
-    },
-    {
-        type: prev => prev === true ? 'text' : null,
+        type: 'text',
         name: 'pagePath',
         message: 'Page Path: https://cactus.app',
         initial: (prev, values) => getUrlFromInput(values.title),
