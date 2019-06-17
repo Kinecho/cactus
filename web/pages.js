@@ -62,6 +62,10 @@ module.exports = {
         "title": "When has being open-minded enriched your life?",
         "path": "/when-has-being-open-minded-enriched-your-life"
     },
+    "what_have_you_pursued_where_the_journey_became_the_reward": {
+        "title": "What have you pursued where the journey became the reward?",
+        "path": "/what-have-you-pursued-where-the-journey-became-the-reward"
+    },
     "what_do_you_appreciate_most_about_your_best_friend": {
         "title": "What do you appreciate most about your best friend?",
         "path": "/what-do-you-appreciate-most-about-your-best-friend"
