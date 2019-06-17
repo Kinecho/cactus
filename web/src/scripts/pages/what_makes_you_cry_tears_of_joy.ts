@@ -1,4 +1,4 @@
-import "styles/pages/what_makes_you_cry_tears_of_joy.scss"
+import "@styles/pages/what_makes_you_cry_tears_of_joy.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

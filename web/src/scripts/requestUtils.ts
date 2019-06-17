@@ -4,8 +4,8 @@ import {Config} from "@web/config";
 let _request: AxiosInstance;
 
 export function initializeAxios(): AxiosInstance{
-    let domain = Config.apiDomain;
-    let baseURL = `${domain}`;
+    const domain = Config.apiDomain;
+    const baseURL = `${domain}`;
     axios.defaults.baseURL = baseURL;
     console.log("set axios base url to ", baseURL);
 

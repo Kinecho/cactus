@@ -71,14 +71,13 @@ function getFirebaseConfig(): { hosting: { rewrites: { source: string, destinati
 }
 
 export function formatFilename(value: string) {
-    let filename = getFilenameFromInput(value);
-    return filename;
+    return getFilenameFromInput(value);
 }
 
 export function validatePageName(input): boolean | string {
-    let htmlName = getFilenameFromInput(input, "html");
-    let htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, htmlName));
-    let pagesExists = !!pages[htmlName];
+    const htmlName = getFilenameFromInput(input, "html");
+    const htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, htmlName));
+    const pagesExists = !!pages[htmlName];
 
     if (!htmlExists && !pagesExists) {
         return true;
@@ -88,8 +87,8 @@ export function validatePageName(input): boolean | string {
 }
 
 export function validateUrl(input): boolean | string {
-    let firebaseUrl = getFirebaseConfig().hosting.rewrites.find(rewrite => rewrite.source === input);
-    let pagesUrl = Object.values(pages).find(page => page.path === input);
+    const firebaseUrl = getFirebaseConfig().hosting.rewrites.find(rewrite => rewrite.source === input);
+    const pagesUrl = Object.values(pages).find(page => page.path === input);
 
     if (!firebaseUrl && !pagesUrl) {
         return true;
@@ -133,16 +132,16 @@ export function removeSpecialCharacters(input: string, replacement: string): str
 }
 
 function updateFirebaseJson() {
-    let config = getFirebaseConfig();
-    let rewrites = config.hosting.rewrites;
+    const config = getFirebaseConfig();
+    const rewrites = config.hosting.rewrites;
 
-    let newPage = {
+    const newPage = {
         source: `${response.pagePath}`,
         destination: `/${response.pageName}.html`
     };
 
 
-    let existing = rewrites.find(page => page.source === newPage.source || page.destination === newPage.source);
+    const existing = rewrites.find(page => page.source === newPage.source || page.destination === newPage.source);
     if (existing) {
         console.warn("A page with the same source or destination was found in firebase.json");
         console.warn("NOT UPDATING FIREBASE.JSON");
@@ -154,7 +153,9 @@ function updateFirebaseJson() {
     //TODO: actually write to file;
     console.log("Adding page to Firebase Config:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
     fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
-        if (err) return console.log(err);
+        if (err) {
+            console.log(err);
+        }
     });
 }
 
@@ -171,82 +172,90 @@ function updatePagesFile() {
 
     console.log("\nAdding new page to pages.js:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
 
-    let data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
+    const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
 
     fs.writeFile(pagesPath, data, 'utf8', function (err) {
-        if (err) return console.log(err);
+        if (err) {
+            console.log(err);
+        }
     });
 }
 
 function createHtml() {
-    let htmlOutputPath = `${helpers.htmlDir}/${response.pageName}.html`;
-    let templateFile = path.resolve(helpers.srcDir, "templates", "page.html");
+    const htmlOutputPath = `${helpers.htmlDir}/${response.pageName}.html`;
+    const templateFile = path.resolve(helpers.srcDir, "templates", "page.html");
     console.log("creating HTML from template\n", chalk.blue(htmlOutputPath), "\n");
 
     fs.readFile(templateFile, 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
+            console.log(err);
         }
         const content = data.replace(/\$PAGE_TITLE\$/g, response.title);
 
-        fs.writeFile(htmlOutputPath, content, 'utf8', function (err) {
-            if (err) return console.log(err);
+        fs.writeFile(htmlOutputPath, content, 'utf8', function (e) {
+            if (e) {
+                console.log(e);
+            }
         });
 
     });
 }
 
 function addToSitemap() {
-    let sitemapFile = path.resolve(helpers.projectRoot, "web", "src", "assets", "sitemaps", "questions.txt");
+    const sitemapFile = path.resolve(helpers.projectRoot, "web", "src", "assets", "sitemaps", "questions.txt");
     console.log("appending new page URL to Questions Sitemap\n");
 
     const newUrl = "\n" + "https://cactus.app" + response.pagePath;
 
     fs.appendFile(sitemapFile, newUrl, 'utf8', function (err) {
-        if (err) return console.log(err);
+        if (err) {
+            console.log(err);
+        }
     });
 }
 
 function createJS() {
-    let outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
+    const outputFilePath = `${helpers.pagesScriptsDir}/${response.pageName}.ts`;
     // console.log("creating js file with response = ", response);
     console.log("creating javascript file from template:\n", chalk.blue(outputFilePath), "\n");
 
-    let templateFile = path.resolve(helpers.srcDir, "templates", "page_script.ts");
+    const templateFile = path.resolve(helpers.srcDir, "templates", "page_script.ts");
 
     fs.readFile(templateFile, 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
+            console.log(err);
         }
         const content = data.replace(/\$PAGE_NAME\$/g, response.pageName);
 
-        fs.writeFile(outputFilePath, content, 'utf8', function (err) {
-            if (err) return console.log(err);
+        fs.writeFile(outputFilePath, content, 'utf8', function (e) {
+            if (e) {
+                console.log(e);
+            }
         });
     });
 }
 
 function createScss() {
-    let templateFile = path.resolve(helpers.srcDir, "templates", "page_style.scss");
-    let scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
+    const templateFile = path.resolve(helpers.srcDir, "templates", "page_style.scss");
+    const scssFilePath = `${helpers.pagesStylesDir}/${response.pageName}.scss`;
     console.log("creating SCSS file\n", chalk.blue(scssFilePath), "\n");
 
     fs.readFile(templateFile, 'utf8', function (err, data) {
         if (err) {
-            return console.log(err);
+            console.log(err);
         }
-        const content = data;
 
-
-        fs.writeFile(scssFilePath, content, 'utf8', function (err) {
-            if (err) return console.log(err);
+        fs.writeFile(scssFilePath, data, 'utf8', function (e) {
+            if (e) {
+                console.log(e);
+            }
         });
 
     });
 }
 
-async function start(): Promise<void> {
+export async function start(): Promise<void> {
     response = await prompts(questions);
     const {pagePath, title, looksGood} = response;
 
@@ -273,10 +282,10 @@ async function start(): Promise<void> {
 
 }
 
-
-start().then(() => {
-    console.log("Done")
-}).catch(error => {
-    console.error("Failed to create page", error);
-});
-
+//
+// start().then(() => {
+//     console.log("Done")
+// }).catch(error => {
+//     console.error("Failed to create page", error);
+// });
+//

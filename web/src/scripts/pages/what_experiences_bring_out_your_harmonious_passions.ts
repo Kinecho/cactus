@@ -1,4 +1,4 @@
-import "styles/pages/what_experiences_bring_out_your_harmonious_passions.scss"
+import "@styles/pages/what_experiences_bring_out_your_harmonious_passions.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

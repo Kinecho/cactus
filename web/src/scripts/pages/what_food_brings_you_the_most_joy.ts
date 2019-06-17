@@ -1,4 +1,4 @@
-import "styles/pages/what_food_brings_you_the_most_joy.scss"
+import "@styles/pages/what_food_brings_you_the_most_joy.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

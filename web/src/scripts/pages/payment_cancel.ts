@@ -1,4 +1,4 @@
-import "styles/pages/payment_cancel.scss"
+import "@styles/pages/payment_cancel.scss"
 
 
 document.addEventListener('DOMContentLoaded', function() {

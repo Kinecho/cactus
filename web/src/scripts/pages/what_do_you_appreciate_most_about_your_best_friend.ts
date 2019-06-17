@@ -1,4 +1,4 @@
-import "styles/pages/what_do_you_appreciate_most_about_your_best_friend.scss"
+import "@styles/pages/what_do_you_appreciate_most_about_your_best_friend.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

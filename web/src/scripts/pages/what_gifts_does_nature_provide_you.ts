@@ -1,4 +1,4 @@
-import "styles/pages/what_gifts_does_nature_provide_you.scss"
+import "@styles/pages/what_gifts_does_nature_provide_you.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

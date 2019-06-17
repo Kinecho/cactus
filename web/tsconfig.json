@@ -13,8 +13,12 @@
             "@web/*": [
                 "./src/scripts/*"
             ],
+            "@styles/*": [
+                "./src/styles/*"
+            ],
             "@shared/*": ["../shared/src/*"]
         }
     },
-    "compileOnSave": false
+    "compileOnSave": false,
+    "exclude": ["./public", "./webpack"]
 }

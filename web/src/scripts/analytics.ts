@@ -1,13 +1,22 @@
 import {Config} from './config'
 
-let _gtag = null;
-
 declare global {
     interface Window { dataLayer: Array<any>; }
 }
 
+let _gtag = null;
+
 // window.dataLayer = window.dataLayer || {};
 
+/**
+ * gtag('event', <action>, {
+      'event_category': <category>,
+      'event_label': <label>,
+      'value': <value>
+    });
+ * @type {_gtag|*}
+ */
+export const gtag = createGTag();
 
 /**
  * set up the analytics function
@@ -36,18 +45,7 @@ function createGTag(){
 }
 
 
-/**
- * gtag('event', <action>, {
-      'event_category': <category>,
-      'event_label': <label>,
-      'value': <value>
-    });
- * @type {_gtag|*}
- */
-export const gtag = createGTag();
-
-
-
+// tslint:disable
 export function startFullstory(){
 
     if (!Config.fullStoryTeamId){
@@ -66,6 +64,7 @@ export function startFullstory(){
     window['_fs_org'] = Config.fullStoryTeamId;
     // noinspection UseOfBracketNotationInspection
     window['_fs_namespace'] = 'FS';
+
     (function(m,n,e,t,l,o,g,y){
         if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
         g=m[e]=function(a,b,s){g.q?g.q.push([a,b,s]):g._api(a,b,s);};g.q=[];
@@ -74,7 +73,9 @@ export function startFullstory(){
         g.identify=function(i,v,s){g(l,{uid:i},s);if(v)g(l,v,s)};g.setUserVars=function(v,s){g(l,v,s)};g.event=function(i,v,s){g('event',{n:i,p:v},s)};
         g.shutdown=function(){g("rec",!1)};g.restart=function(){g("rec",!0)};
         g.consent=function(a){g("consent",!arguments.length||a)};
+
         g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
         g.clearUserCookie=function(){};
     })(window,document,window['_fs_namespace'],'script','user');
 }
+// tslint:enable

@@ -3,7 +3,22 @@
 # cactus
 Cactus App
 
+## Versions 
+You must use node version >= 8.13.0. The suggested version is v8.15.0
+
+See [Firebase Runtime Environments](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for more information
+
+You can install the suggested version using the bash script in the root of this repo: 
+```bash
+# From project root
+. node-version.sh
+```  
+> NOTE: Don't forget the leading period in the script, otherwise your current version of node won't get updated in your current terminal session
+This will install correct version via [Node Version Manager](https://github.com/nvm-sh/nvm). If you do not have NVM installed yet, the script will install it for you.
+
+
 ## Development
+
 Run `npm run dev` from the `/web` directory to run the local dev server. It will run `webpack-dev-server` and launch a server on `localhost:8080`. Static assets (images) are served out of the `/src/assets` directory. The dev server supports hot reloading of javascript and sass files. 
 
 Since static assets (images, etc) are served from the `src` directory, all changes should be available immediately

@@ -1,4 +1,4 @@
-import "styles/pages/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.scss"
+import "@styles/pages/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

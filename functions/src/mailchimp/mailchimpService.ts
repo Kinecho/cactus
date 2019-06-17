@@ -9,7 +9,7 @@ import ListMember, {
 } from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 import * as md5 from "md5";
-import {Campaign} from "@api/mailchimp/models/MailchimpTypes";
+import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 
 
 const config = getConfig();

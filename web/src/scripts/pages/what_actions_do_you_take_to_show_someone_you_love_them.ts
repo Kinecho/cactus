@@ -1,4 +1,4 @@
-import "styles/pages/what_actions_do_you_take_to_show_someone_you_love_them.scss"
+import "@styles/pages/what_actions_do_you_take_to_show_someone_you_love_them.scss"
 import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
 
 

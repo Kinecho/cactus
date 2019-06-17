@@ -1,4 +1,4 @@
-import "styles/pages/checkout_redirect.scss"
+import "@styles/pages/checkout_redirect.scss"
 import {configureStripe, redirectToCheckout} from "@web/checkoutService";
 import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";

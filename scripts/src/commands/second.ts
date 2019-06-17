@@ -1,20 +1,13 @@
 import {BaseCommand} from "@scripts/run";
+import * as admin from "firebase-admin";
 
 export default class TestTwo extends BaseCommand {
 
     constructor(){
-        super({useAdmin: true});
+        super({useAdmin: true, name: "TestTwo"});
     }
 
-    async run():Promise<any>{
-        const app = await super.getFirebaseApp();
-        console.log("Second Test!");
-
-        if (!app){
-            console.error("Unable to use admin app");
-            return;
-        }
-
+    async run(app: admin.app.App):Promise<any>{
         const db = app.firestore();
         const collections = await db.listCollections();
         const ids = collections.map((collection) => {

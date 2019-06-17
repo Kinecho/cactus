@@ -1,4 +1,4 @@
-import "styles/pages/payment_success.scss"
+import "@styles/pages/payment_success.scss"
 
 
 document.addEventListener('DOMContentLoaded', function() {

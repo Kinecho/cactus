@@ -19,12 +19,50 @@ import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMembe
 import {getMailchimpDateString} from "@api/util/DateUtil";
 import * as getRawBody from 'raw-body';
 import {logEmailReply} from "@api/services/emailService";
+import {getById, save} from "@api/services/firestoreService";
+import TestModel from "@shared/models/TestModel";
+import {fromJSON} from "@shared/util/FirebaseUtil";
+import bodyParser = require("body-parser");
 
 const app = express();
 
 app.use(cors({origin: true}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
+
+app.get('/testModel/:id', async (req, res) => {
+
+    const id = req.params.id;
+    if (!id) {
+        return res.status(400);
+    }
+
+    const model = await getById(id, TestModel);
+
+    if (!model){
+        return res.sendStatus(404);
+    }
+
+
+    return res.status(200).json({status: 'ok', data: model.toJSON()})
+
+});
+
+app.post("/testModel", bodyParser.json(), async (req, res) => {
+
+    try {
+        console.log("body", JSON.stringify(req.body));
+        const model = await fromJSON(req.body, TestModel);
+        console.log("model", JSON.stringify(model));
+        const saved = await save(model);
+        console.log("saved object", saved);
+        res.send({data: await saved.toJSON()})
+    } catch (e){
+        res.status(500).send({error: e});
+    }
+
+
+});
 
 /**
  * NOTE: turns out cloud functions request middleware isn't the plain, standard express app you might think. As a result, often the body may be different than expected, or not exist at all.
