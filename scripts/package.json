@@ -7,7 +7,9 @@
     "test": "jest",
     "start": "npm run cmd",
     "lint": "tslint --project tsconfig.json",
-    "cmd": "ts-node -r tsconfig-paths/register src/index.ts"
+    "cmd": "ts-node -r tsconfig-paths/register src/index.ts",
+    "page": "npm run cmd createPage",
+    "page:delete": "npm run cmd deletePage"
   },
   "_moduleAliases": {
     "@scripts": "lib/scripts/src",
@@ -17,10 +19,13 @@
   "author": "Neil Poulin",
   "license": "ISC",
   "dependencies": {
+    "@types/md5": "^2.1.33",
+    "axios": "^0.19.0",
     "chalk": "^2.4.2",
     "firebase-admin": "^8.1.0",
     "firebase-functions": "^3.0.0",
     "firebase-tools": "^7.0.0",
+    "md5": "^2.2.1",
     "module-alias": "^2.2.0",
     "prompts": "^2.1.0",
     "yesno": "^0.2.0"

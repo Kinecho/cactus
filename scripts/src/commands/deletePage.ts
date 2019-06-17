@@ -1,17 +1,15 @@
 import chalk from "chalk";
-
 const prompts = require('prompts');
-const helpers = require("./helpers");
+const helpers = require("@web/../helpers");
 const fs = require("fs");
 import {promisify} from "util";
+import {Command} from "@scripts/run";
 
 const path = require("path");
 
 const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
 const pages = require(pagesPath) as { [name: string]: { title: string, path: string } };
-
-console.log(chalk.red("Let's remove a page."));
 
 export interface InputResponse {
     pageName: string,
@@ -26,15 +24,15 @@ function getFirebaseConfig(): { hosting: { rewrites: { source: string, destinati
 async function listAllPageNames(): Promise<string[]> {
     const files = await promisify(fs.readdir)(helpers.htmlDir);
 
-    const fileNames = [];
-    files.forEach(file => {
+    const fileNames:string[] = [];
+    files.forEach((file:string) => {
         fileNames.push(file.replace(".html", ""));
     });
 
     return fileNames;
 }
 
-export function validatePageExists(input): boolean | string {
+export function validatePageExists(input:string): boolean | string {
     const baseName = input.split(".")[0];
     const htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, baseName));
     const pagesExists = !!pages[baseName];
@@ -72,7 +70,7 @@ async function updateFirebaseJson() {
     if (remove) {
         config.hosting.rewrites = rewrites.filter((page) => page.destination !== htmlName);
 
-        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
+        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', (err: any) => {
             if (err) {
                 console.log(err);
             }
@@ -104,7 +102,7 @@ async function updatePagesFile() {
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-    fs.writeFile(pagesPath, data, 'utf8', function (err) {
+    fs.writeFile(pagesPath, data, 'utf8', (err: any) => {
         if (err) {
             console.log(err)
         }
@@ -165,40 +163,47 @@ async function removeScss() {
     fs.unlinkSync(scssFilePath);
 }
 
-export async function start(): Promise<void> {
-    console.log("Loading pages...");
-    const files = (await listAllPageNames()).map(file => ({title: file}));
-    let canceled = false;
-    const questions = [
-        {
-            type: "autocomplete",
-            name: 'pageName',
-            message: 'Page (type to filter)',
-            // initial: (prev, values) => formatFilename(values.title),
-            validate: validatePageExists,
-            // format: formatFilename,
-            choices: files,
-            limit: 20,
-        },
-    ];
 
-    response = await prompts(questions, {
-        onCancel: () => {
-            console.log("Canceled deletion");
-            canceled = true;
+
+export default class DeletePage implements Command {
+    name = "Delete Page";
+
+    async start(): Promise<void> {
+        console.log(chalk.red("Let's remove a page.\n"));
+
+        const files = (await listAllPageNames()).map(file => ({title: file}));
+        let canceled = false;
+        const questions = [
+            {
+                type: "autocomplete",
+                name: 'pageName',
+                message: 'Page (type to filter)',
+                // initial: (prev, values) => formatFilename(values.title),
+                validate: validatePageExists,
+                // format: formatFilename,
+                choices: files,
+                limit: 10,
+            },
+        ];
+
+        response = await prompts(questions, {
+            onCancel: () => {
+                console.log("Canceled deletion");
+                canceled = true;
+            }
+        });
+
+        if (!canceled){
+            const {pageName} = response;
+            console.log("removing page", chalk.red(pageName));
+
+            await updatePagesFile();
+            await updateFirebaseJson();
+            await removeJS();
+            await removeScss();
+            await removeHtml();
+        } else {
+            console.log("cancel success");
         }
-    });
-
-    if (!canceled){
-        const {pageName} = response;
-        console.log("removing page", chalk.red(pageName));
-
-        await updatePagesFile();
-        await updateFirebaseJson();
-        await removeJS();
-        await removeScss();
-        await removeHtml();
-    } else {
-        console.log("cancel success");
     }
 }

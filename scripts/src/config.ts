@@ -3,6 +3,7 @@ import * as admin from "firebase-admin";
 const yesno = require("yesno");
 import chalk from "chalk";
 import helpers from "@scripts/helpers";
+import {CactusConfig}from "@api/config/CactusConfig";
 
 export enum Project {
     STAGE = "stage",
@@ -45,14 +46,14 @@ export async function getAdmin(project:Project, opts:ConfigOptions=DefaultOption
         }
     }
 
-    const config = await getConfig(project, opts);
+    const config = await getAdminConfig(project, opts);
 
     const app = admin.initializeApp(config);
     app.firestore().settings({timestampsInSnapshots: true});
     return app;
 }
 
-async function getConfig(project:Project, opts:ConfigOptions=DefaultOptions) {
+async function getAdminConfig(project:Project, opts:ConfigOptions=DefaultOptions) {
     const config = await firebaseTools.setup.web({project: project});
     if (opts && opts.useAdmin) {
         try {
@@ -65,4 +66,8 @@ async function getConfig(project:Project, opts:ConfigOptions=DefaultOptions) {
         }
     }
     return config;
+}
+
+export async function getCactusConfig(project: Project):Promise<CactusConfig> {
+    return firebaseTools.functions.config.get(undefined, {project}) as CactusConfig;
 }

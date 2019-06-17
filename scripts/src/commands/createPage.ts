@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import {Command} from "@scripts/run";
-
-
+import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
 const prompts = require('prompts');
 const helpers = require("@web/../helpers");
 const fs = require("fs");
@@ -10,8 +9,6 @@ const path = require("path");
 const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
 const pages = require(pagesPath) as { [name: string]: { title: string, path: string } };
-
-console.log('Let\'s create a static page.');
 
 const questions = [
     {
@@ -27,7 +24,6 @@ const questions = [
         validate: validatePageName,
         format: formatFilename,
     },
-
     {
         type: 'text',
         name: 'pagePath',
@@ -254,54 +250,24 @@ function createScss() {
     });
 }
 
-// export async function start(): Promise<void> {
-//     response = await prompts(questions);
-//     const {pagePath, title, looksGood} = response;
-//
-//     if (!looksGood) {
-//         console.warn("Not creating pages.");
-//         return;
-//     }
-//
-//     console.log("page path is: ", pagePath);
-//     console.log("title ", title);
-//
-//     createHtml();
-//     createJS();
-//     createScss();
-//     addToSitemap();
-//
-//
-//     if (response.writeUrls) {
-//         updateFirebaseJson();
-//         updatePagesFile();
-//     } else {
-//         console.log("Not writing urls to pages.js or firebase.json");
-//     }
-//
-// }
-
-//
-// start().then(() => {
-//     console.log("Done")
-// }).catch(error => {
-//     console.error("Failed to create page", error);
-// });
-//
-
-
 
 export default class CreatePage implements Command {
     name = "Create Page";
 
     async start(): Promise<any> {
         // const db = app.firestore();
-
+        console.log(chalk.green('Let\'s create a static page.'));
         response = await prompts(questions);
         const {pagePath, title, looksGood} = response;
 
+
+        const mailchimpCommand = new MailchimpQuestionCampaign();
+        mailchimpCommand.question = response.title;
         if (!looksGood) {
             console.warn(chalk.red("Not creating pages."));
+
+            await mailchimpCommand.start();
+
             return;
         }
 

@@ -155,7 +155,8 @@ export async function start(): Promise<void> {
 
 export async function runCommand(name:string): Promise<void> {
     const command = await loadCommand(name);
-    console.log("Running command" + command.name);
+    resetConsole();
+    console.log("Running command " + command.name);
     await command.start();
 }
 

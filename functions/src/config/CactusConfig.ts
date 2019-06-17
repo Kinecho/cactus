@@ -1,4 +1,4 @@
-interface CactusConfig {
+export interface CactusConfig {
     isEmulator: boolean,
     mailchimp: {
         api_key: string,
