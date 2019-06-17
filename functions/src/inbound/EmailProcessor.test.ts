@@ -5,11 +5,11 @@ import {
     processBodyHeaders, getMailchimpCampaignIdFromBody, getLinks, getReplyTextContent, processEmail
 } from "@api/inbound/EmailProcessor";
 import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
-
 import realBody from "./test_data/emailBody1";
 import scottEmail from "./test_data/emailBody2";
 import * as nonMailchimp from "./test_data/email3";
 import EmailReply from "@shared/models/EmailReply";
+
 
 describe("processAttachments", () => {
     test("no attachments", () => {
@@ -59,26 +59,26 @@ describe("processBodyHeaders", () => {
 
 describe("Get sender from headers", () => {
     test("No headers present", () => {
-        const headers:EmailHeaders = {};
+        const headers: EmailHeaders = {};
         expect(getSenderFromHeaders(headers)).toBeNull();
     });
 
     test("Authentication results is present", () => {
-        const headers:EmailHeaders = {
+        const headers: EmailHeaders = {
             [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com"
         };
         expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
     });
 
     test("with semicolon", () => {
-        const headers:EmailHeaders = {
+        const headers: EmailHeaders = {
             [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com;  "
         };
         expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
     });
 
     test("Authentication with shit at the end of the string", () => {
-        const headers:EmailHeaders = {
+        const headers: EmailHeaders = {
             [Header.AUTHENTICATION_RESULTS]: "mx.google.com; dkim=pass header.i=@anecdotal-co.20150623.gappssmtp.com header.s=20150623 header.b=fvgI1v7k; spf=pass (google.com: domain of neil@kinecho.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=neil@kinecho.com; alkdfj a alkjdflaksjdflj"
         };
         expect(getSenderFromHeaders(headers)).toBe("neil@kinecho.com");
@@ -180,7 +180,7 @@ describe('parse reply', () => {
     test("use email parser to get text and html replies", async () => {
         const email = await processEmail(nonMailchimp.headers, nonMailchimp.body);
         expect(email).not.toBeNull();
-        if (!email){
+        if (!email) {
             return;
         }
         const textReply = getReplyTextContent(email);
@@ -193,7 +193,7 @@ describe("process email", () => {
         const email = await processEmail(nonMailchimp.busboyHeaders, nonMailchimp.busboyBody);
         console.log("processed email", email);
         expect(email).not.toBeNull();
-        if (email === null){
+        if (email === null) {
             return;
         }
         expect(email.subject).toBe("super beta file");
@@ -202,7 +202,7 @@ describe("process email", () => {
     test("real body", async () => {
         const email = await processEmail(nonMailchimp.headers, nonMailchimp.body);
         expect(email).not.toBeNull();
-        if (email === null){
+        if (email === null) {
             return;
         }
         expect(email.subject).toBe("Re: When do you feel deep satisfaction?");
@@ -222,26 +222,37 @@ describe("process email", () => {
             email: 'test@test.myfleck.com',
             name: null,
             local: 'test',
-            domain: 'test.myfleck.com' });
-        expect(email.envelope).toEqual({ to: [{
+            domain: 'test.myfleck.com'
+        });
+        expect(email.envelope).toEqual({
+            to: [{
                 email: 'test@test.myfleck.com',
                 name: null,
                 local: 'test',
-                domain: 'test.myfleck.com' }],
+                domain: 'test.myfleck.com'
+            }],
             from:
-                { email: 'neil@kinecho.com',
+                {
+                    email: 'neil@kinecho.com',
                     name: null,
                     local: 'neil',
-                    domain: 'kinecho.com' } } )
+                    domain: 'kinecho.com'
+                }
+        })
     });
 
     test("firebase", async () => {
         const email = await processEmail(nonMailchimp.firebaseHeaders, nonMailchimp.firebaseBody);
         console.log("processed email", email);
         expect(email).not.toBeNull();
-        if (email === null){
+        if (email === null) {
             return;
         }
-        expect(email.from).toEqual({email: "neil@kinecho.com", name: "Neil Poulin", domain: "kinecho.com", local: "neil"});
+        expect(email.from).toEqual({
+            email: "neil@kinecho.com",
+            name: "Neil Poulin",
+            domain: "kinecho.com",
+            local: "neil"
+        });
     })
 });

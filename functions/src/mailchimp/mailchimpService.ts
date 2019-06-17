@@ -5,11 +5,12 @@ import axios, {AxiosError} from "axios";
 import ListMember, {
     ListMemberStatus,
     MergeField,
-    MergeFields, Tag
+    MergeFields, Tag, TagName, TagStatus
 } from "@shared/mailchimp/models/ListMember"
 import ApiError from "@shared/ApiError";
 import * as md5 from "md5";
 import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
+import {getMailchimpDateString} from "@api/util/DateUtil";
 
 
 const config = getConfig();
@@ -207,4 +208,34 @@ export async function getCampaign(id:string):Promise<Campaign|null> {
         console.error(e.data);
         return null;
     }
+}
+
+// export type ResetUserReminderRequest
+export async function resetUserReminder(email: string|null|undefined): Promise<void> {
+
+    if (!email){
+        console.warn("No email given provided to resetUserReminder function");
+        return;
+    }
+
+    // console.log("updating merge tag for user", email.mailchimpMemberId);
+    const mergeRequest: UpdateMergeFieldRequest = {
+        email,
+        mergeFields: {
+            [MergeField.LAST_REPLY]: getMailchimpDateString()
+        }
+    };
+
+    const tagRequest: UpdateTagsRequest = {
+        email,
+        tags: [
+            {
+                name: TagName.NEEDS_ONBOARDING_REMINDER,
+                status: TagStatus.INACTIVE
+            },
+        ]
+    };
+
+    await updateMergeFields(mergeRequest);
+    await updateTags(tagRequest);
 }

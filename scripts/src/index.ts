@@ -5,8 +5,20 @@ import * as admin from "firebase-admin";
 
 setTimestamp(admin.firestore.Timestamp);
 
-start().then(() => {
-    console.log(chalk.dim("\nDone"));
-}).catch(error => {
-    console.error(chalk.red("error", error));
-});
+if (process.argv && process.argv.length > 0){
+    const scriptName = process.argv[0];
+    console.log("attempting to run ", scriptName);
+
+
+
+
+}
+else {
+    start().then(() => {
+        console.log(chalk.dim("\nDone"));
+    }).catch(error => {
+        console.error(chalk.red("error", error));
+    });
+}
+
+

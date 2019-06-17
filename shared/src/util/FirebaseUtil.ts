@@ -61,8 +61,6 @@ export async function convertTimestampToDate(input: any): Promise<any> {
     })
 }
 
-
-
 export async function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): Promise<T|null> {
     const data = doc.data();
     if (!data){

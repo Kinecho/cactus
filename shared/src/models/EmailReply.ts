@@ -7,10 +7,8 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 
 export enum EmailStoragePath {
-    RAW_BODY = "RAW_BODY",
     HEADERS = "HEADERS",
     BODY = "BODY",
-    RAW_HEADERS = "RAW_HEADERS",
 }
 
 export interface InboundEmailFiles {
@@ -64,7 +62,8 @@ export default class EmailReply extends BaseModel{
         this.mailchimpMemberId = this.headers[MailchimpMemberId];
         this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         this.mailchimpCampaignId = input.mailchimpCampaignId;
-        this.originalEmailStoragePaths = {RAW_BODY: null, HEADERS: null, BODY: null, RAW_HEADERS: null};
+        this.originalEmailStoragePaths = {HEADERS: null, BODY: null};
+
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {

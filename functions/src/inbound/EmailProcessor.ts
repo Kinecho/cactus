@@ -20,6 +20,7 @@ export const forwardedGmailEmail = "hello+caf_=forwarded=inbound.cactus.app@kine
 export async function processEmail(headers:any, body:any):Promise<EmailReply|null> {
     return new Promise(async (resolve, reject) => {
         try {
+
             const busboy = new Busboy({headers: headers});
             const emailFiles: InboundEmailFiles = {};
             const emailInput: InboundEmail = {};
@@ -34,6 +35,7 @@ export async function processEmail(headers:any, body:any):Promise<EmailReply|nul
             // This callback will be invoked after all uploaded files are saved.
             busboy.on('finish', async () => {
                 const email = await createEmailFromInputs(emailInput, emailFiles);
+
 
                 email.replyText = getReplyTextContent(email);
 
