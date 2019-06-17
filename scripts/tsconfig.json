@@ -16,7 +16,8 @@
                 "./src/*"
             ],
             "@shared/*": ["../shared/src/*"],
-            "@api/*": ["../functions/src/*"]
+            "@api/*": ["../functions/src/*"],
+            "@web/*": ["../web/src/*"]
         }
     },
     "compileOnSave": false,

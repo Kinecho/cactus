@@ -1,8 +1,8 @@
-import {BaseCommand} from "@scripts/run";
+import {FirebaseCommand} from "@scripts/run";
 import {listCollections} from "@api/services/firestoreService";
 import * as admin from "firebase-admin";
 
-export default class ListCollections extends BaseCommand {
+export default class ListCollections extends FirebaseCommand {
 
     constructor(){
         super({useAdmin: true, name: "ListCollections"});

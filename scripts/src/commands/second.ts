@@ -1,7 +1,7 @@
-import {BaseCommand} from "@scripts/run";
+import {FirebaseCommand} from "@scripts/run";
 import * as admin from "firebase-admin";
 
-export default class TestTwo extends BaseCommand {
+export default class TestTwo extends FirebaseCommand {
 
     constructor(){
         super({useAdmin: true, name: "TestTwo"});

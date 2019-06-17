@@ -2,21 +2,20 @@
 import {promisify} from "util";
 import * as admin from "firebase-admin";
 import helpers from "@scripts/helpers";
+import chalk from "chalk";
+import {getAdmin, Project} from "@scripts/config";
+import {setAdmin} from "@api/services/firestoreService";
 
 const prompts = require("prompts");
 const path = require("path");
 const fs = require("fs");
-import chalk from "chalk";
-import {getAdmin, Project} from "@scripts/config";
-import {setAdmin} from "@api/services/firestoreService";
 
 function resetConsole(){
     process.stdout.write('\x1B[2J\x1B[0f');
 }
 
 export interface Command {
-    app?: admin.app.App,
-    project: Project,
+    name: string;
     start: () => Promise<void>,
 }
 
@@ -24,13 +23,13 @@ export interface ProjectInput {
     project: Project,
 }
 
-export interface BaseCommandConstructorArgs {
+export interface FirebaseCommandConstructorArgs {
     useAdmin: boolean;
     name: string;
 }
 
-export abstract class BaseCommand implements Command {
-    project: Project = Project.STAGE;
+export abstract class FirebaseCommand implements Command {
+    project: Project = Project.STAGE; //default project to stage
     app?: admin.app.App;
     useAdmin: boolean;
     name: string;
@@ -44,7 +43,7 @@ export abstract class BaseCommand implements Command {
         console.groupEnd();
     }
 
-    protected constructor(opts: BaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
+    protected constructor(opts: FirebaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
         this.useAdmin = opts.useAdmin;
         this.name = opts.name;
     }
@@ -95,7 +94,8 @@ export interface InputResponse {
 
 export async function getAllCommands(): Promise<string[]> {
     console.log("reading all files in", helpers.commandsDir);
-    return await promisify(fs.readdir)(helpers.commandsDir);
+    const commands = await promisify(fs.readdir)(helpers.commandsDir);
+    return commands.filter((name:string) => !name.endsWith("test.ts"));
 }
 
 
@@ -151,6 +151,12 @@ export async function start(): Promise<void> {
     await command.start();
 
     return;
+}
+
+export async function runCommand(name:string): Promise<void> {
+    const command = await loadCommand(name);
+    console.log("Running command" + command.name);
+    await command.start();
 }
 
 async function loadCommand(filename: string): Promise<Command> {
