@@ -2,21 +2,21 @@
 import {promisify} from "util";
 import * as admin from "firebase-admin";
 import helpers from "@scripts/helpers";
+import chalk from "chalk";
+import {getAdmin, Project} from "@scripts/config";
+import {setAdmin} from "@api/services/firestoreService";
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 
 const prompts = require("prompts");
 const path = require("path");
 const fs = require("fs");
-import chalk from "chalk";
-import {getAdmin, Project} from "@scripts/config";
-import {setAdmin} from "@api/services/firestoreService";
 
 function resetConsole(){
     process.stdout.write('\x1B[2J\x1B[0f');
 }
 
 export interface Command {
-    app?: admin.app.App,
-    project: Project,
+    name: string;
     start: () => Promise<void>,
 }
 
@@ -24,29 +24,42 @@ export interface ProjectInput {
     project: Project,
 }
 
-export interface BaseCommandConstructorArgs {
+export interface FirebaseCommandConstructorArgs {
     useAdmin: boolean;
     name: string;
 }
 
-export abstract class BaseCommand implements Command {
-    project: Project = Project.STAGE;
+export abstract class FirebaseCommand implements Command {
+    project?: Project; //default project to stage
     app?: admin.app.App;
     useAdmin: boolean;
     name: string;
+    firestoreService?:AdminFirestoreService;
 
-    protected abstract async run(app: admin.app.App): Promise<void>;
+    protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void>;
 
     async start():Promise<void>{
         const app = await this.getFirebaseApp();
+        const firestoreService = await this.getFirestoreService();
+
         console.group(chalk.yellow(`${this.name} Logs:`));
-        await this.run(app);
+        await this.run(app, firestoreService);
         console.groupEnd();
     }
 
-    protected constructor(opts: BaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
+    protected constructor(opts: FirebaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
         this.useAdmin = opts.useAdmin;
         this.name = opts.name;
+    }
+
+    async getFirestoreService():Promise<AdminFirestoreService> {
+        if (this.firestoreService){
+            return this.firestoreService;
+        }
+
+        const app = await this.getFirebaseApp();
+        this.firestoreService = new AdminFirestoreService(app);
+        return this.firestoreService;
     }
 
     async getFirebaseApp(): Promise<admin.app.App> {
@@ -54,24 +67,26 @@ export abstract class BaseCommand implements Command {
             return this.app;
         }
 
-        const questions = [
-            {
-                type: "select",
-                name: 'project',
-                message: 'Choose environment',
-                choices: [{title: "Cactus Stage", value: Project.STAGE}, {title: "Cactus Prod", value: Project.PROD}],
-                limit: 20,
-            },
-        ];
+        if (!this.project){
+            const questions = [
+                {
+                    type: "select",
+                    name: 'project',
+                    message: 'Choose environment',
+                    choices: [{title: "Cactus Stage", value: Project.STAGE}, {title: "Cactus Prod", value: Project.PROD}],
+                    limit: 20,
+                },
+            ];
+            const response: ProjectInput = await prompts(questions, {
+                onCancel: () => {
+                    console.log("Canceled command");
+                    return process.exit(0);
+                }
+            });
 
-        const response: ProjectInput = await prompts(questions, {
-            onCancel: () => {
-                console.log("Canceled command");
-                return process.exit(0);
-            }
-        });
+            this.project = response.project;
+        }
 
-        this.project = response.project;
         this.app = await getAdmin(this.project, {useAdmin: this.useAdmin});
 
         if (!this.app) {
@@ -95,7 +110,8 @@ export interface InputResponse {
 
 export async function getAllCommands(): Promise<string[]> {
     console.log("reading all files in", helpers.commandsDir);
-    return await promisify(fs.readdir)(helpers.commandsDir);
+    const commands = await promisify(fs.readdir)(helpers.commandsDir);
+    return commands.filter((name:string) => !name.endsWith("test.ts"));
 }
 
 
@@ -151,6 +167,13 @@ export async function start(): Promise<void> {
     await command.start();
 
     return;
+}
+
+export async function runCommand(name:string): Promise<void> {
+    const command = await loadCommand(name);
+    resetConsole();
+    console.log("Running command " + command.name);
+    await command.start();
 }
 
 async function loadCommand(filename: string): Promise<Command> {

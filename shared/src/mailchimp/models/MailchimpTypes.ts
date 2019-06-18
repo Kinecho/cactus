@@ -1,4 +1,5 @@
 import {MergeFields} from "@shared/mailchimp/models/ListMember";
+import {SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
     unsubscribe = "unsubscribe",
@@ -7,6 +8,14 @@ export enum EventType {
     upemail = "upemail",
     cleaned = "cleaned",
     campaign = "campaign",
+}
+
+export enum CampaignType {
+    regular = "regular",
+    plaintext = "plaintext",
+    absplit = "absplit",
+    rss = "rss",
+    variate = "variate",
 }
 
 export enum UnsubscribeAction {
@@ -88,6 +97,14 @@ export interface CampaignEventData {
     list_id: string,
 }
 
+export enum CampaignStatus {
+    save = "save",
+    paused = "paused",
+    schedule ="schedule",
+    sending = "sending",
+    sent = "sent"
+}
+
 export interface Campaign {
     emails_sent: number,
     send_time: string,
@@ -96,7 +113,7 @@ export interface Campaign {
     id: string,
     web_id: string,
     archive_url: string,
-    status: string,
+    status: CampaignStatus,
     recipients: {
         list_id: string,
         list_is_active: boolean,
@@ -124,4 +141,84 @@ export interface Campaign {
         click_rate: number,
 
     }
+}
+
+export interface MailchimpLink {
+    rel: string,
+    href: string,
+    method: string,
+    targetSchema: string,
+    schema: string,
+}
+
+export interface ListResponse {
+    total_items: number,
+    _links: MailchimpLink[],
+}
+
+export enum SegmentType {
+    saved = "saved",
+    static = "static",
+    fuzzy = "fuzzy"
+}
+
+type ISODate = string;
+
+export interface Segment {
+    id: number,
+    name: string,
+    member_count: number,
+    type: SegmentType,
+    created_at: ISODate,
+    updated_at: ISODate,
+    options: {
+        match: SegmentMatchType,
+        conditions: SegmentCondition[],
+    },
+    list_id: string,
+    _links: MailchimpLink[]
+
+}
+
+export interface SegmentListResponse extends ListResponse{
+    segments: Segment[],
+    list_id: string,
+}
+
+export enum TemplateType {
+    user = "user",
+    base = "base",
+    gallery = "gallery"
+}
+
+/**
+ * Email Template
+ * (@Link https://developer.mailchimp.com/documentation/mailchimp/reference/templates/#read-get_templates)
+ */
+export interface Template {
+    id: number,
+    type: TemplateType,
+    name: string,
+    drag_and_drop: boolean,
+    responsive: boolean,
+    category: string,
+    date_created: ISODate,
+    date_edited: ISODate,
+    created_by: string,
+    edited_by: string,
+    active: boolean,
+    folder_id: string,
+    thumbnail?: string, //url of the image
+    share_url: string,
+    _links: MailchimpLink[],
+}
+
+export enum TemplateSortField {
+    date_created = "date_created",
+    name = "name",
+}
+
+export interface TemplateListResponse extends ListResponse {
+    templates: Template[],
+
 }

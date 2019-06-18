@@ -7,6 +7,7 @@ export enum Collection {
     sentCampaigns = "sentCampaigns",
     reflectionResponses = "reflectionResponses",
     users = "users",
+    reflectionPrompt = "reflectionPrompt",
 }
 
 export interface FirestoreIdentifiable {
@@ -24,9 +25,17 @@ export abstract class BaseModel implements FirestoreIdentifiable{
     deleted?:boolean = false;
     deletedAt?:Date;
 
+    prepareForFirestore():any{
+        return this;
+    }
+
     async toFirestoreData(removeKeys=["id", "collection"]):Promise<any> {
-        const data = await convertDateToTimestamp(this);
-        console.log("data after converting to dates", data);
+        const prepared = this.prepareForFirestore();
+        if (!prepared){
+            throw new Error("Unable to prepare for firestore");
+        }
+        const data = await convertDateToTimestamp(prepared);
+        // console.log("data after converting to dates", data);
 
         if (removeKeys && data){
             removeKeys.forEach(key => {
@@ -34,13 +43,11 @@ export abstract class BaseModel implements FirestoreIdentifiable{
             });
         }
 
-
         Object.keys(data).forEach(key => {
             if (data[key] === undefined) {
                 delete data[key];
             }
         });
-
 
         return data;
     }

@@ -54,7 +54,7 @@
 
     // Do not allow any imports for modules that are not in package.json. These will almost certainly fail when
     // deployed.
-    "no-implicit-dependencies": [true, ["@api", "@shared", "@api", "@scripts"]],
+    "no-implicit-dependencies": [true, ["@api", "@shared", "@api", "@scripts", "@web"]],
 
     // The 'this' keyword can only be used inside of classes.
     "no-invalid-this": true,
@@ -66,7 +66,7 @@
     "no-unsafe-finally": true,
 
 //    // Do not allow variables to be used before they are declared.
-//    "no-use-before-declare": true,
+    "no-use-before-declare": true,
 
     // Expressions must always return a value. Avoids common errors like const myValue = functionReturningVoid();
     "no-void-expression": [true, "ignore-arrow-function-shorthand"],

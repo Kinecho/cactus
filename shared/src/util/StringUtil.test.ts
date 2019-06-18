@@ -1,4 +1,4 @@
-import {getFilenameFromInput, getUrlFromInput} from "./createPage"
+import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 
 describe("get filename from input", () => {
     test("all lowercase, valid", () => {
@@ -71,5 +71,11 @@ describe("get url from input", () => {
 
     test("null value", () => {
         expect(getUrlFromInput(null)).toEqual("");
+    });
+
+    test("add a domain", () => {
+        const input = "test_page";
+        const domain = "cactus.app";
+        expect(getUrlFromInput(input, domain)).toEqual("https://cactus.app/test-page");
     });
 });

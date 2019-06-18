@@ -30,7 +30,7 @@ If you want to remove a webpage and all of it's associated mappings, use the scr
 
 ## Add a new webpage
 
-> NOTE: this process has been updated! You can use `npm run page` to do the following steps automatically.
+> NOTE: this process has been updated! You can use `npm run page` from the `scripts` directory to do the following steps automatically.
 
 Since we're not running a single page app, we have no routing layer. We need to create and set up routes manually. You can either do this manually, or use the automated script.
 

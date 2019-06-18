@@ -1,17 +1,22 @@
 import chalk from "chalk";
-
 const prompts = require('prompts');
-const helpers = require("./helpers");
+const helpers = require("@web/../helpers");
 const fs = require("fs");
 import {promisify} from "util";
+import {Command} from "@scripts/run";
 
 const path = require("path");
 
+interface PageFileEntry{
+    title: string,
+    path: string,
+}
+
 const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
-const pages = require(pagesPath) as { [name: string]: { title: string, path: string } };
+const pages = require(pagesPath) as { [name: string]: PageFileEntry };
 
-console.log(chalk.red("Let's remove a page."));
+const readFile = promisify(fs.readFile);
 
 export interface InputResponse {
     pageName: string,
@@ -26,15 +31,15 @@ function getFirebaseConfig(): { hosting: { rewrites: { source: string, destinati
 async function listAllPageNames(): Promise<string[]> {
     const files = await promisify(fs.readdir)(helpers.htmlDir);
 
-    const fileNames = [];
-    files.forEach(file => {
+    const fileNames:string[] = [];
+    files.forEach((file:string) => {
         fileNames.push(file.replace(".html", ""));
     });
 
     return fileNames;
 }
 
-export function validatePageExists(input): boolean | string {
+export function validatePageExists(input:string): boolean | string {
     const baseName = input.split(".")[0];
     const htmlExists = fs.existsSync(path.join(`${helpers.htmlDir}`, baseName));
     const pagesExists = !!pages[baseName];
@@ -72,7 +77,7 @@ async function updateFirebaseJson() {
     if (remove) {
         config.hosting.rewrites = rewrites.filter((page) => page.destination !== htmlName);
 
-        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', function (err) {
+        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', (err: any) => {
             if (err) {
                 console.log(err);
             }
@@ -83,7 +88,8 @@ async function updateFirebaseJson() {
     }
 }
 
-async function updatePagesFile() {
+
+async function updatePagesFile():Promise<PageFileEntry|null> {
     const existingPage = pages[response.pageName];
     if (!existingPage) {
         console.warn(`No page with name ${response.pageName} exists in pages.js`);
@@ -97,19 +103,16 @@ async function updatePagesFile() {
 
     if (!remove) {
         console.log("Not updating pages.js configuration");
-        return
+        return null;
     }
 
     delete pages[response.pageName];
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-    fs.writeFile(pagesPath, data, 'utf8', function (err) {
-        if (err) {
-            console.log(err)
-        }
-    });
+    await promisify(fs.writeFile)(pagesPath, data, {encoding: 'utf8'});
     console.log(chalk.green("Removed configuration from pages.js"));
+    return existingPage;
 }
 
 async function removeHtml() {
@@ -165,40 +168,80 @@ async function removeScss() {
     fs.unlinkSync(scssFilePath);
 }
 
-export async function start(): Promise<void> {
-    console.log("Loading pages...");
-    const files = (await listAllPageNames()).map(file => ({title: file}));
-    let canceled = false;
-    const questions = [
-        {
-            type: "autocomplete",
-            name: 'pageName',
-            message: 'Page (type to filter)',
-            // initial: (prev, values) => formatFilename(values.title),
-            validate: validatePageExists,
-            // format: formatFilename,
-            choices: files,
-            limit: 20,
-        },
-    ];
+async function removeFromSitemap(pageEntry:PageFileEntry|null){
 
-    response = await prompts(questions, {
-        onCancel: () => {
-            console.log("Canceled deletion");
-            canceled = true;
-        }
+    if (!pageEntry){
+        console.warn("No page entry found - unable to remove from sitemap");
+        return;
+    }
+
+    console.log("removing entry for page path", JSON.stringify(pageEntry));
+
+    const sitemap = await readFile(helpers.questionsSiteMap, {encoding: 'utf8'});
+
+    const urls = sitemap.split("\n");
+    const filteredUrls = urls.filter((url:string) => !url.includes(pageEntry.path));
+
+    if (filteredUrls.length === urls.length) {
+        console.log("No entry found in sitemap for url", pageEntry.path);
+        return
+    }
+
+    const {remove} = await prompts({
+        name: "remove",
+        message: `Remove ${pageEntry.path} from questions sitemap?`,
+        type: "confirm"
     });
 
-    if (!canceled){
-        const {pageName} = response;
-        console.log("removing page", chalk.red(pageName));
+    if (remove) {
 
-        await updatePagesFile();
-        await updateFirebaseJson();
-        await removeJS();
-        await removeScss();
-        await removeHtml();
+        await promisify(fs.writeFile)(helpers.questionsSiteMap, filteredUrls.join("\n"), 'utf8');
+        console.log(chalk.green("Removed entry from sitemap"))
     } else {
-        console.log("cancel success");
+        console.log("Skipping sitemap");
+    }
+}
+
+export default class DeletePage implements Command {
+    name = "Delete Page";
+
+    async start(): Promise<void> {
+        console.log(chalk.red("Let's remove a page.\n"));
+
+        const files = (await listAllPageNames()).map(file => ({title: file}));
+        let canceled = false;
+        const questions = [
+            {
+                type: "autocomplete",
+                name: 'pageName',
+                message: 'Page (type to filter)',
+                // initial: (prev, values) => formatFilename(values.title),
+                validate: validatePageExists,
+                // format: formatFilename,
+                choices: files,
+                limit: 10,
+            },
+        ];
+
+        response = await prompts(questions, {
+            onCancel: () => {
+                console.log("Canceled deletion");
+                canceled = true;
+            }
+        });
+
+        if (!canceled){
+            const {pageName} = response;
+            console.log("removing page", chalk.red(pageName));
+
+            const pageEntry = await updatePagesFile();
+            await updateFirebaseJson();
+            await removeJS();
+            await removeScss();
+            await removeHtml();
+            await removeFromSitemap(pageEntry);
+        } else {
+            console.log("cancel success");
+        }
     }
 }
