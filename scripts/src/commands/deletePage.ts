@@ -16,6 +16,8 @@ const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
 const pages = require(pagesPath) as { [name: string]: PageFileEntry };
 
+const readFile = promisify(fs.readFile);
+
 export interface InputResponse {
     pageName: string,
 }
@@ -173,7 +175,9 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
         return;
     }
 
-    const sitemap = await promisify(fs.readFile)(helpers.questionsSiteMap);
+    console.log("removing entry for page path", JSON.stringify(pageEntry));
+
+    const sitemap = await readFile(helpers.questionsSiteMap, {encoding: 'utf8'});
 
     const urls = sitemap.split("\n");
     const filteredUrls = urls.filter((url:string) => !url.includes(pageEntry.path));
@@ -191,7 +195,7 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
 
     if (remove) {
 
-        await promisify(fs.writeFile)(firebaseConfigPath, filteredUrls.join("\n"), 'utf8');
+        await promisify(fs.writeFile)(helpers.questionsSiteMap, filteredUrls.join("\n"), 'utf8');
         console.log(chalk.green("Removed entry from sitemap"))
     } else {
         console.log("Skipping sitemap");
