@@ -1,4 +1,5 @@
 import {MergeFields} from "@shared/mailchimp/models/ListMember";
+import {SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
     unsubscribe = "unsubscribe",
@@ -7,6 +8,14 @@ export enum EventType {
     upemail = "upemail",
     cleaned = "cleaned",
     campaign = "campaign",
+}
+
+export enum CampaignType {
+    regular = "regular",
+    plaintext = "plaintext",
+    absplit = "absplit",
+    rss = "rss",
+    variate = "variate",
 }
 
 export enum UnsubscribeAction {
@@ -124,4 +133,46 @@ export interface Campaign {
         click_rate: number,
 
     }
+}
+
+export interface MailchimpLink {
+    rel: string,
+    href: string,
+    method: string,
+    targetSchema: string,
+    schema: string,
+}
+
+export interface ListResponse {
+    list_id: string,
+    total_items: number,
+    _links: MailchimpLink[],
+}
+
+export enum SegmentType {
+    saved = "saved",
+    static = "static",
+    fuzzy = "fuzzy"
+}
+
+type ISODate = string;
+
+export interface Segment {
+    id: number,
+    name: string,
+    member_count: number,
+    type: SegmentType,
+    created_at: ISODate,
+    updated_at: ISODate,
+    options: {
+        match: SegmentMatchType,
+        conditions: SegmentCondition[],
+    },
+    list_id: string,
+    _links: MailchimpLink[]
+
+}
+
+export interface SegmentListResponse extends ListResponse{
+    segments: Segment[],
 }
