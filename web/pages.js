@@ -26,6 +26,10 @@ module.exports = {
         "title": "What spiritual experience are you grateful for? | Cactus",
         "path": "/what-spiritual-experience-are-you-grateful-for"
     },
+    "what_are_your_simple_pleasures": {
+        "title": "What are your simple pleasures? | Cactus",
+        "path": "/what-are-your-simple-pleasures"
+    },
     "how_do_you_celebrate": {
         "title": "How do you celebrate? | Cactus",
         "path": "/how-do-you-celebrate"
@@ -37,6 +41,10 @@ module.exports = {
     "what_makes_your_body_and_mind_feel_connected_in_a_positive_way": {
         "title": "What makes your body and mind feel connected in a positive way?",
         "path": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way"
+    },
+    "what_place_changed_the_way_you_view_the_world_for_the_better": {
+        "title": "What place changed the way you view the world for the better?",
+        "path": "/what-place-changed-the-way-you-view-the-world-for-the-better"
     },
     "what_food_brings_you_the_most_joy": {
         "title": "What food brings you the most joy?",
@@ -61,6 +69,10 @@ module.exports = {
     "when_has_being_open_minded_enriched_your_life": {
         "title": "When has being open-minded enriched your life?",
         "path": "/when-has-being-open-minded-enriched-your-life"
+    },
+    "what_have_you_pursued_where_the_journey_became_the_reward": {
+        "title": "What have you pursued where the journey became the reward?",
+        "path": "/what-have-you-pursued-where-the-journey-became-the-reward"
     },
     "what_do_you_appreciate_most_about_your_best_friend": {
         "title": "What do you appreciate most about your best friend?",

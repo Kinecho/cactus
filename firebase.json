@@ -33,6 +33,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-are-your-simple-pleasures",
+                "destination": "/what_are_your_simple_pleasures.html"
+            },
+            {
                 "source": "/what-gifts-does-nature-provide-you",
                 "destination": "/what_gifts_does_nature_provide_you.html"
             },
@@ -109,8 +113,16 @@
                 "destination": "/what_food_brings_you_the_most_joy.html"
             },
             {
+                "source": "/what-have-you-pursued-where-the-journey-became-the-reward",
+                "destination": "/what_have_you_pursued_where_the_journey_became_the_reward.html"
+            },
+            {
                 "source": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way",
                 "destination": "/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.html"
+            },
+            {
+                "source": "/what-place-changed-the-way-you-view-the-world-for-the-better",
+                "destination": "/what_place_changed_the_way_you_view_the_world_for_the_better.html"
             },
             {
                 "source": "/what-experiences-or-activities-make-you-lose-track-of-time",
