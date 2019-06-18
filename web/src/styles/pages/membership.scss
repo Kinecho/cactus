@@ -1,0 +1,217 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+
+body {
+  overflow-x: hidden;
+}
+
+.hero {
+  align-items: center;
+  background-color: $lightPink;
+  display: flex;
+  flex-flow: column wrap;
+  height: 100vh;
+  justify-content: center;
+  text-align: center;
+
+  h3 {
+    color: $darkestPink;
+    margin-bottom: .8rem;
+  }
+
+  h1 {
+    margin-bottom: 1.6rem;
+  }
+
+  .subtext {
+    @include r(768) {
+      font-size: 2.4rem;
+    }
+  }
+}
+
+.centered {
+  max-width: 60rem;
+  text-align: left;
+
+  @include r(768) {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    max-width: 1200px;
+  }
+}
+
+.truck {
+  padding: 5.6rem 2.4rem;
+
+  @include r(768) {
+    padding: 6.4rem 2.4rem 7.2rem;
+  }
+
+  .centered {
+    @include r(768) {
+      flex-flow: row-reverse;
+    }
+  }
+
+  .graphic {
+    @include r(768) {
+      width: 50%;
+    }
+  }
+
+  .text {
+    @include r(768) {
+      margin-right: 6.4rem;
+      max-width: 42rem;
+    }
+  }
+
+  .reflection {
+    font-size: 1.6rem;
+    margin: 0 auto -1.6rem;
+    position: relative;
+    width: 67%;
+    z-index: 1;
+
+    @include r(768) {
+      font-size: 1.8rem;
+      max-width: 32rem;
+    }
+  }
+}
+
+.foodtruck {
+  display: block;
+  margin: 0 auto 3.2rem;
+  width: 100%;
+}
+
+h2 {
+  margin-bottom: 1.6rem;
+}
+
+.reflection {
+  @include shadowbox;
+  padding: 2.4rem;
+
+  .flexContainer {
+    margin-bottom: 1.6rem;
+  }
+
+  .date {
+    color: $darkestPink;
+    font-size: 1.6rem;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid $pink;
+    box-shadow: none;
+    flex-grow: 0;
+    height: 3rem;
+    margin: 0;
+    padding: .8rem;
+    width: 3rem;
+  }
+
+  .question {
+    font-weight: bold;
+    margin-bottom: .8rem;
+  }
+}
+
+.private {
+  background-color: $lightGreen;
+  padding: 5.6rem 2.4rem;
+  position: relative;
+  z-index: 0;
+
+  @include r(768) {
+    padding: 8rem 2.4rem;
+  }
+
+  &:before {
+    background-image: url(assets/images/yellowBlob.svg);
+    background-repeat: no-repeat;
+    background-size: 170px;
+    content: "";
+    height: 170px;
+    position: absolute;
+    right: -110px;
+    top: -30px;
+    width: 170px;
+
+    @include r(768) {
+      background-position: calc(50% - 32px) 0;
+      right: 0;
+      top: 32px;
+      width: 100%;
+      z-index: -1;
+    }
+  }
+
+  .flexContainer {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .text {
+    @include r(768) {
+      margin-left: 7.2rem;
+      max-width: 42rem;
+    }
+  }
+
+  .reflection {
+    margin-bottom: 5.6rem;
+    position: relative;
+
+    @include r(768) {
+      max-width: 48rem;
+      width: 50%;
+    }
+
+    &:before {
+      @include shadowbox;
+      background-color: mix($lightGreen, white, 33%);
+      bottom: -1.6rem;
+      content: '';
+      filter: blur(2px);
+      height: 50px;
+      left: 0;
+      margin: 0 auto;
+      position: absolute;
+      right: 0;
+      width: 80%;
+      z-index: -1;
+
+      @include r(768) {
+        bottom: -3.2rem;
+      }
+    }
+
+    &:after {
+      @include shadowbox;
+      background-color: mix($lightGreen, white, 67%);
+      bottom: -3.2rem;
+      content: '';
+      filter: blur(2px);
+      height: 50px;
+      left: 0;
+      margin: 0 auto;
+      position: absolute;
+      right: 0;
+      width: 60%;
+      z-index: -2;
+
+      @include r(768) {
+        bottom: -6.4rem;
+      }
+    }
+  }
+}

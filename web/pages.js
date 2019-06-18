@@ -125,5 +125,9 @@ module.exports = {
     "what_gifts_does_nature_provide_you": {
         "title": "What gifts does nature provide you?",
         "path": "/what-gifts-does-nature-provide-you"
+    },
+    "membership": {
+        "title": "Membership",
+        "path": "/membership"
     }
 }

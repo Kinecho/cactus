@@ -33,6 +33,10 @@
         ],
         "rewrites": [
             {
+                "source": "/membership",
+                "destination": "/membership.html"
+            },
+            {
                 "source": "/what-are-your-simple-pleasures",
                 "destination": "/what_are_your_simple_pleasures.html"
             },
