@@ -5,14 +5,12 @@ import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {getAdmin, Project} from "@scripts/config";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import {resetConsole} from "@scripts/util/ConsoleUtil";
 
 const prompts = require("prompts");
 const path = require("path");
 const fs = require("fs");
 
-function resetConsole(){
-    process.stdout.write('\x1B[2J\x1B[0f');
-}
 
 export interface Command {
     name: string;
@@ -108,8 +106,8 @@ export interface InputResponse {
 }
 
 export async function getAllCommands(): Promise<string[]> {
-    console.log("reading all files in", helpers.commandsDir);
-    const commands = await promisify(fs.readdir)(helpers.commandsDir);
+    console.log("reading all files in", helpers.publicCommandsDirRelativeToSource);
+    const commands = await promisify(fs.readdir)(helpers.publicCommandsDir);
     return commands.filter((name:string) => !name.endsWith("test.ts"));
 }
 
@@ -125,7 +123,7 @@ export function validateFileExists(filename: string, directory: string = ""): bo
 }
 
 export function validateCommandExists(commandName: string): boolean | string {
-    return validateFileExists(commandName, helpers.commandsDir)
+    return validateFileExists(commandName, helpers.publicCommandsDir)
 }
 
 export async function start(): Promise<void> {
@@ -176,6 +174,6 @@ export async function runCommand(name:string): Promise<void> {
 }
 
 async function loadCommand(filename: string): Promise<Command> {
-    const LoadedCommand = await import(`@scripts/${helpers.commandsDirRelativeToSource}/${filename}`);
+    const LoadedCommand = await import(`@scripts/${helpers.publicCommandsDirRelativeToSource}/${filename}`);
     return new LoadedCommand.default();
 }

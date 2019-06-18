@@ -17,7 +17,7 @@ const pagesPath = `${helpers.webRoot}/pages.js`;
 const pages = require(pagesPath) as { [name: string]: PageFileEntry };
 
 const readFile = promisify(fs.readFile);
-
+const writeFile = promisify(fs.writeFile);
 export interface InputResponse {
     pageName: string,
 }
@@ -70,19 +70,15 @@ async function updateFirebaseJson() {
 
     const {remove} = await prompts({
         name: "remove",
-        message: `Remove from firebase config? \n ${chalk.yellow(JSON.stringify(foundPage, null, 2))}`,
+        message: `Remove from firebase config? ${chalk.yellow(JSON.stringify(foundPage))}`,
         type: "confirm"
     });
 
     if (remove) {
         config.hosting.rewrites = rewrites.filter((page) => page.destination !== htmlName);
 
-        fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8', (err: any) => {
-            if (err) {
-                console.log(err);
-            }
-        });
-        console.log(chalk.green("Removed config from firebase.json"))
+        await writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), {encoding: 'utf8'});
+        // console.log(chalk.green("Removed config from firebase.json"))
     } else {
         console.log("Skipping firebase.json");
     }
@@ -97,7 +93,7 @@ async function updatePagesFile():Promise<PageFileEntry|null> {
 
     const {remove} = await prompts({
         name: "remove",
-        message: `Remove configuration from pages.js? \n${chalk.yellow(JSON.stringify(existingPage, null, 4))}`,
+        message: `Remove configuration from pages.js? ${chalk.yellow(JSON.stringify(existingPage))}`,
         type: "confirm"
     });
 
@@ -110,8 +106,8 @@ async function updatePagesFile():Promise<PageFileEntry|null> {
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-    await promisify(fs.writeFile)(pagesPath, data, {encoding: 'utf8'});
-    console.log(chalk.green("Removed configuration from pages.js"));
+    await writeFile(pagesPath, data, {encoding: 'utf8'});
+    // console.log(chalk.green("Removed configuration from pages.js"));
     return existingPage;
 }
 
@@ -129,7 +125,7 @@ async function removeHtml() {
         return;
     }
 
-    console.log(chalk.green("removing HTML"));
+    // console.log(chalk.green("removing HTML"));
     fs.unlinkSync(htmlPath);
 }
 
@@ -147,7 +143,7 @@ async function removeJS() {
         return;
     }
 
-    console.log(chalk.green("removing TS file"));
+    // console.log(chalk.green("removing TS file"));
     fs.unlinkSync(tsPath)
 }
 
@@ -164,7 +160,7 @@ async function removeScss() {
         return;
     }
 
-    console.log(chalk.green("removing SCSS file"));
+    // console.log(chalk.green("removing SCSS file"));
     fs.unlinkSync(scssFilePath);
 }
 
@@ -175,7 +171,7 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
         return;
     }
 
-    console.log("removing entry for page path", JSON.stringify(pageEntry));
+    // console.log("removing entry for page path", JSON.stringify(pageEntry));
 
     const sitemap = await readFile(helpers.questionsSiteMap, {encoding: 'utf8'});
 
@@ -196,7 +192,7 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
     if (remove) {
 
         await promisify(fs.writeFile)(helpers.questionsSiteMap, filteredUrls.join("\n"), 'utf8');
-        console.log(chalk.green("Removed entry from sitemap"))
+        // console.log(chalk.green("Removed entry from sitemap"))
     } else {
         console.log("Skipping sitemap");
     }

@@ -8,8 +8,9 @@
     "start": "npm run cmd",
     "lint": "tslint --project tsconfig.json",
     "cmd": "ts-node -r tsconfig-paths/register src/index.ts",
-    "page": "npm run cmd createPage",
-    "page:delete": "npm run cmd deletePage"
+    "page": "npm run cmd CreateLandingPage",
+    "prompt": "npm run cmd CreateReflectionPrompt",
+    "page:delete": "npm run cmd DeletePage"
   },
   "_moduleAliases": {
     "@scripts": "lib/scripts/src",
