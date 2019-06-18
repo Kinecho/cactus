@@ -4,7 +4,6 @@ import * as admin from "firebase-admin";
 import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {getAdmin, Project} from "@scripts/config";
-import {setAdmin} from "@api/services/firestoreService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 
 const prompts = require("prompts");
@@ -98,7 +97,7 @@ export abstract class FirebaseCommand implements Command {
         const message = `${separator}\n Starting ${this.name}\n Using firebase project ${chalk.blue(this.app.options.projectId || "unknown")}\n${separator}`;
         console.log(chalk.bold.green(message));
 
-        setAdmin(this.app);
+        // setAdmin(this.app);
 
         return this.app;
     }
