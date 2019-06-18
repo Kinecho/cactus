@@ -5,6 +5,7 @@ import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {getAdmin, Project} from "@scripts/config";
 import {setAdmin} from "@api/services/firestoreService";
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 
 const prompts = require("prompts");
 const path = require("path");
@@ -29,17 +30,20 @@ export interface FirebaseCommandConstructorArgs {
 }
 
 export abstract class FirebaseCommand implements Command {
-    project: Project = Project.STAGE; //default project to stage
+    project?: Project; //default project to stage
     app?: admin.app.App;
     useAdmin: boolean;
     name: string;
+    firestoreService?:AdminFirestoreService;
 
-    protected abstract async run(app: admin.app.App): Promise<void>;
+    protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void>;
 
     async start():Promise<void>{
         const app = await this.getFirebaseApp();
+        const firestoreService = new AdminFirestoreService(app);
+        this.firestoreService = firestoreService;
         console.group(chalk.yellow(`${this.name} Logs:`));
-        await this.run(app);
+        await this.run(app, firestoreService);
         console.groupEnd();
     }
 
@@ -53,24 +57,29 @@ export abstract class FirebaseCommand implements Command {
             return this.app;
         }
 
-        const questions = [
-            {
-                type: "select",
-                name: 'project',
-                message: 'Choose environment',
-                choices: [{title: "Cactus Stage", value: Project.STAGE}, {title: "Cactus Prod", value: Project.PROD}],
-                limit: 20,
-            },
-        ];
 
-        const response: ProjectInput = await prompts(questions, {
-            onCancel: () => {
-                console.log("Canceled command");
-                return process.exit(0);
-            }
-        });
 
-        this.project = response.project;
+
+        if (!this.project){
+            const questions = [
+                {
+                    type: "select",
+                    name: 'project',
+                    message: 'Choose environment',
+                    choices: [{title: "Cactus Stage", value: Project.STAGE}, {title: "Cactus Prod", value: Project.PROD}],
+                    limit: 20,
+                },
+            ];
+            const response: ProjectInput = await prompts(questions, {
+                onCancel: () => {
+                    console.log("Canceled command");
+                    return process.exit(0);
+                }
+            });
+
+            this.project = response.project;
+        }
+
         this.app = await getAdmin(this.project, {useAdmin: this.useAdmin});
 
         if (!this.app) {

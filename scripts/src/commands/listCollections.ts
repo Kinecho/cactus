@@ -1,6 +1,7 @@
 import {FirebaseCommand} from "@scripts/run";
 import {listCollections} from "@api/services/firestoreService";
 import * as admin from "firebase-admin";
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 
 export default class ListCollections extends FirebaseCommand {
 
@@ -8,7 +9,7 @@ export default class ListCollections extends FirebaseCommand {
         super({useAdmin: true, name: "ListCollections"});
     }
 
-    async run(app: admin.app.App):Promise<any>{
+    async run(app: admin.app.App, firestoreService: AdminFirestoreService):Promise<any>{
         const collections = await listCollections();
         console.group("Collection Names:");
         collections.forEach(collection => {

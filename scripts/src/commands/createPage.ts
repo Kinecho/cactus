@@ -1,6 +1,11 @@
 import chalk from "chalk";
-import {Command} from "@scripts/run";
+import {Command, FirebaseCommand} from "@scripts/run";
 import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
+import {Project} from "@scripts/config";
+import * as admin from "firebase-admin";
+import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 const prompts = require('prompts');
 const helpers = require("@web/../helpers");
 const fs = require("fs");
@@ -254,6 +259,8 @@ function createScss() {
 export default class CreatePage implements Command {
     name = "Create Page";
 
+    mailchimpCommand?:MailchimpQuestionCampaign;
+
     async start(): Promise<any> {
         // const db = app.firestore();
         console.log(chalk.green('Let\'s create a static page.'));
@@ -261,13 +268,9 @@ export default class CreatePage implements Command {
         const {pagePath, title, looksGood} = response;
 
 
-        const mailchimpCommand = new MailchimpQuestionCampaign();
-        mailchimpCommand.question = response.title;
+
         if (!looksGood) {
             console.warn(chalk.red("Not creating pages."));
-
-            await mailchimpCommand.start();
-
             return;
         }
 
@@ -288,6 +291,87 @@ export default class CreatePage implements Command {
         }
 
 
+        const mailchimpQuestions = [{
+            type: "toggle",
+            message: "Create campaign in mailchimp?",
+            name: "createMailchimp",
+            initial: true,
+            active: 'yes',
+            inactive: 'no',
+        }];
+
+        const {createMailchimp} = await prompts(mailchimpQuestions);
+
+        if (!createMailchimp){
+            console.log(chalk.yellow("Alrighty then. Moving on."));
+        } else {
+            const mailchimpCommand = new MailchimpQuestionCampaign();
+            mailchimpCommand.question = response.title;
+            mailchimpCommand.contentUrl = response.pagePath;
+            await mailchimpCommand.start();
+            this.mailchimpCommand = mailchimpCommand;
+        }
+
+        const firestoreQuestions = [{
+            type: "toggle",
+            message: "Save this question in the database?",
+            name: "saveFirestore",
+            initial: true,
+            active: 'yes',
+            inactive: 'no',
+        }];
+
+        const {saveFirestore} = await prompts(firestoreQuestions);
+
+        if (!saveFirestore){
+            console.log(chalk.yellow("That's cool. Not saving this question"));
+        } else {
+            console.log(chalk.bgRed("Saving to firestore.. (not implemented yet)"));
+            // const firestoreService = new AdminFirestoreService()
+            const selectedProject = this.mailchimpCommand && this.mailchimpCommand.response ? this.mailchimpCommand.response.environment : undefined;
+            const firestoreCommand = new SaveQuestionCommand(selectedProject);
+            if (this.mailchimpCommand){
+                firestoreCommand.campaign = this.mailchimpCommand.campaign;
+                firestoreCommand.reminderCampaign = this.mailchimpCommand.reminderCampaign;
+                firestoreCommand.question = this.mailchimpCommand.question;
+            } else {
+                firestoreCommand.question = response.title;
+            }
+            firestoreCommand.contentPath = response.pagePath;
+
+
+            await firestoreCommand.start();
+        }
+
         return;
     }
+}
+
+export class SaveQuestionCommand extends FirebaseCommand {
+    question?:string;
+    campaign?: Campaign;
+    reminderCampaign?: Campaign;
+
+    contentPath?: string;
+
+    constructor(project: Project|undefined=undefined){
+        super({name: "Save Question Command", useAdmin: true});
+        this.project = project;
+    }
+
+    protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
+        console.log(chalk.bgYellow.black("Starting save question command..."));
+        const model = new ReflectionPrompt();
+        model.campaign = this.campaign;
+        model.reminderCampaign = this.reminderCampaign;
+        model.contentPath = this.contentPath;
+
+        const saved = await firestoreService.save(model);
+        const savedJson = await saved.toJSON();
+        console.log("Saved ReflectionPrompt", chalk.yellow(JSON.stringify(savedJson, null, 2)));
+
+        return;
+    }
+
+
 }

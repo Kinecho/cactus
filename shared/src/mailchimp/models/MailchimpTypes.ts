@@ -97,6 +97,14 @@ export interface CampaignEventData {
     list_id: string,
 }
 
+export enum CampaignStatus {
+    save = "save",
+    paused = "paused",
+    schedule ="schedule",
+    sending = "sending",
+    sent = "sent"
+}
+
 export interface Campaign {
     emails_sent: number,
     send_time: string,
@@ -105,7 +113,7 @@ export interface Campaign {
     id: string,
     web_id: string,
     archive_url: string,
-    status: string,
+    status: CampaignStatus,
     recipients: {
         list_id: string,
         list_is_active: boolean,

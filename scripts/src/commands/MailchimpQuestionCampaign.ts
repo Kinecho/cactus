@@ -8,7 +8,7 @@ import {
     SegmentMatchType,
     TemplateSection
 } from "@shared/mailchimp/models/CreateCampaignRequest";
-import {CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
+import {Campaign, CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 // import {CreateCampaignRequest} from "@shared/mailchimp/models/CreateCampaignRequest";
 // import {CampaignType} from "@shared/mailchimp/models/MailchimpTypes";
 
@@ -24,7 +24,7 @@ interface QuestionResponse {
     segmentIds?: number[];
     useTags: boolean;
     tagSegmentIds: number[];
-    environment: Project | string;
+    environment: Project;
     templateId?: number;
     segmentMatchType?: SegmentMatchType;
     inspirationText?:string;
@@ -34,11 +34,11 @@ export default class MailchimpQuestionCampaign implements Command {
     name = "Mailchimp Question";
     question?: string;
     contentUrl?:string;
-    apiKey?: string;
-    campaignId?: string;
-    reminderCampaignId?: string;
-    response?: QuestionResponse;
 
+    response?: QuestionResponse;
+    project?: Project;
+    campaign?:Campaign;
+    reminderCampaign?:Campaign;
 
     async start(): Promise<void> {
         console.log("Starting mailchimp question");
@@ -166,7 +166,7 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         });
         this.response = response;
-
+        // this.project = response.
         console.log(chalk.blue("Responses:\n", JSON.stringify(response, null, 2)));
 
 
@@ -186,40 +186,41 @@ export default class MailchimpQuestionCampaign implements Command {
 
         }]);
 
-        if (confirmResponses.confirm) {
-            console.log("\ncreating campaign...");
-            const campaignRequest:CreateCampaignRequest = {
-                type: CampaignType.regular,
-                recipients: {
-                    list_id: config.mailchimp.audience_id,
-                },
-                settings: {
-                    title: response.question
-                }
-            };
-            const campaign = await mailchimpService.createCampaign(campaignRequest);
-            console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify({id: campaign.id, web_id: campaign.web_id, status: campaign.status}, null, 2)));
-
-            if (response.templateId){
-                console.log(chalk.bold("\ncreating template content..."));
-                const contentRequest:CampaignContentRequest = {
-                    template: {
-                        id: response.templateId,
-                        sections: {
-                            [TemplateSection.question]: response.question,
-                            [TemplateSection.content_link]: `<a href="${response.contentUrl}">${response.contentLinkText}</a>`,
-                            [TemplateSection.inspiration]: response.inspirationText || "",
-                        }
-                    }
-                };
-                console.log(chalk.yellow("content request is", JSON.stringify(contentRequest)));
-                await mailchimpService.updateCampaignContent(campaign.id, contentRequest);
-                console.log(chalk.blue("\nUpdated content for campaign\n"));
-            }
-        } else {
-            console.log("not creating campaign")
+        if (!confirmResponses.confirm) {
+            console.log(chalk.red("Not creating campaign. Exiting"));
+            return;
         }
 
+        console.log(chalk.yellow("\ncreating campaign..."));
+        const campaignRequest:CreateCampaignRequest = {
+            type: CampaignType.regular,
+            recipients: {
+                list_id: config.mailchimp.audience_id,
+            },
+            settings: {
+                title: response.question
+            }
+        };
+        const campaign = await mailchimpService.createCampaign(campaignRequest);
+        this.campaign = campaign;
+        console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify({id: campaign.id, web_id: campaign.web_id, status: campaign.status}, null, 2)));
+
+        if (response.templateId){
+            console.log(chalk.bold("\ncreating template content..."));
+            const contentRequest:CampaignContentRequest = {
+                template: {
+                    id: response.templateId,
+                    sections: {
+                        [TemplateSection.question]: response.question,
+                        [TemplateSection.content_link]: `<a href="${response.contentUrl}">${response.contentLinkText}</a>`,
+                        [TemplateSection.inspiration]: response.inspirationText || "",
+                    }
+                }
+            };
+            console.log(chalk.yellow("content request is", JSON.stringify(contentRequest)));
+            await mailchimpService.updateCampaignContent(campaign.id, contentRequest);
+            console.log(chalk.blue("\nUpdated content for campaign\n"));
+        }
 
         return;
     }
