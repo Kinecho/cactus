@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-are-your-simple-pleasures",
+                "destination": "/what_are_your_simple_pleasures.html"
+            },
+            {
                 "source": "/what-gifts-does-nature-provide-you",
                 "destination": "/what_gifts_does_nature_provide_you.html"
             },

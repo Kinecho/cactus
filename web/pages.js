@@ -26,6 +26,10 @@ module.exports = {
         "title": "What spiritual experience are you grateful for? | Cactus",
         "path": "/what-spiritual-experience-are-you-grateful-for"
     },
+    "what_are_your_simple_pleasures": {
+        "title": "What are your simple pleasures? | Cactus",
+        "path": "/what-are-your-simple-pleasures"
+    },
     "how_do_you_celebrate": {
         "title": "How do you celebrate? | Cactus",
         "path": "/how-do-you-celebrate"
