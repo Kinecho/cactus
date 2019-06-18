@@ -232,7 +232,7 @@ All Good?`
         } else {
             const mailchimpCommand = new MailchimpQuestionCampaign();
             mailchimpCommand.question = response.title;
-            mailchimpCommand.contentUrl = response.pagePath;
+            mailchimpCommand.contentPath = response.pagePath;
             await mailchimpCommand.start();
             this.mailchimpCommand = mailchimpCommand;
         }

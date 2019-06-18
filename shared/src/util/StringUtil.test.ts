@@ -72,4 +72,10 @@ describe("get url from input", () => {
     test("null value", () => {
         expect(getUrlFromInput(null)).toEqual("");
     });
+
+    test("add a domain", () => {
+        const input = "test_page";
+        const domain = "cactus.app";
+        expect(getUrlFromInput(input, domain)).toEqual("https://cactus.app/test-page");
+    });
 });

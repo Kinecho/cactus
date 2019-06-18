@@ -17,7 +17,7 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
-export function getUrlFromInput(input: string|null): string {
+export function getUrlFromInput(input: string|null|undefined, domain:string|undefined=undefined): string {
     let toProcess = input;
 
     if (!toProcess) {
@@ -28,9 +28,14 @@ export function getUrlFromInput(input: string|null): string {
         toProcess = toProcess.slice(1);
     }
 
-    const name = removeSpecialCharacters(toProcess, "-");
+    let name = removeSpecialCharacters(toProcess, "-");
     if (!name.startsWith("/")) {
-        return `/${name}`;
+        name = `/${name}`;
     }
+
+    if (domain && !name.startsWith("http")){
+        return `https://${domain}${name}`;
+    }
+
     return name;
 }

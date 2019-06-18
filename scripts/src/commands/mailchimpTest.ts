@@ -6,7 +6,7 @@ export default class MailchimpTest implements Command {
     async start():Promise<void> {
         const command = new MailchimpQuestionCampaign();
         command.question = "What is a food you love?";
-        command.contentUrl = "https://cactus.app";
+        command.contentPath = "https://cactus.app";
         await command.start();
 
         return;

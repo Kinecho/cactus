@@ -9,16 +9,14 @@ import {
     TemplateSection
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {Campaign, CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
-// import {CreateCampaignRequest} from "@shared/mailchimp/models/CreateCampaignRequest";
-// import {CampaignType} from "@shared/mailchimp/models/MailchimpTypes";
+import {getUrlFromInput} from "@shared/util/StringUtil";
 
 const prompts = require('prompts');
-
 
 interface QuestionResponse {
     audienceId: string;
     question: string;
-    contentUrl: string;
+    contentPath: string;
     contentLinkText: string;
     useSegments: boolean;
     segmentIds?: number[];
@@ -33,7 +31,7 @@ interface QuestionResponse {
 export default class MailchimpQuestionCampaign implements Command {
     name = "Mailchimp Question";
     question?: string;
-    contentUrl?:string;
+    contentPath?:string;
 
     response?: QuestionResponse;
     project?: Project;
@@ -56,9 +54,10 @@ export default class MailchimpQuestionCampaign implements Command {
             },
             {
                 type: "text",
-                name: "contentUrl",
+                name: "contentPath",
                 message: "Go Deeper content url",
-                initial: this.contentUrl || "",
+                initial: () => getUrlFromInput(this.contentPath),
+                format: (value:string) => getUrlFromInput(value)
             },
             {
                 type: "text",
@@ -212,7 +211,7 @@ export default class MailchimpQuestionCampaign implements Command {
                     id: response.templateId,
                     sections: {
                         [TemplateSection.question]: response.question,
-                        [TemplateSection.content_link]: `<a href="${response.contentUrl}">${response.contentLinkText}</a>`,
+                        [TemplateSection.content_link]: `<a href="${getUrlFromInput(response.contentPath, "cactus.app")}">${response.contentLinkText}</a>`,
                         [TemplateSection.inspiration]: response.inspirationText || "",
                     }
                 }
@@ -224,5 +223,4 @@ export default class MailchimpQuestionCampaign implements Command {
 
         return;
     }
-
 }
