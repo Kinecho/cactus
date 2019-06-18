@@ -5,9 +5,13 @@ import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 import SaveQuestionCommand from "@scripts/commands/SaveQuestionCommand";
 const prompts = require('prompts');
 const webHelpers = require("@web/../helpers");
-const fs = require("fs").promises;
+import {promisify} from "util";
+const fs = require("fs");
 const path = require("path");
 
+const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
+const appendFile = promisify(fs.appendFile);
 
 const firebaseConfigPath = `${webHelpers.projectRoot}/firebase.json`;
 const pagesPath = `${webHelpers.webRoot}/pages.js`;
@@ -117,7 +121,7 @@ All Good?`
 
         console.log("Adding page to Firebase Config:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
 
-        await fs.writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), 'utf8')
+        await writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), {encoding: 'utf8'});
         return;
     }
 
@@ -136,7 +140,7 @@ All Good?`
 
         const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-        return fs.writeFile(pagesPath, data, 'utf8');
+        return writeFile(pagesPath, data, {encoding: 'utf8'});
     }
 
     static async createHtml(response:InputResponse):Promise<void> {
@@ -145,9 +149,9 @@ All Good?`
         console.log("creating HTML from template\n", chalk.blue(htmlOutputPath), "\n");
 
 
-        const data = await fs.readFile(templateFile, 'utf8');
+        const data = await readFile(templateFile, {encoding: 'utf8'});
         const content = data.replace(/\$PAGE_TITLE\$/g, response.title);
-        await fs.writeFile(htmlOutputPath, content, 'utf8');
+        await writeFile(htmlOutputPath, content, {encoding: 'utf8'});
         return;
     }
 
@@ -157,7 +161,7 @@ All Good?`
 
         const newUrl = "\n" + "https://cactus.app" + response.pagePath;
 
-        await fs.appendFile(sitemapFile, newUrl, 'utf8');
+        await appendFile(sitemapFile, newUrl, {encoding: 'utf8'});
         return;
     }
 
@@ -168,10 +172,10 @@ All Good?`
 
         const templateFile = path.resolve(webHelpers.srcDir, "templates", "page_script.ts");
 
-        const data = await fs.readFile(templateFile, 'utf8');
+        const data = await readFile(templateFile, {encoding: 'utf8'});
         const content = data.replace(/\$PAGE_NAME\$/g, response.pageName);
 
-        await fs.writeFile(outputFilePath, content, 'utf8');
+        await writeFile(outputFilePath, content, 'utf8');
         return;
 
     }
@@ -181,8 +185,8 @@ All Good?`
         const scssFilePath = `${webHelpers.pagesStylesDir}/${response.pageName}.scss`;
         console.log("creating SCSS file\n", chalk.blue(scssFilePath), "\n");
 
-        const data =  await fs.readFile(templateFile, 'utf8');
-        await fs.writeFile(scssFilePath, data);
+        const data =  await readFile(templateFile, {encoding: 'utf8'});
+        await writeFile(scssFilePath, data);
         return;
     }
 
@@ -193,8 +197,6 @@ All Good?`
         this.response = response;
         const {pagePath, title, looksGood} = response;
 
-
-
         if (!looksGood) {
             console.warn(chalk.red("Not creating pages."));
             return;
@@ -203,23 +205,14 @@ All Good?`
         console.log("page path is: ", pagePath);
         console.log("title ", title);
 
-        const fileTasks = [];
-        fileTasks.push(
+        const fileTasks = [
             CreatePage.createHtml(response),
             CreatePage.createJS(response),
             CreatePage.createScss(response),
-            CreatePage.addToSitemap(response)
-        );
-
-
-        if (response.writeUrls) {
-            fileTasks.push(
-                CreatePage.updateFirebaseJson(response),
-                CreatePage.updatePagesFile(response)
-            );
-        } else {
-            console.log("Not writing urls to pages.js or firebase.json");
-        }
+            CreatePage.addToSitemap(response),
+            CreatePage.updateFirebaseJson(response),
+            CreatePage.updatePagesFile(response)
+        ];
 
         await Promise.all(fileTasks);
 
@@ -270,6 +263,7 @@ All Good?`
                 firestoreCommand.question = response.title;
             }
             firestoreCommand.contentPath = response.pagePath;
+            firestoreCommand.baseFileName = response.pageName;
 
             await firestoreCommand.start();
         }

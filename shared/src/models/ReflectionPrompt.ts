@@ -9,7 +9,7 @@ export default class ReflectionPrompt extends BaseModel {
     campaign?:Campaign;
     reminderCampaign?:Campaign;
     contentPath?:string;
-
+    baseFileName?:string;
 
     prepareForFirestore(): any {
         this.campaignIds = [];

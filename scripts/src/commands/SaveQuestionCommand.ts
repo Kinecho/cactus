@@ -12,6 +12,7 @@ export default class SaveQuestionCommand extends FirebaseCommand {
     reminderCampaign?: Campaign;
     model?: ReflectionPrompt;
     contentPath?: string;
+    baseFileName?:string;
 
     constructor(project: Project|undefined=undefined){
         super({name: "Save Question Command", useAdmin: true});
@@ -37,6 +38,7 @@ export default class SaveQuestionCommand extends FirebaseCommand {
         model.campaign = this.campaign;
         model.reminderCampaign = this.reminderCampaign;
         model.contentPath = this.contentPath;
+        model.baseFileName = this.baseFileName;
 
         const saved = await firestoreService.save(model);
         const savedJson = await saved.toJSON();
