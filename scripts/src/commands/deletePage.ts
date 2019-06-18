@@ -7,9 +7,14 @@ import {Command} from "@scripts/run";
 
 const path = require("path");
 
+interface PageFileEntry{
+    title: string,
+    path: string,
+}
+
 const firebaseConfigPath = `${helpers.projectRoot}/firebase.json`;
 const pagesPath = `${helpers.webRoot}/pages.js`;
-const pages = require(pagesPath) as { [name: string]: { title: string, path: string } };
+const pages = require(pagesPath) as { [name: string]: PageFileEntry };
 
 export interface InputResponse {
     pageName: string,
@@ -81,7 +86,8 @@ async function updateFirebaseJson() {
     }
 }
 
-async function updatePagesFile() {
+
+async function updatePagesFile():Promise<PageFileEntry|null> {
     const existingPage = pages[response.pageName];
     if (!existingPage) {
         console.warn(`No page with name ${response.pageName} exists in pages.js`);
@@ -95,19 +101,16 @@ async function updatePagesFile() {
 
     if (!remove) {
         console.log("Not updating pages.js configuration");
-        return
+        return null;
     }
 
     delete pages[response.pageName];
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 
-    fs.writeFile(pagesPath, data, 'utf8', (err: any) => {
-        if (err) {
-            console.log(err)
-        }
-    });
+    await promisify(fs.writeFile)(pagesPath, data, {encoding: 'utf8'});
     console.log(chalk.green("Removed configuration from pages.js"));
+    return existingPage;
 }
 
 async function removeHtml() {
@@ -163,7 +166,37 @@ async function removeScss() {
     fs.unlinkSync(scssFilePath);
 }
 
+async function removeFromSitemap(pageEntry:PageFileEntry|null){
 
+    if (!pageEntry){
+        console.warn("No page entry found - unable to remove from sitemap");
+        return;
+    }
+
+    const sitemap = await promisify(fs.readFile)(helpers.questionsSiteMap);
+
+    const urls = sitemap.split("\n");
+    const filteredUrls = urls.filter((url:string) => !url.includes(pageEntry.path));
+
+    if (filteredUrls.length === urls.length) {
+        console.log("No entry found in sitemap for url", pageEntry.path);
+        return
+    }
+
+    const {remove} = await prompts({
+        name: "remove",
+        message: `Remove ${pageEntry.path} from questions sitemap?`,
+        type: "confirm"
+    });
+
+    if (remove) {
+
+        await promisify(fs.writeFile)(firebaseConfigPath, filteredUrls.join("\n"), 'utf8');
+        console.log(chalk.green("Removed entry from sitemap"))
+    } else {
+        console.log("Skipping sitemap");
+    }
+}
 
 export default class DeletePage implements Command {
     name = "Delete Page";
@@ -197,11 +230,12 @@ export default class DeletePage implements Command {
             const {pageName} = response;
             console.log("removing page", chalk.red(pageName));
 
-            await updatePagesFile();
+            const pageEntry = await updatePagesFile();
             await updateFirebaseJson();
             await removeJS();
             await removeScss();
             await removeHtml();
+            await removeFromSitemap(pageEntry);
         } else {
             console.log("cancel success");
         }

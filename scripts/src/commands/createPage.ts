@@ -156,7 +156,7 @@ All Good?`
     }
 
     static async addToSitemap(response:InputResponse):Promise<void> {
-        const sitemapFile = path.resolve(webHelpers.projectRoot, "web", "src", "assets", "sitemaps", "questions.txt");
+        const sitemapFile = webHelpers.questionsSiteMap;
         console.log("appending new page URL to Questions Sitemap\n");
 
         const newUrl = "\n" + "https://cactus.app" + response.pagePath;
