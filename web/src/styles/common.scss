@@ -130,7 +130,7 @@ button, a.button {
   }
 }
 
-h1, h2, p {
+h1, h2, h3, p {
   margin: 0;
 }
 
@@ -148,6 +148,16 @@ h2 {
 
   @include r(768) {
     font-size: 3.2rem;
+  }
+}
+
+h3 {
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  @include r(768) {
+    font-size: 1.6rem;
   }
 }
 

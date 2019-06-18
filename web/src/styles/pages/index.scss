@@ -364,10 +364,8 @@ input[type=email] {
   }
 
   .quote {
+    @include shadowbox;
     align-items: flex-start;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
     margin: 0 3.2rem 4rem 0;
     max-width: 45rem;
     min-width: 80vw;
