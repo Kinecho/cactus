@@ -1,4 +1,4 @@
-import {CampaignType} from "@shared/mailchimp/models/MailchimpTypes";
+import {CampaignType, MailchimpLink} from "@shared/mailchimp/models/MailchimpTypes";
 
 export enum SegmentMatchType {
     any = "any",
@@ -128,4 +128,34 @@ export interface CreateCampaignRequest {
         description?: string,
         title?: string,
     }
+}
+
+export enum TemplateSection {
+    question = "question",
+    content_link = "content_link",
+    inspiration = "inspiration",
+}
+
+export interface CampaignContentRequest {
+    plain_text?: string,
+    html?: string,
+    url?: string,
+    template?: {
+        id: number,
+        sections: {
+            [key in keyof typeof TemplateSection]: string
+        }
+    }
+}
+
+export interface CampaignContentResponse {
+    variate_contents?: {
+        content_label: string,
+        plain_text: string,
+        html: string,
+    }[],
+    plain_text: string,
+    html: string,
+    archive_html: string,
+    _links: MailchimpLink[],
 }

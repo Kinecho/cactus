@@ -3,7 +3,12 @@ import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import {chooseEnvironment} from "@scripts/questionUtil";
 import MailchimpService from "@scripts/services/mailchimpService";
-import {SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
+import {
+    CampaignContentRequest, CreateCampaignRequest,
+    SegmentMatchType,
+    TemplateSection
+} from "@shared/mailchimp/models/CreateCampaignRequest";
+import {CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 // import {CreateCampaignRequest} from "@shared/mailchimp/models/CreateCampaignRequest";
 // import {CampaignType} from "@shared/mailchimp/models/MailchimpTypes";
 
@@ -13,17 +18,22 @@ const prompts = require('prompts');
 interface QuestionResponse {
     audienceId: string;
     question: string;
-    useSegments: boolean,
-    segmentIds?: number[],
-    useTags: boolean,
-    tagSegmentIds: number[],
+    contentUrl: string;
+    contentLinkText: string;
+    useSegments: boolean;
+    segmentIds?: number[];
+    useTags: boolean;
+    tagSegmentIds: number[];
     environment: Project | string;
-    segmentMatchType?: SegmentMatchType
+    templateId?: number;
+    segmentMatchType?: SegmentMatchType;
+    inspirationText?:string;
 }
 
 export default class MailchimpQuestionCampaign implements Command {
     name = "Mailchimp Question";
     question?: string;
+    contentUrl?:string;
     apiKey?: string;
     campaignId?: string;
     reminderCampaignId?: string;
@@ -45,6 +55,23 @@ export default class MailchimpQuestionCampaign implements Command {
                 initial: this.question || "",
             },
             {
+                type: "text",
+                name: "contentUrl",
+                message: "Go Deeper content url",
+                initial: this.contentUrl || "",
+            },
+            {
+                type: "text",
+                name: "contentLinkText",
+                message: "Content link text",
+                initial: "Read More..."
+            },
+            {
+                type: "text",
+                name: "inspirationText",
+                message: "Inspiration text (optional)",
+            },
+            {
                 ...chooseEnvironment,
                 // hint: "this will determine the audience ID",
                 onState: (args: { value: string, aborted: boolean }) => {
@@ -55,6 +82,20 @@ export default class MailchimpQuestionCampaign implements Command {
                     }
                     mailchimpService = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
                 }
+            },
+            {
+                type: "select",
+                name: "templateId",
+                max: 1,
+                message: "Choose a template (optional)",
+                choices: async () => {
+                    const templates = await mailchimpService.getAllTemplates(TemplateType.user);
+                    return templates.map(template => ({
+                        title: template.name,
+                        value: template.id,
+                    }))
+                },
+                format: (value:string) => Number(value),
             },
             {
                 type: "toggle",
@@ -146,18 +187,35 @@ export default class MailchimpQuestionCampaign implements Command {
         }]);
 
         if (confirmResponses.confirm) {
+            console.log("\ncreating campaign...");
+            const campaignRequest:CreateCampaignRequest = {
+                type: CampaignType.regular,
+                recipients: {
+                    list_id: config.mailchimp.audience_id,
+                },
+                settings: {
+                    title: response.question
+                }
+            };
+            const campaign = await mailchimpService.createCampaign(campaignRequest);
+            console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify({id: campaign.id, web_id: campaign.web_id, status: campaign.status}, null, 2)));
 
-            // const campaignRequest:CreateCampaignRequest = {
-            //     type: CampaignType.regular,
-            //     recipients: {
-            //         list_id: config.mailchimp.audience_id,
-            //     },
-            //     settings: {
-            //         title: response.question
-            //     }
-            // };
-            // await mailchimpService.createCampaign(campaignRequest);
-            console.log("creating campaign");
+            if (response.templateId){
+                console.log(chalk.bold("\ncreating template content..."));
+                const contentRequest:CampaignContentRequest = {
+                    template: {
+                        id: response.templateId,
+                        sections: {
+                            [TemplateSection.question]: response.question,
+                            [TemplateSection.content_link]: `<a href="${response.contentUrl}">${response.contentLinkText}</a>`,
+                            [TemplateSection.inspiration]: response.inspirationText || "",
+                        }
+                    }
+                };
+                console.log(chalk.yellow("content request is", JSON.stringify(contentRequest)));
+                await mailchimpService.updateCampaignContent(campaign.id, contentRequest);
+                console.log(chalk.blue("\nUpdated content for campaign\n"));
+            }
         } else {
             console.log("not creating campaign")
         }

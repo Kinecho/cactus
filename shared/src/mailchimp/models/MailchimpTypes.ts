@@ -144,7 +144,6 @@ export interface MailchimpLink {
 }
 
 export interface ListResponse {
-    list_id: string,
     total_items: number,
     _links: MailchimpLink[],
 }
@@ -175,4 +174,43 @@ export interface Segment {
 
 export interface SegmentListResponse extends ListResponse{
     segments: Segment[],
+    list_id: string,
+}
+
+export enum TemplateType {
+    user = "user",
+    base = "base",
+    gallery = "gallery"
+}
+
+/**
+ * Email Template
+ * (@Link https://developer.mailchimp.com/documentation/mailchimp/reference/templates/#read-get_templates)
+ */
+export interface Template {
+    id: number,
+    type: TemplateType,
+    name: string,
+    drag_and_drop: boolean,
+    responsive: boolean,
+    category: string,
+    date_created: ISODate,
+    date_edited: ISODate,
+    created_by: string,
+    edited_by: string,
+    active: boolean,
+    folder_id: string,
+    thumbnail?: string, //url of the image
+    share_url: string,
+    _links: MailchimpLink[],
+}
+
+export enum TemplateSortField {
+    date_created = "date_created",
+    name = "name",
+}
+
+export interface TemplateListResponse extends ListResponse {
+    templates: Template[],
+
 }

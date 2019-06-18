@@ -1,6 +1,20 @@
 import axios, {AxiosInstance} from "axios";
-import {CreateCampaignRequest} from "@shared/mailchimp/models/CreateCampaignRequest";
-import {ListResponse, Segment, SegmentListResponse, SegmentType} from "@shared/mailchimp/models/MailchimpTypes";
+import {
+    CampaignContentRequest,
+    CampaignContentResponse,
+    CreateCampaignRequest
+} from "@shared/mailchimp/models/CreateCampaignRequest";
+import {
+    Campaign,
+    ListResponse,
+    Segment,
+    SegmentListResponse,
+    SegmentType,
+    Template,
+    TemplateListResponse,
+    TemplateSortField,
+    TemplateType
+} from "@shared/mailchimp/models/MailchimpTypes";
 
 // import * as md5 from "md5";
 
@@ -87,11 +101,19 @@ export default class MailchimpService {
         console.log("sent to responses", JSON.stringify(response.data, null, 2));
     }
 
-    async createCampaign(campaign: CreateCampaignRequest) {
+    async createCampaign(campaign: CreateCampaignRequest):Promise<Campaign> {
         const url = `${this.apiDomain}/campaigns`;
         const response = await this.request.post(url, campaign);
 
-        console.log("created campaign", JSON.stringify(response.data));
+        // console.log("created campaign", JSON.stringify(response.data));
+        return response.data;
+    }
+
+    async updateCampaignContent(campaignId: string|number, content: CampaignContentRequest):Promise<CampaignContentResponse> {
+        const url = `${this.apiDomain}/campaigns/${campaignId}/content`;
+        const response = await this.request.put(url, content);
+        // console.log("updated campaign content", response.data);
+        return response.data;
     }
 
     async getSavedSegments(pagination=DEFAULT_PAGINATION): Promise<SegmentListResponse> {
@@ -121,8 +143,6 @@ export default class MailchimpService {
     }
 
     async getAllSegments(pageSize=defaultPageSize): Promise<Segment[]> {
-
-
         const segments:Segment[] = [];
         let currentOffset = 0;
 
@@ -135,6 +155,24 @@ export default class MailchimpService {
 
 
         return segments;
+    }
+
+    async getTemplates(type: TemplateType|undefined, pagination=DEFAULT_PAGINATION): Promise<TemplateListResponse> {
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const url = `${this.apiDomain}/templates`;
+        const response = await this.request.get(url, {
+            params: {
+                sort_field: TemplateSortField.name,
+                offset,
+                count,
+                type: type
+            }
+        });
+        return response.data;
+    }
+
+    async getAllTemplates(type: TemplateType=TemplateType.user, pageSize=defaultPageSize):Promise<Template[]>{
+        return this.getAllPaginatedResults(pagination => this.getTemplates(type, pagination), result => result.templates, pageSize);
     }
 
     async getAllSavedSegments(pageSize=defaultPageSize):Promise<Segment[]>{
