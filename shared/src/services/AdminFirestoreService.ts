@@ -2,6 +2,7 @@ import * as firebaseAdmin from "firebase-admin";
 import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
+import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
@@ -16,8 +17,43 @@ export default class AdminFirestoreService {
         return this.firestore.collection(collectionName);
     }
 
+    getCollectionRefFromModel(model: BaseModel): CollectionReference {
+        return this.firestore.collection(model.collection);
+    }
+
+    getDocumentRefFromModel(model:BaseModel):DocumentReference {
+        const collectionRef = this.getCollectionRefFromModel(model);
+        let doc:DocumentReference;
+        if (model.id){
+            doc = collectionRef.doc(model.id)
+        } else {
+            doc = collectionRef.doc();
+        }
+
+        return doc;
+    }
+
     async listCollections(): Promise<CollectionReference[]> {
         return this.firestore.listCollections();
+    }
+
+    /**
+     * Generate an ID and set date fields for the model, but don't save it
+     * @param {T} model
+     * @return {T}
+     */
+    initializeModel<T extends BaseModel>(model: T):T{
+        const collectionRef = this.getCollectionRef(model.collection);
+        let doc = collectionRef.doc();
+        if (model.id) {
+            doc = collectionRef.doc(model.id);
+        } else {
+            model.id = doc.id;
+            model.createdAt = new Date();
+        }
+
+        model.updatedAt = new Date();
+        return model;
     }
 
     async save<T extends BaseModel>(model: T): Promise<T> {
@@ -33,6 +69,7 @@ export default class AdminFirestoreService {
 
             model.updatedAt = new Date();
 
+            // const doc = this.getDocumentRefFromModel(model);
             const data = await model.toFirestoreData();
             // console.log("Data to save:", JSON.stringify(data));
 

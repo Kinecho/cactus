@@ -40,8 +40,8 @@ export abstract class FirebaseCommand implements Command {
 
     async start():Promise<void>{
         const app = await this.getFirebaseApp();
-        const firestoreService = new AdminFirestoreService(app);
-        this.firestoreService = firestoreService;
+        const firestoreService = await this.getFirestoreService();
+
         console.group(chalk.yellow(`${this.name} Logs:`));
         await this.run(app, firestoreService);
         console.groupEnd();
@@ -52,13 +52,20 @@ export abstract class FirebaseCommand implements Command {
         this.name = opts.name;
     }
 
+    async getFirestoreService():Promise<AdminFirestoreService> {
+        if (this.firestoreService){
+            return this.firestoreService;
+        }
+
+        const app = await this.getFirebaseApp();
+        this.firestoreService = new AdminFirestoreService(app);
+        return this.firestoreService;
+    }
+
     async getFirebaseApp(): Promise<admin.app.App> {
         if (this.app) {
             return this.app;
         }
-
-
-
 
         if (!this.project){
             const questions = [
