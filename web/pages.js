@@ -38,6 +38,10 @@ module.exports = {
         "title": "What makes your body and mind feel connected in a positive way?",
         "path": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way"
     },
+    "what_place_changed_the_way_you_view_the_world_for_the_better": {
+        "title": "What place changed the way you view the world for the better?",
+        "path": "/what-place-changed-the-way-you-view-the-world-for-the-better"
+    },
     "what_food_brings_you_the_most_joy": {
         "title": "What food brings you the most joy?",
         "path": "/what-food-brings-you-the-most-joy"
