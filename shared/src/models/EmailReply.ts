@@ -5,7 +5,6 @@ import EmailAddress from "@shared/EmailAddress";
 import EmailHeaders, {MailchimpMemberId} from "@shared/models/EmailHeaders";
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
-
 export enum EmailStoragePath {
     HEADERS = "HEADERS",
     BODY = "BODY",
@@ -37,32 +36,45 @@ export interface InboundEmail {
 
 export default class EmailReply extends BaseModel{
     collection = Collection.emailReply;
-    headers: EmailHeaders;
+
+    headers: EmailHeaders = {};
     to?: EmailAddress;
     cc?: EmailAddress;
     from?: EmailAddress;
     envelope?: {to: EmailAddress[], from: EmailAddress};
     replyText?: string;
-    text?: string;
-    html?: string;
+    content: {
+        text?: string;
+        html?: string;
+    } = {};
     subject?: string;
     attachments?: Array<AttachmentInfo>;
     mailchimpMemberId?: string|undefined|null;
     mailchimpUniqueEmailId?: string|undefined|null;
     mailchimpCampaignId?:string;
-    originalEmailStoragePaths: EmailStorageFiles;
+    originalEmailStoragePaths: EmailStorageFiles = {HEADERS: null, BODY: null};
 
-    constructor(input:InboundEmail){
+    //models need an empty constructor
+    constructor(input:InboundEmail|undefined=undefined){
         super();
+
+        if (!input) {
+            return;
+        }
+
         this.headers = input.headers || {};
         this.attachments = input.attachments || [];
-        this.text = input.text;
-        this.html = input.html;
+        this.content = {
+            text: input.text,
+            html: input.html,
+        };
+        // this.text = input.text;
+        // this.html = input.html;
         this.subject = input.subject;
         this.mailchimpMemberId = this.headers[MailchimpMemberId];
         this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         this.mailchimpCampaignId = input.mailchimpCampaignId;
-        this.originalEmailStoragePaths = {HEADERS: null, BODY: null};
+        // this.originalEmailStoragePaths = ;
 
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;

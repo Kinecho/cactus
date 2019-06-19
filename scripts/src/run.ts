@@ -31,11 +31,30 @@ export abstract class FirebaseCommand implements Command {
     app?: admin.app.App;
     useAdmin: boolean;
     name: string;
+    description?: string;
+    confirmExecution: boolean = false;
     firestoreService?:AdminFirestoreService;
 
     protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void>;
 
     async start():Promise<void>{
+        if (this.description){
+            console.log(`\n${this.description}\n`)
+        }
+
+        if (this.confirmExecution){
+            const {confirmed} = await prompts([{
+                type: "confirm",
+                message: "Do you want to run this command?",
+                name: "confirmed"
+            }]);
+
+            if (!confirmed){
+                console.log(`\n${chalk.red("Not running command")}`);
+                return;
+            }
+        }
+
         const app = await this.getFirebaseApp();
         const firestoreService = await this.getFirestoreService();
 

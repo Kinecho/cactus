@@ -70,7 +70,10 @@ export default class AdminFirestoreService {
             model.updatedAt = new Date();
 
             // const doc = this.getDocumentRefFromModel(model);
-            const data = await model.toFirestoreData();
+
+
+
+            const data = await model.toFirestoreData(model.excludedFirestoreFields);
             // console.log("Data to save:", JSON.stringify(data));
 
             const writeResult = await doc.set(data, {merge: true});
