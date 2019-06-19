@@ -243,7 +243,7 @@ export function getMailchimpCampaignIdFromBody(body:string):string|undefined{
 
 export function getReplyTextContent(email:EmailReply):string {
     try {
-        const parsedBody = replyParser(email.text);
+        const parsedBody = replyParser(email.content.text);
         const visibleText = parsedBody.getVisibleText() || "";
         return visibleText.trim();
     } catch (error){
