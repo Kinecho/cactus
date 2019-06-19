@@ -8,3 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupJumpToForm();
     configureSignupForm("email-form-bottom");
 });
+
+// window.onscroll = function() {moveLogo()};
+//
+// function moveLogo() {
+//   if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+//     document.getElementById("id1").className = "test";
+//   } else {
+//     document.getElementById("id1").className = "";
+//   }
+// }

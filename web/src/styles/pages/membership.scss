@@ -16,6 +16,12 @@ body {
   justify-content: center;
   text-align: center;
 
+  .logoLink {
+    left: 3.2rem;
+    position: absolute;
+    top: 2.4rem;
+  }
+
   h3 {
     color: $darkestPink;
     margin-bottom: .8rem;
@@ -26,9 +32,33 @@ body {
   }
 
   .subtext {
+    margin-bottom: 3.2rem;
+
     @include r(768) {
       font-size: 2.4rem;
     }
+  }
+
+  .button {
+    flex-grow: 0;
+  }
+
+  .leaf1 {
+    bottom: -1vh;
+    left: 52vw;
+    position: absolute;
+    transform: rotate(-75deg);
+  }
+  .leaf2 {
+    left: 25vw;
+    position: absolute;
+    top: 75vh;
+    transform: rotate(10deg);
+  }
+  .leaf3 {
+    left: 75vw;
+    position: absolute;
+    top: 20vh;
   }
 }
 
@@ -214,4 +244,17 @@ h2 {
       }
     }
   }
+}
+
+@keyframes background {
+  from {
+    background-color: $lightPink;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.animate {
+  animation: background 3s ease-in-out forwards;
 }
