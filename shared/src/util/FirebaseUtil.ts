@@ -1,5 +1,5 @@
 
-import {isDate, isNotNull, transformObject} from "@shared/util/ObjectUtil";
+import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
 
 
@@ -28,10 +28,10 @@ export interface DocumentSnapshot {
     readonly exists: boolean;
 }
 
-export async function convertDateToTimestamp(input: any): Promise<any> {
+export function convertDateToTimestamp(input: any): any {
     const copy = Object.assign({}, input);
 
-    return await transformObject(copy, (value) => {
+    return transformObjectSync(copy, (value) => {
         if (isDate(value)) {
             return TimestampClass.fromDate(value);
         }
@@ -39,10 +39,10 @@ export async function convertDateToTimestamp(input: any): Promise<any> {
     })
 }
 
-export async function convertDateToJSON(input: any): Promise<any> {
+export function convertDateToJSON(input: any): any {
     const copy = Object.assign({}, input);
 
-    return await transformObject(copy, (value) => {
+    return transformObjectSync(copy, (value) => {
         if (isDate(value)) {
             return (value as Date).getTime();
         }
@@ -50,10 +50,10 @@ export async function convertDateToJSON(input: any): Promise<any> {
     })
 }
 
-export async function convertTimestampToDate(input: any): Promise<any> {
+export function convertTimestampToDate(input: any): any {
     const copy = Object.assign({}, input);
 
-    return await transformObject(copy, (value) => {
+    return transformObjectSync(copy, (value) => {
         if (isNotNull(value) && value instanceof TimestampClass) {
             return value.toDate();
         }
@@ -61,7 +61,7 @@ export async function convertTimestampToDate(input: any): Promise<any> {
     })
 }
 
-export async function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): Promise<T|null> {
+export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): T|null {
     const data = doc.data();
     if (!data){
         return null;
@@ -71,8 +71,8 @@ export async function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnap
     return fromFirestoreData(data, Type);
 }
 
-export async function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): Promise<T> {
-    const transformed = await convertTimestampToDate(data);
+export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
+    const transformed = convertTimestampToDate(data);
     const model = new Type();
     return Object.assign(model, transformed) as T;
 }

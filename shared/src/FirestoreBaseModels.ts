@@ -29,12 +29,12 @@ export abstract class BaseModel implements FirestoreIdentifiable{
         return this;
     }
 
-    async toFirestoreData(removeKeys=["id", "collection"]):Promise<any> {
+    toFirestoreData(removeKeys=["id", "collection"]):any {
         const prepared = this.prepareForFirestore();
         if (!prepared){
             throw new Error("Unable to prepare for firestore");
         }
-        const data = await convertDateToTimestamp(prepared);
+        const data = convertDateToTimestamp(prepared);
         // console.log("data after converting to dates", data);
 
         if (removeKeys && data){
@@ -52,8 +52,8 @@ export abstract class BaseModel implements FirestoreIdentifiable{
         return data;
     }
 
-    async toJSON(removeKeys=["collection"]):Promise<any> {
-        const data = await convertDateToJSON(this);
+    toJSON(removeKeys=["collection"]):any {
+        const data = convertDateToJSON(this);
 
         if (removeKeys && data){
             removeKeys.forEach(key => {

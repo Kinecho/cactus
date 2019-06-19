@@ -10,7 +10,7 @@ import {
 
 import {getMailchimpDateString} from "@api/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
-import {getById, save} from "@api/services/firestoreService";
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
 import {fromJSON} from "@shared/util/FirebaseUtil";
 import EmailReply, {EmailStoragePath} from "@shared/models/EmailReply";
@@ -18,6 +18,8 @@ import bodyParser = require("body-parser");
 import {writeToFile} from "@api/util/FileUtil";
 
 const app = express();
+
+const firestoreService = AdminFirestoreService.getSharedInstance();
 
 app.use(cors({origin: true}));
 
@@ -30,12 +32,14 @@ app.get('/testModel/:id', async (req, res) => {
         return res.status(400);
     }
 
-    const model = await getById(id, TestModel);
+    const model = await firestoreService.getById(id, TestModel);
 
     if (!model){
         return res.sendStatus(404);
     }
 
+
+    console.log("model.name", model.name);
 
     return res.status(200).json({status: 'ok', data: model.toJSON()})
 
@@ -45,11 +49,11 @@ app.post("/testModel", bodyParser.json(), async (req, res) => {
 
     try {
         console.log("body", JSON.stringify(req.body));
-        const model = await fromJSON(req.body, TestModel);
+        const model = fromJSON(req.body, TestModel);
         console.log("model", JSON.stringify(model));
-        const saved = await save(model);
+        const saved = await firestoreService.save(model);
         console.log("saved object", saved);
-        res.send({data: await saved.toJSON()})
+        res.send({data: saved.toJSON()})
     } catch (e){
         res.status(500).send({error: e});
     }

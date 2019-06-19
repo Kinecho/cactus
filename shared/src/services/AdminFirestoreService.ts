@@ -8,6 +8,22 @@ export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
 
+
+
+    protected static sharedInstance:AdminFirestoreService;
+
+    static getSharedInstance():AdminFirestoreService{
+        if (!AdminFirestoreService.sharedInstance){
+            throw new Error("No shared instance is available. Ensure you have called the initialize() function before using the shared instance")
+        }
+        return AdminFirestoreService.sharedInstance;
+    }
+
+    static initialize(app: firebaseAdmin.app.App){
+        console.log("Initializing firestore service");
+        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
+    }
+
     constructor(admin: firebaseAdmin.app.App){
         this.admin = admin;
         this.firestore = admin.firestore()
@@ -100,7 +116,9 @@ export default class AdminFirestoreService {
             return null;
         }
 
-        return await fromDocumentSnapshot(doc, Type);
+        console.log(`doc.data()`, doc.data());
+
+        return fromDocumentSnapshot(doc, Type);
     }
 }
 
