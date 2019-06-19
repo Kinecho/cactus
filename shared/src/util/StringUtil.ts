@@ -39,3 +39,7 @@ export function getUrlFromInput(input: string|null|undefined, domain:string|unde
 
     return name;
 }
+
+export function isValidEmail(input:string){
+    return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input);
+}

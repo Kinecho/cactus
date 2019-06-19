@@ -5,6 +5,8 @@ import {
     CreateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
+    Automation,
+    AutomationListResponse,
     Campaign,
     ListResponse,
     Segment,
@@ -165,7 +167,8 @@ export default class MailchimpService {
                 sort_field: TemplateSortField.name,
                 offset,
                 count,
-                type: type
+                type: type,
+                exclude_fields: ["templates._links"].join(',')
             }
         });
         return response.data;
@@ -173,6 +176,38 @@ export default class MailchimpService {
 
     async getAllTemplates(type: TemplateType=TemplateType.user, pageSize=defaultPageSize):Promise<Template[]>{
         return this.getAllPaginatedResults(pagination => this.getTemplates(type, pagination), result => result.templates, pageSize);
+    }
+
+    /**
+     *
+     * @param {string} automationId
+     * @return {Promise<AutomationListResponse>}
+     */
+    async getAutomation(automationId: string):Promise<Automation|null> {
+        const url = `/automations/${automationId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["_links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAutomations(pagination=DEFAULT_PAGINATION):Promise<AutomationListResponse> {
+        const url = `/automations`;
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: ["automations._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAutomations(pageSize=defaultPageSize): Promise<Automation[]>{
+        return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
     }
 
     async getAllSavedSegments(pageSize=defaultPageSize):Promise<Segment[]>{
@@ -201,4 +236,7 @@ export default class MailchimpService {
 
         return results;
     }
+
+
 }
+

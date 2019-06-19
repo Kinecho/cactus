@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import {Command} from "@scripts/run";
-import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
+import MailchimpQuestionCampaign from "@scripts/commands/public/MailchimpQuestionCampaign";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 import SaveQuestionCommand from "@scripts/commands/SaveQuestionCommand";
 const prompts = require('prompts');

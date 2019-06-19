@@ -72,28 +72,78 @@ export enum SegmentValue {
     last = "last",
 }
 
+export enum SegmentConditionType {
+    Automation = "Automation",
+    CampaignPoll = "CampaignPoll",
+    Conversation = "Conversation",
+    Date = "Date",
+    EmailClient = "EmailClient",
+    Language = "Language",
+    Mandrill = "Mandrill",
+    MemberRating = "MemberRating",
+    SignupSource = "SignupSource",
+    SurveyMonkey = "SurveyMonkey",
+    VIP = "VIP",
+    Interests = "Interests",
+    EcommCategory = "EcommCategory",
+    EcommNumber = "EcommNumber",
+    EcommPurchased = "EcommPurchased",
+    EcommSpent = "EcommSpent",
+    EcommStore = "EcommStore",
+    GoalActivity = "GoalActivity",
+    GoalTimestamp = "GoalTimestamp",
+    FuzzySegment = "FuzzySegment",
+    StaticSegment = "StaticSegment",
+    IPGeoCountryState = "IPGeoCountryState",
+    IPGeoIn = "IPGeoIn",
+    IPGeoInZip = "IPGeoInZip",
+    IPGeoUnknown = "IPGeoUnknown",
+    IPGeoZip = "IPGeoZip",
+    SocialAge = "SocialAge",
+    SocialGender = "SocialGender",
+    SocialInfluence = "SocialInfluence",
+    Follow = "Follow",
+    AddressMerge = "AddressMerge",
+    ZipMerge = "ZipMerge",
+    BirthdayMerge = "BirthdayMerge",
+    DateMerge = "DateMerge",
+    TextMerge = "TextMerge",
+    SelectMerge = "SelectMerge",
+    EmailAddress = "EmailAddress",
+    PredictedAge = "PredictedAge",
+    PredictedGender = "PredictedGender",
+}
+
 export interface SegmentCondition {
-    condition_type?: string,
+    condition_type: SegmentConditionType,
     op: SegmentOperator|string,
     field: SegmentField|string,
-    extra: string,
-    value: SegmentValue|string,
+    extra?: string,
+    value: SegmentValue|string|number,
+}
+
+export interface SavedSegmentOption {
+    saved_segment_id: number;
+    prebuilt_segment_id?:number;
+}
+
+export interface SegmentConditionOption {
+    match: SegmentMatchType;
+    conditions: SegmentCondition[];
+}
+
+export interface CreateCampaignRequestRecipients {
+    list_id: string
+    // An object representing all segmentation options.
+    // This object should contain a saved_segment_id to use an existing segment,
+    // or you can create a new segment by including both match and conditions options.
+    segment_options?: SavedSegmentOption|SegmentConditionOption;
+
 }
 
 export interface CreateCampaignRequest {
     type: CampaignType,
-    recipients: {
-        list_id: string,
-        // An object representing all segmentation options.
-        // This object should contain a saved_segment_id to use an existing segment,
-        // or you can create a new segment by including both match and conditions options.
-        segment_options?: {
-            saved_segment_id?: number,
-            prebuilt_segment_id?: string, //The prebuilt segment id, if a prebuilt segment has been designated for this campaign.
-            match?: SegmentMatchType,
-            conditions?: SegmentCondition[]
-        }
-    },
+    recipients: CreateCampaignRequestRecipients,
     settings?: {
         subject_line?: string,
         preview_text?: string,

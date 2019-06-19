@@ -105,6 +105,15 @@ export enum CampaignStatus {
     sent = "sent"
 }
 
+export interface CampaignReportSummary {
+    opens: number,
+    unique_opens: number,
+    open_rate: number,
+    clicks: number,
+    subscriber_clicks: number,
+    click_rate: number,
+}
+
 export interface Campaign {
     emails_sent: number,
     send_time: string,
@@ -132,15 +141,7 @@ export interface Campaign {
         to_name: string,
         template_id: string,
     },
-    report_summary: {
-        opens: number,
-        unique_opens: number,
-        open_rate: number,
-        clicks: number,
-        subscriber_clicks: number,
-        click_rate: number,
-
-    }
+    report_summary: CampaignReportSummary;
 }
 
 export interface MailchimpLink {
@@ -221,4 +222,102 @@ export enum TemplateSortField {
 export interface TemplateListResponse extends ListResponse {
     templates: Template[],
 
+}
+
+enum AutomationStatus {
+    save = "save",
+    paused = "paused",
+    sending = "sending",
+}
+
+export interface AutomationCampaignSettings {
+    title: string;
+    from_name: string;
+    reply_to: string;
+    use_conversation: boolean;
+    to_name: string;
+    authenticate: boolean;
+    auto_footer: boolean;
+    inline_css: boolean;
+}
+
+export interface AutomationTrackingOptions {
+    opens: boolean;
+    html_clicks: boolean;
+    text_clicks: boolean;
+    goal_tracking: boolean;
+    ecomm360: boolean;
+    google_analytics: string;
+    clicktale: string;
+}
+
+export enum AutomationSendHourType {
+    send_asap = "send_asap",
+    send_between = "send_between",
+    send_at = "send_at",
+}
+
+export interface AutomationTrigger {
+    workflow_type: string;
+    workflow_title: string;
+    //then there are a ton of options here
+    // see https://developer.mailchimp.com/documentation/mailchimp/reference/automations/#read-get_automations
+    trigger_on_import: boolean;
+    send_immediately: boolean;
+    workflow_emails_count: number;
+    runtime: {
+        days: any[],
+        hours: {
+            type: AutomationSendHourType;
+            send_asap?: boolean;
+            send_between?: {
+                start: string;
+                end: string;
+            };
+            sent_at?: string;
+        }
+    }
+}
+
+export interface AutomationRecipients {
+    list_id: string;
+    list_is_active: string;
+    list_name: string;
+    segment_opts: {
+        saved_segment_id: number;
+        match: SegmentMatchType,
+        conditions: SegmentCondition[]
+    };
+    store_id: string;
+}
+
+export interface Automation {
+    id: string;
+    create_time: ISODate;
+    start_time: ISODate;
+    status: AutomationStatus;
+    emails_sent: number,
+    recipients: AutomationRecipients;
+    settings: AutomationCampaignSettings;
+    tracking: AutomationTrackingOptions;
+    trigger_settings: AutomationTrigger;
+    report_summary: CampaignReportSummary;
+    _links: MailchimpLink[];
+}
+
+export interface AutomationListResponse extends ListResponse {
+    automations: Automation[],
+}
+
+export interface AutomationWorkflow {
+    id: string;
+    create_time: ISODate;
+    start_time: ISODate;
+    status: AutomationStatus;
+    emails_sent: number;
+    recipients: AutomationRecipients;
+    settings: AutomationCampaignSettings;
+    tracking: AutomationTrackingOptions;
+    trigger_settings: AutomationTrigger;
+    report_summary: CampaignReportSummary;
 }
