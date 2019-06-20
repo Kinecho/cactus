@@ -137,5 +137,9 @@ module.exports = {
     "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful": {
         "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
         "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful"
+    },
+    "what_three_things_are_you_looking_forward_to_experiencing_this_week": {
+        "title": "What three things are you looking forward to experiencing this week?",
+        "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week"
     }
 }
