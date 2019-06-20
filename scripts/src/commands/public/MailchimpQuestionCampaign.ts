@@ -187,7 +187,7 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: "text",
                 name: "contentPath",
-                message: "Go Deeper content url",
+                message: "Go Deeper content path",
                 initial: () => getUrlFromInput(this.contentPath),
                 format: (value:string) => getUrlFromInput(value)
             },
@@ -195,7 +195,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "contentLinkText",
                 message: "Content link text",
-                initial: "Read More &rarr;"
+                initial: "Read More →"
             },
             {
                 type: "text",
