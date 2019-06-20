@@ -5,6 +5,7 @@ import {
     CreateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
+    Audience, AudienceListResponse,
     Automation,
     AutomationListResponse,
     Campaign,
@@ -54,8 +55,6 @@ export default class MailchimpService {
 
         this.apiDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
 
-        console.log("Created mailchimp service with apiDomain", this.apiDomain);
-
         this.request = axios.create({baseURL: this.apiDomain});
         this.request.interceptors.request.use(config => {
             config.auth = this.getAuthConfig();
@@ -94,6 +93,12 @@ export default class MailchimpService {
         const url = this.getCampaignURL(id);
         const response = await this.request.get(url);
         console.log("campaign response", JSON.stringify(response.data, null, 2));
+    }
+
+    async getAudienceSegment(listId: string, segmentId: number):Promise<Segment> {
+        const url = `/lists/${listId}/segments/${segmentId}`;
+        const response = await this.request.get(url);
+        return response.data;
     }
 
     async getSentTo(campaignId: string, pagination=DEFAULT_PAGINATION) {
@@ -174,6 +179,16 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async getTemplate(templateId:number): Promise<Template> {
+        const url = `${this.apiDomain}/templates/${templateId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["templates._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
     async getAllTemplates(type: TemplateType=TemplateType.user, pageSize=defaultPageSize):Promise<Template[]>{
         return this.getAllPaginatedResults(pagination => this.getTemplates(type, pagination), result => result.templates, pageSize);
     }
@@ -208,6 +223,33 @@ export default class MailchimpService {
 
     async getAllAutomations(pageSize=defaultPageSize): Promise<Automation[]>{
         return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
+    }
+
+    async getAudience(audienceId:string):Promise<Audience>{
+        const url = `/lists/${audienceId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["lists._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAudiences(pagination=DEFAULT_PAGINATION):Promise<AudienceListResponse> {
+        const url = `/lists`;
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: ["lists._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAudiences(pageSize=defaultPageSize): Promise<Audience[]>{
+        return this.getAllPaginatedResults(pagination => this.getAudiences(pagination), result => result.lists, pageSize);
     }
 
     async getAllSavedSegments(pageSize=defaultPageSize):Promise<Segment[]>{

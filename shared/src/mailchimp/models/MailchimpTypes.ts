@@ -321,3 +321,73 @@ export interface AutomationWorkflow {
     trigger_settings: AutomationTrigger;
     report_summary: CampaignReportSummary;
 }
+
+export enum AudienceVisibility {
+    pub = "pub",
+    prv = "prv",
+}
+
+export interface Audience {
+    id: string,
+    web_id: number,
+    name: string,
+    campaign_defaults: {
+        from_name: string;
+        from_email: string;
+        subject: string;
+        language: string;
+    }
+    contact: {
+        company: string;
+        address1: string;
+        address2: string;
+        city: string;
+        state: string;
+        zip: string;
+        country: string;
+        phone: string;
+    }
+    permission_reminder: string;
+    use_archive_bar: boolean;
+    notify_on_subscribe: string;
+    notify_on_unsubscribe: string;
+    date_created: ISODate;
+    list_rating: number;
+    email_type_option: boolean;
+    subscribe_url_short: string;
+    subscribe_url_long: string;
+    beamer_address: string;
+    visibility: AudienceVisibility;
+    double_optin: boolean;
+    has_welcome: boolean;
+    marketing_permissions: boolean;
+    modules: any[];
+    stats: {
+        member_count: number;
+        total_contacts: number;
+        unsubscribe_count: number
+        cleaned_count: number
+        member_count_since_send: number;
+        unsubscribe_count_since_send: number
+        cleaned_count_since_send: number
+        campaign_count: number
+        campaign_last_sent: ISODate
+        merge_field_count: number;
+        avg_sub_rate: number
+        avg_unsub_rate: number
+        target_sub_rate: number
+        open_rate: number
+        click_rate: number
+        last_sub_date: ISODate
+        last_unsub_date: ISODate
+    }
+}
+
+export interface AudienceListResponse extends ListResponse {
+    lists: Audience[],
+    constraints: {
+        may_create: boolean,
+        max_instances: number;
+        current_total_instances: number;
+    }
+}

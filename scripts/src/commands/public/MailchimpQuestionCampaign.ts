@@ -1,7 +1,6 @@
 import {Command} from "@scripts/run";
 import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
-import {chooseEnvironment} from "@scripts/questionUtil";
 import MailchimpService from "@scripts/services/mailchimpService";
 import {
     CampaignContentRequest,
@@ -17,22 +16,29 @@ import {
 import {Campaign, CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
-
+import {CactusConfig} from "@api/config/CactusConfig";
 
 export const ONBOARDING_AUTOMATION_ID = "05913cc097";
 
 const prompts = require('prompts');
 
-interface QuestionResponse {
-    audienceId: string;
+interface ContentQuestionResponse {
     question: string;
     contentPath: string;
     contentLinkText: string;
-    replyTo: string;
-    fromName: string;
+    inspirationText?:string;
     subjectLine: string;
     previewText: string;
+    replyTo: string;
+    fromName: string;
+}
 
+interface UseDefaultConfigurationResponse {
+    useDefault: boolean;
+}
+
+interface RecipientsConfiguration {
+    audienceId: string,
     useSavedSegment: boolean;
     savedSegmentId?: number;
     useTags: boolean;
@@ -41,10 +47,9 @@ interface QuestionResponse {
     useTemplate: boolean;
     templateId?: number;
     segmentMatchType: SegmentMatchType;
-    inspirationText?:string;
     useAutomations: boolean;
-    automationOperator: SegmentOperator;
     automationIds: string[];
+    automationOperator: SegmentOperator;
 }
 
 export default class MailchimpQuestionCampaign implements Command {
@@ -53,78 +58,93 @@ export default class MailchimpQuestionCampaign implements Command {
     question?: string;
     contentPath?:string;
 
-    response?: QuestionResponse;
-    project?: Project;
     campaign?:Campaign;
     reminderCampaign?:Campaign;
 
-    async start(): Promise<void> {
-        console.log(chalk.bold.cyan("Let's create a mailchimp campaign for a daily question"));
-        console.log(chalk.cyan("This program will walk you through creating the campaign. \n" +
-            "You'll have the chance to review the settings before creating it in Mailchimp. \n" +
-            "Once a campaign is created, it will be in a draft status, so you can always edit/delete it before it starts sending.\n"));
+    project?: Project;
+    currentConfig?: CactusConfig;
+    stageConfig?:CactusConfig;
+    prodConfig?:CactusConfig;
+    mailchimpService?:MailchimpService;
 
-        const [prodConfig, stageConfig] = await Promise.all([getCactusConfig(Project.PROD), getCactusConfig(Project.STAGE)]);
+    contentQuestions = [
+        {
+            type: "text",
+            name: "question",
+            message: "What is the question?",
+            initial: this.question || "",
+        },
+        {
+            type: "text",
+            name: "contentPath",
+            message: "Go Deeper content url",
+            initial: () => getUrlFromInput(this.contentPath),
+            format: (value:string) => getUrlFromInput(value)
+        },
+        {
+            type: "text",
+            name: "contentLinkText",
+            message: "Content link text",
+            initial: "Read More..."
+        },
+        {
+            type: "text",
+            name: "inspirationText",
+            message: "Inspiration text (optional)",
+        },
+        {
+            type: "text",
+            name: "subjectLine",
+            message: "Subject Line",
+            initial: (prev:string, values:ContentQuestionResponse) => values.question,
+        },
+        {
+            type: "text",
+            name: "previewText",
+            message: "Preview Text",
+            initial: (prev:string, values:ContentQuestionResponse) => values.subjectLine,
+        },
+        {
+            type: "text",
+            name: "fromName",
+            message: "From Name",
+            initial: "Cactus",
+        },
+        {
+            type: "text",
+            name: "replyTo",
+            message: "reply-to email address",
+            initial: "hello@cactus.app",
+            validate: (value:string) => isValidEmail(value)  && value.endsWith("cactus.app") ? true : 'Please enter a valid email that ends in \"cactus.app\"'
+        }
+    ];
 
-        let config = stageConfig;
-        let mailchimpService = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
-        const questions = [
-            {
-                type: "text",
-                name: "question",
-                message: "What is the question?",
-                initial: this.question || "",
-            },
-            {
-                type: "text",
-                name: "contentPath",
-                message: "Go Deeper content url",
-                initial: () => getUrlFromInput(this.contentPath),
-                format: (value:string) => getUrlFromInput(value)
-            },
-            {
-                type: "text",
-                name: "contentLinkText",
-                message: "Content link text",
-                initial: "Read More..."
-            },
-            {
-                type: "text",
-                name: "inspirationText",
-                message: "Inspiration text (optional)",
-            },
-            {
-                type: "text",
-                name: "subjectLine",
-                message: "Subject Line",
-                initial: (prev:string, values:QuestionResponse) => values.question,
-            },
-            {
-                type: "text",
-                name: "fromName",
-                message: "From Name",
-                initial: "Cactus",
-            },
-            {
-                type: "text",
-                name: "replyTo",
-                message: "reply-to email address",
-                initial: "hello@cactus.app",
-                validate: (value:string) => isValidEmail(value)  && value.endsWith("cactus.app") ? true : 'Please enter a valid email that ends in \"cactus.app\"'
-            },
+    async askEnvironmentQuestion() :Promise<{environment:Project}> {
+        return await prompts([{
+            type: "select",
+            message: "Choose an environment",
+            name: "environment",
+            choices: [{title: "Prod", value: Project.PROD}, {title: "Stage", value: Project.STAGE}],
+            initial: 1
+        }], {
+            onCancel: (prompt: any, answers: RecipientsConfiguration) => {
+                console.log("Canceled command on prompt", prompt.message);
+                return process.exit(0);
+            }
+        })
+    }
 
-            {
-                ...chooseEnvironment,
-                // hint: "this will determine the audience ID",
-                onState: (args: { value: string, aborted: boolean }) => {
-                    const {value} = args;
-                    // console.log("chose", value, "aborted", aborted);
-                    if (value === Project.PROD) {
-                        config = prodConfig;
-                    }
-                    mailchimpService = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
-                }
-            },
+    async askRecipientQuestions(): Promise<RecipientsConfiguration> {
+        const mailchimpService = this.mailchimpService;
+        if (!mailchimpService){
+            throw new Error("Unable to get mailchimp service while asking recipient questions");
+        }
+        const config = this.currentConfig;
+        if (!config){
+            throw new Error("No configuration is set while asking recipient questions");
+        }
+
+        const recipientQuestions = [
             {
                 type: "toggle",
                 name: "useTemplate",
@@ -134,11 +154,11 @@ export default class MailchimpQuestionCampaign implements Command {
                 inactive: 'no',
             },
             {
-                type: (prev:boolean, values:QuestionResponse) =>  values.useTemplate ? "select" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) =>  values.useTemplate ? "select" : null,
                 name: "templateId",
                 max: 1,
                 message: "Choose a template for the email",
-                choices: async (prev:boolean, values:QuestionResponse, prompt:any) => {
+                choices: async (prev:boolean, values:RecipientsConfiguration) => {
                     if (!values.useTemplate){
                         console.log("not fetching templates");
                         return []
@@ -160,11 +180,11 @@ export default class MailchimpQuestionCampaign implements Command {
                 inactive: 'no',
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => values.useSavedSegment ? "autocomplete" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => values.useSavedSegment ? "autocomplete" : null,
                 name: "segmentId",
                 message: "Choose the segment",
                 format: (value:string) => Number(value),
-                choices: async (prev:boolean, values:QuestionResponse, prompt:any) => {
+                choices: async (prev:boolean, values:RecipientsConfiguration) => {
                     if (!values.useSavedSegment){
                         console.log("not fetching segments");
                         return [];
@@ -178,21 +198,21 @@ export default class MailchimpQuestionCampaign implements Command {
                 }
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment ? "toggle" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment ? "toggle" : null,
                 name: "useTags",
                 message: "Add tag filter(s) to your segment??",
-                initial: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment,
+                initial: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment,
                 active: 'yes',
                 inactive: 'no',
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment && values.useTags ? "autocompleteMultiselect" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment && values.useTags ? "autocompleteMultiselect" : null,
                 name: "tagSegmentIds",
                 message: "Select one or more tags",
                 // max: 5,
                 initial: [],
                 format: (strings:string[]) => strings.map(value => Number(value)),
-                choices: async (prev:boolean, values:QuestionResponse, prompt:any) => {
+                choices: async (prev:boolean, values:RecipientsConfiguration, prompt:any) => {
                     if (!values.useTags){
                         console.log("Not getting tags");
                         return [];
@@ -207,19 +227,19 @@ export default class MailchimpQuestionCampaign implements Command {
                 }
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment ? "toggle" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment ? "toggle" : null,
                 name: "useAutomations",
                 message: "Add automation filter(s) to your segment?",
-                initial: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment,
+                initial: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment,
                 active: 'yes',
                 inactive: 'no',
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment && values.useAutomations ? "autocompleteMultiselect" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment && values.useAutomations ? "autocompleteMultiselect" : null,
                 name: "automationIds",
                 message: "Choose Automations",
                 // max: 5,
-                choices: async (prev:boolean, values:QuestionResponse) => {
+                choices: async (prev:boolean, values:RecipientsConfiguration) => {
                     if (!values.useAutomations){
                         console.log("skipping automations");
                         return [];
@@ -235,22 +255,22 @@ export default class MailchimpQuestionCampaign implements Command {
                 }
             },
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment && values.useAutomations && values.automationIds.length > 0 ? "select" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment && values.useAutomations && values.automationIds.length > 0 ? "select" : null,
                 name: "automationOperator",
                 message: "What operator should we use for the for the automations?",
                 // max: 5,
-                choices: async (prev:boolean, values:QuestionResponse) => {
-                   return [
-                       {title: SegmentOperator.completed, value: SegmentOperator.completed},
-                       {title: SegmentOperator.started, value: SegmentOperator.started},
-                       {title: SegmentOperator.not_started, value: SegmentOperator.not_started},
-                       {title: SegmentOperator.not_completed, value: SegmentOperator.not_completed}
-                   ]
+                choices: async (prev:boolean, values:RecipientsConfiguration) => {
+                    return [
+                        {title: SegmentOperator.completed, value: SegmentOperator.completed},
+                        {title: SegmentOperator.started, value: SegmentOperator.started},
+                        {title: SegmentOperator.not_started, value: SegmentOperator.not_started},
+                        {title: SegmentOperator.not_completed, value: SegmentOperator.not_completed}
+                    ]
                 }
             },
 
             {
-                type: (prev:boolean, values:QuestionResponse) => !values.useSavedSegment ? "select" : null,
+                type: (prev:boolean, values:RecipientsConfiguration) => !values.useSavedSegment ? "select" : null,
                 name: "segmentMatchType",
                 message: "Segment Match Type",
                 choices: [
@@ -266,29 +286,88 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         ];
 
-        const response: QuestionResponse = await prompts(questions, {
-            onCancel: (prompt:any, answers:QuestionResponse) => {
+        return await prompts(recipientQuestions, {
+            onCancel: (prompt: any, answers: RecipientsConfiguration) => {
                 console.log("Canceled command on prompt", prompt.message);
                 return process.exit(0);
             }
         });
-        this.response = response;
+    }
 
-        console.log(chalk.blue("Responses:\n", JSON.stringify(response, null, 2)));
+    async askUseDefaultsQuestion():Promise<UseDefaultConfigurationResponse> {
+        const useDefaultConfigurationQuestions = [
+            {
+                type: "toggle",
+                message: "Do you want to use the default configuration for the daily emails?",
+                name: "useDefault",
+                initial: true,
+                active: 'yes',
+                inactive: 'no, create my own',
+            },
+
+        ];
+        return await prompts(useDefaultConfigurationQuestions, {
+            onCancel: (prompt: any, answers: RecipientsConfiguration) => {
+                console.log("Canceled command on prompt", prompt.message);
+                return process.exit(0);
+            }
+        });
+    }
+
+    async start(): Promise<void> {
+        console.log(chalk.bold.cyan("Let's create a mailchimp campaign for a daily question"));
+        console.log(chalk.cyan("This program will walk you through creating the campaign. \n" +
+            "You'll have the chance to review the settings before creating it in Mailchimp. \n" +
+            "Once a campaign is created, it will be in a draft status, so you can always edit/delete it before it starts sending.\n"));
+
+        const [prodConfig, stageConfig] = await Promise.all([getCactusConfig(Project.PROD), getCactusConfig(Project.STAGE)]);
+        this.prodConfig = prodConfig;
+        this.stageConfig = stageConfig;
+
+        if (!this.project){
+            const {environment} = await this.askEnvironmentQuestion();
+            this.project = environment;
+        } else {
+            console.log("environment has been set to " + this.project);
+        }
+
+        if (this.project === Project.PROD){
+            this.currentConfig = prodConfig;
+        } else {
+            this.currentConfig = stageConfig;
+        }
+
+        const mailchimpService = new MailchimpService(this.currentConfig.mailchimp.api_key, this.currentConfig.mailchimp.audience_id);
+        this.mailchimpService = mailchimpService;
+
+        const contentResponse:ContentQuestionResponse = await prompts(this.contentQuestions);
+        const defaultConfigurationResponse:UseDefaultConfigurationResponse =  await this.askUseDefaultsQuestion();
+
+        let recipientsConfig:RecipientsConfiguration;
+        if (defaultConfigurationResponse.useDefault) {
+            console.log(`Great! Using the default configuration for ${this.project}`);
+            recipientsConfig = await this.getDefaultRecipientConfiguration(this.project, {prod: prodConfig, stage: stageConfig});
+
+        } else {
+            //need to set up the content response
+            recipientsConfig = await this.askRecipientQuestions();
+        }
+
+        console.log(chalk.blue("Responses:\n", JSON.stringify(recipientsConfig, null, 2)));
         console.log(chalk.yellow("\nsetting up campaign request"));
         console.log(chalk.blue("setting up recipients"));
         const campaignRecipients:CreateCampaignRequestRecipients = {
-            list_id: config.mailchimp.audience_id,
+            list_id: this.currentConfig.mailchimp.audience_id,
         };
 
-        if (response.savedSegmentId){
-            campaignRecipients.segment_options = {
-                saved_segment_id: response.savedSegmentId,
+        if (recipientsConfig.savedSegmentId){
+            campaignRecipients.segment_opts = {
+                saved_segment_id: recipientsConfig.savedSegmentId,
             }
         } else {
             const conditions:SegmentCondition[] = [];
-            if (response.useTags && response.tagSegmentIds && response.tagSegmentIds.length > 0){
-                response.tagSegmentIds.forEach(segmentId => {
+            if (recipientsConfig.useTags && recipientsConfig.tagSegmentIds && recipientsConfig.tagSegmentIds.length > 0){
+                recipientsConfig.tagSegmentIds.forEach(segmentId => {
                     conditions.push({
                         op: SegmentOperator.static_is,
                         field: SegmentField.static_segment,
@@ -298,10 +377,10 @@ export default class MailchimpQuestionCampaign implements Command {
                 })
             }
 
-            if (response.useAutomations && response.automationIds && response.automationIds.length > 0){
-                response.automationIds.forEach(automationId => {
+            if (recipientsConfig.useAutomations && recipientsConfig.automationIds && recipientsConfig.automationIds.length > 0){
+                recipientsConfig.automationIds.forEach(automationId => {
                     conditions.push({
-                        op: response.automationOperator,
+                        op: recipientsConfig.automationOperator,
                         field: SegmentField.static_segment,
                         condition_type: SegmentConditionType.StaticSegment,
                         value: automationId,
@@ -309,8 +388,8 @@ export default class MailchimpQuestionCampaign implements Command {
                 })
             }
 
-            campaignRecipients.segment_options = {
-                match: response.segmentMatchType,
+            campaignRecipients.segment_opts = {
+                match: recipientsConfig.segmentMatchType,
                 conditions,
             }
         }
@@ -319,10 +398,11 @@ export default class MailchimpQuestionCampaign implements Command {
             type: CampaignType.regular,
             recipients: campaignRecipients,
             settings: {
-                title: response.question,
-                reply_to: response.replyTo,
-                subject_line: response.subjectLine,
-                from_name: response.fromName
+                title: contentResponse.question,
+                reply_to: contentResponse.replyTo,
+                subject_line: contentResponse.subjectLine,
+                from_name: contentResponse.fromName,
+                preview_text: contentResponse.previewText,
             }
         };
 
@@ -351,17 +431,18 @@ export default class MailchimpQuestionCampaign implements Command {
         const campaign = await mailchimpService.createCampaign(campaignRequest);
 
         this.campaign = campaign;
-        console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify({id: campaign.id, web_id: campaign.web_id, status: campaign.status}, null, 2)));
+        // let campaignSummary = {id: campaign.id, web_id: campaign.web_id, status: campaign.status};
+        console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify(campaign, null, 2)));
 
-        if (response.templateId){
+        if (recipientsConfig.templateId){
             console.log(chalk.bold("\ncreating template content..."));
             const contentRequest:CampaignContentRequest = {
                 template: {
-                    id: response.templateId,
+                    id: recipientsConfig.templateId,
                     sections: {
-                        [TemplateSection.question]: response.question,
-                        [TemplateSection.content_link]: `<a href="${getUrlFromInput(response.contentPath, "cactus.app")}">${response.contentLinkText}</a>`,
-                        [TemplateSection.inspiration]: response.inspirationText || "",
+                        [TemplateSection.question]: contentResponse.question,
+                        [TemplateSection.content_link]: `<a href="${getUrlFromInput(contentResponse.contentPath, "cactus.app")}">${contentResponse.contentLinkText}</a>`,
+                        [TemplateSection.inspiration]: contentResponse.inspirationText || "",
                     }
                 }
             };
@@ -371,5 +452,57 @@ export default class MailchimpQuestionCampaign implements Command {
         }
 
         return;
+    }
+
+    async getDefaultRecipientConfiguration(project:Project, configs:{prod:CactusConfig, stage:CactusConfig}): Promise<RecipientsConfiguration> {
+        let recipientConfig;
+        if (this.project === Project.PROD) {
+            recipientConfig = {
+                audienceId: configs.prod.mailchimp.audience_id,
+                useSavedSegment: true,
+                savedSegmentId: 39485,
+                useTags: false,
+                tagSegmentIds: [],
+                environment: Project.PROD,
+                useTemplate: true,
+                templateId: 53353,
+                segmentMatchType: SegmentMatchType.any,
+                useAutomations: false,
+                automationIds: [],
+                automationOperator: SegmentOperator.completed,
+            }
+        } else {
+            recipientConfig = {
+                audienceId: configs.stage.mailchimp.audience_id,
+                useSavedSegment: true,
+                savedSegmentId: 38081,
+                useTags: false,
+                tagSegmentIds: [],
+                environment: Project.PROD,
+                useTemplate: true,
+                templateId: 53353,
+                segmentMatchType: SegmentMatchType.any,
+                useAutomations: false,
+                automationIds: [],
+                automationOperator: SegmentOperator.completed,
+            };
+
+        }
+
+        if (this.mailchimpService ){
+
+            const segment = await this.mailchimpService.getAudienceSegment(recipientConfig.audienceId, recipientConfig.savedSegmentId);
+            console.log(chalk.blue(`Using audience segment "${segment.name }" (id = ${segment.id})` ));
+
+            if (recipientConfig.templateId){
+                const template = await this.mailchimpService.getTemplate(recipientConfig.templateId)
+                console.log(chalk.blue(`Using template "${template.name}" (id = ${template.id})`));
+            } else {
+                console.log(chalk.blue(`Not using a template`));
+            }
+
+        }
+
+        return recipientConfig;
     }
 }
