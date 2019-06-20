@@ -831,63 +831,55 @@ export default class MailchimpQuestionCampaign implements Command {
         } else if (!isReady){
             console.log(chalk.red(`Campaign "${chalk.bold(campaign.settings.title)}" is not ready to send. Please correct the following issues in the Mailchimp UI: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
             const issues = campaignChecklist.items.filter(item => item.type !== SendChecklistItemType.success && item.heading !== "MonkeyRewards");
-            console.log(chalk.red(JSON.stringify(issues, null, 2)));
-
 
             if (!isReady && allowForceRetry && issues.length === 1 && issues[0].id === 501 && issues[0].details.toLowerCase() === "your advanced segment is empty."){
-                const {forceRetry} = await prompts({
-                    type: "confirm",
-                    name: "forceRetry",
-                    message: `Force a retry for ${campaign.settings.title}?`
-                });
-
-                if (forceRetry){
-                    console.log("setting recipients to be just neil@cactus.app");
-                    const updatedCampaignRequest:UpdateCampaignRequest = {
-                        settings: {
-                          subject_line: campaign.settings.subject_line,
-                          from_name: campaign.settings.from_name,
-                          reply_to: campaign.settings.reply_to,
-                        },
-                        recipients: {
-                            list_id: campaign.recipients.list_id,
-                            segment_opts: {
-                                match: SegmentMatchType.all,
-                                conditions: [{
-                                    condition_type: SegmentConditionType.EmailAddress,
-                                    op: SegmentOperator.is,
-                                    value: "neil@cactus.app",
-                                    field: SegmentField.EMAIL
-                                }]
-                            }
+                console.log("Forcing the campaign to schedule using a dirty trick -- setting recipients to be just neil@cactus.app");
+                const updatedCampaignRequest:UpdateCampaignRequest = {
+                    settings: {
+                      subject_line: campaign.settings.subject_line,
+                      from_name: campaign.settings.from_name,
+                      reply_to: campaign.settings.reply_to,
+                    },
+                    recipients: {
+                        list_id: campaign.recipients.list_id,
+                        segment_opts: {
+                            match: SegmentMatchType.all,
+                            conditions: [{
+                                condition_type: SegmentConditionType.EmailAddress,
+                                op: SegmentOperator.is,
+                                value: "neil@cactus.app",
+                                field: SegmentField.EMAIL
+                            }]
                         }
-                    };
-                    try {
-                        const updatedCampaign = await this.mailchimpService.updateCampaign(campaign.id, updatedCampaignRequest);
-                        didForceRetry = true;
-                        console.log(`successfully updated ${updatedCampaign.id}'s recipients. Rerunning checks`);
-
-                        const updatedChecklist = await this.mailchimpService.getCampaignSendChecklist(campaign.id);
-                        const updatedErrors = updatedChecklist.items.filter(item => item.type === SendChecklistItemType.error && item.heading !== "MonkeyRewards");
-                        if (updatedChecklist.is_ready){
-                            console.log("Yeehaw! We can now schedule the campaign");
-                            const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
-                            if (warnings.length > 0){
-                                console.log(chalk.yellow(`However, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
-                            }
-                            isReady = true;
-                        } else {
-                            console.log(chalk.yellow("Welp, we still aren't able to schedule the campaign."));
-                            console.log(chalk.yellow(JSON.stringify(updatedErrors, null, 2)));
-                        }
-
-                    } catch (e){
-                        console.error("Unable to update campaign", e);
                     }
-                }
+                };
+                try {
+                    const updatedCampaign = await this.mailchimpService.updateCampaign(campaign.id, updatedCampaignRequest);
+                    didForceRetry = true;
+                    console.log(`successfully updated ${updatedCampaign.id}'s recipients. Rerunning checks`);
 
+                    const updatedChecklist = await this.mailchimpService.getCampaignSendChecklist(campaign.id);
+                    const updatedErrors = updatedChecklist.items.filter(item => item.type === SendChecklistItemType.error && item.heading !== "MonkeyRewards");
+                    if (updatedChecklist.is_ready){
+                        console.log("Yeehaw! We can now schedule the campaign");
+                        const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
+                        if (warnings.length > 0){
+                            console.log(chalk.yellow(`However, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
+                        }
+                        isReady = true;
+                    } else {
+                        console.log(chalk.yellow("Welp, we still aren't able to schedule the campaign."));
+                        console.log(chalk.yellow(JSON.stringify(updatedErrors, null, 2)));
+                    }
+
+                } catch (e){
+                    console.error("Unable to update campaign", e);
+                }
+            } else if (!allowForceRetry){
+                console.log(chalk.red(JSON.stringify(issues, null, 2)));
             } else {
                 console.log(`wasn't able to force a retry. allowRetry: ${allowForceRetry}, issues.length: ${issues.length}`);
+                console.log(chalk.red(JSON.stringify(issues, null, 2)));
                 return;
             }
 
