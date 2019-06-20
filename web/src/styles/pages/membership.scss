@@ -8,18 +8,24 @@ body {
 }
 
 .hero {
-  align-items: center;
-  background-color: $lightPink;
-  display: flex;
-  flex-flow: column wrap;
-  height: 100vh;
-  justify-content: center;
-  text-align: center;
+  background-image: linear-gradient($lightPink, white);
+  height: 200vh;
+
+  .copy {
+    align-items: center;
+    display: flex;
+    flex-flow: column wrap;
+    height: 100vh;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
 
   .logoLink {
-    left: 3.2rem;
-    position: absolute;
-    top: 2.4rem;
+    margin-left: 32px;
+    position: fixed;
+    top: 24px;
   }
 
   h3 {
@@ -43,22 +49,64 @@ body {
     flex-grow: 0;
   }
 
-  .leaf1 {
+  .reflections {
+    align-items: flex-end;
+    bottom: 0;
+    display: flex;
+    flex-flow: column wrap;
+    height: 100vh;
+    left: 0;
+    padding: 3.2rem;
+    position: sticky;
+    width: 100vw;
+  }
+
+  .reflection {
+    margin-bottom: 3.2rem;
+    width: 32rem;
+  }
+
+  #reflection1 {
+    transform: translate(-20vw, -10vh);
+  }
+  #reflection2 {
+    transform: translate(-60vw, -10vh);
+  }
+  #reflection3 {
+    transform: translate(10vw, 20vh);
+  }
+  #reflection4 {
+    transform: translate(-80vw, 15vh);
+  }
+
+  #leaf1 {
     bottom: -1vh;
     left: 52vw;
     position: absolute;
     transform: rotate(-75deg);
   }
-  .leaf2 {
+  #leaf2 {
     left: 25vw;
     position: absolute;
     top: 75vh;
     transform: rotate(10deg);
   }
-  .leaf3 {
+  #leaf3 {
     left: 75vw;
     position: absolute;
     top: 20vh;
+  }
+
+  #stem1 {
+    left: 45vw;
+    position: absolute;
+    top: -28vh;
+  }
+  #stem2 {
+    bottom: -24vh;
+    left: 69vw;
+    position: absolute;
+    transform: rotate(125deg);
   }
 }
 
@@ -129,6 +177,9 @@ h2 {
   padding: 2.4rem;
 
   .flexContainer {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 1.6rem;
   }
 
@@ -184,12 +235,6 @@ h2 {
     }
   }
 
-  .flexContainer {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-  }
-
   .text {
     @include r(768) {
       margin-left: 7.2rem;
@@ -230,7 +275,7 @@ h2 {
       background-color: mix($lightGreen, white, 67%);
       bottom: -3.2rem;
       content: '';
-      filter: blur(2px);
+      filter: blur(4px);
       height: 50px;
       left: 0;
       margin: 0 auto;
@@ -246,15 +291,21 @@ h2 {
   }
 }
 
-@keyframes background {
-  from {
-    background-color: $lightPink;
-  }
+@keyframes reflectionSet {
   to {
-    background-color: transparent;
+    transform: translate(0,0);
+  }
+}
+@keyframes fadeOut {
+  to {
+    opacity: 0;
   }
 }
 
+.fadeOut {
+  animation: fadeOut 2s ease-in-out forwards;
+}
+
 .animate {
-  animation: background 3s ease-in-out forwards;
+  animation: reflectionSet 3s ease-in-out forwards;
 }
