@@ -33,10 +33,6 @@
         ],
         "rewrites": [
             {
-                "source": "/what-makes-you-think-automation-is-good",
-                "destination": "/what_makes_you_think_automation_is_good.html"
-            },
-            {
                 "source": "/membership",
                 "destination": "/membership.html"
             },

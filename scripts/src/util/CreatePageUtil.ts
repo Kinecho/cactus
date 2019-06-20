@@ -71,7 +71,7 @@ export async function updateFirebaseJson(response: PageConfig): Promise<void> {
 
     rewrites.unshift(newPage);
 
-    console.log("Adding page to Firebase Config:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
+    console.log("Adding page to Firebase Config", chalk.yellow(newPage.source));
 
     await writeFile(firebaseConfigPath, JSON.stringify(config, null, 4), {encoding: 'utf8'});
     return;
@@ -88,7 +88,7 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
 
     pages[response.pageName] = newPage;
 
-    console.log("\nAdding new page to pages.js:\n", chalk.yellow(JSON.stringify(newPage, null, 4)));
+    console.log("Adding new page to pages.js:", chalk.yellow(newPage.path));
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 

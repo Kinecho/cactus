@@ -4,7 +4,6 @@ import MailchimpQuestionCampaign from "@scripts/commands/public/MailchimpQuestio
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 import SaveQuestionCommand from "@scripts/commands/SaveQuestionCommand";
 const prompts = require('prompts');
-const webHelpers = require("@web/../helpers");
 
 import {
     addToSitemap,
@@ -56,17 +55,7 @@ export default class CreateReflectionPrompt implements Command {
             {
                 type: "confirm",
                 name: "looksGood",
-                message: (prev: any, values: any) => `\n\nHere's the current configuration:
-        
-${chalk.blue("Page Title")}: ${values.title}
-${chalk.blue("Page URL")}: ${values.pagePath ? values.pagePath : chalk.gray("<none>")}
-${chalk.blue("Files to create")}: 
- • ${webHelpers.htmlDir}/${values.pageName}.html
- • ${webHelpers.pagesStylesDir}/${values.pageName}.ts
- • ${webHelpers.pagesScriptsDir}/${values.pageName}.scss 
-${values.pagePath ? `${chalk.blue("Files to update")}: \n • ${webHelpers.webRoot}/pages.js \n • ${webHelpers.projectRoot}/firebase.json` : ''}
- 
-Continue?`
+                message: (prev: any, values: any) => `Ready to create the files?`
             },
         ];
     }
@@ -77,15 +66,12 @@ Continue?`
         console.log(chalk.dim('This will walk you through making a new landing page, email campaign, and record in the database'));
         const response = await prompts(this.getQuestions());
         this.response = response;
-        const {pagePath, title, looksGood} = response;
+        const {looksGood} = response;
 
         if (!looksGood) {
             console.warn(chalk.red("Not creating pages."));
             return;
         }
-
-        console.log("page path is: ", pagePath);
-        console.log("title ", title);
 
         const fileTasks = [
             createHtml(response),
