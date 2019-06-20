@@ -32,8 +32,6 @@ export default class SaveQuestionCommand extends FirebaseCommand {
     }
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
-        console.log(chalk.bgYellow.black("Starting save question command..."));
-
         const model = await this.getModel();
         model.campaign = this.campaign;
         model.reminderCampaign = this.reminderCampaign;
@@ -41,8 +39,8 @@ export default class SaveQuestionCommand extends FirebaseCommand {
         model.baseFileName = this.baseFileName;
 
         const saved = await firestoreService.save(model);
-        const savedJson = await saved.toJSON();
-        console.log("Saved ReflectionPrompt", chalk.yellow(JSON.stringify(savedJson, null, 2)));
+
+        console.log(chalk.green(`Saved ReflectionPrompt successfully. ID = ${saved.id}`));
 
         return;
     }

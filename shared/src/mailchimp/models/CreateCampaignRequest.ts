@@ -72,57 +72,145 @@ export enum SegmentValue {
     last = "last",
 }
 
+export enum SegmentConditionType {
+    Aim = "Aim",
+    Automation = "Automation",
+    CampaignPoll = "CampaignPoll",
+    Conversation = "Conversation",
+    Date = "Date",
+    EmailClient = "EmailClient",
+    Language = "Language",
+    Mandrill = "Mandrill",
+    MemberRating = "MemberRating",
+    SignupSource = "SignupSource",
+    SurveyMonkey = "SurveyMonkey",
+    VIP = "VIP",
+    Interests = "Interests",
+    EcommCategory = "EcommCategory",
+    EcommNumber = "EcommNumber",
+    EcommPurchased = "EcommPurchased",
+    EcommSpent = "EcommSpent",
+    EcommStore = "EcommStore",
+    GoalActivity = "GoalActivity",
+    GoalTimestamp = "GoalTimestamp",
+    FuzzySegment = "FuzzySegment",
+    StaticSegment = "StaticSegment",
+    IPGeoCountryState = "IPGeoCountryState",
+    IPGeoIn = "IPGeoIn",
+    IPGeoInZip = "IPGeoInZip",
+    IPGeoUnknown = "IPGeoUnknown",
+    IPGeoZip = "IPGeoZip",
+    SocialAge = "SocialAge",
+    SocialGender = "SocialGender",
+    SocialInfluence = "SocialInfluence",
+    Follow = "Follow",
+    AddressMerge = "AddressMerge",
+    ZipMerge = "ZipMerge",
+    BirthdayMerge = "BirthdayMerge",
+    DateMerge = "DateMerge",
+    TextMerge = "TextMerge",
+    SelectMerge = "SelectMerge",
+    EmailAddress = "EmailAddress",
+    PredictedAge = "PredictedAge",
+    PredictedGender = "PredictedGender",
+}
+
 export interface SegmentCondition {
-    condition_type?: string,
+    condition_type: SegmentConditionType,
     op: SegmentOperator|string,
     field: SegmentField|string,
-    extra: string,
-    value: SegmentValue|string,
+    extra?: string,
+    value: SegmentValue|string|number,
+}
+
+export interface SavedSegmentOption {
+    saved_segment_id: number;
+    prebuilt_segment_id?:number;
+}
+
+export interface SegmentConditionOption {
+    match: SegmentMatchType;
+    conditions: SegmentCondition[];
+}
+
+export interface CreateCampaignRequestRecipients {
+    list_id: string
+    // An object representing all segmentation options.
+    // This object should contain a saved_segment_id to use an existing segment,
+    // or you can create a new segment by including both match and conditions options.
+    segment_opts?: SavedSegmentOption|SegmentConditionOption;
+
+}
+
+export interface CreateCampaignSettings {
+    subject_line?: string,
+    preview_text?: string,
+    title: string,
+    from_name?: string,
+    reply_to?: string,
+    use_conversation?: boolean,
+    to_name?: string,
+    folder_id?: string,
+    authenticate?: boolean,
+    auto_footer?: boolean,
+    inline_css?: boolean,
+    auto_tweet?: boolean,
+    auto_fb_post?:string[], //array of page ids to post to
+    fb_comments?:boolean,
+    template_id?:number,
+}
+
+export interface UpdateCampaignSettings {
+    subject_line: string,
+    preview_text?: string,
+    title?: string,
+    from_name: string,
+    reply_to: string,
+    use_conversation?: boolean,
+    to_name?: string,
+    folder_id?: string,
+    authenticate?: boolean,
+    auto_footer?: boolean,
+    inline_css?: boolean,
+    auto_tweet?: boolean,
+    auto_fb_post?:string[], //array of page ids to post to
+    fb_comments?:boolean,
+    template_id?:number,
+}
+
+export interface CampaignTracking {
+    opens?:boolean,
+    html_clicks?: boolean,
+    text_clicks?: boolean,
+    goal_tracking?:boolean,
+    ecomm360?:boolean,
+    google_analytics?: string, //custom clug for GA tracking
+    clicktale?:string,
 }
 
 export interface CreateCampaignRequest {
     type: CampaignType,
-    recipients: {
-        list_id: string,
-        // An object representing all segmentation options.
-        // This object should contain a saved_segment_id to use an existing segment,
-        // or you can create a new segment by including both match and conditions options.
-        segment_options?: {
-            saved_segment_id?: number,
-            prebuilt_segment_id?: string, //The prebuilt segment id, if a prebuilt segment has been designated for this campaign.
-            match?: SegmentMatchType,
-            conditions?: SegmentCondition[]
-        }
-    },
-    settings?: {
-        subject_line?: string,
-        preview_text?: string,
-        title: string,
-        from_name?: string,
-        reply_to?: string,
-        use_conversation?: boolean,
-        to_name?: string,
-        folder_id?: string,
-        authenticate?: boolean,
-        auto_footer?: boolean,
-        inline_css?: boolean,
-        auto_tweet?: boolean,
-        auto_fb_post?:string[], //array of page ids to post to
-        fb_comments?:boolean,
-        template_id?:number,
-    },
+    recipients: CreateCampaignRequestRecipients,
+    settings?: CreateCampaignSettings,
     variate_settings?: {
         //not used yet
     },
-    tracking?: {
-        opens?:boolean,
-        html_clicks?: boolean,
-        text_clicks?: boolean,
-        goal_tracking?:boolean,
-        ecomm360?:boolean,
-        google_analytics?: string, //custom clug for GA tracking
-        clicktale?:string,
+    tracking?: CampaignTracking,
+    social_card?: {
+        image_url?: string,
+        description?: string,
+        title?: string,
+    }
+}
+
+
+export interface UpdateCampaignRequest {
+    recipients?: CreateCampaignRequestRecipients,
+    settings: UpdateCampaignSettings,
+    variate_settings?: {
+        //not used yet
     },
+    tracking?: CampaignTracking,
     social_card?: {
         image_url?: string,
         description?: string,

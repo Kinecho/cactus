@@ -34,14 +34,14 @@ export function isNumber(input:any){
 }
 
 /**
- * Transform object keys based on provided transform function
+ * Transform object keys based on provided async transform function
  * @param {any} input
  * @param {(value: any) => Promise<void>} transform
  * @return {Promise<any>}
  */
-export async function transformObject(input:any, transform:(value:any) => Promise<any>):Promise<any> {
+export async function transformObjectAsync(input:any, transform:(value:any) => Promise<any>):Promise<any> {
     if (isArray(input)){
-        const tasks = input.map((entry:any) => transformObject(entry, transform));
+        const tasks = input.map((entry:any) => transformObjectAsync(entry, transform));
         return await Promise.all(tasks);
         // input.forEach(async (entry:any) => await transformObject(entry, transform))
     }
@@ -60,7 +60,7 @@ export async function transformObject(input:any, transform:(value:any) => Promis
 
             //if the transformation did something, don't loop through the value
             if (value === transformed){
-                value = await transformObject(value, transform);
+                value = await transformObjectAsync(value, transform);
             } else {
                 value = transformed;
             }
@@ -71,5 +71,41 @@ export async function transformObject(input:any, transform:(value:any) => Promis
     }
 
 
+    return input;
+}
+
+/**
+ * Transform object keys based on provided transform function
+ * @param {any} input
+ * @param {(value: any) => Promise<void>} transform
+ * @return {any}
+ */
+export function transformObjectSync(input:any, transform:(value:any) => any):any {
+    if (isArray(input)){
+        return input.map((entry:any) => transformObjectSync(entry, transform));
+    }
+
+    // input = await (transform(input))
+    const rootTransform = transform(input);
+
+    if (rootTransform !== input){
+        return rootTransform;
+    }
+
+    if (isNonEmptyObject(input)) {
+        Object.keys(input).forEach(key => {
+            let value = input[key];
+            const transformed = transform(value);
+
+            //if the transformation did something, don't loop through the value
+            if (value === transformed){
+                value = transformObjectSync(value, transform);
+            } else {
+                value = transformed;
+            }
+            input[key] = value;
+        });
+
+    }
     return input;
 }

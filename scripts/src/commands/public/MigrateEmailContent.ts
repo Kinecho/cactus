@@ -25,22 +25,22 @@ export default class MigrateEmailContent extends FirebaseCommand {
                 documentCount++;
                 // const model = await fromDocumentSnapshot(doc, EmailReply);
                 // Note: not using the data model because we want to remove fields
-                const model = doc.data();
-                const content = model.content || {};
+                const data = doc.data();
+                const content = data.content || {};
 
-                if (!model){
+                if (!data){
                     console.warn("Unable to get model from snapshot");
                     return;
                 }
                 let needsUpdate = false;
-                if (!content.html && model.html){
-                    console.log(`[${model.id}]need to set html content`);
-                    content.html = model.html;
+                if (!content.html && data.html){
+                    console.log(`[${doc.id}]need to set html content`);
+                    content.html = data.html;
                     needsUpdate = true;
                 }
-                if (!content.text && model.text){
-                    console.log(`[${model.id}]need to set text content`);
-                    content.text = model.text;
+                if (!content.text && data.text){
+                    console.log(`[${doc.id}]need to set text content`);
+                    content.text = data.text;
                     needsUpdate = true;
                 }
 

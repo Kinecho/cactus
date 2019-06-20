@@ -4,6 +4,7 @@ import * as admin from "firebase-admin";
 import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {getAdmin, Project} from "@scripts/config";
+
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 

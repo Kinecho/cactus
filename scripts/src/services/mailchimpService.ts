@@ -2,10 +2,13 @@ import axios, {AxiosInstance} from "axios";
 import {
     CampaignContentRequest,
     CampaignContentResponse,
-    CreateCampaignRequest
+    CreateCampaignRequest, UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
-    Campaign,
+    Audience, AudienceListResponse,
+    Automation,
+    AutomationListResponse,
+    Campaign, SendChecklist,
     ListResponse,
     Segment,
     SegmentListResponse,
@@ -13,7 +16,7 @@ import {
     Template,
     TemplateListResponse,
     TemplateSortField,
-    TemplateType
+    TemplateType, CampaignScheduleBody
 } from "@shared/mailchimp/models/MailchimpTypes";
 
 // import * as md5 from "md5";
@@ -52,11 +55,12 @@ export default class MailchimpService {
 
         this.apiDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
 
-        console.log("Created mailchimp service with apiDomain", this.apiDomain);
-
         this.request = axios.create({baseURL: this.apiDomain});
         this.request.interceptors.request.use(config => {
             config.auth = this.getAuthConfig();
+            const params = config.params || {};
+            params.exclude_fields = "_links";
+            config.params = params;
             return config;
         });
     }
@@ -94,6 +98,12 @@ export default class MailchimpService {
         console.log("campaign response", JSON.stringify(response.data, null, 2));
     }
 
+    async getAudienceSegment(listId: string, segmentId: number):Promise<Segment> {
+        const url = `/lists/${listId}/segments/${segmentId}`;
+        const response = await this.request.get(url);
+        return response.data;
+    }
+
     async getSentTo(campaignId: string, pagination=DEFAULT_PAGINATION) {
         const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
         const url = `reports/${campaignId}/sent-to`;
@@ -106,6 +116,13 @@ export default class MailchimpService {
         const response = await this.request.post(url, campaign);
 
         // console.log("created campaign", JSON.stringify(response.data));
+        return response.data;
+    }
+
+    async updateCampaign(campaignId:string, campaign: UpdateCampaignRequest): Promise<Campaign> {
+        const url = `/campaigns/${campaignId}`;
+        const response = await this.request.patch(url, campaign);
+
         return response.data;
     }
 
@@ -165,7 +182,18 @@ export default class MailchimpService {
                 sort_field: TemplateSortField.name,
                 offset,
                 count,
-                type: type
+                type: type,
+                exclude_fields: ["templates._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getTemplate(templateId:number): Promise<Template> {
+        const url = `${this.apiDomain}/templates/${templateId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["templates._links"].join(',')
             }
         });
         return response.data;
@@ -173,6 +201,65 @@ export default class MailchimpService {
 
     async getAllTemplates(type: TemplateType=TemplateType.user, pageSize=defaultPageSize):Promise<Template[]>{
         return this.getAllPaginatedResults(pagination => this.getTemplates(type, pagination), result => result.templates, pageSize);
+    }
+
+    /**
+     *
+     * @param {string} automationId
+     * @return {Promise<AutomationListResponse>}
+     */
+    async getAutomation(automationId: string):Promise<Automation|null> {
+        const url = `/automations/${automationId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["_links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAutomations(pagination=DEFAULT_PAGINATION):Promise<AutomationListResponse> {
+        const url = `/automations`;
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: ["automations._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAutomations(pageSize=defaultPageSize): Promise<Automation[]>{
+        return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
+    }
+
+    async getAudience(audienceId:string):Promise<Audience>{
+        const url = `/lists/${audienceId}`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: ["lists._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAudiences(pagination=DEFAULT_PAGINATION):Promise<AudienceListResponse> {
+        const url = `/lists`;
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: ["lists._links"].join(',')
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAudiences(pageSize=defaultPageSize): Promise<Audience[]>{
+        return this.getAllPaginatedResults(pagination => this.getAudiences(pagination), result => result.lists, pageSize);
     }
 
     async getAllSavedSegments(pageSize=defaultPageSize):Promise<Segment[]>{
@@ -201,4 +288,30 @@ export default class MailchimpService {
 
         return results;
     }
+
+
+    async getCampaignSendChecklist(campaignId:string): Promise<SendChecklist> {
+        const url = `/campaigns/${campaignId}/send-checklist`;
+        const response = await this.request.get(url,);
+        return response.data;
+    }
+
+    /**
+     * Returns true if the campaign was sent successfully
+     * @param {string} campaignId
+     * @param {CampaignScheduleBody} config
+     * @return {Promise<boolean>} - false if there was a problem schedulign the campaign
+     */
+    async scheduleCampaign(campaignId:string, config: CampaignScheduleBody): Promise<boolean> {
+        const url = `/campaigns/${campaignId}/actions/schedule`;
+        try {
+            const response = await this.request.post(url, config);
+            return response.status === 204
+        } catch (e){
+            console.error("Failed to schedule campaign", e);
+            return false;
+        }
+    }
+
 }
+
