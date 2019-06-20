@@ -5,10 +5,12 @@ import {
     CreateCampaignRequest, UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
-    Audience, AudienceListResponse,
+    Audience,
+    AudienceListResponse,
     Automation,
     AutomationListResponse,
-    Campaign, SendChecklist,
+    Campaign,
+    SendChecklist,
     ListResponse,
     Segment,
     SegmentListResponse,
@@ -16,7 +18,12 @@ import {
     Template,
     TemplateListResponse,
     TemplateSortField,
-    TemplateType, CampaignScheduleBody
+    TemplateType,
+    CampaignScheduleBody,
+    PaginationParameters,
+    CampaignListResponse,
+    GetCampaignsOptions,
+    DEFAULT_PAGINATION, defaultPageSize, getDefaultCampaignFetchOptions
 } from "@shared/mailchimp/models/MailchimpTypes";
 
 // import * as md5 from "md5";
@@ -27,19 +34,6 @@ interface MailchimpAuth {
     password: string,
 }
 
-
-declare type PaginationParameters = {
-    count?: number,
-    offset?: number
-}
-
-const defaultPageSize = 30;
-const defaultOffset = 0;
-
-const DEFAULT_PAGINATION: PaginationParameters = {
-    count: defaultPageSize,
-    offset: defaultOffset,
-};
 
 export default class MailchimpService {
     apiKey: string;
@@ -96,6 +90,32 @@ export default class MailchimpService {
         const url = this.getCampaignURL(id);
         const response = await this.request.get(url);
         console.log("campaign response", JSON.stringify(response.data, null, 2));
+    }
+
+    async getCampaigns(options:GetCampaignsOptions=getDefaultCampaignFetchOptions()):Promise<CampaignListResponse>{
+        const url = `/campaigns`;
+        const response = await this.request.get(url, {
+            params: {
+                ...options.pagination,
+                ...options.params
+            }
+        });
+
+        return response.data;
+    }
+
+    async getAllCampaigns(options:GetCampaignsOptions=getDefaultCampaignFetchOptions()):Promise<Campaign[]> {
+        // options.
+        const pageSize = (options.pagination && options.pagination.count) ? options.pagination.count : defaultPageSize;
+
+        const fetcher = (pagination:PaginationParameters):Promise<CampaignListResponse> => {
+            options.pagination = pagination;
+            return this.getCampaigns(options)
+        };
+
+        const resultMapper = (result:CampaignListResponse) => result.campaigns;
+
+        return this.getAllPaginatedResults(fetcher, resultMapper, pageSize);
     }
 
     async getAudienceSegment(listId: string, segmentId: number):Promise<Segment> {

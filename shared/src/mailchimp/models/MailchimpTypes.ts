@@ -419,3 +419,62 @@ export interface CampaignScheduleBody {
         batch_count: number;
     };
 }
+
+export enum CampaignSortField {
+    create_time = "create_time",
+    send_time = "send_time",
+}
+
+export enum SortDirection {
+    ASC = "ASC",
+    DESC = "DESC",
+}
+
+export interface PaginationParameters {
+    count?: number,
+    offset?: number
+}
+
+export const defaultPageSize = 30;
+export const defaultOffset = 0;
+
+
+export const DEFAULT_PAGINATION: PaginationParameters = {
+    count: defaultPageSize,
+    offset: defaultOffset,
+};
+
+export interface GetCampaignsOptions {
+    params?: {
+        sort_field?: CampaignSortField,
+        sort_dir?: SortDirection,
+        list_id?:string,
+        folder_id?:string,
+        since_create_time?: ISODate,
+        before_create_time?: ISODate,
+        since_send_time?: ISODate,
+        before_send_time?: ISODate,
+        status?: CampaignStatus,
+        type?: CampaignType,
+        exclude_fields?: string[],
+        fields?: string[],
+    },
+
+    pagination?: PaginationParameters
+
+}
+
+export function getDefaultCampaignFetchOptions():GetCampaignsOptions {
+    return {
+        params: {
+            sort_field: CampaignSortField.create_time,
+            sort_dir: SortDirection.DESC,
+            exclude_fields: ["campaign._links"]
+        },
+        pagination: DEFAULT_PAGINATION
+    };
+}
+
+export interface CampaignListResponse extends ListResponse{
+    campaigns: Campaign[]
+}

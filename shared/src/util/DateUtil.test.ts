@@ -44,3 +44,12 @@ test("date formatting", () => {
     expect(format).not.toBeNull();
     expect(format).toEqual("Wednesday 2019-06-19 at 12:00 AM")
 });
+
+test("date formatting 2" , () => {
+    // const denverTime = 1560924000000; //2019-06-19 at midnight
+    // const date = new Date(denverTime);
+
+    const suppressionDateISO = DateTime.fromISO("2019-02-21").minus({days: 10}).toISODate();
+    expect(suppressionDateISO).toEqual("2019-02-11");
+});
+

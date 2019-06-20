@@ -7,7 +7,7 @@ import {
     CampaignContentResponse,
     CreateCampaignRequest,
     CreateCampaignRequestRecipients,
-    SegmentCondition,
+    SegmentCondition, SegmentConditionOption,
     SegmentConditionType,
     SegmentField,
     SegmentMatchType,
@@ -70,6 +70,8 @@ interface ReminderConfiguration {
     useTemplate: boolean;
     templateId?: number;
     campaignTitle: string;
+    suppressInactive: boolean;
+    inactiveDaysThreshold?: number;
 }
 
 export default class MailchimpQuestionCampaign implements Command {
@@ -302,6 +304,20 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         };
 
+
+        if (reminderConfig.suppressInactive && reminderConfig.inactiveDaysThreshold && reminderConfig.inactiveDaysThreshold > 0){
+            const suppressionDateISO = DateTime.fromISO(originalContentResponse.sendDateISO).minus({days: reminderConfig.inactiveDaysThreshold}).toISODate()
+            console.log(`Suppressing reminders if people haven't responded since ${suppressionDateISO}`);
+
+            const opts = campaignRecipients.segment_opts as SegmentConditionOption;
+            opts.conditions.push({
+                condition_type: SegmentConditionType.DateMerge,
+                field: MergeField.LAST_REPLY,
+                op: SegmentOperator.greater,
+                value: DateTime.fromISO(suppressionDateISO).toISODate()
+            },)
+        }
+
         const campaignRequest:CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: campaignRecipients,
@@ -435,6 +451,25 @@ export default class MailchimpQuestionCampaign implements Command {
                     return true;
                 },
                 format: (value:Date) => makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone)
+            },
+            {
+                type: "toggle",
+                name: "suppressInactive",
+                message: "Suppress reminders for inactive users?",
+                initial: true,
+                active: 'yes',
+                inactive: 'no'
+            },
+            {
+                type: (prev:boolean, values:ReminderConfiguration) => values.suppressInactive ? "number" : null,
+                name: "inactiveDaysThreshold",
+                message: "How many days of inactivity should we suppress?",
+                initial: 7,
+                min: 1,
+                max: 100,
+                validate: (value:number) => {
+                    return value > 0 ? true : "Please choose a number greater than 0";
+                }
             },
             {
                 type: "toggle",
