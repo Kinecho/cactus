@@ -195,7 +195,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "contentLinkText",
                 message: "Content link text",
-                initial: "Read More..."
+                initial: "Read More &rarr;"
             },
             {
                 type: "text",
