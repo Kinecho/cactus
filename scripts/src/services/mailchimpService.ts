@@ -63,25 +63,6 @@ export default class MailchimpService {
         return {username: `cactus`, password: this.apiKey}
     }
 
-
-    // /**
-    //  * Get the hashed version of the user's email, which is used as the id for the mailchip amp
-    //  * see: https://developer.mailchimp.com/documentation/mailchimp/guides/manage-subscribers-with-the-mailchimp-api/
-    //  * @param {string} email
-    //  * @return {string}
-    //  */
-    // getMemberIdFromEmail(email:string):string {
-    //     const hashed = md5(email.toLowerCase().trim());
-    //     return hashed;
-    // }
-
-    // private getListURL(audienceId:string|undefined = this.audienceId):string{
-    //     if (!audienceId){
-    //         throw new Error("No audience ID was found on the mailchimp service");
-    //     }
-    //     return `${this.apiDomain}/lists/${audienceId}`;
-    // }
-
     private getCampaignURL(id: string): string {
         return `${this.apiDomain}/campaigns/${id}`;
     }
