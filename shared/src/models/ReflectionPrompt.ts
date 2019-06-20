@@ -3,7 +3,7 @@ import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 
 export default class ReflectionPrompt extends BaseModel {
     readonly collection = Collection.reflectionPrompt;
-    question?:string;
+    promptText?:string;
     protected campaignIds:string[] = [];
     protected campaignWebIds:string[] = [];
     campaign?:Campaign;
