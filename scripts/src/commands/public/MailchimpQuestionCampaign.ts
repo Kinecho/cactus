@@ -872,7 +872,7 @@ export default class MailchimpQuestionCampaign implements Command {
             const issues = campaignChecklist.items.filter(item => item.type !== SendChecklistItemType.success && item.heading !== "MonkeyRewards");
 
             if (allowForceRetry && issues.length === 1 && issues[0].id === 501 && issues[0].details.toLowerCase() === "your advanced segment is empty."){
-                console.log("Forcing the campaign to schedule using a dirty trick -- setting recipients to be just neil@cactus.app");
+                console.log("Forcing the campaign to schedule using a dirty trick -- setting recipients to be just neil@kinecho.com");
                 const updatedCampaignRequest:UpdateCampaignRequest = {
                     settings: {
                       subject_line: campaign.settings.subject_line,
@@ -886,7 +886,7 @@ export default class MailchimpQuestionCampaign implements Command {
                             conditions: [{
                                 condition_type: SegmentConditionType.EmailAddress,
                                 op: SegmentOperator.is,
-                                value: "neil@cactus.app",
+                                value: "neil@kinecho.com",
                                 field: SegmentField.EMAIL
                             }]
                         }
