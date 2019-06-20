@@ -12,17 +12,17 @@ import {
     SegmentField,
     SegmentMatchType,
     SegmentOperator,
-    TemplateSection, UpdateCampaignRequest
+    TemplateSection,
+    UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {Campaign, CampaignType, SendChecklistItemType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
-import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {CactusConfig} from "@api/config/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 import {MergeField} from "@shared/mailchimp/models/ListMember";
 
-export const DEFAULT_MORNING_TEMPLATE_ID = 53981;
+export const DEFAULT_MORNING_TEMPLATE_ID = 53353;
 export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
 
 const prompts = require('prompts');
@@ -139,14 +139,41 @@ export default class MailchimpQuestionCampaign implements Command {
             this.reminderContentResponse = reminderResponse.content;
         }
 
+        const {scheduleNow} = await prompts({
+            type: "confirm",
+            name: "scheduleNow",
+            message: `Would you like to schedule your campaigns now (say no to leave them in draft status)?`
+        });
 
+        if (scheduleNow){
+            if (this.campaign){
+                await this.scheduleCampaign(this.campaign, contentResponse.sendDateISO, false);
+            }
+
+            if (this.reminderCampaign){
+                await this.scheduleCampaign(this.reminderCampaign, reminderConfig.sendDateISO, true);
+            }
+
+        } else {
+            console.log(chalk.blue("Not scheduling the emails. They will remain in draft status."));
+        }
+
+
+
+        console.log(chalk.green("\n\n======================================================"));
         if (this.campaign){
-            await this.scheduleCampaign(this.campaign, contentResponse.sendDateISO, false);
+            console.log(`Created Daily campaign "${chalk.bold(this.campaign.settings.title)}"\nid = ${this.campaign.id}\nCampaign URL: https://us20.admin.mailchimp.com/campaigns/edit?id=${this.campaign.web_id}\n`)
+        } else {
+            console.log(chalk.red("Unable to create the daily campaign"));
         }
 
         if (this.reminderCampaign){
-            await this.scheduleCampaign(this.reminderCampaign, reminderConfig.sendDateISO, true);
+            // await this.scheduleCampaign(this.reminderCampaign, reminderConfig.sendDateISO, true);
+            console.log(`Created Reminder campaign "${chalk.bold(this.reminderCampaign.settings.title)}"\nid = ${this.reminderCampaign.id})\nCampaign URL: https://us20.admin.mailchimp.com/campaigns/edit?id=${this.reminderCampaign.web_id}`)
+        } else {
+            console.log(chalk.red("Unable to create the reminder campaign"));
         }
+        console.log(chalk.green("======================================================"));
 
         return;
     }
@@ -206,7 +233,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "date",
                 name: "sendDateISO",
                 message: "When should this email be sent?",
-                mask: `dddd, MMMM D, YYYY "at" h:mm A "Mountain Time"`,
+                mask: `dddd YYYY-MM-DD "at" h:mm A "Mountain Time"`,
                 initial: DateTime.local().plus({day: 1}).set({hour: 2, minute: 45, second: 0, millisecond: 0}).toJSDate(),
                 validate: (date:Date) => {
                     if ( date.getTime() <= Date.now()) {
@@ -289,17 +316,13 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         };
 
-        resetConsole();
-        console.log(chalk.bold.yellow("The configuration for the reminder campaign is this:"));
-        console.log(chalk.yellow(JSON.stringify(campaignRequest, null, 2)));
-
         const confirmResponses = await prompts([{
             type: "toggle",
-            message: "Please verify the configuration looks right. Ready to Create Campaign?",
+            message: "Ready to save the reminder campaign to Mailchimp?",
             name: "confirm",
             active: 'yes',
             inactive: 'no',
-
+            initial: true,
         }]);
 
         if (!confirmResponses.confirm) {
@@ -311,8 +334,6 @@ export default class MailchimpQuestionCampaign implements Command {
          * This will create the campaign
          */
         const reminderCampaign = await mailchimpService.createCampaign(campaignRequest);
-
-        console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify(reminderCampaign, null, 2)));
 
         let campaignContent;
         if (reminderConfig.useTemplate && reminderConfig.templateId || reminderConfig.useDefaultTemplate){
@@ -333,7 +354,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
         let campaignContent;
 
-        console.log(chalk.bold("\ncreating template content..."));
+        console.log(chalk.bold("creating template content..."));
         const contentRequest:CampaignContentRequest = {
             template: {
                 id: templateId,
@@ -344,9 +365,8 @@ export default class MailchimpQuestionCampaign implements Command {
                 }
             }
         };
-        console.log(chalk.yellow("content request is", JSON.stringify(contentRequest)));
         campaignContent = await mailchimpService.updateCampaignContent(campaignId, contentRequest);
-        console.log(chalk.blue("\nUpdated content for campaign\n"));
+        console.log("Successfully updated the template content for campaign\n");
 
         return campaignContent
     }
@@ -404,7 +424,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "date",
                 name: "sendDateISO",
                 message: `When should this reminder email be sent (morning email is set to ${DateTime.fromISO(contentConfig.sendDateISO).toFormat("cccc yyyy-LL-dd 'at' h:mm a")})?`,
-                mask: `dddd, MMMM D, YYYY "at" h:mm A "Mountain Time"`,
+                mask: `dddd YYYY-MM-DD "at" h:mm A "Mountain Time"`,
                 initial: DateTime.fromISO(contentConfig.sendDateISO).set({hour: 17, minute: 0, second: 0}).toJSDate(),
                 validate: (date:Date) => {
                     if (date.getTime() <= Date.now()) {
@@ -416,13 +436,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
                     return true;
                 },
-                format: (value:Date) => {
-                    console.log("formatting date: timezone offset", value.getTimezoneOffset());
-                    console.log("formatting date", value, "from Mountain to UTC");
-                    const dateString =  makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone);
-                    console.log("iso date string", dateString);
-                    return dateString;
-                }
+                format: (value:Date) => makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone)
             },
             {
                 type: "toggle",
@@ -447,7 +461,6 @@ export default class MailchimpQuestionCampaign implements Command {
                 message: "Choose a template for the reminder email",
                 choices: async (prev: boolean, values: RecipientsConfiguration) => {
                     if (!values.useTemplate) {
-                        console.log("not fetching templates");
                         return []
                     }
                     const templates = await mailchimpService.getAllTemplates(TemplateType.user);
@@ -533,17 +546,13 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         };
 
-        resetConsole();
-        console.log(chalk.bold.yellow("The configuration for the campaign is this:"));
-        console.log(chalk.yellow(JSON.stringify(campaignRequest, null, 2)));
-
         const confirmResponses = await prompts([{
             type: "toggle",
-            message: "Please verify the configuration looks right. Ready to Create Campaign?",
+            message: "Ready to save the campaign to Mailchimp?",
             name: "confirm",
             active: 'yes',
             inactive: 'no',
-
+            initial: true,
         }]);
 
         if (!confirmResponses.confirm) {
@@ -555,7 +564,7 @@ export default class MailchimpQuestionCampaign implements Command {
          * This will create the campaign
          */
         const campaign = await mailchimpService.createCampaign(campaignRequest);
-        console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify(campaign, null, 2)));
+        console.log(chalk.bold(`Daily campaign created successfully. Campaign ID = ${campaign.id}`));
 
         let campaignContent;
         if (recipientsConfig.templateId){
@@ -607,7 +616,6 @@ export default class MailchimpQuestionCampaign implements Command {
                 message: "Choose a template for the email",
                 choices: async (prev:boolean, values:RecipientsConfiguration) => {
                     if (!values.useTemplate){
-                        console.log("not fetching templates");
                         return []
                     }
                     const templates = await mailchimpService.getAllTemplates(TemplateType.user);
@@ -633,7 +641,6 @@ export default class MailchimpQuestionCampaign implements Command {
                 format: (value:string) => Number(value),
                 choices: async (prev:boolean, values:RecipientsConfiguration) => {
                     if (!values.useSavedSegment){
-                        console.log("not fetching segments");
                         return [];
                     }
                     const segments = await mailchimpService.getAllSavedSegments();
@@ -749,7 +756,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 name: "useDefault",
                 initial: true,
                 active: 'yes',
-                inactive: 'no, create my own',
+                inactive: 'no',
             },
 
         ];
@@ -811,7 +818,7 @@ export default class MailchimpQuestionCampaign implements Command {
         return recipientConfig;
     }
 
-    async scheduleCampaign(campaign: Campaign, sendDate:string, allowForceRetry: boolean):Promise<void>{
+    async scheduleCampaign(campaign: Campaign, sendDate:string, allowForceRetry: boolean):Promise<boolean>{
         if (!this.mailchimpService){
             throw new Error("no mailchimp service found");
         }
@@ -824,15 +831,14 @@ export default class MailchimpQuestionCampaign implements Command {
 
         if (isReady){
             const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
-            console.log(chalk.green(`Campaign is ready to send!`));
+            // console.log(chalk.green(`Campaign is ready to be scheduled!`));
             if (warnings.length > 0){
                 console.log(chalk.yellow(`However, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
             }
         } else if (!isReady){
-            console.log(chalk.red(`Campaign "${chalk.bold(campaign.settings.title)}" is not ready to send. Please correct the following issues in the Mailchimp UI: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
             const issues = campaignChecklist.items.filter(item => item.type !== SendChecklistItemType.success && item.heading !== "MonkeyRewards");
 
-            if (!isReady && allowForceRetry && issues.length === 1 && issues[0].id === 501 && issues[0].details.toLowerCase() === "your advanced segment is empty."){
+            if (allowForceRetry && issues.length === 1 && issues[0].id === 501 && issues[0].details.toLowerCase() === "your advanced segment is empty."){
                 console.log("Forcing the campaign to schedule using a dirty trick -- setting recipients to be just neil@cactus.app");
                 const updatedCampaignRequest:UpdateCampaignRequest = {
                     settings: {
@@ -876,30 +882,23 @@ export default class MailchimpQuestionCampaign implements Command {
                     console.error("Unable to update campaign", e);
                 }
             } else if (!allowForceRetry){
+                console.log(chalk.red(`Campaign "${chalk.bold(campaign.settings.title)}" is not ready to send. Please correct the following issues in the Mailchimp UI: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
                 console.log(chalk.red(JSON.stringify(issues, null, 2)));
             } else {
-                console.log(`wasn't able to force a retry. allowRetry: ${allowForceRetry}, issues.length: ${issues.length}`);
+                console.log(`wasn't able to force a retry. allowRetry: ${allowForceRetry}, issues.length: ${issues.length}. Please try to correct the following issues in the Mailchimp UI: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`);
                 console.log(chalk.red(JSON.stringify(issues, null, 2)));
-                return;
+                return false;
             }
 
         }
 
         //doing another check because the else block above could have updated the ready status
+        let success = false;
         if (isReady){
-            const {scheduleNow} = await prompts({
-                type: "confirm",
-                name: "scheduleNow",
-                message: `Your campaign "${campaign.settings.title}" is able to be scheduled. Schedule it to send at ${sendDate} now?`
-            });
-
-            if (!scheduleNow){
-                console.log("Not scheduling the email. It will remain as a draft.");
-            }
-
-            const scheduleSuccess = await this.mailchimpService.scheduleCampaign(campaign.id, {schedule_time: sendDate});
-            if (scheduleSuccess){
+            success = await this.mailchimpService.scheduleCampaign(campaign.id, {schedule_time: sendDate});
+            if (success){
                 console.log(chalk.green(`${campaign.settings.title} scheduled successfully!`));
+
             } else {
                 console.warn(chalk.yellow("Unable to schedule the campaign. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}"));
             }
@@ -927,6 +926,6 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         }
 
-        return;
+        return success;
     }
 }
