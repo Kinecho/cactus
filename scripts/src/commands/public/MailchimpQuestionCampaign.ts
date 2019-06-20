@@ -126,8 +126,6 @@ export default class MailchimpQuestionCampaign implements Command {
             recipientsConfig = await this.askRecipientQuestions();
         }
 
-        console.log(chalk.blue("Responses:\n", JSON.stringify(recipientsConfig, null, 2)));
-
         const {campaign, content} = await this.createCampaign(contentResponse, recipientsConfig);
         this.campaign = campaign;
         this.campaignContent = content;

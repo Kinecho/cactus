@@ -129,5 +129,9 @@ module.exports = {
     "membership": {
         "title": "Membership",
         "path": "/membership"
+    },
+    "what_makes_you_think_automation_is_good": {
+        "title": "What makes you think automation is good?",
+        "path": "/what-makes-you-think-automation-is-good"
     }
 }
