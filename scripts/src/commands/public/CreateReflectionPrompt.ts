@@ -133,15 +133,15 @@ Continue?`
         if (!saveFirestore){
             console.log(chalk.yellow("That's cool. Not saving this question"));
         } else {
-            console.log(chalk.bgRed("Saving to firestore.. (not implemented yet)"));
-            // const firestoreService = new AdminFirestoreService()
-            const selectedProject = this.mailchimpCommand && this.mailchimpCommand.response ? this.mailchimpCommand.response.environment : undefined;
-            const firestoreCommand = new SaveQuestionCommand(selectedProject);
+            console.log(chalk.bgRed("Saving to firestore..."));
+            let firestoreCommand:SaveQuestionCommand;
             if (this.mailchimpCommand){
+                firestoreCommand = new SaveQuestionCommand(this.mailchimpCommand.project);
                 firestoreCommand.campaign = this.mailchimpCommand.campaign;
                 firestoreCommand.reminderCampaign = this.mailchimpCommand.reminderCampaign;
                 firestoreCommand.question = this.mailchimpCommand.question;
             } else {
+                firestoreCommand = new SaveQuestionCommand();
                 firestoreCommand.question = response.title;
             }
             firestoreCommand.contentPath = response.pagePath;

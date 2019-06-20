@@ -4,6 +4,7 @@ import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@scripts/services/mailchimpService";
 import {
     CampaignContentRequest,
+    CampaignContentResponse,
     CreateCampaignRequest,
     CreateCampaignRequestRecipients,
     SegmentCondition,
@@ -18,7 +19,11 @@ import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {CactusConfig} from "@api/config/CactusConfig";
 
+
 export const ONBOARDING_AUTOMATION_ID = "05913cc097";
+
+export const DEFAULT_MORNING_TEMPLATE_ID = 53981;
+export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
 
 const prompts = require('prompts');
 
@@ -52,6 +57,17 @@ interface RecipientsConfiguration {
     automationOperator: SegmentOperator;
 }
 
+interface ReminderConfiguration {
+    scheduleReminder: boolean;
+    sendDate: Date;
+    fromName: string;
+    replyTo: string;
+    previewText: string;
+    subjectLine: string;
+    useTemplate: boolean;
+    templateId?: number;
+}
+
 export default class MailchimpQuestionCampaign implements Command {
     name = "Mailchimp Question";
 
@@ -60,6 +76,9 @@ export default class MailchimpQuestionCampaign implements Command {
 
     campaign?:Campaign;
     reminderCampaign?:Campaign;
+
+    campaignContent?: CampaignContentResponse;
+    reminderContentResponse?: CampaignContentResponse;
 
     project?: Project;
     currentConfig?: CactusConfig;
@@ -320,6 +339,15 @@ export default class MailchimpQuestionCampaign implements Command {
             "You'll have the chance to review the settings before creating it in Mailchimp. \n" +
             "Once a campaign is created, it will be in a draft status, so you can always edit/delete it before it starts sending.\n"));
 
+        const config = await this.askReminderQuestions({subjectLine: "testing", fromName: "Neil", replyTo: "hello@cactus.app", previewText: "my preview"} as ContentQuestionResponse);
+        if (config.scheduleReminder){
+            console.log("will schedule reminder");
+            console.log(JSON.stringify(config, null, 2));
+        } else {
+            console.log("not scheduling reminder");
+            process.exit(0);
+        }
+
         const [prodConfig, stageConfig] = await Promise.all([getCactusConfig(Project.PROD), getCactusConfig(Project.STAGE)]);
         this.prodConfig = prodConfig;
         this.stageConfig = stageConfig;
@@ -336,28 +364,118 @@ export default class MailchimpQuestionCampaign implements Command {
         } else {
             this.currentConfig = stageConfig;
         }
+        this.mailchimpService = new MailchimpService(this.currentConfig.mailchimp.api_key, this.currentConfig.mailchimp.audience_id);
 
-        const mailchimpService = new MailchimpService(this.currentConfig.mailchimp.api_key, this.currentConfig.mailchimp.audience_id);
-        this.mailchimpService = mailchimpService;
+        const contentResponse = await prompts(this.contentQuestions);
+        const defaultConfigurationResponse =  await this.askUseDefaultsQuestion();
 
-        const contentResponse:ContentQuestionResponse = await prompts(this.contentQuestions);
-        const defaultConfigurationResponse:UseDefaultConfigurationResponse =  await this.askUseDefaultsQuestion();
-
-        let recipientsConfig:RecipientsConfiguration;
+        let recipientsConfig;
         if (defaultConfigurationResponse.useDefault) {
             console.log(`Great! Using the default configuration for ${this.project}`);
             recipientsConfig = await this.getDefaultRecipientConfiguration(this.project, {prod: prodConfig, stage: stageConfig});
-
         } else {
             //need to set up the content response
             recipientsConfig = await this.askRecipientQuestions();
         }
 
         console.log(chalk.blue("Responses:\n", JSON.stringify(recipientsConfig, null, 2)));
-        console.log(chalk.yellow("\nsetting up campaign request"));
-        console.log(chalk.blue("setting up recipients"));
+
+        const {campaign, content} = await this.createCampaign(contentResponse, recipientsConfig);
+        this.campaign = campaign;
+        this.campaignContent = content;
+
+        const reminderConfig = await this.askReminderQuestions(contentResponse);
+        if (reminderConfig.scheduleReminder) {
+            const reminderResponse = await this.createReminderCampaign(contentResponse, reminderConfig);
+            this.reminderCampaign = reminderResponse.campaign;
+            this.reminderContentResponse = reminderResponse.content;
+        }
+
+        return;
+    }
+
+    async createReminderCampaign(oiginalContentResponse:ContentQuestionResponse, reminderConfig: ReminderConfiguration): Promise<{campaign?: Campaign, content?: CampaignContentResponse}>{
+
+        // console.log("Reminder config\n", JSON.stringify(config, null, 2));
+
+        return {};
+    }
+
+    async askReminderQuestions(contentConfig: ContentQuestionResponse):Promise<ReminderConfiguration>{
+        const config = await prompts([
+            {
+                type: "toggle",
+                name: "scheduleReminder",
+                message: "Do you want to schedule the reminder email now?",
+                initial: true,
+                active: 'yes',
+                inactive: 'no',
+            },
+            {
+                type: "date",
+                name: "sendDate",
+                message: "When should this reminder be sent?",
+                mask: "dddd, MMMM D, YYYY @ h:mm A",
+                initial: new Date((new Date()).setHours(17, 0, 0, 0)),
+                validate: (date:Date) => {
+                    return date.getTime() <= (new Date()).setHours(0, 0, 0 ,0) ? 'The date must be in the future' : true
+                },
+                format: (value:Date) => {
+                    console.log("formatting date: timezone offset", value.getTimezoneOffset());
+                    console.log("formatting date", value, "from Mountain to UTC");
+
+                }
+            },
+            {
+                type: "text",
+                name: "subjectLine",
+                message: "Subject Line",
+                initial: `*|DATE:l|* Reflection Reminder: ${contentConfig.subjectLine}`,
+            },
+            {
+                type: "text",
+                name: "replyTo",
+                message: "From Email",
+                initial: contentConfig.replyTo,
+            },
+            {
+                type: "text",
+                name: "fromName",
+                message: "From Name",
+                initial: contentConfig.fromName,
+            },
+            {
+                type: "text",
+                name: "previewText",
+                message: "Preview Text",
+                initial: contentConfig.previewText,
+            }
+        ], {
+            onSubmit: (prompt: any, response:any, answers:ReminderConfiguration) => {
+                if (!answers.scheduleReminder){
+                    console.log("not scheduling reminders");
+                    return true;
+                }
+                return false;
+            },
+            onCancel: (prompt: any, answers: RecipientsConfiguration) => {
+                console.log("Canceled command on prompt", prompt.message);
+
+                return process.exit(0);
+            }
+        });
+
+        return config;
+    }
+
+    async createCampaign(contentResponse:ContentQuestionResponse, recipientsConfig:RecipientsConfiguration):Promise<{campaign?: Campaign, content?: CampaignContentResponse}>{
+        const mailchimpService = this.mailchimpService;
+        if (!mailchimpService){
+            throw new Error("No mailchimp service was available - unable to save campaign");
+        }
+
         const campaignRecipients:CreateCampaignRequestRecipients = {
-            list_id: this.currentConfig.mailchimp.audience_id,
+            list_id: recipientsConfig.audienceId,
         };
 
         if (recipientsConfig.savedSegmentId){
@@ -421,19 +539,19 @@ export default class MailchimpQuestionCampaign implements Command {
 
         if (!confirmResponses.confirm) {
             console.log(chalk.bold.red("Not creating campaign. Exiting"));
-            return;
+            return {};
         }
-
 
         /*
          * This will create the campaign
          */
         const campaign = await mailchimpService.createCampaign(campaignRequest);
-
         this.campaign = campaign;
+
         // let campaignSummary = {id: campaign.id, web_id: campaign.web_id, status: campaign.status};
         console.log(chalk.bold("Created campaign. Campaign Info\n"), chalk.green(JSON.stringify(campaign, null, 2)));
 
+        let campaignContent;
         if (recipientsConfig.templateId){
             console.log(chalk.bold("\ncreating template content..."));
             const contentRequest:CampaignContentRequest = {
@@ -447,11 +565,11 @@ export default class MailchimpQuestionCampaign implements Command {
                 }
             };
             console.log(chalk.yellow("content request is", JSON.stringify(contentRequest)));
-            await mailchimpService.updateCampaignContent(campaign.id, contentRequest);
+            campaignContent = await mailchimpService.updateCampaignContent(campaign.id, contentRequest);
             console.log(chalk.blue("\nUpdated content for campaign\n"));
         }
 
-        return;
+        return {campaign: campaign, content: campaignContent};
     }
 
     async getDefaultRecipientConfiguration(project:Project, configs:{prod:CactusConfig, stage:CactusConfig}): Promise<RecipientsConfiguration> {
@@ -465,7 +583,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 tagSegmentIds: [],
                 environment: Project.PROD,
                 useTemplate: true,
-                templateId: 53353,
+                templateId: DEFAULT_MORNING_TEMPLATE_ID,
                 segmentMatchType: SegmentMatchType.any,
                 useAutomations: false,
                 automationIds: [],
@@ -480,7 +598,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 tagSegmentIds: [],
                 environment: Project.PROD,
                 useTemplate: true,
-                templateId: 53353,
+                templateId: DEFAULT_MORNING_TEMPLATE_ID,
                 segmentMatchType: SegmentMatchType.any,
                 useAutomations: false,
                 automationIds: [],
@@ -489,8 +607,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
         }
 
-        if (this.mailchimpService ){
-
+        if (this.mailchimpService){
             const segment = await this.mailchimpService.getAudienceSegment(recipientConfig.audienceId, recipientConfig.savedSegmentId);
             console.log(chalk.blue(`Using audience segment "${segment.name }" (id = ${segment.id})` ));
 

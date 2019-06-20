@@ -8,7 +8,7 @@ import {
     resetUserReminder,
 } from "@api/mailchimp/mailchimpService";
 
-import {getMailchimpDateString} from "@api/util/DateUtil";
+import {getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";

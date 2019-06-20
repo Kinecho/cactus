@@ -10,7 +10,7 @@ import ListMember, {
 import ApiError from "@shared/ApiError";
 import * as md5 from "md5";
 import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
-import {getMailchimpDateString} from "@api/util/DateUtil";
+import {getMailchimpDateString} from "@shared/util/DateUtil";
 
 
 const config = getConfig();
