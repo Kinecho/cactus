@@ -33,6 +33,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-film-television-series-or-work-of-theater-allows-you-to-think-and-feel-in-new-ways",
+                "destination": "/what_film_television_series_or_work_of_theater_allows_you_to_think_and_feel_in_new_ways.html"
+            },
+            {
                 "source": "/what-makes-dinner-meaningful-to-you",
                 "destination": "/what_makes_dinner_meaningful_to_you.html"
             },
