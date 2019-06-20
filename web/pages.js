@@ -129,5 +129,9 @@ module.exports = {
     "membership": {
         "title": "Membership",
         "path": "/membership"
+    },
+    "what_do_you_enjoy_and_savor_about_your_daily_work": {
+        "title": "What do you enjoy and savor about your daily work?",
+        "path": "/what-do-you-enjoy-and-savor-about-your-daily-work"
     }
 }

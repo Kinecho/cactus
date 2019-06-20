@@ -33,6 +33,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-do-you-enjoy-and-savor-about-your-daily-work",
+                "destination": "/what_do_you_enjoy_and_savor_about_your_daily_work.html"
+            },
+            {
                 "source": "/membership",
                 "destination": "/membership.html"
             },
