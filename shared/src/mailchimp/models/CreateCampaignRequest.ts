@@ -73,6 +73,7 @@ export enum SegmentValue {
 }
 
 export enum SegmentConditionType {
+    Aim = "Aim",
     Automation = "Automation",
     CampaignPoll = "CampaignPoll",
     Conversation = "Conversation",
