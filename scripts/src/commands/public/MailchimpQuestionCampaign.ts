@@ -12,9 +12,9 @@ import {
     SegmentField,
     SegmentMatchType,
     SegmentOperator,
-    TemplateSection
+    TemplateSection, UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
-import {Campaign, CampaignType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
+import {Campaign, CampaignType, SendChecklistItemType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {CactusConfig} from "@api/config/CactusConfig";
@@ -65,6 +65,7 @@ interface ReminderConfiguration {
     replyTo: string;
     previewText: string;
     subjectLine: string;
+    sendDateISO: string;
     useDefaultTemplate:boolean;
     useTemplate: boolean;
     templateId?: number;
@@ -138,6 +139,15 @@ export default class MailchimpQuestionCampaign implements Command {
             this.reminderContentResponse = reminderResponse.content;
         }
 
+
+        if (this.campaign){
+            await this.scheduleCampaign(this.campaign, contentResponse.sendDateISO, false);
+        }
+
+        if (this.reminderCampaign){
+            await this.scheduleCampaign(this.reminderCampaign, reminderConfig.sendDateISO, true);
+        }
+
         return;
     }
 
@@ -197,17 +207,18 @@ export default class MailchimpQuestionCampaign implements Command {
                 name: "sendDateISO",
                 message: "When should this email be sent?",
                 mask: `dddd, MMMM D, YYYY "at" h:mm A "Mountain Time"`,
-                initial: new Date((new Date()).setHours(17, 0, 0, 0)),
+                initial: DateTime.local().plus({day: 1}).set({hour: 2, minute: 45, second: 0, millisecond: 0}).toJSDate(),
                 validate: (date:Date) => {
-                    return date.getTime() <= (new Date()).setHours(0, 0, 0 ,0) ? 'The date must be in the future' : true
+                    if ( date.getTime() <= Date.now()) {
+                      return 'The date must be in the future';
+                    }
+                    if (![0, 15, 30, 45].includes(date.getMinutes())){
+                        return 'The schedule time must be on the quarter hour, :00, :15, :30, or :45'
+                    }
+
+                    return true;
                 },
-                format: (value:Date) => {
-                    console.log("formatting date: timezone offset", value.getTimezoneOffset());
-                    console.log("formatting date", value, "from Mountain to UTC");
-                    const dateString =  makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone);
-                    console.log("iso date string", dateString);
-                    return dateString;
-                }
+                format: (value:Date) => makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone)
             },
             {
                 type: "text",
@@ -351,7 +362,7 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: "toggle",
                 name: "scheduleReminder",
-                message: "Do you want to schedule the reminder email now?",
+                message: "Do you want to create the reminder email now?",
                 initial: true,
                 active: 'yes',
                 inactive: 'no',
@@ -388,6 +399,30 @@ export default class MailchimpQuestionCampaign implements Command {
                 name: "previewText",
                 message: "Preview Text",
                 initial: contentConfig.previewText,
+            },
+            {
+                type: "date",
+                name: "sendDateISO",
+                message: `When should this reminder email be sent (morning email is set to ${DateTime.fromISO(contentConfig.sendDateISO).toFormat("cccc yyyy-LL-dd 'at' h:mm a")})?`,
+                mask: `dddd, MMMM D, YYYY "at" h:mm A "Mountain Time"`,
+                initial: DateTime.fromISO(contentConfig.sendDateISO).set({hour: 17, minute: 0, second: 0}).toJSDate(),
+                validate: (date:Date) => {
+                    if (date.getTime() <= Date.now()) {
+                        return 'The date must be in the future';
+                    }
+                    if (![0, 15, 30, 45].includes(date.getMinutes())){
+                        return 'The schedule time must be on the quarter hour, :00, :15, :30, or :45'
+                    }
+
+                    return true;
+                },
+                format: (value:Date) => {
+                    console.log("formatting date: timezone offset", value.getTimezoneOffset());
+                    console.log("formatting date", value, "from Mountain to UTC");
+                    const dateString =  makeUTCDateIntoMailchimpDate(value, true, mailchimpTimeZone);
+                    console.log("iso date string", dateString);
+                    return dateString;
+                }
             },
             {
                 type: "toggle",
@@ -771,9 +806,135 @@ export default class MailchimpQuestionCampaign implements Command {
             } else {
                 console.log(chalk.blue(`Not using a template`));
             }
-
         }
 
         return recipientConfig;
+    }
+
+    async scheduleCampaign(campaign: Campaign, sendDate:string, allowForceRetry: boolean):Promise<void>{
+        if (!this.mailchimpService){
+            throw new Error("no mailchimp service found");
+        }
+
+        const campaignChecklist = await this.mailchimpService.getCampaignSendChecklist(campaign.id);
+
+        let isReady = campaignChecklist.is_ready;
+        let didForceRetry = false;
+
+
+        if (isReady){
+            const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
+            console.log(chalk.green(`Campaign is ready to send!`));
+            if (warnings.length > 0){
+                console.log(chalk.yellow(`However, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
+            }
+        } else if (!isReady){
+            console.log(chalk.red(`Campaign "${chalk.bold(campaign.settings.title)}" is not ready to send. Please correct the following issues in the Mailchimp UI: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
+            const issues = campaignChecklist.items.filter(item => item.type !== SendChecklistItemType.success && item.heading !== "MonkeyRewards");
+            console.log(chalk.red(JSON.stringify(issues, null, 2)));
+
+
+            if (!isReady && allowForceRetry && issues.length === 1 && issues[0].id === 501 && issues[0].details.toLowerCase() === "your advanced segment is empty."){
+                const {forceRetry} = await prompts({
+                    type: "confirm",
+                    name: "forceRetry",
+                    message: `Force a retry for ${campaign.settings.title}?`
+                });
+
+                if (forceRetry){
+                    console.log("setting recipients to be just neil@cactus.app");
+                    const updatedCampaignRequest:UpdateCampaignRequest = {
+                        settings: {
+                          subject_line: campaign.settings.subject_line,
+                          from_name: campaign.settings.from_name,
+                          reply_to: campaign.settings.reply_to,
+                        },
+                        recipients: {
+                            list_id: campaign.recipients.list_id,
+                            segment_opts: {
+                                match: SegmentMatchType.all,
+                                conditions: [{
+                                    condition_type: SegmentConditionType.EmailAddress,
+                                    op: SegmentOperator.is,
+                                    value: "neil@cactus.app",
+                                    field: SegmentField.EMAIL
+                                }]
+                            }
+                        }
+                    };
+                    try {
+                        const updatedCampaign = await this.mailchimpService.updateCampaign(campaign.id, updatedCampaignRequest);
+                        didForceRetry = true;
+                        console.log(`successfully updated ${updatedCampaign.id}'s recipients. Rerunning checks`);
+
+                        const updatedChecklist = await this.mailchimpService.getCampaignSendChecklist(campaign.id);
+                        const updatedErrors = updatedChecklist.items.filter(item => item.type === SendChecklistItemType.error && item.heading !== "MonkeyRewards");
+                        if (updatedChecklist.is_ready){
+                            console.log("Yeehaw! We can now schedule the campaign");
+                            const warnings = campaignChecklist.items.filter(item => item.type === SendChecklistItemType.warning && item.heading !== "MonkeyRewards");
+                            if (warnings.length > 0){
+                                console.log(chalk.yellow(`However, there are ${warnings.length} warnings. \n${JSON.stringify(warnings, null, 2)}`));
+                            }
+                            isReady = true;
+                        } else {
+                            console.log(chalk.yellow("Welp, we still aren't able to schedule the campaign."));
+                            console.log(chalk.yellow(JSON.stringify(updatedErrors, null, 2)));
+                        }
+
+                    } catch (e){
+                        console.error("Unable to update campaign", e);
+                    }
+                }
+
+            } else {
+                console.log(`wasn't able to force a retry. allowRetry: ${allowForceRetry}, issues.length: ${issues.length}`);
+                return;
+            }
+
+        }
+
+        //doing another check because the else block above could have updated the ready status
+        if (isReady){
+            const {scheduleNow} = await prompts({
+                type: "confirm",
+                name: "scheduleNow",
+                message: `Your campaign "${campaign.settings.title}" is able to be scheduled. Schedule it to send at ${sendDate} now?`
+            });
+
+            if (!scheduleNow){
+                console.log("Not scheduling the email. It will remain as a draft.");
+            }
+
+            const scheduleSuccess = await this.mailchimpService.scheduleCampaign(campaign.id, {schedule_time: sendDate});
+            if (scheduleSuccess){
+                console.log(chalk.green(`${campaign.settings.title} scheduled successfully!`));
+            } else {
+                console.warn(chalk.yellow("Unable to schedule the campaign. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}"));
+            }
+        }
+
+        if (didForceRetry){
+            console.log("Since we forced a retry, we need to revert back");
+            const updatedCampaignRequest:UpdateCampaignRequest = {
+                settings: {
+                    subject_line: campaign.settings.subject_line,
+                    from_name: campaign.settings.from_name,
+                    reply_to: campaign.settings.reply_to,
+                },
+                recipients: {
+                    list_id: campaign.recipients.list_id,
+                    segment_opts: campaign.recipients.segment_opts,
+                }
+            };
+            try {
+                await this.mailchimpService.updateCampaign(campaign.id, updatedCampaignRequest);
+                console.log(`Nice! Reverted our recipients back successfully.`);
+            }
+            catch (e){
+                console.error(chalk.red(`**** Failed to revert back! *****\nPlease make any corrections in the web ui: https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
+            }
+        }
+
+        return;
     }
 }

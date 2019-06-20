@@ -142,38 +142,75 @@ export interface CreateCampaignRequestRecipients {
 
 }
 
+export interface CreateCampaignSettings {
+    subject_line?: string,
+    preview_text?: string,
+    title: string,
+    from_name?: string,
+    reply_to?: string,
+    use_conversation?: boolean,
+    to_name?: string,
+    folder_id?: string,
+    authenticate?: boolean,
+    auto_footer?: boolean,
+    inline_css?: boolean,
+    auto_tweet?: boolean,
+    auto_fb_post?:string[], //array of page ids to post to
+    fb_comments?:boolean,
+    template_id?:number,
+}
+
+export interface UpdateCampaignSettings {
+    subject_line: string,
+    preview_text?: string,
+    title?: string,
+    from_name: string,
+    reply_to: string,
+    use_conversation?: boolean,
+    to_name?: string,
+    folder_id?: string,
+    authenticate?: boolean,
+    auto_footer?: boolean,
+    inline_css?: boolean,
+    auto_tweet?: boolean,
+    auto_fb_post?:string[], //array of page ids to post to
+    fb_comments?:boolean,
+    template_id?:number,
+}
+
+export interface CampaignTracking {
+    opens?:boolean,
+    html_clicks?: boolean,
+    text_clicks?: boolean,
+    goal_tracking?:boolean,
+    ecomm360?:boolean,
+    google_analytics?: string, //custom clug for GA tracking
+    clicktale?:string,
+}
+
 export interface CreateCampaignRequest {
     type: CampaignType,
     recipients: CreateCampaignRequestRecipients,
-    settings?: {
-        subject_line?: string,
-        preview_text?: string,
-        title: string,
-        from_name?: string,
-        reply_to?: string,
-        use_conversation?: boolean,
-        to_name?: string,
-        folder_id?: string,
-        authenticate?: boolean,
-        auto_footer?: boolean,
-        inline_css?: boolean,
-        auto_tweet?: boolean,
-        auto_fb_post?:string[], //array of page ids to post to
-        fb_comments?:boolean,
-        template_id?:number,
-    },
+    settings?: CreateCampaignSettings,
     variate_settings?: {
         //not used yet
     },
-    tracking?: {
-        opens?:boolean,
-        html_clicks?: boolean,
-        text_clicks?: boolean,
-        goal_tracking?:boolean,
-        ecomm360?:boolean,
-        google_analytics?: string, //custom clug for GA tracking
-        clicktale?:string,
+    tracking?: CampaignTracking,
+    social_card?: {
+        image_url?: string,
+        description?: string,
+        title?: string,
+    }
+}
+
+
+export interface UpdateCampaignRequest {
+    recipients?: CreateCampaignRequestRecipients,
+    settings: UpdateCampaignSettings,
+    variate_settings?: {
+        //not used yet
     },
+    tracking?: CampaignTracking,
     social_card?: {
         image_url?: string,
         description?: string,

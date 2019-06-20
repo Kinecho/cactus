@@ -129,7 +129,7 @@ export interface Campaign {
         list_name: string,
         segment_text: string,
         recipient_count: number,
-        segment_options: any,
+        segment_opts: any,
     },
     settings: {
         subject_line: string,
@@ -390,4 +390,32 @@ export interface AudienceListResponse extends ListResponse {
         max_instances: number;
         current_total_instances: number;
     }
+}
+
+export enum SendChecklistItemType {
+    success = "success",
+    warning = "warning",
+    error = "error"
+}
+
+export interface SendChecklistItem {
+    type: SendChecklistItemType;
+    id: number;
+    heading: string;
+    details: string;
+}
+
+export interface SendChecklist {
+    is_ready: boolean;
+    items: SendChecklistItem[];
+    _links?: MailchimpLink[];
+}
+
+export interface CampaignScheduleBody {
+    schedule_time: ISODate;
+    timewarp?: boolean;
+    batch_delivery?: {
+        batch_delay: number;
+        batch_count: number;
+    };
 }
