@@ -33,6 +33,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful",
+                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful.html"
+            },
+            {
                 "source": "/what-do-you-enjoy-and-savor-about-your-daily-work",
                 "destination": "/what_do_you_enjoy_and_savor_about_your_daily_work.html"
             },

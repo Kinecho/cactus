@@ -133,5 +133,9 @@ module.exports = {
     "what_do_you_enjoy_and_savor_about_your_daily_work": {
         "title": "What do you enjoy and savor about your daily work?",
         "path": "/what-do-you-enjoy-and-savor-about-your-daily-work"
+    },
+    "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful": {
+        "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
+        "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful"
     }
 }
