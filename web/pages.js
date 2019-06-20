@@ -141,5 +141,9 @@ module.exports = {
     "what_three_things_are_you_looking_forward_to_experiencing_this_week": {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week"
+    },
+    "what_makes_dinner_meaningful_to_you": {
+        "title": "What makes dinner meaningful to you?",
+        "path": "/what-makes-dinner-meaningful-to-you"
     }
 }
