@@ -4,6 +4,11 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 
+export interface QueryResult<T extends BaseModel> {
+    results:T[],
+    size: number,
+}
+
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
@@ -119,6 +124,27 @@ export default class AdminFirestoreService {
         console.log(`doc.data()`, doc.data());
 
         return fromDocumentSnapshot(doc, Type);
+    }
+
+    async executeQuery<T extends BaseModel>(query:FirebaseFirestore.Query, Type: { new(): T }):Promise<QueryResult<T>>{
+        const snapshot = await query.get();
+        const size = snapshot.size;
+        const results:T[] = [];
+        if (snapshot.empty){
+            return  {results, size};
+        }
+
+        snapshot.forEach(doc => {
+            const model = fromDocumentSnapshot(doc, Type);
+            if (model){
+                results.push(model);
+            } else {
+                console.warn("Unable to decode model", Type);
+            }
+        });
+
+
+        return {results, size};
     }
 }
 

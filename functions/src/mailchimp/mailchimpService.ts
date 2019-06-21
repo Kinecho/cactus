@@ -153,7 +153,12 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
     }
 }
 
-export async function getMemberByEmailId(emailId:string): Promise<ListMember|null>{
+//TODO: make this look up the member in our database first
+export async function getMemberByEmailId(emailId?:string): Promise<ListMember|undefined>{
+    if (!emailId){
+        return undefined;
+    }
+
     console.log("getting member id: ", emailId);
     try {
         const response = await axios.get(`${getListURL()}/members`, {...getAuthConfig(), params: {unique_email_id: emailId}});
@@ -164,11 +169,11 @@ export async function getMemberByEmailId(emailId:string): Promise<ListMember|nul
             const members = response.data.members as ListMember[];
             return members[0]
         } else {
-            return null;
+            return undefined;
         }
     } catch (error){
         console.error("Unable to get list member by unique email id", error);
-        return null;
+        return undefined;
     }
 }
 

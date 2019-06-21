@@ -2,7 +2,6 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
-    UNKNOWN = "UNKNOWN",
 }
 
 export interface ReflectionContent {
@@ -12,12 +11,14 @@ export interface ReflectionContent {
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
 
+    responseDate?: Date;
     emailReplyId?:string;
-    responseMedium = ResponseMedium.UNKNOWN;
+    responseMedium?: ResponseMedium;
+    mailchimpMemberId?: string;
     mailchimpUniqueEmailId?: string;
     memberEmail?: string;
     content:ReflectionContent = {};
     promptId?:string;
-    promptText?:string
+    promptQuestion?:string
 
 }
