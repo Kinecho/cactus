@@ -29,11 +29,13 @@ function configureAnimations() {
           .addTo(controller);
     }
 
-    new ScrollMagic.Scene({
-        offset: 1,
-        duration: "100%",
-    }).setTween(".hero", 1, {backgroundColor: 'white'})
-        .addTo(controller);
+    if (width >= 1140) {
+      new ScrollMagic.Scene({
+          offset: 1,
+          duration: "100%",
+      }).setTween(".hero", 1, {backgroundColor: 'white'})
+          .addTo(controller);
+    }
 
     if (width >= 1140) {
       new ScrollMagic.Scene({
