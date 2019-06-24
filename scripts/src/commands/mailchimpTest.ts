@@ -1,5 +1,5 @@
 import {Command} from "@scripts/run";
-import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
+import MailchimpQuestionCampaign from "@scripts/commands/public/MailchimpQuestionCampaign";
 
 export default class MailchimpTest implements Command {
     name = "Mailchimp Test";

@@ -33,6 +33,26 @@
         ],
         "rewrites": [
             {
+                "source": "/what-film-television-series-or-work-of-theater-allows-you-to-think-and-feel-in-new-ways",
+                "destination": "/what_film_television_series_or_work_of_theater_allows_you_to_think_and_feel_in_new_ways.html"
+            },
+            {
+                "source": "/what-makes-dinner-meaningful-to-you",
+                "destination": "/what_makes_dinner_meaningful_to_you.html"
+            },
+            {
+                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week",
+                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week.html"
+            },
+            {
+                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful",
+                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful.html"
+            },
+            {
+                "source": "/what-do-you-enjoy-and-savor-about-your-daily-work",
+                "destination": "/what_do_you_enjoy_and_savor_about_your_daily_work.html"
+            },
+            {
                 "source": "/membership",
                 "destination": "/membership.html"
             },

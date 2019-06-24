@@ -129,5 +129,25 @@ module.exports = {
     "membership": {
         "title": "Membership",
         "path": "/membership"
+    },
+    "what_do_you_enjoy_and_savor_about_your_daily_work": {
+        "title": "What do you enjoy and savor about your daily work?",
+        "path": "/what-do-you-enjoy-and-savor-about-your-daily-work"
+    },
+    "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful": {
+        "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
+        "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful"
+    },
+    "what_three_things_are_you_looking_forward_to_experiencing_this_week": {
+        "title": "What three things are you looking forward to experiencing this week?",
+        "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week"
+    },
+    "what_makes_dinner_meaningful_to_you": {
+        "title": "What makes dinner meaningful to you?",
+        "path": "/what-makes-dinner-meaningful-to-you"
+    },
+    "what_film_television_series_or_work_of_theater_allows_you_to_think_and_feel_in_new_ways": {
+        "title": "What film, television series, or work of theater allows you to think and feel in new ways?",
+        "path": "/what-film-television-series-or-work-of-theater-allows-you-to-think-and-feel-in-new-ways"
     }
 }
