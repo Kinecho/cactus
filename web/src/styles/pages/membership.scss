@@ -11,7 +11,7 @@ body {
   background-color: $lightPink;
   height: 100vh;
 
-  @include r(768) {
+  @include r(1140) {
     height: 185vh;
   }
 
@@ -67,7 +67,8 @@ body {
       height: 100vh;
       left: 0;
       padding: 3.2rem;
-      position: fixed;
+      position: sticky;
+      /* position: fixed; */
       width: 100vw;
       z-index: 2;
     }
@@ -204,10 +205,15 @@ body {
     justify-content: center;
     max-width: 1200px;
   }
+  /* @include r(1140) {
+    margin-right: 32rem;
+  } */
 }
 
 .text {
-  max-width: 42rem;
+  @include r(768) {
+    max-width: 42rem;
+  }
 
   p {
     margin-bottom: 1.6rem;
@@ -223,6 +229,9 @@ body {
 
   @include r(768) {
     padding: 8.8rem 2.4rem;
+  }
+  @include r(1400) {
+    margin-top: -20rem;
   }
 
   .centered {
@@ -350,7 +359,7 @@ h2 {
 
   .text {
     @include r(768) {
-      margin-left: 7.2rem;
+      margin-left: 12.8rem;
     }
   }
 
@@ -418,6 +427,7 @@ h2 {
 
   .mirror {
     @include r(768) {
+      margin: 0 0 3.2rem;
       width: 50%;
     }
   }
