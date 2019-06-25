@@ -9,6 +9,10 @@ export default class AdminReflectionPromptService {
 
     public static sharedInstance = new AdminReflectionPromptService();
 
+    async save(model:ReflectionPrompt):Promise<ReflectionPrompt> {
+        return firestoreService.save(model);
+    }
+
     async getPromptForCampaignId(campaignId?:string):Promise<ReflectionPrompt|undefined> {
         if (!campaignId){
             return undefined;

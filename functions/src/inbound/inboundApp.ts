@@ -16,6 +16,7 @@ import AdminReflectionPromptService from "@shared/services/AdminReflectionPrompt
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ListMember from "@shared/mailchimp/models/ListMember";
 import bodyParser = require("body-parser");
+import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 
 const app = express();
 
@@ -110,6 +111,11 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             await resetUserReminder(from.email);
         }
 
+        const savedReflectionResponse = await AdminReflectionResponseService.sharedInstance.save(promptResponse);
+        if (savedReflectionResponse){
+            console.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
+        }
+
         let messageColor = undefined;
         let message = "Successfully processed an reflection response!";
         if (!savedEmail) {
@@ -123,7 +129,6 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         await sendActivityNotification("ERROR: Failed to process incoming email: " +  `${error}`);
         res.sendStatus(500);
     }
-
 });
 
 async function sendSlackMessage(email: EmailReply, prompt?: ReflectionPrompt, sentToMember?: ListMember, message = "Got a reply!", color = AttachmentColor.info):Promise<void> {
@@ -152,7 +157,7 @@ async function sendSlackMessage(email: EmailReply, prompt?: ReflectionPrompt, se
             },
             {
                 title: "Content Link",
-                value: `https://cactus.app/${prompt.contentPath}`,
+                value: `https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` :  prompt.contentPath}`,
                 short: false,
             }
         )
