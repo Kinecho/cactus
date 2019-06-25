@@ -126,9 +126,9 @@ module.exports = {
         "title": "What gifts does nature provide you?",
         "path": "/what-gifts-does-nature-provide-you"
     },
-    "membership": {
-        "title": "Membership",
-        "path": "/membership"
+    "journal": {
+        "title": "Journal",
+        "path": "/journal"
     },
     "what_do_you_enjoy_and_savor_about_your_daily_work": {
         "title": "What do you enjoy and savor about your daily work?",

@@ -1,12 +1,12 @@
 // tslint:disable-next-line:no-implicit-dependencies
-import "@styles/pages/membership.scss"
+import "@styles/pages/journal.scss"
 import * as ScrollMagic from "scrollmagic";
 import 'animation.gsap'
 
 const controller = new ScrollMagic.Controller();
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("membership loaded");
+    console.log("journal loaded");
     configureAnimations();
 });
 
