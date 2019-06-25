@@ -445,3 +445,69 @@ a.button {
     margin-top: .8rem;
   }
 }
+
+.recap {
+  background-color: $yellow;
+  /* background: url(assets/images/yellowNeedles.svg) $yellow;
+  background-size: 80%; */
+  padding: 5.6rem 4rem;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  z-index: 1;
+
+  @include r(768) {
+    /* background-size: 30%; */
+  }
+
+  .centered {
+    flex-direction: column;
+  }
+
+  h2 {
+    font-size: 2.4rem;
+    margin: 0 0 .8rem;
+    padding: 0 2.4rem;
+
+    @include r(768) {
+      font-size: 3.2rem;
+      margin-bottom: 2.4rem;
+    }
+  }
+
+  .smallText {
+    margin: 0 auto;
+    max-width: 60rem;
+  }
+
+  a.button {
+    display: inline-block;
+    margin: 2.4rem 0;
+  }
+}
+
+.features {
+  display: flex;
+  margin-bottom: 2.4rem;
+  text-align: left;
+
+  @include r(768) {
+    flex-flow: row wrap;
+    justify-content: center;
+  }
+}
+
+.feature {
+  @include r(768) {
+    padding-right: 4rem;
+    width: 20%;
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+.smallText {
+  font-size: 1.4rem;
+}
