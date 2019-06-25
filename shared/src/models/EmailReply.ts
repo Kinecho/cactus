@@ -38,9 +38,9 @@ export default class EmailReply extends BaseModel{
     collection = Collection.emailReply;
 
     headers: EmailHeaders = {};
-    to?: EmailAddress;
-    cc?: EmailAddress;
-    from?: EmailAddress;
+    to: EmailAddress = {};
+    cc: EmailAddress = {};
+    from: EmailAddress = {};
     envelope?: {to: EmailAddress[], from: EmailAddress};
     replyText?: string;
     content: {
@@ -49,11 +49,11 @@ export default class EmailReply extends BaseModel{
     } = {};
     subject?: string;
     attachments?: Array<AttachmentInfo>;
-    mailchimpMemberId?: string|undefined|null;
-    mailchimpUniqueEmailId?: string|undefined|null;
+    mailchimpMemberId?: string;
+    mailchimpUniqueEmailId?: string;
     mailchimpCampaignId?:string;
     originalEmailStoragePaths: EmailStorageFiles = {HEADERS: null, BODY: null};
-
+    reflectionPromptId?: string;
     //models need an empty constructor
     constructor(input:InboundEmail|undefined=undefined){
         super();
@@ -68,13 +68,10 @@ export default class EmailReply extends BaseModel{
             text: input.text,
             html: input.html,
         };
-        // this.text = input.text;
-        // this.html = input.html;
         this.subject = input.subject;
-        this.mailchimpMemberId = this.headers[MailchimpMemberId];
+        this.mailchimpMemberId = this.headers[MailchimpMemberId] || undefined;
         this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         this.mailchimpCampaignId = input.mailchimpCampaignId;
-        // this.originalEmailStoragePaths = ;
 
         if (input.fromRaw){
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
