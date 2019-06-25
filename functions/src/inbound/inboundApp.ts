@@ -118,12 +118,12 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         }
 
         let messageColor = undefined;
-        let message = "Successfully processed an reflection response!";
+        let message = "Successfully processed a reflection response!";
         if (!savedEmail) {
             messageColor = AttachmentColor.error;
             message = `:rotating_light: Unable to save the email reply. The following details from ${from.email} have not been fully saved to Firestore`;
         }
-        await sendSlackMessage(savedEmail || emailReply, prompt, listMember, message,  messageColor);
+        await sendSlackMessage(savedEmail || emailReply, prompt, savedReflectionResponse, listMember, message,  messageColor);
 
         res.send({email: (savedEmail || emailReply).toJSON()});
     } catch(error) {
@@ -132,7 +132,12 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     }
 });
 
-async function sendSlackMessage(email: EmailReply, prompt?: ReflectionPrompt, sentToMember?: ListMember, message = "Got a reply!", color = AttachmentColor.info):Promise<void> {
+async function sendSlackMessage(email: EmailReply,
+                                prompt?: ReflectionPrompt,
+                                response?: ReflectionResponse,
+                                sentToMember?: ListMember,
+                                message = "Got a reply!",
+                                color = AttachmentColor.info):Promise<void> {
     let messageColor = color;
     const msg: SlackMessage = {};
     msg.text = message;
@@ -143,6 +148,14 @@ async function sendSlackMessage(email: EmailReply, prompt?: ReflectionPrompt, se
     const campaign = email.mailchimpCampaignId ? await getCampaign(email.mailchimpCampaignId) : null;
 
     const fields = [];
+
+    if (response){
+        fields.push({
+            title: "Response ID",
+            value: `${response.id} || ?`,
+            short: false,
+        })
+    }
 
     if (prompt){
         fields.push(
@@ -215,19 +228,18 @@ async function sendSlackMessage(email: EmailReply, prompt?: ReflectionPrompt, se
 
         fields.unshift(
             {
-                title: ":merperson: List Member Email (from link)",
+                title: "List Member Email",
                 value: sentToMember ? sentToMember.email_address : "not found",
-                short: true,
+                short: false,
             },
             {
-                title: "Unique Email Id from body",
+                title: "Mailchimp Unique Email ID",
                 value: email.mailchimpUniqueEmailId,
-                short: true,
+                short: false,
             })
     } else {
         console.log("unable to find email id on processed email");
     }
-
 
     msg.attachments = [{
         color: messageColor,
