@@ -13,10 +13,10 @@ import EmailReply, {EmailStoragePath} from "@shared/models/EmailReply";
 import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
-import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
 import ListMember from "@shared/mailchimp/models/ListMember";
-import bodyParser = require("body-parser");
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
+import bodyParser = require("body-parser");
 
 const app = express();
 
@@ -100,6 +100,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         promptResponse.emailReplyId = savedEmail ? savedEmail.id : undefined;
         promptResponse.promptId = prompt ? prompt.id : undefined;
         promptResponse.promptQuestion = prompt ? prompt.question : undefined;
+        promptResponse.responseMedium = ResponseMedium.EMAIL;
 
         if (listMember){
             promptResponse.memberEmail = listMember.email_address;
