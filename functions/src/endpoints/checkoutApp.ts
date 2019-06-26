@@ -8,14 +8,16 @@ import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
-import {getMemberByEmail, updateTags} from "@api/services/mailchimpService";
 import {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
+import MailchimpService from "@shared/services/MailchimpService";
 
 const config = getConfig();
 
 const stripe = new Stripe(config.stripe.secret_key);
 const app = express();
+
+const mailchimpService = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: true}));
@@ -44,11 +46,12 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             await sendActivityNotification(`:moneybag: Successfully processed pre-order for ${email}!`);
 
             //Update mailchimp member, if they exist, if not, send scary slack message
-            const mailchimpMember = await getMemberByEmail(email);
+            const mailchimpMember = await mailchimpService.getMemberByEmail(email);
+            console.log("Mailchimp member", mailchimpMember);
             if (email && mailchimpMember){
-                const tagUpdateSuccess = await updateTags({tags: [{name: TagName.JOURNAL_PAID, status: TagStatus.ACTIVE}], email});
+                const tagUpdateSuccess = await mailchimpService.updateTags({tags: [{name: TagName.JOURNAL_PREMIUM, status: TagStatus.ACTIVE}], email});
                 if (!tagUpdateSuccess){
-                   await sendActivityNotification(`:warning: Failed to add tag ${TagName.JOURNAL_PAID} to Mailchimp member ${email}`);
+                   await sendActivityNotification(`:warning: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}`);
                 }
             } else {
                 await sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);

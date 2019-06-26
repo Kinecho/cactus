@@ -9,7 +9,6 @@ import {
 } from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {getCampaign, signup} from "@api/services/mailchimpService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
 import {writeToFile} from "@api/util/FileUtil";
@@ -21,8 +20,11 @@ import {
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {saveSentCampaign} from "@api/services/sentCampaignService";
+import MailchimpService from "@shared/services/MailchimpService";
 
 const app = express();
+
+const mailchimpService = MailchimpService.getSharedInstance();
 
 // Automatically allow cross-origin requests
 app.use(cors({ origin: true }));
@@ -75,7 +77,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             break;
         case EventType.campaign:
             const campaignData = event.data as CampaignEventData;
-            const campaign = await getCampaign(campaignData.id);
+            const campaign = await mailchimpService.getCampaign(campaignData.id);
 
             await saveSentCampaign(campaign, campaignData);
 
@@ -135,7 +137,7 @@ app.post("/", async (req: express.Request, res: express.Response ) => {
   res.contentType("application/json");
 
   try {
-      const signupResult = await signup(subscription);
+      const signupResult = await mailchimpService.addSubscriber(subscription);
       console.log("singed up with result", signupResult);
 
       if (signupResult.status === SubscriptionResultStatus.new_subscriber){

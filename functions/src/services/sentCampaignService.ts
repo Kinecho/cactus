@@ -4,7 +4,7 @@ import FirestoreService from "@shared/services/AdminFirestoreService";
 
 const firestoreService = FirestoreService.getSharedInstance();
 
-export async function saveSentCampaign(campaign:Campaign|null, webhookData: CampaignEventData):Promise<SentCampaign|null> {
+export async function saveSentCampaign(campaign:Campaign|null|undefined, webhookData: CampaignEventData):Promise<SentCampaign|null> {
     const model = new SentCampaign();
     if (!campaign){
         console.error("No campaign given, can't save");

@@ -1,11 +1,16 @@
 require("module-alias/register");
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin'
+import {getConfig} from "@api/config/configService";
+import MailchimpService from "@shared/services/MailchimpService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 //need to initialize these modules before including any other code
 admin.initializeApp();
 const app = admin.app();
+const config = getConfig();
+
 AdminFirestoreService.initialize(app);
+MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
 
 import {setTimestamp} from "@shared/util/FirebaseUtil";
 setTimestamp(admin.firestore.Timestamp);

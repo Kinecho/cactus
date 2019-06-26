@@ -23,10 +23,17 @@ import {
     PaginationParameters,
     CampaignListResponse,
     GetCampaignsOptions,
-    DEFAULT_PAGINATION, defaultPageSize, getDefaultCampaignFetchOptions
+    DEFAULT_PAGINATION,
+    defaultPageSize,
+    getDefaultCampaignFetchOptions,
+    UpdateTagsRequest,
+    UpdateMergeFieldRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
-
-// import * as md5 from "md5";
+import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
+import * as md5 from "md5";
+import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import ApiError from "@shared/ApiError";
 
 
 interface MailchimpAuth {
@@ -34,12 +41,37 @@ interface MailchimpAuth {
     password: string,
 }
 
+/**
+ * Get the hashed version of the user's email, which is used as the id for the mailchip amp
+ * see: https://developer.mailchimp.com/documentation/mailchimp/guides/manage-subscribers-with-the-mailchimp-api/
+ * @param {string} email
+ * @return {string}
+ */
+export function getMemberIdFromEmail(email:string):string {
+    const hashed = md5(email.toLowerCase().trim());
+    return hashed;
+}
 
 export default class MailchimpService {
     apiKey: string;
     apiDomain: string;
     request: AxiosInstance;
     audienceId?: string;
+
+    protected static sharedInstance: MailchimpService;
+
+    static initialize(apiKey:string, audienceId:string|undefined){
+        console.log("initializing mailchimp service");
+        MailchimpService.sharedInstance = new MailchimpService(apiKey, audienceId);
+    }
+
+    static getSharedInstance(){
+        if (MailchimpService.sharedInstance) {
+            return MailchimpService.sharedInstance;
+        }
+        throw new Error("You must initialize mailchimp service before calling sharedInstance()");
+    }
+
 
     constructor(apiKey: string, audienceId: string | undefined) {
         this.apiKey = apiKey;
@@ -64,13 +96,23 @@ export default class MailchimpService {
     }
 
     private getCampaignURL(id: string): string {
-        return `${this.apiDomain}/campaigns/${id}`;
+        return `/campaigns/${id}`;
     }
 
-    async getCampaign(id: string) {
-        const url = this.getCampaignURL(id);
-        const response = await this.request.get(url);
-        console.log("campaign response", JSON.stringify(response.data, null, 2));
+    protected getMemberUrlForEmail(email:string):string{
+        const id = getMemberIdFromEmail(email);
+        return `/lists/${this.audienceId}/members/${id}`;
+    }
+
+    async getCampaign(id: string):Promise<Campaign|undefined> {
+        try {
+            const url = this.getCampaignURL(id);
+            const response = await this.request.get(url);
+            return response.data;
+        } catch (error){
+            console.error("failed to get mailchimp campaign for campaign id", id, error);
+            return undefined;
+        }
     }
 
     async getCampaigns(options:GetCampaignsOptions=getDefaultCampaignFetchOptions()):Promise<CampaignListResponse>{
@@ -158,6 +200,35 @@ export default class MailchimpService {
             }
         });
         return response.data;
+    }
+
+    async updateTags(tagRequest: UpdateTagsRequest): Promise<boolean>{
+        const memberId = getMemberIdFromEmail(tagRequest.email);
+        console.log("Updating member with patch", tagRequest);
+
+        try {
+            await this.request.post(`/lists/${this.audienceId}/members/${memberId}`, {
+                tags: tagRequest.tags
+            });
+            return true;
+        } catch (error){
+            console.error("failed to update tags", error);
+            return false;
+        }
+    }
+
+    async updateMergeFields(request: UpdateMergeFieldRequest):Promise<boolean>{
+        try {
+            const url = this.getMemberUrlForEmail(request.email);
+            await this.request.patch(url, {
+                merge_fields: request.mergeFields
+            });
+            return true;
+        } catch (error){
+            console.error("failed to update member merge tags", error);
+            return false;
+        }
+
     }
 
     async getAllSegments(pageSize=defaultPageSize): Promise<Segment[]> {
@@ -314,5 +385,97 @@ export default class MailchimpService {
         }
     }
 
+    async getMemberByEmail(email?:string): Promise<ListMember|undefined>{
+        if (!email){
+            return undefined;
+        }
+        const id = getMemberIdFromEmail(email);
+        const url = `/lists/${this.audienceId}/members/${id}`;
+        try {
+            const response = await this.request.get(url);
+            return response.data;
+        } catch (error){
+            console.warn("Failed to get list member for email", email);
+            return undefined;
+        }
+    }
+
+    async getMemberByUniqueEmailId(uniqueEmailId?:string):Promise<ListMember|undefined>{
+        if (!uniqueEmailId){
+            return;
+        }
+
+        const url = `/lists/${this.audienceId}/members`;
+        const response = await this.request.get(url, {
+            params: {
+                unique_email_id: uniqueEmailId
+            }
+        });
+        if (response.data && response.data.members){
+            const [member] = response.data.members;
+            return member;
+        } else {
+            return undefined;
+        }
+    }
+
+    async addSubscriber(subscription:SubscriptionRequest, status=ListMemberStatus.pending):Promise<SubscriptionResult>{
+        const member = new ListMember(subscription.email);
+        member.status = ListMemberStatus.pending;
+        if (subscription.referredByEmail){
+            member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
+        }
+
+        const url = `/lists/${this.audienceId}/members`;
+
+        const result = new SubscriptionResult();
+        result.member = member;
+
+        try {
+            const response = await this.request.post(url, member);
+            console.log("mailchimp response", response.data);
+            result.success = true;
+            result.status = SubscriptionResultStatus.new_subscriber;
+        } catch (error){
+            const apiError = new ApiError();
+            if (error && error.response && error.response.data){
+                const data = error.response.data;
+                switch (data.title) {
+                    case "Member Exists":
+                        console.warn("User is already on list. Treating as a successful signup", data)
+                        result.success = true;
+                        result.status = SubscriptionResultStatus.existing_subscriber;
+                        break;
+                    case "Invalid Resource":
+                        console.warn("unable to sign up user", data);
+                        result.success = false;
+                        result.status = SubscriptionResultStatus.unknown;
+                        apiError.friendlyMessage = data.detail || "Please provide a valid email address.";
+                        apiError.code = data.status;
+                        apiError.error = error.response.data;
+                        break;
+                    default:
+                        console.error("failed to create new member. Response data", data);
+                        apiError.friendlyMessage = "Oops, we're unable to sign you up right now. Please try again later.";
+                        apiError.error = error.response.data;
+                        apiError.code = data.status;
+                        result.success = false;
+                        result.status = SubscriptionResultStatus.unknown;
+                        break;
+                }
+
+            }
+            else {
+                console.error("Failed to update mailchimp list", error);
+                apiError.code = 500;
+                apiError.error = error;
+                apiError.friendlyMessage = "An unexpected error occurred. Please try again later";
+                result.success = false;
+            }
+            result.error = apiError;
+        }
+
+        return result;
+    }
 }
 
