@@ -260,7 +260,7 @@ a.button {
 }
 
 .truck {
-  padding: 5.6rem 2.4rem;
+  padding: 8rem 2.4rem;
 
   @include r(768) {
     padding: 8.8rem 2.4rem;
@@ -311,7 +311,7 @@ a.button {
 
 .private {
   background-color: $lightGreen;
-  padding: 5.6rem 2.4rem;
+  padding: 8rem 2.4rem;
   position: relative;
   z-index: 0;
 
@@ -411,7 +411,7 @@ a.button {
 }
 
 .thrive {
-  padding: 5.6rem 2.4rem;
+  padding: 8rem 2.4rem;
 
   @include r(768) {
     padding: 8.8rem 2.4rem;
@@ -447,18 +447,14 @@ a.button {
 }
 
 .recap {
-  background-color: $yellow;
-  /* background: url(assets/images/yellowNeedles.svg) $yellow;
-  background-size: 80%; */
-  padding: 5.6rem 4rem;
+  background: url(assets/images/yellowBlob.svg) $yellow no-repeat;
+  background-position: left 14rem bottom -21rem;
+  background-size: 50rem;
+  padding: 8rem 4rem;
   position: relative;
   text-align: center;
   width: 100%;
   z-index: 1;
-
-  @include r(768) {
-    /* background-size: 30%; */
-  }
 
   .centered {
     flex-direction: column;
@@ -475,20 +471,29 @@ a.button {
     }
   }
 
+  .icon {
+    opacity: .8;
+  }
+
   .smallText {
     margin: 0 auto;
     max-width: 60rem;
+    text-align: center;
   }
 
   a.button {
     display: inline-block;
-    margin: 2.4rem 0;
+    margin: 1.6rem 0 3.2rem;
+  }
+
+  .heart {
+    color: #FFBCA3;
   }
 }
 
 .features {
   display: flex;
-  margin-bottom: 2.4rem;
+  margin-bottom: 4.8rem;
   text-align: left;
 
   @include r(768) {
