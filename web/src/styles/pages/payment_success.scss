@@ -9,4 +9,8 @@
   a {
     @include fancyLink;
   }
+
+  &.smaller {
+    font-size: 1.6rem;
+  }
 }
