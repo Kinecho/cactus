@@ -8,5 +8,9 @@ export interface CactusConfig {
         webhooks: {
             cactus_activity: string,
         }
+    },
+    stripe: {
+        api_key: string,
+        secret_key: string,
     }
 }

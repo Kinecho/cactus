@@ -1,6 +1,6 @@
 import "firebase/functions"
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {request} from "@web/requestUtils";
+import {Endpoint, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag} from "@web/analytics";
 import {addModal, getQueryParam, showModal, validateEmail} from "@web/util";
@@ -15,7 +15,7 @@ export async function submitEmail(subscription:SubscriptionRequest): Promise<Sub
     // subscription.as
     console.log("submitting subscription", subscription);
 
-    const result = (await request.post("/mailchimp", subscription)).data as SubscriptionResult;
+    const result = (await request.post(Endpoint.mailchimp, subscription)).data as SubscriptionResult;
     if (result.success){
         console.log("Signup successful", result)
     } else {

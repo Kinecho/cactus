@@ -10,15 +10,15 @@ AdminFirestoreService.initialize(app);
 import {setTimestamp} from "@shared/util/FirebaseUtil";
 setTimestamp(admin.firestore.Timestamp);
 
-import mailchimpApp from "@api/mailchimp/mailchimpApp";
-import inboundApp from "@api/inbound/inboundApp";
-
 /**
- * Handle mailchimp related things. This is a full express app/routing tier
+ * Imports of the various endpoints needs to be after the initial setup steps above.
  */
+
+import mailchimpApp from "@api/endpoints/mailchimpApp";
+import inboundApp from "@api/endpoints/inboundApp";
+import checkoutApp from "@api/endpoints/checkoutApp";
+
+
 export const mailchimp = functions.https.onRequest(mailchimpApp);
-
-/**
- * Handle inbound emails
- */
 export const inbound = functions.https.onRequest(inboundApp);
+export const checkout = functions.https.onRequest(checkoutApp);

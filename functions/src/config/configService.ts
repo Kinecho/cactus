@@ -33,6 +33,10 @@ function buildMockConfig():CactusConfig {
             webhooks: {
                 cactus_activity: "https://cactus_activity_webhook.test.com"
             }
+        },
+        stripe: {
+            api_key: "test_api_key",
+            secret_key: "test_secret_key",
         }
     }
 }

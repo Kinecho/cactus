@@ -2,7 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import {AttachmentColor, sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
-import {getCampaign, getMemberByEmailId, resetUserReminder,} from "@api/mailchimp/mailchimpService";
+import {getCampaign, getMemberByEmailId, resetUserReminder,} from "@api/services/mailchimpService";
 
 import {getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
@@ -152,7 +152,7 @@ async function sendSlackMessage(email: EmailReply,
     if (response){
         fields.push({
             title: "Response ID",
-            value: `${response.id} || ?`,
+            value: `${response.id || "?"}`,
             short: false,
         })
     }
