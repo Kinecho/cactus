@@ -33,6 +33,13 @@ module.exports = function(config){
                 '@shared': helpers.sharedDir,
                 '@web': helpers.scriptDir,
                 '@styles': helpers.stylesDir,
+                "TweenLite": path.resolve(helpers.webRoot, 'node_modules', 'gsap/src/uncompressed/TweenLite.js'),
+                "TweenMax": path.resolve(helpers.webRoot,'node_modules', 'gsap/src/uncompressed/TweenMax.js'),
+                "TimelineLite": path.resolve(helpers.webRoot,'node_modules', 'gsap/src/uncompressed/TimelineLite.js'),
+                "TimelineMax": path.resolve(helpers.webRoot,'node_modules', 'gsap/src/uncompressed/TimelineMax.js'),
+                "ScrollMagic": path.resolve(helpers.webRoot,'node_modules', 'scrollmagic/scrollmagic/uncompressed/ScrollMagic.js'),
+                "animation.gsap": path.resolve(helpers.webRoot,'node_modules', 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js'),
+                "debug.addIndicators": path.resolve(helpers.webRoot,'node_modules', 'scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators.js')
             },
             extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html'],
         },

@@ -196,6 +196,12 @@ Under `hosting.rewrites` add your new route + filename. Notice that you do *NOT=
 
 Once you deploy (to stage first, hopefully!!), you should be able to hit your new page with the route specified. Obviously, you will want to keep the route in `firebase.json` consistent with what you set up in `pages.js` or else dev and stage/prod will have different behavior. 
 
+## Animating with GSAP & ScrollMagic
+[ScrollMagic Docs](https://scrollmagic.io/docs/index.html)
+[GSAP Docs](https://greensock.com/docs/NPMUsage)
+
+
+
 ## Frontend Environment Variables (Config)
 At build time, we inject environment variables into a config file: `src/scripts/config.ts`. The values here should begin and end with double underscores as they are replaced by webpack at build-time. Example parameter is `__MY_PARAM__`.  In the `config.ts` file, we declare these variables so that typescript doesn't complain about them. We can then leverage any of of these variables at runtime by importing the config file.
 

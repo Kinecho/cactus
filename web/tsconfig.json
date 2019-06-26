@@ -16,7 +16,10 @@
             "@styles/*": [
                 "./src/styles/*"
             ],
-            "@shared/*": ["../shared/src/*"]
+            "@shared/*": ["../shared/src/*"],
+            "animations.gsap": [
+                "./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"
+            ]
         }
     },
     "compileOnSave": false,
