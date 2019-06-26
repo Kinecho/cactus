@@ -63,6 +63,11 @@
 			@content;
 		}
 	}
+	@if $point==960 {
+		@media ( min-height: 960px ) {
+			@content;
+		}
+	}
 }
 
 /* ANIMATIONS */

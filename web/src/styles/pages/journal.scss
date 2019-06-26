@@ -3,20 +3,48 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-body {
+html, body {
   overflow-x: hidden;
 }
 
 .hero {
   background-color: $lightPink;
   height: 100vh;
+  position: relative;
 
   @include r(1140) {
     height: 185vh;
   }
 
+  &:before {
+    background-image: url(assets/images/yellowNeedleBlob.svg);
+    background-repeat: no-repeat;
+    background-size: 510px;
+    content: "";
+    height: 64rem;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(61vw, -19vh);
+    width: 64rem;
+  }
+
+  &:after {
+    background-image: url(assets/images/stem.svg);
+    background-repeat: no-repeat;
+    background-size: 170px;
+    bottom: -24vh;
+    content: "";
+    height: 420px;
+    left: 80vw;
+    position: absolute;
+    transform: rotate(125deg);
+    width: 180px;
+  }
+
   .copy {
     align-items: center;
+    bottom: 0;
     display: flex;
     flex-flow: column wrap;
     height: 100vh;
@@ -24,7 +52,6 @@ body {
     padding: 2.4rem;
     position: sticky;
     text-align: center;
-    top: 0;
     z-index: 3;
   }
 
@@ -34,10 +61,6 @@ body {
     position: absolute;
     top: 24px;
     z-index: 3;
-
-    @include r(1140) {
-      position: sticky;
-    }
   }
 
   h3 {
@@ -68,20 +91,19 @@ body {
 .reflections {
   display: none;
 
-  @include r(960) {
-    align-items: flex-end;
-    bottom: 0;
-    display: flex;
-    flex-flow: column nowrap;
-    height: 100vh;
-    left: 0;
-    padding: 3.2rem;
-    position: absolute;
-    width: 100vw;
-    z-index: 2;
-  }
-  @include r(1140) {
-    position: sticky;
+  @include h(768) {
+    @include r(960) {
+      align-items: flex-end;
+      bottom: 0;
+      display: flex;
+      flex-flow: column nowrap;
+      height: 100vh;
+      left: 0;
+      padding: 3.2rem;
+      position: absolute;
+      width: 100vw;
+      z-index: 2;
+    }
   }
 }
 
@@ -95,7 +117,12 @@ body {
   transform: translate(10vw, 20vh);
 }
 #reflection4 {
-  transform: translate(-80vw, 15vh);
+  display: none;
+
+  @include h(960) {
+    display: block;
+    transform: translate(-80vw, 15vh);
+  }
 }
 
 #leaf1 {
@@ -115,6 +142,28 @@ body {
   position: absolute;
   top: 20vh;
 }
+#leaf4 {
+  display: none;
+
+  @include r(1140) {
+    bottom: -75vh;
+    display: block;
+    left: 29vw;
+    position: absolute;
+    transform: rotate(10deg);
+  }
+}
+#leaf5 {
+  display: none;
+
+  @include r(1140) {
+    bottom: -85vh;
+    display: block;
+    left: 11vw;
+    position: absolute;
+    transform: rotate(-75deg);
+  }
+}
 
 #stem1 {
   display: none;
@@ -125,13 +174,6 @@ body {
     position: absolute;
     top: -28vh;
   }
-}
-#stem2 {
-  bottom: -24vh;
-  display: block;
-  left: 80vw;
-  position: absolute;
-  transform: rotate(125deg);
 }
 
 #yellowBlob1 {
@@ -160,14 +202,6 @@ body {
     width: 20rem;
     z-index: 1;
   }
-}
-#needleBlob {
-  height: 64rem;
-  left: 0;
-  position: absolute;
-  top: 0;
-  transform: translate(71vw, -19vh);
-  width: 64rem;
 }
 #pinkBlob {
   display: none;
@@ -519,6 +553,7 @@ a.button {
   @include r(768) {
     display: block;
     font-size: 1.6rem;
+    margin-bottom: 4.8rem;
     padding-right: 4rem;
     width: 20%;
 
