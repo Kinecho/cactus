@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let planId = Config.stripe.monthlyPlanId;
     if (productParam && productParam.toLowerCase() === "y"){
         planId = Config.stripe.yearlyPlanId;
+    } else if (productParam){
+        planId = productParam;
     }
 
 

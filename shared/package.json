@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "email-addresses": "^3.0.3",
-    "firebase": "^6.2.0",
+    "firebase": "^6.2.3",
     "firebase-admin": "^8.1.0",
     "luxon": "^1.16.0"
   },

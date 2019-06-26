@@ -37,6 +37,9 @@ export type MergeFields = {
 };
 
 export default class ListMember {
+    id?: string;
+    web_id?: string;
+    email_type?: string;
     email_address: string;
     unique_email_id?: string;
     status = ListMemberStatus.pending;

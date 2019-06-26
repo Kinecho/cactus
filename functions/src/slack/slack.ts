@@ -4,6 +4,10 @@ import {IncomingWebhook,IncomingWebhookSendArguments, MessageAttachment} from "@
 const config = getConfig();
 const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
 const webhook = new IncomingWebhook(appNotificationsWebhookUrl);
+export enum AttachmentColor {
+    info = "#83ecf9",
+    error = "#7A3814"
+}
 
 export type SlackMessage = IncomingWebhookSendArguments
 export type SlackAttachment = MessageAttachment

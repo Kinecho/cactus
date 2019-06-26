@@ -1,9 +1,20 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 
+export enum Field {
+    question = "question",
+    campaignIds = "campaignIds",
+    campaignWebIds = "campaignWebIds",
+    campaign = "campaign",
+    reminderCampaign = "reminderCampaign",
+    contentPath = "contentPath",
+    baseFileName = "baseFileName",
+}
+
+
 export default class ReflectionPrompt extends BaseModel {
     readonly collection = Collection.reflectionPrompt;
-    promptText?:string;
+    question?:string;
     protected campaignIds:string[] = [];
     protected campaignWebIds:string[] = [];
     campaign?:Campaign;

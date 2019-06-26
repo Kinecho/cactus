@@ -149,5 +149,9 @@ module.exports = {
     "what_film_television_series_or_work_of_theater_allows_you_to_think_and_feel_in_new_ways": {
         "title": "What film, television series, or work of theater allows you to think and feel in new ways?",
         "path": "/what-film-television-series-or-work-of-theater-allows-you-to-think-and-feel-in-new-ways"
+    },
+    "what_do_you_love_about_your_morning_rituals": {
+        "title": "What do you love about your morning rituals?",
+        "path": "/what-do-you-love-about-your-morning-rituals"
     }
 }

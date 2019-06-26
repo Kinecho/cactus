@@ -37,7 +37,7 @@ export default class SaveQuestionCommand extends FirebaseCommand {
         model.reminderCampaign = this.reminderCampaign;
         model.contentPath = this.contentPath;
         model.baseFileName = this.baseFileName;
-        model.promptText = this.question;
+        model.question = this.question;
         const saved = await firestoreService.save(model);
 
         console.log(chalk.green(`Saved ReflectionPrompt successfully. ID = ${saved.id}`));
