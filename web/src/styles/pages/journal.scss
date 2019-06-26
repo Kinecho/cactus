@@ -31,9 +31,13 @@ body {
   .logoLink {
     display: block;
     margin-left: 32px;
-    position: sticky;
+    position: absolute;
     top: 24px;
     z-index: 3;
+
+    @include r(1140) {
+      position: sticky;
+    }
   }
 
   h3 {
@@ -50,29 +54,34 @@ body {
 
     @include r(768) {
       font-size: 2.4rem;
-    }
-  }
-
-  .reflections {
-    display: none;
-
-    @include r(768) {
-      align-items: flex-end;
-      bottom: 0;
-      display: flex;
-      flex-flow: column nowrap;
-      height: 100vh;
-      left: 0;
-      padding: 3.2rem;
-      position: sticky;
-      width: 100vw;
-      z-index: 2;
+      margin: 0 auto 3.2rem;
+      max-width: 47rem;
     }
   }
 
   .reflection {
     margin-bottom: 3.2rem;
     width: 32rem;
+  }
+}
+
+.reflections {
+  display: none;
+
+  @include r(960) {
+    align-items: flex-end;
+    bottom: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100vh;
+    left: 0;
+    padding: 3.2rem;
+    position: absolute;
+    width: 100vw;
+    z-index: 2;
+  }
+  @include r(1140) {
+    position: sticky;
   }
 }
 
@@ -118,15 +127,11 @@ body {
   }
 }
 #stem2 {
-  display: none;
-
-  @include r(768) {
-    bottom: -24vh;
-    display: block;
-    left: 69vw;
-    position: absolute;
-    transform: rotate(125deg);
-  }
+  bottom: -24vh;
+  display: block;
+  left: 80vw;
+  position: absolute;
+  transform: rotate(125deg);
 }
 
 #yellowBlob1 {
@@ -167,7 +172,7 @@ body {
 #pinkBlob {
   display: none;
 
-  @include r(768) {
+  @include r(1140) {
     display: block;
     height: 54rem;
     left: 0;
@@ -180,7 +185,7 @@ body {
 #greenBlob {
   display: none;
 
-  @include r(768) {
+  @include r(1140) {
     display: block;
     height: 52rem;
     left: 0;
@@ -464,7 +469,7 @@ a.button {
 
   h2 {
     font-size: 2.4rem;
-    margin-bottom: 4.8rem;
+    margin-bottom: 3.2rem;
 
     @include r(768) {
       font-size: 3.2rem;
@@ -509,7 +514,7 @@ a.button {
 .feature {
   align-items: center;
   display: flex;
-  margin-bottom: 4.8rem;
+  margin-bottom: 3.2rem;
 
   @include r(768) {
     display: block;

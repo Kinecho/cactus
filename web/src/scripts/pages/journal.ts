@@ -21,12 +21,6 @@ function configureAnimations() {
           duration: '100%',
       }).setTween(".reflection", 1, {transform: 'translate(0,0)'})
           .addTo(controller);
-    } else if (width < 1140) {
-      new ScrollMagic.Scene({
-          offset: 1,
-          duration: '30%',
-      }).setTween(".hero .reflection", 1, {transform: 'translate(-30vw,0) scale(0)', opacity: 0})
-          .addTo(controller);
     }
 
     if (width >= 1140) {
