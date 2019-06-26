@@ -14,8 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function configureLearnMoreScroll(){
+
+
+
+
+
     controller.scrollTo((newpos: any) => {
-        TweenMax.to(window, 1.0, {scrollTo: {y: newpos}, ease: Power1.easeIn});
+        const width = window.innerWidth;
+
+        let duration = 1.0;
+        if (width < 1140){
+            duration = 0.25
+        }
+
+        TweenMax.to(window, duration, {scrollTo: {y: newpos}, ease: Power1.easeIn});
     });
 
     const learnMore = document.getElementById("learnMoreTop");
@@ -32,8 +44,7 @@ function configureLearnMoreScroll(){
 
 function configureAnimations() {
 
-    var width = window.innerWidth,
-    height = window.innerHeight;
+    const width = window.innerWidth;
 
     if (width >= 1140) {
       new ScrollMagic.Scene({
