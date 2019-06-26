@@ -4,6 +4,7 @@ import {QueryParam} from "@web/queryParams";
 import Stripe = stripe.Stripe;
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import {Endpoint, request} from "@web/requestUtils";
+import {gtag} from "@web/analytics";
 
 // import * as Stripe from "stripe";
 // import Stripe = stripe.Stripe;
@@ -38,6 +39,14 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
         };
 
         console.log("stripe options:", stripeOptions);
+
+
+        gtag('event', 'begin_checkout', {
+            value: createResponse.amount,
+            items: [createResponse.productId],
+            currency: 'USD',
+        });
+
 
         const result = await stripe.redirectToCheckout(stripeOptions);
 
@@ -82,6 +91,12 @@ export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.m
     }
 
     console.log("stripe options:", stripeOptions);
+
+
+    gtag('event', 'begin_checkout', {
+        items: [planId],
+        currency: 'USD',
+    });
 
     const result = await stripe.redirectToCheckout(stripeOptions);
 

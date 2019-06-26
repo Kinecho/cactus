@@ -7,7 +7,8 @@ import chalk from "chalk";
 import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
-
+import {QueryParam} from "../../../web/src/scripts/queryParams";
+import {URL} from "url";
 const config = getConfig();
 
 const stripe = new Stripe(config.stripe.secret_key);
@@ -96,6 +97,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
 
 
         let chargeAmount:number|undefined|null = 499;
+        let productId = planId;
         if (planId) {
             stripeOptions.subscription_data = {
                 items: [{
@@ -111,6 +113,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             }
         }
         else if (preOrder) {
+            productId = 'Cactus Journal';
             stripeOptions.payment_intent_data = {
                 capture_method: 'manual',
             };
@@ -124,17 +127,21 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             }];
         }
 
-        console.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
-
         const updatedSuccess = new URL(stripeOptions.success_url);
-        updatedSuccess.searchParams.set("amount", `${chargeAmount}`);
-        stripeOptions.success_url = successUrl.toString();
+        updatedSuccess.searchParams.set(QueryParam.PURCHASE_AMOUNT, `${chargeAmount}`);
+        updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${productId}`);
 
+
+        console.log(chalk.blue("success url is", updatedSuccess.toString()))
+        stripeOptions.success_url = updatedSuccess.toString();
+
+
+        console.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
         // @ts-ignore
         const session = await stripe.checkout.sessions.create(stripeOptions);
 
         createResponse = {
-            success: true, sessionId: session.id
+            success: true, sessionId: session.id, amount: chargeAmount, productId,
         };
 
     } catch (error){

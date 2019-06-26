@@ -38,6 +38,7 @@ export function init(){
 }
 
 export function setUserId(userId:string) {
+    console.log("setting userId to:", userId);
     gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
 }
 
