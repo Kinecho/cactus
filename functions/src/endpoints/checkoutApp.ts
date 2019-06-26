@@ -22,7 +22,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
         const event = req.body as CheckoutSessionCompleted;
         const data = event.data.object;
         const customerId = data.customer;
-        const email = data.customer_email;
+        let email = data.customer_email;
         const paymentIntentId = data.payment_intent;
         const intent = await stripe.paymentIntents.retrieve(paymentIntentId) as PaymentIntent;
 
@@ -35,6 +35,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             } as ICustomerUpdateOptions;
 
             const updateResponse = await stripe.customers.update(customerId, updateData); //Force the update options to comply to typescript :(
+            email = updateResponse.email;
             await sendActivityNotification(`:moneybag: Successfully processed pre-order for ${email}!`);
             console.log("Update response", JSON.stringify(updateResponse, null, 2));
         } else {
