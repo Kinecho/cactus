@@ -5,10 +5,13 @@ import {getConfig} from "@api/config/configService";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import chalk from "chalk";
 import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes";
-import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
+import {getMemberByEmail, updateTags} from "@api/services/mailchimpService";
+import {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
+
 const config = getConfig();
 
 const stripe = new Stripe(config.stripe.secret_key);
@@ -36,7 +39,21 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
 
             const updateResponse = await stripe.customers.update(customerId, updateData); //Force the update options to comply to typescript :(
             email = updateResponse.email;
+
+            //Notify slack that payment was successful
             await sendActivityNotification(`:moneybag: Successfully processed pre-order for ${email}!`);
+
+            //Update mailchimp member, if they exist, if not, send scary slack message
+            const mailchimpMember = await getMemberByEmail(email);
+            if (email && mailchimpMember){
+                const tagUpdateSuccess = await updateTags({tags: [{name: TagName.JOURNAL_PAID, status: TagStatus.ACTIVE}], email});
+                if (!tagUpdateSuccess){
+                   await sendActivityNotification(`:warning: Failed to add tag ${TagName.JOURNAL_PAID} to Mailchimp member ${email}`);
+                }
+            } else {
+                await sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);
+            }
+
             console.log("Update response", JSON.stringify(updateResponse, null, 2));
         } else {
             const msg:SlackMessage = {

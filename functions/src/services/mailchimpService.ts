@@ -153,6 +153,14 @@ export async function updateMergeFields(request: UpdateMergeFieldRequest){
     }
 }
 
+export async function getMemberByEmail(email?: string): Promise<ListMember|undefined>{
+    if (!email){
+        return;
+    }
+    const id = getMemberIdFromEmail(email);
+    return getMemberByEmailId(id);
+}
+
 //TODO: make this look up the member in our database first
 export async function getMemberByEmailId(emailId?:string): Promise<ListMember|undefined>{
     if (!emailId){
@@ -177,7 +185,7 @@ export async function getMemberByEmailId(emailId?:string): Promise<ListMember|un
     }
 }
 
-export async function updateTags(request: UpdateTagsRequest){
+export async function updateTags(request: UpdateTagsRequest):Promise<boolean>{
     try {
         const memberPatch = {tags: request.tags};
         const memberId = getMemberIdFromEmail(request.email);

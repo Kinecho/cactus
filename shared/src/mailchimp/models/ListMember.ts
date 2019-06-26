@@ -14,6 +14,7 @@ export enum MergeField {
 
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
+    JOURNAL_PAID = "journal_paid",
 }
 
 export enum TagStatus {
