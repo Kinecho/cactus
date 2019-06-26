@@ -1,4 +1,6 @@
 import {Config} from './config'
+import {QueryParam} from "@web/queryParams";
+import {getQueryParam} from "@web/util";
 
 declare global {
     interface Window { dataLayer: Array<any>; }
@@ -28,6 +30,15 @@ export function init(){
     createGTag();
     gtag('js', new Date());
     gtag('config', Config.googleAnalyticsID);
+
+    const mailchimpUserId = getQueryParam(QueryParam.MAILCHIMP_EMAIL_ID);
+    if (mailchimpUserId) {
+        setUserId(`mcuid_${mailchimpUserId}`);
+    }
+}
+
+export function setUserId(userId:string) {
+    gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
 }
 
 function createGTag(){

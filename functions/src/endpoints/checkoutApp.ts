@@ -94,15 +94,23 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             stripeOptions.line_items = items;
         }
 
+
+        let chargeAmount:number|undefined|null = 499;
         if (planId) {
             stripeOptions.subscription_data = {
                 items: [{
                     plan: planId
                 }]
             };
-        }
 
-        if (preOrder) {
+            try {
+                const plan = await stripe.plans.retrieve(planId);
+                chargeAmount = plan.amount;
+            } catch (error){
+                console.error("failed to retrive the plan");
+            }
+        }
+        else if (preOrder) {
             stripeOptions.payment_intent_data = {
                 capture_method: 'manual',
             };
@@ -110,13 +118,17 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             stripeOptions.line_items = [{
                 name: "Cactus Journal",
                 currency: 'USD',
-                amount: 499,
+                amount: chargeAmount,
                 description: "You will be billed monthly. Pause or cancel anytime.",
                 quantity: 1,
             }];
         }
 
         console.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
+
+        const updatedSuccess = new URL(stripeOptions.success_url);
+        updatedSuccess.searchParams.set("amount", `${chargeAmount}`);
+        stripeOptions.success_url = successUrl.toString();
 
         // @ts-ignore
         const session = await stripe.checkout.sessions.create(stripeOptions);
