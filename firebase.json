@@ -33,6 +33,14 @@
         ],
         "rewrites": [
             {
+                "source": "/what-is-a-meaningful-gift-you-received-from-another-person",
+                "destination": "/what_is_a_meaningful_gift_you_received_from_another_person.html"
+            },
+            {
+                "source": "/what-is-a-physical-sensation-you-savor",
+                "destination": "/what_is_a_physical_sensation_you_savor.html"
+            },
+            {
                 "source": "/what-do-you-love-about-your-morning-rituals",
                 "destination": "/what_do_you_love_about_your_morning_rituals.html"
             },

@@ -153,5 +153,13 @@ module.exports = {
     "what_do_you_love_about_your_morning_rituals": {
         "title": "What do you love about your morning rituals?",
         "path": "/what-do-you-love-about-your-morning-rituals"
+    },
+    "what_is_a_physical_sensation_you_savor": {
+        "title": "What is a physical sensation you savor?",
+        "path": "/what-is-a-physical-sensation-you-savor"
+    },
+    "what_is_a_meaningful_gift_you_received_from_another_person": {
+        "title": "What is a meaningful gift you received from another person?",
+        "path": "/what-is-a-meaningful-gift-you-received-from-another-person"
     }
 }
