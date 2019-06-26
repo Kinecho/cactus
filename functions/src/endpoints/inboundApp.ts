@@ -2,8 +2,6 @@ import * as express from "express";
 import * as cors from "cors";
 import {AttachmentColor, sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
-import {getCampaign, getMemberByEmailId, resetUserReminder,} from "@api/services/mailchimpService";
-
 import {getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
@@ -14,13 +12,16 @@ import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
-import ListMember from "@shared/mailchimp/models/ListMember";
+import ListMember, {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import bodyParser = require("body-parser");
+import MailchimpService from "@shared/services/MailchimpService";
+import {UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
 
 const app = express();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
+const mailchimpService = MailchimpService.getSharedInstance();
 
 app.use(cors({origin: true}));
 
@@ -63,10 +64,13 @@ app.post("/testModel", bodyParser.json(), async (req, res) => {
 });
 
 /**
- * NOTE: turns out cloud functions request middleware isn't the plain, standard express app you might think. As a result, often the body may be different than expected, or not exist at all.
- * Usually, you can access the `req.rawBody` to get the original contents, but it will not exist via the emulator (i.e. running `server` locally). So, you have to either check for both rawBody & body,
+ * NOTE: turns out cloud functions request middleware isn't the plain, standard express app you might think.
+ * As a result, often the body may be different than expected, or not exist at all.
+ * Usually, you can access the `req.rawBody` to get the original contents,
+ * but it will not exist via the emulator (i.e. running `server` locally). So, you have to either check for both rawBody & body,
  * or have faith that rawBody will be there when deployed.
- * ref: Doug Stevenson's answer here: https://stackoverflow.com/questions/47242340/how-to-perform-an-http-file-upload-using-express-on-cloud-functions-for-firebase/47319614#47319614
+ * ref: Doug Stevenson's answer here:
+ * https://stackoverflow.com/questions/47242340/how-to-perform-an-http-file-upload-using-express-on-cloud-functions-for-firebase/47319614#47319614
  */
 app.post("/", async (req: express.Request | any, res: express.Response) => {
     try {
@@ -84,7 +88,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
 
         const {mailchimpCampaignId, mailchimpUniqueEmailId, from} = emailReply;
 
-        const listMember = await getMemberByEmailId(mailchimpUniqueEmailId);
+        const listMember = await mailchimpService.getMemberByUniqueEmailId(mailchimpUniqueEmailId);
         const prompt = await AdminReflectionPromptService.sharedInstance.getPromptForCampaignId(mailchimpCampaignId);
 
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
@@ -108,7 +112,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             promptResponse.mailchimpMemberId = listMember.id;
             await resetUserReminder(listMember.email_address);
         } else {
-            await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`})
+            await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
             await resetUserReminder(from.email);
         }
 
@@ -132,6 +136,24 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     }
 });
 
+async function resetUserReminder(email?:string){
+    if (!email){
+        console.warn("No email given provided to resetUserReminder function");
+        return;
+    }
+    const tagRequest: UpdateTagsRequest = {
+        email,
+        tags: [
+            {
+                name: TagName.NEEDS_ONBOARDING_REMINDER,
+                status: TagStatus.INACTIVE
+            },
+        ]
+    };
+
+    return mailchimpService.updateTags(tagRequest);
+}
+
 async function sendSlackMessage(email: EmailReply,
                                 prompt?: ReflectionPrompt,
                                 response?: ReflectionResponse,
@@ -145,7 +167,7 @@ async function sendSlackMessage(email: EmailReply,
     const fromEmail = email.from && email.from.email ? email.from.email : null;
     const fromHeader = getSenderFromHeaders(email.headers);
 
-    const campaign = email.mailchimpCampaignId ? await getCampaign(email.mailchimpCampaignId) : null;
+    const campaign = email.mailchimpCampaignId ? await mailchimpService.getCampaign(email.mailchimpCampaignId) : null;
 
     const fields = [];
 

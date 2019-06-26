@@ -1,7 +1,7 @@
 import {Command} from "@scripts/run";
 import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
-import MailchimpService from "@scripts/services/mailchimpService";
+import MailchimpService from "@shared/services/MailchimpService";
 import {
     CampaignContentRequest,
     CampaignContentResponse,

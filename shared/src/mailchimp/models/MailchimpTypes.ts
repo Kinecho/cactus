@@ -1,4 +1,4 @@
-import {MergeFields} from "@shared/mailchimp/models/ListMember";
+import {MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
 import {SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
@@ -477,4 +477,15 @@ export function getDefaultCampaignFetchOptions():GetCampaignsOptions {
 
 export interface CampaignListResponse extends ListResponse{
     campaigns: Campaign[]
+}
+
+
+export interface UpdateMergeFieldRequest {
+    email: string,
+    mergeFields: MergeFields
+}
+
+export interface UpdateTagsRequest {
+    email: string,
+    tags: Tag[]
 }
