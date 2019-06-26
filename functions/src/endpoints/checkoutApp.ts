@@ -4,7 +4,7 @@ import * as Stripe from "stripe";
 import {getConfig} from "@api/config/configService";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import chalk from "chalk";
-import {CheckoutSessionCompleted, PaymentIntent, PaymentMethod} from "@shared/types/StripeTypes";
+import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 
@@ -15,29 +15,6 @@ const app = express();
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: true}));
-
-
-app.get("/customers/:id", async (req: express.Request, res: express.Response) => {
-    const customerId = req.params.id;
-    let customer = await stripe.customers.retrieve(customerId);
-
-
-    // @ts-ignore
-    let paymentMethods = await getPaymentMethodsForCustomer(customerId);
-
-    // customer
-
-    return res.send({pms: paymentMethods, customer});
-});
-
-app.get("/payment-intents/:id", async (req: express.Request, res: express.Response) => {
-    const paymentIntentId = req.params.id;
-    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    // customer
-
-    return res.send(intent);
-});
 
 app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
     try {
@@ -60,8 +37,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             console.log("Update response", JSON.stringify(updateResponse, null, 2));
         } else {
             const msg:SlackMessage = {
-                text: ":rotating_light: No customerId or payment intent found on payload. Unable to process payment webhook.\n```" + JSON.stringify(req.body, null, 2) + "```",
-
+                text: `:rotating_light: No customerId or payment intent found on payload. Unable to process payment webhook.\n*Event Payload:*\n\`\`\`${JSON.stringify(req.body, null, 2)}\`\`\``,
             };
             await sendActivityNotification(msg);
         }
@@ -70,7 +46,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
         return res.sendStatus(204);
     } catch (error) {
         const msg:SlackMessage = {
-            text: ":rotating_light: Failed to process webhook event.\n```" + JSON.stringify(req.body, null, 2) + "```",
+            text: `:rotating_light: Failed to process Stripe Payment Complete webhook event.\n\`${error}\`\n\`\`\`${JSON.stringify(req.body, null, 2)}\`\`\``,
 
         };
         await sendActivityNotification(msg);
@@ -155,20 +131,5 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
     }
     return res.send(createResponse);
 });
-
-
-async function getPaymentMethodsForCustomer(customerId: string): Promise<PaymentMethod[]> {
-    try {
-        // @ts-ignore
-        const paymentMethods = await stripe.paymentMethods.list(
-            {customer: customerId, type: 'card'}
-        );
-        return paymentMethods;
-    } catch (error) {
-        console.log(chalk.red("Error getting payment methods", error));
-        return []
-    }
-
-}
 
 export default app;
