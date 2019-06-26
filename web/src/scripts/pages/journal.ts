@@ -3,8 +3,7 @@ import "@styles/pages/journal.scss"
 import * as ScrollMagic from "scrollmagic";
 import 'animation.gsap';
 import 'ScrollToPlugin';
-import {TweenMax} from "gsap";
-
+import {TweenMax, Power1} from "gsap";
 const controller = new ScrollMagic.Controller();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function configureLearnMoreScroll(){
     controller.scrollTo((newpos: any) => {
-        TweenMax.to(window, 1.0, {scrollTo: {y: newpos}});
+        TweenMax.to(window, 1.0, {scrollTo: {y: newpos}, ease: Power1.easeIn});
     });
 
     const learnMore = document.getElementById("learnMoreTop");
