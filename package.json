@@ -12,7 +12,16 @@
     "install:scripts": "npm --prefix \"scripts\" install",
     "deploy:stage": "npm run deploy:stage:api && npm run deploy:stage:web",
     "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
-    "deploy:stage:web": "npm --prefix \"web\" run deploy:stage"
+    "deploy:stage:web": "npm --prefix \"web\" run deploy:stage",
+
+    "deploy:prod": "npm run deploy:prod:api && npm run deploy:prod:web",
+    "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
+    "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
+
+    "cmd": "npm --prefix \"scripts\" run cmd",
+    "fe": "npm --prervix \"web\" run fe",
+    "dev": "npm --prervix \"web\" run dev",
+    "api": "npm --prervix \"functions\" run serve"
   },
   "repository": {
     "type": "git",
