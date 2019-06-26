@@ -1,0 +1,30 @@
+{
+  "name": "cactus",
+  "version": "1.0.0",
+  "description": "Cactus Monorepo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
+    "install:web": "npm --prefix \"web\" install",
+    "install:api": "npm --prefix \"functions\" install",
+    "install:shared": "npm --prefix \"shared\" install",
+    "install:scripts": "npm --prefix \"scripts\" install",
+    "deploy:stage": "npm run deploy:stage:api && npm run deploy:stage:web",
+    "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
+    "deploy:stage:web": "npm --prefix \"web\" run deploy:stage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kinecho/cactus.git"
+  },
+  "author": "Neil Poulin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kinecho/cactus/issues"
+  },
+  "homepage": "https://github.com/Kinecho/cactus#readme",
+  "dependencies": {
+    "firebase": "^6.2.3"
+  }
+}
