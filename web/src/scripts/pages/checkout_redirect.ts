@@ -27,11 +27,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             preOrder: true,
         };
 
-        const error = await redirectToCheckoutWithSessionId(request);
-        if (error){
-            showError("We were unable to send you to the checkout page. Please try again later.");
-        }
-
+        setTimeout(async () => {
+            const error = await redirectToCheckoutWithSessionId(request);
+            if (error){
+                showError("We were unable to send you to the checkout page. Please try again later.");
+            }
+        }, 1000);
     } else {
         configureStripe('checkout-button', planId);
         setTimeout(async () => {
