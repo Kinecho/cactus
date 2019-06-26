@@ -19,19 +19,29 @@
 </head>
 
 <body>
-  <div class="centered">
+<div class="centered">
     <header>
-      <a href="/"><img class="logo" src="/assets/images/logo.svg" alt="Cactus logo" /></a>
+        <a href="/"><img class="logo" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
     </header>
-    <section>
-      <h1>Loading checkout...</h1>
-      <p>You should be redirected momentarily. If that doesn't happen, please tap the button below.</p>
-      <button id="checkout-button" role="link">
-          Go to Checkout
-      </button>
+    <section id="loading-message">
+        <h1>Loading checkout...</h1>
+        <p>You should be redirected momentarily. If that doesn't happen, please tap the button below.</p>
+        <button id="checkout-button" role="link">
+            Go to Checkout
+        </button>
     </section>
-  </div>
+    <section id="error-message" class="error hidden">
+        <h1>Oops! Something went wrong</h1>
+        <p class="message">We were unable to send you to the checkout page. Please try again later.</p>
+        <button role="link" onclick="goBack()">Go Back</button>
+    </section>
+</div>
 
 <!--Note: JS is included via webpack-->
 </body>
+<script>
+    function goBack(){
+        window.history.back();
+    }
+</script>
 </html>

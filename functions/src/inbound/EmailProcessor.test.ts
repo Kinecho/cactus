@@ -131,6 +131,12 @@ describe("get userId from body", () => {
     test("scott's email body, campaign", () => {
         expect(getMailchimpCampaignIdFromBody(scottEmail)).toBe("3D66d7a69778");
     });
+
+
+    // test("blighe's email body, user id", () => {
+    //     const [first] = getLinks(blitheFailedEmail, true);
+    //     expect(first).toBe("https://app.us20.list-manage.com/track/click?u=3D676af7cc149986a=aec398daa7&id=3Dc36e8dec43&e=3D0bcd131ced");
+    // });
 });
 
 

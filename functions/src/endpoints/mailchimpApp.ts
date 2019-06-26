@@ -9,7 +9,7 @@ import {
 } from "@api/slack/slack"
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {getCampaign, signup} from "@api/mailchimp/mailchimpService";
+import {getCampaign, signup} from "@api/services/mailchimpService";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
 import {writeToFile} from "@api/util/FileUtil";

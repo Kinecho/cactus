@@ -1,7 +1,10 @@
 import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 import Stripe = stripe.Stripe;
+import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
+import {Endpoint, request} from "@web/requestUtils";
+import {gtag} from "@web/analytics";
 
 // import * as Stripe from "stripe";
 // import Stripe = stripe.Stripe;
@@ -15,8 +18,55 @@ interface CactusStripe extends Stripe {
 
 }
 
+export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessionRequest, errorElementId:string|undefined="stripe-error-message"):Promise<any|null|undefined> {
+    const stripe = Stripe(Config.stripe.apiKey) as CactusStripe;
 
-export async function redirectToCheckout(planId:string=Config.stripe.monthlyPlanId) {
+    try {
+        const response = await request.post(Endpoint.checkoutSessions, sessionRequest);
+        const createResponse = response.data as CreateSessionResponse;
+        if (createResponse.error){
+            console.log("Unable to create stripe session", createResponse.error);
+            return "Oops, something went wrong. Please try again later"
+        }
+
+        if (!createResponse.sessionId){
+            console.log("Unable to create stripe session - no sessionId returned");
+            return "Oops, something went wrong. Please try again later"
+        }
+
+        const stripeOptions = {
+            sessionId: createResponse.sessionId
+        };
+
+        console.log("stripe options:", stripeOptions);
+
+
+        gtag('event', 'begin_checkout', {
+            value: createResponse.amount,
+            items: [createResponse.productId],
+            currency: 'USD',
+        });
+
+
+        const result = await stripe.redirectToCheckout(stripeOptions);
+
+        if (result.error) {
+            // If `redirectToCheckout` fails due to a browser or network
+            // error, display the localized error message to your customer.
+            return result.error.message;
+
+        } else {
+            return;
+        }
+    } catch(error) {
+        console.log("error getting checkout session", error);
+        return "Oops, something went wrong. Please try again later"
+    }
+}
+
+
+
+export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.monthlyPlanId) {
     const stripe = Stripe(Config.stripe.apiKey) as CactusStripe;
 
     const stripeOptions:any = {
@@ -41,6 +91,12 @@ export async function redirectToCheckout(planId:string=Config.stripe.monthlyPlan
     }
 
     console.log("stripe options:", stripeOptions);
+
+
+    gtag('event', 'begin_checkout', {
+        items: [planId],
+        currency: 'USD',
+    });
 
     const result = await stripe.redirectToCheckout(stripeOptions);
 
@@ -67,7 +123,7 @@ export function configureStripe(checkoutButtonId: string, planId: string = Confi
     checkoutButton.addEventListener('click', async () => {
         // When the customer clicks on the button, redirect
         // them to Checkout.
-        await redirectToCheckout(planId)
+        await redirectToCheckoutWithPlanId(planId)
     });
 }
 

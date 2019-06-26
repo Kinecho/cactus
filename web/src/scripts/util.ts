@@ -1,4 +1,4 @@
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 
 export function validateEmail(email:string)
 {

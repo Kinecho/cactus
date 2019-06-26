@@ -3,6 +3,13 @@ import {Config} from "@web/config";
 
 let _request: AxiosInstance;
 
+export enum Endpoint {
+    mailchimp = "mailchimp",
+    inbound = "inbound",
+    checkout = "checkout",
+    checkoutSessions = "checkout/sessions"
+}
+
 export function initializeAxios(): AxiosInstance{
     const domain = Config.apiDomain;
     const baseURL = `${domain}`;
