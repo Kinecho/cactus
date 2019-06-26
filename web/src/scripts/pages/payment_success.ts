@@ -1,7 +1,7 @@
 import "@styles/pages/payment_success.scss"
 import {gtag} from "@web/analytics";
 import {getQueryParam} from "@web/util";
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("payment success loaded");

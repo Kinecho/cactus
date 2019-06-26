@@ -7,7 +7,7 @@ import chalk from "chalk";
 import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
-import {QueryParam} from "../../../web/src/scripts/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
 const config = getConfig();
 

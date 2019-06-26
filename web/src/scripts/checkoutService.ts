@@ -1,6 +1,6 @@
 import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 import Stripe = stripe.Stripe;
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import {Endpoint, request} from "@web/requestUtils";

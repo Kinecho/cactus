@@ -4,7 +4,7 @@ import {Endpoint, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag} from "@web/analytics";
 import {addModal, getQueryParam, showModal, validateEmail} from "@web/util";
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 
 /**
  *

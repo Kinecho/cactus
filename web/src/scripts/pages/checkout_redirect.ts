@@ -2,7 +2,7 @@ import "@styles/pages/checkout_redirect.scss"
 import {configureStripe, redirectToCheckoutWithPlanId, redirectToCheckoutWithSessionId} from "@web/checkoutService";
 import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 import {CreateSessionRequest} from "@shared/api/CheckoutTypes";
 
 document.addEventListener('DOMContentLoaded', async () => {

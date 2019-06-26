@@ -1,5 +1,5 @@
 import {Config} from './config'
-import {QueryParam} from "@web/queryParams";
+import {QueryParam} from "@shared/util/queryParams";
 import {getQueryParam} from "@web/util";
 
 declare global {
