@@ -2,3 +2,11 @@
 @import "~styles/variables";
 @import "~styles/common";
 @import "~styles/simplyCentered";
+
+.message {
+  max-width: 720px;
+  line-height: 1.5em;
+  a {
+    @include fancyLink;
+  }
+}
