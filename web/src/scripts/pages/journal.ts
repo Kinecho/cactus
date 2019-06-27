@@ -25,7 +25,6 @@ function configureLearnMoreScroll(){
             autoKill = false;
         }
 
-        console.log("autokill", autoKill);
         TweenMax.to(window, duration, {scrollTo: {y: newpos, autoKill}, ease: Power1.easeIn});
     });
 
