@@ -1,4 +1,3 @@
-import {Command} from "@scripts/run";
 import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@shared/services/MailchimpService";
@@ -21,6 +20,7 @@ import {CactusConfig} from "@api/config/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 import {MergeField} from "@shared/mailchimp/models/ListMember";
+import {Command} from "@scripts/CommandTypes";
 
 export const DEFAULT_MORNING_TEMPLATE_ID = 53353;
 export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
@@ -75,7 +75,11 @@ interface ReminderConfiguration {
 }
 
 export default class MailchimpQuestionCampaign implements Command {
-    name = "Mailchimp Question";
+    name = "Mailchimp Email Campaign";
+    description = "Create a mailchimp email campaign + reeminder";
+    showInList = false;
+
+
 
     question?: string;
     contentPath?:string;

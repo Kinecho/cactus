@@ -1,13 +1,16 @@
-import {FirebaseCommand} from "@scripts/run";
 import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {Project} from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import chalk from "chalk";
+import {FirebaseCommand} from "@scripts/CommandTypes";
 
 export default class SaveQuestionCommand extends FirebaseCommand {
     question?:string;
+    description = "Save a question prompt to the database";
+    showInList = false;
+
     campaign?: Campaign;
     reminderCampaign?: Campaign;
     model?: ReflectionPrompt;

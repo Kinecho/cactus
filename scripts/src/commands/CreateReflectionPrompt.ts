@@ -1,6 +1,5 @@
 import chalk from "chalk";
-import {Command} from "@scripts/run";
-import MailchimpQuestionCampaign from "@scripts/commands/public/MailchimpQuestionCampaign";
+import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 import SaveQuestionCommand from "@scripts/commands/SaveQuestionCommand";
 const prompts = require('prompts');
@@ -15,6 +14,7 @@ import {
     updatePagesFile, validatePageName, validateUrl
 } from "@scripts/util/CreatePageUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
+import {Command} from "@scripts/CommandTypes";
 
 export interface InputResponse extends PageConfig {
     pageName: string,
@@ -25,9 +25,12 @@ export interface InputResponse extends PageConfig {
 }
 
 export default class CreateReflectionPrompt implements Command {
-    name = "Create Page";
+    name = "Create A Reflection Prompt";
     mailchimpCommand?:MailchimpQuestionCampaign;
     response?: InputResponse;
+    description = "New prompt, web page, and mailchimp emails";
+    showInList = true;
+
 
     getQuestions():any[]{
         return [

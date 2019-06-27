@@ -3,7 +3,7 @@ const prompts = require('prompts');
 const helpers = require("@web/../helpers");
 const fs = require("fs");
 import {promisify} from "util";
-import {Command} from "@scripts/run";
+import {Command} from "@scripts/CommandTypes";
 
 const path = require("path");
 
@@ -199,7 +199,10 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
 }
 
 export default class DeletePage implements Command {
-    name = "Delete Page";
+    name = "Delete A Page";
+    description = "Removes the files and config entries for a web page";
+    showInList = true;
+
 
     async start(): Promise<void> {
         console.log(chalk.red("Let's remove a page.\n"));

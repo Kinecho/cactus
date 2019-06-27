@@ -1,8 +1,7 @@
 import chalk from "chalk";
-import {Command} from "@scripts/run";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 const prompts = require('prompts');
-const webHelpers = require("@web/../helpers");
+const webHelpers = require("../../../web/helpers");
 
 import {
     addToSitemap,
@@ -14,6 +13,7 @@ import {
     updatePagesFile, validatePageName, validateUrl
 } from "@scripts/util/CreatePageUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
+import {Command} from "@scripts/CommandTypes";
 
 export interface InputResponse extends PageConfig {
     pageName: string,
@@ -24,8 +24,11 @@ export interface InputResponse extends PageConfig {
 }
 
 export default class CreateLandingPage implements Command {
-    name = "Create Page";
+    name = "Create a Landing Page";
     response?: InputResponse;
+    description = "Creates a standalone webpage";
+    showInList = true;
+
 
     getQuestions():any[]{
         return [

@@ -1,16 +1,20 @@
-import {FirebaseCommand} from "@scripts/run";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Collection} from "@shared/FirestoreBaseModels";
 import FieldValue = admin.firestore.FieldValue;
 import chalk from "chalk";
+import {FirebaseCommand} from "@scripts/CommandTypes";
 // import FieldValue = admin.firestore.FieldValue;
 
 export default class MigrateEmailContent extends FirebaseCommand {
+    showInList = false;
+
+
+
     constructor() {
         super();
         this.name = "Migrate Email Content";
-        this.description = "This command will convert the top-level html & text properties into a nested \"content\" object on every EmailReply in the database. There is no un-do script written.";
+        this.description = "Convert the top-level html & text properties into a nested \"content\" object on every EmailReply in the database.";
         this.confirmExecution = true;
     }
 
