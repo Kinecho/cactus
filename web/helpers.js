@@ -7,6 +7,8 @@ module.exports = {
     webRoot: webRoot,
     srcDir: path.resolve(webRoot, "src"),
     scriptDir: path.resolve(webRoot, "src", "scripts"),
+    pagesScriptsDir: path.resolve(webRoot, "src", "scripts", "pages"),
+
     pagesFile: pages,
     htmlDir: path.resolve(webRoot, "src", "html"),
 
