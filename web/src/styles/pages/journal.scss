@@ -115,6 +115,7 @@ html {
       left: 0;
       padding: 3.2rem;
       position: absolute;
+      text-align: left;
       width: 100vw;
       z-index: 2;
     }
@@ -143,13 +144,13 @@ html {
   bottom: -1vh;
   left: 52vw;
   position: absolute;
-  transform: rotate(-75deg);
+  transform: rotate(-5deg);
 }
 #leaf2 {
   left: 25vw;
   position: absolute;
   top: 75vh;
-  transform: rotate(10deg);
+  transform: rotate(30deg);
 }
 #leaf3 {
   left: 75vw;
@@ -160,22 +161,11 @@ html {
   display: none;
 
   @include r(1140) {
-    bottom: -75vh;
+    bottom: 25vh;
     display: block;
-    left: 29vw;
+    left: 19vw;
     position: absolute;
-    transform: rotate(10deg);
-  }
-}
-#leaf5 {
-  display: none;
-
-  @include r(1140) {
-    bottom: -85vh;
-    display: block;
-    left: 11vw;
-    position: absolute;
-    transform: rotate(-75deg);
+    transform: rotate(-60deg);
   }
 }
 
@@ -351,14 +341,29 @@ a.button {
 
   .reflection {
     font-size: 1.6rem;
-    margin: 0 auto -1.6rem;
+    margin: 0 auto -6rem;
     position: relative;
-    width: 67%;
+    width: 26rem;
     z-index: 1;
 
     @include r(768) {
       font-size: 1.8rem;
-      max-width: 32rem;
+      width: 28rem;
+    }
+
+    &:after {
+      content: " ";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -8px;
+      border-width: 8px;
+      border-style: solid;
+      border-color: white transparent transparent transparent;
+    }
+
+    .question {
+      margin-bottom: 0;
     }
   }
 }
@@ -582,4 +587,8 @@ a.button {
 
 .smallText {
   font-size: 1.4rem;
+}
+
+.blink {
+  animation: blink 1s infinite;
 }
