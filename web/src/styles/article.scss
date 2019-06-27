@@ -148,6 +148,14 @@ h1 {
     @include r(1024) {
       justify-self: center;
     }
+
+    p+p {
+      margin-top: 1.6rem;
+    }
+
+    p+.quoteText {
+      margin-top: 3.2rem;
+    }
   }
 
   .quote {
