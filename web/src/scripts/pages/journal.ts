@@ -15,26 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function configureLearnMoreScroll(){
 
-
-
-
-
     controller.scrollTo((newpos: any) => {
         const width = window.innerWidth;
 
         let duration = 1.0;
+        let autoKill = true;
         if (width < 1140){
-            duration = 0.25
+            duration = 0.25;
+            autoKill = false;
         }
 
-        TweenMax.to(window, duration, {scrollTo: {y: newpos}, ease: Power1.easeIn});
+        console.log("autokill", autoKill);
+        TweenMax.to(window, duration, {scrollTo: {y: newpos, autoKill}, ease: Power1.easeIn});
     });
 
     const learnMore = document.getElementById("learnMoreTop");
-    learnMore.addEventListener("click", () => {
+    learnMore.addEventListener("click", (e) => {
+        e.preventDefault();
         controller.scrollTo("#learnMore");
     })
-
 
 }
 
