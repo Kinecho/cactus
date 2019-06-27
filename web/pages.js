@@ -161,5 +161,17 @@ module.exports = {
     "what_is_a_meaningful_gift_you_received_from_another_person": {
         "title": "What is a meaningful gift you received from another person?",
         "path": "/what-is-a-meaningful-gift-you-received-from-another-person"
+    },
+    "what_experience_inspired_you_to_see_many_new_possibilities": {
+        "title": "What experience inspired you to see many new possibilities?",
+        "path": "/what-experience-inspired-you-to-see-many-new-possibilities"
+    },
+    "what_gifts_and_benefits_do_you_receive_from_helping_others": {
+        "title": "What gifts and benefits do you receive from helping others?",
+        "path": "/what-gifts-and-benefits-do-you-receive-from-helping-others"
+    },
+    "what_work_of_art_do_you_appreciate_experiencing": {
+        "title": "What work of art do you appreciate experiencing?",
+        "path": "/what-work-of-art-do-you-appreciate-experiencing"
     }
 }
