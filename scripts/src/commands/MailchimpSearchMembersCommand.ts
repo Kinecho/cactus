@@ -6,6 +6,7 @@ import chalk from "chalk";
 import {writeToFile} from "@scripts/util/FileUtil";
 import helpers from "@scripts/helpers";
 const prompts = require("prompts");
+const exec = require("child_process").exec;
 
 
 export default class MailchimpSearchMembersCommand implements Command {
@@ -37,7 +38,17 @@ export default class MailchimpSearchMembersCommand implements Command {
         const data = JSON.stringify(searchResult, null, 2);
         await writeToFile(fileName, data);
         console.log(chalk.yellow(data));
-        console.log(chalk.green(`\nResults saved to ${fileName}`));
+        console.log(chalk.green(`\nResults saved to ${fileName}\n`));
+
+        const doOpenResponse:{doOpen:boolean} = await prompts({
+            type: "confirm",
+            message: "Do you want to open this file on your computer?",
+            name: "doOpen"
+        });
+
+        if (doOpenResponse.doOpen){
+            exec(`open ${fileName}`);
+        }
     }
 
 }
