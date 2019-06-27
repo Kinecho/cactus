@@ -33,10 +33,6 @@ function configureLearnMoreScroll(){
     const learnMore = document.getElementById("learnMoreTop");
     learnMore.addEventListener("click", () => {
         controller.scrollTo("#learnMore");
-
-        if (window.history && window.history.pushState) {
-            history.pushState("", document.title, "#learnMore");
-        }
     })
 
 
