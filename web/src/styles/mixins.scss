@@ -23,6 +23,12 @@
 
 /* MEDIA QUERIES */
 
+@mixin maxW($point){
+	@media ( max-width: #{$point}px ) {
+		@content;
+	}
+}
+
 @mixin r( $point ) {
 	@if $point==600 {
 		@media ( min-width: 600px ) {

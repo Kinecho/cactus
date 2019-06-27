@@ -1,19 +1,50 @@
 // tslint:disable-next-line:no-implicit-dependencies
 import "@styles/pages/journal.scss"
 import * as ScrollMagic from "scrollmagic";
-import 'animation.gsap'
-
+import 'animation.gsap';
+import 'ScrollToPlugin';
+import {TweenMax, Power1} from "gsap";
 const controller = new ScrollMagic.Controller();
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("journal loaded");
+
+    configureLearnMoreScroll();
     configureAnimations();
 });
 
+function configureLearnMoreScroll(){
+
+
+
+
+
+    controller.scrollTo((newpos: any) => {
+        const width = window.innerWidth;
+
+        let duration = 1.0;
+        if (width < 1140){
+            duration = 0.25
+        }
+
+        TweenMax.to(window, duration, {scrollTo: {y: newpos}, ease: Power1.easeIn});
+    });
+
+    const learnMore = document.getElementById("learnMoreTop");
+    learnMore.addEventListener("click", () => {
+        controller.scrollTo("#learnMore");
+
+        if (window.history && window.history.pushState) {
+            history.pushState("", document.title, "#learnMore");
+        }
+    })
+
+
+}
+
 function configureAnimations() {
 
-    var width = window.innerWidth,
-    height = window.innerHeight;
+    const width = window.innerWidth;
 
     if (width >= 1140) {
       new ScrollMagic.Scene({

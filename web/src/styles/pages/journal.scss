@@ -3,9 +3,18 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-html, body {
+body {
   overflow-x: hidden;
 }
+
+
+html {
+  @include maxW(768) {
+    overflow-x: hidden;
+  }
+
+}
+
 
 .button.learnMore {
   z-index: 5;
@@ -48,7 +57,7 @@ html, body {
 
   .copy {
     align-items: center;
-    bottom: 0;
+    top: 0;
     display: flex;
     flex-flow: column wrap;
     height: 100vh;
@@ -91,6 +100,7 @@ html, body {
     width: 32rem;
   }
 }
+
 
 .reflections {
   display: none;
