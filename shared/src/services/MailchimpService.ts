@@ -1,7 +1,7 @@
 import axios, {AxiosInstance} from "axios";
 import {
     CampaignContentRequest,
-    CampaignContentResponse,
+    CampaignContent,
     CreateCampaignRequest, UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
@@ -27,7 +27,7 @@ import {
     defaultPageSize,
     getDefaultCampaignFetchOptions,
     UpdateTagsRequest,
-    UpdateMergeFieldRequest
+    UpdateMergeFieldRequest, CampaignSearchResultListResponse
 } from "@shared/mailchimp/models/MailchimpTypes";
 import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
 import * as md5 from "md5";
@@ -104,6 +104,18 @@ export default class MailchimpService {
         return `/lists/${this.audienceId}/members/${id}`;
     }
 
+    async searchCampaigns(query:string, options:GetCampaignsOptions=getDefaultCampaignFetchOptions()):Promise<CampaignSearchResultListResponse>{
+        const url = `/search-campaigns`;
+        const response = await this.request.get(url, {
+            params: {
+                ...options.pagination,
+                    ...options.params
+            }
+        });
+
+        return response.data;
+    }
+
     async getCampaign(id: string):Promise<Campaign|undefined> {
         try {
             const url = this.getCampaignURL(id);
@@ -141,6 +153,17 @@ export default class MailchimpService {
         return this.getAllPaginatedResults(fetcher, resultMapper, pageSize);
     }
 
+    async getCampaignContent(campaignId:string):Promise<CampaignContent|undefined>{
+        const url = `/campaigns/${campaignId}/content`;
+        try {
+            const response = await this.request.get(url);
+            return response.data;
+        } catch (e) {
+            console.log("Unable to get campaign content", e);
+            return;
+        }
+    }
+
     async getAudienceSegment(listId: string, segmentId: number):Promise<Segment> {
         const url = `/lists/${listId}/segments/${segmentId}`;
         const response = await this.request.get(url);
@@ -169,7 +192,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async updateCampaignContent(campaignId: string|number, content: CampaignContentRequest):Promise<CampaignContentResponse> {
+    async updateCampaignContent(campaignId: string|number, content: CampaignContentRequest):Promise<CampaignContent> {
         const url = `${this.apiDomain}/campaigns/${campaignId}/content`;
         const response = await this.request.put(url, content);
         // console.log("updated campaign content", response.data);

@@ -1,6 +1,6 @@
 const path = require("path");
 const scriptsRoot = path.resolve(__dirname, "..");
-
+const webHelpers = require("../../web/helpers.js");
 const commandsDirRelativeToSource = "commands";
 
 const publicCommandsDirRelativeToSource =`${commandsDirRelativeToSource}`;
@@ -14,4 +14,5 @@ export default {
     commandsDir: path.resolve(scriptsRoot, "src", commandsDirRelativeToSource),
     publicCommandsDir: path.resolve(scriptsRoot, "src", commandsDirRelativeToSource),
     sharedDir: path.resolve(scriptsRoot, "..", "shared"),
+    webHelpers,
 }

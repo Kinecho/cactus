@@ -84,6 +84,7 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
     const newPage = {
         title: response.title,
         path: response.pagePath,
+        reflectionPrompt: true,
     };
 
     pages[response.pageName] = newPage;

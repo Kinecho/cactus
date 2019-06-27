@@ -62,6 +62,10 @@ export function convertTimestampToDate(input: any): any {
 }
 
 export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): T|null {
+    if (!doc.exists){
+        return null;
+    }
+
     const data = doc.data();
     if (!data){
         return null;

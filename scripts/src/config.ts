@@ -1,6 +1,6 @@
 const firebaseTools = require("firebase-tools");
 import * as admin from "firebase-admin";
-const yesno = require("yesno");
+const prompts = require("prompts");
 import chalk from "chalk";
 import helpers from "@scripts/helpers";
 import {CactusConfig}from "@api/config/CactusConfig";
@@ -29,21 +29,19 @@ export async function getAdmin(project:Project, opts:ConfigOptions=DefaultOption
             )
         );
 
-        const question = "Are you sure you want to continue?";
-        const doContinue = await new Promise((resolve) => {
-            yesno.ask(question, false, (ok:boolean) => {
-                if (ok) {
-                    console.log("Continuing!");
-                    resolve(true);
-                } else {
-                    process.stdout.write("\nNot continuing.\n\n");
-                    resolve(false);
-                }
-            });
+        const response = await prompts({
+            type: "confirm",
+            message: "Are you sure you want to continue?",
+            name: "doContinue",
         });
-        if (!doContinue) {
-            process.exit(1);
+
+        if (!response.doContinue){
+            console.log("not continuing");
+            process.exit(0);
+        } else{
+            console.log("Continuing")
         }
+
     }
 
     const config = await getAdminConfig(project, opts);

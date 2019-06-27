@@ -8,9 +8,9 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 
 export default class SaveQuestionCommand extends FirebaseCommand {
     question?:string;
-    description = "Save a question prompt to the database";
+    name = "Create Reflection Prompt";
+    description = "Save a reflection prompt to the database";
     showInList = false;
-
     campaign?: Campaign;
     reminderCampaign?: Campaign;
     model?: ReflectionPrompt;
@@ -18,7 +18,7 @@ export default class SaveQuestionCommand extends FirebaseCommand {
     baseFileName?:string;
 
     constructor(project: Project|undefined=undefined){
-        super({name: "Save Question Command", useAdmin: true});
+        super({useAdmin: true});
         this.project = project;
         // this.model = new ReflectionPrompt()
     }

@@ -1,13 +1,16 @@
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUtil";
 
 
-export enum Collection {
+export enum
+Collection {
     emailReply = "emailReply",
     testModels = "testModels",
     sentCampaigns = "sentCampaigns",
     reflectionResponses = "reflectionResponses",
     users = "users",
     reflectionPrompt = "reflectionPrompt",
+
+    tmpReflectionPrompts = "tmpReflectionPrompt",
 }
 
 export interface FirestoreIdentifiable {

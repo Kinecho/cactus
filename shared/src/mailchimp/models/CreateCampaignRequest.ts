@@ -236,7 +236,7 @@ export interface CampaignContentRequest {
     }
 }
 
-export interface CampaignContentResponse {
+export interface CampaignContent {
     variate_contents?: {
         content_label: string,
         plain_text: string,

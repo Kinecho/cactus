@@ -15,7 +15,7 @@ export interface Command {
 
 export interface FirebaseCommandConstructorArgs {
     useAdmin: boolean;
-    name: string;
+    name?: string;
 }
 
 export interface ProjectInput {
@@ -26,7 +26,7 @@ export abstract class FirebaseCommand implements Command {
     project?: Project; //default project to stage
     app?: admin.app.App;
     useAdmin: boolean;
-    name: string;
+    abstract name: string;
     description?: string;
     abstract showInList:boolean;
     confirmExecution: boolean = false;
@@ -62,7 +62,6 @@ export abstract class FirebaseCommand implements Command {
 
     protected constructor(opts: FirebaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
         this.useAdmin = opts.useAdmin;
-        this.name = opts.name;
     }
 
     async getFirestoreService(): Promise<AdminFirestoreService> {

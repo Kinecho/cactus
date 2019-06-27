@@ -3,6 +3,7 @@
 web/public/
 web/build
 scripts/lib/
+scripts/output/
 
 .runtimeconfig.json
 

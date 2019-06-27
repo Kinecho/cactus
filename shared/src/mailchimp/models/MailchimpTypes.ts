@@ -114,6 +114,15 @@ export interface CampaignReportSummary {
     click_rate: number,
 }
 
+export interface CampaignSearchResult {
+    campaign: Campaign;
+    snippet: string
+}
+
+export interface CampaignSearchResultListResponse extends ListResponse {
+    results: [CampaignSearchResult]
+}
+
 export interface Campaign {
     emails_sent: number,
     send_time: string,

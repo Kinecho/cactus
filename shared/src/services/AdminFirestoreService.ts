@@ -97,9 +97,7 @@ export default class AdminFirestoreService {
             const data = await model.toFirestoreData();
             // console.log("Data to save:", JSON.stringify(data));
 
-            const writeResult = await doc.set(data, {merge: true});
-
-            console.log("writeResult", writeResult);
+            await doc.set(data, {merge: true});
 
             return model;
         } catch (e) {

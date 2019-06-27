@@ -3,7 +3,7 @@ import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@shared/services/MailchimpService";
 import {
     CampaignContentRequest,
-    CampaignContentResponse,
+    CampaignContent,
     CreateCampaignRequest,
     CreateCampaignRequestRecipients,
     SegmentCondition, SegmentConditionOption,
@@ -87,8 +87,8 @@ export default class MailchimpQuestionCampaign implements Command {
     campaign?:Campaign;
     reminderCampaign?:Campaign;
 
-    campaignContent?: CampaignContentResponse;
-    reminderContentResponse?: CampaignContentResponse;
+    campaignContent?: CampaignContent;
+    reminderContentResponse?: CampaignContent;
 
     project?: Project;
     currentConfig?: CactusConfig;
@@ -274,7 +274,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
     async createReminderCampaign(originalContentResponse:ContentQuestionResponse,
                                  recipientsConfig:RecipientsConfiguration,
-                                 reminderConfig: ReminderConfiguration): Promise<{campaign?: Campaign, content?: CampaignContentResponse}>{
+                                 reminderConfig: ReminderConfiguration): Promise<{campaign?: Campaign, content?: CampaignContent}>{
 
         if (!this.campaign){
             throw new Error("Can't create a reminder because no original campaign can be found");
@@ -363,7 +363,7 @@ export default class MailchimpQuestionCampaign implements Command {
         return {campaign: reminderCampaign, content: campaignContent};
     }
 
-    async createCampaignContent(campaignId:string, templateId:number, contentResponse:ContentQuestionResponse):Promise<CampaignContentResponse|undefined> {
+    async createCampaignContent(campaignId:string, templateId:number, contentResponse:ContentQuestionResponse):Promise<CampaignContent|undefined> {
         const mailchimpService = this.mailchimpService;
         if (!mailchimpService){
             throw new Error("No mailchimp service was available - unable to save campaign");
@@ -526,7 +526,7 @@ export default class MailchimpQuestionCampaign implements Command {
         });
     }
 
-    async createCampaign(contentResponse:ContentQuestionResponse, recipientsConfig:RecipientsConfiguration):Promise<{campaign?: Campaign, content?: CampaignContentResponse}>{
+    async createCampaign(contentResponse:ContentQuestionResponse, recipientsConfig:RecipientsConfiguration):Promise<{campaign?: Campaign, content?: CampaignContent}>{
         const mailchimpService = this.mailchimpService;
         if (!mailchimpService){
             throw new Error("No mailchimp service was available - unable to save campaign");

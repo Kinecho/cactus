@@ -444,4 +444,18 @@ describe("transformObjectSync", () => {
         expect(result).toEqual(output);
         expect(transform).toHaveBeenCalledTimes(9)
     });
+
+    test("nested object with undefined is removed",  () => {
+
+
+        const transform = jest.fn((value:any) => {
+            return value;
+        });
+        const input = [{nothing: undefined, something: "test"}];
+
+        const output = [{something: "test"}];
+
+        const result = transformObjectSync(input, transform);
+        expect(result).toEqual(output);
+    });
 });

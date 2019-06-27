@@ -1,7 +1,9 @@
 import chalk from "chalk";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 const prompts = require('prompts');
-const webHelpers = require("../../../web/helpers");
+import helpers from "@scripts/helpers";
+
+const webHelpers = helpers.webHelpers;
 
 import {
     addToSitemap,

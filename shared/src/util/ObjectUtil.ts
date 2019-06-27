@@ -65,7 +65,11 @@ export async function transformObjectAsync(input:any, transform:(value:any) => P
                 value = transformed;
             }
 
-            input[key] = value;
+            if (value === undefined){
+                delete input[key]
+            } else {
+                input[key] = value;
+            }
         });
         await Promise.all(tasks);
     }
@@ -75,7 +79,8 @@ export async function transformObjectAsync(input:any, transform:(value:any) => P
 }
 
 /**
- * Transform object keys based on provided transform function
+ * Transform object keys based on provided transform function.
+ * This will delete undefined keys in objects
  * @param {any} input
  * @param {(value: any) => Promise<void>} transform
  * @return {any}
@@ -103,7 +108,12 @@ export function transformObjectSync(input:any, transform:(value:any) => any):any
             } else {
                 value = transformed;
             }
-            input[key] = value;
+
+            if (value === undefined){
+                delete input[key]
+            } else {
+                input[key] = value;
+            }
         });
 
     }

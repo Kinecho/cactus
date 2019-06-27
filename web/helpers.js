@@ -1,13 +1,13 @@
 const path = require("path");
 const webRoot = path.resolve(__dirname);
+const pages = require("./pages");
 
 module.exports = {
     projectRoot: path.resolve(webRoot, ".."),
     webRoot: webRoot,
     srcDir: path.resolve(webRoot, "src"),
     scriptDir: path.resolve(webRoot, "src", "scripts"),
-    pagesScriptsDir: path.resolve(webRoot, "src", "scripts", "pages"),
-
+    pagesFile: pages,
     htmlDir: path.resolve(webRoot, "src", "html"),
 
     stylesDir: path.resolve(webRoot, "src", "styles"),

@@ -8,13 +8,13 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 
 export default class MigrateEmailContent extends FirebaseCommand {
     showInList = false;
+    name = "Migrate EmailReply Content";
+    description = "Convert the top-level html & text properties into a nested \"content\" object on every EmailReply in the database.";
 
 
 
     constructor() {
         super();
-        this.name = "Migrate Email Content";
-        this.description = "Convert the top-level html & text properties into a nested \"content\" object on every EmailReply in the database.";
         this.confirmExecution = true;
     }
 
