@@ -22,8 +22,10 @@ setTimestamp(admin.firestore.Timestamp);
 import mailchimpApp from "@api/endpoints/mailchimpApp";
 import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
+import testApp from "@api/endpoints/testApp";
 
 
 export const mailchimp = functions.https.onRequest(mailchimpApp);
 export const inbound = functions.https.onRequest(inboundApp);
 export const checkout = functions.https.onRequest(checkoutApp);
+export const test = functions.https.onRequest(testApp);

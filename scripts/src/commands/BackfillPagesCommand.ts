@@ -11,11 +11,11 @@ import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {Campaign, CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {URL} from "url";
+import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
+const prompts = require("prompts");
 import * as fs from "fs";
 import {promisify} from "util";
 import * as osPath from "path";
-import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
-const prompts = require("prompts");
 const writeFile =  promisify(fs.writeFile);
 
 const getUrls = require('get-urls');

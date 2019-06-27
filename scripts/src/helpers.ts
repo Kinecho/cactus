@@ -14,5 +14,6 @@ export default {
     commandsDir: path.resolve(scriptsRoot, "src", commandsDirRelativeToSource),
     publicCommandsDir: path.resolve(scriptsRoot, "src", commandsDirRelativeToSource),
     sharedDir: path.resolve(scriptsRoot, "..", "shared"),
+    outputDir: path.resolve(scriptsRoot, "output"),
     webHelpers,
 }

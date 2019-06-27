@@ -16,6 +16,7 @@
     "firebase-admin": "^8.1.0",
     "luxon": "^1.16.0",
     "md5": "^2.2.1",
+    "qs": "^6.7.0",
     "stripe": "^7.3.0"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "@types/jest": "^24.0.14",
     "@types/luxon": "^1.15.1",
     "@types/md5": "^2.1.33",
+    "@types/qs": "^6.5.3",
     "@types/stripe": "^6.30.3",
     "jest": "^24.8.0",
     "ts-jest": "^24.0.2",

@@ -1,4 +1,4 @@
-import {MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
+import ListMember, {MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
 import {SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
@@ -452,6 +452,31 @@ export const DEFAULT_PAGINATION: PaginationParameters = {
     count: defaultPageSize,
     offset: defaultOffset,
 };
+
+export interface SearchMembersOptions {
+    list_id?:string;
+    exclude_fields?: string[],
+    fields?: string[],
+    query: string,
+}
+
+export function getSearchMemberOptionsDefaults():SearchMembersOptions{
+    return {
+        exclude_fields: ["exact_matches.members._links", "full_search.members._links", "_links"],
+        query: "",
+    }
+}
+
+export interface SearchMembersResult {
+    exact_matches: {
+        members: ListMember[];
+        total_items: number;
+    }[],
+    full_search: {
+        members: ListMember[];
+        total_items: number;
+    }
+}
 
 export interface GetCampaignsOptions {
     params?: {
