@@ -1,4 +1,4 @@
-import {CampaignType, MailchimpLink} from "@shared/mailchimp/models/MailchimpTypes";
+import {CampaignSocialCard, CampaignType, MailchimpLink} from "@shared/mailchimp/models/MailchimpTypes";
 
 export enum SegmentMatchType {
     any = "any",
@@ -196,11 +196,7 @@ export interface CreateCampaignRequest {
         //not used yet
     },
     tracking?: CampaignTracking,
-    social_card?: {
-        image_url?: string,
-        description?: string,
-        title?: string,
-    }
+    social_card?: CampaignSocialCard
 }
 
 

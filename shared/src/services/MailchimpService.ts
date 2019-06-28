@@ -31,7 +31,7 @@ import {
     CampaignSearchResultListResponse,
     SearchMembersResult,
     SearchMembersOptions,
-    getSearchMemberOptionsDefaults
+    getSearchMemberOptionsDefaults, AutomationEmailListResponse, AutomationEmail
 } from "@shared/mailchimp/models/MailchimpTypes";
 import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
 import * as md5 from "md5";
@@ -137,7 +137,11 @@ export default class MailchimpService {
     async getCampaign(id: string): Promise<Campaign | undefined> {
         try {
             const url = this.getCampaignURL(id);
-            const response = await this.request.get(url);
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links"
+                }
+            });
             return response.data;
         } catch (error) {
             console.error("failed to get mailchimp campaign for campaign id", id, error);
@@ -147,14 +151,45 @@ export default class MailchimpService {
 
     async getCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions()): Promise<CampaignListResponse> {
         const url = `/campaigns`;
+
+        let exclude_fields = options.params ? options.params.exclude_fields : [] || [];
+        const set_exclude_fields = new Set(exclude_fields);
+        set_exclude_fields.add("campaigns._links");
+        set_exclude_fields.add("_links");
+        exclude_fields = Array.from(set_exclude_fields);
+
+
+        console.log("Get Campaigns exclude fields", exclude_fields);
+
+        // exclude_fields
         const response = await this.request.get(url, {
             params: {
                 ...options.pagination,
-                ...options.params
+                ...options.params,
+                exclude_fields: exclude_fields.join(","),
             }
         });
 
+        console.log("fetch campaigns config", JSON.stringify(response.config.params, null, 2));
+
         return response.data;
+    }
+
+    async getCampaignsByIds(campaignIds:string[]=[]):Promise<Campaign[]> {
+        if (campaignIds.length === 0){
+            return [];
+        }
+
+        const campaignTasks = campaignIds.map(async (id, index) => {
+            return new Promise<Campaign>(resolve => {
+                setTimeout(async () => {
+                    const campaign = await this.getCampaign(id);
+                    resolve(campaign)
+                }, 150 * index) //delay to prevent api throttling
+            })
+        });
+
+        return await Promise.all(campaignTasks);
     }
 
     async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions()): Promise<Campaign[]> {
@@ -174,7 +209,11 @@ export default class MailchimpService {
     async getCampaignContent(campaignId: string): Promise<CampaignContent | undefined> {
         const url = `/campaigns/${campaignId}/content`;
         try {
-            const response = await this.request.get(url);
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links,archive_html"
+                }
+            });
             return response.data;
         } catch (e) {
             console.log("Unable to get campaign content", e);
@@ -331,6 +370,46 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async getAutomationEmail(workflowId:string, emailId: string): Promise<AutomationEmail|undefined> {
+        try {
+            const url = `/automations/${workflowId}/emails/${emailId}`;
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links"
+                }
+            });
+            return response.data;
+        } catch (e){
+            console.error("Failed to get workflow email. WorkflowId = ", workflowId, "emailId =", emailId);
+            return;
+        }
+
+    }
+
+    async getAutomationEmails(automationWorkflowId:string, pagination=DEFAULT_PAGINATION): Promise<AutomationEmailListResponse>{
+        const url = `/automations/${automationWorkflowId}/emails`;
+        const response = await this.request.get(url, {
+            params: {
+                exclude_fields: "emails._links",
+                ...pagination
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAutomationEmailCampaigns(audienceId?:string, pageSize=defaultPageSize):Promise<Campaign[]> {
+        const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize);
+        const campaignIds = automationEmails.map(email => {
+            return email.id
+        });
+
+        return this.getCampaignsByIds(campaignIds);
+    }
+
+    async getAllAutomationEmailsForWorkflow(workflowId:string, pageSize=defaultPageSize): Promise<AutomationEmail[]>{
+        return this.getAllPaginatedResults(pagination => this.getAutomationEmails(workflowId, pagination), result => result.emails, pageSize);
+    }
+
     async getAutomations(pagination = DEFAULT_PAGINATION): Promise<AutomationListResponse> {
         const url = `/automations`;
         const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
@@ -346,6 +425,36 @@ export default class MailchimpService {
 
     async getAllAutomations(pageSize = defaultPageSize): Promise<Automation[]> {
         return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
+    }
+
+    async getAllAutomationEmails(listId?:string, pageSize:number=defaultPageSize):Promise<AutomationEmail[]> {
+        try {
+            const automations = await this.getAllAutomations(pageSize);
+            const automationTasks:Promise<AutomationEmail[]>[] = [];
+            automations.forEach(automation => {
+                if (!listId || automation.recipients.list_id !== listId) {
+                    return;
+                }
+                const task = new Promise<AutomationEmail[]>(async resolve => {
+                    const automationEmails = await this.getAllAutomationEmailsForWorkflow(automation.id, pageSize);
+                    resolve(automationEmails);
+
+                });
+                automationTasks.push(task)
+            });
+
+            const workflowEmailsResponses = await Promise.all(automationTasks);
+
+            const allEmails:AutomationEmail[] = [];
+            workflowEmailsResponses.forEach(response => {
+                allEmails.push(...response);
+            });
+
+            return allEmails;
+        } catch (error){
+            console.error("Failed to get automation emails", error);
+            return []
+        }
     }
 
     async getAudience(audienceId: string): Promise<Audience> {
