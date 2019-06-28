@@ -580,7 +580,11 @@ export default class MailchimpService {
         const id = getMemberIdFromEmail(email);
         const url = `/lists/${this.audienceId}/members/${id}`;
         try {
-            const response = await this.request.get(url);
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links"
+                }
+            });
             return response.data;
         } catch (error) {
             console.warn("Failed to get list member for email", email);
@@ -596,7 +600,8 @@ export default class MailchimpService {
         const url = `/lists/${this.audienceId}/members`;
         const response = await this.request.get(url, {
             params: {
-                unique_email_id: uniqueEmailId
+                unique_email_id: uniqueEmailId,
+                exclude_fields: "_links,members._links"
             }
         });
         if (response.data && response.data.members) {

@@ -1,11 +1,10 @@
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
-
 require("module-alias/register");
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin'
 import {getConfig} from "@api/config/configService";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 //need to initialize these modules before including any other code
 admin.initializeApp();
 const app = admin.app();
