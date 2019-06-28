@@ -187,7 +187,7 @@ export enum SegmentType {
     fuzzy = "fuzzy"
 }
 
-type ISODate = string;
+export type ISODate = string;
 
 export interface Segment {
     id: number,

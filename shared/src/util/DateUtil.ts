@@ -1,4 +1,5 @@
 import {DateTime} from "luxon";
+import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -12,10 +13,22 @@ export function getMailchimpDateString(date:Date=new Date()):string{
 }
 
 export function makeUTCDateIntoMailchimpDate(date:Date, keepTime:boolean=false, timezone=mailchimpTimeZone):string {
-    let dateWithZone = DateTime.fromJSDate(date).setZone(timezone)
+    let dateWithZone = DateTime.fromJSDate(date).setZone(timezone);
     if (keepTime){
         dateWithZone = dateWithZone.set({hour: date.getHours(), second: date.getSeconds(), minute: date.getMinutes()});
     }
 
     return dateWithZone.toISO();
+}
+
+export function getDateFromISOString(input:ISODate):Date|null{
+    return DateTime.fromISO(input).toJSDate();
+}
+
+export function stringFromISODate(input?:ISODate|null, format="yyyy-LL-dd"){
+    if (!input){
+        return null;
+    }
+
+    return DateTime.fromISO(input).toFormat(format);
 }

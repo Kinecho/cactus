@@ -56,7 +56,8 @@ export function validateCommandExists(commandName: string): boolean | string {
 
 export async function start(): Promise<void> {
     // const commands = (await getAllCommandFilenames()).map(file => ({title: file}));
-    const commands = (await getCommandNames()).map((cmd) => ({title: cmd.name, value: cmd.command}));
+    const commands = (await getCommandNames()).map((cmd) => ({title: cmd.name, value: cmd.command})).sort((a, b) => a.title.localeCompare(b.title));
+
     resetConsole();
     let canceled = false;
     const questions = [

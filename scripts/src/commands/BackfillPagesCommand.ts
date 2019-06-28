@@ -50,7 +50,7 @@ interface PageMatch {
 }
 
 export default class BackfillPagesCommand extends FirebaseCommand {
-    name = "Backfill Reflection Prompts";
+    name = "Reflection Prompts: Backfill";
     description = "Use existing pages to backpopulate Reflection Prompts";
     showInList = true;
     project = Project.PROD;

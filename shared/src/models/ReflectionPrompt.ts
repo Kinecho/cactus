@@ -21,6 +21,7 @@ export default class ReflectionPrompt extends BaseModel {
     reminderCampaign?:Campaign;
     contentPath?:string;
     baseFileName?:string;
+    sendDate?: Date;
 
     prepareForFirestore(): any {
         this.campaignIds = [];

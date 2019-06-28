@@ -1,7 +1,7 @@
 import * as firebaseAdmin from "firebase-admin";
 import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 
 export interface QueryResult<T extends BaseModel> {
@@ -127,20 +127,7 @@ export default class AdminFirestoreService {
     async executeQuery<T extends BaseModel>(query:FirebaseFirestore.Query, Type: { new(): T }):Promise<QueryResult<T>>{
         const snapshot = await query.get();
         const size = snapshot.size;
-        const results:T[] = [];
-        if (snapshot.empty){
-            return  {results, size};
-        }
-
-        snapshot.forEach(doc => {
-            const model = fromDocumentSnapshot(doc, Type);
-            if (model){
-                results.push(model);
-            } else {
-                console.warn("Unable to decode model", Type);
-            }
-        });
-
+        const results:T[] = fromQuerySnapshot(snapshot, Type);
 
         return {results, size};
     }

@@ -25,12 +25,11 @@ export interface InputResponse extends PageConfig {
 }
 
 export default class CreateReflectionPrompt implements Command {
-    name = "Create A Reflection Prompt";
+    name = "Pages: Create A Reflection Prompt";
     mailchimpCommand?:MailchimpQuestionCampaign;
     response?: InputResponse;
-    description = "New prompt, web page, and mailchimp emails";
+    description = "New reflection prompt, web page, and mailchimp emails";
     showInList = true;
-
 
     getQuestions():any[]{
         return [
