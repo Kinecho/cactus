@@ -308,7 +308,7 @@ export default class MailchimpService {
         console.log("Updating member with patch", tagRequest);
 
         try {
-            await this.request.post(`/lists/${this.audienceId}/members/${memberId}`, {
+            await this.request.post(`/lists/${this.audienceId}/members/${memberId}/tags`, {
                 tags: tagRequest.tags
             });
             return true;
