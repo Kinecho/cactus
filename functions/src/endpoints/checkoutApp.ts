@@ -49,9 +49,9 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             const mailchimpMember = await mailchimpService.getMemberByEmail(email);
             console.log("Mailchimp member", mailchimpMember);
             if (email && mailchimpMember){
-                const tagUpdateSuccess = await mailchimpService.updateTags({tags: [{name: TagName.JOURNAL_PREMIUM, status: TagStatus.ACTIVE}], email});
-                if (!tagUpdateSuccess){
-                   await sendActivityNotification(`:warning: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}`);
+                const tagUpdateResponse = await mailchimpService.updateTags({tags: [{name: TagName.JOURNAL_PREMIUM, status: TagStatus.ACTIVE}], email});
+                if (!tagUpdateResponse.success){
+                   await sendActivityNotification(`:rotating-light: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}\nError: \`${tagUpdateResponse.error ? tagUpdateResponse.error.title : tagUpdateResponse.unknownError}\``);
                 }
             } else {
                 await sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);

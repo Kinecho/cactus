@@ -16,7 +16,7 @@ import ListMember, {TagName, TagStatus} from "@shared/mailchimp/models/ListMembe
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import bodyParser = require("body-parser");
 import MailchimpService from "@shared/services/MailchimpService";
-import {UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
+import {UpdateTagResponse, UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
 
 const app = express();
 
@@ -110,7 +110,10 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-            await resetUserReminder(listMember.email_address);
+            const tagResponse = await resetUserReminder(listMember.email_address);
+            if (!tagResponse.success){
+                console.log("reset user reminder failed", tagResponse);
+            }
         } else {
             await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
             await resetUserReminder(from.email);
@@ -136,10 +139,10 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     }
 });
 
-async function resetUserReminder(email?:string){
+async function resetUserReminder(email?:string):Promise<UpdateTagResponse>{
     if (!email){
         console.warn("No email given provided to resetUserReminder function");
-        return;
+        return {success: false, unknownError: "No email provided to resetUser function"};
     }
     const tagRequest: UpdateTagsRequest = {
         email,

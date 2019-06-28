@@ -659,6 +659,20 @@ export interface UpdateTagsRequest {
     tags: Tag[]
 }
 
+export interface TagResponseError {
+    type: string,
+    title:  string,
+    status: number,
+    detail: string,
+    instance: string,
+}
+
+export interface UpdateTagResponse {
+    success: boolean,
+    error?: TagResponseError,
+    unknownError?: any,
+}
+
 export enum InterestMatch {
     any = "any",
     all = "all",

@@ -1,4 +1,4 @@
-import axios, {AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance} from "axios";
 import {
     CampaignContentRequest,
     CampaignContent,
@@ -35,14 +35,13 @@ import {
     AutomationEmailListResponse,
     AutomationEmail,
     ListMemberListResponse,
-    GetListMembersOptions
+    GetListMembersOptions, UpdateTagResponse, TagResponseError
 } from "@shared/mailchimp/models/MailchimpTypes";
 import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
 import * as md5 from "md5";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
-
 
 interface MailchimpAuth {
     username: string,
@@ -303,18 +302,27 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async updateTags(tagRequest: UpdateTagsRequest): Promise<boolean> {
+    async updateTags(tagRequest: UpdateTagsRequest): Promise<UpdateTagResponse> {
         const memberId = getMemberIdFromEmail(tagRequest.email);
         console.log("Updating member with patch", tagRequest);
 
         try {
+            //this just returns a 204 or an error
             await this.request.post(`/lists/${this.audienceId}/members/${memberId}/tags`, {
                 tags: tagRequest.tags
             });
-            return true;
+
+            return {success: true};
         } catch (error) {
-            console.error("failed to update tags", error);
-            return false;
+            const axiosError = error as AxiosError;
+            if (axiosError.response){
+                console.error("failed to update tags", error.response);
+                const errorData = error.response.data as TagResponseError;
+                return {success: false, error: errorData}
+            } else {
+                console.error("Unknown error while updating tags", error);
+                return {success: false, unknownError: error};
+            }
         }
     }
 
