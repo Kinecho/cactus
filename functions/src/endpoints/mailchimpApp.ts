@@ -34,11 +34,6 @@ app.get("/", async (req: express.Request, res: express.Response) => {
 });
 
 
-app.get("/webhook", async (req: express.Request, res: express.Response) => {
-
-    res.send({success: true})
-});
-
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const event = req.body as WebhookEvent;
     console.log("webhook event", JSON.stringify(event));
