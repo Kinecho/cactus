@@ -14,7 +14,6 @@ export default class AdminFirestoreService {
     firestore: FirebaseFirestore.Firestore;
 
 
-
     protected static sharedInstance:AdminFirestoreService;
 
     static getSharedInstance():AdminFirestoreService{
@@ -106,7 +105,7 @@ export default class AdminFirestoreService {
         }
     }
 
-    async getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | null> {
+    async getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
 
         const collection = this.getCollectionRef(type.collection);
@@ -116,7 +115,7 @@ export default class AdminFirestoreService {
         const doc = await collection.doc(id).get();
 
         if (!doc) {
-            return null;
+            return;
         }
 
         console.log(`doc.data()`, doc.data());

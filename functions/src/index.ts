@@ -1,3 +1,5 @@
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+
 require("module-alias/register");
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin'
@@ -9,8 +11,10 @@ admin.initializeApp();
 const app = admin.app();
 const config = getConfig();
 
+
 AdminFirestoreService.initialize(app);
 MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
+AdminCactusMemberService.initialize();
 
 import {setTimestamp} from "@shared/util/FirebaseUtil";
 setTimestamp(admin.firestore.Timestamp);

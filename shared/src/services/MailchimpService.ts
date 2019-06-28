@@ -31,7 +31,11 @@ import {
     CampaignSearchResultListResponse,
     SearchMembersResult,
     SearchMembersOptions,
-    getSearchMemberOptionsDefaults, AutomationEmailListResponse, AutomationEmail
+    getSearchMemberOptionsDefaults,
+    AutomationEmailListResponse,
+    AutomationEmail,
+    ListMemberListResponse,
+    GetListMembersOptions
 } from "@shared/mailchimp/models/MailchimpTypes";
 import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
 import * as md5 from "md5";
@@ -117,6 +121,23 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async getMembers(options: GetListMembersOptions = {}, pagination = DEFAULT_PAGINATION): Promise<ListMemberListResponse> {
+        const url = `/lists/${this.audienceId}/members`;
+        const response = await this.request.get(url, {
+            params: {
+                ...pagination,
+                ...options,
+                exclude_fields: "members._links,_links"
+            }
+        });
+
+        return response.data;
+    }
+
+    async getAllMembers(options?: GetListMembersOptions, pageSize = defaultPageSize, pageDelay = 0, onPageValues?: (members: ListMember[]) => Promise<void>): Promise<ListMember[]> {
+        return this.getAllPaginatedResults(pagination => this.getMembers(options, pagination), response => response.members, pageSize, pageDelay, onPageValues)
+    }
+
     async searchMembers(options: SearchMembersOptions): Promise<SearchMembersResult> {
         const defaults = getSearchMemberOptionsDefaults();
         const params: any = {
@@ -175,8 +196,8 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getCampaignsByIds(campaignIds:string[]=[]):Promise<Campaign[]> {
-        if (campaignIds.length === 0){
+    async getCampaignsByIds(campaignIds: string[] = []): Promise<Campaign[]> {
+        if (campaignIds.length === 0) {
             return [];
         }
 
@@ -370,7 +391,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAutomationEmail(workflowId:string, emailId: string): Promise<AutomationEmail|undefined> {
+    async getAutomationEmail(workflowId: string, emailId: string): Promise<AutomationEmail | undefined> {
         try {
             const url = `/automations/${workflowId}/emails/${emailId}`;
             const response = await this.request.get(url, {
@@ -379,14 +400,14 @@ export default class MailchimpService {
                 }
             });
             return response.data;
-        } catch (e){
+        } catch (e) {
             console.error("Failed to get workflow email. WorkflowId = ", workflowId, "emailId =", emailId);
             return;
         }
 
     }
 
-    async getAutomationEmails(automationWorkflowId:string, pagination=DEFAULT_PAGINATION): Promise<AutomationEmailListResponse>{
+    async getAutomationEmails(automationWorkflowId: string, pagination = DEFAULT_PAGINATION): Promise<AutomationEmailListResponse> {
         const url = `/automations/${automationWorkflowId}/emails`;
         const response = await this.request.get(url, {
             params: {
@@ -397,7 +418,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAllAutomationEmailCampaigns(audienceId?:string, pageSize=defaultPageSize):Promise<Campaign[]> {
+    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize): Promise<Campaign[]> {
         const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize);
         const campaignIds = automationEmails.map(email => {
             return email.id
@@ -406,7 +427,7 @@ export default class MailchimpService {
         return this.getCampaignsByIds(campaignIds);
     }
 
-    async getAllAutomationEmailsForWorkflow(workflowId:string, pageSize=defaultPageSize): Promise<AutomationEmail[]>{
+    async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize): Promise<AutomationEmail[]> {
         return this.getAllPaginatedResults(pagination => this.getAutomationEmails(workflowId, pagination), result => result.emails, pageSize);
     }
 
@@ -427,10 +448,10 @@ export default class MailchimpService {
         return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
     }
 
-    async getAllAutomationEmails(listId?:string, pageSize:number=defaultPageSize):Promise<AutomationEmail[]> {
+    async getAllAutomationEmails(listId?: string, pageSize: number = defaultPageSize): Promise<AutomationEmail[]> {
         try {
             const automations = await this.getAllAutomations(pageSize);
-            const automationTasks:Promise<AutomationEmail[]>[] = [];
+            const automationTasks: Promise<AutomationEmail[]>[] = [];
             automations.forEach(automation => {
                 if (!listId || automation.recipients.list_id !== listId) {
                     return;
@@ -445,13 +466,13 @@ export default class MailchimpService {
 
             const workflowEmailsResponses = await Promise.all(automationTasks);
 
-            const allEmails:AutomationEmail[] = [];
+            const allEmails: AutomationEmail[] = [];
             workflowEmailsResponses.forEach(response => {
                 allEmails.push(...response);
             });
 
             return allEmails;
-        } catch (error){
+        } catch (error) {
             console.error("Failed to get automation emails", error);
             return []
         }
@@ -494,7 +515,9 @@ export default class MailchimpService {
 
     async getAllPaginatedResults<T, R extends ListResponse>(method: (pagination: PaginationParameters) => Promise<R>,
                                                             getValues: (val: R) => T[],
-                                                            pageSize = defaultPageSize): Promise<T[]> {
+                                                            pageSize = defaultPageSize,
+                                                            pageDelay = 0,
+                                                            onPageResults?: (values: T[]) => Promise<void>): Promise<T[]> {
         const results: T[] = [];
         let currentOffset = 0;
         let fetchCount = 0;
@@ -503,9 +526,24 @@ export default class MailchimpService {
             listResponse = await method({offset: currentOffset, count: pageSize});
             fetchCount++;
             const values = getValues(listResponse);
+
+            if (onPageResults) {
+                await onPageResults(values);
+            }
+
             results.push(...values);
             currentOffset = results.length;
             console.log("fetched ", results.length, "/", listResponse.total_items, "items. # Fetches", fetchCount)
+
+            if (pageDelay > 0){
+                console.log(`delaying between pages for ${pageDelay}ms`);
+                await new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve()
+                    }, pageDelay)
+                })
+            }
+
         }
 
         return results;

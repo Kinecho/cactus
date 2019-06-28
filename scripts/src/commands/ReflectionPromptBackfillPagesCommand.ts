@@ -49,7 +49,7 @@ interface PageMatch {
     reminderContent: CampaignContent,
 }
 
-export default class BackfillPagesCommand extends FirebaseCommand {
+export default class ReflectionPromptBackfillPagesCommand extends FirebaseCommand {
     name = "Reflection Prompts: Backfill";
     description = "Use existing pages to backpopulate Reflection Prompts";
     showInList = true;

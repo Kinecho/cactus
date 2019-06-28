@@ -1,4 +1,4 @@
-import ListMember, {MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
+import ListMember, {ListMemberStatus, MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
 import {CampaignTracking, SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
@@ -657,4 +657,39 @@ export interface UpdateMergeFieldRequest {
 export interface UpdateTagsRequest {
     email: string,
     tags: Tag[]
+}
+
+export enum InterestMatch {
+    any = "any",
+    all = "all",
+    none = "none",
+}
+
+export enum ListMemberSortField {
+    timestamp_opt = "timestamp_opt",
+    timestamp_signup = "timestamp_signup",
+    last_changed = "last_changed",
+}
+
+export interface GetListMembersOptions {
+    email_type?: string,
+    status?: ListMemberStatus,
+    since_timestamp_opt?: ISODate,
+    before_timestamp_opt?: ISODate,
+    since_last_changed?: ISODate,
+    before_last_changed?: ISODate,
+    unique_email_id?: string,
+    vip_only?: boolean,
+    interest_category_id?: string,
+    interest_ids?: string,
+    interest_match?: InterestMatch,
+    sort_field?: ListMemberSortField,
+    sort_dir?: SortDirection,
+    since_last_campaign?: boolean,
+    unsubscribed_since?: ISODate
+}
+
+export interface ListMemberListResponse extends ListResponse {
+    members: ListMember[]
+    list_id: string
 }

@@ -22,7 +22,11 @@ export function makeUTCDateIntoMailchimpDate(date:Date, keepTime:boolean=false, 
 }
 
 export function getDateFromISOString(input:ISODate):Date|undefined{
-    return DateTime.fromISO(input).toJSDate() || undefined;
+    if (!input){
+        return;
+    }
+
+    return DateTime.fromISO(input).toUTC().toJSDate() || undefined;
 }
 
 export function stringFromISODate(input?:ISODate|null, format="yyyy-LL-dd"){
