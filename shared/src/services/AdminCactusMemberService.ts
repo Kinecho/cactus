@@ -98,7 +98,9 @@ export default class AdminCactusMemberService {
         cactusMember.firstName = listMember.merge_fields.FNAME as string || cactusMember.firstName;
         cactusMember.lastName = listMember.merge_fields.LNAME as string || cactusMember.firstName;
         cactusMember.lastReplyAt = getDateFromISOString(listMember.merge_fields.LAST_REPLY as string) || cactusMember.lastReplyAt;
-
+        cactusMember.lastSyncedAt = new Date();
+        cactusMember.signupAt = getDateFromISOString(listMember.timestamp_signup);
+        cactusMember.signupConfirmedAt = getDateFromISOString(listMember.timestamp_opt);
 
         const premiumJournal = listMember.tags.find(tag => tag.name === TagName.JOURNAL_PREMIUM);
         if (premiumJournal){

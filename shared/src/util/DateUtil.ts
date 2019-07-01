@@ -21,7 +21,7 @@ export function makeUTCDateIntoMailchimpDate(date:Date, keepTime:boolean=false, 
     return dateWithZone.toISO();
 }
 
-export function getDateFromISOString(input:ISODate):Date|undefined{
+export function getDateFromISOString(input? :ISODate):Date|undefined{
     if (!input){
         return;
     }

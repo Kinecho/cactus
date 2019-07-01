@@ -23,7 +23,8 @@ export default class CactusMember extends BaseModel {
     firstName?:string;
     lastName?:string;
     email?:string;
-    joinedAt?:Date;
+    signupAt?:Date;
+    signupConfirmedAt?:Date;
     userId?:string;
 
     mailchimpListMember?:ListMember;
@@ -31,4 +32,10 @@ export default class CactusMember extends BaseModel {
     lastReplyAt?: Date;
 
     journalStatus=JournalStatus.NONE;
+
+    prepareForFirestore(): any {
+        super.prepareForFirestore();
+        this.email = this.email ? this.email.toLowerCase().trim() : this.email;
+        return this;
+    }
 }
