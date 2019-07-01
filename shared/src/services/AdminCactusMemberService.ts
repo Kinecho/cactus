@@ -84,12 +84,7 @@ export default class AdminCactusMemberService {
         return member;
     }
 
-
     async updateFromMailchimpListMember(listMember:ListMember):Promise<CactusMember|undefined> {
-
-
-
-
         let cactusMember = await this.getByMailchimpWebId(listMember.web_id);
         if (cactusMember){
             console.log("Got cactus member", cactusMember.email);
@@ -117,5 +112,29 @@ export default class AdminCactusMemberService {
 
         cactusMember = await this.save(cactusMember);
         return cactusMember;
+    }
+
+    async getMemberByEmail(email:string):Promise<CactusMember|undefined> {
+        const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
+        const result = await firestoreService.executeQuery(query, CactusMember);
+        if (result.size > 0){
+            const [member] = result.results;
+            if (result.size > 1){
+                console.warn("More than one member found for email", email);
+            }
+            return member;
+        }
+        return;
+    }
+
+    async updateLastReplyByEmail(email:string, lastReply:Date=new Date()):Promise<CactusMember|undefined>{
+        const member = await this.getMemberByEmail(email);
+        if (!member){
+            return
+        }
+
+        member.lastReplyAt = lastReply;
+        await this.save(member);
+        return member;
     }
 }

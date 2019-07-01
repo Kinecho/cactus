@@ -2,7 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import {AttachmentColor, sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
-import {getMailchimpDateString} from "@shared/util/DateUtil";
+import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
@@ -22,11 +22,12 @@ import {
     UpdateTagResponse,
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
-
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 const app = express();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
 const mailchimpService = MailchimpService.getSharedInstance();
+const memberService = AdminCactusMemberService.getSharedInstance();
 
 app.use(cors({origin: true}));
 
@@ -163,6 +164,8 @@ async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
         return {success: false, unknownError: "No email provided to resetUser function", mergeResponse: {success:false}, tagResponse: {success: false}};
     }
 
+    const lastReplyString = getMailchimpDateString();
+    const lastReplyDate = getDateFromISOString(lastReplyString);
     const mergeRequest: UpdateMergeFieldRequest = {
         email,
         mergeFields: {
@@ -181,6 +184,8 @@ async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
             },
         ]
     };
+
+    await memberService.updateLastReplyByEmail(email, lastReplyDate);
 
     const tagResponse = await mailchimpService.updateTags(tagRequest);
 
