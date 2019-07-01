@@ -198,7 +198,7 @@ async function sendSlackMessage(email: EmailReply,
                                 sentToMember?: ListMember,
                                 message = "Got a reply!",
                                 color = AttachmentColor.info):Promise<void> {
-    let messageColor = color;
+    const messageColor = color;
     const msg: SlackMessage = {};
     msg.text = message;
 
