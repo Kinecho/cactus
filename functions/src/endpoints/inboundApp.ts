@@ -12,11 +12,16 @@ import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
-import ListMember, {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import ListMember, {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import bodyParser = require("body-parser");
 import MailchimpService from "@shared/services/MailchimpService";
-import {UpdateTagResponse, UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
+import {
+    UpdateMergeFieldRequest,
+    UpdateMergeFieldResponse,
+    UpdateTagResponse,
+    UpdateTagsRequest
+} from "@shared/mailchimp/models/MailchimpTypes";
 
 const app = express();
 
@@ -106,17 +111,23 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         promptResponse.promptQuestion = prompt ? prompt.question : undefined;
         promptResponse.responseMedium = ResponseMedium.EMAIL;
 
+        let resetUserResponse;
         if (listMember){
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-            const tagResponse = await resetUserReminder(listMember.email_address);
-            if (!tagResponse.success){
-                console.log("reset user reminder failed", tagResponse);
+             resetUserResponse = await resetUserReminder(listMember.email_address);
+            if (!resetUserResponse.success){
+                console.log("reset user reminder failed", resetUserResponse);
+                await sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
             }
         } else {
             await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
-            await resetUserReminder(from.email);
+            resetUserResponse = await resetUserReminder(from.email);
+            if (!resetUserResponse.success){
+                console.log("reset user reminder failed", resetUserResponse);
+                await sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+            }
         }
 
         const savedReflectionResponse = await AdminReflectionResponseService.sharedInstance.save(promptResponse);
@@ -139,11 +150,28 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     }
 });
 
-async function resetUserReminder(email?:string):Promise<UpdateTagResponse>{
+interface ResetUserResponse {
+    success: boolean
+    unknownError?: any
+    mergeResponse: UpdateMergeFieldResponse,
+    tagResponse: UpdateTagResponse,
+}
+
+async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
     if (!email){
         console.warn("No email given provided to resetUserReminder function");
-        return {success: false, unknownError: "No email provided to resetUser function"};
+        return {success: false, unknownError: "No email provided to resetUser function", mergeResponse: {success:false}, tagResponse: {success: false}};
     }
+
+    const mergeRequest: UpdateMergeFieldRequest = {
+        email,
+        mergeFields: {
+            [MergeField.LAST_REPLY]: getMailchimpDateString()
+        }
+    };
+
+    const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+
     const tagRequest: UpdateTagsRequest = {
         email,
         tags: [
@@ -154,7 +182,9 @@ async function resetUserReminder(email?:string):Promise<UpdateTagResponse>{
         ]
     };
 
-    return mailchimpService.updateTags(tagRequest);
+    const tagResponse = await mailchimpService.updateTags(tagRequest);
+
+    return {success: tagResponse.success && tagResponse.success, tagResponse, mergeResponse};
 }
 
 async function sendSlackMessage(email: EmailReply,

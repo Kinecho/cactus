@@ -35,7 +35,7 @@ import {
     AutomationEmailListResponse,
     AutomationEmail,
     ListMemberListResponse,
-    GetListMembersOptions, UpdateTagResponse, TagResponseError
+    GetListMembersOptions, UpdateTagResponse, TagResponseError, UpdateMergeFieldResponse
 } from "@shared/mailchimp/models/MailchimpTypes";
 import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
 import * as md5 from "md5";
@@ -326,16 +326,23 @@ export default class MailchimpService {
         }
     }
 
-    async updateMergeFields(request: UpdateMergeFieldRequest): Promise<boolean> {
+    async updateMergeFields(request: UpdateMergeFieldRequest): Promise<UpdateMergeFieldResponse> {
         try {
             const url = this.getMemberUrlForEmail(request.email);
             await this.request.patch(url, {
                 merge_fields: request.mergeFields
             });
-            return true;
+            return {success: true};
         } catch (error) {
-            console.error("failed to update member merge tags", error);
-            return false;
+            const axiosError = error as AxiosError;
+            if (axiosError.response){
+                console.error("failed to update merge fields", error.response);
+                const errorData = error.response.data as TagResponseError;
+                return {success: false, error: errorData}
+            } else {
+                console.error("Unknown error while updating merge fields", error);
+                return {success: false, unknownError: error};
+            }
         }
 
     }

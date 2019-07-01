@@ -654,6 +654,20 @@ export interface UpdateMergeFieldRequest {
     mergeFields: MergeFields
 }
 
+export interface UpdateMergeFieldError {
+    type: string,
+    title: string,
+    status: number,
+    detail: string,
+    instance: string,
+}
+
+export interface UpdateMergeFieldResponse {
+    success: boolean,
+    error?: UpdateMergeFieldError,
+    unknownError?:any,
+}
+
 export interface UpdateTagsRequest {
     email: string,
     tags: Tag[]
