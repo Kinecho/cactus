@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
-import {AttachmentColor, sendActivityNotification, SlackMessage} from "@api/slack/slack";
-import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
+import {AttachmentColor, sendActivityNotification, SlackAttachmentField, SlackMessage} from "@api/slack/slack";
+import {processEmail} from "@api/inbound/EmailProcessor"
 import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
@@ -203,11 +203,9 @@ async function sendSlackMessage(email: EmailReply,
     msg.text = message;
 
     const fromEmail = email.from && email.from.email ? email.from.email : null;
-    const fromHeader = getSenderFromHeaders(email.headers);
-
     const campaign = email.mailchimpCampaignId ? await mailchimpService.getCampaign(email.mailchimpCampaignId) : null;
 
-    const fields = [];
+    const fields:SlackAttachmentField[] = [];
 
     if (response){
         fields.push({
@@ -270,16 +268,6 @@ async function sendSlackMessage(email: EmailReply,
         );
     }
 
-    if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
-        messageColor = AttachmentColor.error;
-        msg.text = `:warning: ${msg.text} (we are still using the original email, will update if we see that the smtp.mailfrom is consistently correct)`;
-        fields.push(
-            {
-                title: "smtp.mailfrom (from address)",
-                value: fromHeader || "unknown",
-                short: false,
-            })
-    }
 
     if (email.mailchimpUniqueEmailId) {
         console.log("looking for member on list with unique email id = ", email.mailchimpUniqueEmailId);
@@ -289,7 +277,7 @@ async function sendSlackMessage(email: EmailReply,
         fields.unshift(
             {
                 title: "List Member Email",
-                value: sentToMember ? sentToMember.email_address : "not found",
+                value: (sentToMember && sentToMember.email_address) ? sentToMember.email_address : "not found",
                 short: false,
             },
             {
