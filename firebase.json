@@ -33,6 +33,14 @@
         ],
         "rewrites": [
             {
+                "source": "/sign-up-success",
+                "destination": "/sign_up_success.html"
+            },
+            {
+                "source": "/signup",
+                "destination": "/sign_up.html"
+            },
+            {
                 "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190630",
                 "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190630.html"
             },

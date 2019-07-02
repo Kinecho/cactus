@@ -7,6 +7,7 @@ module.exports = {
     webRoot: webRoot,
     srcDir: path.resolve(webRoot, "src"),
     scriptDir: path.resolve(webRoot, "src", "scripts"),
+    componentsDir: path.resolve(webRoot, "src", "vue"),
     pagesScriptsDir: path.resolve(webRoot, "src", "scripts", "pages"),
 
     pagesFile: pages,

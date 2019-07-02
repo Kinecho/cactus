@@ -1,0 +1,30 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+//@import "~styles/article";
+
+.signup-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  #signup-app {
+    //background: white;
+    width: 60rem;
+    max-width: 90vw;
+    //button{
+    //  height: 2rem;
+    //}
+    //
+    //img {
+    //  height: 30px;
+    //}
+  }
+
+}
+
+body {
+  background: none;
+}

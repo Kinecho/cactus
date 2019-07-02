@@ -3,6 +3,6 @@ import {configureSignupForm, setupJumpToForm} from "@web/mailchimp";
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("What spiritual experience are you grateful for? Page Loaded");
-    configureSignupForm("email-form-bottom")
+    configureSignupForm("email-form-bottom");
     setupJumpToForm();
 });

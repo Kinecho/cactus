@@ -4,6 +4,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const pages = require('./../pages')
 const helpers = require("./../helpers")
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
 
 let jsEntries = Object.keys(pages).reduce((entries, title) => {
@@ -28,10 +29,12 @@ module.exports = function(config){
             publicPath: "/"
         },
         resolve: {
-            modules: ['src', 'styles', 'assets', 'images', 'scripts', 'node_modules'],
+            modules: ['src', 'styles', 'assets', 'images', 'scripts', 'components', 'vue', 'node_modules'],
             alias: {
+                'vue$': 'vue/dist/vue.esm.js',
                 '@shared': helpers.sharedDir,
                 '@web': helpers.scriptDir,
+                '@components': helpers.componentsDir,
                 '@styles': helpers.stylesDir,
                 "AttrPlugin": path.resolve(helpers.webRoot, 'node_modules', 'gsap/src/uncompressed/plugins/AttrPlugin.js'),
                 "BezierPlugin": path.resolve(helpers.webRoot, 'node_modules', 'gsap/src/uncompressed/plugins/BezierPlugin.js'),
@@ -53,14 +56,23 @@ module.exports = function(config){
                 "animation.gsap": path.resolve(helpers.webRoot,'node_modules', 'scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js'),
                 "debug.addIndicators": path.resolve(helpers.webRoot,'node_modules', 'scrollmagic/scrollmagic/uncompressed/plugins/debug.addIndicators.js')
             },
-            extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html'],
+            extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html', '.vue'],
         },
         module: {
             rules: [
                 {
+                    test: /\.vue$/,
+                    loader: 'vue-loader'
+                },
+                // {
+                //     test: /\.ts$/,
+                //     exclude: /node_modules/,
+                //     loader: 'awesome-typescript-loader',
+                // },
+                {
                     test: /\.ts$/,
-                    exclude: /node_modules/,
-                    loader: 'awesome-typescript-loader',
+                    loader: 'ts-loader',
+                    options: { appendTsSuffixTo: [/\.vue$/] }
                 },
                 {
                     test: /\.scss$/,
@@ -91,7 +103,7 @@ module.exports = function(config){
                             options: {},
                         },
                     ],
-                },
+                }
             ],
         },
         plugins: [
@@ -110,6 +122,7 @@ module.exports = function(config){
                 })
             }),
             new webpack.DefinePlugin(parsedConfig),
+            new VueLoaderPlugin(),
         ],
     };
 }

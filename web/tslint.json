@@ -54,7 +54,8 @@
 
         // Do not allow any imports for modules that are not in package.json. These will almost certainly fail when
         // deployed.
-        "no-implicit-dependencies": [true, ["@web", "@shared", "@styles", "animation.gsap",
+        "no-implicit-dependencies": [true, ["@web", "@shared", "@styles", "@components",
+            "animation.gsap",
             "AttrPlugin",
             "BezierPlugin",
             "ColorPropsPlugin",
