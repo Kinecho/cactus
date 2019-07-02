@@ -37,12 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     return {
                         signInSuccessWithAuthResult: function (authResult, redirectUrl) {
                             console.log("signin success", authResult);
+
+                            authResult.additionalUserInfo.isNewUser;
+
                             return false;
                         },
                         // Additional state showPromo=1234 can be retrieved from URL on
                         // sign-in completion in signInSuccess callback by checking
                         // window.location.href.
-                        url: `${Config.domain}/signup?showPromo=1234`,
+                        url: `${Config.domain}/signup`,
+                        continueUrl: `${Config.domain}/signup`,
                         // Custom FDL domain.
                         dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
                         // Always true for email link sign-in.

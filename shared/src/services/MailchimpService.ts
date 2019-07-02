@@ -629,7 +629,7 @@ export default class MailchimpService {
 
     async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
         const member = new ListMember(subscription.email);
-        member.status = ListMemberStatus.pending;
+        member.status = status;
         if (subscription.referredByEmail) {
             member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
         }

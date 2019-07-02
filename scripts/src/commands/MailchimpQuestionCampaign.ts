@@ -16,7 +16,7 @@ import {
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {Campaign, CampaignType, SendChecklistItemType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
-import {CactusConfig} from "@api/config/CactusConfig";
+import {CactusConfig} from "@shared/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 import {MergeField} from "@shared/mailchimp/models/ListMember";

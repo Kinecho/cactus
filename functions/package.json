@@ -20,7 +20,7 @@
   "engines": {
     "node": "8"
   },
-  "main": "lib/functions/src/index.js",
+  "main": "lib/functions/src/main.js",
   "_moduleAliases": {
     "@api": "lib/functions/src",
     "@shared": "lib/shared/src"

@@ -22,13 +22,16 @@ import {
 import {saveSentCampaign} from "@api/services/sentCampaignService";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+// import AdminUserService from "@shared/services/AdminUserService";
+
 
 const app = express();
 
 const mailchimpService = MailchimpService.getSharedInstance();
+// const userService = AdminUserService.getSharedInstance();
 
 // Automatically allow cross-origin requests
-app.use(cors({ origin: true }));
+app.use(cors({origin: true}));
 
 app.get("/", async (req: express.Request, res: express.Response) => {
     return res.send({success: true, message: "got the get request"})
@@ -42,7 +45,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const dateId = date.getTime();
     await writeToFile(`output/webhook/${dateId}-mailchimp.json`, JSON.stringify(event));
 
-    let message: string|SlackMessage = "";
+    let message: string | SlackMessage = "";
     // let data = event.data;
     switch (event.type) {
         case EventType.unsubscribe:
@@ -55,9 +58,9 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             console.log("webhook received for subscribe");
             const data = event.data as SubscribeEventData;
             const listMember = await mailchimpService.getMemberByEmail(data.email);
-            if (listMember){
+            if (listMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
-                if (cactusMember){
+                if (cactusMember) {
                     await sendActivityNotification(`Added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
                 } else {
                     await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
@@ -77,9 +80,9 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             };
 
             const profileMember = await mailchimpService.getMemberByEmail(profile.email);
-            if (profileMember){
+            if (profileMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(profileMember);
-                if (cactusMember){
+                if (cactusMember) {
                     await sendActivityNotification(`Updated ${profile.email} in our database. CactusMember ID = ${cactusMember.id}`)
                 } else {
                     await sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
@@ -116,23 +119,23 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
                 },
             ];
 
-            if (campaign){
+            if (campaign) {
                 fields.push(
-                {
-                    title: "Send Type",
+                    {
+                        title: "Send Type",
                         value: campaign.type,
-                    short: true,
-                },
-                {
-                    title: "Email URL",
+                        short: true,
+                    },
+                    {
+                        title: "Email URL",
                         value: campaign.archive_url,
-                    short: true,
-                },
-                {
-                    title: "Emails Sent",
+                        short: true,
+                    },
+                    {
+                        title: "Emails Sent",
                         value: `${campaign.emails_sent}`,
-                    short: true,
-                })
+                        short: true,
+                    })
             }
 
             message = {
@@ -140,7 +143,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
                     title: `:email: An email campaign was sent!`,
                     color: "#29A389",
                     fields: fields,
-                    ts: campaign ?`${(new Date(campaign.send_time )).getTime()/1000}` : undefined,
+                    ts: campaign ? `${(new Date(campaign.send_time)).getTime() / 1000}` : undefined,
                 }]
             };
 
@@ -152,85 +155,89 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
     res.send({success: true})
 });
 
-app.post("/", async (req: express.Request, res: express.Response ) => {
-  console.log("request params", req.body);
-  const subscription = SubscriptionRequest.fromData(req.body);
-  res.contentType("application/json");
-
-  try {
-      const signupResult = await mailchimpService.addSubscriber(subscription);
-      console.log("singed up with result", signupResult);
-
-      if (signupResult.status === SubscriptionResultStatus.new_subscriber){
-          console.log("new user signed up successfully");
-          const fields = [
-              {
-                  title: "Email",
-                  value: subscription.email,
-                  short: true
-              }
-          ];
+app.post("/", async (req: express.Request, res: express.Response) => {
+    console.log("request params", req.body);
+    const subscription = SubscriptionRequest.fromData(req.body);
+    res.contentType("application/json");
 
 
-          const attachmentSummary:SlackAttachment = {
-              color: "#33CCAB",
-              ts: `${(new Date()).getTime()/1000}`,
-              fields: fields
-          };
+    // const userResult = await userService.signupSubscriber(subscription);
+    // console.log("userResult", userResult);
 
-          if (subscription.firstName || subscription.lastName) {
-              fields.push({
-                  title: "Name",
-                  value: `${subscription.firstName} ${subscription.lastName}`.trim(),
-                  short: true
-              });
-          }
+    try {
+        const signupResult = await mailchimpService.addSubscriber(subscription);
+        console.log("singed up with result", signupResult);
 
-          if (subscription.referredByEmail){
-              fields.push({
-                  title: "Referred By",
-                  value: subscription.referredByEmail,
-                  short: true,
-              })
-          }
+        if (signupResult.status === SubscriptionResultStatus.new_subscriber) {
+            console.log("new user signed up successfully");
+            const fields = [
+                {
+                    title: "Email",
+                    value: subscription.email,
+                    short: true
+                }
+            ];
 
 
-          console.log("subscription", JSON.stringify(subscription, null, 2));
-          if (subscription.subscriptionLocation){
-              console.log("adding footer to message");
-              attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
-          } else {
-              console.log("Not adding footer to message");
-          }
+            const attachmentSummary: SlackAttachment = {
+                color: "#33CCAB",
+                ts: `${(new Date()).getTime() / 1000}`,
+                fields: fields
+            };
 
-          const message:SlackMessage = {
-              text: "Got a new signup!",
-              attachments: [attachmentSummary],
-          };
+            if (subscription.firstName || subscription.lastName) {
+                fields.push({
+                    title: "Name",
+                    value: `${subscription.firstName} ${subscription.lastName}`.trim(),
+                    short: true
+                });
+            }
 
-          const slackResult = await sendActivityNotification(message);
-          console.log("slack result", slackResult);
-      } else if (!signupResult.success){
-          await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
-      }
-
-      return res.send(signupResult);
-
-  } catch (error){
-      const result = new SubscriptionResult();
-      result.success = false;
-      const apiError = new ApiError();
-      apiError.code = 500;
-      apiError.friendlyMessage = "Unable to process your subscription. Please try again later";
-      apiError.error = error;
-      result.error = apiError;
-
-      // result.member = null;
-      result.status = SubscriptionResultStatus.unknown;
+            if (subscription.referredByEmail) {
+                fields.push({
+                    title: "Referred By",
+                    value: subscription.referredByEmail,
+                    short: true,
+                })
+            }
 
 
-    return res.send(result)
-  }
+            console.log("subscription", JSON.stringify(subscription, null, 2));
+            if (subscription.subscriptionLocation) {
+                console.log("adding footer to message");
+                attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
+            } else {
+                console.log("Not adding footer to message");
+            }
+
+            const message: SlackMessage = {
+                text: "Got a new signup!",
+                attachments: [attachmentSummary],
+            };
+
+            const slackResult = await sendActivityNotification(message);
+            console.log("slack result", slackResult);
+        } else if (!signupResult.success) {
+            await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
+        }
+
+        return res.send(signupResult);
+
+    } catch (error) {
+        const result = new SubscriptionResult();
+        result.success = false;
+        const apiError = new ApiError();
+        apiError.code = 500;
+        apiError.friendlyMessage = "Unable to process your subscription. Please try again later";
+        apiError.error = error;
+        result.error = apiError;
+
+        // result.member = null;
+        result.status = SubscriptionResultStatus.unknown;
+
+
+        return res.send(result)
+    }
 });
 
 export default app;
