@@ -33,11 +33,13 @@
             "**/node_modules/**"
         ],
         "rewrites": [
-            { "source": "/p/**", "dynamicLinks": true },
-            { "source": "/s/**", "dynamicLinks": true },
             {
-                "source": "/sign-up-success",
-                "destination": "/sign_up_success.html"
+                "source": "/p/**",
+                "dynamicLinks": true
+            },
+            {
+                "source": "/s/**",
+                "dynamicLinks": true
             },
             {
                 "source": "/signup",
