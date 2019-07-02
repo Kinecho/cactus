@@ -37,6 +37,13 @@ function buildMockConfig():CactusConfig {
         stripe: {
             api_key: "test_api_key",
             secret_key: "test_secret_key",
+        },
+        dynamic_links: {
+            domain: "cactus-app-stage.web.app",
+            prefix: "",
+        },
+        web: {
+            domain: "cactus-app-stage.web.app",
         }
     }
 }
