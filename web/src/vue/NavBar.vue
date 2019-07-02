@@ -4,7 +4,7 @@
         <a v-if="!loggedIn" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
             Up Free</a>
         <div v-if="loggedIn">
-            <span >{{username}}</span>&nbsp;<a href="#" @click=logout>logout</a>
+            <span >{{username}}</span>&nbsp;<a href="#" @click.prevent=logout>logout</a>
         </div>
 
     </header>
@@ -41,7 +41,8 @@
             }
         },
         methods: {
-            async logout() {
+            async logout(e) {
+                // e.prev
                 console.log("Logging out...");
                 await this.$auth.signOut();
             }
