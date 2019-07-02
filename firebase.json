@@ -22,6 +22,7 @@
         ]
     },
     "hosting": {
+        "appAssociation": "AUTO",
         "predeploy": [
             "npm --prefix ./web run predeploy"
         ],
@@ -32,6 +33,8 @@
             "**/node_modules/**"
         ],
         "rewrites": [
+            { "source": "/p/**", "dynamicLinks": true },
+            { "source": "/s/**", "dynamicLinks": true },
             {
                 "source": "/sign-up-success",
                 "destination": "/sign_up_success.html"
