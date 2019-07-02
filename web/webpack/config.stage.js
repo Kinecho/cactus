@@ -17,6 +17,10 @@ module.exports = {
         monthlyPlanId: "plan_F6oBhRX9L4WKMB", //this is no longer valid - this is a test id
         yearlyPlanId: "plan_FC2EkJJoDXBzCO"
     },
+    __FIREBASE_DYNAMIC_LINK__: {
+        domain: "cactusstage.page.link",
+        prefix: ""
+    }
 }
 
 

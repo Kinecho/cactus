@@ -1,4 +1,3 @@
-
 export interface StripeConfig {
     apiKey: string,
     monthlyPlanId: string,
@@ -15,6 +14,11 @@ export interface FirebaseConfig {
     appId: string,
 }
 
+export interface FirebaseDynamicLinkConfig {
+    domain: string,
+    prefix: string
+}
+
 //these variables come from the webpack Define plugin
 declare var __GOOGLE_ANALYTICS_ID__: string;
 declare var __FIREBASE_CONFIG__: FirebaseConfig;
@@ -22,6 +26,7 @@ declare var __API_DOMAIN__: string;
 declare var __FULL_STORY_TEAM_ID__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
 declare var __PUBLIC_DOMAIN__: string;
+declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
 
 export const Config = {
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
@@ -30,4 +35,5 @@ export const Config = {
     fullStoryTeamId: __FULL_STORY_TEAM_ID__,
     stripe: __STRIPE_CONFIG__,
     domain: __PUBLIC_DOMAIN__,
+    firebaseDynamicLink: __FIREBASE_DYNAMIC_LINK__,
 };
