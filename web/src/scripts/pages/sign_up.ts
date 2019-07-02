@@ -14,20 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = firebase.initializeApp(Config.firebase);
 
 
-
     var uiConfig = {
         signInSuccessUrl: '/',
-        signInFlow: 'popup',
+        signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions: [
             // Leave the lines as is for the providers you want to offer your users.
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            // firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            // firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-            // firebase.auth.GithubAuthProvider.PROVIDER_ID,
-            // firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            // firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-            // firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
             {
                 provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
                 // Use email link authentication and do not require password.
@@ -41,14 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Used to define the optional firebase.auth.ActionCodeSettings if
                 // additional state needs to be passed along request and whether to open
                 // the link in a mobile app if it is installed.
-                emailLinkSignIn: function() {
+                emailLinkSignIn: function () {
                     return {
+                        signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                            console.log("signin success", authResult);
+                            return false;
+                        },
                         // Additional state showPromo=1234 can be retrieved from URL on
                         // sign-in completion in signInSuccess callback by checking
                         // window.location.href.
-                        url: `${Config.apiDomain}/sign-up-success?showPromo=1234`,
+                        url: `${Config.domain}/signup?showPromo=1234`,
                         // Custom FDL domain.
-                        dynamicLinkDomain: 'example.page.link',
+                        dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
                         // Always true for email link sign-in.
                         handleCodeInApp: true,
                         // Whether to handle link in iOS app if installed.
@@ -64,21 +60,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     };
                 }
-            }
+            },
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+            firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+            // firebase.auth.GithubAuthProvider.PROVIDER_ID,
+            // firebase.auth.EmailAuthProvider.PROVIDER_ID,
+            {
+                provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+                recaptchaParameters: {
+                    type: 'image', // 'audio'
+                    size: 'invisible', // 'invisible' or 'compact' or 'normal'
+                    badge: 'bottomleft' //' bottomright' or 'inline' applies to invisible.
+                },
+                defaultCountry: 'US', // Set default country to the United Kingdom (+44).
+                defaultNationalNumber: '1234567890',
+            },
         ],
-        // tosUrl and privacyPolicyUrl accept either url string or a callback
-        // function.
-        // Terms of service url/callback.
         tosUrl: 'https://www.kinecho.com/terms-of-service',
-        // Privacy policy url/callback.
-        privacyPolicyUrl: function() {
-            window.location.assign('https://kinecho.com/policies/privacy');
-        }
+        privacyPolicyUrl: 'https://kinecho.com/policies/privacy'
     };
 
     // Initialize the FirebaseUI Widget using Firebase.
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    // The start method will wait until the DOM is loaded.
-    ui.start('#signup-app', uiConfig);
+
+    if (ui.isPendingRedirect()) {
+        console.log("Is pending redirect.... need to log the user in");
+        ui.start('#signup-app', uiConfig);
+    } else {
+        // The start method will wait until the DOM is loaded.
+        ui.start('#signup-app', uiConfig);
+    }
 
 });

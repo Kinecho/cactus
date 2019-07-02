@@ -22,9 +22,11 @@
             this.$auth = auth;
             this.authHandler = this.$auth.onAuthStateChanged(user => {
                 if (user) {
-                    console.log('user is logged in')
+                    console.log('user is logged in', user.toJSON())
                     this.loggedIn = true
-                    this.username = user.email
+                    this.username = user.email || user.displayName || user.phoneNumber
+
+
                 } else {
                     console.log('User is logged out')
                     this.loggedIn = false
