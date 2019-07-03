@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190706",
+                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190706.html"
+            },
+            {
                 "source": "/what-does-the-power-to-choose-provide-you",
                 "destination": "/what_does_the_power_to_choose_provide_you.html"
             },

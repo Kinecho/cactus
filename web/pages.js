@@ -276,6 +276,12 @@ module.exports = {
     "what_does_the_power_to_choose_provide_you": {
         "title": "What does the power to choose provide you?",
         "path": "/what-does-the-power-to-choose-provide-you",
+        "reflectionPrompt": true,
+        "name": "what_does_the_power_to_choose_provide_you"
+    },
+    "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190706": {
+        "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
+        "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190706",
         "reflectionPrompt": true
     }
 }
