@@ -643,11 +643,11 @@ export default class MailchimpService {
         const url = `/lists/${this.audienceId}/members`;
 
         const result = new SubscriptionResult();
-        result.member = member;
 
         try {
             const response = await this.request.post(url, member);
             console.log("mailchimp response", response.data);
+            result.member = response.data;
             result.success = true;
             result.status = SubscriptionResultStatus.new_subscriber;
         } catch (error) {
