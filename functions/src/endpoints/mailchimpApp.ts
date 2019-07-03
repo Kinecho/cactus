@@ -61,7 +61,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             if (listMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
                 if (cactusMember) {
-                    await sendActivityNotification(`Added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
+                    await sendActivityNotification(`${data.email} has confirmed their subscription. They have been added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
                 } else {
                     await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
                 }

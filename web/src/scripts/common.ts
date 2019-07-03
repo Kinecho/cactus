@@ -2,16 +2,11 @@ import {init as initAnalytics, startFullstory} from '@web/analytics'
 import Vue from "vue";
 // @ts-ignore
 import NavBar from "@components/NavBar";
-import * as firebase from "firebase/app";
-import {Config} from "@web/config";
-
+import {initializeFirebase} from "@web/firebase";
 initAnalytics();
 startFullstory();
 
-const app = firebase.initializeApp(Config.firebase);
-
-
-
+initializeFirebase();
 
 function setupNavigation(){
     const $headers = document.getElementsByTagName("header");

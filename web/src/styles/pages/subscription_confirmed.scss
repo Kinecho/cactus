@@ -2,3 +2,22 @@
 @import "~styles/variables";
 @import "~styles/common";
 @import "~styles/simplyCentered";
+
+@keyframes fadein{
+  0% { opacity:0; }
+  66% { opacity:0; }
+  100% { opacity:1; }
+}
+
+#loading-container {
+
+  animation: 2s ease 0s normal forwards 1 fadein;
+}
+
+
+body {
+  &.error {
+    //background: $darkText url(assets/images/sadCactusPatternWhiteTransparent.svg);
+    //color: white;
+  }
+}

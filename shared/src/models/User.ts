@@ -8,6 +8,8 @@ export enum Field {
 export default class User extends BaseModel {
     collection = Collection.users;
     email?: string;
+    cactusMemberId?:string;
+
 
     prepareForFirestore(): any {
         const object = super.prepareForFirestore();

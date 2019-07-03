@@ -1,5 +1,6 @@
 @import "~styles/variables";
 @import "~styles/mixins";
+@import "~styles/forms";
 
 .modal-window {
   position: fixed;
@@ -12,6 +13,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease-in-out;
+
 
   &.open {
     opacity: 1;
@@ -29,6 +31,9 @@
     text-align: center;
     transform: translate(-50%, -50%);
     padding: 3.2rem;
+    max-height: 90vh;
+
+    overflow-y: auto;
 
     @include r(768) {
       text-align: left;
@@ -46,6 +51,14 @@
   img {
     width: 100%;
   }
+
+  .modal-content {
+    .error {
+      color: red;
+      margin-bottom: 1rem;
+    }
+  }
+
 }
 
 .modal-close {

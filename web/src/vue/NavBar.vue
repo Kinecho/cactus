@@ -11,10 +11,8 @@
 </template>
 
 <script>
-    import * as firebase from 'firebase/app'
-    import 'firebase/auth'
-
-
+    import {initializeFirebase} from '@web/firebase'
+    const firebase = initializeFirebase();
 
     export default {
         created: function () {

@@ -1,9 +1,9 @@
 import {QueryParam} from "@shared/util/queryParams";
 
-export function validateEmail(email:string)
-{
-    return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+export enum LocalStorageKey {
+    emailForSignIn = 'emailForSignIn'
 }
+
 
 function createElementFromString(htmlString:string):ChildNode{
     const div = document.createElement('div');
@@ -12,8 +12,6 @@ function createElementFromString(htmlString:string):ChildNode{
     // Change this to div.childNodes to support multiple top-level nodes
     return div.firstChild;
 }
-
-
 
 function addModalCloseListener(){
     const buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("modal-close");
@@ -50,13 +48,74 @@ export function showModal(modalId: string){
     return false;
 }
 
+export interface ConfirmEmailResponse {
+    canceled: boolean,
+    email?: string,
+}
+export function showConfirmEmailModal(options: {
+    title?: string,
+    message?: string,
+    error?:string,
+    imageUrl?: string,
+    imageAlt?:string,
+    classNames?: string[]
+}):Promise<ConfirmEmailResponse> {
+
+    const modalId = "auth-confirm-modal";
+
+    return new Promise(async (resolve, rejeect) => {
+
+        const modal = addModal(modalId, {
+            ...options,
+            classNames: [...(options.classNames || []), "auth"],
+            onClose: () => {
+                resolve({canceled: true})
+            }
+        });
+
+        // modal.child
+        const $content = modal.getElementsByClassName("modal-content").item(0);
+        const $emailInput = createElementFromString(`<input type="email" class="email-confirm" name="email" autocomplete="username" placeholder="Enter your email"/>`) as HTMLInputElement;
+        // $emailInput.addEventListener("")
+
+        const $inputContainer = document.createElement("div");
+        $inputContainer.appendChild($emailInput);
+
+        const $confirmButton = createElementFromString(`<button class="button confirm">Confirm</button>`);
+
+
+        $content.appendChild($inputContainer);
+
+        if (options.error){
+            const $error = createElementFromString(`<div class="error">${options.error}</div>`);
+            $content.appendChild($error);
+        }
+
+        $content.appendChild($confirmButton);
+
+        $confirmButton.addEventListener("click", () => {
+            const email = $emailInput.value;
+            resolve({canceled: false, email});
+            closeModal(modalId);
+        });
+
+
+        showModal(modalId);
+
+    })
+
+}
+
 export function addModal(modalId: string, options: {
     title?: string,
     message?: string,
     imageUrl?: string,
-}): ChildNode {
+    imageAlt?:string,
+    classNames?: string[],
+    onClose?: () => void,
+}): HTMLDivElement {
 
-    const existingModal = <HTMLDivElement>document.getElementById("signup-success-modal");
+    const existingModal = <HTMLDivElement>document.getElementById(modalId);
     if (existingModal){
         console.warn(`a modal with id ${modalId} already exists, removing it`);
         existingModal.remove()
@@ -67,16 +126,22 @@ export function addModal(modalId: string, options: {
     </svg>
     </button>`);
 
-    const $illustration = createElementFromString(`<img src="assets/images/success.svg" alt="Success!" />`);
 
     $button.addEventListener("click", () => {
         closeModal(modalId);
+        if (options.onClose){
+            options.onClose();
+        }
     });
 
     const $content = document.createElement("div");
+    $content.classList.add("modal-content");
     $content.append($button);
-    $content.append($illustration);
 
+    if (options.imageUrl){
+        const $illustration = createElementFromString(`<img src="${options.imageUrl}" alt="${options.imageAlt || ''}" />`);
+        $content.append($illustration);
+    }
     let $title = null;
     let $message = null;
 
@@ -95,6 +160,9 @@ export function addModal(modalId: string, options: {
     const modal = document.createElement("div");
     modal.id = modalId;
     modal.classList.add("modal-window");
+    if (options.classNames){
+        modal.classList.add(...options.classNames);
+    }
     modal.appendChild($content);
 
 

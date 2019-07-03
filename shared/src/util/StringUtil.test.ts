@@ -1,4 +1,4 @@
-import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
+import {destructureDisplayName, getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 
 describe("get filename from input", () => {
     test("all lowercase, valid", () => {
@@ -77,5 +77,37 @@ describe("get url from input", () => {
         const input = "test_page";
         const domain = "cactus.app";
         expect(getUrlFromInput(input, domain)).toEqual("https://cactus.app/test-page");
+    });
+});
+
+describe("Destructure displayName", () => {
+    test("null value", () => {
+        const input = null;
+        const output = destructureDisplayName(input);
+        expect(output).toEqual({});
+    });
+
+    test("Neil Poulin", () => {
+        const input = "Neil Poulin";
+        const output = destructureDisplayName(input);
+        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+    });
+
+    test("Neil   Poulin lots of spaces", () => {
+        const input = "  Neil   Poulin   ";
+        const output = destructureDisplayName(input);
+        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+    });
+
+    test("Neil James Poulin lots of spaces", () => {
+        const input = "  Neil  James   Poulin   ";
+        const output = destructureDisplayName(input);
+        expect(output).toEqual({firstName: "Neil", middleName: "James", lastName: "Poulin"});
+    });
+
+    test("Neil King James Poulin lots of spaces", () => {
+        const input = "  Neil  King James   Poulin   ";
+        const output = destructureDisplayName(input);
+        expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
     });
 });
