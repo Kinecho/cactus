@@ -16,6 +16,7 @@ export enum Field {
     mailchimpListMemberId = "mailchimpListMember.id",
     mailchimpListMemberUniqueEmailId = "mailchimpListMember.unique_email_id",
     mailchimpListMemberWebId = "mailchimpListMember.web_id",
+    journalStatus = "journalStatus",
 }
 
 export default class CactusMember extends BaseModel {

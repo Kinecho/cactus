@@ -1,4 +1,5 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import {JournalStatus} from "@shared/models/CactusMember";
 
 export enum ListMemberStatus {
     subscribed = "subscribed",
@@ -12,7 +13,10 @@ export enum MergeField {
     LNAME = "LNAME",
     REF_EMAIL = "REF_EMAIL",
     LAST_REPLY = "LAST_REPLY",
+    JNL_STATUS = "JNL_STATUS",
 }
+
+
 
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
@@ -36,7 +40,7 @@ export enum MergeFieldBoolean {
 }
 
 export type MergeFields = {
-    [s in MergeField]?: String|Number|MergeFieldBoolean;
+    [s in MergeField]?: String|Number|MergeFieldBoolean|JournalStatus;
 };
 
 export default class ListMember {
