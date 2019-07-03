@@ -1,5 +1,5 @@
 <template lang="html">
-    <header>
+    <header v-bind:class="{loggedIn: loggedIn}">
         <a href="/"><img class="logo" src="assets/images/logo.svg" alt="Cactus logo"/></a>
         <a v-if="!loggedIn" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
             Up Free</a>
@@ -43,11 +43,18 @@
                 // e.prev
                 console.log("Logging out...");
                 await this.$auth.signOut();
+                window.location.href = "/";
             }
         }
     }
 </script>
 
 <style lang="scss" scoped>
+header {
+    &.loggedIn {
+        display: flex;
+        justify-content: space-between;
+    }
 
+}
 </style>

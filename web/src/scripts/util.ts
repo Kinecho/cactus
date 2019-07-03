@@ -1,4 +1,5 @@
 import {QueryParam} from "@shared/util/queryParams";
+import {isValidEmail} from "@shared/util/StringUtil";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn'
@@ -86,17 +87,28 @@ export function showConfirmEmailModal(options: {
 
         $content.appendChild($inputContainer);
 
+
+        const $error = createElementFromString(`<div class="error hidden">${options.error || "Unable to sign in"}</div>`) as HTMLDivElement;
+        $content.appendChild($error);
+
         if (options.error){
-            const $error = createElementFromString(`<div class="error">${options.error}</div>`);
-            $content.appendChild($error);
+            $error.classList.remove("hidden");
         }
 
         $content.appendChild($confirmButton);
 
         $confirmButton.addEventListener("click", () => {
             const email = $emailInput.value;
-            resolve({canceled: false, email});
-            closeModal(modalId);
+            const isValid = isValidEmail(email);
+            if (!isValid){
+                $error.innerText = "Please enter a valid email";
+                $error.classList.remove("hidden");
+            } else {
+                $error.classList.add("hidden");
+                resolve({canceled: false, email});
+                closeModal(modalId);
+            }
+
         });
 
 
@@ -173,4 +185,10 @@ export function addModal(modalId: string, options: {
 export function getQueryParam(name:QueryParam):string|null {
     const params = new URLSearchParams(window.location.search);
     return params.get(name);
+}
+
+export function triggerWindowResize(){
+    const resizeEvent = window.document.createEvent('UIEvents');
+    resizeEvent .initUIEvent('resize', true, false, window, 0);
+    window.dispatchEvent(resizeEvent);
 }

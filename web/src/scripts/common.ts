@@ -16,7 +16,7 @@ function setupNavigation(){
 
 
     if (!$nav && !$header){
-        console.error("Can not find the Vue root element for the nav bar. Not initializing");
+        console.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
     }
 

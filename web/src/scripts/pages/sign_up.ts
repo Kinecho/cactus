@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize the FirebaseUI Widget using Firebase.
     const ui = getAuthUI();
 
-    const config = getAuthUIConfig({signinSuccessPath: "/", emailLinkSigninPath: "/confirmed"});
+    const config = getAuthUIConfig({signInSuccessPath: "/confirmed", emailLinkSignInPath: "/signup"});
     if (ui.isPendingRedirect()) {
         console.log("Is pending redirect.... need to log the user in");
         ui.start('#signup-app', config);

@@ -8,9 +8,23 @@ const firebase = initializeFirebase();
 
 let authUi;
 
-export function getAuthUIConfig(opts:{signinSuccessPath:string, emailLinkSigninPath?:string}) {
+
+export interface EmailLinkSignupResult {
+    success: boolean,
+    error?: {
+        title: string,
+        message: string,
+        friendlyMessage?: string
+    }
+    continue?: {
+        title: string,
+        url: string,
+    }
+}
+
+export function getAuthUIConfig(opts:{signInSuccessPath:string, emailLinkSignInPath?:string}) {
     return {
-        signInSuccessUrl: opts.signinSuccessPath,
+        signInSuccessUrl: opts.signInSuccessPath,
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions: [
@@ -34,7 +48,7 @@ export function getAuthUIConfig(opts:{signinSuccessPath:string, emailLinkSigninP
                         // Additional state showPromo=1234 can be retrieved from URL on
                         // sign-in completion in signInSuccess callback by checking
                         // window.location.href.
-                        url: `${Config.domain}${opts.emailLinkSigninPath}`,
+                        url: `${Config.domain}${opts.emailLinkSignInPath}`,
                         continueUrl: `${Config.domain}/signup`,
                         // Custom FDL domain.
                         dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
@@ -63,12 +77,8 @@ export function getAuthUIConfig(opts:{signinSuccessPath:string, emailLinkSigninP
         // tosUrl: 'https://www.kinecho.com/terms-of-service',
         // privacyPolicyUrl: 'https://kinecho.com/policies/privacy'
     }
-};
-
-export interface EmailLinkSignupResult {
-    success: boolean,
-    error?: any,
 }
+
 
 export function getAuthUI(): firebaseui.auth.AuthUI {
     if (authUi) {
@@ -87,17 +97,23 @@ export function createAuthModal(): string {
     addModal(modalId, {});
 
     const ui = getAuthUI();
-    ui.start(`#${modalId} > div`, getAuthUIConfig({signinSuccessPath: "/confirmed", emailLinkSigninPath: "/confirmed"}));
+    ui.start(`#${modalId} > div`, getAuthUIConfig({signInSuccessPath: "/confirmed", emailLinkSignInPath: "/confirmed"}));
     return modalId;
 }
 
 export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSignupResult> {
     const isSignIn = firebase.auth().isSignInWithEmailLink(window.location.href);
     if (!isSignIn) {
+        console.log("isSignIn is false");
         return {success: true};
     }
 
     let email = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
+    if (getAuth().currentUser){
+        console.log("using current user's email");
+        email = getAuth().currentUser.email
+    }
+
     if (!email) {
         const {email: confirmedEmail, canceled} = await showConfirmEmailModal({
             title: "Confirm email",
@@ -105,7 +121,17 @@ export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSig
             error,
         });
         if (canceled){
-            return {success:false, error: "Unable to confirm your subscription"};
+            return {
+                success:false,
+                error: {
+                    title: "Oh no!",
+                    message: "Unable to confirm your subscription.",
+                },
+                continue: {
+                    title: "Try again",
+                    url: window.location.href,
+                }
+            };
         }
         email = confirmedEmail;
         console.log("got confirmed email", email);
@@ -121,11 +147,26 @@ export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSig
             if (error.code === "auth/invalid-email"){
                 return handleEmailLinkSignIn("The email you entered does not match the email used to sign in.");
             }
+            else if (error.code === "auth/invalid-action-code"){
+                return {
+                    success: false,
+                    error: {
+                        title: "Oh Oh!",
+                        message: "This link is invalid. This can happen if the link is malformed, expired, or has already been used."
+                    },
+                    continue: {
+                        title: "Sign In",
+                        url: "/signup",
+                    }
+                };
+            }
+
+            return {success: false, error: error.message};
         }
 
         return {success: true}
     } else {
-        return {success: false, error: "Unable to sign in"}
+        return {success: false, error: {title: "Whoops!", message: "Unable to complete your registration"}}
     }
 }
 
@@ -136,7 +177,7 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
             url: `${Config.domain}/confirmed`,
             handleCodeInApp: true,
         });
-        // window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
+        window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
         return {success: true};
     } catch (error) {
         console.error("failed to send signin link", error);
