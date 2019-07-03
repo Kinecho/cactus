@@ -22,6 +22,36 @@ export interface EmailLinkSignupResult {
     }
 }
 
+export const emailProvider = (opts) => ({
+        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+        forceSameDevice: false,
+        emailLinkSignIn: function () {
+            return {
+                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                    console.log("signin from auth link success", authResult);
+
+                    authResult.additionalUserInfo.isNewUser;
+                    if (redirectUrl) {
+                        console.log("redirecting to redirect url", redirectUrl);
+                        // window.location = redirectUrl;
+                    }
+                    return false;
+                },
+                // Additional state showPromo=1234 can be retrieved from URL on
+                // sign-in completion in signInSuccess callback by checking
+                // window.location.href.
+                url: `${Config.domain}${opts.emailLinkSignInPath}`,
+                continueUrl: `${Config.domain}/signup`,
+                // Custom FDL domain.
+                dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
+                // Always true for email link sign-in.
+                handleCodeInApp: true,
+
+            };
+        }
+    });
+
 export function getAuthUIConfig(opts:{signInSuccessPath:string, emailLinkSignInPath?:string}) {
     return {
         signInSuccessUrl: opts.signInSuccessPath,
@@ -29,35 +59,6 @@ export function getAuthUIConfig(opts:{signInSuccessPath:string, emailLinkSignInP
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions: [
             // Leave the lines as is for the providers you want to offer your users.
-            {
-                provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-                signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-                forceSameDevice: false,
-                emailLinkSignIn: function () {
-                    return {
-                        signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-                            console.log("signin from auth link success", authResult);
-
-                            authResult.additionalUserInfo.isNewUser;
-                            if (redirectUrl) {
-                                console.log("redirecting to redirect url", redirectUrl);
-                                // window.location = redirectUrl;
-                            }
-                            return false;
-                        },
-                        // Additional state showPromo=1234 can be retrieved from URL on
-                        // sign-in completion in signInSuccess callback by checking
-                        // window.location.href.
-                        url: `${Config.domain}${opts.emailLinkSignInPath}`,
-                        continueUrl: `${Config.domain}/signup`,
-                        // Custom FDL domain.
-                        dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
-                        // Always true for email link sign-in.
-                        handleCodeInApp: true,
-
-                    };
-                }
-            },
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             firebase.auth.FacebookAuthProvider.PROVIDER_ID,
             firebase.auth.TwitterAuthProvider.PROVIDER_ID,

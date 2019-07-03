@@ -35,15 +35,37 @@
 
     <!--note CSS is included via webpack-->
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
-    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css" />
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/4.0.0/firebaseui.css"/>
 
 </head>
 
-<body> 
-    <div class="signup-container">
-        <h1>Sign Up</h1>
-        <div id="signup-app"></div>
+<body>
+<div class="page-container">
+    <div class="top">
+        <a class="logo-link"  href="/"><img src="/assets/images/logoMark.svg" alt="Cactus Logo" class="logo"/></a>
+        <h1>Join Cactus</h1>
     </div>
+    <div class="signup-container" id="signup-container">
+        <form class="email-form hidden" id="email-signup">
+            <div class="alert error hidden">Sorry, looks like we have issues.</div>
+            <input type="email" name="email" placeholder="Enter your email address"/>
+            <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
+        </form>
+        <div class="divider hidden">
+            <div class="message-container">
+                <span class="message">Or choose an option</span>
+            </div>
 
+            <span class="line"></span>
+        </div>
+        <div id="third-party-logins">
+            <div id="third-party-loading" class="hidden">
+                Signing In...
+            </div>
+            <div id="signup-app"></div>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>
