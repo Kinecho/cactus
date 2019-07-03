@@ -12,11 +12,12 @@ import SentCampaign from "@shared/models/SentCampaign";
 import {Campaign, CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {URL} from "url";
 import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
-const prompts = require("prompts");
 import * as fs from "fs";
 import {promisify} from "util";
 import * as osPath from "path";
-const writeFile =  promisify(fs.writeFile);
+
+const prompts = require("prompts");
+const writeFile = promisify(fs.writeFile);
 
 const getUrls = require('get-urls');
 
@@ -82,6 +83,44 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
 
         // const mail
 
+        const emailStatusResponse: { statusFilter: CampaignStatus, includeAutomations: boolean } = await prompts([
+            {
+                name: "statusFilter",
+                message: "Filter Campaign Status (default is sent)",
+                type: "select",
+                initial: 0,
+                choices: [
+                    {
+                        title: "Sent",
+                        value: CampaignStatus.sent,
+                    },
+                    {
+                        title: "Scheduled",
+                        value: CampaignStatus.schedule
+                    },
+                    {
+                        title: "Saved",
+                        value: CampaignStatus.save
+                    },
+                    {
+                        title: "Sending",
+                        value: CampaignStatus.sending
+                    },
+                    {
+                        title: "Paused",
+                        value: CampaignStatus.paused
+                    }
+                ]
+            },
+            {
+                type: "toggle",
+                name: "includeAutomations",
+                active: "Yes",
+                inactive: "No",
+                message: "Include automation emails (e.g. onboarding)?"
+            }
+        ]);
+
 
         const config = await getCactusConfig(this.project);
         MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
@@ -93,15 +132,20 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         const campaigns = await mailchimpService.getAllCampaigns({
             params: {
                 list_id: config.mailchimp.audience_id,
-                status: CampaignStatus.sent,
+                status: emailStatusResponse.statusFilter,
                 exclude_fields: ["campaigns._links"]
             },
-            pagination: {count: 50}
+            pagination: {count: 100},
         });
-        const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
-        console.log(`got ${automationCampaigns.length} automation campaigns`);
 
-        campaigns.push(...automationCampaigns);
+        if (emailStatusResponse.includeAutomations){
+            const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
+            console.log(`got ${automationCampaigns.length} automation campaigns`);
+
+            campaigns.push(...automationCampaigns);
+        } else {
+            console.log("Not including automations")
+        }
 
         campaigns.forEach(campaign => {
             this.campaignsById[campaign.id] = campaign;
@@ -111,7 +155,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         console.log("fetched campaigns");
 
         const contentTasks = campaigns.map(async (campaign, i) => {
-            console.log(campaign.settings.title);
+            console.log(campaign.settings.title, chalk.gray(`id = ${campaign.id} | web_id = ${campaign.web_id}`));
             const campaignId = campaign.id;
             return new Promise(async resolve => {
                 setTimeout(async () => {
@@ -129,7 +173,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
 
 
         console.log("processing content...");
-        const matchesByPageName: {[pageName: string]: PageMatch} = {};
+        const matchesByPageName: { [pageName: string]: PageMatch } = {};
 
         Object.keys(contentById).forEach(campaignId => {
             console.log("Processing content for campaignId", campaignId);
@@ -153,7 +197,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
                     if (matchedPage) {
 
                         const campaign = this.campaignsById[campaignId];
-                        if (!campaign){
+                        if (!campaign) {
                             console.error(chalk.red("No campaign found for campaignId", campaignId));
                             return;
                         }
@@ -163,7 +207,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
                         const campaignTitle = campaign.settings.title;
                         console.log("campaign title", campaignTitle);
 
-                        if (campaignTitle.toLowerCase().includes("reminder")){
+                        if (campaignTitle.toLowerCase().includes("reminder")) {
                             pageMatch.reminderCampaign = campaign;
                             pageMatch.reminderId = campaignId;
                             pageMatch.reminderContent = content;
@@ -181,14 +225,13 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
             });
 
 
-
         });
         await this.processMatches(Object.values(matchesByPageName), firestoreService);
 
         return undefined;
     }
 
-    async processMatches(matches:PageMatch[], firestoreService:AdminFirestoreService){
+    async processMatches(matches: PageMatch[], firestoreService: AdminFirestoreService) {
         console.log("about to process", matches.length, "page matches");
 
         const dateId = (new Date()).getTime();
@@ -197,39 +240,45 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         const folder = osPath.dirname(filePath);
         try {
             await promisify(fs.mkdir)(folder, {recursive: true});
-        } catch (error){
+        } catch (error) {
             // console.debug("Unable to create folder " + folder, error);
         }
         await writeFile(filePath, JSON.stringify(matches, null, 2));
 
-        const existingMatches:PageMatch[] = [];
-        const matchesToCreate:PageMatch[] = [];
+        const existingMatches: PageMatch[] = [];
+        const matchesToCreate: PageMatch[] = [];
 
         const tasks = matches.map(match => {
             return new Promise(async resolve => {
-                if (!match.reminderId && match.campaignId){
+                if (!match.campaignId){
+                    console.error(chalk.red("No campaign ID found on match. Not processing", match.page.name));
+                    resolve();
+                    return;
+                }
+
+                if (!match.reminderId && match.campaignId) {
                     console.warn(chalk.yellow(`can't process match ${match.page.name} as no campaign ids were found`));
                 }
 
 
-                let existingPrompts:ReflectionPrompt[] = [];
+                let existingPrompts: ReflectionPrompt[] = [];
                 const campaignQuery = firestoreService.getCollectionRef(Collection.reflectionPrompt).where(Field.campaignIds, "array-contains", match.campaignId);
                 const foundCampaignPrompts = await firestoreService.executeQuery(campaignQuery, ReflectionPrompt);
-                if (foundCampaignPrompts.size === 0 && match.reminderId){
+                if (foundCampaignPrompts.size === 0 && match.reminderId) {
                     const reminderQuery = firestoreService.getCollectionRef(Collection.reflectionPrompt).where(Field.campaignIds, "array-contains", match.reminderId);
                     const foundReminderPrompts = await firestoreService.executeQuery(reminderQuery, ReflectionPrompt);
-                    if (foundReminderPrompts.size > 0){
+                    if (foundReminderPrompts.size > 0) {
                         existingPrompts = foundReminderPrompts.results;
                     }
                 } else {
                     existingPrompts = foundCampaignPrompts.results;
                 }
 
-                if (existingPrompts.length === 1){
+                if (existingPrompts.length === 1) {
                     resolve(existingPrompts[0]);
                     existingMatches.push(match);
                     return
-                } else if (existingPrompts.length > 1){
+                } else if (existingPrompts.length > 1) {
                     console.warn(chalk.yellow(`More than 1 prompt found for campaignId=${match.campaignId} or reminderId ${match.reminderId}. Using first one`));
                     existingMatches.push(match);
                     resolve(existingPrompts[0]);
@@ -253,17 +302,20 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         const mailchimpService = MailchimpService.getSharedInstance();
         const questions = [];
 
-        const campaignReminderChoices =  Object.values(this.campaignsById).filter(campaign => campaign && campaign.settings.title.toLowerCase().includes("reminder"))
+        const campaignReminderChoices = Object.values(this.campaignsById).filter(campaign => campaign && campaign.settings.title.toLowerCase().includes("reminder"))
             .map((campaign) => {
-                if (!campaign){
+                if (!campaign) {
                     return {title: "", value: ""};
                 }
-                return {title: campaign.settings.title + chalk.gray(` type=${campaign.type} | id=${campaign.id} | web_id=${campaign.web_id}`),
-                        value: campaign.id}});
+                return {
+                    title: campaign.settings.title + chalk.gray(` type=${campaign.type} | id=${campaign.id} | web_id=${campaign.web_id}`),
+                    value: campaign.id
+                }
+            });
 
-        for (let i=0; i < matchesToCreate.length; i++){
+        for (let i = 0; i < matchesToCreate.length; i++) {
             const match = matchesToCreate[i];
-            if (match.campaign && (!match.reminderId && !match.reminderCampaign) ){
+            if (match.campaign && (!match.reminderId && !match.reminderCampaign)) {
                 const questionName = match.campaign.id || "unknown";
                 console.log("setting up question name", questionName);
                 const titleSplit = match.campaign.settings.title.toLowerCase().split("daily");
@@ -273,27 +325,33 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
                     message: `What is the Reminder Campaign ID for \"${match.campaign.settings.title}\"?`,
                     choices: campaignReminderChoices,
                     initial: titleSplit ? titleSplit[titleSplit.length - 1] : "",
-                    suggest: (input:string, choices:{title:string, value:string}[]) =>
-                        Promise.resolve(choices.filter(choice => choice.title.toLowerCase().includes(input.toLowerCase()) ))
+                    suggest: (input: string, choices: { title: string, value: string }[]) =>
+                        Promise.resolve(choices.filter(choice => choice.title.toLowerCase().includes(input.toLowerCase())))
                 });
 
-               // console.log("got reminderId", reminderId);
+                // console.log("got reminderId", reminderId);
             }
         }
 
 
-        console.log("there are ", questions.length, "to ask", JSON.stringify(questions, null, 2));
+        console.log("there are", questions.length, "to create", JSON.stringify(questions, null, 2));
+
+
+        if (questions.length === 0){
+            console.log("No questions to create. Exiting");
+            return;
+        }
 
         const questionResponses = await prompts(questions);
 
 
-        const saveResponse:{doSave:boolean} = await prompts({
+        const saveResponse: { doSave: boolean } = await prompts({
             type: "confirm",
             message: "Do you want to save these to the database now?",
             name: "doSave",
         });
 
-        if (!saveResponse.doSave){
+        if (!saveResponse.doSave) {
             console.log("Not saving, exiting");
             return;
         }
@@ -311,14 +369,14 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
                 prompt.createdAt = new Date();
                 prompt.updatedAt = new Date();
 
-                if (!match.reminderId && questionResponses[match.campaignId]){
+                if (!match.reminderId && questionResponses[match.campaignId]) {
                     const reminderCampaignId = questionResponses[match.campaignId];
                     try {
                         const reminderCampaign = await mailchimpService.getCampaign(reminderCampaignId);
-                        if (reminderCampaign){
+                        if (reminderCampaign) {
                             prompt.reminderCampaign = reminderCampaign;
                         }
-                    }catch (error){
+                    } catch (error) {
                         console.warn("unable to get reminder campaign ", reminderCampaignId);
                     }
 
