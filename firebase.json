@@ -34,6 +34,26 @@
         ],
         "rewrites": [
             {
+                "source": "/what-makes-you-feel-calm-peaceful-or-serene",
+                "destination": "/what_makes_you_feel_calm_peaceful_or_serene.html"
+            },
+            {
+                "source": "/what-is-essential-to-your-happiness",
+                "destination": "/what_is_essential_to_your_happiness.html"
+            },
+            {
+                "source": "/how-do-you-benefit-from-moments-of-reflection",
+                "destination": "/how_do_you_benefit_from_moments_of_reflection.html"
+            },
+            {
+                "source": "/when-do-you-feel-completely-free-to-be-yourself",
+                "destination": "/when_do_you_feel_completely_free_to_be_yourself.html"
+            },
+            {
+                "source": "/how-has-friendship-enriched-your-life",
+                "destination": "/how_has_friendship_enriched_your_life.html"
+            },
+            {
                 "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190707",
                 "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190707.html"
             },

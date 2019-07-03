@@ -289,5 +289,30 @@ module.exports = {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190707",
         "reflectionPrompt": true
+    },
+    "how_has_friendship_enriched_your_life": {
+        "title": "How has friendship enriched your life?",
+        "path": "/how-has-friendship-enriched-your-life",
+        "reflectionPrompt": true
+    },
+    "when_do_you_feel_completely_free_to_be_yourself": {
+        "title": "When do you feel completely free to be yourself?",
+        "path": "/when-do-you-feel-completely-free-to-be-yourself",
+        "reflectionPrompt": true
+    },
+    "how_do_you_benefit_from_moments_of_reflection": {
+        "title": "How do you benefit from moments of reflection?",
+        "path": "/how-do-you-benefit-from-moments-of-reflection",
+        "reflectionPrompt": true
+    },
+    "what_is_essential_to_your_happiness": {
+        "title": "What is essential to your happiness?",
+        "path": "/what-is-essential-to-your-happiness",
+        "reflectionPrompt": true
+    },
+    "what_makes_you_feel_calm_peaceful_or_serene": {
+        "title": "What makes you feel calm, peaceful, or serene?",
+        "path": "/what-makes-you-feel-calm-peaceful-or-serene",
+        "reflectionPrompt": true
     }
 }
