@@ -296,8 +296,15 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         await Promise.all(tasks);
 
 
-        console.log(chalk.blue(`Found ${existingMatches.length} existing prompts!`));
+        console.log(chalk.blue(`Found ${existingMatches.length} existing prompts from the campaign matches`));
         console.log(chalk.blue(`Need to Create ${matchesToCreate.length} new prompts from existing campaigns`));
+
+
+        if (matchesToCreate.length === 0){
+            console.log("No need to create any question prompts. Existing");
+            return;
+        }
+
         await writeFile(matchesToCreateFilePath, JSON.stringify(matchesToCreate, null, 2));
         const mailchimpService = MailchimpService.getSharedInstance();
         const questions = [];
@@ -333,17 +340,9 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
             }
         }
 
-
-        console.log("there are", questions.length, "to create", JSON.stringify(questions, null, 2));
-
-
-        if (questions.length === 0){
-            console.log("No questions to create. Exiting");
-            return;
-        }
+        console.log("there are", questions.length, "questions to ask about reminder campaigns", JSON.stringify(questions, null, 2));
 
         const questionResponses = await prompts(questions);
-
 
         const saveResponse: { doSave: boolean } = await prompts({
             type: "confirm",
