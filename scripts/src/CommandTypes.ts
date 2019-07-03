@@ -70,6 +70,7 @@ export abstract class FirebaseCommand implements Command {
         }
 
         const app = await this.getFirebaseApp();
+        AdminFirestoreService.initialize(app);
         this.firestoreService = new AdminFirestoreService(app);
         return this.firestoreService;
     }

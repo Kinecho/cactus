@@ -15,12 +15,13 @@ import {writeToFile} from "@api/util/FileUtil";
 import {
     CampaignEventData,
     CleanedEmailEventData, EmailChangeEventData,
-    EventType, ProfileUpdateEventData,
+    EventType, ProfileUpdateEventData, SubscribeEventData,
     UnsubscribeEventData,
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {saveSentCampaign} from "@api/services/sentCampaignService";
 import MailchimpService from "@shared/services/MailchimpService";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 
 const app = express();
 
@@ -33,11 +34,6 @@ app.get("/", async (req: express.Request, res: express.Response) => {
     return res.send({success: true, message: "got the get request"})
 });
 
-
-app.get("/webhook", async (req: express.Request, res: express.Response) => {
-
-    res.send({success: true})
-});
 
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const event = req.body as WebhookEvent;
@@ -57,6 +53,19 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
         case EventType.subscribe:
             //already have a hook for this
             console.log("webhook received for subscribe");
+            const data = event.data as SubscribeEventData;
+            const listMember = await mailchimpService.getMemberByEmail(data.email);
+            if (listMember){
+                const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
+                if (cactusMember){
+                    await sendActivityNotification(`Added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
+                } else {
+                    await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
+                }
+            } else {
+                await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
+            }
+
             break;
         case EventType.profile:
             const profile = event.data as ProfileUpdateEventData;
@@ -66,6 +75,19 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
                 text: `${profile.email} updated their profile`,
                 attachments: [attachment]
             };
+
+            const profileMember = await mailchimpService.getMemberByEmail(profile.email);
+            if (profileMember){
+                const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(profileMember);
+                if (cactusMember){
+                    await sendActivityNotification(`Updated ${profile.email} in our database. CactusMember ID = ${cactusMember.id}`)
+                } else {
+                    await sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
+                }
+            } else {
+                await sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
+            }
+
             break;
         case EventType.upemail:
             const update = event.data as EmailChangeEventData;

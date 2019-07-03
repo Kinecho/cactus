@@ -1,7 +1,7 @@
 import * as firebaseAdmin from "firebase-admin";
 import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 
 export interface QueryResult<T extends BaseModel> {
@@ -12,7 +12,6 @@ export interface QueryResult<T extends BaseModel> {
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
-
 
 
     protected static sharedInstance:AdminFirestoreService;
@@ -106,7 +105,7 @@ export default class AdminFirestoreService {
         }
     }
 
-    async getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | null> {
+    async getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
 
         const collection = this.getCollectionRef(type.collection);
@@ -116,7 +115,7 @@ export default class AdminFirestoreService {
         const doc = await collection.doc(id).get();
 
         if (!doc) {
-            return null;
+            return;
         }
 
         console.log(`doc.data()`, doc.data());
@@ -127,20 +126,7 @@ export default class AdminFirestoreService {
     async executeQuery<T extends BaseModel>(query:FirebaseFirestore.Query, Type: { new(): T }):Promise<QueryResult<T>>{
         const snapshot = await query.get();
         const size = snapshot.size;
-        const results:T[] = [];
-        if (snapshot.empty){
-            return  {results, size};
-        }
-
-        snapshot.forEach(doc => {
-            const model = fromDocumentSnapshot(doc, Type);
-            if (model){
-                results.push(model);
-            } else {
-                console.warn("Unable to decode model", Type);
-            }
-        });
-
+        const results:T[] = fromQuerySnapshot(snapshot, Type);
 
         return {results, size};
     }

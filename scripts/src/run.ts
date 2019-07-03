@@ -3,6 +3,7 @@ import {promisify} from "util";
 import helpers from "@scripts/helpers";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {Command} from "@scripts/CommandTypes";
+import chalk from "chalk";
 
 const prompts = require("prompts");
 const path = require("path");
@@ -33,7 +34,7 @@ export async function getCommandNames(): Promise<{name: string, command: Command
 
 
     return (await Promise.all(tasks)).filter(cmd => cmd.showInList).map(cmd => ({
-        name: cmd.name + (cmd.description ? ` - ${cmd.description}` : ""),
+        name: cmd.name + (cmd.description ? chalk.gray(` - ${cmd.description}`) : ""),
         command: cmd,
     } ));
 
@@ -55,18 +56,21 @@ export function validateCommandExists(commandName: string): boolean | string {
 
 export async function start(): Promise<void> {
     // const commands = (await getAllCommandFilenames()).map(file => ({title: file}));
-    const commands = (await getCommandNames()).map((cmd) => ({title: cmd.name, value: cmd.command}));
+    const commands = (await getCommandNames()).map((cmd) => ({title: cmd.name, value: cmd.command})).sort((a, b) => a.title.localeCompare(b.title));
+
     resetConsole();
     let canceled = false;
     const questions = [
         {
             type: "autocomplete",
             name: 'command',
-            message: 'Chose a command to run (type to filter)',
+            message: 'Choose a command to run (type to filter)',
             // initial: (prev, values) => formatFilename(values.title),
             validate: (filename: string) => validateCommandExists(filename),
             // format: formatFilename,
             choices: commands,
+            suggest: (input:string, choices:{title:string, value:string}[]) =>
+                Promise.resolve(choices.filter(choice => choice.title.toLowerCase().includes(input.toLowerCase()) )),
             limit: 20,
         },
     ];

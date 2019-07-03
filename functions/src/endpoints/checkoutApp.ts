@@ -8,9 +8,10 @@ import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
-import {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import MailchimpService from "@shared/services/MailchimpService";
+import {JournalStatus} from "@shared/models/CactusMember";
 
 const config = getConfig();
 
@@ -49,10 +50,16 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             const mailchimpMember = await mailchimpService.getMemberByEmail(email);
             console.log("Mailchimp member", mailchimpMember);
             if (email && mailchimpMember){
-                const tagUpdateSuccess = await mailchimpService.updateTags({tags: [{name: TagName.JOURNAL_PREMIUM, status: TagStatus.ACTIVE}], email});
-                if (!tagUpdateSuccess){
-                   await sendActivityNotification(`:warning: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}`);
+                const tagUpdateResponse = await mailchimpService.updateTags({tags: [{name: TagName.JOURNAL_PREMIUM, status: TagStatus.ACTIVE}], email});
+                if (!tagUpdateResponse.success){
+                   await sendActivityNotification(`:rotating-light: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}\nError: \`${tagUpdateResponse.error ? tagUpdateResponse.error.title : tagUpdateResponse.unknownError}\``);
                 }
+
+                const mergeFieldUpdateResponse = await mailchimpService.updateMergeFields({mergeFields: {JNL_STATUS: JournalStatus.PREMIUM}, email});
+                if (!mergeFieldUpdateResponse.success){
+                    await sendActivityNotification(`:rotating-light: Failed update merge field ${MergeField.JNL_STATUS} to ${TagName.JOURNAL_PREMIUM} for Mailchimp member ${email}\nError: \`${mergeFieldUpdateResponse.error ? mergeFieldUpdateResponse.error.title : mergeFieldUpdateResponse.unknownError}\``);
+                }
+
             } else {
                 await sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);
             }

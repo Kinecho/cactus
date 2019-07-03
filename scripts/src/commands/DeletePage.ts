@@ -199,7 +199,7 @@ async function removeFromSitemap(pageEntry:PageFileEntry|null){
 }
 
 export default class DeletePage implements Command {
-    name = "Delete A Page";
+    name = "Pages: Delete Page";
     description = "Removes the files and config entries for a web page";
     showInList = true;
 

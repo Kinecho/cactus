@@ -1,6 +1,8 @@
 
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
+import * as admin from "firebase-admin";
+import QuerySnapshot = admin.firestore.QuerySnapshot;
 
 
 let TimestampClass:TimestampInterface|any;
@@ -61,18 +63,36 @@ export function convertTimestampToDate(input: any): any {
     })
 }
 
-export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): T|null {
+export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): T|undefined {
     if (!doc.exists){
-        return null;
+        return;
     }
 
     const data = doc.data();
     if (!data){
-        return null;
+        return;
     }
     data.id = doc.id;
 
     return fromFirestoreData(data, Type);
+}
+
+export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, Type: {new(): T}): T[] {
+    const results:T[] = [];
+
+    if (snapshot.empty){
+        return results;
+    }
+
+    snapshot.forEach(doc => {
+        const model = fromDocumentSnapshot(doc, Type);
+        if (model){
+            results.push(model);
+        } else {
+            console.warn("Unable to decode model", Type);
+        }
+    });
+    return results;
 }
 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {

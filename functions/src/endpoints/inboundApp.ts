@@ -1,8 +1,8 @@
 import * as express from "express";
 import * as cors from "cors";
-import {AttachmentColor, sendActivityNotification, SlackMessage} from "@api/slack/slack";
-import {forwardedGmailEmail, getSenderFromHeaders, processEmail} from "@api/inbound/EmailProcessor"
-import {getMailchimpDateString} from "@shared/util/DateUtil";
+import {AttachmentColor, sendActivityNotification, SlackAttachmentField, SlackMessage} from "@api/slack/slack";
+import {processEmail} from "@api/inbound/EmailProcessor"
+import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
@@ -12,16 +12,22 @@ import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
-import ListMember, {TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
+import ListMember, {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import bodyParser = require("body-parser");
 import MailchimpService from "@shared/services/MailchimpService";
-import {UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
-
+import {
+    UpdateMergeFieldRequest,
+    UpdateMergeFieldResponse,
+    UpdateTagResponse,
+    UpdateTagsRequest
+} from "@shared/mailchimp/models/MailchimpTypes";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 const app = express();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
 const mailchimpService = MailchimpService.getSharedInstance();
+const memberService = AdminCactusMemberService.getSharedInstance();
 
 app.use(cors({origin: true}));
 
@@ -106,14 +112,23 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         promptResponse.promptQuestion = prompt ? prompt.question : undefined;
         promptResponse.responseMedium = ResponseMedium.EMAIL;
 
+        let resetUserResponse;
         if (listMember){
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-            await resetUserReminder(listMember.email_address);
+             resetUserResponse = await resetUserReminder(listMember.email_address);
+            if (!resetUserResponse.success){
+                console.log("reset user reminder failed", resetUserResponse);
+                await sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+            }
         } else {
             await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
-            await resetUserReminder(from.email);
+            resetUserResponse = await resetUserReminder(from.email);
+            if (!resetUserResponse.success){
+                console.log("reset user reminder failed", resetUserResponse);
+                await sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+            }
         }
 
         const savedReflectionResponse = await AdminReflectionResponseService.sharedInstance.save(promptResponse);
@@ -136,11 +151,30 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
     }
 });
 
-async function resetUserReminder(email?:string){
+interface ResetUserResponse {
+    success: boolean
+    unknownError?: any
+    mergeResponse: UpdateMergeFieldResponse,
+    tagResponse: UpdateTagResponse,
+}
+
+async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
     if (!email){
         console.warn("No email given provided to resetUserReminder function");
-        return;
+        return {success: false, unknownError: "No email provided to resetUser function", mergeResponse: {success:false}, tagResponse: {success: false}};
     }
+
+    const lastReplyString = getMailchimpDateString();
+    const lastReplyDate = getDateFromISOString(lastReplyString);
+    const mergeRequest: UpdateMergeFieldRequest = {
+        email,
+        mergeFields: {
+            [MergeField.LAST_REPLY]: getMailchimpDateString()
+        }
+    };
+
+    const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+
     const tagRequest: UpdateTagsRequest = {
         email,
         tags: [
@@ -151,7 +185,11 @@ async function resetUserReminder(email?:string){
         ]
     };
 
-    return mailchimpService.updateTags(tagRequest);
+    await memberService.updateLastReplyByEmail(email, lastReplyDate);
+
+    const tagResponse = await mailchimpService.updateTags(tagRequest);
+
+    return {success: tagResponse.success && tagResponse.success, tagResponse, mergeResponse};
 }
 
 async function sendSlackMessage(email: EmailReply,
@@ -160,16 +198,14 @@ async function sendSlackMessage(email: EmailReply,
                                 sentToMember?: ListMember,
                                 message = "Got a reply!",
                                 color = AttachmentColor.info):Promise<void> {
-    let messageColor = color;
+    const messageColor = color;
     const msg: SlackMessage = {};
     msg.text = message;
 
     const fromEmail = email.from && email.from.email ? email.from.email : null;
-    const fromHeader = getSenderFromHeaders(email.headers);
-
     const campaign = email.mailchimpCampaignId ? await mailchimpService.getCampaign(email.mailchimpCampaignId) : null;
 
-    const fields = [];
+    const fields:SlackAttachmentField[] = [];
 
     if (response){
         fields.push({
@@ -232,16 +268,6 @@ async function sendSlackMessage(email: EmailReply,
         );
     }
 
-    if (fromHeader && fromHeader !== fromEmail && fromHeader !== forwardedGmailEmail) {
-        messageColor = AttachmentColor.error;
-        msg.text = `:warning: ${msg.text} (we are still using the original email, will update if we see that the smtp.mailfrom is consistently correct)`;
-        fields.push(
-            {
-                title: "smtp.mailfrom (from address)",
-                value: fromHeader || "unknown",
-                short: false,
-            })
-    }
 
     if (email.mailchimpUniqueEmailId) {
         console.log("looking for member on list with unique email id = ", email.mailchimpUniqueEmailId);
@@ -251,7 +277,7 @@ async function sendSlackMessage(email: EmailReply,
         fields.unshift(
             {
                 title: "List Member Email",
-                value: sentToMember ? sentToMember.email_address : "not found",
+                value: (sentToMember && sentToMember.email_address) ? sentToMember.email_address : "not found",
                 short: false,
             },
             {

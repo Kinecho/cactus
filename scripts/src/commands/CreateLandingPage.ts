@@ -26,7 +26,7 @@ export interface InputResponse extends PageConfig {
 }
 
 export default class CreateLandingPage implements Command {
-    name = "Create a Landing Page";
+    name = "Pages: Create Landing Page";
     response?: InputResponse;
     description = "Creates a standalone webpage";
     showInList = true;

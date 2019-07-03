@@ -1,3 +1,6 @@
+import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import {JournalStatus} from "@shared/models/CactusMember";
+
 export enum ListMemberStatus {
     subscribed = "subscribed",
     unsubscribed = "unsubscribed",
@@ -10,7 +13,10 @@ export enum MergeField {
     LNAME = "LNAME",
     REF_EMAIL = "REF_EMAIL",
     LAST_REPLY = "LAST_REPLY",
+    JNL_STATUS = "JNL_STATUS",
 }
+
+
 
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
@@ -34,14 +40,14 @@ export enum MergeFieldBoolean {
 }
 
 export type MergeFields = {
-    [s in MergeField]?: String|Number|MergeFieldBoolean;
+    [s in MergeField]?: String|Number|MergeFieldBoolean|JournalStatus;
 };
 
 export default class ListMember {
     id?: string;
     web_id?: string;
     email_type?: string;
-    email_address: string;
+    email_address?: string;
     unique_email_id?: string;
     status = ListMemberStatus.pending;
     merge_fields: MergeFields = {};
@@ -51,8 +57,33 @@ export default class ListMember {
     };
     tags: Tag[] = [];
     list_id?: string;
+    timestamp_signup?: ISODate;
+    timestamp_opt?: ISODate;
+    email_client?:string;
+    localtion?: {
+        latitude: number,
+        longitude: number,
+        gmtoff: number, //The time difference in hours from GMT.
+        dstoff: number, //The offset for timezones where daylight saving time is observed.
+        country_code: string,
+        timezone: string,
+    };
+    marketing_permissions:{
+        marketing_permission_id:string,
+        text:string,
+        enabled:boolean,
+    }[] = [];
+    last_note?: {
+        note_id: number,
+        created_at: ISODate,
+        created_by: string,
+        note: string
+    };
+    source?: string;
+    tags_count?: number;
 
-    constructor(email:string){
+
+    constructor(email?:string){
         this.email_address = email;
     }
 

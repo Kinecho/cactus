@@ -17,5 +17,8 @@ module.exports = {
         monthlyPlanId: "plan_FC3gAPGeHs0wCY",
         yearlyPlanId: "plan_FC3gAPGeHs0wCY" //no yearly - this is just monthly
     },
-
+    __FIREBASE_DYNAMIC_LINK__: {
+        domain: "cactus.app",
+        prefix: "/p"
+    }
 }

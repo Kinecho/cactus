@@ -1,5 +1,5 @@
-import ListMember, {MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
-import {SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
+import ListMember, {ListMemberStatus, MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
+import {CampaignTracking, SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
 
 export enum EventType {
     unsubscribe = "unsubscribe",
@@ -36,11 +36,11 @@ export enum CleanedReason {
 export interface WebhookEvent {
     type: EventType,
     fired_at: string,
-    data: SubscribeEventData|UnsubscribeEventData|ProfileUpdateEventData|EmailChangeEventData|CleanedEmailEventData|CampaignEventData,
+    data: SubscribeEventData | UnsubscribeEventData | ProfileUpdateEventData | EmailChangeEventData | CleanedEmailEventData | CampaignEventData,
 }
 
 
-export interface SubscribeEventData{
+export interface SubscribeEventData {
     id: string,
     list_id: string,
     email: string,
@@ -100,7 +100,7 @@ export interface CampaignEventData {
 export enum CampaignStatus {
     save = "save",
     paused = "paused",
-    schedule ="schedule",
+    schedule = "schedule",
     sending = "sending",
     sent = "sent"
 }
@@ -114,6 +114,12 @@ export interface CampaignReportSummary {
     click_rate: number,
 }
 
+export interface CampaignSocialCard {
+    image_url?: string,
+    description?: string,
+    title?: string,
+}
+
 export interface CampaignSearchResult {
     campaign: Campaign;
     snippet: string
@@ -121,6 +127,24 @@ export interface CampaignSearchResult {
 
 export interface CampaignSearchResultListResponse extends ListResponse {
     results: [CampaignSearchResult]
+}
+
+export interface CampaignSettings {
+    subject_line: string,
+    preview_text: string,
+    title: string,
+    from_name: string,
+    reply_to: string,
+    authenticate: boolean,
+    auto_footer: boolean,
+    inline_css: boolean,
+    auto_tweet: boolean,
+    auto_fb_post: string[],
+    fb_comments: boolean,
+    drag_and_drop: boolean
+    use_conversation: boolean,
+    to_name: string,
+    template_id: string,
 }
 
 export interface Campaign {
@@ -140,16 +164,7 @@ export interface Campaign {
         recipient_count: number,
         segment_opts: any,
     },
-    settings: {
-        subject_line: string,
-        preview_text: string,
-        title: string,
-        from_name: string,
-        reply_to: string,
-        use_conversation: boolean,
-        to_name: string,
-        template_id: string,
-    },
+    settings: CampaignSettings,
     report_summary: CampaignReportSummary;
 }
 
@@ -172,7 +187,7 @@ export enum SegmentType {
     fuzzy = "fuzzy"
 }
 
-type ISODate = string;
+export type ISODate = string;
 
 export interface Segment {
     id: number,
@@ -190,7 +205,7 @@ export interface Segment {
 
 }
 
-export interface SegmentListResponse extends ListResponse{
+export interface SegmentListResponse extends ListResponse {
     segments: Segment[],
     list_id: string,
 }
@@ -300,6 +315,19 @@ export interface AutomationRecipients {
     store_id: string;
 }
 
+export interface AutomationEmailRecipients {
+    list_id: string;
+    list_is_active: string;
+    list_name: string;
+    segment_text: string,
+    recipient_count: number,
+    segment_opts: {
+        saved_segment_id: number;
+        match: SegmentMatchType,
+        conditions: SegmentCondition[]
+    };
+}
+
 export interface Automation {
     id: string;
     create_time: ISODate;
@@ -314,8 +342,115 @@ export interface Automation {
     _links: MailchimpLink[];
 }
 
+export enum AutomationDelayType {
+    now = "now",
+    day = "day",
+    hour = "hour",
+    week = "week",
+}
+
+export enum AutomationDelayDirection {
+    before = "before",
+    after = "after"
+}
+
+export enum AutomationDelayAction {
+    previous_campaign_sent = "previous_campaign_sent",
+    previous_campaign_opened = "previous_campaign_opened",
+    previous_campaign_not_opened = "previous_campaign_not_opened",
+    previous_campaign_clicked_any = "previous_campaign_clicked_any",
+    previous_campaign_not_clicked_any = "previous_campaign_not_clicked_any",
+    previous_campaign_specific_clicked = "previous_campaign_specific_clicked",
+    ecomm_bought_any = "ecomm_bought_any",
+    ecomm_bought_product = "ecomm_bought_product",
+    ecomm_bought_category = "ecomm_bought_category",
+    ecomm_not_bought_any = "ecomm_not_bought_any",
+    ecomm_abandoned_cart = "ecomm_abandoned_cart",
+    campaign_sent = "campaign_sent",
+    opened_email = "opened_email",
+    not_opened_email = "not_opened_email",
+    clicked_email = "clicked_email",
+    not_clicked_email = "not_clicked_email",
+    campaign_specific_clicked = "campaign_specific_clicked",
+    manual = "manual",
+    signup = "signup",
+    merge_changed = "merge_changed",
+    group_add = "group_add",
+    group_remove = "group_remove",
+    mandrill_sent = "mandrill_sent",
+    mandrill_opened = "mandrill_opened",
+    mandrill_clicked = "mandrill_clicked",
+    mandrill_any = "mandrill_any",
+    api = "api",
+    goal = "goal",
+    annual = "annual",
+    birthday = "birthday",
+    date = "date",
+    date_added = "date_added",
+    tag_add = "tag_add",
+}
+
+export enum AutomationCampaignContentType {
+    drag_and_drop = "drag_and_drop",
+    html = "html",
+    url = "url",
+}
+
+
+export interface AutomationEmailCampaignSettings {
+    subject_line: string,
+    preview_text: string,
+    title: string,
+    from_name: string,
+    reply_to: string,
+    authenticate: boolean,
+    auto_footer: boolean,
+    inline_css: boolean,
+    auto_tweet: boolean,
+    auto_fb_post: string[],
+    fb_comments: boolean,
+    drag_and_drop: boolean
+    // use_conversation: boolean,
+    to_name: string,
+    template_id: string,
+}
+
+export interface AutomationEmail {
+    id: string,
+    web_id: string,
+    workflow_id: string,
+    position: number,
+    delay: {
+        amount: number,
+        type: AutomationDelayType,
+        direction: AutomationDelayDirection,
+        action:  AutomationDelayAction,
+        action_description: string,
+        full_description: string,
+    },
+    create_time: ISODate,
+    start_time: ISODate,
+    archive_url: string,
+    status: CampaignStatus,
+    emails_sent: number,
+    send_time: ISODate,
+    content_type: AutomationCampaignContentType,
+    needs_block_refresh: boolean,
+    has_logo_merge_tag: boolean,
+    recipients: AutomationEmailRecipients,
+    settings: AutomationEmailCampaignSettings,
+    tracking: CampaignTracking,
+    social_card: CampaignSocialCard,
+    trigger_settings: AutomationTrigger,
+    report_summary:  CampaignReportSummary,
+}
+
 export interface AutomationListResponse extends ListResponse {
     automations: Automation[],
+}
+
+export interface AutomationEmailListResponse extends ListResponse {
+    emails: AutomationEmail[]
 }
 
 export interface AutomationWorkflow {
@@ -454,13 +589,13 @@ export const DEFAULT_PAGINATION: PaginationParameters = {
 };
 
 export interface SearchMembersOptions {
-    list_id?:string;
+    list_id?: string;
     exclude_fields?: string[],
     fields?: string[],
     query: string,
 }
 
-export function getSearchMemberOptionsDefaults():SearchMembersOptions{
+export function getSearchMemberOptionsDefaults(): SearchMembersOptions {
     return {
         exclude_fields: ["exact_matches.members._links", "full_search.members._links", "_links"],
         query: "",
@@ -482,8 +617,8 @@ export interface GetCampaignsOptions {
     params?: {
         sort_field?: CampaignSortField,
         sort_dir?: SortDirection,
-        list_id?:string,
-        folder_id?:string,
+        list_id?: string,
+        folder_id?: string,
         since_create_time?: ISODate,
         before_create_time?: ISODate,
         since_send_time?: ISODate,
@@ -498,7 +633,7 @@ export interface GetCampaignsOptions {
 
 }
 
-export function getDefaultCampaignFetchOptions():GetCampaignsOptions {
+export function getDefaultCampaignFetchOptions(): GetCampaignsOptions {
     return {
         params: {
             sort_field: CampaignSortField.create_time,
@@ -509,7 +644,7 @@ export function getDefaultCampaignFetchOptions():GetCampaignsOptions {
     };
 }
 
-export interface CampaignListResponse extends ListResponse{
+export interface CampaignListResponse extends ListResponse {
     campaigns: Campaign[]
 }
 
@@ -519,7 +654,70 @@ export interface UpdateMergeFieldRequest {
     mergeFields: MergeFields
 }
 
+export interface UpdateMergeFieldError {
+    type: string,
+    title: string,
+    status: number,
+    detail: string,
+    instance: string,
+}
+
+export interface UpdateMergeFieldResponse {
+    success: boolean,
+    error?: UpdateMergeFieldError,
+    unknownError?:any,
+}
+
 export interface UpdateTagsRequest {
     email: string,
     tags: Tag[]
+}
+
+export interface TagResponseError {
+    type: string,
+    title:  string,
+    status: number,
+    detail: string,
+    instance: string,
+}
+
+export interface UpdateTagResponse {
+    success: boolean,
+    error?: TagResponseError,
+    unknownError?: any,
+}
+
+export enum InterestMatch {
+    any = "any",
+    all = "all",
+    none = "none",
+}
+
+export enum ListMemberSortField {
+    timestamp_opt = "timestamp_opt",
+    timestamp_signup = "timestamp_signup",
+    last_changed = "last_changed",
+}
+
+export interface GetListMembersOptions {
+    email_type?: string,
+    status?: ListMemberStatus,
+    since_timestamp_opt?: ISODate,
+    before_timestamp_opt?: ISODate,
+    since_last_changed?: ISODate,
+    before_last_changed?: ISODate,
+    unique_email_id?: string,
+    vip_only?: boolean,
+    interest_category_id?: string,
+    interest_ids?: string,
+    interest_match?: InterestMatch,
+    sort_field?: ListMemberSortField,
+    sort_dir?: SortDirection,
+    since_last_campaign?: boolean,
+    unsubscribed_since?: ISODate
+}
+
+export interface ListMemberListResponse extends ListResponse {
+    members: ListMember[]
+    list_id: string
 }

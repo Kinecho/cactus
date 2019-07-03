@@ -8,9 +8,8 @@ Collection {
     sentCampaigns = "sentCampaigns",
     reflectionResponses = "reflectionResponses",
     users = "users",
+    members = "members",
     reflectionPrompt = "reflectionPrompt",
-
-    tmpReflectionPrompts = "tmpReflectionPrompt",
 }
 
 export interface FirestoreIdentifiable {

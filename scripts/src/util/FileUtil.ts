@@ -1,6 +1,6 @@
 import {promisify} from "util";
 const path = require("path");
-const fs = require("fs");
+const fs = require("fs-extra");
 
 /**
  * write data to a file
@@ -10,13 +10,12 @@ const fs = require("fs");
  */
 export async function writeToFile(filePath:string, data: any): Promise<string|boolean>{
     try {
-
-
         const folder = path.dirname(filePath);
+        console.log("attempting to make foilder", folder);
         try {
-            await promisify(fs.mkdir)(folder, {recursive: true});
+            await fs.mkdirp(folder, {recursive: true});
         } catch (error){
-            // console.debug("Unable to create folder " + folder, error);
+            console.debug("Unable to create folder " + folder, error);
         }
 
         try {

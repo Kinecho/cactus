@@ -1,6 +1,8 @@
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
+import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
+import {getDateFromISOString} from "@shared/util/DateUtil";
 
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
@@ -29,5 +31,28 @@ export default class AdminReflectionPromptService {
 
         const [prompt] = results;
         return prompt;
+    }
+
+    async updateCampaign(campaign:Campaign):Promise<ReflectionPrompt|undefined> {
+        const reflectionPrompt = await this.getPromptForCampaignId(campaign.id);
+
+        if (reflectionPrompt){
+            if (reflectionPrompt.campaign && reflectionPrompt.campaign.id === campaign.id) {
+                reflectionPrompt.campaign = campaign;
+                if (campaign.send_time){
+                    reflectionPrompt.sendDate = getDateFromISOString(campaign.send_time)
+                }
+            } else if (reflectionPrompt.reminderCampaign && reflectionPrompt.reminderCampaign.id === campaign.id) {
+                reflectionPrompt.reminderCampaign = campaign;
+            }
+            else {
+                console.warn("Unable to find matching campaign info on reflection prompt", reflectionPrompt.id, "for campaignId", campaign.id);
+                return reflectionPrompt;
+            }
+
+            await this.save(reflectionPrompt)
+        }
+
+        return reflectionPrompt;
     }
 }

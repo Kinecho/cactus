@@ -49,8 +49,8 @@ interface PageMatch {
     reminderContent: CampaignContent,
 }
 
-export default class BackfillPagesCommand extends FirebaseCommand {
-    name = "Backfill Reflection Prompts";
+export default class ReflectionPromptBackfillPagesCommand extends FirebaseCommand {
+    name = "Reflection Prompts: Backfill";
     description = "Use existing pages to backpopulate Reflection Prompts";
     showInList = true;
     project = Project.PROD;
@@ -98,7 +98,10 @@ export default class BackfillPagesCommand extends FirebaseCommand {
             },
             pagination: {count: 50}
         });
-        // const campaigns = (await mailchimpService.getCampaigns({pagination: {count: 4, offset: 1}})).campaigns;
+        const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
+        console.log(`got ${automationCampaigns.length} automation campaigns`);
+
+        campaigns.push(...automationCampaigns);
 
         campaigns.forEach(campaign => {
             this.campaignsById[campaign.id] = campaign;
@@ -255,7 +258,8 @@ export default class BackfillPagesCommand extends FirebaseCommand {
                 if (!campaign){
                     return {title: "", value: ""};
                 }
-                return {title: campaign.settings.title, value: campaign.id}});
+                return {title: campaign.settings.title + chalk.gray(` type=${campaign.type} | id=${campaign.id} | web_id=${campaign.web_id}`),
+                        value: campaign.id}});
 
         for (let i=0; i < matchesToCreate.length; i++){
             const match = matchesToCreate[i];
@@ -282,6 +286,17 @@ export default class BackfillPagesCommand extends FirebaseCommand {
 
         const questionResponses = await prompts(questions);
 
+
+        const saveResponse:{doSave:boolean} = await prompts({
+            type: "confirm",
+            message: "Do you want to save these to the database now?",
+            name: "doSave",
+        });
+
+        if (!saveResponse.doSave){
+            console.log("Not saving, exiting");
+            return;
+        }
 
         const createTasks = matchesToCreate.map(match => {
             return new Promise(async resolve => {
