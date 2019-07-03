@@ -13,11 +13,9 @@
     "deploy:stage": "npm run deploy:stage:api && npm run deploy:stage:web",
     "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
     "deploy:stage:web": "npm --prefix \"web\" run deploy:stage",
-
     "deploy:prod": "npm run deploy:prod:api && npm run deploy:prod:web",
     "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
     "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
-
     "cmd": "npm --prefix \"scripts\" run cmd",
     "fe": "npm --prervix \"web\" run fe",
     "dev": "npm --prervix \"web\" run dev",
@@ -34,6 +32,6 @@
   },
   "homepage": "https://github.com/Kinecho/cactus#readme",
   "dependencies": {
-    "firebase": "^6.2.3"
+    "firebase": "^6.2.4"
   }
 }

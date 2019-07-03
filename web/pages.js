@@ -220,5 +220,10 @@ module.exports = {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190630",
         "reflectionPrompt": true
+    },
+    "what_makes_freedom_meaningful_to_you": {
+        "title": "What makes freedom meaningful to you?",
+        "path": "/what-makes-freedom-meaningful-to-you",
+        "reflectionPrompt": true
     }
 }
