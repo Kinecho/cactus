@@ -1,5 +1,7 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import {JournalStatus} from "@shared/models/CactusMember";
+import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUtil";
+import {getDateFromISOString} from "@shared/util/DateUtil";
 
 export enum ListMemberStatus {
     subscribed = "subscribed",
@@ -96,5 +98,47 @@ export default class ListMember {
 
     removeMergeField(field:MergeField){
         delete this.merge_fields[field];
+    }
+
+    toFirestoreData(){
+        let data = Object.assign({}, this) as any;
+        data.timestamp_signup = getDateFromISOString(data.timestamp_signup);
+        data.timestamp_opt = getDateFromISOString(data.timestamp_opt);
+
+        if (data.last_note){
+            data.last_note = getDateFromISOString(data.last_note);
+        }
+
+        data = convertDateToTimestamp(this);
+        // console.log("data after converting to dates", data);
+
+        Object.keys(data).forEach(key => {
+            if (data[key] === undefined) {
+                delete data[key];
+            }
+        });
+
+        return data;
+    }
+
+    toJSON(){
+        let data = Object.assign({}, this) as any;
+        data.timestamp_signup = getDateFromISOString(data.timestamp_signup);
+        data.timestamp_opt = getDateFromISOString(data.timestamp_opt);
+
+        if (data.last_note){
+            data.last_note = getDateFromISOString(data.last_note);
+        }
+
+        data = convertDateToJSON(this);
+        // console.log("data after converting to dates", data);
+
+        Object.keys(data).forEach(key => {
+            if (data[key] === undefined) {
+                delete data[key];
+            }
+        });
+
+        return data;
     }
 }

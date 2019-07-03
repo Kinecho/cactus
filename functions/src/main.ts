@@ -1,4 +1,9 @@
 require("module-alias/register");
-import * as main from "./index";
+import {endpoints} from "./index";
 
-exports = main;
+
+/**
+ * this is a special pass-through file to ensure we require & register the module alias mapper before any other code.
+ * This file should not need to be updated. To add new functions, see functions/src/index.ts
+ */
+module.exports = endpoints;

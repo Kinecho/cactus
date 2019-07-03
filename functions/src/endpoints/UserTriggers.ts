@@ -3,15 +3,16 @@ import AdminUserService from "@shared/services/AdminUserService";
 import User from "@shared/models/User";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import {sendActivityNotification} from "@api/slack/slack";
-// import MailchimpService from "@shared/services/MailchimpService";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName} from "@shared/util/StringUtil";
-// import CactusMember from "@shared/models/CactusMember";
-// import {ListMemberStatus} from "@shared/mailchimp/models/ListMember";
+import {ListMemberStatus} from "@shared/mailchimp/models/ListMember";
+import CactusMember from "@shared/models/CactusMember";
+import MailchimpService from "@shared/services/MailchimpService";
+
 
 const userService = AdminUserService.getSharedInstance();
 const memberService = AdminCactusMemberService.getSharedInstance();
-// const mailchimpService = MailchimpService.getSharedInstance();
+const mailchimpService = MailchimpService.getSharedInstance();
 
 export async function onCreate(user:admin.auth.UserRecord):Promise<void>{
     const email = user.email;
@@ -36,24 +37,25 @@ export async function onCreate(user:admin.auth.UserRecord):Promise<void>{
         subscription.lastName = lastName;
         subscription.firstName = firstName;
 
-        //TODO: add back in subscription
-        await sendActivityNotification("New user signed up - need to add them to mailchimp list");
+        await sendActivityNotification(`:wave: ${user.email} has signed up`);
 
-        // const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
-        // if (mailchimpResult.success){
-        //     const mailchimpMember = mailchimpResult.member;
-        //     cactusMember = new CactusMember();
-        //     cactusMember.userId = userId;
-        //     cactusMember.mailchimpListMember = mailchimpMember;
-        //     cactusMember.email = email;
-        //     cactusMember.lastName = lastName;
-        //     cactusMember.firstName = firstName;
-        //     cactusMember.signupAt = new Date();
-        //     cactusMember.signupConfirmedAt = new Date();
-        // }
-        // else {
-        //     console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));
-        // }
+        const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
+        if (mailchimpResult.success){
+            await sendActivityNotification(`Successfully signed ${email} up to mailchimp with status ${mailchimpResult.member}`);
+            const mailchimpMember = mailchimpResult.member ? mailchimpResult.member.toFirestoreData() : undefined;
+            cactusMember = new CactusMember();
+            cactusMember.userId = userId;
+            cactusMember.mailchimpListMember = mailchimpMember;
+            cactusMember.email = email;
+            cactusMember.lastName = lastName;
+            cactusMember.firstName = firstName;
+            cactusMember.signupAt = new Date();
+            cactusMember.signupConfirmedAt = new Date();
+        }
+        else {
+            console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));
+            await sendActivityNotification(`Failed to create mailchimp subscriber for ${user.email}.\n\`\`\`${JSON.stringify(mailchimpResult.error)}\`\`\``);
+        }
     }
 
     if (cactusMember){
@@ -61,6 +63,7 @@ export async function onCreate(user:admin.auth.UserRecord):Promise<void>{
         cactusMember = await memberService.save(cactusMember);
 
         model.cactusMemberId = cactusMember.id;
+        await sendActivityNotification(`Successfully saved ${user.email} to the db \nUserId=${userId}.\nMailchimpMemberId=${cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : 'unknown'}`);
     }
 
 
@@ -69,6 +72,7 @@ export async function onCreate(user:admin.auth.UserRecord):Promise<void>{
 
 }
 
-export function onDelete(user:admin.auth.UserRecord){
+export async function onDelete(user:admin.auth.UserRecord){
+    await sendActivityNotification(`:ghost: ${user.email} has been delete`)
 
 }

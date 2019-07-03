@@ -5,6 +5,7 @@
     "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
     "debug:func": "functions inspect mailchimp",
     "deploy:stage": "firebase deploy --only functions -P stage",
+    "deploy:stage:func": "func() { npx firebase deploy -P stage --only functions:\"$1\"; }; func",
     "deploy:prod": "firebase deploy --only functions -P prod",
     "emulator:start": "firebase emulators:start --only functions",
     "lint": "tslint --project tsconfig.json",

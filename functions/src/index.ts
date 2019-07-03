@@ -17,6 +17,7 @@ MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_
 AdminCactusMemberService.initialize();
 AdminUserService.initialize(config);
 import {setTimestamp} from "@shared/util/FirebaseUtil";
+
 setTimestamp(admin.firestore.Timestamp);
 
 /**
@@ -35,3 +36,12 @@ export const checkout = functions.https.onRequest(checkoutApp);
 export const test = functions.https.onRequest(testApp);
 export const userCreatedTrigger = functions.auth.user().onCreate(onCreate);
 export const userDeletedTrigger = functions.auth.user().onDelete(onDelete);
+
+export const endpoints = {
+    mailchimp,
+    inbound,
+    checkout,
+    test,
+    userCreatedTrigger,
+    userDeletedTrigger,
+};
