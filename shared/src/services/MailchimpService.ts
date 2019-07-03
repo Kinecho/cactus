@@ -35,9 +35,15 @@ import {
     AutomationEmailListResponse,
     AutomationEmail,
     ListMemberListResponse,
-    GetListMembersOptions, UpdateTagResponse, TagResponseError, UpdateMergeFieldResponse
+    GetListMembersOptions,
+    UpdateTagResponse,
+    TagResponseError,
+    UpdateMergeFieldResponse,
+    MergeField,
+    ListMemberStatus,
+    ListMember
 } from "@shared/mailchimp/models/MailchimpTypes";
-import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
+import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
@@ -628,7 +634,7 @@ export default class MailchimpService {
     }
 
     async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
-        const member = new ListMember(subscription.email);
+        const member = new MailchimpListMember(subscription.email);
         member.status = status;
         if (subscription.referredByEmail) {
             member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);

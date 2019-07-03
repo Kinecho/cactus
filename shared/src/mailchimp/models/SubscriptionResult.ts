@@ -1,4 +1,4 @@
-import ListMember from "@shared/mailchimp/models/ListMember";
+import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import ApiError from "@shared/ApiError";
 
 export enum SubscriptionResultStatus {
@@ -9,7 +9,7 @@ export enum SubscriptionResultStatus {
 
 export default class SubscriptionResult {
     success: boolean = false;
-    member?: ListMember;
+    member?: MailchimpListMember;
     error?: ApiError;
     status: SubscriptionResultStatus = SubscriptionResultStatus.unknown
 }

@@ -1,5 +1,5 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import ListMember from "@shared/mailchimp/models/ListMember";
+import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -28,7 +28,7 @@ export default class CactusMember extends BaseModel {
     signupConfirmedAt?:Date;
     userId?:string;
 
-    mailchimpListMember?:ListMember;
+    mailchimpListMember?:MailchimpListMember;
     lastSyncedAt?:Date;
     lastReplyAt?: Date;
 

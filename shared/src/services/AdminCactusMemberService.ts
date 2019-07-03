@@ -1,8 +1,9 @@
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
-import ListMember, {TagName} from "@shared/mailchimp/models/ListMember";
+import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import {TagName} from "@shared/mailchimp/models/MailchimpTypes";
 
 let firestoreService:AdminFirestoreService;
 
@@ -84,7 +85,7 @@ export default class AdminCactusMemberService {
         return member;
     }
 
-    async updateFromMailchimpListMember(listMember:ListMember):Promise<CactusMember|undefined> {
+    async updateFromMailchimpListMember(listMember:MailchimpListMember):Promise<CactusMember|undefined> {
         let cactusMember = await this.getByMailchimpWebId(listMember.web_id);
         if (cactusMember){
             console.log("Got cactus member", cactusMember.email);

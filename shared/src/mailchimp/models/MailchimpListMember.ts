@@ -1,51 +1,16 @@
-import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-import {JournalStatus} from "@shared/models/CactusMember";
+import {
+    ISODate,
+    ListMember,
+    ListMemberStatus,
+    MergeField,
+    MergeFields,
+    Tag
+} from "@shared/mailchimp/models/MailchimpTypes";
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUtil";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
-export enum ListMemberStatus {
-    subscribed = "subscribed",
-    unsubscribed = "unsubscribed",
-    cleaned = "cleaned",
-    pending = "pending"
-}
 
-export enum MergeField {
-    FNAME = "FNAME",
-    LNAME = "LNAME",
-    REF_EMAIL = "REF_EMAIL",
-    LAST_REPLY = "LAST_REPLY",
-    JNL_STATUS = "JNL_STATUS",
-}
-
-
-
-export enum TagName {
-    NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
-    JOURNAL_PREMIUM = "journal_premium",
-}
-
-export enum TagStatus {
-    ACTIVE = "active",
-    INACTIVE = "inactive",
-}
-
-export interface Tag {
-    name?: TagName,
-    id?: string,
-    status?: TagStatus
-}
-
-export enum MergeFieldBoolean {
-    YES = "YES",
-    NO = "NO"
-}
-
-export type MergeFields = {
-    [s in MergeField]?: String|Number|MergeFieldBoolean|JournalStatus;
-};
-
-export default class ListMember {
+export default class MailchimpListMember implements ListMember{
     id?: string;
     web_id?: string;
     email_type?: string;
@@ -62,7 +27,7 @@ export default class ListMember {
     timestamp_signup?: ISODate;
     timestamp_opt?: ISODate;
     email_client?:string;
-    localtion?: {
+    location?: {
         latitude: number,
         longitude: number,
         gmtoff: number, //The time difference in hours from GMT.

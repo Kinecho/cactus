@@ -14,12 +14,17 @@ import {
     TemplateSection,
     UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
-import {Campaign, CampaignType, SendChecklistItemType, TemplateType} from "@shared/mailchimp/models/MailchimpTypes";
+import {
+    Campaign,
+    CampaignType,
+    MergeField,
+    SendChecklistItemType,
+    TemplateType
+} from "@shared/mailchimp/models/MailchimpTypes";
 import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
 import {CactusConfig} from "@shared/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
-import {MergeField} from "@shared/mailchimp/models/ListMember";
 import {Command} from "@scripts/CommandTypes";
 
 export const DEFAULT_MORNING_TEMPLATE_ID = 53353;

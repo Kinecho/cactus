@@ -5,9 +5,9 @@ import AdminCactusMemberService from "@shared/services/AdminCactusMemberService"
 import {sendActivityNotification} from "@api/slack/slack";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName} from "@shared/util/StringUtil";
-import {ListMemberStatus} from "@shared/mailchimp/models/ListMember";
 import CactusMember from "@shared/models/CactusMember";
 import MailchimpService from "@shared/services/MailchimpService";
+import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 
 const userService = AdminUserService.getSharedInstance();
