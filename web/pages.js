@@ -314,5 +314,10 @@ module.exports = {
         "title": "What makes you feel calm, peaceful, or serene?",
         "path": "/what-makes-you-feel-calm-peaceful-or-serene",
         "reflectionPrompt": true
+    },
+    "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713": {
+        "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
+        "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
+        "reflectionPrompt": true
     }
 }
