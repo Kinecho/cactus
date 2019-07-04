@@ -118,4 +118,15 @@ export default class AdminUserService {
         return await firestoreService.getById(id, User);
     }
 
+    /**
+     * Logically delete the user and the corresponding member
+     * @param {string} id
+     * @return {Promise<User | undefined>}
+     */
+    async delete(id:string):Promise<User|undefined> {
+        const deletedUser = await firestoreService.delete(id, User);
+
+        return deletedUser;
+    }
+
 }

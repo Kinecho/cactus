@@ -12,11 +12,11 @@ import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
-import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import bodyParser = require("body-parser");
 import MailchimpService from "@shared/services/MailchimpService";
 import {
+    ListMember,
     MergeField,
     TagName,
     TagStatus,
@@ -198,7 +198,7 @@ async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
 async function sendSlackMessage(email: EmailReply,
                                 prompt?: ReflectionPrompt,
                                 response?: ReflectionResponse,
-                                sentToMember?: MailchimpListMember,
+                                sentToMember?: ListMember,
                                 message = "Got a reply!",
                                 color = AttachmentColor.info):Promise<void> {
     const messageColor = color;

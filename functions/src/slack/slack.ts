@@ -6,7 +6,9 @@ const appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
 const webhook = new IncomingWebhook(appNotificationsWebhookUrl);
 export enum AttachmentColor {
     info = "#83ecf9",
-    error = "#7A3814"
+    error = "#7A3814",
+    success = "#0d7a03",
+    warning = "#FFC947",
 }
 
 export type SlackMessage = IncomingWebhookSendArguments

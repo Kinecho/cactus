@@ -656,9 +656,10 @@ export default class MailchimpService {
                 const data = error.response.data;
                 switch (data.title) {
                     case "Member Exists":
-                        console.warn("User is already on list. Treating as a successful signup", data)
+                        console.warn("User is already on list. Treating as a successful signup", data);
                         result.success = true;
                         result.status = SubscriptionResultStatus.existing_subscriber;
+                        // data
                         break;
                     case "Invalid Resource":
                         console.warn("unable to sign up user", data);
