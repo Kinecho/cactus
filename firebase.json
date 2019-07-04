@@ -46,6 +46,42 @@
                 "destination": "/sign_up.html"
             },
             {
+                "source": "/what-makes-you-feel-calm-peaceful-or-serene",
+                "destination": "/what_makes_you_feel_calm_peaceful_or_serene.html"
+            },
+            {
+                "source": "/what-is-essential-to-your-happiness",
+                "destination": "/what_is_essential_to_your_happiness.html"
+            },
+            {
+                "source": "/how-do-you-benefit-from-moments-of-reflection",
+                "destination": "/how_do_you_benefit_from_moments_of_reflection.html"
+            },
+            {
+                "source": "/when-do-you-feel-completely-free-to-be-yourself",
+                "destination": "/when_do_you_feel_completely_free_to_be_yourself.html"
+            },
+            {
+                "source": "/how-has-friendship-enriched-your-life",
+                "destination": "/how_has_friendship_enriched_your_life.html"
+            },
+            {
+                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190707",
+                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190707.html"
+            },
+            {
+                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190706",
+                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190706.html"
+            },
+            {
+                "source": "/what-does-the-power-to-choose-provide-you",
+                "destination": "/what_does_the_power_to_choose_provide_you.html"
+            },
+            {
+                "source": "/what-makes-freedom-meaningful-to-you",
+                "destination": "/what_makes_freedom_meaningful_to_you.html"
+            },
+            {
                 "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190630",
                 "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190630.html"
             },
