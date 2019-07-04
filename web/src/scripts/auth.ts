@@ -4,10 +4,11 @@ import {showConfirmEmailModal, addModal, LocalStorageKey, showModal} from "@web/
 import {initializeFirebase, getAuth, getFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
+import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
 
-let authUi;
+let authUi:AuthUI;
 
 
 export interface EmailLinkSignupResult {
@@ -23,13 +24,13 @@ export interface EmailLinkSignupResult {
     }
 }
 
-export const emailProvider = (opts) => ({
+export const emailProvider = (opts:any) => ({
     provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
     signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
     forceSameDevice: false,
     emailLinkSignIn: function () {
         return {
-            signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+            signInSuccessWithAuthResult: function (authResult:any, redirectUrl:string|undefined) {
                 console.log("signin from auth link success", authResult);
 
                 authResult.additionalUserInfo.isNewUser;
@@ -116,10 +117,11 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
         return {success: true};
     }
 
-    let email = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
-    if (getAuth().currentUser) {
+    let email:string|undefined|null = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
+    const currentUser = getAuth().currentUser;
+    if (currentUser) {
         console.log("using current user's email");
-        email = getAuth().currentUser.email
+        email = currentUser.email
     }
 
     if (!email) {
@@ -149,7 +151,12 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
         try {
             const authResult = await firebase.auth().signInWithEmailLink(email, window.location.href);
             window.localStorage.removeItem(LocalStorageKey.emailForSignIn);
-            console.log("successfully completed sign in ", authResult.user.toJSON());
+            const resultUser = authResult.user;
+            if (resultUser){
+                console.log("successfully completed sign in ", resultUser.toJSON());
+            }
+
+
         } catch (error) {
             console.error("failed to login with email", error);
             if (error.code === "auth/invalid-email") {

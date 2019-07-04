@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const productParam = getQueryParam(QueryParam.SUBSCRIPTION_PLAN);
 
-    let planId = undefined;
+    let planId:string|undefined = undefined;
 
     if (productParam && productParam.toLowerCase() === "y"){
         planId = Config.stripe.yearlyPlanId;

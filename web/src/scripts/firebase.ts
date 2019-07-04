@@ -6,7 +6,7 @@ import "firebase/auth";
 let isInitialized = false;
 let firebaseApp:firebase.app.App;
 
-export function initializeFirebase(){
+export function initializeFirebase():FirebaseObject{
     if (!isInitialized){
         firebaseApp = firebase.initializeApp(Config.firebase);
         isInitialized = true;

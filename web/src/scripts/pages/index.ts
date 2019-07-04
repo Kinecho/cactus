@@ -2,7 +2,6 @@ import "@styles/pages/index.scss"
 import { configureMailchimpSignupForm, setupJumpToForm} from '@web/mailchimp'
 import {initializeFirebase} from "@web/firebase";
 const firebase = initializeFirebase();
-
 document.addEventListener('DOMContentLoaded', function () {
     console.log("index.js loaded");
 
@@ -11,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log(`Firebase SDK loaded with ${features.join(', ')}`)
     } catch (e) {
         console.error('FAILED TO GET FIREBASE', e);
-        document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     }
 
 

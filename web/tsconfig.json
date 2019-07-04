@@ -2,6 +2,7 @@
     "compilerOptions": {
         "outDir": "./build/",
         "allowJs": true,
+        "strict": true,
         "checkJs": false,
         "module": "commonjs",
         "target": "es5",
@@ -13,12 +14,12 @@
             "@web/*": [
                 "./src/scripts/*"
             ],
-            "@components/*": ["./src/vue/*"],
+            "@components/*": ["./src/scripts/components/*"],
             "@styles/*": [
                 "./src/styles/*"
             ],
             "@shared/*": ["../shared/src/*"],
-            "animations.gsap": ["./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"],
+            "animations.gsap": ["./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"]
 //            "ScrollToPlugin": ["./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/ScrollToPlugin.js"]
 //            "TweenLite": ["./node_modules/gsap/src/uncompressed/TweenLite.js"],
 //            "TweenMax": ["./node_modules/gsap/src/uncompressed/TweenMax.js"],
@@ -27,5 +28,11 @@
         }
     },
     "compileOnSave": false,
+    "include": [
+        "../shared/src/**/*.ts",
+        "..shared/src/**/*.vue",
+        "src/**/*.ts",
+        "src/**/*.vue"
+    ],
     "exclude": ["./public", "./webpack"]
 }

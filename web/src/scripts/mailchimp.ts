@@ -39,8 +39,12 @@ export function configureLoginForm(formId:string){
     }
 
 
-    async function processForm(e) {
+    async function processForm(e:Event) {
         if (e.preventDefault) e.preventDefault();
+        if (!form){
+            return;
+        }
+
         /* do what you want with the form */
         console.log("form submitted", formId);
 
@@ -52,7 +56,7 @@ export function configureLoginForm(formId:string){
         const emailInput = <HTMLInputElement>form.children.namedItem("email");
         const button = <HTMLButtonElement>form.children.namedItem("submit");
         const errors = <HTMLCollection>form.getElementsByClassName("error");
-        let errorDiv:HTMLDivElement = null;
+        let errorDiv:HTMLDivElement|null = null;
         if (errors && errors.length > 0){
             errorDiv = <HTMLDivElement>errors.item(0)
         }
@@ -168,8 +172,13 @@ export function configureMailchimpSignupForm(formId:string){
         return
     }
 
-    async function processForm(e) {
+    async function processForm(e:Event) {
         if (e.preventDefault) e.preventDefault();
+        if (!form){
+            return;
+        }
+
+
         /* do what you want with the form */
         console.log("form submitted", formId);
 
@@ -181,7 +190,7 @@ export function configureMailchimpSignupForm(formId:string){
         const emailInput = <HTMLInputElement>form.children.namedItem("email");
         const button = <HTMLButtonElement>form.children.namedItem("submit");
         const errors = <HTMLCollection>form.getElementsByClassName("error");
-        let errorDiv:HTMLDivElement = null;
+        let errorDiv:HTMLDivElement|null = null;
         if (errors && errors.length > 0){
             errorDiv = <HTMLDivElement>errors.item(0)
         }
@@ -297,15 +306,21 @@ export function setupJumpToForm(buttonClass:string="jump-to-form"){
 
         const scrollToId = button.dataset.scrollTo;
         const doFocus = Boolean(button.dataset.focusForm);
-
+        const focusFormId = button.dataset.focusForm;
         console.log("scrolling to", scrollToId);
+
+        if (!scrollToId){
+            console.log("no content to scroll to");
+            return;
+        }
+
         const content = document.getElementById(scrollToId);
 
         button.addEventListener("click", () => {
             gtag("event", "scroll_to", {formId: scrollToId});
-            content.scrollIntoView();
-            if (doFocus){
-                const form = document.getElementById(button.dataset.focusForm);
+            if (content) content.scrollIntoView();
+            if (doFocus && focusFormId){
+                const form = document.getElementById(focusFormId);
                 if (form){
                     const input = form.getElementsByTagName("input").item(0);
                     if (input) {

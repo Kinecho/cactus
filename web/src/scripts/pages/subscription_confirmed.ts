@@ -20,8 +20,8 @@ getAuth().onAuthStateChanged(async user => {
 function showUserSuccess(user:firebase.User){
     const $success = document.getElementById("success-container");
     const $loading = document.getElementById("loading-container");
-    $success.classList.remove("hidden");
-    $loading.classList.add("hidden");
+    if($success) $success.classList.remove("hidden");
+    if($loading) $loading.classList.add("hidden");
     showShareButtons();
 }
 
@@ -33,28 +33,31 @@ function handleResponse(response:EmailLinkSignupResult){
     const $success = document.getElementById("success-container");
     const $error = document.getElementById("error-container");
     const $loading = document.getElementById("loading-container");
-    const $container = document.getElementById("page-container");
     const $continueContainer = document.getElementById("continue-container");
 
-    $loading.classList.add("hidden");
+    if($loading) $loading.classList.add("hidden");
     if (response.success){
-        $success.classList.remove("hidden");
+        if($success) $success.classList.remove("hidden");
         showShareButtons();
-    } else if (response.error){
+    } else if (response.error && $error){
         $error.classList.remove("hidden");
         // document.getE
         if (response.error){
-            $error.getElementsByClassName("title").item(0).textContent = response.error.title;
-            $error.getElementsByClassName("message").item(0).textContent = response.error.message;
+            const $title = $error.getElementsByClassName("title").item(0) ;
+            const $message = $error.getElementsByClassName("message").item(0);
+            if ($title) $title.textContent = response.error.title;
+            if ($message) $message.textContent = response.error.message;
         }
     }
 
-    if (response.continue){
+    if (response.continue && $continueContainer){
         const $button = $continueContainer.getElementsByTagName("a").item(0);
-        $button.text = response.continue.title;
-        $button.href = response.continue.url;
+        if ($button){
+            $button.text = response.continue.title;
+            $button.href = response.continue.url;
+        }
         $continueContainer.classList.remove("hidden")
-    } else {
+    } else if ($continueContainer) {
         $continueContainer.classList.add("hidden")
     }
 }

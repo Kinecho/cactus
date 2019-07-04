@@ -14,7 +14,7 @@ import {gtag} from "@web/analytics";
 // declare interface Stripe{}
 //
 interface CactusStripe extends Stripe {
-    redirectToCheckout(options?: any);
+    redirectToCheckout(options?: any):{error?: {message?:string}};
 
 }
 
@@ -104,7 +104,9 @@ export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.m
         // If `redirectToCheckout` fails due to a browser or network
         // error, display the localized error message to your customer.
         const displayError = document.getElementById('stripe-error-message');
-        displayError.textContent = result.error.message;
+        if (displayError){
+            displayError.textContent = result.error.message || "Unknown error";
+        }
     }
 
 }
@@ -120,6 +122,9 @@ export function configureStripe(checkoutButtonId: string, planId: string = Confi
     // @ts-ignore
 
     const checkoutButton = document.getElementById(checkoutButtonId);
+    if (!checkoutButton){
+        return;
+    }
     checkoutButton.addEventListener('click', async () => {
         // When the customer clicks on the button, redirect
         // them to Checkout.

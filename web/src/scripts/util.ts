@@ -11,7 +11,7 @@ function createElementFromString(htmlString:string):ChildNode{
     div.innerHTML = htmlString.trim();
 
     // Change this to div.childNodes to support multiple top-level nodes
-    return div.firstChild;
+    return div.firstChild as ChildNode;
 }
 
 function addModalCloseListener(){
@@ -19,6 +19,10 @@ function addModalCloseListener(){
     Array.from(buttons).forEach(button => {
         button.addEventListener("click", () => {
             const modalId = button.dataset.for;
+            if (!modalId){
+                console.error("Unable to get modal as the modal ID was null");
+                return;
+            }
             const modal = <HTMLDivElement> document.getElementById(modalId);
             modal.classList.add("hidden");
             modal.classList.remove("open");
@@ -76,6 +80,10 @@ export function showConfirmEmailModal(options: {
 
         // modal.child
         const $content = modal.getElementsByClassName("modal-content").item(0);
+        if (!$content){
+            console.error("unable to create modal content");
+            return;
+        }
         const $emailInput = createElementFromString(`<input type="email" class="email-confirm" name="email" autocomplete="username" placeholder="Enter your email"/>`) as HTMLInputElement;
         // $emailInput.addEventListener("")
 

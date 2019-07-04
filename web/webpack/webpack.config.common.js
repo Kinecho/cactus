@@ -5,6 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const pages = require('./../pages')
 const helpers = require("./../helpers")
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const WebpackNotifierPlugin = require('webpack-notifier');
 
 
 let jsEntries = Object.keys(pages).reduce((entries, title) => {
@@ -14,7 +16,7 @@ let jsEntries = Object.keys(pages).reduce((entries, title) => {
 
 
 module.exports = function(config){
-
+    const isDev = config.isDev || false;
     let parsedConfig = {}
     Object.keys(config).forEach(key => {
         parsedConfig[key] = JSON.stringify(config[key])
@@ -24,8 +26,8 @@ module.exports = function(config){
         entry: jsEntries,
         output: {
             path: helpers.publicDir,
-            chunkFilename: '[name].js',
-            filename: '[name].[hash].js',
+            // chunkFilename: '[name].js',
+            filename: isDev ? '[name].js' : '[name].[hash].js',
             publicPath: "/"
         },
         resolve: {
@@ -64,15 +66,13 @@ module.exports = function(config){
                     test: /\.vue$/,
                     loader: 'vue-loader'
                 },
-                // {
-                //     test: /\.ts$/,
-                //     exclude: /node_modules/,
-                //     loader: 'awesome-typescript-loader',
-                // },
                 {
                     test: /\.ts$/,
                     loader: 'ts-loader',
-                    options: { appendTsSuffixTo: [/\.vue$/] }
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/],
+                        transpileOnly: true
+                    }
                 },
                 {
                     test: /\.scss$/,
@@ -107,9 +107,10 @@ module.exports = function(config){
             ],
         },
         plugins: [
+            new ForkTsCheckerWebpackPlugin(),
             new MiniCssExtractPlugin({
-                filename: '[id].[hash].css',
-                chunkFilename: '[id].[hash].css',
+                filename: isDev ? '[name].css' : '[id].[hash].css',
+                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
             }),
             ...Object.keys(pages).map(filename => {
                 const page = pages[filename]
@@ -123,6 +124,11 @@ module.exports = function(config){
             }),
             new webpack.DefinePlugin(parsedConfig),
             new VueLoaderPlugin(),
+            new WebpackNotifierPlugin({
+                title: "Webpack",
+                alwaysNotify: true,
+                contentImage: path.join(helpers.webpackDir, "cactus-square.png")
+            }),
         ],
     };
 }
