@@ -16,9 +16,9 @@ const minimizers = [
 module.exports = {
     optimization: {
         minimizer: minimizers,
-        splitChunks: {
-            chunks: 'all'
-        }
+        // splitChunks: {
+        //     chunks: 'all'
+        // }
     },
 
 };

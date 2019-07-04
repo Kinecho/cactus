@@ -18,13 +18,13 @@
         "predeploy": [
             "npm --prefix \"$RESOURCE_DIR\" run lint",
             "npm --prefix \"$RESOURCE_DIR\" run test",
-            "npm --prefix \"$RESOURCE_DIR\" run build --max-old-space-size=2048"
+            "npm --prefix \"$RESOURCE_DIR\" run build"
         ]
     },
     "hosting": {
         "appAssociation": "AUTO",
         "predeploy": [
-            "npm --prefix ./web run predeploy --max-old-space-size=2048"
+            "npm --prefix ./web run build:firebase"
         ],
         "public": "web/public",
         "ignore": [

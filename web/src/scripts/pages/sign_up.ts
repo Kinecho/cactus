@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const $loading = document.getElementById("third-party-loading");
     configureLoginForm("email-signup");
 
+
     const ui = getAuthUI();
     const config = getAuthUIConfig({signInSuccessPath: PageRoute.SIGNUP_CONFIRMED, emailLinkSignInPath: PageRoute.SIGNUP});
 
