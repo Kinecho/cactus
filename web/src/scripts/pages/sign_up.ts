@@ -1,6 +1,7 @@
 import "@styles/pages/sign_up.scss"
 import {getAuthUI, getAuthUIConfig} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
+import {PageRoute} from "@web/PageRoutes";
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("sign_up loaded");
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     configureLoginForm("email-signup");
 
     const ui = getAuthUI();
-    const config = getAuthUIConfig({signInSuccessPath: "/confirmed", emailLinkSignInPath: "/signup"});
+    const config = getAuthUIConfig({signInSuccessPath: PageRoute.SIGNUP_CONFIRMED, emailLinkSignInPath: PageRoute.SIGNUP});
 
     if (ui.isPendingRedirect()) {
         console.log("Is pending redirect.... need to log the user in");

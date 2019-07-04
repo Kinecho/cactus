@@ -3,6 +3,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {showConfirmEmailModal, addModal, LocalStorageKey, showModal} from "@web/util";
 import {initializeFirebase, getAuth, getFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
+import {PageRoute} from "@web/PageRoutes";
 
 const firebase = initializeFirebase();
 
@@ -42,7 +43,7 @@ export const emailProvider = (opts) => ({
             // sign-in completion in signInSuccess callback by checking
             // window.location.href.
             url: `${Config.domain}${opts.emailLinkSignInPath}`,
-            continueUrl: `${Config.domain}/signup`,
+            continueUrl: `${Config.domain}${PageRoute.SIGNUP}`,
             // Custom FDL domain.
             dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
             // Always true for email link sign-in.
@@ -102,8 +103,8 @@ export function createAuthModal(): string {
 
     const ui = getAuthUI();
     ui.start(`#${modalId} > div`, getAuthUIConfig({
-        signInSuccessPath: "/confirmed",
-        emailLinkSignInPath: "/confirmed"
+        signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
+        emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED
     }));
     return modalId;
 }
@@ -162,7 +163,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
                     },
                     continue: {
                         title: "Sign In",
-                        url: "/signup",
+                        url: PageRoute.SIGNUP,
                     }
                 };
             }
@@ -180,7 +181,7 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     const email = subscription.email;
     try {
         await firebase.auth().sendSignInLinkToEmail(email, {
-            url: `${Config.domain}/confirmed`,
+            url: `${Config.domain}${PageRoute.SIGNUP_CONFIRMED}`,
             handleCodeInApp: true,
         });
         window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);

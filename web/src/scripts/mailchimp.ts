@@ -156,7 +156,7 @@ export function configureLoginForm(formId:string){
 
 }
 
-export function configureSignupForm(formId:string){
+export function configureMailchimpSignupForm(formId:string){
     const form = document.getElementById(formId);
 
     if (!form){
@@ -242,12 +242,16 @@ export function configureSignupForm(formId:string){
             if (signupResult.success){
                 const modalId = "signup-success-modal";
                 hideError();
-                addModal(modalId, {title: "Success!", message: `Look for the confirmation email in your ${emailAddress} inbox.`});
+                addModal(modalId, {
+                    title: "Success!",
+                    message: `Look for the confirmation email in your ${emailAddress} inbox.`,
+                    imageUrl: '/assets/images/success.svg',
+                    imageAlt: 'Success!',
+                });
                 gtag('event', 'email_signup_success', {
                     event_category: "email_signup",
                     event_label: `${formId}`,
-                    imageUrl: '/assets/images/success.svg',
-                    imageAlt: 'Success!',
+
                 });
                 showModal(modalId);
 

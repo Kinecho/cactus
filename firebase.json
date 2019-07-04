@@ -42,7 +42,7 @@
                 "dynamicLinks": true
             },
             {
-                "source": "/signup",
+                "source": "/signup-abc-123",
                 "destination": "/sign_up.html"
             },
             {
