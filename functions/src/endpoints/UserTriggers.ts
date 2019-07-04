@@ -13,8 +13,9 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import MailchimpService from "@shared/services/MailchimpService";
-import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import {formatDate} from "@shared/util/DateUtil";
 
 
 const userService = AdminUserService.getSharedInstance();
@@ -32,16 +33,6 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     const attachments = [attachment];
     const slackMessage: SlackMessage = {attachments: attachments};
 
-    if (!email) {
-        await sendActivityNotification(":rotating_light: No email found on newly created Admin user " + user.uid);
-        return;
-    }
-
-    const model = new User();
-    model.createdAt = new Date();
-    model.email = user.email;
-    model.id = userId;
-
     fields.push({
         title: "User ID",
         value: userId,
@@ -49,7 +40,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     });
 
     fields.push({
-        title: "Providers",
+        title: "Sign-in Method(s)",
         value: user.providerData.map(p => p.providerId).join(", "),
         short: false
     });
@@ -79,73 +70,74 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         })
     }
 
+    if (!email) {
+        attachment.text = ":warning: No email found on newly created Admin user " + user.uid;
+        // await sendActivityNotification(slackMessage);
 
-    let cactusMember = await memberService.getMemberByEmail(email);
+    }
+    let cactusMember:CactusMember|undefined;
+    let mailchimpMember:ListMember|undefined;
+    if (email){
+        cactusMember = await memberService.getMemberByEmail(email);
 
-    if (!cactusMember) {
-        const {firstName, lastName} = destructureDisplayName(displayName);
-        const subscription: SubscriptionRequest = new SubscriptionRequest(email);
-        subscription.lastName = lastName;
-        subscription.firstName = firstName;
+        if (!cactusMember) {
+            const {firstName, lastName} = destructureDisplayName(displayName);
+            const subscription: SubscriptionRequest = new SubscriptionRequest(email);
+            subscription.lastName = lastName;
+            subscription.firstName = firstName;
 
-        const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
-        if (mailchimpResult.success) {
-            let mailchimpMember = mailchimpResult.member;
-            cactusMember = new CactusMember();
-            cactusMember.userId = userId;
+            const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
+            if (mailchimpResult.success) {
+                mailchimpMember = mailchimpResult.member;
 
-            cactusMember.email = email;
-            cactusMember.lastName = lastName;
-            cactusMember.firstName = firstName;
-            cactusMember.signupAt = new Date();
-            cactusMember.signupConfirmedAt = new Date();
-            if (!mailchimpMember && mailchimpResult.status === SubscriptionResultStatus.existing_subscriber){
-                mailchimpMember = await mailchimpService.getMemberByEmail(cactusMember.email);
-            }
-
-            cactusMember.mailchimpListMember = mailchimpMember;
-            if (mailchimpMember) {
-                let webId = mailchimpMember.web_id || '--';
-                if (mailchimpMember.web_id) {
-                    webId = `<https://us20.admin.mailchimp.com/lists/members/view?id=${mailchimpMember.web_id}|${mailchimpMember.web_id}>`
+                if (!mailchimpMember && mailchimpResult.status === SubscriptionResultStatus.existing_subscriber){
+                    mailchimpMember = await mailchimpService.getMemberByEmail(email);
                 }
 
-                fields.push(
-                    {
-                        title: "Mailchimp Status",
-                        value: `${mailchimpMember.status || 'not sure'}`,
-                        short: true,
-                    }, {
-                        title: "Mailchimp Member Web ID",
-                        value: webId,
-                        short: false
-                    }, {
-                        title: "Mailchimp Member ID",
-                        value: mailchimpMember.id || '--',
-                        short: false
-                    });
+                fields.push({
+                    title: "Existing Cactus Member",
+                    value: `Nope, brand new!`,
+                    short: false,
+                });
+
+                cactusMember = new CactusMember();
+                cactusMember.userId = userId;
+
+                cactusMember.email = email;
+                cactusMember.lastName = lastName;
+                cactusMember.firstName = firstName;
+                cactusMember.signupAt = new Date();
+                cactusMember.signupConfirmedAt = new Date();
+
+                cactusMember.mailchimpListMember = mailchimpMember;
             }
-        }
-        // else if (mailchimpResult.status === SubscriptionResultStatus.existing_subscriber){
-        //     attachments.push({
-        //         title: ":warning: User is an existing subscriber",
-        //         text: "This case is not handled automatically - we'll need to manually resolve it.",
-        //         color: "warning",
-        //     })
-        // }
-        else {
-            console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));
-            attachments.push({
-                text: `Failed to save mailchimp list member\n\`\`\`${JSON.stringify(mailchimpResult.error, null, 2)}\`\`\``,
-                color: AttachmentColor.error
-            });
+            else {
+                console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));
+                attachments.push({
+                    text: `Failed to save mailchimp list member\n\`\`\`${JSON.stringify(mailchimpResult.error, null, 2)}\`\`\``,
+                    color: AttachmentColor.error
+                });
+            }
+        } else {
+            fields.push({
+                title: "Existing Cactus Member",
+                value: `Yes, since ${formatDate(cactusMember.signupAt || cactusMember.createdAt) || 'unknown'}`,
+                short: false,
+            })
         }
     }
+
+
+    const model = new User();
+    model.createdAt = new Date();
+    model.email = user.email;
+    model.id = userId;
+    model.phoneNumber = user.phoneNumber;
 
     if (cactusMember) {
         cactusMember.userId = userId;
         cactusMember = await memberService.save(cactusMember);
-
+        mailchimpMember = cactusMember.mailchimpListMember;
         model.cactusMemberId = cactusMember.id;
         fields.push({
             title: "Cactus Member ID",
@@ -154,9 +146,31 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         })
     }
 
+    if (mailchimpMember) {
+        let webId = mailchimpMember.web_id || '--';
+        if (mailchimpMember.web_id) {
+            webId = `<https://us20.admin.mailchimp.com/lists/members/view?id=${mailchimpMember.web_id}|${mailchimpMember.web_id}>`
+        }
+
+        fields.push(
+            {
+                title: "Mailchimp Status",
+                value: `${mailchimpMember.status || 'not sure'}`,
+                short: true,
+            }, {
+                title: "Mailchimp Member Web ID",
+                value: webId,
+                short: false
+            }, {
+                title: "Mailchimp Member ID",
+                value: mailchimpMember.id || '--',
+                short: false
+            });
+    }
+
 
     const savedModel = await userService.save(model);
-    attachment.title = `${user.email} has signed up :wave:`;
+    attachment.title = `${user.email || user.phoneNumber} has signed up :wave:`;
     console.log("Saved user to db. UserId = ", savedModel.id);
     attachment.ts = `${(new Date()).getTime() / 1000}`;
 
@@ -203,7 +217,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
     }
 
     fields.push({
-        title: "Providers",
+        title: "Sign-in Method(s)",
         value: user.providerData.map(p => p.providerId).join(", "),
         short: false
     });

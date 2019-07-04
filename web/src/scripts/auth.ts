@@ -23,57 +23,60 @@ export interface EmailLinkSignupResult {
 }
 
 export const emailProvider = (opts) => ({
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-        forceSameDevice: false,
-        emailLinkSignIn: function () {
-            return {
-                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-                    console.log("signin from auth link success", authResult);
+    provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+    signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+    forceSameDevice: false,
+    emailLinkSignIn: function () {
+        return {
+            signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                console.log("signin from auth link success", authResult);
 
-                    authResult.additionalUserInfo.isNewUser;
-                    if (redirectUrl) {
-                        console.log("redirecting to redirect url", redirectUrl);
-                        // window.location = redirectUrl;
-                    }
-                    return false;
-                },
-                // Additional state showPromo=1234 can be retrieved from URL on
-                // sign-in completion in signInSuccess callback by checking
-                // window.location.href.
-                url: `${Config.domain}${opts.emailLinkSignInPath}`,
-                continueUrl: `${Config.domain}/signup`,
-                // Custom FDL domain.
-                dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
-                // Always true for email link sign-in.
-                handleCodeInApp: true,
+                authResult.additionalUserInfo.isNewUser;
+                if (redirectUrl) {
+                    console.log("redirecting to redirect url", redirectUrl);
+                    // window.location = redirectUrl;
+                }
+                return false;
+            },
+            // Additional state showPromo=1234 can be retrieved from URL on
+            // sign-in completion in signInSuccess callback by checking
+            // window.location.href.
+            url: `${Config.domain}${opts.emailLinkSignInPath}`,
+            continueUrl: `${Config.domain}/signup`,
+            // Custom FDL domain.
+            dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
+            // Always true for email link sign-in.
+            handleCodeInApp: true,
 
-            };
-        }
-    });
+        };
+    }
+});
 
-export function getAuthUIConfig(opts:{signInSuccessPath:string, emailLinkSignInPath?:string}) {
+function getPhoneProviderConfig() {
+    return {
+        provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+        recaptchaParameters: {
+            type: 'image', // 'audio'
+            size: 'invisible', // 'invisible' or 'compact' or 'normal'
+            badge: 'bottomleft' //' bottomright' or 'inline' applies to invisible.
+        },
+        defaultCountry: 'US', // Set default country to the United Kingdom (+44).
+        defaultNationalNumber: '1234567890',
+    };
+}
+
+export function getAuthUIConfig(opts: { signInSuccessPath: string, emailLinkSignInPath?: string }) {
     return {
         signInSuccessUrl: opts.signInSuccessPath,
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions: [
-            // Leave the lines as is for the providers you want to offer your users.
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             firebase.auth.FacebookAuthProvider.PROVIDER_ID,
             firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-            // firebase.auth.GithubAuthProvider.PROVIDER_ID,
-            // firebase.auth.EmailAuthProvider.PROVIDER_ID,
-            {
-                provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
-                recaptchaParameters: {
-                    type: 'image', // 'audio'
-                    size: 'invisible', // 'invisible' or 'compact' or 'normal'
-                    badge: 'bottomleft' //' bottomright' or 'inline' applies to invisible.
-                },
-                defaultCountry: 'US', // Set default country to the United Kingdom (+44).
-                defaultNationalNumber: '1234567890',
-            },
+            // getPhoneProviderConfig(),
+            // emailProvider(opts)
+
         ],
         // tosUrl: 'https://www.kinecho.com/terms-of-service',
         // privacyPolicyUrl: 'https://kinecho.com/policies/privacy'
@@ -98,11 +101,14 @@ export function createAuthModal(): string {
     addModal(modalId, {});
 
     const ui = getAuthUI();
-    ui.start(`#${modalId} > div`, getAuthUIConfig({signInSuccessPath: "/confirmed", emailLinkSignInPath: "/confirmed"}));
+    ui.start(`#${modalId} > div`, getAuthUIConfig({
+        signInSuccessPath: "/confirmed",
+        emailLinkSignInPath: "/confirmed"
+    }));
     return modalId;
 }
 
-export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSignupResult> {
+export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSignupResult> {
     const isSignIn = firebase.auth().isSignInWithEmailLink(window.location.href);
     if (!isSignIn) {
         console.log("isSignIn is false");
@@ -110,7 +116,7 @@ export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSig
     }
 
     let email = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
-    if (getAuth().currentUser){
+    if (getAuth().currentUser) {
         console.log("using current user's email");
         email = getAuth().currentUser.email
     }
@@ -121,9 +127,9 @@ export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSig
             message: "Please enter the email address that you signed up with",
             error,
         });
-        if (canceled){
+        if (canceled) {
             return {
-                success:false,
+                success: false,
                 error: {
                     title: "Oh no!",
                     message: "Unable to confirm your subscription.",
@@ -138,17 +144,16 @@ export async function handleEmailLinkSignIn(error?:string): Promise<EmailLinkSig
         console.log("got confirmed email", email);
     }
 
-    if (email){
+    if (email) {
         try {
             const authResult = await firebase.auth().signInWithEmailLink(email, window.location.href);
             window.localStorage.removeItem(LocalStorageKey.emailForSignIn);
             console.log("successfully completed sign in ", authResult.user.toJSON());
-        } catch (error){
+        } catch (error) {
             console.error("failed to login with email", error);
-            if (error.code === "auth/invalid-email"){
+            if (error.code === "auth/invalid-email") {
                 return handleEmailLinkSignIn("The email you entered does not match the email used to sign in.");
-            }
-            else if (error.code === "auth/invalid-action-code"){
+            } else if (error.code === "auth/invalid-action-code") {
                 return {
                     success: false,
                     error: {

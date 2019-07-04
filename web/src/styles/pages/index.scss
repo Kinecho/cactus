@@ -86,7 +86,7 @@ header {
     grid-area: form;
     justify-content: center;
     padding-top: 3.2rem;
-
+    z-index: 2;
     @include r(768) {
       background-color: transparent;
       justify-content: flex-start;

@@ -12,6 +12,13 @@ export function getMailchimpDateString(date:Date=new Date()):string{
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
+export function formatDate(date?:Date, format="yyyy-LL-dd"): string|undefined{
+    if (!date){
+        return;
+    }
+    return DateTime.fromJSDate(date).toFormat(format);
+}
+
 export function makeUTCDateIntoMailchimpDate(date:Date, keepTime:boolean=false, timezone=mailchimpTimeZone):string {
     let dateWithZone = DateTime.fromJSDate(date).setZone(timezone);
     if (keepTime){
