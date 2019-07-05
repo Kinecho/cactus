@@ -319,5 +319,10 @@ module.exports = {
         "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
         "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
         "reflectionPrompt": true
+    },
+    "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714": {
+        "title": "What three things are you looking forward to experiencing this week?",
+        "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
+        "reflectionPrompt": true
     }
 }

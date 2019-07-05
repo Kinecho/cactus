@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+
+    <!--
+      Mailchimp style sheet - might not need it, but is useful for error responses from form validation, etc
+      for overriding mailchimp styles
+      https://mailchimp.com/help/css-hooks-for-customizing-forms/?_ga=2.182420327.1706163018.1558414964-1765411640.1547337406
+     -->
+    <!--<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">-->
+
+    <meta name="description" content="Anticipate the gifts and benefits of the experiences you are looking forward to.">
+    <meta name="og:site_name" content="Cactus">
+    <meta name="og:title" content="What three things are you looking forward to experiencing this week?">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-image.png?alt=media&token=b2d52de3-ecc5-42f4-a401-f4158d1c4296">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:description" content="Anticipate the gifts and benefits of the experiences you are looking forward to.">
+    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Ftwitter-image.png?alt=media&token=a26531e8-3add-4459-be15-c2a14ae2d9ff">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@itscalledcactus">
+    <meta name="twitter:title" content="What three things are you looking forward to experiencing this week?">
+    <meta name="twitter:description" content="Anticipate the gifts and benefits of the experiences you are looking forward to.">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700&display=swap" rel="stylesheet">
+
+    <meta name="theme-color" content="#33CCAB">
+
+    <!--note CSS is included via webpack-->
+    <script async src="https://www.googletagmanager.com/gtag/js"></script>
+</head>
+
+<body>
+<header>
+    <a href="/"><img class="logo" src="assets/images/logo.svg" alt="Cactus logo" /></a>
+    <a class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign Up Free</a>
+</header>
+<h1>What three things are you looking forward to experiencing this week?</h1>
+<div class="graphicContainer">
+    <img class="graphic" src="assets/images/scooter2.svg" alt="" />
+</div>
+<div class="centered gridContainer">
+    <h2>Inspiration</h2>
+    <aside class="quote">
+        <p class="quoteText">"We become what we think about."</p>
+        <div class="source">
+            <img class="avatarImg" src="assets/images/napoleon.svg" alt="" />
+            <p class="name">Napoleon Hill<span class="byline">Self-help author</span></p>
+        </div>
+    </aside>
+    <div class="content">
+        <p>Self-help author Napoleon Hill writes, “We become what we think about.” So let’s think about the best parts of the week ahead.</p>
+        <p>Researchers Dina Nir and Hadassah Littman-Ovadia found that a brief, future-focused optimism practice buffers us against pessimism, negative affect, and emotional exhaustion, while boosting our optimism. Let’s think about what we’re looking forward to, and anticipate the best parts of the week ahead.</p>
+        <h2>Gratitude</h2>
+        <p>Anticipate the gifts and benefits of the experiences you are looking forward to. Visualize yourself experiencing the best parts of your week, allowing the appreciation you have for their presence in your life to wash over you.</p>
+        <h2>Intention</h2>
+        <p>Take stock of the simple pleasures and opportunities that await you. An abundance of gifts and benefits are available to us, <strong>should we choose to focus on them</strong>.</p>
+    </div>
+</div>
+<div id="signupAnchor"></div>
+<div class="centered">
+    <section class="email">
+        <h2 class="emailHeader">A Reflection a Day…</h2>
+        <p class="subtext">A Different Kind of Mindfulness</p>
+        <form id="email-form-bottom" class="lower">
+            <div class="alert error hidden">Sorry, looks like we have issues.</div>
+            <input type="email" name="email" placeholder="Enter your email address"/>
+            <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
+        </form>
+    </section>
+</div>
+<footer class="lifted">
+    <div class="centered">
+        <div class="footerInfo">
+            <img class="logomark" src="assets/images/logoMark.svg" alt="" />
+            <p class="copyright">&copy; 2019 Cactus.<br />
+                All rights reserved.</p>
+        </div>
+        <nav class="socialLinks">
+            <a class="link" href="https://www.facebook.com/itscalledcactus" target="_blank"><img class="icon" src="assets/images/facebook.svg" alt="facebook" /></a>
+            <a class="link" href="https://twitter.com/itscalledcactus" target="_blank"><img class="icon" src="assets/images/twitter.svg" alt="twitter" /></a>
+            <a class="link" href="https://www.linkedin.com/company/19185975" target="_blank"><img class="icon" src="assets/images/linkedin.svg" alt="linkedin" /></a>
+            <a class="link" href="https://www.instagram.com/itscalledcactus/" target="_blank"><img class="icon" src="assets/images/instagram.svg" alt="instagram" /></a>
+            <a class="link" href="https://www.pinterest.com/itscalledcactus/" target="_blank"><img class="icon" src="assets/images/pinterest.svg" alt="pinterest" /></a>
+            <a class="link" href="https://itscalledcactus.tumblr.com/" target="_blank"><img class="icon" src="assets/images/tumblr.svg" alt="tumblr" /></a>
+        </nav>
+    </div>
+</footer>
+</body>
+</html>
