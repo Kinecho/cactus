@@ -324,5 +324,10 @@ module.exports = {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
         "reflectionPrompt": true
+    },
+    "what_brings_out_your_playful_side": {
+        "title": "What brings out your playful side?",
+        "path": "/what-brings-out-your-playful-side",
+        "reflectionPrompt": true
     }
 }
