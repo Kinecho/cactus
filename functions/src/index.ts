@@ -1,4 +1,3 @@
-import {backupFirestore} from "@api/endpoints/DataExportJob";
 
 require("module-alias/register");
 import * as functions from 'firebase-functions';
@@ -28,6 +27,7 @@ import mailchimpApp from "@api/endpoints/mailchimpApp";
 import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
 import testApp from "@api/endpoints/testApp";
+import {backupFirestore} from "@api/endpoints/DataExportJob";
 
 
 export const mailchimp = functions.https.onRequest(mailchimpApp);
@@ -35,4 +35,4 @@ export const inbound = functions.https.onRequest(inboundApp);
 export const checkout = functions.https.onRequest(checkoutApp);
 export const test = functions.https.onRequest(testApp);
 
-export const firerstoreBackup = functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore);
+export const firestoreBackup = functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore);

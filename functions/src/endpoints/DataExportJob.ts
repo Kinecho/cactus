@@ -3,18 +3,24 @@ import * as functions from "firebase-functions";
 import {JWT} from "google-auth-library";
 import axios from "axios";
 import {sendEngineeringMessage} from "@api/slack/slack";
-
+import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 const Config = getConfig();
+
+const firestoreService = AdminFirestoreService.getSharedInstance();
 
 const defaultScopes = [
     "https://www.googleapis.com/auth/datastore",
     "https://www.googleapis.com/auth/cloud-platform",
 ];
 
-export async function backupFirestore(message: functions.pubsub.Message, context: functions.EventContext):Promise<void>{
+export async function backupFirestore(message?: functions.pubsub.Message, context?: functions.EventContext):Promise<void>{
     const serviceAccount = Config.firestore_backups_service_account;
     const backupsConfig = Config.backups_config;
-    await initializeBackup(serviceAccount.project_id,  backupsConfig.firestore_backups_bucket)
+    const collectionIds = await getCollectionIds();
+    console.log("collectionIds", collectionIds);
+    await sendEngineeringMessage(`Backing up collections: ${collectionIds.join(", ")}\nsaving to bucket: ${backupsConfig.firestore_backups_bucket}`);
+
+    await initializeBackup(serviceAccount.project_id,  backupsConfig.firestore_backups_bucket, collectionIds)
 }
 
 /**
@@ -24,6 +30,12 @@ export async function backupFirestore(message: functions.pubsub.Message, context
  */
 function buildExportUrl(projectId:string):string {
     return `https://firestore.googleapis.com/v1beta1/projects/${projectId}/databases/(default):exportDocuments`;
+}
+
+
+async function getCollectionIds(){
+    const collections = await firestoreService.listCollections();
+    return collections.map(collection => collection.id);
 }
 
 
@@ -64,14 +76,16 @@ async function getAuthHeaders():Promise<{[key: string]: string}>{
  */
 async function initializeBackup(projectId:string, outputBucket:string, collectionIds?:string[]) {
     console.log("starting backup job for project", projectId);
+    console.log("output bucket", outputBucket);
     const exportUrl = buildExportUrl(projectId);
     console.log("got access token and exportUrl = ", exportUrl);
     try {
         const response = await axios.post(exportUrl, {
-            outputUriPrefix: outputBucket,
+            outputUriPrefix: `gs://${outputBucket}`,
             collectionIds,
         }, {
             headers: {
+                "Content-Type": "application/json",
                 ...(await getAuthHeaders()),
             },
         });

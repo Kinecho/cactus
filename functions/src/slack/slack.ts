@@ -151,14 +151,14 @@ export async function sendMessage(channelName: ChannelName, message: string|Chat
 }
 
 export async function sendEngineeringMessage(message: string|ChatMessage):Promise<void>{
-    return await sendMessage(ChannelName.engineering, message);
+    await sendMessage(ChannelName.engineering, message);
 }
 
 export async function sendGeneralMessage(message: string|ChatMessage):Promise<void>{
-    return await sendMessage(ChannelName.general, message);
+    await sendMessage(ChannelName.general, message);
 }
 
 
 export async function sendActivityMessage(message: string|ChatMessage):Promise<void>{
-    return await sendMessage(ChannelName.activity, message);
+    await sendMessage(ChannelName.activity, message);
 }
