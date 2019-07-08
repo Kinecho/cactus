@@ -24,7 +24,7 @@
     "hosting": {
         "appAssociation": "AUTO",
         "predeploy": [
-            "npm --prefix ./web run predeploy"
+            "npm --prefix ./web run build:firebase"
         ],
         "public": "web/public",
         "ignore": [
@@ -34,6 +34,17 @@
         ],
         "rewrites": [
             {
+                "source": "/p/**",
+                "dynamicLinks": true
+            },
+            {
+                "source": "/s/**",
+                "dynamicLinks": true
+            },
+            {
+                "source": "/signup-abc-123",
+                "destination": "/sign_up.html"
+            },
                 "source": "/what-brings-out-your-playful-side",
                 "destination": "/what_brings_out_your_playful_side.html"
             },
@@ -80,14 +91,6 @@
             {
                 "source": "/what-makes-freedom-meaningful-to-you",
                 "destination": "/what_makes_freedom_meaningful_to_you.html"
-            },
-            {
-                "source": "/p/**",
-                "dynamicLinks": true
-            },
-            {
-                "source": "/s/**",
-                "dynamicLinks": true
             },
             {
                 "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190630",

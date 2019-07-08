@@ -6,6 +6,7 @@ module.exports = function (config) {
         devServer: {
             open: false,
             contentBase: helpers.srcDir,
+            stats: "errors-warnings",
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [

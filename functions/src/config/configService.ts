@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions"
 import {Environment, getEnvironment} from "@api/config/environmentManager";
-import {CactusConfig} from "@api/config/CactusConfig";
+import {CactusConfig} from "@shared/CactusConfig";
 
 let _config:CactusConfig;
 
@@ -37,6 +37,13 @@ function buildMockConfig():CactusConfig {
         stripe: {
             api_key: "test_api_key",
             secret_key: "test_secret_key",
+        },
+        dynamic_links: {
+            domain: "cactus-app-stage.web.app",
+            prefix: "",
+        },
+        web: {
+            domain: "cactus-app-stage.web.app",
         }
     }
 }

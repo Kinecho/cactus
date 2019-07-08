@@ -13,4 +13,11 @@ export interface CactusConfig {
         api_key: string,
         secret_key: string,
     }
+    dynamic_links: {
+        domain: string,
+        prefix: string,
+    },
+    web: {
+        domain: string,
+    }
 }

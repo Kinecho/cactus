@@ -3,32 +3,69 @@ import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
+import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
+import Timestamp = firebaseAdmin.firestore.Timestamp;
 
 export interface QueryResult<T extends BaseModel> {
-    results:T[],
+    results: T[],
     size: number,
 }
+
+export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
+
+export enum QuerySortDirection {
+    desc = "desc",
+    asc = "asc",
+}
+
+export interface GetOptions {
+    includeDeleted?: false,
+    onlyDeleted?: false,
+}
+
+export interface QueryOptions extends GetOptions {
+    pagination?: {
+        startAt?: QueryCursor,
+        startAfter?: QueryCursor,
+        endAt?: QueryCursor,
+        endBefore?: QueryCursor,
+        orderBy: string,
+        sortDirection: QuerySortDirection,
+        limit: number,
+
+    }
+}
+
+export const DefaultGetOptions: GetOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+};
+
+export const DefaultQueryOptions: QueryOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+};
 
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
 
 
-    protected static sharedInstance:AdminFirestoreService;
+    protected static sharedInstance: AdminFirestoreService;
 
-    static getSharedInstance():AdminFirestoreService{
-        if (!AdminFirestoreService.sharedInstance){
+    static getSharedInstance(): AdminFirestoreService {
+        if (!AdminFirestoreService.sharedInstance) {
             throw new Error("No shared instance is available. Ensure you have called the initialize() function before using the shared instance")
         }
         return AdminFirestoreService.sharedInstance;
     }
 
-    static initialize(app: firebaseAdmin.app.App){
+    static initialize(app: firebaseAdmin.app.App) {
         console.log("Initializing firestore service");
         AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
     }
 
-    constructor(admin: firebaseAdmin.app.App){
+    constructor(admin: firebaseAdmin.app.App) {
         this.admin = admin;
         this.firestore = admin.firestore()
     }
@@ -41,10 +78,10 @@ export default class AdminFirestoreService {
         return this.firestore.collection(model.collection);
     }
 
-    getDocumentRefFromModel(model:BaseModel):DocumentReference {
+    getDocumentRefFromModel(model: BaseModel): DocumentReference {
         const collectionRef = this.getCollectionRefFromModel(model);
-        let doc:DocumentReference;
-        if (model.id){
+        let doc: DocumentReference;
+        if (model.id) {
             doc = collectionRef.doc(model.id)
         } else {
             doc = collectionRef.doc();
@@ -62,7 +99,7 @@ export default class AdminFirestoreService {
      * @param {T} model
      * @return {T}
      */
-    initializeModel<T extends BaseModel>(model: T):T{
+    initializeModel<T extends BaseModel>(model: T): T {
         const collectionRef = this.getCollectionRef(model.collection);
         let doc = collectionRef.doc();
         if (model.id) {
@@ -92,7 +129,6 @@ export default class AdminFirestoreService {
             // const doc = this.getDocumentRefFromModel(model);
 
 
-
             const data = await model.toFirestoreData();
             // console.log("Data to save:", JSON.stringify(data));
 
@@ -105,7 +141,7 @@ export default class AdminFirestoreService {
         }
     }
 
-    async getById<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
+    async getById<T extends BaseModel>(id: string, Type: { new(): T }, options:GetOptions=DefaultGetOptions): Promise<T | undefined> {
         const type = new Type();
 
         const collection = this.getCollectionRef(type.collection);
@@ -118,17 +154,60 @@ export default class AdminFirestoreService {
             return;
         }
 
+        if (!options.includeDeleted && doc.get("deleted") === true) {
+            console.warn("Document is deleted, and the request options did not include deleted objects");
+            return;
+        }
+
         console.log(`doc.data()`, doc.data());
 
         return fromDocumentSnapshot(doc, Type);
     }
 
-    async executeQuery<T extends BaseModel>(query:FirebaseFirestore.Query, Type: { new(): T }):Promise<QueryResult<T>>{
+    async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
+        let query = originalQuery;
+        if (!options.includeDeleted) {
+            query = query.where("deleted", "==", false);
+        } else if (options.onlyDeleted) {
+            query = query.where("deleted", "==", true)
+        }
+
+        if (options.pagination) {
+            query = query.limit(options.pagination.limit).orderBy(options.pagination.orderBy, options.pagination.sortDirection);
+
+            if (options.pagination.startAfter) {
+                query = query.startAfter(options.pagination.startAfter);
+            } else if (options.pagination.startAt) {
+                query = query.startAt(options.pagination.startAt);
+            } else if (options.pagination.endAt) {
+                query = query.endAt(options.pagination.endAt);
+            } else if (options.pagination.endBefore) {
+                query.endBefore(options.pagination.endBefore);
+            }
+        }
+
+
         const snapshot = await query.get();
+
         const size = snapshot.size;
-        const results:T[] = fromQuerySnapshot(snapshot, Type);
+        const results: T[] = fromQuerySnapshot(snapshot, Type);
 
         return {results, size};
+    }
+
+    async delete<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
+        const model = await this.getById(id, Type);
+        if (model && !model.deleted) {
+            model.deleted = true;
+            model.deletedAt = new Date();
+            await this.save(model);
+        } else if (model && model.deleted) {
+            console.warn("Model is already deleted. Not performing any action");
+        } else {
+            console.warn("No object found for given id. Not deleting anything.");
+        }
+
+        return model;
     }
 }
 

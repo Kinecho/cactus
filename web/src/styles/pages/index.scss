@@ -86,7 +86,7 @@ header {
     grid-area: form;
     justify-content: center;
     padding-top: 3.2rem;
-
+    z-index: 2;
     @include r(768) {
       background-color: transparent;
       justify-content: flex-start;
@@ -150,28 +150,6 @@ form {
   }
 }
 
-input[type=email] {
-  border: 1px solid $green;
-  border-radius: 3rem;
-  display: block;
-  flex-grow: 1;
-  font-size: 1.8rem;
-  margin: 0 0 1.6rem;
-  max-width: 53rem;
-  padding: 1.2rem 1.6rem;
-  transition: border-color .3s ease-in-out;
-
-  @include r(600) {
-    margin: 0 1.6rem 1.6rem 0;
-  }
-  @include r(768) {
-    min-width: 32rem;
-  }
-
-  &:hover {
-    border-color: $darkGreen;
-  }
-}
 
 .listHeader {
   color: $darkestPink;

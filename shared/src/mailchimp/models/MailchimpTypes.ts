@@ -1,5 +1,5 @@
-import ListMember, {ListMemberStatus, MergeFields, Tag} from "@shared/mailchimp/models/ListMember";
 import {CampaignTracking, SegmentCondition, SegmentMatchType} from "@shared/mailchimp/models/CreateCampaignRequest";
+import {JournalStatus} from "@shared/models/CactusMember";
 
 export enum EventType {
     unsubscribe = "unsubscribe",
@@ -39,6 +39,46 @@ export interface WebhookEvent {
     data: SubscribeEventData | UnsubscribeEventData | ProfileUpdateEventData | EmailChangeEventData | CleanedEmailEventData | CampaignEventData,
 }
 
+
+export enum ListMemberStatus {
+    subscribed = "subscribed",
+    unsubscribed = "unsubscribed",
+    cleaned = "cleaned",
+    pending = "pending"
+}
+
+export enum MergeField {
+    FNAME = "FNAME",
+    LNAME = "LNAME",
+    REF_EMAIL = "REF_EMAIL",
+    LAST_REPLY = "LAST_REPLY",
+    JNL_STATUS = "JNL_STATUS",
+}
+
+export enum TagName {
+    NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
+    JOURNAL_PREMIUM = "journal_premium",
+}
+
+export enum TagStatus {
+    ACTIVE = "active",
+    INACTIVE = "inactive",
+}
+
+export interface Tag {
+    name?: TagName,
+    id?: string,
+    status?: TagStatus
+}
+
+export enum MergeFieldBoolean {
+    YES = "YES",
+    NO = "NO"
+}
+
+export type MergeFields = {
+    [s in MergeField]?: String | Number | MergeFieldBoolean | JournalStatus;
+};
 
 export interface SubscribeEventData {
     id: string,
@@ -424,7 +464,7 @@ export interface AutomationEmail {
         amount: number,
         type: AutomationDelayType,
         direction: AutomationDelayDirection,
-        action:  AutomationDelayAction,
+        action: AutomationDelayAction,
         action_description: string,
         full_description: string,
     },
@@ -442,7 +482,7 @@ export interface AutomationEmail {
     tracking: CampaignTracking,
     social_card: CampaignSocialCard,
     trigger_settings: AutomationTrigger,
-    report_summary:  CampaignReportSummary,
+    report_summary: CampaignReportSummary,
 }
 
 export interface AutomationListResponse extends ListResponse {
@@ -665,7 +705,7 @@ export interface UpdateMergeFieldError {
 export interface UpdateMergeFieldResponse {
     success: boolean,
     error?: UpdateMergeFieldError,
-    unknownError?:any,
+    unknownError?: any,
 }
 
 export interface UpdateTagsRequest {
@@ -675,7 +715,7 @@ export interface UpdateTagsRequest {
 
 export interface TagResponseError {
     type: string,
-    title:  string,
+    title: string,
     status: number,
     detail: string,
     instance: string,
@@ -720,4 +760,45 @@ export interface GetListMembersOptions {
 export interface ListMemberListResponse extends ListResponse {
     members: ListMember[]
     list_id: string
+}
+
+export interface ListMember {
+    id?: string;
+    web_id?: string;
+    email_type?: string;
+    email_address?: string;
+    unique_email_id?: string;
+    status: ListMemberStatus;
+    merge_fields: MergeFields;
+    stats?: {
+        avg_open_rate: number,
+        avg_click_rate: number,
+    };
+    tags: Tag[];
+    list_id?: string;
+    timestamp_signup?: ISODate;
+    timestamp_opt?: ISODate;
+    email_client?: string;
+    location?: {
+        latitude: number,
+        longitude: number,
+        gmtoff: number, //The time difference in hours from GMT.
+        dstoff: number, //The offset for timezones where daylight saving time is observed.
+        country_code: string,
+        timezone: string,
+    };
+    marketing_permissions: {
+        marketing_permission_id: string,
+        text: string,
+        enabled: boolean,
+    }[];
+    last_note?: {
+        note_id: number,
+        created_at: ISODate,
+        created_by: string,
+        note: string
+    };
+    source?: string;
+    tags_count?: number;
+
 }

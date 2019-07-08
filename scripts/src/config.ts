@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 const prompts = require("prompts");
 import chalk from "chalk";
 import helpers from "@scripts/helpers";
-import {CactusConfig}from "@api/config/CactusConfig";
+import {CactusConfig}from "@shared/CactusConfig";
 
 export enum Project {
     STAGE = "stage",

@@ -8,6 +8,12 @@ module.exports = {
         "path": "/",
         "name": "index"
     },
+    "sign_up": {
+        "title": "Sign Up",
+        "path": "/signup-abc-123",
+        "reflectionPrompt": true,
+        "name": "sign_up"
+    },
     "payment_success": {
         "title": "Payment Success",
         "path": "/success",

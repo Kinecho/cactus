@@ -35,9 +35,15 @@ import {
     AutomationEmailListResponse,
     AutomationEmail,
     ListMemberListResponse,
-    GetListMembersOptions, UpdateTagResponse, TagResponseError, UpdateMergeFieldResponse
+    GetListMembersOptions,
+    UpdateTagResponse,
+    TagResponseError,
+    UpdateMergeFieldResponse,
+    MergeField,
+    ListMemberStatus,
+    ListMember
 } from "@shared/mailchimp/models/MailchimpTypes";
-import ListMember, {ListMemberStatus, MergeField} from "@shared/mailchimp/models/ListMember";
+import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
@@ -212,7 +218,7 @@ export default class MailchimpService {
         return await Promise.all(campaignTasks);
     }
 
-    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions()): Promise<Campaign[]> {
+    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions(), delay:number=100): Promise<Campaign[]> {
         // options.
         const pageSize = (options.pagination && options.pagination.count) ? options.pagination.count : defaultPageSize;
 
@@ -223,7 +229,7 @@ export default class MailchimpService {
 
         const resultMapper = (result: CampaignListResponse) => result.campaigns;
 
-        return this.getAllPaginatedResults(fetcher, resultMapper, pageSize);
+        return this.getAllPaginatedResults(fetcher, resultMapper, pageSize, delay);
     }
 
     async getCampaignContent(campaignId: string): Promise<CampaignContent | undefined> {
@@ -433,8 +439,8 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize): Promise<Campaign[]> {
-        const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize);
+    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize, delay:number=100): Promise<Campaign[]> {
+        const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize, delay);
         const campaignIds = automationEmails.map(email => {
             return email.id
         });
@@ -442,8 +448,8 @@ export default class MailchimpService {
         return this.getCampaignsByIds(campaignIds);
     }
 
-    async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize): Promise<AutomationEmail[]> {
-        return this.getAllPaginatedResults(pagination => this.getAutomationEmails(workflowId, pagination), result => result.emails, pageSize);
+    async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize, delay?:number): Promise<AutomationEmail[]> {
+        return this.getAllPaginatedResults(pagination => this.getAutomationEmails(workflowId, pagination), result => result.emails, pageSize, delay);
     }
 
     async getAutomations(pagination = DEFAULT_PAGINATION): Promise<AutomationListResponse> {
@@ -463,7 +469,7 @@ export default class MailchimpService {
         return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
     }
 
-    async getAllAutomationEmails(listId?: string, pageSize: number = defaultPageSize): Promise<AutomationEmail[]> {
+    async getAllAutomationEmails(listId?: string, pageSize: number = defaultPageSize, delay?:number): Promise<AutomationEmail[]> {
         try {
             const automations = await this.getAllAutomations(pageSize);
             const automationTasks: Promise<AutomationEmail[]>[] = [];
@@ -472,7 +478,7 @@ export default class MailchimpService {
                     return;
                 }
                 const task = new Promise<AutomationEmail[]>(async resolve => {
-                    const automationEmails = await this.getAllAutomationEmailsForWorkflow(automation.id, pageSize);
+                    const automationEmails = await this.getAllAutomationEmailsForWorkflow(automation.id, pageSize, delay);
                     resolve(automationEmails);
 
                 });
@@ -628,8 +634,8 @@ export default class MailchimpService {
     }
 
     async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
-        const member = new ListMember(subscription.email);
-        member.status = ListMemberStatus.pending;
+        const member = new MailchimpListMember(subscription.email);
+        member.status = status;
         if (subscription.referredByEmail) {
             member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
         }
@@ -637,11 +643,11 @@ export default class MailchimpService {
         const url = `/lists/${this.audienceId}/members`;
 
         const result = new SubscriptionResult();
-        result.member = member;
 
         try {
             const response = await this.request.post(url, member);
             console.log("mailchimp response", response.data);
+            result.member = response.data;
             result.success = true;
             result.status = SubscriptionResultStatus.new_subscriber;
         } catch (error) {
@@ -650,9 +656,10 @@ export default class MailchimpService {
                 const data = error.response.data;
                 switch (data.title) {
                     case "Member Exists":
-                        console.warn("User is already on list. Treating as a successful signup", data)
+                        console.warn("User is already on list. Treating as a successful signup", data);
                         result.success = true;
                         result.status = SubscriptionResultStatus.existing_subscriber;
+                        // data
                         break;
                     case "Invalid Resource":
                         console.warn("unable to sign up user", data);

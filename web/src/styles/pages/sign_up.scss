@@ -1,0 +1,96 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+//@import "~styles/article";
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  min-height: 100vh;
+
+  .top {
+    margin-bottom: 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    .logo-link {
+      text-align: center;
+      @include maxW(768){
+        display:none;
+      }
+    }
+  }
+
+  .signup-container {
+    width: 30rem;
+    max-width: 90vw;
+
+    input {
+      margin-right: 0;
+      text-align: center;
+      width: 100%;
+    }
+
+
+
+    #signup-app {
+
+    }
+
+    .email-form {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+
+      button {
+        flex-grow: 1;
+        min-width: 25rem;
+      }
+
+      &.hidden {
+        display: none;
+      }
+    }
+
+
+    .divider {
+      width: 100%;
+      position: relative;
+      .message-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .message {
+          color: $lightText;
+          text-align: center;
+          display: inline;
+          background: white;
+          z-index: 1;
+          padding: 1rem;
+        }
+      }
+
+      .line {
+        display: block;
+        border-top: 2px solid $lightText;
+        position: absolute;
+        top: 50%;
+        height: 2px;
+        width: 100%;
+        z-index: 0;
+      }
+    }
+
+  }
+
+}
+
+
+#third-party-loading {
+  text-align: center;
+}

@@ -1,22 +1,27 @@
 import "@styles/pages/index.scss"
-import {Config} from "@web/config"
-import * as firebase from "firebase/app"
-import "firebase/functions"
-import {configureSignupForm, setupJumpToForm} from '@web/mailchimp'
-
+import { configureMailchimpSignupForm, setupJumpToForm} from '@web/mailchimp'
+import {initializeFirebase} from "@web/firebase";
+const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {
     console.log("index.js loaded");
 
     try {
-        const app = firebase.initializeApp(Config.firebase);
-        const features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof app[feature] === 'function');
+        const features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof firebase[feature] === 'function');
         console.log(`Firebase SDK loaded with ${features.join(', ')}`)
     } catch (e) {
         console.error('FAILED TO GET FIREBASE', e);
-        document.getElementById('load').innerHTML = 'Error loading the Firebase SDK, check the console.';
     }
-    configureSignupForm("sign-up-top");
-    configureSignupForm("email-form-bottom");
+
+
+    //TODO: change these to use the new flows, commented out below
+    //these are the mailchimp signup flows
+    configureMailchimpSignupForm("email-form-bottom");
+    configureMailchimpSignupForm("sign-up-top");
+
+    //Below is the new, firebase auth method
+    // configureLoginForm("email-form-bottom");
+    // configureLoginForm("sign-up-top");
+
     setupJumpToForm();
 });
 

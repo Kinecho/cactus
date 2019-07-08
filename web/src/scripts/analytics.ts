@@ -6,7 +6,7 @@ declare global {
     interface Window { dataLayer: Array<any>; }
 }
 
-let _gtag = null;
+let _gtag:null | ((name:string, event?:any, options?:any) => void) = null;
 
 // window.dataLayer = window.dataLayer || {};
 
@@ -62,6 +62,7 @@ function createGTag(){
 
 
 // tslint:disable
+// @ts-ignore:
 export function startFullstory(){
 
     if (!Config.fullStoryTeamId){
@@ -81,16 +82,24 @@ export function startFullstory(){
     // noinspection UseOfBracketNotationInspection
     window['_fs_namespace'] = 'FS';
 
+    // tslint:disable
     (function(m,n,e,t,l,o,g,y){
         if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
+        // @ts-ignore
         g=m[e]=function(a,b,s){g.q?g.q.push([a,b,s]):g._api(a,b,s);};g.q=[];
+        // @ts-ignore
         o=n.createElement(t);o.async=1;o.crossOrigin='anonymous';o.src='https://'+_fs_host+'/s/fs.js';
+        // @ts-ignore
         y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y);
+        // @ts-ignore
         g.identify=function(i,v,s){g(l,{uid:i},s);if(v)g(l,v,s)};g.setUserVars=function(v,s){g(l,v,s)};g.event=function(i,v,s){g('event',{n:i,p:v},s)};
+        // @ts-ignore
         g.shutdown=function(){g("rec",!1)};g.restart=function(){g("rec",!0)};
+        // @ts-ignore
         g.consent=function(a){g("consent",!arguments.length||a)};
-
+        // @ts-ignore
         g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
+        // @ts-ignore
         g.clearUserCookie=function(){};
     })(window,document,window['_fs_namespace'],'script','user');
 }

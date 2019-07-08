@@ -3,7 +3,14 @@ const getCommonWebpackConfig = require("./webpack.config.common")
 const getDevServerConfig = require("./devserver.config")
 const config = require('./config.dev')
 
+config.isDev = true;
+
 module.exports = merge(getCommonWebpackConfig(config), {
     mode: "development",
-    devtool: "inline-source-map",
+    devtool: "cheap-module-eval-source-map",
+    // optimization: {
+    //     splitChunks: {
+    //         chunks: 'all'
+    //     }
+    // },
 }, getDevServerConfig(config))

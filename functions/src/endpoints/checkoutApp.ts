@@ -8,10 +8,10 @@ import {CheckoutSessionCompleted, PaymentIntent} from "@shared/types/StripeTypes
 import {sendActivityNotification, SlackMessage} from "@api/slack/slack";
 import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
-import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/ListMember";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import MailchimpService from "@shared/services/MailchimpService";
 import {JournalStatus} from "@shared/models/CactusMember";
+import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 const config = getConfig();
 
