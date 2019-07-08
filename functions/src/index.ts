@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin'
-import {getConfig} from "@api/config/configService";
+import {getConfig, PubSubTopic} from "@api/config/configService";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
@@ -28,6 +28,8 @@ import mailchimpApp from "@api/endpoints/mailchimpApp";
 import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
 import testApp from "@api/endpoints/testApp";
+import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
+
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 
 export const mailchimp = functions.https.onRequest(mailchimpApp);
@@ -44,4 +46,6 @@ export const endpoints = {
     test,
     userCreatedTrigger,
     userDeletedTrigger,
+    backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
+    exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
 };
