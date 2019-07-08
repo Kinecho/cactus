@@ -9,14 +9,21 @@ import {formatDuration} from "@shared/util/DateUtil";
 import {Storage} from "@google-cloud/storage";
 import {BigQuery} from "@google-cloud/bigquery";
 import {writeToFile} from "@api/util/FileUtil";
+import * as fs from "fs";
+import {promisify} from "util";
+import {snakeCase} from "lodash";
+import bigqueryTypes from "@google-cloud/bigquery/build/src/types";
+import IJob = bigqueryTypes.IJob;
 
+const readFile = promisify(fs.readFile);
 const Config = getConfig();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
 const firestoreAdminVersion = 'v1';
 const betaVersion = '';
 
-const serviceAccount = Config.firestore_backups_service_account;
+const firestoreServiceAccount = Config.firestore_backups_service_account;
+const bigQueryServiceAccount = Config.bigquery_service_account;
 const backupsConfig = Config.backups_config;
 
 const defaultScopes = [
@@ -24,62 +31,174 @@ const defaultScopes = [
     "https://www.googleapis.com/auth/cloud-platform",
 ];
 
-export const prefixFilename = "latest-prefix.txt";
+export const latestBigQueryExportFileName = "latest-prefix.txt";
 
-export async function backupFirestore(message?: functions.pubsub.Message, context?: functions.EventContext): Promise<void> {
+/**
+ * Exports firestore and ingests into big query
+ * @return {Promise<void>}
+ */
+export async function exportFirestoreToBigQuery() {
+    await sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
+
     const collectionIds = await getCollectionIds();
     console.log("collectionIds", collectionIds);
 
     const startTime = new Date();
-    await sendEngineeringMessage({
-        text: `Starting database backup job.`,
-        attachments: [
-            {
-                text: `Collection IDs:\n \`\`\`${collectionIds.join(", ")}\`\`\``,
-                color: AttachmentColor.info,
-                ts: `${(new Date()).getTime() / 1000}`
-            }
-        ]
-    });
+    const attachments: SlackAttachment[] = [
+        {
+            text: `Collection IDs:\n \`\`\`${collectionIds.join(", ")}\`\`\``,
+            color: AttachmentColor.info,
+            ts: `${(new Date()).getTime() / 1000}`
+        }
+    ];
+    const slackMessage = {
+        text: `*BigQuery Ingest* Finished`,
+        attachments,
+    };
 
     try {
         const [
-            exportOperation,
             bigQueryOperation
         ] = await Promise.all([
-            exportForBackup(),
             exportForBigQuery(collectionIds)
+        ]);
+
+        attachments.push(
+            buildOperationAttachment("Firestore Export to Analytics", bigQueryOperation.operation, formatDuration(startTime, bigQueryOperation.endTime), bigQueryOperation.error),
+        );
+
+        if (bigQueryOperation.nextPrefix) {
+            const ingestStartTime = new Date();
+            try {
+                const bigueryResults = await bigqueryIngestFirestore(bigQueryOperation.nextPrefix);
+                const ingestEndTime = new Date();
+                const flatResults: IJob[] = [];
+                bigueryResults.forEach(resultsList => flatResults.push(...resultsList));
+                const processedResults = flatResults.map(r => {
+                    return {
+                        tableId: (r.configuration && r.configuration.load && r.configuration.load.destinationTable) ? r.configuration.load.destinationTable.tableId : null,
+                        badRecords: (r.statistics && r.statistics.load) ? r.statistics.load.badRecords : 0,
+                    }
+                });
+
+                attachments.push({
+                    text: `*BigQuery Ingest* completed successfully after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
+                    color: "good"
+                })
+            } catch (bigqueryError) {
+                const ingestEndTime = new Date();
+                attachments.push({
+                    text: `:warning: Big Query Ingest failed after ${formatDuration(ingestStartTime, ingestEndTime)}\n\`\`\`${JSON.stringify(bigqueryError)}\`\`\``,
+                    color: "warning"
+                })
+            }
+        }
+
+        const endTime = new Date();
+        attachments.push({
+            text: `*Big Query Ingest Job* Completed after ${formatDuration(startTime, endTime)}`,
+            color: "good"
+        });
+        await sendEngineeringMessage(slackMessage);
+    } catch (e) {
+        console.error("failed to backup", e);
+        await sendEngineeringMessage(`Failed to backup ${JSON.stringify(e, null, 2)}`);
+    }
+}
+
+export async function backupFirestore(message?: functions.pubsub.Message, context?: functions.EventContext): Promise<void> {
+    await sendEngineeringMessage({
+        text: `*Firestore Backup* Starting Job.`,
+    });
+    const startTime = new Date();
+    try {
+        const [
+            exportOperation,
+        ] = await Promise.all([
+            exportForBackup(),
         ]);
 
         const endTime = new Date();
 
         const attachments: SlackAttachment[] = [
-            buildOperationAttachment("Firestore Backup", exportOperation.operation, formatDuration(startTime, exportOperation.endTime), exportOperation.error),
-            buildOperationAttachment("Big Query Export", bigQueryOperation.operation, formatDuration(startTime, bigQueryOperation.endTime), bigQueryOperation.error),
+            buildOperationAttachment("Firestore Export to Cloud Storage", exportOperation.operation, formatDuration(startTime, exportOperation.endTime), exportOperation.error),
+            {
+                text: `*Firestore Backup Job* Completed after ${formatDuration(startTime, endTime)}`,
+                color: "good"
+            }
         ];
 
         await sendEngineeringMessage({
-            text: `Export Completed after ${formatDuration(startTime, endTime)}`,
+            text: `*Firestore Backup* Finished`,
             attachments,
         });
     } catch (e) {
         console.error("failed to backup", e);
-        await sendEngineeringMessage(`Failed to backup ${JSON.stringify(e, null, 2)}`);
+        await sendEngineeringMessage(`Failed to backup \`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
     }
-
-
 }
 
-export function importToBigQuery(){
-    const projectId = serviceAccount.project_id;
-    //TODO: get the dataset id
-    // const datasetid = '';
-    // const bucketName = backupsConfig.bigquery_import_bucket;
-    // const metadata = {
-    //     sourceFormat: "DATASTORE_BACKUP",
-    //     writeDisposition: "WRITE_TRUNCATE", // Overwrite bigquery tables
-    // };
-    // const bigquery = new BigQuery({projectId, credentials: serviceAccount});
+export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJob[][]> {
+    let latestPrefix: string | undefined = bucketPrefix;
+
+    const collectionIds = await getCollectionIds();
+
+    const projectId = bigQueryServiceAccount.project_id;
+    const datasetId = backupsConfig.bigquery_dataset_id;
+    const bigqueryImportBucketName = backupsConfig.bigquery_import_bucket;
+    const metadata = {
+        sourceFormat: "DATASTORE_BACKUP",
+        writeDisposition: "WRITE_TRUNCATE", // Overwrite bigquery tables
+    };
+    const bigquery = new BigQuery({projectId, credentials: bigQueryServiceAccount});
+    const storage = new Storage({projectId, credentials: bigQueryServiceAccount});
+
+    if (!latestPrefix) {
+        console.log("Prefix not found on message, trying to read it from file in Storage");
+        const tmpPrefixFilePath = `/tmp/${latestBigQueryExportFileName}`;
+        await storage.bucket(bigqueryImportBucketName)
+            .file(latestBigQueryExportFileName)
+            .download({destination: tmpPrefixFilePath});
+
+        latestPrefix = await readFile(tmpPrefixFilePath, "utf8");
+        console.log("got latest prefix from file", latestPrefix);
+    }
+
+    if (!latestPrefix) {
+        throw new Error("No prefix could be determined - unable to find firestore backup to ingest");
+    }
+
+    const importTasks: Promise<IJob[]>[] = [];
+
+    collectionIds.forEach(collectionId => {
+        try {
+            const filename = `${latestPrefix}/all_namespaces/kind_${collectionId}/all_namespaces_kind_${collectionId}.export_metadata`;
+
+            const tableId = snakeCase(collectionId);
+            console.log("starting the import for fileName ", filename, "into table", tableId);
+            // Loads data from a Google Cloud Storage file into the table
+            const job = bigquery
+                .dataset(datasetId)
+                .table(tableId)
+                .load(storage.bucket(bigqueryImportBucketName).file(filename), metadata);
+
+            importTasks.push(job);
+
+        } catch (e) {
+            console.error("failed to process collection", e);
+        }
+    });
+
+    const taskResults = await Promise.all(importTasks);
+    taskResults.forEach((jobs, index) => {
+        jobs.forEach(job => {
+            console.log(`finished job #${index} - id=${job.id} | status=${job.status}`);
+        })
+    });
+
+    console.log("finished all import tasks");
+    return taskResults;
+
 }
 
 function buildOperationAttachment(displayName: string, operation?: Operation, duration?: string, error?: any): SlackAttachment {
@@ -107,7 +226,7 @@ function buildOperationAttachment(displayName: string, operation?: Operation, du
     let linkString = "";
     if (outputUriPrefix) {
         const bucketPath = outputUriPrefix.replace("gs://", "");
-        webLink = `https://console.cloud.google.com/storage/browser/${bucketPath}?project=${serviceAccount.project_id}`;
+        webLink = `https://console.cloud.google.com/storage/browser/${bucketPath}?project=${firestoreServiceAccount.project_id}`;
         linkString = `<${webLink}|View Bucket>`
     }
 
@@ -121,7 +240,7 @@ function buildOperationAttachment(displayName: string, operation?: Operation, du
 // @ts-ignore
 async function exportForBackup(): Promise<{ operation?: Operation, endTime: Date, error?: any }> {
 
-    const {operation, error} = await initializeBackup(serviceAccount.project_id, backupsConfig.firestore_backups_bucket);
+    const {operation, error} = await initializeBackup(firestoreServiceAccount.project_id, backupsConfig.firestore_backups_bucket);
     if (!operation) {
         return {endTime: new Date(), error: error || {message: "Unable to initialize operation"}};
     }
@@ -137,7 +256,7 @@ async function exportForBackup(): Promise<{ operation?: Operation, endTime: Date
     }
 }
 
-async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?: Operation, endTime: Date, error?: any }> {
+async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?: Operation, endTime: Date, error?: any, nextPrefix?: string }> {
     // const operation = await initializeBackup(serviceAccount.project_id, backupsConfig.bigquery_import_bucket, collectionIds);
     const analyticsProjectId = backupsConfig.analytics_project_id;
 
@@ -147,9 +266,9 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
     const date = new Date();
     const nextPrefix = date.toISOString();
     try {
-        const storage = new Storage({projectId: analyticsProjectId, credentials: serviceAccount});
+        const storage = new Storage({projectId: analyticsProjectId, credentials: firestoreServiceAccount});
         const bucket = storage.bucket(backupsConfig.bigquery_import_bucket);
-        const tmpFilePath = `/tmp/${prefixFilename}`;
+        const tmpFilePath = `/tmp/${latestBigQueryExportFileName}`;
         await writeToFile(tmpFilePath, nextPrefix);
         await bucket.upload(tmpFilePath);
     } catch (error) {
@@ -157,7 +276,7 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
         return {endTime: new Date(), error}
     }
 
-    const {operation, error: initError} = await initializeBackup(serviceAccount.project_id,
+    const {operation, error: initError} = await initializeBackup(firestoreServiceAccount.project_id,
         `${backupsConfig.bigquery_import_bucket}/${nextPrefix}`,
         collectionIds);
 
@@ -169,7 +288,7 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
     try {
         const finishedOperation = await pollForOperation(operation.name);
         const endTime = new Date();
-        return {operation: finishedOperation, endTime};
+        return {operation: finishedOperation, endTime, nextPrefix: nextPrefix};
 
     } catch (e) {
         const endTime = new Date();

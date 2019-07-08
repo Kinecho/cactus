@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@google-cloud/bigquery": "^4.1.4",
+    "@google-cloud/pubsub": "^0.30.1",
     "@google-cloud/storage": "^3.0.2",
     "@sendgrid/inbound-mail-parser": "^6.4.0",
     "@slack/client": "^5.0.1",
@@ -43,6 +44,7 @@
     "firebase-functions": "^3.0.1",
     "get-urls": "^9.1.0",
     "google-auth-library": "^4.2.5",
+    "lodash": "^4.17.11",
     "luxon": "^1.15.0",
     "mailparser": "^2.7.1",
     "md5": "^2.2.1",

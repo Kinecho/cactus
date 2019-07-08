@@ -2,26 +2,27 @@ import * as functions from "firebase-functions"
 import {Environment, getEnvironment} from "@api/config/environmentManager";
 import {CactusConfig} from "@shared/CactusConfig";
 
-let _config:CactusConfig;
+let _config: CactusConfig;
 
 export enum PubSubTopic {
-    firestore_backup = "firestore_backup"
+    firestore_backup = "firestore_backup",
+    firestore_export_bigquery = "firestore_export_bigquery"
 }
 
-export function getConfig():CactusConfig{
+export function getConfig(): CactusConfig {
     //used for testing purposes
     if (getEnvironment() === Environment.test) {
         return buildMockConfig();
     }
 
-    if (!_config){
+    if (!_config) {
         _config = buildConfig()
     }
 
     return _config
 }
 
-function buildConfig():CactusConfig {
+function buildConfig(): CactusConfig {
     const config = functions.config() as CactusConfig;
 
     config.isEmulator = process.env.IS_EMULATOR === "true";
@@ -29,7 +30,7 @@ function buildConfig():CactusConfig {
     return config;
 }
 
-function buildMockConfig():CactusConfig {
+function buildMockConfig(): CactusConfig {
     return {
         isEmulator: true,
         mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
@@ -63,6 +64,18 @@ function buildMockConfig():CactusConfig {
         web: {
             domain: "cactus-app-stage.web.app",
         },
+        bigquery_service_account: {
+            "type": "service_account",
+            "project_id": "analytics",
+            "private_key_id": "id123",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nFAKE PRIVATE KEY\n-----END PRIVATE KEY-----\n",
+            "client_email": "firestore-backups@cactus-app-stage.iam.gserviceaccount.com",
+            "client_id": "fake_id",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firestore-backups%40cactus-app-stage.iam.gserviceaccount.com"
+        },
         firestore_backups_service_account: {
             "type": "service_account",
             "project_id": "cactus-app-stage",
@@ -78,7 +91,8 @@ function buildMockConfig():CactusConfig {
         backups_config: {
             analytics_project_id: "fake-project-1222",
             bigquery_import_bucket: "fake-bigquery-bucket",
-            firestore_backups_bucket: "fake-backup-bucket"
+            firestore_backups_bucket: "fake-backup-bucket",
+            bigquery_dataset_id: "fake_dataset_id",
         }
     }
 }
