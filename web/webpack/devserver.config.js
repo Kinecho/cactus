@@ -1,7 +1,8 @@
 const helpers = require('./../helpers')
-const pages = require('./../pages')
-
+const allPages = require('./../pages')
+const pagesUtil = require("./../pagesUtil");
 module.exports = function (config) {
+    const pages = pagesUtil.getPages(config, allPages);
     return {
         devServer: {
             open: false,
@@ -13,7 +14,7 @@ module.exports = function (config) {
                     ...Object.keys(pages).filter(page => {
                         return pages[page].path
                     }).map(filename => {
-                        console.log('adding page', filename)
+                        console.log('DevServer: adding page', filename)
                         let page = pages[filename]
                         let pattern = new RegExp('^' + page.path + '$')
                         return {from: pattern, to: `/${filename}.html`}

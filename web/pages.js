@@ -11,7 +11,7 @@ module.exports = {
     "sign_up": {
         "title": "Sign Up",
         "path": "/signup-abc-123",
-        "reflectionPrompt": true,
+        "reflectionPrompt": false,
         "name": "sign_up"
     },
     "payment_success": {
@@ -44,6 +44,7 @@ module.exports = {
         "title": "What are your simple pleasures? | Cactus",
         "path": "/what-are-your-simple-pleasures",
         "reflectionPrompt": true,
+        "includeInDev": true,
         "name": "what_are_your_simple_pleasures"
     },
     "how_do_you_celebrate": {
