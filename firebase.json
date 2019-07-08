@@ -45,6 +45,17 @@
                 "source": "/signup-abc-123",
                 "destination": "/sign_up.html"
             },
+                "source": "/what-brings-out-your-playful-side",
+                "destination": "/what_brings_out_your_playful_side.html"
+            },
+            {
+                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
+                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714.html"
+            },
+            {
+                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
+                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713.html"
+            },
             {
                 "source": "/what-makes-you-feel-calm-peaceful-or-serene",
                 "destination": "/what_makes_you_feel_calm_peaceful_or_serene.html"

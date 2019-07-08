@@ -320,5 +320,20 @@ module.exports = {
         "title": "What makes you feel calm, peaceful, or serene?",
         "path": "/what-makes-you-feel-calm-peaceful-or-serene",
         "reflectionPrompt": true
+    },
+    "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713": {
+        "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
+        "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
+        "reflectionPrompt": true
+    },
+    "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714": {
+        "title": "What three things are you looking forward to experiencing this week?",
+        "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
+        "reflectionPrompt": true
+    },
+    "what_brings_out_your_playful_side": {
+        "title": "What brings out your playful side?",
+        "path": "/what-brings-out-your-playful-side",
+        "reflectionPrompt": true
     }
 }
