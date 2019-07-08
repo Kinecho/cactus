@@ -1,7 +1,7 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn}">
         <a href="/"><img class="logo" src="../../assets/images/logo.svg" alt="Cactus logo"/></a>
-        <a v-if="!loggedIn" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
+        <a v-if="!loggedIn && showSignup" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
             Up Free</a>
         <div v-if="loggedIn">
             <span >{{username}}</span>&nbsp;<a href="#" @click.prevent=logout>logout</a>
@@ -31,6 +31,9 @@
                     this.username = '';
                 }
             })
+        },
+        props: {
+          showSignup: Boolean,
         },
         data() {
             return {

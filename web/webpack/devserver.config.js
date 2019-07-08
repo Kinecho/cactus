@@ -14,8 +14,8 @@ module.exports = function (config) {
                     ...Object.keys(pages).filter(page => {
                         return pages[page].path
                     }).map(filename => {
-                        console.log('DevServer: adding page', filename)
                         let page = pages[filename]
+                        console.log('DevServer: adding page', page.path)
                         let pattern = new RegExp('^' + page.path + '$')
                         return {from: pattern, to: `/${filename}.html`}
                     }),

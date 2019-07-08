@@ -8,12 +8,12 @@ startFullstory();
 
 initializeFirebase();
 
-function setupNavigation(){
+function setupNavigation() {
     const $headers = document.getElementsByTagName("header");
     const $header = $headers ? $headers.item(0) : undefined;
     const $nav = document.getElementById("#top-nav");
 
-    if (!$nav && !$header){
+    if (!$nav && !$header) {
         console.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
     }
@@ -22,7 +22,7 @@ function setupNavigation(){
     // @ts-ignore
     window.NavBar = new Vue({
         el: $nav || $header,
-        template: '<NavBar/>',
+        template: '<NavBar v-bind:show-signup="true" />',
         components: {NavBar: NavBar}
     });
 }
