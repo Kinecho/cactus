@@ -39,13 +39,13 @@ export const test = functions.https.onRequest(testApp);
 export const userCreatedTrigger = functions.auth.user().onCreate(onCreate);
 export const userDeletedTrigger = functions.auth.user().onDelete(onDelete);
 
-export const endpoints = {
+export const cloudFunctions = {
     mailchimp,
     inbound,
     checkout,
     test,
-    userCreatedTrigger,
-    userDeletedTrigger,
     backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
     exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
+    userCreatedTrigger,
+    userDeletedTrigger,
 };
