@@ -8,9 +8,4 @@ config.isDev = true;
 module.exports = merge(getCommonWebpackConfig(config), {
     mode: "development",
     devtool: "cheap-module-eval-source-map",
-    // optimization: {
-    //     splitChunks: {
-    //         chunks: 'all'
-    //     }
-    // },
 }, getDevServerConfig(config))

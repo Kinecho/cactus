@@ -5,10 +5,5 @@ const config = require('./config.fe')
 
 module.exports = merge(getCommonWebpackConfig(config), {
     mode: "development",
-    devtool: "inline-source-map",
-    optimization: {
-        splitChunks: {
-            chunks: 'all'
-        }
-    },
+    devtool: "cheap-module-eval-source-map",
 }, getDevServerConfig(config))
