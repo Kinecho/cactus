@@ -38,7 +38,6 @@ export function configureLoginForm(formId:string){
         return
     }
 
-
     async function processForm(e:Event) {
         if (e.preventDefault) e.preventDefault();
         if (!form){
