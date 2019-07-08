@@ -1,5 +1,4 @@
 import {getConfig} from "@api/config/configService";
-import * as functions from "firebase-functions";
 import {JWT} from "google-auth-library";
 import axios, {AxiosError} from "axios";
 import {AttachmentColor, sendEngineeringMessage, SlackAttachment} from "@api/slack/slack";
@@ -106,7 +105,7 @@ export async function exportFirestoreToBigQuery() {
     }
 }
 
-export async function backupFirestore(message?: functions.pubsub.Message, context?: functions.EventContext): Promise<void> {
+export async function backupFirestore(): Promise<void> {
     await sendEngineeringMessage({
         text: `*Firestore Backup* Starting Job.`,
     });
