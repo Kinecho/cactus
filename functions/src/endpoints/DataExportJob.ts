@@ -7,7 +7,6 @@ import {Operation} from "@shared/types/FirestoreTypes";
 import {formatDuration} from "@shared/util/DateUtil";
 import {Storage} from "@google-cloud/storage";
 import {BigQuery} from "@google-cloud/bigquery";
-import {writeToFile} from "@api/util/FileUtil";
 import * as fs from "fs";
 import {promisify} from "util";
 import {snakeCase} from "lodash";
@@ -15,6 +14,7 @@ import bigqueryTypes from "@google-cloud/bigquery/build/src/types";
 import IJob = bigqueryTypes.IJob;
 
 const readFile = promisify(fs.readFile);
+const writeFile = promisify(fs.writeFile);
 const Config = getConfig();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
@@ -268,7 +268,7 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
         const storage = new Storage({projectId: analyticsProjectId, credentials: firestoreServiceAccount});
         const bucket = storage.bucket(backupsConfig.bigquery_import_bucket);
         const tmpFilePath = `/tmp/${latestBigQueryExportFileName}`;
-        await writeToFile(tmpFilePath, nextPrefix);
+        await writeFile(tmpFilePath, nextPrefix);
         await bucket.upload(tmpFilePath);
     } catch (error) {
         console.error("Failed to upload new prefix for bigquery export file to storage", error)
@@ -304,13 +304,6 @@ export async function getOperation(name: string): Promise<Operation | undefined>
                 ...(await getAuthHeaders())
             }
         });
-        // await sendEngineeringMessage({
-        //     text: "Fetched operation",
-        //     attachments: [{
-        //         text: `\`\`\`${JSON.stringify(response.data, null, 2)}\`\`\``,
-        //         color: "good"
-        //     }]
-        // });
 
         return response.data;
     } catch (error) {
