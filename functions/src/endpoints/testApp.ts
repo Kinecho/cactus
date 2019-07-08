@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
-import {backupFirestore} from "@api/endpoints/DataExportJob";
+import {backupFirestore, getOperation} from "@api/endpoints/DataExportJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -9,8 +9,14 @@ app.get('/', (req, res) => {
 });
 
 app.get("/backups", async (req, res) => {
-    await backupFirestore(undefined,undefined);
+    await backupFirestore(undefined, undefined);
     res.send("done");
+});
+
+app.get("/operation", async (req, res) => {
+    const name = req.query.name;
+    const operation = await getOperation(name);
+    return res.send(operation);
 });
 
 export default app;

@@ -1,4 +1,4 @@
-import {getMailchimpDateString, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
+import {formatDuration, getMailchimpDateString, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
 describe("getMailchimpCurrentDateString test", () => {
@@ -53,3 +53,18 @@ test("date formatting 2" , () => {
     expect(suppressionDateISO).toEqual("2019-02-11");
 });
 
+describe("format duration", () => {
+    test("second scale formatting", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const start = new Date(denverTime);
+        const end = new Date(denverTime + 1200);
+        expect(formatDuration(start, end)).toEqual("1.2s")
+    });
+
+    test("minute scale formatting", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const start = new Date(denverTime);
+        const end = new Date(denverTime + (1000 * 60 * 3 + 30000) );
+        expect(formatDuration(start, end)).toEqual("3m 30s")
+    });
+});

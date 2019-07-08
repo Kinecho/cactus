@@ -1,6 +1,6 @@
 import {DateTime} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-
+import * as prettyMilliseconds from "pretty-ms";
 export const mailchimpTimeZone = "America/Denver";
 
 /**
@@ -10,6 +10,16 @@ export const mailchimpTimeZone = "America/Denver";
  */
 export function getMailchimpDateString(date:Date=new Date()):string{
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
+}
+
+/**
+ *
+ * @param {Date} start
+ * @param {Date} end
+ * @return {string}
+ */
+export function formatDuration(start:Date, end: Date):string{
+    return prettyMilliseconds(end.getTime() - start.getTime())
 }
 
 export function makeUTCDateIntoMailchimpDate(date:Date, keepTime:boolean=false, timezone=mailchimpTimeZone):string {
