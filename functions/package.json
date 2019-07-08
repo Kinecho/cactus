@@ -26,6 +26,7 @@
     "@shared": "lib/shared/src"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^4.1.4",
     "@google-cloud/storage": "^3.0.2",
     "@sendgrid/inbound-mail-parser": "^6.4.0",
     "@slack/client": "^5.0.1",

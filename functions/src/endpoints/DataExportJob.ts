@@ -7,6 +7,7 @@ import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {Operation} from "@shared/types/FirestoreTypes";
 import {formatDuration} from "@shared/util/DateUtil";
 import {Storage} from "@google-cloud/storage";
+import {BigQuery} from "@google-cloud/bigquery";
 import {writeToFile} from "@api/util/FileUtil";
 
 const Config = getConfig();
@@ -67,6 +68,18 @@ export async function backupFirestore(message?: functions.pubsub.Message, contex
     }
 
 
+}
+
+export function importToBigQuery(){
+    const projectId = serviceAccount.project_id;
+    //TODO: get the dataset id
+    // const datasetid = '';
+    // const bucketName = backupsConfig.bigquery_import_bucket;
+    // const metadata = {
+    //     sourceFormat: "DATASTORE_BACKUP",
+    //     writeDisposition: "WRITE_TRUNCATE", // Overwrite bigquery tables
+    // };
+    // const bigquery = new BigQuery({projectId, credentials: serviceAccount});
 }
 
 function buildOperationAttachment(displayName: string, operation?: Operation, duration?: string, error?: any): SlackAttachment {
