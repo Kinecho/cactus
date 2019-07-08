@@ -2,6 +2,8 @@
 **/*.js
 **/*.js.map
 
+/tmp/
+
 .runtimeconfig.json
 
 # Typescript v1 declaration files
