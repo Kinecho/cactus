@@ -43,3 +43,28 @@ export function getUrlFromInput(input: string|null|undefined, domain:string|unde
 export function isValidEmail(input:string){
     return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input);
 }
+
+export function destructureDisplayName(displayName?: string|null): {firstName?:string, middleName?: string, lastName?:string} {
+    if (!displayName){
+        return {};
+    }
+
+    const parts = displayName.trim().replace(/\s\s+/g, " ").split(" ");
+    if (parts.length < 3){
+        const [firstName, lastName] = parts;
+        return {firstName, lastName};
+    }
+
+    if (parts.length === 3){
+        const [firstName, middleName, lastName] = parts;
+        return {firstName, middleName, lastName};
+    } else if (parts.length > 3){
+        const [firstName] = parts;
+        const lastName = parts[parts.length - 1];
+        return {firstName, lastName};
+    }
+
+
+    return {}
+
+}

@@ -1,5 +1,6 @@
 // tslint:disable-next-line:no-implicit-dependencies
 import "@styles/pages/journal.scss"
+// @ts-ignore
 import * as ScrollMagic from "scrollmagic";
 import 'animation.gsap';
 import 'ScrollToPlugin';
@@ -29,10 +30,12 @@ function configureLearnMoreScroll(){
     });
 
     const learnMore = document.getElementById("learnMoreTop");
-    learnMore.addEventListener("click", (e) => {
-        e.preventDefault();
-        controller.scrollTo("#learnMore");
-    })
+    if (learnMore){
+        learnMore.addEventListener("click", (e) => {
+            e.preventDefault();
+            controller.scrollTo("#learnMore");
+        })
+    }
 
 }
 

@@ -44,4 +44,11 @@ export interface CactusConfig {
         client_x509_cert_url: string,
         private_key_id: string
     }
+    dynamic_links: {
+        domain: string,
+        prefix: string,
+    },
+    web: {
+        domain: string,
+    }
 }

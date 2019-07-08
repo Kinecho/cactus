@@ -1,5 +1,5 @@
-import ListMember from "@shared/mailchimp/models/ListMember";
 import ApiError from "@shared/ApiError";
+import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 
 export enum SubscriptionResultStatus {
     new_subscriber = "new_subscriber",

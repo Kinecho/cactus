@@ -1,0 +1,54 @@
+@import "~styles/variables.scss";
+@import "~styles/mixins.scss";
+@import "~styles/../../node_modules/firebaseui/dist/firebaseui.css";
+
+
+
+@mixin emailInput {
+  border: 1px solid $green;
+  border-radius: 3rem;
+  display: block;
+  flex-grow: 1;
+  font-size: 1.8rem;
+  margin: 0 0 1.6rem;
+  max-width: 53rem;
+  padding: 1.2rem 1.6rem;
+  transition: border-color .3s ease-in-out;
+
+  @include r(600) {
+    margin: 0 1.6rem 1.6rem 0;
+  }
+  @include r(768) {
+    min-width: 32rem;
+  }
+
+  &:hover {
+    border-color: $darkGreen;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 3px 2pt $darkGreen;
+  }
+}
+
+
+@mixin buttonPrimary {
+
+}
+
+@mixin buttonSecondary {
+  background-color: transparent;
+  box-shadow: none;
+  color: $green;
+  padding: .8rem 1.2rem;
+
+  &:hover {
+    background-color: $lightGreen;
+  }
+}
+
+
+input[type=email] {
+  @include emailInput();
+}

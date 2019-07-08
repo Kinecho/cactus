@@ -15,21 +15,31 @@
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
     <!-- Load Stripe.js on your website. -->
 
-    <script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=5d095cf20345900012ec7795&product='inline-share-buttons' async='async'></script>
+    <script type='text/javascript' src="https://platform-api.sharethis.com/js/sharethis.js#property=5d095cf20345900012ec7795&product='inline-share-buttons'" async='async'></script>
 </head>
 
 <body>
-  <div class="centered">
+<div class="centered" id="page-container">
     <header>
-      <a href="/"><img class="logo" src="assets/images/logo.svg" alt="Cactus logo" /></a>
+        <a href="/"><img class="logo" src="assets/images/logo.svg" alt="Cactus logo"/></a>
     </header>
-    <section>
-      <img class="graphic" src="assets/images/celebrate.svg" alt="" />
-      <h1>Subscription Confirmed</h1>
-      <p>You’re on your way to a happier, healthier mindset. Help us spread the word:</p>
-      <div class="sharethis-inline-share-buttons" data-url="https://cactus.app/?utm_source=ShareThis" data-message="Join me in developing a happier, healthier mindset with https://cactus.app" data-title="The simplest way to change your reality is to change what you focus on. See yourself and the world more positively with Cactus."></div>
+    <section id="loading-container">
+        <h1>Loading your subscription</h1>
     </section>
-  </div>
+    <section id="success-container" class="hidden">
+        <img class="graphic" src="/assets/images/celebrate.svg" alt=""/>
+        <h1 id="message">Subscription Confirmed</h1>
+        <p id="content">You’re on your way to a happier, healthier mindset. Help us spread the word:</p>
+        <div class="sharethis-inline-share-buttons" data-url="https://cactus.app/?utm_source=ShareThis" data-message="Join me in developing a happier, healthier mindset with https://cactus.app" data-title="The simplest way to change your reality is to change what you focus on. See yourself and the world more positively with Cactus."></div>
+    </section>
+    <section class="hidden" id="error-container">
+        <h1 class="title">Uh oh!</h1>
+        <p class="message">We were unable to confirm your subscription</p>
+    </section>
+    <section id="continue-container" class="hidden">
+        <a href="#" class="button">Continue</a>
+    </section>
+</div>
 
 <!--Note: JS is included via webpack-->
 </body>

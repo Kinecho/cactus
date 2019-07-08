@@ -14,7 +14,9 @@ const web = new WebClient(config.slack.app.oauth_access_token);
 
 export enum AttachmentColor {
     info = "#83ecf9",
-    error = "#7A3814"
+    error = "#7A3814",
+    success = "#0d7a03",
+    warning = "#FFC947",
 }
 
 export type SlackMessage = IncomingWebhookSendArguments

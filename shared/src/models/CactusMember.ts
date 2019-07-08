@@ -1,5 +1,5 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import ListMember from "@shared/mailchimp/models/ListMember";
+import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",

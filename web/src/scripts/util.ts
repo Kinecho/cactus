@@ -1,25 +1,28 @@
 import {QueryParam} from "@shared/util/queryParams";
+import {isValidEmail} from "@shared/util/StringUtil";
 
-export function validateEmail(email:string)
-{
-    return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
+export enum LocalStorageKey {
+    emailForSignIn = 'emailForSignIn'
 }
+
 
 function createElementFromString(htmlString:string):ChildNode{
     const div = document.createElement('div');
     div.innerHTML = htmlString.trim();
 
     // Change this to div.childNodes to support multiple top-level nodes
-    return div.firstChild;
+    return div.firstChild as ChildNode;
 }
-
-
 
 function addModalCloseListener(){
     const buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("modal-close");
     Array.from(buttons).forEach(button => {
         button.addEventListener("click", () => {
             const modalId = button.dataset.for;
+            if (!modalId){
+                console.error("Unable to get modal as the modal ID was null");
+                return;
+            }
             const modal = <HTMLDivElement> document.getElementById(modalId);
             modal.classList.add("hidden");
             modal.classList.remove("open");
@@ -50,13 +53,89 @@ export function showModal(modalId: string){
     return false;
 }
 
+export interface ConfirmEmailResponse {
+    canceled: boolean,
+    email?: string,
+}
+export function showConfirmEmailModal(options: {
+    title?: string,
+    message?: string,
+    error?:string,
+    imageUrl?: string,
+    imageAlt?:string,
+    classNames?: string[]
+}):Promise<ConfirmEmailResponse> {
+
+    const modalId = "auth-confirm-modal";
+
+    return new Promise(async (resolve, rejeect) => {
+
+        const modal = addModal(modalId, {
+            ...options,
+            classNames: [...(options.classNames || []), "auth"],
+            onClose: () => {
+                resolve({canceled: true})
+            }
+        });
+
+        // modal.child
+        const $content = modal.getElementsByClassName("modal-content").item(0);
+        if (!$content){
+            console.error("unable to create modal content");
+            return;
+        }
+        const $emailInput = createElementFromString(`<input type="email" class="email-confirm" name="email" autocomplete="username" placeholder="Enter your email"/>`) as HTMLInputElement;
+        // $emailInput.addEventListener("")
+
+        const $inputContainer = document.createElement("div");
+        $inputContainer.appendChild($emailInput);
+
+        const $confirmButton = createElementFromString(`<button class="button confirm">Confirm</button>`);
+
+
+        $content.appendChild($inputContainer);
+
+
+        const $error = createElementFromString(`<div class="error hidden">${options.error || "Unable to sign in"}</div>`) as HTMLDivElement;
+        $content.appendChild($error);
+
+        if (options.error){
+            $error.classList.remove("hidden");
+        }
+
+        $content.appendChild($confirmButton);
+
+        $confirmButton.addEventListener("click", () => {
+            const email = $emailInput.value;
+            const isValid = isValidEmail(email);
+            if (!isValid){
+                $error.innerText = "Please enter a valid email";
+                $error.classList.remove("hidden");
+            } else {
+                $error.classList.add("hidden");
+                resolve({canceled: false, email});
+                closeModal(modalId);
+            }
+
+        });
+
+
+        showModal(modalId);
+
+    })
+
+}
+
 export function addModal(modalId: string, options: {
     title?: string,
     message?: string,
     imageUrl?: string,
-}): ChildNode {
+    imageAlt?:string,
+    classNames?: string[],
+    onClose?: () => void,
+}): HTMLDivElement {
 
-    const existingModal = <HTMLDivElement>document.getElementById("signup-success-modal");
+    const existingModal = <HTMLDivElement>document.getElementById(modalId);
     if (existingModal){
         console.warn(`a modal with id ${modalId} already exists, removing it`);
         existingModal.remove()
@@ -67,16 +146,22 @@ export function addModal(modalId: string, options: {
     </svg>
     </button>`);
 
-    const $illustration = createElementFromString(`<img src="assets/images/success.svg" alt="Success!" />`);
 
     $button.addEventListener("click", () => {
         closeModal(modalId);
+        if (options.onClose){
+            options.onClose();
+        }
     });
 
     const $content = document.createElement("div");
+    $content.classList.add("modal-content");
     $content.append($button);
-    $content.append($illustration);
 
+    if (options.imageUrl){
+        const $illustration = createElementFromString(`<img src="${options.imageUrl}" alt="${options.imageAlt || ''}" />`);
+        $content.append($illustration);
+    }
     let $title = null;
     let $message = null;
 
@@ -95,6 +180,9 @@ export function addModal(modalId: string, options: {
     const modal = document.createElement("div");
     modal.id = modalId;
     modal.classList.add("modal-window");
+    if (options.classNames){
+        modal.classList.add(...options.classNames);
+    }
     modal.appendChild($content);
 
 
@@ -105,4 +193,10 @@ export function addModal(modalId: string, options: {
 export function getQueryParam(name:QueryParam):string|null {
     const params = new URLSearchParams(window.location.search);
     return params.get(name);
+}
+
+export function triggerWindowResize(){
+    const resizeEvent = window.document.createEvent('UIEvents');
+    resizeEvent .initUIEvent('resize', true, false, window, 0);
+    window.dispatchEvent(resizeEvent);
 }
