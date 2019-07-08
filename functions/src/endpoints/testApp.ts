@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 });
 
 app.get("/backups", async (req, res) => {
-    await backupFirestore(undefined, undefined);
+    await backupFirestore();
     res.send("done");
 });
 
