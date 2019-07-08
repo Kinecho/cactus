@@ -26,6 +26,7 @@ export interface PageConfig {
     pageName: string,
     title: string,
     pagePath: string,
+    reflectionPrompt: boolean,
 }
 
 
@@ -93,7 +94,7 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
     const newPage:PageEntry = {
         title: response.title,
         path: response.pagePath,
-        reflectionPrompt: true,
+        reflectionPrompt: response.reflectionPrompt,
         includeInDev: true,
         name: response.pageName,
     };
