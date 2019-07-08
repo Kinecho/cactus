@@ -9,7 +9,16 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const appendFile = promisify(fs.appendFile);
 const pagesPath = `${webHelpers.webRoot}/pages.js`;
-const pages = require(pagesPath) as { [name: string]: { title: string, path: string } };
+
+export interface PageEntry {
+    path?: string,
+    title: string,
+    name: string,
+    includeInDev?:boolean,
+    reflectionPrompt?: boolean,
+}
+
+const pages = require(pagesPath) as { [name: string]: PageEntry };
 
 const firebaseConfigPath = `${webHelpers.projectRoot}/firebase.json`;
 
@@ -17,6 +26,7 @@ export interface PageConfig {
     pageName: string,
     title: string,
     pagePath: string,
+    reflectionPrompt: boolean,
 }
 
 
@@ -81,15 +91,25 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
     if (pages[response.pageName]) {
         console.warn("A Page with the same key already exists in pages.js");
     }
-    const newPage = {
+    const newPage:PageEntry = {
         title: response.title,
         path: response.pagePath,
-        reflectionPrompt: true,
+        reflectionPrompt: response.reflectionPrompt,
+        includeInDev: true,
+        name: response.pageName,
     };
+
+    //turning off all other pages in dev
+    Object.keys(pages).forEach(title => {
+        const page = pages[title];
+        if (page.reflectionPrompt && page.includeInDev){
+            page.includeInDev = false;
+        }
+    });
 
     pages[response.pageName] = newPage;
 
-    console.log("Adding new page to pages.js:", chalk.yellow(newPage.path));
+    console.log("Adding new page to pages.js:", chalk.yellow(newPage.path || ""));
 
     const data = `module.exports = ${JSON.stringify(pages, null, 4)}`;
 

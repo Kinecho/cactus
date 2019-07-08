@@ -45,6 +45,7 @@
                 "source": "/signup-abc-123",
                 "destination": "/sign_up.html"
             },
+            {
                 "source": "/what-brings-out-your-playful-side",
                 "destination": "/what_brings_out_your_playful_side.html"
             },

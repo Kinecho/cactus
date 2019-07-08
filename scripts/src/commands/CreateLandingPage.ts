@@ -78,6 +78,7 @@ Continue?`
         console.log(chalk.green(`Let\'s create a landing page.`));
         console.log(chalk.dim(`This will not create any email campaigns or add anything to the database. If you want to create a Reflection Prompt page, please use the ${chalk.yellow("CreateReflectionPrompt.ts")} script.`));
         const response = await prompts(this.getQuestions());
+        response.reflectionPrompt = false;
         this.response = response;
         const {pagePath, title, looksGood} = response;
 

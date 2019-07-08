@@ -67,6 +67,7 @@ export default class CreateReflectionPrompt implements Command {
         console.log(chalk.bold.green('Let\'s create Reflection Prompt.'));
         console.log(chalk.dim('This will walk you through making a new landing page, email campaign, and record in the database'));
         const response = await prompts(this.getQuestions());
+        response.reflectionPrompt = true;
         this.response = response;
         const {looksGood} = response;
 
