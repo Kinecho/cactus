@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ui.isPendingRedirect()) {
         console.log("Is pending redirect.... need to log the user in");
         if ($loading) $loading.classList.remove("hidden");
-        if ($emailContainer) $emailContainer.remove();
-        if($divider) $divider.remove();
+        if ($emailContainer) $emailContainer.classList.add("hidden");
+        if($divider) $divider.classList.add("hidden");
         ui.start('#signup-app', config);
     } else {
         if($emailContainer) $emailContainer.classList.remove("hidden");

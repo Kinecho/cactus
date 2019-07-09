@@ -10,8 +10,6 @@ const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const pagesUtil = require("./../pagesUtil");
 
-
-
 module.exports = function (config) {
 
 

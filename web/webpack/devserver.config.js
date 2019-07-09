@@ -1,16 +1,30 @@
 const helpers = require('./../helpers')
 const allPages = require('./../pages')
-const pagesUtil = require("./../pagesUtil");
+const pagesUtil = require('./../pagesUtil')
+const util = require('util')
+const fs = require('fs')
+const path = require('path')
+const writeFile = util.promisify(fs.writeFile)
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
 module.exports = function (config) {
-    const pages = pagesUtil.getPages(config, allPages);
+    const pages = pagesUtil.getPages(config, allPages)
+    const indexPath = path.join(helpers.srcDir, 'pages-index.html')
+    const pagesListHtml = Object.values(pages)
+        .filter(page => page.path)
+        .sort((p1, p2) => p1.path.localeCompare(p2.path))
+        .map(page => `<li class="message" style="padding:.5rem 0 .5rem 0;"><a style="text-decoration: none;" href="${page.path}"><strong>${page.path}</strong></a>&nbsp;<span style="color:#757575;">${page.name}.html</span></li>`)
+        .join('\n')
+    writeFile(indexPath, `<html><body><div class="centered"><div><div style="text-align:center;margin-bottom: 2rem;"><img class="logo" src="/assets/images/logo.svg"><h1>Dev Server Pages</h1></div><ul>${pagesListHtml}</ul></div></div></body></html>`)
     return {
         devServer: {
             open: false,
             contentBase: helpers.srcDir,
-            stats: "errors-warnings",
+            stats: 'errors-warnings',
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [
+                    {from: new RegExp('^/index$'), to: '/pages-index.html'},
                     ...Object.keys(pages).filter(page => {
                         return pages[page].path
                     }).map(filename => {
@@ -23,5 +37,12 @@ module.exports = function (config) {
                 ],
             },
         },
+        plugins: [new HtmlWebpackPlugin({
+            // chunks: ['common', filename],
+            title: 'Page Index',
+            template: indexPath,
+            filename: `pages-index.html`,
+            favicon: `${helpers.srcDir}/favicon.ico`,
+        })],
     }
 }

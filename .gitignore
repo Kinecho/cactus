@@ -5,6 +5,8 @@ web/build
 scripts/lib/
 scripts/output/
 
+web/src/pages-index.html
+
 .runtimeconfig.json
 
 applicationCredentials.json

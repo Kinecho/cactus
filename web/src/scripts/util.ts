@@ -1,12 +1,14 @@
 import {QueryParam} from "@shared/util/queryParams";
 import {isValidEmail} from "@shared/util/StringUtil";
+import Vue from "vue";
+import NavBar from "@components/NavBar.vue";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn'
 }
 
 
-function createElementFromString(htmlString:string):ChildNode{
+function createElementFromString(htmlString: string): ChildNode {
     const div = document.createElement('div');
     div.innerHTML = htmlString.trim();
 
@@ -14,16 +16,16 @@ function createElementFromString(htmlString:string):ChildNode{
     return div.firstChild as ChildNode;
 }
 
-function addModalCloseListener(){
-    const buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName("modal-close");
+function addModalCloseListener() {
+    const buttons = <HTMLCollectionOf<HTMLButtonElement>>document.getElementsByClassName("modal-close");
     Array.from(buttons).forEach(button => {
         button.addEventListener("click", () => {
             const modalId = button.dataset.for;
-            if (!modalId){
+            if (!modalId) {
                 console.error("Unable to get modal as the modal ID was null");
                 return;
             }
-            const modal = <HTMLDivElement> document.getElementById(modalId);
+            const modal = <HTMLDivElement>document.getElementById(modalId);
             modal.classList.add("hidden");
             modal.classList.remove("open");
         })
@@ -35,7 +37,7 @@ function addModalCloseListener(){
  * @param {string} modalId - the ID of the modal to close
  * @returns {boolean} success - if the modal was successfully closed
  */
-export function closeModal(modalId:string): boolean{
+export function closeModal(modalId: string): boolean {
     const modalDiv = <HTMLDivElement>document.getElementById(modalId);
     if (modalDiv) {
         modalDiv.classList.remove("open");
@@ -44,7 +46,7 @@ export function closeModal(modalId:string): boolean{
     return false;
 }
 
-export function showModal(modalId: string){
+export function showModal(modalId: string) {
     const modalDiv = <HTMLDivElement>document.getElementById(modalId);
     if (modalDiv) {
         modalDiv.classList.add("open");
@@ -57,14 +59,15 @@ export interface ConfirmEmailResponse {
     canceled: boolean,
     email?: string,
 }
+
 export function showConfirmEmailModal(options: {
     title?: string,
     message?: string,
-    error?:string,
+    error?: string,
     imageUrl?: string,
-    imageAlt?:string,
+    imageAlt?: string,
     classNames?: string[]
-}):Promise<ConfirmEmailResponse> {
+}): Promise<ConfirmEmailResponse> {
 
     const modalId = "auth-confirm-modal";
 
@@ -80,7 +83,7 @@ export function showConfirmEmailModal(options: {
 
         // modal.child
         const $content = modal.getElementsByClassName("modal-content").item(0);
-        if (!$content){
+        if (!$content) {
             console.error("unable to create modal content");
             return;
         }
@@ -99,7 +102,7 @@ export function showConfirmEmailModal(options: {
         const $error = createElementFromString(`<div class="error hidden">${options.error || "Unable to sign in"}</div>`) as HTMLDivElement;
         $content.appendChild($error);
 
-        if (options.error){
+        if (options.error) {
             $error.classList.remove("hidden");
         }
 
@@ -108,7 +111,7 @@ export function showConfirmEmailModal(options: {
         $confirmButton.addEventListener("click", () => {
             const email = $emailInput.value;
             const isValid = isValidEmail(email);
-            if (!isValid){
+            if (!isValid) {
                 $error.innerText = "Please enter a valid email";
                 $error.classList.remove("hidden");
             } else {
@@ -130,13 +133,13 @@ export function addModal(modalId: string, options: {
     title?: string,
     message?: string,
     imageUrl?: string,
-    imageAlt?:string,
+    imageAlt?: string,
     classNames?: string[],
     onClose?: () => void,
 }): HTMLDivElement {
 
     const existingModal = <HTMLDivElement>document.getElementById(modalId);
-    if (existingModal){
+    if (existingModal) {
         console.warn(`a modal with id ${modalId} already exists, removing it`);
         existingModal.remove()
     }
@@ -149,7 +152,7 @@ export function addModal(modalId: string, options: {
 
     $button.addEventListener("click", () => {
         closeModal(modalId);
-        if (options.onClose){
+        if (options.onClose) {
             options.onClose();
         }
     });
@@ -158,20 +161,20 @@ export function addModal(modalId: string, options: {
     $content.classList.add("modal-content");
     $content.append($button);
 
-    if (options.imageUrl){
+    if (options.imageUrl) {
         const $illustration = createElementFromString(`<img src="${options.imageUrl}" alt="${options.imageAlt || ''}" />`);
         $content.append($illustration);
     }
     let $title = null;
     let $message = null;
 
-    if (options.title){
+    if (options.title) {
         $title = document.createElement("h2");
         $title.innerText = options.title;
         $content.append($title);
     }
 
-    if (options.message){
+    if (options.message) {
         $message = document.createElement("div");
         $message.innerText = options.message;
         $content.append($message);
@@ -180,7 +183,7 @@ export function addModal(modalId: string, options: {
     const modal = document.createElement("div");
     modal.id = modalId;
     modal.classList.add("modal-window");
-    if (options.classNames){
+    if (options.classNames) {
         modal.classList.add(...options.classNames);
     }
     modal.appendChild($content);
@@ -190,13 +193,36 @@ export function addModal(modalId: string, options: {
 }
 
 
-export function getQueryParam(name:QueryParam):string|null {
+export function getQueryParam(name: QueryParam): string | null {
     const params = new URLSearchParams(window.location.search);
     return params.get(name);
 }
 
-export function triggerWindowResize(){
+export function triggerWindowResize() {
     const resizeEvent = window.document.createEvent('UIEvents');
-    resizeEvent .initUIEvent('resize', true, false, window, 0);
+    resizeEvent.initUIEvent('resize', true, false, window, 0);
     window.dispatchEvent(resizeEvent);
+}
+
+declare interface NavigationOptions {
+    showSignupButton?: boolean,
+}
+
+export function setupNavigation(options: NavigationOptions) {
+    const $headers = document.getElementsByTagName("header");
+    const $header = $headers ? $headers.item(0) : undefined;
+    const $nav = document.getElementById("#top-nav");
+
+    if (!$nav && !$header) {
+        console.warn("Can not find the Vue root element for the nav bar. Not initializing");
+        return;
+    }
+    console.log("Found a navigation header, initializing");
+
+    // @ts-ignore
+    window.NavBar = new Vue({
+        el: $nav || $header,
+        template: `<NavBar v-bind:show-signup="${options.showSignupButton || true}" />`,
+        components: {NavBar: NavBar}
+    });
 }
