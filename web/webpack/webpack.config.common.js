@@ -28,6 +28,10 @@ module.exports = function (config) {
     }, {common: `${helpers.scriptDir}/common.ts`})
 
 
+    if (isDev){
+        jsEntries["pages-index"] = `${helpers.scriptDir}/pages/pages-index.ts`;
+    }
+
     console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
     console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 

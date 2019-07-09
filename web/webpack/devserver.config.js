@@ -15,7 +15,7 @@ module.exports = function (config) {
         .sort((p1, p2) => p1.path.localeCompare(p2.path))
         .map(page => `<li class="message" style="padding:.5rem 0 .5rem 0;"><a style="text-decoration: none;" href="${page.path}"><strong>${page.path}</strong></a>&nbsp;<span style="color:#757575;">${page.name}.html</span></li>`)
         .join('\n')
-    writeFile(indexPath, `<html><body><div class="centered"><div><div style="text-align:center;margin-bottom: 2rem;"><img class="logo" src="/assets/images/logo.svg"><h1>Dev Server Pages</h1></div><ul>${pagesListHtml}</ul></div></div></body></html>`)
+    writeFile(indexPath, `<html><body><div class="centered"><div><header style="text-align:center;margin-bottom: 2rem;"><img class="logo" src="/assets/images/logo.svg"></header><h1>Dev Server Pages</h1></div><ul>${pagesListHtml}</ul></div></div></body></html>`)
     return {
         devServer: {
             open: false,
@@ -37,8 +37,9 @@ module.exports = function (config) {
                 ],
             },
         },
+
         plugins: [new HtmlWebpackPlugin({
-            // chunks: ['common', filename],
+            chunks: ['common', 'pages-index'],
             title: 'Page Index',
             template: indexPath,
             filename: `pages-index.html`,

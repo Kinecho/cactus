@@ -1,0 +1,10 @@
+@import "common";
+@import "article";
+
+ul {
+  text-align: left;
+  a {
+    @include fancyLink;
+  }
+}
+
