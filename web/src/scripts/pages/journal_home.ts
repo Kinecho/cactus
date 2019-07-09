@@ -1,9 +1,9 @@
-// tslint:disable-next-line:no-implicit-dependencies
 import "@styles/pages/journal_home.scss"
-import {initializeArticlePage} from "@web/articleCommon";
+import Vue from "vue";
+import JournalHome from "@components/JournalHome.vue";
 
-initializeArticlePage();
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("journal_home loaded");
+new Vue({
+    el: "#journal-home-app",
+    template: `<JournalHome/>`,
+    components: {JournalHome: JournalHome}
 });

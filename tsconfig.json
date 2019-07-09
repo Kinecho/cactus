@@ -2,11 +2,15 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es5",
+        "moduleResolution": "node",
         "sourceMap": true,
         "baseUrl": ".",
         "paths": {
             "@shared/*": [
                 "./shared/src/*"
+            ],
+            "@components/*": [
+                "./web/src/scripts/components/*"
             ]
         }
     }
