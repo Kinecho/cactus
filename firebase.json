@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/home",
+                "destination": "/journal_home.html"
+            },
+            {
                 "source": "/p/**",
                 "dynamicLinks": true
             },

@@ -99,13 +99,16 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
         name: response.pageName,
     };
 
-    //turning off all other pages in dev
-    Object.keys(pages).forEach(title => {
-        const page = pages[title];
-        if (page.reflectionPrompt && page.includeInDev){
-            page.includeInDev = false;
-        }
-    });
+    if (response.reflectionPrompt){
+        //turning off all other pages in dev
+        Object.keys(pages).forEach(title => {
+            const page = pages[title];
+            if (page.reflectionPrompt && page.includeInDev){
+                page.includeInDev = false;
+            }
+        });
+    }
+
 
     pages[response.pageName] = newPage;
 

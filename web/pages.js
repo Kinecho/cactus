@@ -44,7 +44,7 @@ module.exports = {
         "title": "What are your simple pleasures? | Cactus",
         "path": "/what-are-your-simple-pleasures",
         "reflectionPrompt": true,
-        "includeInDev": true,
+        "includeInDev": false,
         "name": "what_are_your_simple_pleasures"
     },
     "how_do_you_celebrate": {
@@ -295,46 +295,63 @@ module.exports = {
     "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190707": {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190707",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190707"
     },
     "how_has_friendship_enriched_your_life": {
         "title": "How has friendship enriched your life?",
         "path": "/how-has-friendship-enriched-your-life",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "how_has_friendship_enriched_your_life"
     },
     "when_do_you_feel_completely_free_to_be_yourself": {
         "title": "When do you feel completely free to be yourself?",
         "path": "/when-do-you-feel-completely-free-to-be-yourself",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "when_do_you_feel_completely_free_to_be_yourself"
     },
     "how_do_you_benefit_from_moments_of_reflection": {
         "title": "How do you benefit from moments of reflection?",
         "path": "/how-do-you-benefit-from-moments-of-reflection",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "how_do_you_benefit_from_moments_of_reflection"
     },
     "what_is_essential_to_your_happiness": {
         "title": "What is essential to your happiness?",
         "path": "/what-is-essential-to-your-happiness",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "what_is_essential_to_your_happiness"
     },
     "what_makes_you_feel_calm_peaceful_or_serene": {
         "title": "What makes you feel calm, peaceful, or serene?",
         "path": "/what-makes-you-feel-calm-peaceful-or-serene",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "what_makes_you_feel_calm_peaceful_or_serene"
     },
     "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713": {
         "title": "What are three benefits or gifts that you received this past week for which you are grateful?",
         "path": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713"
     },
     "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714": {
         "title": "What three things are you looking forward to experiencing this week?",
         "path": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "name": "what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714"
     },
     "what_brings_out_your_playful_side": {
         "title": "What brings out your playful side?",
         "path": "/what-brings-out-your-playful-side",
-        "reflectionPrompt": true
+        "reflectionPrompt": true,
+        "includeInDev": true,
+        "name": "what_brings_out_your_playful_side"
+    },
+    "journal_home": {
+        "title": "Journal | Home",
+        "path": "/home",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "journal_home"
     }
 }
