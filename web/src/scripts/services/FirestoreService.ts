@@ -198,6 +198,10 @@ export default class FirestoreService {
 
         const allResults: T[] = [];
         return query.onSnapshot(snapshot => {
+            if (snapshot.empty) {
+                options.onData(allResults);
+            }
+
             snapshot.docChanges().forEach(function (change) {
                 if (!change || !change.doc) {
                     return;
@@ -227,7 +231,6 @@ export default class FirestoreService {
 
                 }
                 if (change.type === "added") {
-                    console.log("document was added");
                     allResults.splice(change.newIndex, 0, model);
                     if (options.onAdded) {
                         options.onAdded(model);
