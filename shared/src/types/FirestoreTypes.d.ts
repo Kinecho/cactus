@@ -51,10 +51,11 @@ declare interface IQueryOptions<IQueryCursor> extends GetOptions {
 }
 
 declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> extends IQueryOptions<IQueryCursor> {
-    onModified?: (model: IModel) => void|Promise<void>,
-    onRemoved?: (removed: IModel) => void|Promise<void>,
-    onAdded?: (added: IModel) => void|Promise<void>,
-    onData: (models: IModel[]) => void|Promise<void>
+    onModified?: (model: IModel) => void | Promise<void>,
+    onRemoved?: (removed: IModel) => void | Promise<void>,
+    onAdded?: (added: IModel) => void | Promise<void>,
+    onData: (models: IModel[]) => void | Promise<void>,
+    queryName?: string,
 }
 
 declare interface QueryResult<T extends BaseModel> {

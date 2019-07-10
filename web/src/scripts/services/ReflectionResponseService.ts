@@ -29,8 +29,11 @@ export default class ReflectionResponseService {
     }
 
     observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
+        console.log("attempting to observe reflection responses for mailchimpMemberId, ordered by createdAt", memberId);
         const query = this.getCollectionRef().where(ReflectionResponseField.mailchimpMemberId, "==", memberId)
             .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+
+        options.queryName = "observeForMailchimpMemberId";
         return this.firestoreService.observeQuery(query, ReflectionResponse, options);
 
     }

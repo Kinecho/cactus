@@ -3,9 +3,6 @@ import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {getISODate, hoursToMilliseconds, minusDays, minutesToMilliseconds} from "@shared/util/DateUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import * as prompts from "prompts";
-import list = prompts.prompts.list;
-import {CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 export default class ReflectionPromptService {
     public static sharedInstance = new ReflectionPromptService();
