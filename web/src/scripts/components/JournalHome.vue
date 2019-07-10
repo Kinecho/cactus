@@ -10,9 +10,12 @@
                 </div>
             </div>
             <div v-if="loggedIn">
-                <section class="today journalList" v-if="todaysPrompt">
+                <section class="today" v-if="todaysPrompt">
                     <h2>Today</h2>
                     <h3 class="question">{{todaysPrompt.question}}</h3>
+                </section>
+                <section class="empty journalList" v-if="!preparedResponses.length">
+                    You have no responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
                     <response-card
@@ -53,6 +56,7 @@
         todaysPrompt?: ReflectionPrompt,
         todayUnsubscriber?: ListenerUnsubscriber,
         didCreateTodaysReflection: boolean,
+        responsesHasLoaded: boolean,
     }
 
     export default Vue.extend({
@@ -63,9 +67,7 @@
 
                 this.todayUnsubscriber = ReflectionPromptService.sharedInstance.observeTodaysPrompt({
                     onData: async (updatedPrompt) => {
-                        console.log("updating today's prompt", updatedPrompt);
                         this.todaysPrompt = updatedPrompt;
-
                         return;
                     },
                     onDateChanged: ({unsubscriber}) => {
@@ -73,14 +75,13 @@
                     }
                 });
 
-                this.todaysPrompt = await ReflectionPromptService.sharedInstance.getTodaysPrompt();
-                console.log("today's prompt is", this.todaysPrompt);
                 if (!user) {
                     window.location.href = "/unauthorized"
                 } else {
-                    console.log("getting cactus member for user", user.uid);
                     this.cactusMember = await CactusMemberService.sharedInstance.getByUserId(user.uid);
-                    console.log("fetched cactus member, found", this.cactusMember);
+                    if (!this.cactusMember) {
+                        console.warn("No cactus member was found for userId", user.uid);
+                    }
                 }
             });
         },
@@ -99,6 +100,7 @@
                 responseUnsubscriber: undefined,
                 todaysPrompt: undefined,
                 didCreateTodaysReflection: false,
+                responsesHasLoaded: false
             };
         },
         watch: {
@@ -108,17 +110,17 @@
                 }
             },
             async responses(responses: ReflectionResponse[]) {
+                this.responsesHasLoaded = true;
                 await this.createTodaysReflectionIfNeeded();
             },
             async cactusMember(member: CactusMember | undefined | null) {
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
                     const mailchimpMemberId = member.mailchimpListMember.id;
-                    this.createTodaysReflectionIfNeeded();
+                    await this.createTodaysReflectionIfNeeded();
                     this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
                         onData: async (models: ReflectionResponse[]): Promise<void> => {
-                            // console.log("received data from query observer. Updating fields");
+                            this.responsesHasLoaded = true;
                             this.responses = models;
-
                             const currentPrompts = this.promptsById;
                             let promptTasks = this.responses.map(response => {
                                 return new Promise(async resolve => {
@@ -136,6 +138,7 @@
                                 })
                             });
                             await Promise.all(promptTasks);
+                            await this.createTodaysReflectionIfNeeded();
                         }
                     });
 
@@ -159,25 +162,21 @@
         methods: {
             async createTodaysReflectionIfNeeded() {
                 const prompt = this.todaysPrompt;
-                if (!this.didCreateTodaysReflection && prompt && this.cactusMember && this.cactusMember.mailchimpListMember && this.responses.length > 0) {
+                if (!this.didCreateTodaysReflection && prompt && this.cactusMember && this.cactusMember.mailchimpListMember && this.responsesHasLoaded) {
                     let todaysResponse = this.responses.find(response => response.promptId === prompt.id);
                     if (!todaysResponse) {
-                        console.log("no response was found for current day, creating one");
                         todaysResponse = new ReflectionResponse();
                         todaysResponse.promptId = prompt.id;
                         todaysResponse.promptQuestion = prompt.question;
-
-                        console.log("cactus member was found. Cactus Member ID = ", this.cactusMember.id);
                         todaysResponse.mailchimpMemberId = this.cactusMember.mailchimpListMember.id;
                         todaysResponse.mailchimpUniqueEmailId = this.cactusMember.mailchimpListMember.unique_email_id;
                         todaysResponse.memberEmail = this.cactusMember.email;
                         todaysResponse.responseMedium = ResponseMedium.JOURNAL_WEB;
-                        console.log("saving reflection prompt", todaysResponse.toJSON());
+                        console.log("Creating Today's reflection prompt", todaysResponse.toJSON());
                         this.didCreateTodaysReflection = true;
                         await ReflectionResponseService.sharedInstance.save(todaysResponse);
                     }
                 }
-
             },
         },
         computed: {
@@ -216,6 +215,9 @@
 </script>
 
 <style scoped lang="scss">
+    @import "~styles/common";
+    @import "~styles/mixins";
+
     .container {
         /*max-width: 74rem;*/
         text-align: left;
@@ -232,5 +234,17 @@
     .today {
         text-align: center;
         margin-bottom: 3rem;
+    }
+
+    .journalList {
+        &.empty {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            min-height: 12rem;
+            @include shadowbox;
+        }
     }
 </style>
