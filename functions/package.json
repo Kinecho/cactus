@@ -7,6 +7,7 @@
     "deploy:stage": "firebase deploy --only functions -P stage",
     "deploy:stage:func": "func() { npx firebase deploy -P stage --only functions:\"$1\"; }; func",
     "deploy:prod": "firebase deploy --only functions -P prod",
+    "deploy:prod:func": "func() { npx firebase deploy -P prod --only functions:\"$1\"; }; func",
     "emulator:start": "firebase emulators:start --only functions",
     "lint": "tslint --project tsconfig.json",
     "logs": "firebase functions:log",
