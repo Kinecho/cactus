@@ -206,6 +206,8 @@ export function triggerWindowResize() {
 
 declare interface NavigationOptions {
     showSignupButton?: boolean,
+    redirectOnSignOut?: boolean,
+    signOutRedirectUrl?: string,
 }
 
 export function setupNavigation(options: NavigationOptions) {
@@ -220,9 +222,13 @@ export function setupNavigation(options: NavigationOptions) {
     console.log("Found a navigation header, initializing");
 
     // @ts-ignore
-    window.NavBar = new Vue({
+    window.NavBar = new NavBar({
         el: $nav || $header,
-        template: `<NavBar v-bind:show-signup="${options.showSignupButton || true}" />`,
+        propsData: {
+            showSignupButton: options.showSignupButton,
+            redirectOnSignOut: options.redirectOnSignOut || false,
+            signOutRedirectUrl: options.signOutRedirectUrl,
+        },
         components: {NavBar: NavBar}
     });
 }

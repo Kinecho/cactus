@@ -34,7 +34,7 @@
         ],
         "rewrites": [
             {
-                "source": "/journal-home",
+                "source": "/home",
                 "destination": "/journal_home.html"
             },
             {

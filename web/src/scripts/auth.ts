@@ -1,18 +1,19 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {showConfirmEmailModal, addModal, LocalStorageKey, showModal} from "@web/util";
-import {initializeFirebase, getAuth, getFirebase} from "@web/firebase";
+import {initializeFirebase, getAuth, FirebaseUserCredential} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
 
-let authUi:AuthUI;
+let authUi: AuthUI;
 
 
 export interface EmailLinkSignupResult {
     success: boolean,
+    credential?: FirebaseUserCredential,
     error?: {
         title: string,
         message: string,
@@ -24,13 +25,13 @@ export interface EmailLinkSignupResult {
     }
 }
 
-export const emailProvider = (opts:any) => ({
+export const emailProvider = (opts: any) => ({
     provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
     signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
     forceSameDevice: false,
     emailLinkSignIn: function () {
         return {
-            signInSuccessWithAuthResult: function (authResult:any, redirectUrl:string|undefined) {
+            signInSuccessWithAuthResult: function (authResult: any, redirectUrl: string | undefined) {
                 console.log("signin from auth link success", authResult);
 
                 authResult.additionalUserInfo.isNewUser;
@@ -67,8 +68,44 @@ function getPhoneProviderConfig() {
     };
 }
 
-export function getAuthUIConfig(opts: { signInSuccessPath: string, emailLinkSignInPath?: string }) {
+export interface AuthUIConfigOptions {
+    signInSuccessPath: string,
+    emailLinkSignInPath?: string,
+    signInSuccess?: ((authResult: FirebaseUserCredential, redirectUrl: string) => boolean),
+    signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>)
+}
+
+
+export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
     return {
+        callbacks: {
+            signInSuccessWithAuthResult: (authResult: FirebaseUserCredential, redirectUri: string): boolean => {
+
+                /*
+                If the callback returns true, then the page is automatically redirected depending on the case:
+
+                If no signInSuccessUrl parameter was given in the URL (See: https://github.com/firebase/firebaseui-web#overwriting-the-sign-in-success-url)
+                then the default signInSuccessUrl in config is used.
+                If the value is provided in the URL, that value will be used instead of the static signInSuccessUrl in config.
+                If the callback returns false or nothing, the page is not automatically redirected.
+                 */
+                if (opts.signInSuccess) {
+                    return opts.signInSuccess(authResult, redirectUri)
+                } else {
+                    console.log("Sign in success. No callback was provided", authResult, redirectUri);
+                    return true;
+                }
+            },
+            async signInFailure(error: firebaseui.auth.AuthUIError): Promise<void> {
+                console.error("Sign in failure", error);
+                if (opts.signInFailure) {
+                    opts.signInFailure(error);
+                } else {
+                    console.error("No signin failure callback provided")
+                }
+                return
+            }
+        },
         signInSuccessUrl: opts.signInSuccessPath,
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
@@ -117,7 +154,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
         return {success: true};
     }
 
-    let email:string|undefined|null = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
+    let email: string | undefined | null = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
     const currentUser = getAuth().currentUser;
     if (currentUser) {
         console.log("using current user's email");
@@ -149,13 +186,16 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
     if (email) {
         try {
-            const authResult = await firebase.auth().signInWithEmailLink(email, window.location.href);
+            const authResult: FirebaseUserCredential = await firebase.auth().signInWithEmailLink(email, window.location.href);
             window.localStorage.removeItem(LocalStorageKey.emailForSignIn);
             const resultUser = authResult.user;
-            if (resultUser){
+
+
+            if (resultUser) {
                 console.log("successfully completed sign in ", resultUser.toJSON());
             }
 
+            return {success: true, credential: authResult}
 
         } catch (error) {
             console.error("failed to login with email", error);
@@ -177,8 +217,6 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
             return {success: false, error: error.message};
         }
-
-        return {success: true}
     } else {
         return {success: false, error: {title: "Whoops!", message: "Unable to complete your registration"}}
     }

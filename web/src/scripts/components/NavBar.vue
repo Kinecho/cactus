@@ -4,60 +4,73 @@
         <a v-if="!loggedIn && showSignup" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
             Up Free</a>
         <div v-if="loggedIn">
-            <span >{{username}}</span>&nbsp;<a href="#" @click.prevent=logout>logout</a>
+            <span>{{displayName}}</span>&nbsp;<a href="#" @click.prevent=logout>logout</a>
         </div>
 
     </header>
 </template>
 
-<script>
-    import {initializeFirebase} from '@web/firebase'
-    const firebase = initializeFirebase();
+<script lang="ts">
+    import Vue from "vue";
+    import {FirebaseUser, getAuth} from '@web/firebase'
 
-    export default {
-        created: function () {
-            const auth = firebase.auth();
-            this.$auth = auth;
-            this.authHandler = this.$auth.onAuthStateChanged(user => {
-                if (user) {
-                    console.log('user is logged in', user.toJSON())
-                    this.loggedIn = true
-                    this.username = user.email || user.displayName || user.phoneNumber
+    declare interface NavBarData {
+        authUnsubscribe?: () => void,
+        user?: FirebaseUser | undefined | null,
+    }
 
-
-                } else {
-                    console.log('User is logged out')
-                    this.loggedIn = false
-                    this.username = '';
-                }
+    export default Vue.extend({
+        created() {
+            this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
+                this.user = user;
             })
         },
-        props: {
-          showSignup: Boolean,
+        beforeDestroy() {
+            if (this.authUnsubscribe) {
+                this.authUnsubscribe();
+            }
         },
-        data() {
+        props: {
+            showSignup: Boolean,
+            signOutRedirectUrl: String,
+            redirectOnSignOut: Boolean,
+        },
+        data(): NavBarData {
             return {
-                username: '',
-                loggedIn: false,
+                user: null,
+                authUnsubscribe: undefined,
+            }
+        },
+        computed: {
+            loggedIn(): boolean {
+                return !!this.user;
+            },
+            displayName(): string | undefined | null {
+                return this.user ? this.user.displayName || this.user.email : null;
+            },
+            email(): string | undefined | null {
+                return this.user ? this.user.email : null;
             }
         },
         methods: {
-            async logout(e) {
-                // e.prev
-                console.log("Logging out...");
-                await this.$auth.signOut();
-                window.location.href = "/";
-            }
-        }
-    }
+            async logout(): Promise<void> {
+                console.log('Logging out...')
+                await getAuth().signOut();
+                if (this.redirectOnSignOut){
+                    window.location.href = this.signOutRedirectUrl || '/';
+                }
+
+            },
+        },
+    })
 </script>
 
 <style lang="scss" scoped>
-header {
-    &.loggedIn {
-        display: flex;
-        justify-content: space-between;
-    }
+    header {
+        &.loggedIn {
+            display: flex;
+            justify-content: space-between;
+        }
 
-}
+    }
 </style>
