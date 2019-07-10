@@ -1,41 +1,26 @@
-import * as firebaseAdmin from "firebase-admin";
-import CollectionReference = firebaseAdmin.firestore.CollectionReference;
+// noinspection ES6UnusedImports
+import * as firebaseClient from "firebase/app";
+import CollectionReference = firebaseClient.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
-import DocumentReference = firebaseAdmin.firestore.DocumentReference;
-import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
-import Timestamp = firebaseAdmin.firestore.Timestamp;
+import DocumentReference = firebaseClient.firestore.DocumentReference;
+import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
+import Timestamp = firebaseClient.firestore.Timestamp;
+import {getFirestore} from "@web/firebase";
 import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
+
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
 }
 
-export default class AdminFirestoreService {
-    admin: firebaseAdmin.app.App;
-    firestore: FirebaseFirestore.Firestore;
 
+export default class FirestoreService {
+    firestore = getFirestore();
 
-    protected static sharedInstance: AdminFirestoreService;
-
-    static getSharedInstance(): AdminFirestoreService {
-        if (!AdminFirestoreService.sharedInstance) {
-            throw new Error("No shared instance is available. Ensure you have called the initialize() function before using the shared instance")
-        }
-        return AdminFirestoreService.sharedInstance;
-    }
-
-    static initialize(app: firebaseAdmin.app.App) {
-        console.log("Initializing firestore service");
-        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
-    }
-
-    constructor(admin: firebaseAdmin.app.App) {
-        this.admin = admin;
-        this.firestore = admin.firestore()
-    }
+    public static sharedInstance = new FirestoreService();
 
     getCollectionRef(collectionName: Collection): CollectionReference {
         return this.firestore.collection(collectionName);
@@ -55,10 +40,6 @@ export default class AdminFirestoreService {
         }
 
         return doc;
-    }
-
-    async listCollections(): Promise<CollectionReference[]> {
-        return this.firestore.listCollections();
     }
 
     /**
@@ -93,11 +74,7 @@ export default class AdminFirestoreService {
 
             model.updatedAt = new Date();
 
-            // const doc = this.getDocumentRefFromModel(model);
-
-
             const data = await model.toFirestoreData();
-            // console.log("Data to save:", JSON.stringify(data));
 
             await doc.set(data, {merge: true});
 

@@ -1,4 +1,3 @@
-
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
 import * as admin from "firebase-admin";

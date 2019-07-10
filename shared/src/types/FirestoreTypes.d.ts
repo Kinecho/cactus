@@ -1,4 +1,5 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import {BaseModel} from "@shared/FirestoreBaseModels";
 
 declare enum OperationState {
     SUCCESSFUL = "SUCCESSFUL",
@@ -17,7 +18,7 @@ declare interface OperationMetadata {
     operationState: OperationState,
     progressDocuments?: ProgressWork,
     progressBytes?: ProgressWork,
-    collectionIds?:string[],
+    collectionIds?: string[],
     outputUriPrefix: string,
 }
 
@@ -28,4 +29,33 @@ declare interface Operation {
     response?: {
         "@type"?: string
     }
+}
+
+
+declare enum QuerySortDirection {
+    desc = "desc",
+    asc = "asc",
+}
+
+declare interface GetOptions {
+    includeDeleted?: false,
+    onlyDeleted?: false,
+}
+
+
+declare interface IQueryOptions<IQueryCursor> extends GetOptions {
+    pagination?: {
+        startAt?: IQueryCursor,
+        startAfter?: IQueryCursor,
+        endAt?: IQueryCursor,
+        endBefore?: IQueryCursor,
+        orderBy: string,
+        sortDirection: QuerySortDirection,
+        limit: number,
+    }
+}
+
+declare interface QueryResult<T extends BaseModel> {
+    results: T[],
+    size: number,
 }
