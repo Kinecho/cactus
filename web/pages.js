@@ -353,5 +353,13 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "journal_home"
+        "reflectionPrompt": true
+    },
+    "journal_home_ui": {
+        "title": "Journal Home",
+        "path": "/journal-home",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "journal_home"
     }
 }

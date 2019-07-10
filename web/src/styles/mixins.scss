@@ -96,3 +96,21 @@
     opacity: 0;
   }
 }
+
+@keyframes turn {
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes wiggle {
+	50% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+	100% {
+    transform: rotate(0);
+  }
+}
