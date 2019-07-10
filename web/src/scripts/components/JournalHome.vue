@@ -10,7 +10,6 @@
                 </div>
             </div>
             <div v-if="loggedIn">
-                <h1>Cactus Journal</h1>
                 <section v-if="responses.length" class="journalList">
                     <response-card
                             v-for="(response, index) in responses"
