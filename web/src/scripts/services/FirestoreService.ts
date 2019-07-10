@@ -7,21 +7,42 @@ import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
 import Query = firebaseClient.firestore.Query;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import {getFirestore} from "@web/firebase";
-import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
+import {
+    GetOptions,
+    IQueryObserverOptions,
+    IQueryOptions,
+    QueryResult,
+} from "@shared/types/FirestoreTypes";
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
-import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
+import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
+import FieldValue = firebaseClient.firestore.FieldValue;
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
-
-export interface QueryOptions extends IQueryOptions<QueryCursor> {
-}
-
+export type QueryOptions = IQueryOptions<QueryCursor>;
+export type QueryObserverOptions<T extends BaseModel> = IQueryObserverOptions<QueryCursor, T>
+export type ListenerUnsubscriber = () => void;
 
 export default class FirestoreService {
-    firestore = getFirestore();
+    firestore: firebaseClient.firestore.Firestore = getFirestore();
 
     public static sharedInstance = new FirestoreService();
+
+    getServerTimestamp(): FieldValue {
+        return FieldValue.serverTimestamp();
+    }
+
+    getCurrentTimestamp(): Timestamp {
+        return Timestamp.now();
+    }
+
+    getTimestampFromMilis(millis: number): Timestamp {
+        return Timestamp.fromMillis(millis);
+    }
+
+    getTimestampFromDate(date: Date) {
+        return Timestamp.fromDate(date);
+    }
 
     getCollectionRef(collectionName: Collection): CollectionReference {
         return this.firestore.collection(collectionName);
@@ -104,8 +125,6 @@ export default class FirestoreService {
             return;
         }
 
-        console.log(`doc.data()`, doc.data());
-
         return fromDocumentSnapshot(doc, Type);
     }
 
@@ -115,8 +134,26 @@ export default class FirestoreService {
         return first;
     }
 
-    async executeQuery<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
+    observeFirst<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: { onData: (result?: T | undefined) => void }): ListenerUnsubscriber {
+        return this.observeQuery(originalQuery, Type, {
+            onData: (results: T[]) => {
+                const [first] = results;
+                options.onData(first);
+            }
+        });
+    }
+
+    buildQuery<T extends BaseModel>(originalQuery: Query, options: QueryOptions = DefaultQueryOptions): Query {
         let query = originalQuery;
+
+        if (options.includeDeleted === undefined) {
+            options.includeDeleted = DefaultQueryOptions.includeDeleted;
+        }
+
+        if (options.onlyDeleted === undefined) {
+            options.onlyDeleted = DefaultQueryOptions.onlyDeleted;
+        }
+
         if (!options.includeDeleted) {
             query = query.where("deleted", "==", false);
         } else if (options.onlyDeleted) {
@@ -136,14 +173,81 @@ export default class FirestoreService {
                 query.endBefore(options.pagination.endBefore);
             }
         }
-
-        const snapshot = await query.get();
-
-        const size = snapshot.size;
-        const results: T[] = fromQuerySnapshot(snapshot, Type);
-
-        return {results, size};
+        return query;
     }
+
+    async executeQuery<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
+        const query = this.buildQuery(originalQuery, options);
+        try {
+            const snapshot = await query.get();
+
+            const size = snapshot.size;
+            const results: T[] = fromQuerySnapshot(snapshot, Type);
+
+            return {results, size};
+        } catch (error) {
+            console.error("Failed to execute query", error);
+            if (error.message && error.message.indexOf("The query requires an index") !== -1) {
+                alert("You need to create an index\n" + error);
+            }
+            return {results: [], size: 0};
+        }
+
+    }
+
+    observeQuery<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: QueryObserverOptions<T>): ListenerUnsubscriber {
+        const query = this.buildQuery(originalQuery, options);
+        const allResults: T[] = [];
+        return query.onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(function (change) {
+                if (!change || !change.doc) {
+                    return;
+                }
+
+                const model: T | undefined = fromQueryDocumentSnapshot(change.doc, Type);
+                if (!model) {
+                    return;
+                }
+
+                if (change.type !== "added") {
+                    const existingIndex = allResults.findIndex(m => m.id === model.id);
+                    if (change.type === "removed") {
+                        allResults.splice(existingIndex, 1);
+                        if (options.onRemoved) {
+                            options.onRemoved(model);
+                        }
+                    }
+
+                    if (change.type === "modified") {
+
+                        if (existingIndex >= 0) {
+                            allResults.splice(existingIndex, 1, model);
+                        }
+                        if (options.onModified) {
+                            options.onModified(model);
+                        }
+                    }
+
+                }
+                if (change.type === "added") {
+                    console.log("document was added");
+                    allResults.push(model);
+                    if (options.onAdded) {
+                        options.onAdded(model);
+                    }
+                }
+
+                options.onData(allResults);
+
+            });
+        }, error => {
+            console.error("Error getting snapshot");
+            if (error.message.includes("The query requires an index")) {
+                alert("The query requires and index\n" + error.message);
+            }
+        })
+    }
+
 
     async delete<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const model = await this.getById(id, Type);

@@ -1,5 +1,6 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import {BaseModel} from "@shared/FirestoreBaseModels";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 declare enum OperationState {
     SUCCESSFUL = "SUCCESSFUL",
@@ -31,12 +32,6 @@ declare interface Operation {
     }
 }
 
-
-declare enum QuerySortDirection {
-    desc = "desc",
-    asc = "asc",
-}
-
 declare interface GetOptions {
     includeDeleted?: false,
     onlyDeleted?: false,
@@ -53,6 +48,13 @@ declare interface IQueryOptions<IQueryCursor> extends GetOptions {
         sortDirection: QuerySortDirection,
         limit: number,
     }
+}
+
+declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> extends IQueryOptions<IQueryCursor> {
+    onModified?: (model: IModel) => void|Promise<void>,
+    onRemoved?: (removed: IModel) => void|Promise<void>,
+    onAdded?: (added: IModel) => void|Promise<void>,
+    onData: (models: IModel[]) => void|Promise<void>
 }
 
 declare interface QueryResult<T extends BaseModel> {

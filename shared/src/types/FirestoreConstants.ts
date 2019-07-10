@@ -10,3 +10,10 @@ export const DefaultQueryOptions: IQueryOptions<any> = {
     includeDeleted: false,
     onlyDeleted: false,
 };
+
+
+
+export enum QuerySortDirection {
+    desc = "desc",
+    asc = "asc",
+}

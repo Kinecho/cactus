@@ -1,4 +1,4 @@
-import {DateTime} from "luxon";
+import {DateTime, Duration} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 
@@ -23,11 +23,27 @@ export function formatDuration(start: Date, end: Date): string {
     return prettyMilliseconds(end.getTime() - start.getTime())
 }
 
+export function getISODate(date: Date = new Date()): string {
+    return DateTime.fromJSDate(date).toISODate();
+}
+
 export function formatDate(date?: Date, format = "yyyy-LL-dd"): string | undefined {
     if (!date) {
         return;
     }
     return DateTime.fromJSDate(date).toFormat(format);
+}
+
+export function minusDays(days: number, date: Date = new Date()): Date {
+    return DateTime.fromJSDate(date).minus({days: days}).toJSDate();
+}
+
+export function minutesToMilliseconds(minutes: number): number {
+    return Duration.fromObject({minutes: minutes}).valueOf();
+}
+
+export function hoursToMilliseconds(hours: number): number {
+    return Duration.fromObject({hours: hours}).valueOf();
 }
 
 export function makeUTCDateIntoMailchimpDate(date: Date, keepTime: boolean = false, timezone = mailchimpTimeZone): string {

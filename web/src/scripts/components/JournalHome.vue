@@ -10,6 +10,10 @@
                 </div>
             </div>
             <div v-if="loggedIn">
+                <section class="today journalList" v-if="todaysPrompt">
+                    <h2>Today</h2>
+                    <h3 class="question">{{todaysPrompt.question}}</h3>
+                </section>
                 <section v-if="preparedResponses.length" class="journalList">
                     <response-card
                             v-for="(preparedResponse, index) in preparedResponses"
@@ -36,7 +40,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionPromptService from '@web/services/ReflectionPromptService'
-
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     declare interface JournalHomeData {
         user?: FirebaseUser | null,
@@ -45,6 +49,9 @@
         loginReady: boolean,
         responses: ReflectionResponse[],
         prompts: ReflectionPrompt[],
+        responseUnsubscriber?: ListenerUnsubscriber,
+        todaysPrompt?: ReflectionPrompt,
+        todayUnsubscriber?: ListenerUnsubscriber,
     }
 
     export default Vue.extend({
@@ -52,6 +59,20 @@
             this.authUnsubscribe = getAuth().onAuthStateChanged(async user => {
                 this.user = user;
                 this.loginReady = true;
+
+                this.todayUnsubscriber = ReflectionPromptService.sharedInstance.observeTodaysPrompt({
+                    onData: (updatedPrompt) => {
+                        console.log("updating today's prompt", updatedPrompt);
+                        this.todaysPrompt = updatedPrompt;
+                        return;
+                    },
+                    onDateChanged: ({unsubscriber}) => {
+                        this.todayUnsubscriber = unsubscriber;
+                    }
+                });
+
+                this.todaysPrompt = await ReflectionPromptService.sharedInstance.getTodaysPrompt();
+                console.log("today's prompt is", this.todaysPrompt);
                 if (!user) {
                     window.location.href = "/unauthorized"
                 } else {
@@ -73,29 +94,38 @@
                 authUnsubscribe: undefined,
                 responses: [],
                 prompts: [],
+                responseUnsubscriber: undefined,
+                todaysPrompt: undefined,
             };
         },
         watch: {
             async cactusMember(member: CactusMember | undefined | null) {
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
-                    this.responses = await ReflectionResponseService.sharedInstance.getForMailchimpMemberId(member.mailchimpListMember.id);
-                    const currentPrompts = this.promptsById;
-                    let promptTasks = this.responses.map(response => {
-                        return new Promise(async resolve => {
-                            if (response.promptId) {
-                                if (currentPrompts[response.promptId]) {
-                                    resolve();
-                                    return;
-                                }
-                                const prompt = await ReflectionPromptService.sharedInstance.getById(response.promptId);
-                                if (prompt) {
-                                    this.prompts.push(prompt);
-                                }
-                                resolve();
-                            }
-                        })
+                    const mailchimpMemberId = member.mailchimpListMember.id;
+                    this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
+                        onData: async (models: ReflectionResponse[]): Promise<void> => {
+                            console.log("received data from query observer. Updating fields");
+                            this.responses = models;
+
+                            const currentPrompts = this.promptsById;
+                            let promptTasks = this.responses.map(response => {
+                                return new Promise(async resolve => {
+                                    if (response.promptId) {
+                                        if (currentPrompts[response.promptId]) {
+                                            resolve();
+                                            return;
+                                        }
+                                        const prompt = await ReflectionPromptService.sharedInstance.getById(response.promptId);
+                                        if (prompt) {
+                                            this.prompts.push(prompt);
+                                        }
+                                        resolve();
+                                    }
+                                })
+                            });
+                            await Promise.all(promptTasks);
+                        }
                     });
-                    await Promise.all(promptTasks);
 
                 }
 
@@ -104,6 +134,14 @@
         beforeDestroy() {
             if (this.authUnsubscribe) {
                 this.authUnsubscribe();
+            }
+
+            if (this.responseUnsubscriber) {
+                this.responseUnsubscriber();
+            }
+
+            if (this.todayUnsubscriber) {
+                this.todayUnsubscriber();
             }
         },
         computed: {
@@ -153,5 +191,10 @@
         flex-direction: column;
         justify-content: center;
         text-align: center;
+    }
+
+    .today {
+        text-align: center;
+        margin-bottom: 3rem;
     }
 </style>

@@ -1,4 +1,4 @@
-import FirestoreService from "@web/services/FirestoreService";
+import FirestoreService, {ListenerUnsubscriber, QueryObserverOptions} from "@web/services/FirestoreService";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {Collection} from "@shared/FirestoreBaseModels";
 
@@ -24,6 +24,12 @@ export default class ReflectionResponseService {
             console.error("Failed to fetch reflection responses", error);
             return [];
         }
+    }
+
+    observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
+        const query = this.getCollectionRef().where(ReflectionResponseField.mailchimpMemberId, "==", memberId);
+        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
+
     }
 
     async getById(id: string): Promise<ReflectionResponse | undefined> {

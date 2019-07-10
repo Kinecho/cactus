@@ -9,6 +9,7 @@ export enum Field {
     reminderCampaign = "reminderCampaign",
     contentPath = "contentPath",
     baseFileName = "baseFileName",
+    sendDate = "sendDate",
 }
 
 

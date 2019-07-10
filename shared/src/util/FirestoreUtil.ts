@@ -1,16 +1,25 @@
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
+import {IQueryObserverOptions} from "@shared/types/FirestoreTypes";
+import {DefaultQueryOptions} from "@shared/types/FirestoreConstants";
+import {QueryCursor} from "../../../web/src/scripts/services/FirestoreService";
 
 let TimestampClass: TimestampInterface | any;
 
 export interface TimestampInterface {
     fromMillis<T extends TimestampInterface>(milliseconds: number): T;
+
     fromDate(date: Date): TimestampInterface;
+
     now(): TimestampInterface;
+
     seconds: number;
     nanoseconds: number;
+
     toDate(): Date;
+
     toMillis(): number;
+
     isEqual(other: TimestampInterface): boolean;
 }
 
@@ -21,13 +30,23 @@ export function setTimestamp(timestamp: any) {
 export type DocumentData = { [field: string]: any };
 
 export interface DocumentSnapshot {
-    data(): DocumentData | undefined;
+    data(options?: SnapshotOptions): DocumentData | undefined;
+
     readonly id: string;
     readonly exists: boolean;
 }
 
+export interface SnapshotOptions {
+    readonly serverTimestamps?: 'estimate' | 'previous' | 'none';
+}
+
+export interface QueryDocumentSnapshot extends DocumentSnapshot {
+    data(options?: SnapshotOptions): DocumentData
+}
+
 export interface QuerySnapshot {
-    forEach(callback:(doc:DocumentSnapshot) => void): void,
+    forEach(callback: (doc: DocumentSnapshot) => void): void,
+
     empty: boolean,
 }
 
@@ -64,12 +83,26 @@ export function convertTimestampToDate(input: any): any {
     })
 }
 
-export function fromDocumentSnapshot<T extends BaseModel>(doc: DocumentSnapshot, Type: { new(): T }): T | undefined {
+export function fromQueryDocumentSnapshot<T extends BaseModel>(doc: QueryDocumentSnapshot, Type: { new(): T }, options?: SnapshotOptions): T | undefined {
     if (!doc.exists) {
         return;
     }
 
-    const data = doc.data();
+    const data = doc.data(options);
+    if (!data) {
+        return;
+    }
+    data.id = doc.id;
+
+    return fromFirestoreData(data, Type);
+}
+
+export function fromDocumentSnapshot<T extends BaseModel>(doc: DocumentSnapshot, Type: { new(): T }, options?: SnapshotOptions): T | undefined {
+    if (!doc.exists) {
+        return;
+    }
+
+    const data = doc.data(options);
     if (!data) {
         return;
     }
@@ -85,7 +118,7 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
         return results;
     }
 
-    snapshot.forEach((doc:DocumentSnapshot) => {
+    snapshot.forEach((doc: DocumentSnapshot) => {
         const model = fromDocumentSnapshot(doc, Type);
         if (model) {
             results.push(model);
@@ -106,4 +139,18 @@ export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T 
     const model = new Type();
     model.decodeJSON(json);
     return model;
+}
+
+
+export function makeQueryObserverOptions<T extends BaseModel>(onData: (results: T[]) => void, options: {
+    onModified?(modified: T): void,
+    onRemoved?(removed: T): void,
+    onAdded?(added: T): void,
+}): IQueryObserverOptions<QueryCursor, T> {
+    return {
+        ...DefaultQueryOptions,
+        onData: onData,
+        ...options,
+
+    }
 }
