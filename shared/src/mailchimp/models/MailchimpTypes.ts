@@ -621,6 +621,7 @@ export interface PaginationParameters {
 
 export const defaultPageSize = 30;
 export const defaultOffset = 0;
+export const defaultPageDelay = 100;
 
 
 export const DEFAULT_PAGINATION: PaginationParameters = {
@@ -801,4 +802,31 @@ export interface ListMember {
     source?: string;
     tags_count?: number;
 
+}
+
+export enum CampaignMemberSendStatus {
+    sent = "sent",
+    hard = "hard", //hard bounce
+    sort = "sort" //soft bounce
+}
+
+
+export interface CampaignSentToListResponse extends ListResponse {
+    sent_to: SentToRecipient[],
+    campaign_id: string,
+}
+
+export interface SentToRecipient {
+    email_id: string;
+    email_address: string;
+    merge_fields: MergeFields,
+    vip: boolean,
+    status: CampaignMemberSendStatus,
+    open_count: number,
+    last_open: number,
+    abslit_group: string,
+    gmp_offset: number,
+    campaign_id: string,
+    list_id: string,
+    list_is_active: boolean,
 }

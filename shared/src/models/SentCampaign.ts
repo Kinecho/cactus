@@ -7,4 +7,5 @@ export default class SentCampaign extends BaseModel {
     campaign?: Campaign;
     content?: CampaignContent;
     webhookEvent?: CampaignEventData;
+    reflectionPromptId?:string;
 }

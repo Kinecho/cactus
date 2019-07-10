@@ -22,12 +22,14 @@ import {
 import {saveSentCampaign} from "@api/services/sentCampaignService";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminSentPromptService from "@shared/services/AdminSentPromptService";
 // import AdminUserService from "@shared/services/AdminUserService";
 
 
 const app = express();
 
 const mailchimpService = MailchimpService.getSharedInstance();
+const sentPromptService = AdminSentPromptService.sharedInstance;
 // const userService = AdminUserService.getSharedInstance();
 
 // Automatically allow cross-origin requests
@@ -104,8 +106,16 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             const campaignData = event.data as CampaignEventData;
             const campaign = await mailchimpService.getCampaign(campaignData.id);
             const content = await mailchimpService.getCampaignContent(campaignData.id);
-            await saveSentCampaign(campaign, campaignData, content);
 
+            //this will create the link in the reflection prompt;
+            const sentCampaign = await saveSentCampaign(campaign, campaignData, content);
+            if (sentCampaign) {
+                await sentPromptService.processSentMailchimpCampaign({
+                    campaignId: campaignData.id,
+                    promptId: sentCampaign.reflectionPromptId
+                });
+            }
+            
             const fields = [
                 {
                     title: "Subject",

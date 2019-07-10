@@ -16,6 +16,7 @@ AdminFirestoreService.initialize(app);
 MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
 AdminCactusMemberService.initialize();
 AdminUserService.initialize(config);
+
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 
 setTimestamp(admin.firestore.Timestamp);
