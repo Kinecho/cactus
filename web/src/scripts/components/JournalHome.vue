@@ -167,7 +167,7 @@
                         todaysResponse.promptId = prompt.id;
                         todaysResponse.promptQuestion = prompt.question;
 
-                        console.log("cactus member was found");
+                        console.log("cactus member was found. Cactus Member ID = ", this.cactusMember.id);
                         todaysResponse.mailchimpMemberId = this.cactusMember.mailchimpListMember.id;
                         todaysResponse.mailchimpUniqueEmailId = this.cactusMember.mailchimpListMember.unique_email_id;
                         todaysResponse.memberEmail = this.cactusMember.email;
