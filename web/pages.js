@@ -358,7 +358,14 @@ module.exports = {
         "title": "What do you love about cooking?",
         "path": "/what-do-you-love-about-cooking",
         "reflectionPrompt": true,
-        "includeInDev": true,
+        "includeInDev": false,
         "name": "what_do_you_love_about_cooking"
+    },
+    "how_has_a_growth_mindset_improved_your_life": {
+        "title": "How has a growth mindset improved your life?",
+        "path": "/how-has-a-growth-mindset-improved-your-life",
+        "reflectionPrompt": true,
+        "includeInDev": true,
+        "name": "how_has_a_growth_mindset_improved_your_life"
     }
 }

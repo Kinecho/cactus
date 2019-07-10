@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/how-has-a-growth-mindset-improved-your-life",
+                "destination": "/how_has_a_growth_mindset_improved_your_life.html"
+            },
+            {
                 "source": "/what-do-you-love-about-cooking",
                 "destination": "/what_do_you_love_about_cooking.html"
             },
