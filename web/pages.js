@@ -353,12 +353,5 @@ module.exports = {
         'includeInDev': true,
         'name': 'journal_home',
         'reflectionPrompt': false,
-    },
-    'journal_home_ui': {
-        'title': 'Journal Home',
-        'path': '/journal-home',
-        'reflectionPrompt': false,
-        'includeInDev': true,
-        'name': 'journal_home_ui',
-    },
+    }
 }

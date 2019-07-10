@@ -34,10 +34,6 @@
         ],
         "rewrites": [
             {
-                "source": "/journal-home",
-                "destination": "/journal_home_ui.html"
-            },
-            {
                 "source": "/home",
                 "destination": "/journal_home.html"
             },
