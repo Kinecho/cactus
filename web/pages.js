@@ -44,7 +44,7 @@ module.exports = {
         "title": "What are your simple pleasures? | Cactus",
         "path": "/what-are-your-simple-pleasures",
         "reflectionPrompt": true,
-        "includeInDev": true,
+        "includeInDev": false,
         "name": "what_are_your_simple_pleasures"
     },
     "how_do_you_celebrate": {
@@ -336,5 +336,12 @@ module.exports = {
         "title": "What brings out your playful side?",
         "path": "/what-brings-out-your-playful-side",
         "reflectionPrompt": true
+    },
+    "journal_home": {
+        "title": "Journal Home",
+        "path": "/journal-home",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "journal_home"
     }
 }
