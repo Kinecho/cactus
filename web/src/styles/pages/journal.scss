@@ -76,7 +76,7 @@ html {
     z-index: 3;
   }
 
-  h3 {
+  h4 {
     color: $darkestPink;
     margin-bottom: .8rem;
   }
@@ -286,7 +286,7 @@ a.button {
 
   button {
     background: transparent;
-    border: 1px solid $pink;
+    border: 1px solid $lightGreen;
     box-shadow: none;
     display: flex;
     flex-grow: 0;
@@ -295,6 +295,11 @@ a.button {
     margin: 0;
     padding: 0;
     width: 3rem;
+  }
+
+  .iconImg {
+    height: 2rem;
+    width: 2rem;
   }
 
   .question {
