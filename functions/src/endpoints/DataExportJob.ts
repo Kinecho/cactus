@@ -83,7 +83,7 @@ export async function exportFirestoreToBigQuery() {
                 const badRecordsCount = processedResults.reduce((count, record) => {
                     return count + Number(record.badRecords) || 0;
                 }, 0);
-                if (badRecordsCount > 0){
+                if (badRecordsCount > 0) {
                     attachments.push({
                         text: `*BigQuery Ingest* completed with ${badRecordsCount} bad records after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
                         color: "warning"
@@ -104,7 +104,7 @@ export async function exportFirestoreToBigQuery() {
 
         const endTime = new Date();
 
-        if (attachments.length > 0){
+        if (attachments.length > 0) {
             attachments.push({
                 text: `*Big Query Ingest Job* Completed after ${formatDuration(startTime, endTime)}`,
                 color: "good"
@@ -118,34 +118,15 @@ export async function exportFirestoreToBigQuery() {
 }
 
 export async function backupFirestore(): Promise<void> {
-    await sendEngineeringMessage({
-        text: `*Firestore Backup* Starting Job.`,
-    });
     const startTime = new Date();
     try {
-        const [
-            exportOperation,
-        ] = await Promise.all([
-            exportForBackup(),
-        ]);
 
+        await exportForBackup();
         const endTime = new Date();
-
-        const attachments: SlackAttachment[] = [
-            buildOperationAttachment("Firestore Export to Cloud Storage", exportOperation.operation, formatDuration(startTime, exportOperation.endTime), exportOperation.error),
-            {
-                text: `*Firestore Backup Job* Completed after ${formatDuration(startTime, endTime)}`,
-                color: "good"
-            }
-        ];
-
-        await sendEngineeringMessage({
-            text: `*Firestore Backup* Finished`,
-            attachments,
-        });
+        console.log("Export firestore for backup finished in ", formatDuration(startTime, endTime));
     } catch (e) {
         console.error("failed to backup", e);
-        await sendEngineeringMessage(`Failed to backup \`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
+        await sendEngineeringMessage(`Failed to backup firestore \`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
     }
 }
 
@@ -212,6 +193,7 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
 
 }
 
+// @ts-ignore
 function buildOperationAttachment(displayName: string, operation?: Operation, duration?: string, error?: any): SlackAttachment {
     if (error) {
         return {
