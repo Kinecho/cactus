@@ -1,58 +1,71 @@
 import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
-import {getAuth, initializeFirebase} from "@web/firebase";
+import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
 import {triggerWindowResize} from "@web/util";
+import {PageRoute} from "@web/PageRoutes";
 
 const firebase = initializeFirebase();
 
 let hasLoaded = false;
 getAuth().onAuthStateChanged(async user => {
-    if (!hasLoaded && !user){
+    console.log("auth state changed. Has Loaded = ", hasLoaded, " User = ", user);
+    if (!hasLoaded && !user) {
+        console.log("not logged in and this is the first time. handling email link...");
+        hasLoaded = true;
         const response = await handleEmailLinkSignIn();
         handleResponse(response);
-    } else if (!hasLoaded && user){
-        showUserSuccess(user);
+    } else if (!hasLoaded && user) {
+        console.log("user is signed in, and the page has not yet loaded auth");
+        hasLoaded = true;
+        handleExistingUserLoginSuccess(user);
+    } else {
+        console.log("auth changed, probably has loaded before. Has loaded =", hasLoaded);
     }
     hasLoaded = true;
 
 });
 
-function showUserSuccess(user:firebase.User){
-    const $success = document.getElementById("success-container");
-    const $loading = document.getElementById("loading-container");
-    if($success) $success.classList.remove("hidden");
-    if($loading) $loading.classList.add("hidden");
-    showShareButtons();
+function handleExistingUserLoginSuccess(user: FirebaseUser) {
+    console.log("redirecting...");
+    setTimeout(() => {
+        window.location.href = PageRoute.JOURNAL_HOME;
+    }, 1000);
 }
 
-function showShareButtons(){
+function showShareButtons() {
     triggerWindowResize();
 }
 
-function handleResponse(response:EmailLinkSignupResult){
+function handleResponse(response: EmailLinkSignupResult) {
+    if (response.credential && response.credential.additionalUserInfo && !response.credential.additionalUserInfo.isNewUser) {
+        window.location.href = PageRoute.JOURNAL_HOME;
+        return;
+    }
+
+
     const $success = document.getElementById("success-container");
     const $error = document.getElementById("error-container");
     const $loading = document.getElementById("loading-container");
     const $continueContainer = document.getElementById("continue-container");
 
-    if($loading) $loading.classList.add("hidden");
-    if (response.success){
-        if($success) $success.classList.remove("hidden");
+    if ($loading) $loading.classList.add("hidden");
+    if (response.success) {
+        if ($success) $success.classList.remove("hidden");
         showShareButtons();
-    } else if (response.error && $error){
+    } else if (response.error && $error) {
         $error.classList.remove("hidden");
         // document.getE
-        if (response.error){
-            const $title = $error.getElementsByClassName("title").item(0) ;
+        if (response.error) {
+            const $title = $error.getElementsByClassName("title").item(0);
             const $message = $error.getElementsByClassName("message").item(0);
             if ($title) $title.textContent = response.error.title;
             if ($message) $message.textContent = response.error.message;
         }
     }
 
-    if (response.continue && $continueContainer){
+    if (response.continue && $continueContainer) {
         const $button = $continueContainer.getElementsByTagName("a").item(0);
-        if ($button){
+        if ($button) {
             $button.text = response.continue.title;
             $button.href = response.continue.url;
         }
@@ -62,6 +75,6 @@ function handleResponse(response:EmailLinkSignupResult){
     }
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     console.log("Subscription Confirmed Page Loaded");
 });

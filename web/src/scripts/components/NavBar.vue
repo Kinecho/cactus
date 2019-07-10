@@ -32,6 +32,8 @@
         },
         props: {
             showSignup: Boolean,
+            signOutRedirectUrl: String,
+            redirectOnSignOut: Boolean,
         },
         data(): NavBarData {
             return {
@@ -54,7 +56,10 @@
             async logout(): Promise<void> {
                 console.log('Logging out...')
                 await getAuth().signOut();
-                window.location.href = '/'
+                if (this.redirectOnSignOut){
+                    window.location.href = this.signOutRedirectUrl || '/';
+                }
+
             },
         },
     })

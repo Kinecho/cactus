@@ -2,6 +2,9 @@ import "@styles/pages/sign_up.scss"
 import {getAuthUI, getAuthUIConfig} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
+import {setupNavigation} from "@web/util";
+
+setupNavigation({showSignupButton: false, redirectOnSignOut: false});
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("sign_up loaded");
@@ -16,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ui = getAuthUI();
     const config = getAuthUIConfig({
         signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
-        emailLinkSignInPath: PageRoute.SIGNUP,
+        emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED,
         signInSuccess: (authResult, redirectUrl) => {
             if (authResult.additionalUserInfo) {
                 if (authResult.additionalUserInfo.isNewUser) {

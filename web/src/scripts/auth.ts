@@ -13,6 +13,7 @@ let authUi: AuthUI;
 
 export interface EmailLinkSignupResult {
     success: boolean,
+    credential?: FirebaseUserCredential,
     error?: {
         title: string,
         message: string,
@@ -75,7 +76,7 @@ export interface AuthUIConfigOptions {
 }
 
 
-export function getAuthUIConfig(opts: AuthUIConfigOptions):firebaseui.auth.Config {
+export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
     return {
         callbacks: {
             signInSuccessWithAuthResult: (authResult: FirebaseUserCredential, redirectUri: string): boolean => {
@@ -95,7 +96,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions):firebaseui.auth.Confi
                     return true;
                 }
             },
-            async signInFailure(error: firebaseui.auth.AuthUIError):Promise<void> {
+            async signInFailure(error: firebaseui.auth.AuthUIError): Promise<void> {
                 console.error("Sign in failure", error);
                 if (opts.signInFailure) {
                     opts.signInFailure(error);
@@ -185,13 +186,16 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
     if (email) {
         try {
-            const authResult = await firebase.auth().signInWithEmailLink(email, window.location.href);
+            const authResult: FirebaseUserCredential = await firebase.auth().signInWithEmailLink(email, window.location.href);
             window.localStorage.removeItem(LocalStorageKey.emailForSignIn);
             const resultUser = authResult.user;
+
+
             if (resultUser) {
                 console.log("successfully completed sign in ", resultUser.toJSON());
             }
 
+            return {success: true, credential: authResult}
 
         } catch (error) {
             console.error("failed to login with email", error);
@@ -213,8 +217,6 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
             return {success: false, error: error.message};
         }
-
-        return {success: true}
     } else {
         return {success: false, error: {title: "Whoops!", message: "Unable to complete your registration"}}
     }
