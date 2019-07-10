@@ -1,7 +1,8 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import {BaseModel, BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
+    JOURNAL_WEB = "JOURNAL_WEB",
 }
 
 export interface ReflectionContent {

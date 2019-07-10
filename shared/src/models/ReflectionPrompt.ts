@@ -6,6 +6,7 @@ export enum Field {
     campaignIds = "campaignIds",
     campaignWebIds = "campaignWebIds",
     campaign = "campaign",
+    campaignStatus = "campaign.status",
     reminderCampaign = "reminderCampaign",
     contentPath = "contentPath",
     baseFileName = "baseFileName",

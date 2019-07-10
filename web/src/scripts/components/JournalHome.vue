@@ -33,7 +33,7 @@
     import {getAuth, FirebaseUser} from '@web/firebase';
     import NavBar from '@components/NavBar.vue';
     import ResponseCard from "@components/ReflectionResponseCard.vue";
-    import ReflectionResponse from '@shared/models/ReflectionResponse';
+    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse';
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {PageRoute} from '@web/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
@@ -52,6 +52,7 @@
         responseUnsubscriber?: ListenerUnsubscriber,
         todaysPrompt?: ReflectionPrompt,
         todayUnsubscriber?: ListenerUnsubscriber,
+        didCreateTodaysReflection: boolean,
     }
 
     export default Vue.extend({
@@ -61,9 +62,10 @@
                 this.loginReady = true;
 
                 this.todayUnsubscriber = ReflectionPromptService.sharedInstance.observeTodaysPrompt({
-                    onData: (updatedPrompt) => {
+                    onData: async (updatedPrompt) => {
                         console.log("updating today's prompt", updatedPrompt);
                         this.todaysPrompt = updatedPrompt;
+
                         return;
                     },
                     onDateChanged: ({unsubscriber}) => {
@@ -96,15 +98,25 @@
                 prompts: [],
                 responseUnsubscriber: undefined,
                 todaysPrompt: undefined,
+                didCreateTodaysReflection: false,
             };
         },
         watch: {
+            async todaysPrompt(prompt: ReflectionPrompt | undefined | null) {
+                if (prompt) {
+                    await this.createTodaysReflectionIfNeeded();
+                }
+            },
+            async responses(responses: ReflectionResponse[]) {
+                await this.createTodaysReflectionIfNeeded();
+            },
             async cactusMember(member: CactusMember | undefined | null) {
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
                     const mailchimpMemberId = member.mailchimpListMember.id;
+                    this.createTodaysReflectionIfNeeded();
                     this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
                         onData: async (models: ReflectionResponse[]): Promise<void> => {
-                            console.log("received data from query observer. Updating fields");
+                            // console.log("received data from query observer. Updating fields");
                             this.responses = models;
 
                             const currentPrompts = this.promptsById;
@@ -143,6 +155,30 @@
             if (this.todayUnsubscriber) {
                 this.todayUnsubscriber();
             }
+        },
+        methods: {
+            async createTodaysReflectionIfNeeded() {
+                const prompt = this.todaysPrompt;
+                if (!this.didCreateTodaysReflection && prompt && this.cactusMember && this.cactusMember.mailchimpListMember && this.responses.length > 0) {
+                    let todaysResponse = this.responses.find(response => response.promptId === prompt.id);
+                    if (!todaysResponse) {
+                        console.log("no response was found for current day, creating one");
+                        todaysResponse = new ReflectionResponse();
+                        todaysResponse.promptId = prompt.id;
+                        todaysResponse.promptQuestion = prompt.question;
+
+                        console.log("cactus member was found");
+                        todaysResponse.mailchimpMemberId = this.cactusMember.mailchimpListMember.id;
+                        todaysResponse.mailchimpUniqueEmailId = this.cactusMember.mailchimpListMember.unique_email_id;
+                        todaysResponse.memberEmail = this.cactusMember.email;
+                        todaysResponse.responseMedium = ResponseMedium.JOURNAL_WEB;
+                        console.log("saving reflection prompt", todaysResponse.toJSON());
+                        this.didCreateTodaysReflection = true;
+                        await ReflectionResponseService.sharedInstance.save(todaysResponse);
+                    }
+                }
+
+            },
         },
         computed: {
             userName(): string | undefined | null {

@@ -1,8 +1,7 @@
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 
 
-export enum
-Collection {
+export enum Collection {
     emailReply = "emailReply",
     testModels = "testModels",
     sentCampaigns = "sentCampaigns",
@@ -19,27 +18,35 @@ export interface FirestoreIdentifiable {
     updatedAt?: Date;
 }
 
-export abstract class BaseModel implements FirestoreIdentifiable{
+export enum BaseModelField {
+    id = "id",
+    createdAt = "createdAt",
+    updatedAt = "updatedAt",
+    deleted = "deleted",
+    deletedAt = "deletedAt",
+}
+
+export abstract class BaseModel implements FirestoreIdentifiable {
     abstract readonly collection: Collection;
     id?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    deleted?:boolean = false;
-    deletedAt?:Date;
+    deleted?: boolean = false;
+    deletedAt?: Date;
 
-    prepareForFirestore():any{
+    prepareForFirestore(): any {
         return this;
     }
 
-    toFirestoreData(removeKeys=["id", "collection"]):any {
+    toFirestoreData(removeKeys = ["id", "collection"]): any {
         const prepared = this.prepareForFirestore();
-        if (!prepared){
+        if (!prepared) {
             throw new Error("Unable to prepare for firestore");
         }
         const data = convertDateToTimestamp(prepared);
         // console.log("data after converting to dates", data);
 
-        if (removeKeys && data){
+        if (removeKeys && data) {
             removeKeys.forEach(key => {
                 delete data[key];
             });
@@ -54,10 +61,10 @@ export abstract class BaseModel implements FirestoreIdentifiable{
         return data;
     }
 
-    toJSON(removeKeys=["collection"]):any {
+    toJSON(removeKeys = ["collection"]): any {
         const data = convertDateToJSON(this);
 
-        if (removeKeys && data){
+        if (removeKeys && data) {
             removeKeys.forEach(key => {
                 delete data[key];
             });
@@ -70,7 +77,7 @@ export abstract class BaseModel implements FirestoreIdentifiable{
      * You can override this method in your concrete class if you need additional customization
      * @param {object} json
      */
-    decodeJSON(json:any){
+    decodeJSON(json: any) {
         Object.assign(this, json);
 
         this.createdAt = json.createdAt ? new Date(json.createdAt) : undefined;

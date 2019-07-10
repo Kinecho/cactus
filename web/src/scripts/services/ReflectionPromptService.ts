@@ -5,6 +5,7 @@ import {getISODate, hoursToMilliseconds, minusDays, minutesToMilliseconds} from 
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as prompts from "prompts";
 import list = prompts.prompts.list;
+import {CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 export default class ReflectionPromptService {
     public static sharedInstance = new ReflectionPromptService();
@@ -49,7 +50,6 @@ export default class ReflectionPromptService {
         const execute = (): ListenerUnsubscriber => {
             const query = this.getCollectionRef()
                 .where(Field.sendDate, "<=", this.firestoreService.getCurrentTimestamp())
-                // .where(Field.sendDate, ">", this.firestoreService.getTimestampFromDate(minusDays(1)))
                 .orderBy(Field.sendDate, QuerySortDirection.desc)
                 .limit(1);
 

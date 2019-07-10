@@ -112,8 +112,6 @@ export default class FirestoreService {
 
         const collection = this.getCollectionRef(type.collection);
 
-        console.log(`Fetching ${type.collection} with ID = ${id}`);
-
         const doc = await collection.doc(id).get();
 
         if (!doc) {
@@ -197,6 +195,7 @@ export default class FirestoreService {
 
     observeQuery<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: QueryObserverOptions<T>): ListenerUnsubscriber {
         const query = this.buildQuery(originalQuery, options);
+
         const allResults: T[] = [];
         return query.onSnapshot(snapshot => {
             snapshot.docChanges().forEach(function (change) {
@@ -210,18 +209,16 @@ export default class FirestoreService {
                 }
 
                 if (change.type !== "added") {
-                    const existingIndex = allResults.findIndex(m => m.id === model.id);
                     if (change.type === "removed") {
-                        allResults.splice(existingIndex, 1);
+                        allResults.splice(change.oldIndex, 1);
                         if (options.onRemoved) {
                             options.onRemoved(model);
                         }
                     }
 
                     if (change.type === "modified") {
-
-                        if (existingIndex >= 0) {
-                            allResults.splice(existingIndex, 1, model);
+                        if (change.newIndex >= 0) {
+                            allResults.splice(change.newIndex, 1, model);
                         }
                         if (options.onModified) {
                             options.onModified(model);
@@ -231,7 +228,7 @@ export default class FirestoreService {
                 }
                 if (change.type === "added") {
                     console.log("document was added");
-                    allResults.push(model);
+                    allResults.splice(change.newIndex, 0, model);
                     if (options.onAdded) {
                         options.onAdded(model);
                     }
@@ -241,7 +238,7 @@ export default class FirestoreService {
 
             });
         }, error => {
-            console.error("Error getting snapshot");
+            console.error("Error getting snapshot", error.message);
             if (error.message.includes("The query requires an index")) {
                 alert("The query requires and index\n" + error.message);
             }
