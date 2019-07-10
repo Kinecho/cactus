@@ -28,12 +28,12 @@
                 </svg>
                 Reflect
             </button>
-            <button onclick="location.href='https://cactus.app/what-three-things-are-you-looking-forward-to-experiencing-this-week'" class="secondary small">
+            <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="secondary small button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M35.5789474,26.1052632 C35.5789474,25.5239108 36.0502266,25.0526316 36.6315789,25.0526316 C37.2129313,25.0526316 37.6842105,25.5239108 37.6842105,26.1052632 L37.6842105,38.7368421 C37.6842105,41.6436039 35.3278145,44 32.4210526,44 L9.26315789,44 C6.35639605,44 4,41.6436039 4,38.7368421 L4,15.5789474 C4,12.6721855 6.35639605,10.3157895 9.26315789,10.3157895 L21.8947368,10.3157895 C22.4760892,10.3157895 22.9473684,10.7870687 22.9473684,11.3684211 C22.9473684,11.9497734 22.4760892,12.4210526 21.8947368,12.4210526 L9.26315789,12.4210526 C7.51910079,12.4210526 6.10526316,13.8348903 6.10526316,15.5789474 L6.10526316,38.7368421 C6.10526316,40.4808992 7.51910079,41.8947368 9.26315789,41.8947368 L32.4210526,41.8947368 C34.1651097,41.8947368 35.5789474,40.4808992 35.5789474,38.7368421 L35.5789474,26.1052632 Z M40.406091,6.10526316 L30.3157895,6.10526316 C29.7344371,6.10526316 29.2631579,5.63398395 29.2631579,5.05263158 C29.2631579,4.47127921 29.7344371,4 30.3157895,4 L42.9473684,4 C43.5287208,4 44,4.47127921 44,5.05263158 L44,17.6842105 C44,18.2655629 43.5287208,18.7368421 42.9473684,18.7368421 C42.3660161,18.7368421 41.8947368,18.2655629 41.8947368,17.6842105 L41.8947368,7.59390901 L20.5337966,28.9548492 C20.1227184,29.3659274 19.456229,29.3659274 19.0451508,28.9548492 C18.6340726,28.543771 18.6340726,27.8772816 19.0451508,27.4662034 L40.406091,6.10526316 Z"/>
                 </svg>
                 Go Deeper
-            </button>
+            </a>
         </nav>
     </article>
 </template>
@@ -43,6 +43,7 @@
     import {getAuth, FirebaseUser} from '@web/firebase'
     import * as DateUtil from "@shared/util/DateUtil";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import ReflectionPrompt from '@shared/models/ReflectionPrompt'
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -51,7 +52,8 @@
 
     export default Vue.extend({
         props: {
-            response: ReflectionResponse
+            response: ReflectionResponse,
+            prompt: ReflectionPrompt,
         },
         data(): ReflectionResponseCardData {
             return {
@@ -109,7 +111,7 @@
         text-align: left;
     }
 
-    button {
+    button, a.button {
         align-items: center;
         display: inline-flex;
 

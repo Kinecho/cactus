@@ -9,7 +9,8 @@
                 <section v-if="responses.length" class="journalList">
                     <response-card
                             v-for="(response, index) in responses"
-                            v-bind:response="response"
+                            v-bind:response="response.response"
+                            v-bind:prompt="response.prompt"
                             v-bind:index="index"
                             v-bind:key="response.id"
                     ></response-card>
@@ -25,13 +26,14 @@
     import NavBar from '@components/NavBar.vue';
     import ResponseCard from "@components/ReflectionResponseCard.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse';
+    import ReflectionPrompt from '@shared/models/ReflectionPrompt'
 
 
     declare interface JournalHomeData {
         user?: FirebaseUser | null,
         authUnsubscribe?: () => void,
         loginReady: boolean,
-        responses: ReflectionResponse[],
+        responses: { response: ReflectionResponse, prompt?: ReflectionPrompt }[],
     }
 
 
@@ -47,7 +49,13 @@
     response2.content.text = "So far so good";
     response2.createdAt = new Date();
 
-    const mockResponses: ReflectionResponse[] = [response1, response2];
+    const prompt1 = new ReflectionPrompt();
+    prompt1.id = "p1";
+    prompt1.contentPath = "/what-brings-out-your-playful-side";
+
+    const mockResponses: { response: ReflectionResponse, prompt?: ReflectionPrompt }[] = [
+        {response: response1},
+        {response: response2, prompt: prompt1}];
 
     export default Vue.extend({
         created() {
