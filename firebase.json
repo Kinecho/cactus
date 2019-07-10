@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-do-you-love-about-cooking",
+                "destination": "/what_do_you_love_about_cooking.html"
+            },
+            {
                 "source": "/home",
                 "destination": "/journal_home.html"
             },
