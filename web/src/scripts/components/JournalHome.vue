@@ -3,7 +3,13 @@
         <NavBar :show-signup="true"/>
         <div class="container centered">
             <div v-if="!loginReady">Loading...</div>
-            <div v-if="loginReady && !loggedIn"></div>
+            <div v-if="loginReady && !loggedIn">
+                <h3>Oops, it looks like you're logged out.</h3>
+                <div class="login-container">
+                    <a class="button primary" :href="loginPath">Sign In</a>
+                </div>
+
+            </div>
             <div v-if="loggedIn">
                 <h1>Cactus Journal</h1>
                 <section v-if="responses.length" class="journalList">
@@ -27,6 +33,7 @@
     import ResponseCard from "@components/ReflectionResponseCard.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse';
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
+    import {PageRoute} from '@web/PageRoutes'
 
 
     declare interface JournalHomeData {
@@ -69,6 +76,9 @@
             }, 500);
         },
         components: {NavBar, ResponseCard},
+        props: {
+            loginPath: {type: String, default: PageRoute.SIGNUP}
+        },
         data(): JournalHomeData {
             return {
                 user: null,
@@ -100,5 +110,13 @@
     .container {
         /*max-width: 74rem;*/
         text-align: left;
+    }
+
+    .login-container {
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
     }
 </style>
