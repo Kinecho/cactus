@@ -1,5 +1,5 @@
 // tslint:disable-next-line:no-implicit-dependencies
-import "@styles/pages/journal_home.scss"
+import "@styles/pages/journal_home_ui.scss"
 import {initializeArticlePage} from "@web/articleCommon";
 import Vue from "vue";
 
