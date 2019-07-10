@@ -8,7 +8,6 @@
                 <div class="login-container">
                     <a class="button primary" :href="loginPath">Sign In</a>
                 </div>
-
             </div>
             <div v-if="loggedIn">
                 <h1>Cactus Journal</h1>
@@ -69,6 +68,9 @@
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
                 this.user = user;
                 this.loginReady = true;
+                if (!user){
+                    window.location.href = "/unauthorized"
+                }
             });
 
             setTimeout(() => {
