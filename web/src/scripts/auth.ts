@@ -99,7 +99,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
             async signInFailure(error: firebaseui.auth.AuthUIError): Promise<void> {
                 console.error("Sign in failure", error);
                 if (opts.signInFailure) {
-                    opts.signInFailure(error);
+                    await opts.signInFailure(error);
                 } else {
                     console.error("No signin failure callback provided")
                 }
