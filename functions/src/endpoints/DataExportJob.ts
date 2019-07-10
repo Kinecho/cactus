@@ -1,7 +1,7 @@
 import {getConfig} from "@api/config/configService";
 import {JWT} from "google-auth-library";
 import axios, {AxiosError} from "axios";
-import {AttachmentColor, sendEngineeringMessage, SlackAttachment} from "@api/slack/slack";
+import {sendEngineeringMessage, SlackAttachment} from "@api/slack/slack";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {Operation} from "@shared/types/FirestoreTypes";
 import {formatDuration} from "@shared/util/DateUtil";
@@ -37,18 +37,18 @@ export const latestBigQueryExportFileName = "latest-prefix.txt";
  * @return {Promise<void>}
  */
 export async function exportFirestoreToBigQuery() {
-    await sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
+    // await sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
 
     const collectionIds = await getCollectionIds();
     console.log("collectionIds", collectionIds);
 
     const startTime = new Date();
     const attachments: SlackAttachment[] = [
-        {
-            text: `Collection IDs:\n \`\`\`${collectionIds.join(", ")}\`\`\``,
-            color: AttachmentColor.info,
-            ts: `${(new Date()).getTime() / 1000}`
-        }
+        // {
+        //     text: `Collection IDs:\n \`\`\`${collectionIds.join(", ")}\`\`\``,
+        //     color: AttachmentColor.info,
+        //     ts: `${(new Date()).getTime() / 1000}`
+        // }
     ];
     const slackMessage = {
         text: `*BigQuery Ingest* Finished`,
@@ -62,9 +62,9 @@ export async function exportFirestoreToBigQuery() {
             exportForBigQuery(collectionIds)
         ]);
 
-        attachments.push(
-            buildOperationAttachment("Firestore Export to Analytics", bigQueryOperation.operation, formatDuration(startTime, bigQueryOperation.endTime), bigQueryOperation.error),
-        );
+        // attachments.push(
+        //     buildOperationAttachment("Firestore Export to Analytics", bigQueryOperation.operation, formatDuration(startTime, bigQueryOperation.endTime), bigQueryOperation.error),
+        // );
 
         if (bigQueryOperation.nextPrefix) {
             const ingestStartTime = new Date();
@@ -80,10 +80,19 @@ export async function exportFirestoreToBigQuery() {
                     }
                 });
 
-                attachments.push({
-                    text: `*BigQuery Ingest* completed successfully after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
-                    color: "good"
-                })
+                const badRecordsCount = processedResults.reduce((count, record) => {
+                    return count + Number(record.badRecords) || 0;
+                }, 0);
+                if (badRecordsCount > 0){
+                    attachments.push({
+                        text: `*BigQuery Ingest* completed with ${badRecordsCount} bad records after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
+                        color: "warning"
+                    })
+                }
+                // attachments.push({
+                //     text: `*BigQuery Ingest* completed successfully after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
+                //     color: "good"
+                // })
             } catch (bigqueryError) {
                 const ingestEndTime = new Date();
                 attachments.push({
@@ -94,11 +103,14 @@ export async function exportFirestoreToBigQuery() {
         }
 
         const endTime = new Date();
-        attachments.push({
-            text: `*Big Query Ingest Job* Completed after ${formatDuration(startTime, endTime)}`,
-            color: "good"
-        });
-        await sendEngineeringMessage(slackMessage);
+
+        if (attachments.length > 0){
+            attachments.push({
+                text: `*Big Query Ingest Job* Completed after ${formatDuration(startTime, endTime)}`,
+                color: "good"
+            });
+            await sendEngineeringMessage(slackMessage);
+        }
     } catch (e) {
         console.error("failed to backup", e);
         await sendEngineeringMessage(`Failed to backup ${JSON.stringify(e, null, 2)}`);
