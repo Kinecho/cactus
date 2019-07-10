@@ -5,7 +5,7 @@ import helpers from "@scripts/helpers";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@shared/services/MailchimpService";
 import {Collection} from "@shared/FirestoreBaseModels";
-import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {Campaign, CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 const prompts = require("prompts");

@@ -2,15 +2,16 @@
 import * as firebaseClient from "firebase/app";
 import CollectionReference = firebaseClient.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
 import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
+import Query = firebaseClient.firestore.Query;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import {getFirestore} from "@web/firebase";
 import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
+import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 
-
+export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
@@ -108,7 +109,13 @@ export default class FirestoreService {
         return fromDocumentSnapshot(doc, Type);
     }
 
-    async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
+    async getFirst<T extends BaseModel>(originalQuery: Query, Type: { new(): T }): Promise<T | undefined> {
+        const results = await this.executeQuery(originalQuery, Type);
+        const [first] = results.results;
+        return first;
+    }
+
+    async executeQuery<T extends BaseModel>(originalQuery: Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
         let query = originalQuery;
         if (!options.includeDeleted) {
             query = query.where("deleted", "==", false);
@@ -129,7 +136,6 @@ export default class FirestoreService {
                 query.endBefore(options.pagination.endBefore);
             }
         }
-
 
         const snapshot = await query.get();
 

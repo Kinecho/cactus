@@ -6,7 +6,7 @@ import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUti
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
-import {fromJSON} from "@shared/util/FirebaseUtil";
+import {fromJSON} from "@shared/util/FirestoreUtil";
 import EmailReply, {EmailStoragePath} from "@shared/models/EmailReply";
 import {writeToFile} from "@api/util/FileUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";

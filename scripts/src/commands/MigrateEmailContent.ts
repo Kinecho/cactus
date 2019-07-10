@@ -32,23 +32,23 @@ export default class MigrateEmailContent extends FirebaseCommand {
                 const data = doc.data();
                 const content = data.content || {};
 
-                if (!data){
+                if (!data) {
                     console.warn("Unable to get model from snapshot");
                     return;
                 }
                 let needsUpdate = false;
-                if (!content.html && data.html){
+                if (!content.html && data.html) {
                     console.log(`[${doc.id}]need to set html content`);
                     content.html = data.html;
                     needsUpdate = true;
                 }
-                if (!content.text && data.text){
+                if (!content.text && data.text) {
                     console.log(`[${doc.id}]need to set text content`);
                     content.text = data.text;
                     needsUpdate = true;
                 }
 
-                if (needsUpdate){
+                if (needsUpdate) {
                     await doc.ref.update({
                         html: FieldValue.delete(),
                         text: FieldValue.delete(),

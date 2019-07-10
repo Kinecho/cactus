@@ -2,6 +2,7 @@
     <article class="journalEntry new" id="reflectParent">
         <div class="dateContainer">
             <p class="date">{{responseDate}}</p>
+            <p class="date edited" v-if="updatedDate && responseDate !== updatedDate">Updated {{updatedDate}}</p>
         </div>
         <h3 class="question">{{questionText}}</h3>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
@@ -44,6 +45,7 @@
     import * as DateUtil from "@shared/util/DateUtil";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -65,6 +67,9 @@
             responseDate(): string | undefined {
                 return DateUtil.formatDate(this.response.createdAt, "LLLL d, yyyy")
             },
+            updatedDate(): string | undefined {
+                return DateUtil.formatDate(this.response.updatedAt, "LLLL d, yyyy")
+            },
             responseText(): string | undefined {
                 return this.response.content.text;
             },
@@ -73,10 +78,10 @@
             }
         },
         methods: {
-            doneEditing() {
+            async doneEditing() {
                 this.response.content.text = this.editedText;
                 this.doReflect = false;
-                alert("Will save model with text = " + this.response.content.text || "");
+                await ReflectionResponseService.sharedInstance.save(this.response);
             },
             cancelEditing() {
                 if (this.editedText.trim() !== (this.response.content.text || "").trim()) {
@@ -155,18 +160,27 @@
     }
 
     .dateContainer {
-        align-items: center;
+        /*align-items: center;*/
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        justify-content: flex-start;
         margin-bottom: 1.6rem;
         position: relative;
+
+        .date {
+            font-size: 1.6rem;
+            flex-grow: 1;
+            opacity: .8;
+            display: flex;
+
+            &.edited {
+                color: $lightText;
+                font-size: 1rem;
+
+            }
+        }
     }
 
-    .date {
-        font-size: 1.6rem;
-        flex-grow: 1;
-        opacity: .8;
-    }
 
     .moreMenu {
         background-color: $lightPink;

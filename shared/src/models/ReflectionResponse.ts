@@ -5,20 +5,32 @@ export enum ResponseMedium {
 }
 
 export interface ReflectionContent {
-    text?:string;
+    text?: string;
+}
+
+export enum ReflectionResponseField {
+    responseDate = "responseDate",
+    emailReplyId = "emailReplyId",
+    responseMedium = "responseMedium",
+    mailchimpMemberId = "mailchimpMemberId",
+    mailchimpUniqueEmailId = "mailchimpUniqueEmailId",
+    memberEmail = "memberEmail",
+    content = "content",
+    promptId = "promptId",
+    promptQuestion = "promptQuestion",
 }
 
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
 
     responseDate?: Date;
-    emailReplyId?:string;
+    emailReplyId?: string;
     responseMedium?: ResponseMedium;
     mailchimpMemberId?: string;
     mailchimpUniqueEmailId?: string;
     memberEmail?: string;
-    content:ReflectionContent = {};
-    promptId?:string;
-    promptQuestion?:string
+    content: ReflectionContent = {};
+    promptId?: string;
+    promptQuestion?: string
 
 }

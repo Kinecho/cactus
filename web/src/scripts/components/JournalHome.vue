@@ -10,13 +10,13 @@
                 </div>
             </div>
             <div v-if="loggedIn">
-                <section v-if="responses.length" class="journalList">
+                <section v-if="preparedResponses.length" class="journalList">
                     <response-card
-                            v-for="(response, index) in responses"
-                            v-bind:response="response.response"
-                            v-bind:prompt="response.prompt"
+                            v-for="(preparedResponse, index) in preparedResponses"
+                            v-bind:response="preparedResponse.response"
+                            v-bind:prompt="preparedResponse.prompt"
                             v-bind:index="index"
-                            v-bind:key="response.id"
+                            v-bind:key="preparedResponse.response.id"
                     ></response-card>
                 </section>
             </div>
@@ -32,49 +32,34 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse';
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {PageRoute} from '@web/PageRoutes'
+    import CactusMember from '@shared/models/CactusMember'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import ReflectionPromptService from '@web/services/ReflectionPromptService'
 
 
     declare interface JournalHomeData {
         user?: FirebaseUser | null,
+        cactusMember?: CactusMember,
         authUnsubscribe?: () => void,
         loginReady: boolean,
-        responses: { response: ReflectionResponse, prompt?: ReflectionPrompt }[],
+        responses: ReflectionResponse[],
+        prompts: ReflectionPrompt[],
     }
-
-
-    const response1 = new ReflectionResponse();
-    response1.id = "123";
-    response1.promptQuestion = "This was a hard question";
-    response1.content.text = "My answer is great";
-    response1.createdAt = new Date("2018-03-22");
-
-    const response2 = new ReflectionResponse();
-    response2.id = "124";
-    response2.promptQuestion = "How much do you like Vue?";
-    response2.content.text = "So far so good";
-    response2.createdAt = new Date();
-
-    const prompt1 = new ReflectionPrompt();
-    prompt1.id = "p1";
-    prompt1.contentPath = "/what-brings-out-your-playful-side";
-
-    const mockResponses: { response: ReflectionResponse, prompt?: ReflectionPrompt }[] = [
-        {response: response1},
-        {response: response2, prompt: prompt1}];
 
     export default Vue.extend({
         created() {
-            this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
+            this.authUnsubscribe = getAuth().onAuthStateChanged(async user => {
                 this.user = user;
                 this.loginReady = true;
-                if (!user){
+                if (!user) {
                     window.location.href = "/unauthorized"
+                } else {
+                    console.log("getting cactus member for user", user.uid);
+                    this.cactusMember = await CactusMemberService.sharedInstance.getByUserId(user.uid);
+                    console.log("fetched cactus member, found", this.cactusMember);
                 }
             });
-
-            setTimeout(() => {
-                this.responses = mockResponses;
-            }, 500);
         },
         components: {NavBar, ResponseCard},
         props: {
@@ -83,10 +68,38 @@
         data(): JournalHomeData {
             return {
                 user: null,
+                cactusMember: undefined,
                 loginReady: false,
                 authUnsubscribe: undefined,
-                responses: []
+                responses: [],
+                prompts: [],
             };
+        },
+        watch: {
+            async cactusMember(member: CactusMember | undefined | null) {
+                if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
+                    this.responses = await ReflectionResponseService.sharedInstance.getForMailchimpMemberId(member.mailchimpListMember.id);
+                    const currentPrompts = this.promptsById;
+                    let promptTasks = this.responses.map(response => {
+                        return new Promise(async resolve => {
+                            if (response.promptId) {
+                                if (currentPrompts[response.promptId]) {
+                                    resolve();
+                                    return;
+                                }
+                                const prompt = await ReflectionPromptService.sharedInstance.getById(response.promptId);
+                                if (prompt) {
+                                    this.prompts.push(prompt);
+                                }
+                                resolve();
+                            }
+                        })
+                    });
+                    await Promise.all(promptTasks);
+
+                }
+
+            }
         },
         beforeDestroy() {
             if (this.authUnsubscribe) {
@@ -102,6 +115,27 @@
             },
             loggedIn(): boolean {
                 return !!this.user;
+            },
+            promptsById(): { [id: string]: ReflectionPrompt } {
+                const initialValue: { [id: string]: ReflectionPrompt } = {};
+                return this.prompts.reduce((map, prompt) => {
+                    if (prompt && prompt.id) {
+                        const id = prompt.id;
+                        map[id] = prompt;
+                    }
+
+                    return map;
+                }, initialValue)
+            },
+            preparedResponses(): { response: ReflectionResponse, prompt?: ReflectionPrompt }[] {
+                const promptsById = this.promptsById;
+                return this.responses.map(response => {
+                    const prompt = response.promptId ? promptsById[response.promptId] : undefined;
+                    return {
+                        response,
+                        prompt,
+                    }
+                })
             }
         }
     })

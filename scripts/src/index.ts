@@ -1,5 +1,5 @@
 import {start, runCommand} from "@scripts/run";
-import {setTimestamp} from "@shared/util/FirebaseUtil";
+import {setTimestamp} from "@shared/util/FirestoreUtil";
 import chalk from "chalk";
 import * as admin from "firebase-admin";
 

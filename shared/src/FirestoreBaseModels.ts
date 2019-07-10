@@ -1,4 +1,4 @@
-import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUtil";
+import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 
 
 export enum

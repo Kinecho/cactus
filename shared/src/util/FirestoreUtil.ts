@@ -1,10 +1,7 @@
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
-import * as admin from "firebase-admin";
-import QuerySnapshot = admin.firestore.QuerySnapshot;
 
-
-let TimestampClass:TimestampInterface|any;
+let TimestampClass: TimestampInterface | any;
 
 export interface TimestampInterface {
     fromMillis<T extends TimestampInterface>(milliseconds: number): T;
@@ -17,16 +14,21 @@ export interface TimestampInterface {
     isEqual(other: TimestampInterface): boolean;
 }
 
-export function setTimestamp(timestamp:any){
+export function setTimestamp(timestamp: any) {
     TimestampClass = timestamp;
 }
 
 export type DocumentData = { [field: string]: any };
 
 export interface DocumentSnapshot {
-    data(): DocumentData|undefined;
+    data(): DocumentData | undefined;
     readonly id: string;
     readonly exists: boolean;
+}
+
+export interface QuerySnapshot {
+    forEach(callback:(doc:DocumentSnapshot) => void): void,
+    empty: boolean,
 }
 
 export function convertDateToTimestamp(input: any): any {
@@ -62,13 +64,13 @@ export function convertTimestampToDate(input: any): any {
     })
 }
 
-export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, Type: {new(): T}): T|undefined {
-    if (!doc.exists){
+export function fromDocumentSnapshot<T extends BaseModel>(doc: DocumentSnapshot, Type: { new(): T }): T | undefined {
+    if (!doc.exists) {
         return;
     }
 
     const data = doc.data();
-    if (!data){
+    if (!data) {
         return;
     }
     data.id = doc.id;
@@ -76,16 +78,16 @@ export function fromDocumentSnapshot<T extends BaseModel>(doc:DocumentSnapshot, 
     return fromFirestoreData(data, Type);
 }
 
-export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, Type: {new(): T}): T[] {
-    const results:T[] = [];
+export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, Type: { new(): T }): T[] {
+    const results: T[] = [];
 
-    if (snapshot.empty){
+    if (snapshot.empty) {
         return results;
     }
 
-    snapshot.forEach(doc => {
+    snapshot.forEach((doc:DocumentSnapshot) => {
         const model = fromDocumentSnapshot(doc, Type);
-        if (model){
+        if (model) {
             results.push(model);
         } else {
             console.warn("Unable to decode model", Type);
@@ -100,7 +102,7 @@ export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new():
     return Object.assign(model, transformed) as T;
 }
 
-export function fromJSON<T extends BaseModel>(json:any, Type: {new(): T}):T{
+export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T {
     const model = new Type();
     model.decodeJSON(json);
     return model;

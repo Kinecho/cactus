@@ -6,7 +6,7 @@ import {
     MergeFields,
     Tag
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirebaseUtil";
+import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
 

@@ -1,7 +1,7 @@
 import * as firebaseAdmin from "firebase-admin";
 import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 import Timestamp = firebaseAdmin.firestore.Timestamp;

@@ -1,6 +1,6 @@
 import {Collection, BaseModel} from "@shared/FirestoreBaseModels";
 import * as firebase from "firebase";
-import {fromDocumentSnapshot, fromFirestoreData, fromJSON, setTimestamp} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot, fromFirestoreData, fromJSON, setTimestamp} from "@shared/util/FirestoreUtil";
 import DocumentSnapshot = firebase.firestore.DocumentSnapshot;
 import DocumentReference = firebase.firestore.DocumentReference;
 import SnapshotMetadata = firebase.firestore.SnapshotMetadata;

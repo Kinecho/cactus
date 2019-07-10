@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import {fromDocumentSnapshot} from "@shared/util/FirebaseUtil";
+import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 import {getCactusConfig, Project} from "@scripts/config";
