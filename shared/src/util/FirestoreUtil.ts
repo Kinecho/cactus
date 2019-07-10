@@ -1,8 +1,5 @@
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
-import {IQueryObserverOptions} from "@shared/types/FirestoreTypes";
-import {DefaultQueryOptions} from "@shared/types/FirestoreConstants";
-import {QueryCursor} from "../../../web/src/scripts/services/FirestoreService";
 
 let TimestampClass: TimestampInterface | any;
 
@@ -139,18 +136,4 @@ export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T 
     const model = new Type();
     model.decodeJSON(json);
     return model;
-}
-
-
-export function makeQueryObserverOptions<T extends BaseModel>(onData: (results: T[]) => void, options: {
-    onModified?(modified: T): void,
-    onRemoved?(removed: T): void,
-    onAdded?(added: T): void,
-}): IQueryObserverOptions<QueryCursor, T> {
-    return {
-        ...DefaultQueryOptions,
-        onData: onData,
-        ...options,
-
-    }
 }
