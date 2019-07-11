@@ -18,7 +18,13 @@
                     You have no responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
-                    <transition-group name="fade-out" tag="div">
+                    <transition-group
+                            name="fade-out"
+                            tag="div"
+                            appear
+                            v-bind:css="false"
+
+                            v-on:enter="enter">
                         <response-card
                                 class="journalListItem"
                                 v-for="(preparedResponse, index) in preparedResponses"
@@ -26,6 +32,7 @@
                                 v-bind:prompt="preparedResponse.prompt"
                                 v-bind:index="index"
                                 v-bind:key="preparedResponse.response.id"
+                                v-bind:data-index="index"
                         ></response-card>
                     </transition-group>
                 </section>
@@ -181,6 +188,18 @@
                     }
                 }
             },
+            beforeEnter: function (el: HTMLElement) {
+                // el.style.opacity = ".1";
+            },
+            enter: function (el: HTMLElement, done: () => void) {
+                const delay = Number(el.dataset.index) * 100;
+                console.log("delay is", delay);
+                setTimeout(function () {
+                    el.classList.add("in");
+                    done();
+                }, delay)
+            },
+
         },
         computed: {
             userName(): string | undefined | null {
@@ -242,11 +261,19 @@
     .journalList {
         display: flex;
         flex-direction: column;
+
         .journalListItem {
             transition: .3s all;
             width: 100%;
             /*display: inline-block;*/
+            transform: translateY(30px);
+            opacity: 0;
+            &.in {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         &.empty {
             display: flex;
             flex-direction: column;
