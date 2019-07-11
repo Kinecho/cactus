@@ -9,7 +9,7 @@
                 </div>
             </div>
             <div v-if="loggedIn" class="section-container">
-                <section class="empty journalList" v-if="!preparedPrompts.length && responsesHasLoaded">
+                <section class="empty journalList" v-if="!preparedPrompts.length && responsesHasLoaded && sentPromptsLoaded">
                     You have not received any questions yet
                 </section>
                 <section v-if="preparedPrompts.length" class="journalList">
@@ -33,7 +33,7 @@
                 </section>
 
 
-                <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded">
+                <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded && sentPromptsLoaded">
                     You have not saved any responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
@@ -302,13 +302,15 @@
             },
             preparedResponses(): { response: ReflectionResponse, prompt?: ReflectionPrompt }[] {
                 const promptsById = this.promptsById;
-                return this.responses.map(response => {
+                const preparedResponses = this.responses.map(response => {
                     const prompt = response.promptId ? promptsById[response.promptId] : undefined;
                     return {
                         response,
                         prompt,
                     }
-                })
+                }).filter(prepared => prepared.prompt && prepared.response);
+
+                return preparedResponses;
             }
         }
     })
