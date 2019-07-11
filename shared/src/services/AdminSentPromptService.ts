@@ -13,28 +13,41 @@ export interface CampaignSentPromptProcessingResult {
     recipient: SentToRecipient,
 }
 
+let firestoreService: AdminFirestoreService;
+
 export default class AdminSentPromptService {
-    static sharedInstance: AdminSentPromptService = new AdminSentPromptService();
-    firestoreService: AdminFirestoreService = AdminFirestoreService.getSharedInstance();
+    protected static sharedInstance: AdminSentPromptService;
     mailchimpService = MailchimpService.getSharedInstance();
-    reflectionPromptService = AdminReflectionPromptService.sharedInstance;
+    reflectionPromptService = AdminReflectionPromptService.getSharedInstance();
     cactusMemberService = AdminCactusMemberService.getSharedInstance();
 
 
+    static getSharedInstance(): AdminSentPromptService {
+        if (!AdminSentPromptService.sharedInstance) {
+            throw new Error("No shared instance available. Be sure to call initialize before using it");
+        }
+        return AdminSentPromptService.sharedInstance;
+    }
+
+    static initialize() {
+        firestoreService = AdminFirestoreService.getSharedInstance();
+        AdminSentPromptService.sharedInstance = new AdminSentPromptService();
+    }
+
     getCollectionRef() {
-        return this.firestoreService.getCollectionRef(Collection.sentPrompts);
+        return firestoreService.getCollectionRef(Collection.sentPrompts);
     }
 
     async getFirst(query: FirebaseFirestore.Query): Promise<SentPrompt | undefined> {
-        return await this.firestoreService.getFirst(query, SentPrompt);
+        return await firestoreService.getFirst(query, SentPrompt);
     }
 
     async save(model: SentPrompt): Promise<SentPrompt> {
-        return this.firestoreService.save(model);
+        return firestoreService.save(model);
     }
 
     async getById(id: string): Promise<SentPrompt | undefined> {
-        return await this.firestoreService.getById(id, SentPrompt);
+        return await firestoreService.getById(id, SentPrompt);
     }
 
 
@@ -55,22 +68,24 @@ export default class AdminSentPromptService {
             const profileMember = await this.mailchimpService.getMemberByEmail(recipient.email_address);
             if (!profileMember) {
                 console.error("Couldn't get a profile member from mailchimp for email", recipient.email_address);
-                await sendEngineeringMessage(`:warning: Processing Mailchimp Campaign Recipient: Unable to get a cactus member or mailchimp member for email address ${emailAddresses}`);
+                await sendEngineeringMessage(`:warning: Processing Mailchimp Campaign Recipient: Unable to get a cactus member or mailchimp member for email address ${recipient.email_address}`);
                 return;
             } else {
                 member = await this.cactusMemberService.updateFromMailchimpListMember(profileMember);
+                console.log("got cactus member after calling updateFromMailchimpListMember", member);
             }
 
         }
 
         if (!member || !member.id) {
-            console.warn("Unable to get cactus member. Can't process email recipient for " + recipient.email_address);
+            console.warn("Still unable to get cactus member. Can't process email recipient for " + recipient.email_address);
             return;
         }
 
 
         let sentPrompt = await this.getSentPromptForCactusMemberId({cactusMemberId: member.id, promptId});
         if (sentPrompt) {
+            console.log("Sent prompt", sentPrompt);
             // we don't want to push more events to this user,
             // because of automation processing we can have lots of duplicates.
             // If we can find a solution to figuring out if a sent was already logged, handling for the automation case,

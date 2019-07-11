@@ -5,6 +5,8 @@ import MailchimpService from "@shared/services/MailchimpService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import AdminUserService from "@shared/services/AdminUserService";
+import AdminSentPromptService from "@shared/services/AdminSentPromptService";
+import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 
 //need to initialize these modules before including any other code
 admin.initializeApp();
@@ -16,6 +18,8 @@ AdminFirestoreService.initialize(app);
 MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
 AdminCactusMemberService.initialize();
 AdminUserService.initialize(config);
+AdminSentPromptService.initialize();
+AdminReflectionPromptService.initialize();
 
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 

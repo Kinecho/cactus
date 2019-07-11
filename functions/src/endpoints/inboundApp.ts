@@ -98,7 +98,7 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         const {mailchimpCampaignId, mailchimpUniqueEmailId, from} = emailReply;
 
         const listMember = await mailchimpService.getMemberByUniqueEmailId(mailchimpUniqueEmailId);
-        const prompt = await AdminReflectionPromptService.sharedInstance.getPromptForCampaignId(mailchimpCampaignId);
+        const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(mailchimpCampaignId);
 
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
         emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);

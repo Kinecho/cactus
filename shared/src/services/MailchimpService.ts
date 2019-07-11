@@ -82,7 +82,7 @@ export default class MailchimpService {
         if (MailchimpService.sharedInstance) {
             return MailchimpService.sharedInstance;
         }
-        throw new Error("You must initialize mailchimp service before calling sharedInstance()");
+        throw new Error("You must initialize mailchimp service before calling getSharedInstance()");
     }
 
 

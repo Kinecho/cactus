@@ -10,14 +10,24 @@
         "strict": true,
         "target": "es2015",
         "baseUrl": ".",
-        "rootDirs": ["src", "../shared/src", "../functions/src"],
+        "rootDirs": [
+            "src",
+            "../shared/src",
+            "../functions/src"
+        ],
         "paths": {
             "@scripts/*": [
                 "./src/*"
             ],
-            "@shared/*": ["../shared/src/*"],
-            "@api/*": ["../functions/src/*"],
-            "@web/*": ["../web/src/*"]
+            "@shared/*": [
+                "../shared/src/*"
+            ],
+            "@api/*": [
+                "../functions/src/*"
+            ],
+            "@web/*": [
+                "../web/src/*"
+            ]
         }
     },
     "compileOnSave": false,

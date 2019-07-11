@@ -5,7 +5,7 @@ import {CampaignContent} from "@shared/mailchimp/models/CreateCampaignRequest";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 
 const firestoreService = FirestoreService.getSharedInstance();
-const reflectionPromptService = AdminReflectionPromptService.sharedInstance;
+const reflectionPromptService = AdminReflectionPromptService.getSharedInstance();
 
 export async function saveSentCampaign(campaign: Campaign | null | undefined, webhookData: CampaignEventData, content?: CampaignContent): Promise<SentCampaign | undefined> {
     try {

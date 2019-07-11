@@ -5,18 +5,31 @@ import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
 
-const firestoreService = AdminFirestoreService.getSharedInstance();
+let firestoreService: AdminFirestoreService;
 
 export default class AdminReflectionPromptService {
 
-    public static sharedInstance = new AdminReflectionPromptService();
+    protected static sharedInstance: AdminReflectionPromptService;
 
-    async save(model:ReflectionPrompt):Promise<ReflectionPrompt> {
+    static getSharedInstance(): AdminReflectionPromptService {
+        if (!AdminReflectionPromptService.sharedInstance) {
+            throw new Error("No shared instance available. Ensure you initialize AdminReflectionPromptService before using it");
+        }
+        return AdminReflectionPromptService.sharedInstance;
+    }
+
+    static initialize() {
+        firestoreService = AdminFirestoreService.getSharedInstance();
+        AdminReflectionPromptService.sharedInstance = new AdminReflectionPromptService();
+    }
+
+
+    async save(model: ReflectionPrompt): Promise<ReflectionPrompt> {
         return firestoreService.save(model);
     }
 
-    async getPromptForCampaignId(campaignId?:string):Promise<ReflectionPrompt|undefined> {
-        if (!campaignId){
+    async getPromptForCampaignId(campaignId?: string): Promise<ReflectionPrompt | undefined> {
+        if (!campaignId) {
             return undefined;
         }
 
@@ -25,7 +38,7 @@ export default class AdminReflectionPromptService {
 
 
         const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
-        if (size > 1){
+        if (size > 1) {
             console.warn("Found more than one question prompt for given campaign id");
         }
 
@@ -33,19 +46,18 @@ export default class AdminReflectionPromptService {
         return prompt;
     }
 
-    async updateCampaign(campaign:Campaign):Promise<ReflectionPrompt|undefined> {
+    async updateCampaign(campaign: Campaign): Promise<ReflectionPrompt | undefined> {
         const reflectionPrompt = await this.getPromptForCampaignId(campaign.id);
 
-        if (reflectionPrompt){
+        if (reflectionPrompt) {
             if (reflectionPrompt.campaign && reflectionPrompt.campaign.id === campaign.id) {
                 reflectionPrompt.campaign = campaign;
-                if (campaign.send_time){
+                if (campaign.send_time) {
                     reflectionPrompt.sendDate = getDateFromISOString(campaign.send_time)
                 }
             } else if (reflectionPrompt.reminderCampaign && reflectionPrompt.reminderCampaign.id === campaign.id) {
                 reflectionPrompt.reminderCampaign = campaign;
-            }
-            else {
+            } else {
                 console.warn("Unable to find matching campaign info on reflection prompt", reflectionPrompt.id, "for campaignId", campaign.id);
                 return reflectionPrompt;
             }
