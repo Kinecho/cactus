@@ -5,7 +5,6 @@ import MailchimpService from "@shared/services/MailchimpService";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
-import {sendEngineeringMessage} from "../../../functions/src/slack/slack";
 
 
 export interface CampaignSentPromptProcessingResult {
@@ -69,7 +68,6 @@ export default class AdminSentPromptService {
             const profileMember = await this.mailchimpService.getMemberByEmail(recipient.email_address);
             if (!profileMember) {
                 console.error("Couldn't get a profile member from mailchimp for email", recipient.email_address);
-                await sendEngineeringMessage(`:warning: Processing Mailchimp Campaign Recipient: Unable to get a cactus member or mailchimp member for email address ${recipient.email_address}`);
                 return;
             } else {
                 member = await this.cactusMemberService.updateFromMailchimpListMember(profileMember);
@@ -136,8 +134,6 @@ export default class AdminSentPromptService {
                 resolve({sentPrompt, recipient});
             })
         });
-
-        await sendEngineeringMessage(`Processing ${tasks.length} campaign recipients for campaignId=\`${campaignId}\` and reflectionPromptId=\`${promptId}\``);
 
         return await Promise.all(tasks);
     }
