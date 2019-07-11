@@ -15,6 +15,10 @@
   }
 }
 
+@mixin popoverShadow {
+  box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
+}
+
 @mixin shadowbox {
   background-color: white;
   border-radius: 12px;

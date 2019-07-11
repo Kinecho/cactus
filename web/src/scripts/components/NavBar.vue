@@ -189,6 +189,7 @@
                 position: absolute;
                 top: 4rem;
                 z-index: 100;
+                @include popoverShadow;
 
                 a, span {
                     background-color: transparent;
