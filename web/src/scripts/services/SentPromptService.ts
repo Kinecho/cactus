@@ -21,7 +21,7 @@ export default class SentPromptService {
         return this.firestoreService.getFirst(query, SentPrompt);
     }
 
-    async save(model: SentPrompt): Promise<SentPrompt> {
+    async save(model: SentPrompt): Promise<SentPrompt|undefined> {
         return this.firestoreService.save(model);
     }
 

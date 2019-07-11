@@ -34,7 +34,7 @@ export default class ReflectionResponseService {
         return response;
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse> {
+    async save(model: ReflectionResponse): Promise<ReflectionResponse|undefined> {
         return this.firestoreService.save(model);
     }
 

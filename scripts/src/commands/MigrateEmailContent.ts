@@ -50,8 +50,8 @@ export default class MigrateEmailContent extends FirebaseCommand {
 
                 if (needsUpdate) {
                     await doc.ref.update({
-                        html: FieldValue.deleteSentPromptById(),
-                        text: FieldValue.deleteSentPromptById(),
+                        html: FieldValue.delete(),
+                        text: FieldValue.delete(),
                         content: content
                     });
                     updatedCount++;

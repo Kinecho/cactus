@@ -20,7 +20,7 @@ export default class ReflectionPromptService {
         return this.firestoreService.getFirst(query, ReflectionPrompt);
     }
 
-    async save(model: ReflectionPrompt): Promise<ReflectionPrompt> {
+    async save(model: ReflectionPrompt): Promise<ReflectionPrompt|undefined> {
         return this.firestoreService.save(model);
     }
 

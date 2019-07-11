@@ -48,7 +48,7 @@ export default class CactusMemberService {
         return this.firestoreService.getFirst(query, CactusMember);
     }
 
-    async save(model: CactusMember): Promise<CactusMember> {
+    async save(model: CactusMember): Promise<CactusMember|undefined> {
         return this.firestoreService.save(model);
     }
 
