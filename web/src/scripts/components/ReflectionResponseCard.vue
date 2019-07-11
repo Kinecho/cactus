@@ -130,8 +130,11 @@
                 }
             },
             async deleteReflection() {
-                this.closeMenu();
-                await ReflectionResponseService.sharedInstance.delete(this.response);
+                const c = confirm("Are you sure you want to delete this reflection?");
+                if (c) {
+                    this.closeMenu();
+                    await ReflectionResponseService.sharedInstance.delete(this.response);
+                }
             },
             startEditing() {
                 this.doReflect = true;
