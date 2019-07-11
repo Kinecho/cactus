@@ -2,6 +2,8 @@ import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} fro
 import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {getAuth} from "@web/firebase";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 export default class SentPromptService {
     public static sharedInstance = new SentPromptService();
@@ -24,7 +26,44 @@ export default class SentPromptService {
     }
 
     async getById(id: string): Promise<SentPrompt | undefined> {
-        return await this.firestoreService.getById(id, SentPrompt);
+        try {
+            return await this.firestoreService.getById(id, SentPrompt);
+        } catch (e) {
+            console.error("Failed to get sent prompt by id", e);
+        }
+
+    }
+
+    async delete(id: string): Promise<SentPrompt | undefined> {
+        return await this.firestoreService.delete(id, SentPrompt);
+    }
+
+    async getSentPrompt(promptId: string): Promise<SentPrompt | undefined> {
+        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!member) {
+            console.warn("Unable to get current member. Can not delete the sentQuestion");
+            return;
+        }
+
+        try {
+            const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id).where(SentPrompt.Fields.promptId, "==", promptId);
+            return this.firestoreService.getFirst(query, SentPrompt);
+        } catch (e) {
+            console.error("failed to get sent prompt by promptId", e);
+        }
+
+    }
+
+    async deleteForPromptId(promptId: string): Promise<SentPrompt | undefined> {
+        const sentPrompt = await this.getSentPrompt(promptId);
+        if (sentPrompt && sentPrompt.id) {
+            try {
+                return this.delete(sentPrompt.id);
+            } catch (e) {
+                console.error(`Failed to delete prompt for promptId=${promptId} and sentPromptId=${sentPrompt.id}`)
+            }
+
+        }
     }
 
     observeForCactusMemberId(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {

@@ -16,7 +16,7 @@ import {
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import FieldValue = firebaseClient.firestore.FieldValue;
-import {addModal, showModal} from "@web/util";
+import {addModal, handleDatabaseError, showModal} from "@web/util";
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
@@ -84,7 +84,7 @@ export default class FirestoreService {
         return model;
     }
 
-    async save<T extends BaseModel>(model: T): Promise<T> {
+    async save<T extends BaseModel>(model: T): Promise<T | undefined> {
         try {
             const collectionRef = this.getCollectionRef(model.collection);
             let doc = collectionRef.doc();
@@ -104,7 +104,15 @@ export default class FirestoreService {
             return model;
         } catch (e) {
             console.error("failed to save firestore document", e);
-            throw e;
+            if (e.code === "permission-denied") {
+                handleDatabaseError({
+                    title: "Whoops!",
+                    message: "You do not have the proper permissions to perform this action.",
+                    error: e
+                })
+            }
+            return;
+            // throw e;
         }
     }
 

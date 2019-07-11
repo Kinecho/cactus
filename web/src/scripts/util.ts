@@ -61,6 +61,13 @@ export interface ConfirmEmailResponse {
     email?: string,
 }
 
+export function handleDatabaseError(error: { title?: string, message?: string, error: any }) {
+    const timestamp = (new Date()).getTime();
+    const id = `error-${timestamp}`;
+    addModal(id, {title: error.title, message: error.message || "Something unexpected occurred."})
+    showModal(id);
+}
+
 export function showConfirmEmailModal(options: {
     title?: string,
     message?: string,
@@ -209,7 +216,7 @@ declare interface NavigationOptions {
     showSignupButton?: boolean,
     redirectOnSignOut?: boolean,
     signOutRedirectUrl?: string,
-    largeLogoOnDesktop?:boolean,
+    largeLogoOnDesktop?: boolean,
 }
 
 export function setupNavigation(options: NavigationOptions) {

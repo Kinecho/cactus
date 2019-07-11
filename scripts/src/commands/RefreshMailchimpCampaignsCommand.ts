@@ -130,8 +130,8 @@ export default class RefreshMailchimpCampaignsCommand extends FirebaseCommand {
             //clear the existing content so we don't merge it by accident
             console.log("clearning content so we can reset it for campaignId", campaignId);
             await sentCampaignRef.update({
-                content: FieldValue.delete(),
-                campaign: FieldValue.delete(),
+                content: FieldValue.deleteSentPromptById(),
+                campaign: FieldValue.deleteSentPromptById(),
             });
         }
 

@@ -20,10 +20,12 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: member => {
+                        console.log("********* Got current cactus member", member);
                         this.currentMember = member;
                     }
                 })
             } else {
+                console.log("***** *unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });

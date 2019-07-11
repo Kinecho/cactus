@@ -26,18 +26,20 @@
                                 v-bind:response="preparedPrompt.response"
                                 v-bind:prompt="preparedPrompt.prompt"
                                 v-bind:index="index"
-                                v-bind:key="preparedPrompt.prompt.id"
+                                v-bind:key="preparedPrompt.prompt.id + index"
                                 v-bind:data-index="index"
                         ></response-card>
                     </transition-group>
                 </section>
 
-
+                <section class="jounalList">
+                    <h1 class="heading">Old Method Using Reflection Responses</h1>
+                </section>
                 <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded && sentPromptsLoaded">
                     You have not saved any responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
-                    <h1 class="heading">Old Method Using Reflection Responses</h1>
+
 
                     <transition-group
                             name="fade-out"
@@ -143,7 +145,7 @@
                             });
 
                             await this.fetchPromptsForIds(promptIds);
-
+                            await this.updatePreparedPrompts();
                             this.sentPromptsLoaded = true;
                         }
                     });
@@ -194,8 +196,7 @@
                 console.log("updating prepared prompts");
                 const promptsById = this.promptsById;
                 const responsesByPromptId = this.responsesByPromptId;
-                console.log("responses by prompt id", responsesByPromptId);
-                const member = this.cactusMember;
+
                 const items: {
                     response?: ReflectionResponse,
                     sentPrompt: SentPrompt,
@@ -205,33 +206,40 @@
                 this.sentPrompts.forEach(sentPrompt => {
                     let promptId = sentPrompt.promptId;
 
-                    let response;
-                    let prompt;
+                    let responses;
+                    let prompt: ReflectionPrompt | undefined;
                     if (promptId) {
                         prompt = promptsById[promptId];
-                        response = responsesByPromptId[promptId];
+                        responses = responsesByPromptId[promptId];
                     } else {
                         console.warn("no prompt id found on sentPrompt", sentPrompt);
                     }
 
-                    if (!response) {
+                    if (!responses) {
                         console.warn("no response was found");
                     }
 
                     if (prompt) {
-                        items.push({
-                            prompt,
-                            response,
-                            sentPrompt,
-                        })
+                        if (responses && prompt) {
+                            responses.forEach(response => {
+                                items.push({
+                                    prompt: prompt as ReflectionPrompt,
+                                    response,
+                                    sentPrompt,
+                                })
+                            })
+                        } else {
+                            items.push({
+                                prompt,
+                                sentPrompt,
+                            })
+                        }
+
+
                     }
                     return;
 
                 });
-
-                console.log("prepared prompts", items);
-
-                // return items;
 
                 this.preparedPrompts = items;
             },
@@ -290,11 +298,15 @@
                     return map;
                 }, initialValue)
             },
-            responsesByPromptId(): { [id: string]: ReflectionResponse } {
-                const initialValue: { [id: string]: ReflectionResponse } = {};
+            responsesByPromptId(): { [id: string]: ReflectionResponse [] } {
+                const initialValue: { [id: string]: ReflectionResponse[] } = {};
                 return this.responses.reduce((map, response) => {
                     if (response && response.promptId) {
-                        map[response.promptId] = response;
+                        if (!map[response.promptId]) {
+                            map[response.promptId] = [];
+                        }
+
+                        map[response.promptId].push(response);
                     }
 
                     return map;

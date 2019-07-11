@@ -19,7 +19,8 @@
                     <nav class="moreMenu" v-show="menuOpen">
                         <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go
                             Deeper</a>
-                        <a href="#" v-on:click.prevent="deleteReflection">Delete Reflection</a>
+                        <a href="#" v-on:click.prevent="deleteReflection" v-if="response">Delete Reflection</a>
+                        <a href="#" v-on:click.prevent="deleteSentPrompt" v-if="prompt">Delete This Question</a>
                     </nav>
                 </transition>
 
@@ -76,6 +77,7 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import SentPromptService from '@web/services/SentPromptService'
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -177,6 +179,23 @@
                     }
                 }
             },
+            async deleteSentPrompt() {
+                if (this.response) {
+                    const c = confirm("Are you sure you want to delete this question? All other responses to this question will also be deleted.");
+                    if (!c) {
+                        return;
+                    }
+                } else {
+                    const c = confirm("Are you sure you want to delete this question? It will no longer be available in your journal");
+                    if (!c) {
+                        return;
+                    }
+                }
+
+                if (this.prompt && this.prompt.id) {
+                    await SentPromptService.sharedInstance.deleteForPromptId(this.prompt.id)
+                }
+            },
             startEditing() {
                 this.doReflect = true;
             }
@@ -221,6 +240,10 @@
         border: 1px solid $lightest;
         margin: 0 auto 2.4rem;
         padding: 3.2rem 1.6rem;
+
+        .entry {
+            white-space: pre-line;
+        }
 
         @include r(768) {
             border-radius: 12px;
@@ -289,6 +312,7 @@
 
     .question {
         margin-bottom: .8rem;
+        white-space: pre-line;
     }
 
     textarea {
