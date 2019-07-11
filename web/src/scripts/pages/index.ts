@@ -1,6 +1,8 @@
 import "@styles/pages/index.scss"
-import { configureMailchimpSignupForm, setupJumpToForm} from '@web/mailchimp'
+import {configureMailchimpSignupForm, setupJumpToForm} from '@web/mailchimp'
 import {initializeFirebase} from "@web/firebase";
+import {setupNavigation} from "@web/util";
+
 const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {
     console.log("index.js loaded");
@@ -13,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+    setupNavigation({showSignupButton: true});
     //TODO: change these to use the new flows, commented out below
     //these are the mailchimp signup flows
     configureMailchimpSignupForm("email-form-bottom");

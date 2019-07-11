@@ -2,6 +2,7 @@ import {QueryParam} from "@shared/util/queryParams";
 import {isValidEmail} from "@shared/util/StringUtil";
 import Vue from "vue";
 import NavBar from "@components/NavBar.vue";
+import {configureDirectives} from "@web/vueDirectives";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn'
@@ -215,6 +216,8 @@ export function setupNavigation(options: NavigationOptions) {
     const $header = $headers ? $headers.item(0) : undefined;
     const $nav = document.getElementById("#top-nav");
 
+    configureDirectives();
+
     if (!$nav && !$header) {
         console.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
@@ -225,7 +228,7 @@ export function setupNavigation(options: NavigationOptions) {
     window.NavBar = new NavBar({
         el: $nav || $header,
         propsData: {
-            showSignupButton: options.showSignupButton,
+            showSignup: options.showSignupButton,
             redirectOnSignOut: options.redirectOnSignOut || false,
             signOutRedirectUrl: options.signOutRedirectUrl,
         },
