@@ -2,7 +2,6 @@
     <div>
         <NavBar :show-signup="true"/>
         <div class="container centered">
-            <div v-if="!loginReady">Loading...</div>
             <div v-if="loginReady && !loggedIn">
                 <h3>Oops, it looks like you're logged out.</h3>
                 <div class="login-container">
@@ -14,7 +13,7 @@
                     <h2>Today</h2>
                     <h3 class="question">{{todaysPrompt.question}}</h3>
                 </section>
-                <section class="empty journalList" v-if="!preparedResponses.length">
+                <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded">
                     You have no responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
