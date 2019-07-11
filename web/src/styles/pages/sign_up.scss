@@ -13,18 +13,12 @@ body {
   position: relative;
 
   @include h(768) {
-    align-items: center;
-    display: flex;
-    height: 100vh;
-    justify-content: center;
-  }
-}
+    //align-items: center;
+    //display: flex;
 
-header {
-  background-color: transparent;
-  justify-content: center;
-  margin-bottom: 2.4rem;
-  position: static;
+    height: 100vh;
+    //justify-content: center;
+  }
 }
 
 .centered {

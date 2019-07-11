@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    setupNavigation({showSignupButton: true});
+    setupNavigation({showSignupButton: true, largeLogoOnDesktop: true});
     //TODO: change these to use the new flows, commented out below
     //these are the mailchimp signup flows
     configureMailchimpSignupForm("email-form-bottom");

@@ -29,7 +29,9 @@ $widthL: 1024;
 $widthXL: 1140;
 $widthXXL: 1500;
 
+$widthTinyPhone: $widthXxs;
 $widthPhone: $widthXs;
+$widthLargePhone: $widthS;
 $widthTablet: $widthM;
 $widthDesktop: $widthXL;
 
@@ -54,13 +56,19 @@ $widthDesktop: $widthXL;
 }
 
 @mixin isTinyPhone(){
-  @include maxW($widthXxs){
+  @include maxW($widthTinyPhone){
     @content;
   }
 }
 
 @mixin isPhone() {
   @include maxW($widthPhone) {
+    @content;
+  }
+}
+
+@mixin biggerThanTinyPhone() {
+  @include minW($widthTinyPhone) {
     @content;
   }
 }
@@ -72,11 +80,55 @@ $widthDesktop: $widthXL;
   }
 }
 
+@mixin phoneOrBigger() {
+  @include minW($widthPhone) {
+    @content;
+  }
+}
+
+@mixin largePhoneOrBigger() {
+  @include minW($widthLargePhone) {
+    @content;
+  }
+}
+
+
 @mixin isTablet() {
   @include widthBetween($widthTablet, $widthDesktop) {
     @content;
   }
 }
+
+
+@mixin biggerThanTablet() {
+  @include minW($widthTablet) {
+    @content;
+  }
+}
+
+
+
+@mixin smallerThanLargePhone() {
+  @include maxW($widthLargePhone) {
+    @content;
+  }
+}
+
+@mixin smallerThanPhone() {
+  @include maxW($widthPhone - 1) {
+    @content;
+  }
+}
+
+
+
+@mixin smallerThanTablet() {
+  @include maxW($widthTablet) {
+    @content;
+  }
+}
+
+
 
 @mixin isDesktop() {
   @include minW($widthDesktop) {

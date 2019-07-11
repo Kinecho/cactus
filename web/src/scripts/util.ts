@@ -209,6 +209,7 @@ declare interface NavigationOptions {
     showSignupButton?: boolean,
     redirectOnSignOut?: boolean,
     signOutRedirectUrl?: string,
+    largeLogoOnDesktop?:boolean,
 }
 
 export function setupNavigation(options: NavigationOptions) {
@@ -231,6 +232,7 @@ export function setupNavigation(options: NavigationOptions) {
             showSignup: options.showSignupButton,
             redirectOnSignOut: options.redirectOnSignOut || false,
             signOutRedirectUrl: options.signOutRedirectUrl,
+            largeLogoOnDesktop: options.largeLogoOnDesktop || false,
         },
         components: {NavBar: NavBar}
     });

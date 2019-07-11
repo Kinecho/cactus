@@ -1,6 +1,6 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn}">
-        <a href="/"><img class="logo" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
+        <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <a v-if="displaySignupButton"
                 class="jump-to-form button"
                 @click.prevent="scrollToSignup"
@@ -67,6 +67,7 @@
             signOutRedirectUrl: String,
             redirectOnSignOut: Boolean,
             signupFormAnchorId: {type: String, default: "signupAnchor"},
+            largeLogoOnDesktop: Boolean,
         },
         data(): NavBarData {
             return {
@@ -152,23 +153,25 @@
             opacity: 0;
         }
 
-
         &.loggedIn {
             display: flex;
             justify-content: space-between;
+        }
 
-            @include isTinyPhone {
-                .logo {
-                    display: none;
+        .nav-logo {
+            height: 5.8rem;
+            width: 11.7rem;
+
+            &.large-desktop {
+                @include biggerThanPhone {
+                    height: 8.8rem;
+                    width: 17.8rem;
                 }
             }
 
-        }
-
-        .logo {
-            @include isPhone {
-                height: 3rem;
-                width: 6rem;
+            @include isTinyPhone {
+                height: 4rem;
+                width: 7rem;
             }
         }
 
@@ -185,6 +188,7 @@
                 padding: .8rem 0;
                 position: absolute;
                 top: 4rem;
+                z-index: 100;
 
                 a, span {
                     background-color: transparent;
@@ -196,6 +200,7 @@
                     text-decoration: none;
                     transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
                     white-space: nowrap;
+
                     &:hover {
                         background-color: lighten($lightPink, 2%);
                         opacity: 1;

@@ -191,6 +191,8 @@
     .container {
         /*max-width: 74rem;*/
         text-align: left;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }
 
     .login-container {

@@ -42,12 +42,21 @@ header {
   top: 0;
   z-index: 10;
 
-  @include r(768) {
+  @include isTinyPhone{
+    min-height: 8rem;
+  }
+
+  @include biggerThanTinyPhone{
+    min-height: 10rem;
+  }
+
+  @include largePhoneOrBigger {
     background-color: transparent;
     margin: 0 auto;
+    min-height: 15rem;
     max-width: 1200px;
     padding: 2.4rem;
-    position: static;
+    position: relative;
   }
 
   button, a.button {
@@ -106,7 +115,7 @@ button, a.button {
       animation: rotate 1s linear infinite;
       background: url(assets/images/loading.svg) no-repeat;
       background-size: 2rem;
-      content:'';
+      content: '';
       display: block;
       height: 2rem;
       position: absolute;
