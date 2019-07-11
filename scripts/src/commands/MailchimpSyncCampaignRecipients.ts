@@ -37,7 +37,7 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
 
 
         const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(campaignResponse.campaignId);
-        console.log("Got prompt", prompt);
+        console.log("Got prompt", prompt ? `${prompt.id} | ${prompt.question}` : 'undefined');
 
         const tasks: Promise<CampaignSentPromptProcessingResult>[] = [];
         const handleBatch = async (recipients: SentToRecipient[]) => {

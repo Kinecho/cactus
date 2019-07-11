@@ -61,10 +61,11 @@ export default class AdminSentPromptService {
 
     // async getByCampaignId
     async processMailchimpRecipient(recipient: SentToRecipient, promptId: string): Promise<SentPrompt | undefined> {
+        console.log("processing recipient", recipient.email_address);
         let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address);
 
         if (!member) {
-            console.warn("Unable to find an existing cactus member for the provided email... creating them now");
+            console.warn(`Unable to find an existing cactus member for the provided email ${recipient.email_address}... creating them now`);
             const profileMember = await this.mailchimpService.getMemberByEmail(recipient.email_address);
             if (!profileMember) {
                 console.error("Couldn't get a profile member from mailchimp for email", recipient.email_address);
@@ -75,6 +76,8 @@ export default class AdminSentPromptService {
                 console.log("got cactus member after calling updateFromMailchimpListMember", member);
             }
 
+        } else {
+            console.log("found cactus member for email", recipient.email_address, "cactus_member_id", member.id);
         }
 
         if (!member || !member.id) {
@@ -85,7 +88,7 @@ export default class AdminSentPromptService {
 
         let sentPrompt = await this.getSentPromptForCactusMemberId({cactusMemberId: member.id, promptId});
         if (sentPrompt) {
-            console.log("Sent prompt", sentPrompt);
+            console.log("Found existing SentPrompt", sentPrompt, "for user email", recipient.email_address);
             // we don't want to push more events to this user,
             // because of automation processing we can have lots of duplicates.
             // If we can find a solution to figuring out if a sent was already logged, handling for the automation case,
@@ -95,6 +98,7 @@ export default class AdminSentPromptService {
         }
 
         sentPrompt = new SentPrompt();
+        sentPrompt.promptId = promptId;
         sentPrompt.firstSentAt = new Date();
         sentPrompt.cactusMemberId = member.id;
         sentPrompt.userId = member.userId;
