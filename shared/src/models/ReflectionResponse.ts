@@ -24,6 +24,8 @@ export enum ReflectionResponseField {
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
 
+    userId?:string;
+    cactusMemberId?:string;
     responseDate?: Date;
     emailReplyId?: string;
     responseMedium?: ResponseMedium;

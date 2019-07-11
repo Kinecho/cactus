@@ -2,6 +2,8 @@ import FirestoreService, {ListenerUnsubscriber, QueryObserverOptions} from "@web
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {getAuth} from "@web/firebase";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 
 export default class ReflectionResponseService {
@@ -10,6 +12,26 @@ export default class ReflectionResponseService {
 
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
+    }
+
+    async createReflectionResponse(promptId:string, promptQuestion?:string): Promise<ReflectionResponse | undefined> {
+        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!cactusMember) {
+            console.log("Unable to get cactus member");
+            return;
+        }
+
+        const response = new ReflectionResponse();
+        response.promptId = promptId;
+        response.promptQuestion = promptQuestion;
+        response.userId = cactusMember.userId;
+        response.cactusMemberId = cactusMember.id;
+        response.memberEmail = cactusMember.email;
+        response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
+        response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
+
+
+        return response;
     }
 
     async save(model: ReflectionResponse): Promise<ReflectionResponse> {

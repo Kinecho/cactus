@@ -16,6 +16,7 @@ import {
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import FieldValue = firebaseClient.firestore.FieldValue;
+import {addModal, showModal} from "@web/util";
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
@@ -243,7 +244,9 @@ export default class FirestoreService {
         }, error => {
             console.error("Error getting snapshot | queryName=" + options.queryName, error.message);
             if (error.message.includes("The query requires an index")) {
-                alert("The query requires and index\n" + error.message);
+                addModal("index-needed", {title: "An index needs to be created", message: error.message});
+                showModal("index-needed");
+                // alert("The query requires and index\n\n" + error.message);
             }
         })
     }

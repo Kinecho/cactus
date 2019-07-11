@@ -3,7 +3,8 @@
     <article class="journalEntry new" id="reflectParent">
         <div class="dateContainer menuParent">
             <div class="dates">
-                <p class="date">{{responseDate}}</p>
+                <p class="date" v-if="responseDate">{{responseDate}}</p>
+                <p class="date" v-else-if="promptDate">Sent {{promptDate}}</p>
                 <p class="date edited" v-if="updatedDate && responseDate !== updatedDate">Updated
                     {{updatedDate}}</p>
             </div>
@@ -25,18 +26,26 @@
             </div>
 
         </div>
+
         <h3 class="question">{{questionText}}</h3>
+        <p v-if="!prompt" class="warning prompt">
+            There is no Prompt!
+        </p>
+        <p v-if="!response" class="warning response">
+            There is no Response!
+        </p>
+
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
 
         <form v-if="doReflect" v-on:submit.prevent>
             <textarea v-model="editedText"></textarea>
-            <button class="primary small" v-on:click="doneEditing">
+            <button class="primary small" v-on:click="doneEditing" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
                 </svg>
                 Done
             </button>
-            <button class="secondary small" v-on:click="cancelEditing">
+            <button class="secondary small" v-on:click="cancelEditing" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
                 </svg>
@@ -77,36 +86,66 @@
 
     export default Vue.extend({
         props: {
-            response: ReflectionResponse,
+            response: Object as () => ReflectionResponse | undefined,
             prompt: ReflectionPrompt,
         },
         data(): ReflectionResponseCardData {
             return {
                 doReflect: false,
-                editedText: this.response.content.text || "",
+                editedText: this.response ? this.response.content.text || "" : "",
                 menuOpen: false,
                 deleting: false,
             };
         },
         computed: {
             responseDate(): string | undefined {
-                return DateUtil.formatDate(this.response.createdAt, "LLLL d, yyyy")
+                if (this.response) {
+                    return DateUtil.formatDate(this.response.createdAt, "LLLL d, yyyy")
+                }
+                return;
             },
             updatedDate(): string | undefined {
-                return DateUtil.formatDate(this.response.updatedAt, "LLLL d, yyyy")
+                if (this.response) {
+                    return DateUtil.formatDate(this.response.updatedAt, "LLLL d, yyyy")
+                }
+                return;
+            },
+            promptDate(): string | undefined {
+                return DateUtil.formatDate(this.prompt.sendDate, "LLL d, yyyy")
             },
             responseText(): string | undefined {
-                return this.response.content.text;
+                if (this.response) {
+                    return this.response.content.text;
+                }
+                return;
             },
             questionText(): string | undefined {
-                return this.response.promptQuestion;
+                if (this.prompt) {
+                    return this.prompt.question
+                }
+
+                if (this.response) {
+                    return this.response.promptQuestion;
+                }
+                return;
             }
         },
         methods: {
             async doneEditing() {
-                this.response.content.text = this.editedText;
                 this.doReflect = false;
-                await ReflectionResponseService.sharedInstance.save(this.response);
+
+
+                let response = this.response;
+                if (!this.response && this.prompt && this.prompt.id) {
+                    response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, this.prompt.question)
+                }
+                if (response) {
+                    response.content.text = this.editedText;
+                    //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
+                    await ReflectionResponseService.sharedInstance.save(response);
+                } else {
+                    console.error("There was no response available to save... this shouldn't happen");
+                }
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -115,7 +154,7 @@
                 this.menuOpen = false;
             },
             cancelEditing() {
-                if (this.editedText.trim() !== (this.response.content.text || "").trim()) {
+                if (this.response && this.editedText.trim() !== (this.response.content.text || "").trim()) {
                     const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
                     if (c) {
                         console.log("confirmed cancel");
@@ -133,7 +172,9 @@
                 const c = confirm("Are you sure you want to delete this reflection?");
                 if (c) {
                     this.closeMenu();
-                    await ReflectionResponseService.sharedInstance.delete(this.response);
+                    if (this.response) {
+                        await ReflectionResponseService.sharedInstance.delete(this.response);
+                    }
                 }
             },
             startEditing() {
@@ -261,6 +302,21 @@
 
     .buttonContainer {
         margin-top: 1.6rem;
+    }
+
+    .warning {
+        &.response {
+            background-color: $darkestYellow;
+        }
+
+        &.prompt {
+            background-color: #7A3814;
+        }
+
+        padding: 1rem;
+        color: white;
+        margin: 1rem 0;
+        border-radius: .5rem;
     }
 
     .secondary {

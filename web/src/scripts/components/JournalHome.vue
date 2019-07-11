@@ -8,11 +8,37 @@
                     <a class="button primary" :href="loginPath">Sign In</a>
                 </div>
             </div>
-            <div v-if="loggedIn">
+            <div v-if="loggedIn" class="section-container">
+                <section class="empty journalList" v-if="!preparedPrompts.length && responsesHasLoaded">
+                    You have not received any questions yet
+                </section>
+                <section v-if="preparedPrompts.length" class="journalList">
+                    <transition-group
+                            name="fade-out"
+                            tag="div"
+                            appear
+                            v-bind:css="false"
+                            v-on:before-enter="beforeEnter"
+                            v-on:enter="enter">
+                        <response-card
+                                class="journalListItem"
+                                v-for="(preparedPrompt, index) in preparedPrompts"
+                                v-bind:response="preparedPrompt.response"
+                                v-bind:prompt="preparedPrompt.prompt"
+                                v-bind:index="index"
+                                v-bind:key="preparedPrompt.prompt.id"
+                                v-bind:data-index="index"
+                        ></response-card>
+                    </transition-group>
+                </section>
+
+
                 <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded">
-                    You have no responses yet
+                    You have not saved any responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
+                    <h1 class="heading">Old Method Using Reflection Responses</h1>
+
                     <transition-group
                             name="fade-out"
                             tag="div"
@@ -38,10 +64,10 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import {getAuth, FirebaseUser} from '@web/firebase';
+    import {FirebaseUser, getAuth} from '@web/firebase';
     import NavBar from '@components/NavBar.vue';
     import ResponseCard from "@components/ReflectionResponseCard.vue";
-    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse';
+    import ReflectionResponse from '@shared/models/ReflectionResponse';
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {PageRoute} from '@web/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
@@ -49,6 +75,8 @@
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionPromptService from '@web/services/ReflectionPromptService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import SentPrompt from "@shared/models/SentPrompt"
+    import SentPromptService from '@web/services/SentPromptService'
 
     declare interface JournalHomeData {
         user?: FirebaseUser | null,
@@ -59,6 +87,10 @@
         prompts: ReflectionPrompt[],
         responseUnsubscriber?: ListenerUnsubscriber,
         responsesHasLoaded: boolean,
+        sentPromptsUnsubscriber?: ListenerUnsubscriber,
+        sentPrompts: SentPrompt[],
+        sentPromptsLoaded: boolean,
+        preparedPrompts: { sentPrompt: SentPrompt, response?: ReflectionResponse, prompt: ReflectionPrompt }[]
     }
 
     export default Vue.extend({
@@ -90,40 +122,63 @@
                 responses: [],
                 prompts: [],
                 responseUnsubscriber: undefined,
-                responsesHasLoaded: false
+                responsesHasLoaded: false,
+                sentPromptsUnsubscriber: undefined,
+                sentPrompts: [],
+                sentPromptsLoaded: false,
+                preparedPrompts: []
             };
         },
         watch: {
             async cactusMember(member: CactusMember | undefined | null) {
+                if (member && member.id) {
+                    this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(member.id, {
+                        onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
+                            this.sentPrompts = sentPrompts;
+                            const promptIds: string[] = [];
+                            sentPrompts.forEach(sent => {
+                                if (sent.promptId) {
+                                    promptIds.push(sent.promptId);
+                                }
+                            });
+
+                            await this.fetchPromptsForIds(promptIds);
+
+                            this.sentPromptsLoaded = true;
+                        }
+                    });
+                }
+
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
                     const mailchimpMemberId = member.mailchimpListMember.id;
+
                     this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
                         onData: async (models: ReflectionResponse[]): Promise<void> => {
                             this.responsesHasLoaded = true;
                             this.responses = models;
-                            const currentPrompts = this.promptsById;
-                            let promptTasks = this.responses.map(response => {
-                                return new Promise(async resolve => {
-                                    if (response.promptId) {
-                                        if (currentPrompts[response.promptId]) {
-                                            resolve();
-                                            return;
-                                        }
-                                        const prompt = await ReflectionPromptService.sharedInstance.getById(response.promptId);
-                                        if (prompt) {
-                                            this.prompts.push(prompt);
-                                        }
-                                        resolve();
-                                    }
-                                })
+                            // const currentPrompts = this.promptsById;
+                            const promptIds: string[] = [];
+                            this.responses.forEach(response => {
+                                if (response.promptId) {
+                                    promptIds.push(response.promptId);
+                                }
                             });
-                            await Promise.all(promptTasks);
+
+                            if (promptIds.length > 0) {
+                                await this.fetchPromptsForIds(promptIds);
+                            }
                         }
                     });
 
                 }
 
-            }
+            },
+            async prompts(): Promise<void> {
+                await this.updatePreparedPrompts();
+            },
+            async responses(): Promise<void> {
+                await this.updatePreparedPrompts();
+            },
         },
         beforeDestroy() {
             if (this.authUnsubscribe) {
@@ -135,6 +190,71 @@
             }
         },
         methods: {
+            async updatePreparedPrompts() {
+                console.log("updating prepared prompts");
+                const promptsById = this.promptsById;
+                const responsesByPromptId = this.responsesByPromptId;
+                console.log("responses by prompt id", responsesByPromptId);
+                const member = this.cactusMember;
+                const items: {
+                    response?: ReflectionResponse,
+                    sentPrompt: SentPrompt,
+                    prompt: ReflectionPrompt
+                }[] = [];
+
+                this.sentPrompts.forEach(sentPrompt => {
+                    let promptId = sentPrompt.promptId;
+
+                    let response;
+                    let prompt;
+                    if (promptId) {
+                        prompt = promptsById[promptId];
+                        response = responsesByPromptId[promptId];
+                    } else {
+                        console.warn("no prompt id found on sentPrompt", sentPrompt);
+                    }
+
+                    if (!response) {
+                        console.warn("no response was found");
+                    }
+
+                    if (prompt) {
+                        items.push({
+                            prompt,
+                            response,
+                            sentPrompt,
+                        })
+                    }
+                    return;
+
+                });
+
+                console.log("prepared prompts", items);
+
+                // return items;
+
+                this.preparedPrompts = items;
+            },
+            async fetchPromptsForIds(promptIds: string[]): Promise<void> {
+                const currentPrompts = this.promptsById;
+                let promptTasks = promptIds.map(promptId => {
+                    return new Promise(async resolve => {
+                        if (promptId) {
+                            if (currentPrompts[promptId]) {
+                                resolve();
+                                return;
+                            }
+                            const prompt = await ReflectionPromptService.sharedInstance.getById(promptId);
+                            if (prompt) {
+                                this.prompts.push(prompt);
+                            }
+                            resolve();
+                        }
+                    })
+                });
+                await Promise.all(promptTasks);
+                return;
+            },
             beforeEnter: function (el: HTMLElement) {
 
                 el.classList.add("out");
@@ -165,6 +285,16 @@
                     if (prompt && prompt.id) {
                         const id = prompt.id;
                         map[id] = prompt;
+                    }
+
+                    return map;
+                }, initialValue)
+            },
+            responsesByPromptId(): { [id: string]: ReflectionResponse } {
+                const initialValue: { [id: string]: ReflectionResponse } = {};
+                return this.responses.reduce((map, response) => {
+                    if (response && response.promptId) {
+                        map[response.promptId] = response;
                     }
 
                     return map;
@@ -208,29 +338,48 @@
         margin-bottom: 3rem;
     }
 
-    .journalList {
-        display: flex;
-        flex-direction: column;
+    section .heading {
+        text-align: center;
+    }
 
-        .journalListItem {
-            transition: .3s all;
-            width: 100%;
-            /*display: inline-block;*/
+    .section-container {
+        /*display: flex;*/
+        /*flex-direction: column;*/
+        /*justify-content: center;*/
+        /*align-items: center;*/
 
-            &.out {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-        }
-
-        &.empty {
+        .journalList {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 2rem 0;
-            min-height: 12rem;
-            @include shadowbox;
+
+            .journalListItem {
+                transition: .3s all;
+                width: 100%;
+                /*display: inline-block;*/
+
+                &.out {
+                    transform: translateY(30px);
+                    opacity: 0;
+                }
+            }
+
+            &.empty {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 12rem;
+                @include shadowbox;
+                background: $lightGreen;
+                color: $darkText;
+
+                margin: 0 auto 4.8rem;
+                max-width: 64rem;
+                padding: 3.2rem;
+
+            }
         }
     }
+
+
 </style>
