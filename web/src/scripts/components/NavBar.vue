@@ -73,10 +73,27 @@
 </script>
 
 <style lang="scss" scoped>
+    @import "~styles/common";
+    @import "~styles/mixins";
+
     header {
         &.loggedIn {
             display: flex;
             justify-content: space-between;
+
+            @include isTinyPhone{
+                .logo {
+                    display: none;
+                }
+            }
+
+        }
+
+        .logo {
+            @include isPhone {
+                height: 3rem;
+                width: 6rem;
+            }
         }
 
         .user-info {
@@ -94,6 +111,14 @@
                     height: 100%;
                     width: 100%;
 
+                }
+            }
+
+            @include isPhone{
+                font-size: 1.4rem;
+                .avatar-container {
+                    width: 3rem;
+                    height: 3rem;
                 }
             }
         }

@@ -100,7 +100,7 @@ $slow: 1.5s;
 
 
 @include createAnimation("bounce", bounce-in, $slow);
-@include createAnimation("fade-down", fade-down ease, $fast, $outDuration: $fast);
+@include createAnimation("fade-down", fade-down cubic-bezier(.42,.97,.52,1.49), .5s, $outDuration: $fast);
 
 
 @keyframes bounce-in {
@@ -134,13 +134,16 @@ $slow: 1.5s;
 @keyframes fade-down {
   0% {
     opacity: 0;
-    transform: translateY(-15px);
+    transform: translateY(-20px) scale(.8)  translateX(15px);
+
   }
   75% {
-    transform: translateY(6px);
+    //transform: translateY(5px)
+    transform: scale(1);
+
   }
   100% {
-    opacity: 1;
-    transform: translateY(0);
+    //opacity: 1;
+    //transform: scaleX(1);
   }
 }

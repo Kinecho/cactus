@@ -9,10 +9,6 @@
                 </div>
             </div>
             <div v-if="loggedIn">
-                <section class="today" v-if="todaysPrompt">
-                    <h2>Today</h2>
-                    <h3 class="question">{{todaysPrompt.question}}</h3>
-                </section>
                 <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded">
                     You have no responses yet
                 </section>
@@ -22,7 +18,7 @@
                             tag="div"
                             appear
                             v-bind:css="false"
-
+                            v-on:before-enter="beforeEnter"
                             v-on:enter="enter">
                         <response-card
                                 class="journalListItem"
@@ -62,9 +58,6 @@
         responses: ReflectionResponse[],
         prompts: ReflectionPrompt[],
         responseUnsubscriber?: ListenerUnsubscriber,
-        todaysPrompt?: ReflectionPrompt,
-        todayUnsubscriber?: ListenerUnsubscriber,
-        didCreateTodaysReflection: boolean,
         responsesHasLoaded: boolean,
     }
 
@@ -73,16 +66,6 @@
             this.authUnsubscribe = getAuth().onAuthStateChanged(async user => {
                 this.user = user;
                 this.loginReady = true;
-
-                this.todayUnsubscriber = ReflectionPromptService.sharedInstance.observeTodaysPrompt({
-                    onData: async (updatedPrompt) => {
-                        this.todaysPrompt = updatedPrompt;
-                        return;
-                    },
-                    onDateChanged: ({unsubscriber}) => {
-                        this.todayUnsubscriber = unsubscriber;
-                    }
-                });
 
                 if (!user) {
                     window.location.href = "/unauthorized"
@@ -107,25 +90,13 @@
                 responses: [],
                 prompts: [],
                 responseUnsubscriber: undefined,
-                todaysPrompt: undefined,
-                didCreateTodaysReflection: false,
                 responsesHasLoaded: false
             };
         },
         watch: {
-            async todaysPrompt(prompt: ReflectionPrompt | undefined | null) {
-                if (prompt) {
-                    await this.createTodaysReflectionIfNeeded();
-                }
-            },
-            async responses(responses: ReflectionResponse[]) {
-                this.responsesHasLoaded = true;
-                await this.createTodaysReflectionIfNeeded();
-            },
             async cactusMember(member: CactusMember | undefined | null) {
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
                     const mailchimpMemberId = member.mailchimpListMember.id;
-                    await this.createTodaysReflectionIfNeeded();
                     this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
                         onData: async (models: ReflectionResponse[]): Promise<void> => {
                             this.responsesHasLoaded = true;
@@ -147,7 +118,6 @@
                                 })
                             });
                             await Promise.all(promptTasks);
-                            await this.createTodaysReflectionIfNeeded();
                         }
                     });
 
@@ -163,38 +133,17 @@
             if (this.responseUnsubscriber) {
                 this.responseUnsubscriber();
             }
-
-            if (this.todayUnsubscriber) {
-                this.todayUnsubscriber();
-            }
         },
         methods: {
-            async createTodaysReflectionIfNeeded() {
-                const prompt = this.todaysPrompt;
-                if (!this.didCreateTodaysReflection && prompt && this.cactusMember && this.cactusMember.mailchimpListMember && this.responsesHasLoaded) {
-                    let todaysResponse = this.responses.find(response => response.promptId === prompt.id);
-                    if (!todaysResponse) {
-                        todaysResponse = new ReflectionResponse();
-                        todaysResponse.promptId = prompt.id;
-                        todaysResponse.promptQuestion = prompt.question;
-                        todaysResponse.mailchimpMemberId = this.cactusMember.mailchimpListMember.id;
-                        todaysResponse.mailchimpUniqueEmailId = this.cactusMember.mailchimpListMember.unique_email_id;
-                        todaysResponse.memberEmail = this.cactusMember.email;
-                        todaysResponse.responseMedium = ResponseMedium.JOURNAL_WEB;
-                        console.log("Creating Today's reflection prompt", todaysResponse.toJSON());
-                        this.didCreateTodaysReflection = true;
-                        await ReflectionResponseService.sharedInstance.save(todaysResponse);
-                    }
-                }
-            },
             beforeEnter: function (el: HTMLElement) {
-                // el.style.opacity = ".1";
+
+                el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
                 const delay = Number(el.dataset.index) * 100;
                 console.log("delay is", delay);
                 setTimeout(function () {
-                    el.classList.add("in");
+                    el.classList.remove("out");
                     done();
                 }, delay)
             },
@@ -265,11 +214,10 @@
             transition: .3s all;
             width: 100%;
             /*display: inline-block;*/
-            transform: translateY(30px);
-            opacity: 0;
-            &.in {
-                opacity: 1;
-                transform: translateY(0);
+
+            &.out {
+                transform: translateY(30px);
+                opacity: 0;
             }
         }
 

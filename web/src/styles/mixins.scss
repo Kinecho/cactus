@@ -1,79 +1,134 @@
 @mixin fancyLink {
-	background-image: linear-gradient($pink, $pink);
-	background-position: 0 100%;
-	background-repeat: no-repeat;
-	background-size: 100% .8rem;
-	color: $darkText;
-	padding: .2rem;
-	text-decoration: none;
-	transition: background-size cubic-bezier(0,.5,0,1) .3s;
+  background-image: linear-gradient($pink, $pink);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% .8rem;
+  color: $darkText;
+  padding: .2rem;
+  text-decoration: none;
+  transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
 
-	&:hover {
-		background-image: linear-gradient($yellow, $yellow);
-		background-size: 100% 100%;
-		text-decoration: none;
-	}
+  &:hover {
+    background-image: linear-gradient($yellow, $yellow);
+    background-size: 100% 100%;
+    text-decoration: none;
+  }
 }
 
 @mixin shadowbox {
-	background-color: white;
-	border-radius: 12px;
-	box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
 }
 
-/* MEDIA QUERIES */
+$widthXxs: 374;
+$widthXs: 600;
+$widthS: 768;
+$widthM: 960;
+$widthL: 1024;
+$widthXL: 1140;
+$widthXXL: 1500;
 
-@mixin maxW($point){
-	@media ( max-width: #{$point}px ) {
-		@content;
-	}
+$widthPhone: $widthXs;
+$widthTablet: $widthM;
+$widthDesktop: $widthXL;
+
+
+/* MEDIA QUERIES */
+@mixin maxW($point) {
+  @media (max-width: #{$point}px) {
+    @content;
+  }
+}
+
+@mixin minW($point) {
+  @media (min-width: #{$point}px) {
+    @content;
+  }
+}
+
+@mixin widthBetween($min, $max) {
+  @media (min-width: #{$min}px) and (max-width: #{$max}px) {
+    @content;
+  }
+}
+
+@mixin isTinyPhone(){
+  @include maxW($widthXxs){
+    @content;
+  }
+}
+
+@mixin isPhone() {
+  @include maxW($widthPhone) {
+    @content;
+  }
+}
+
+
+@mixin biggerThanPhone() {
+  @include minW($widthPhone) {
+    @content;
+  }
+}
+
+@mixin isTablet() {
+  @include widthBetween($widthTablet, $widthDesktop) {
+    @content;
+  }
+}
+
+@mixin isDesktop() {
+  @include minW($widthDesktop) {
+    @content;
+  }
 }
 
 @mixin r( $point ) {
-	@if $point==600 {
-		@media ( min-width: 600px ) {
-			@content;
-		}
-	}
-	@if $point==768 {
-		@media ( min-width: 768px ) {
-			@content;
-		}
-	}
-	@if $point==960 {
-		@media ( min-width: 960px ) {
-			@content;
-		}
-	}
-	@if $point==1024 {
-		@media ( min-width: 1024px ) {
-			@content;
-		}
-	}
-	@if $point==1140 {
-		@media ( min-width: 1140px ) {
-			@content;
-		}
-	}
-	@if $point==1500 {
-		@media ( min-width: 1500px ) {
-			@content;
-		}
-	}
+  @if $point==600 {
+    @media (min-width: 600px) {
+      @content;
+    }
+  }
+  @if $point==768 {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+  @if $point==960 {
+    @media (min-width: 960px) {
+      @content;
+    }
+  }
+  @if $point==1024 {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+  @if $point==1140 {
+    @media (min-width: 1140px) {
+      @content;
+    }
+  }
+  @if $point==1500 {
+    @media (min-width: 1500px) {
+      @content;
+    }
+  }
 }
 
 /*height*/
 @mixin h( $point ) {
-	@if $point==768 {
-		@media ( min-height: 768px ) {
-			@content;
-		}
-	}
-	@if $point==960 {
-		@media ( min-height: 960px ) {
-			@content;
-		}
-	}
+  @if $point==768 {
+    @media (min-height: 768px) {
+      @content;
+    }
+  }
+  @if $point==960 {
+    @media (min-height: 960px) {
+      @content;
+    }
+  }
 }
 
 /* ANIMATIONS */
@@ -104,13 +159,13 @@
 }
 
 @keyframes wiggle {
-	50% {
+  50% {
     transform: rotate(-5deg);
   }
   75% {
     transform: rotate(5deg);
   }
-	100% {
+  100% {
     transform: rotate(0);
   }
 }
