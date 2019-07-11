@@ -41,7 +41,7 @@ import {
     UpdateMergeFieldResponse,
     MergeField,
     ListMemberStatus,
-    ListMember
+    ListMember, CampaignSentToListResponse, SentToRecipient, defaultPageDelay
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
@@ -82,7 +82,7 @@ export default class MailchimpService {
         if (MailchimpService.sharedInstance) {
             return MailchimpService.sharedInstance;
         }
-        throw new Error("You must initialize mailchimp service before calling sharedInstance()");
+        throw new Error("You must initialize mailchimp service before calling getSharedInstance()");
     }
 
 
@@ -218,7 +218,7 @@ export default class MailchimpService {
         return await Promise.all(campaignTasks);
     }
 
-    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions(), delay:number=100): Promise<Campaign[]> {
+    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions(), delay: number = 100): Promise<Campaign[]> {
         // options.
         const pageSize = (options.pagination && options.pagination.count) ? options.pagination.count : defaultPageSize;
 
@@ -253,11 +253,27 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getSentTo(campaignId: string, pagination = DEFAULT_PAGINATION) {
+    async getSentTo(campaignId: string, pagination = DEFAULT_PAGINATION): Promise<CampaignSentToListResponse> {
         const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
         const url = `reports/${campaignId}/sent-to`;
-        const response = await this.request.get(url, {params: {offset, count}});
-        console.log("sent to responses", JSON.stringify(response.data, null, 2));
+        const response = await this.request.get(url, {params: {offset, count, exclude_fields: "_links,sent_to._links"}});
+        return response.data;
+    }
+
+    async getAllSentTo(campaignId: string, options: {
+        pageSize?: number,
+        delayMs?: number,
+        onPage?: (values: SentToRecipient[]) => Promise<void>
+    } = {}): Promise<SentToRecipient[]> {
+
+        const pageSize = options.pageSize || defaultPageSize;
+        const delayMs = options.pageSize || defaultPageDelay;
+
+        return this.getAllPaginatedResults(pagination => this.getSentTo(campaignId, pagination),
+            (listResponse: CampaignSentToListResponse) => listResponse.sent_to,
+            pageSize,
+            delayMs,
+            options.onPage,)
     }
 
     async createCampaign(campaign: CreateCampaignRequest): Promise<Campaign> {
@@ -321,7 +337,7 @@ export default class MailchimpService {
             return {success: true};
         } catch (error) {
             const axiosError = error as AxiosError;
-            if (axiosError.response){
+            if (axiosError.response) {
                 console.error("failed to update tags", error.response);
                 const errorData = error.response.data as TagResponseError;
                 return {success: false, error: errorData}
@@ -341,7 +357,7 @@ export default class MailchimpService {
             return {success: true};
         } catch (error) {
             const axiosError = error as AxiosError;
-            if (axiosError.response){
+            if (axiosError.response) {
                 console.error("failed to update merge fields", error.response);
                 const errorData = error.response.data as TagResponseError;
                 return {success: false, error: errorData}
@@ -439,7 +455,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize, delay:number=100): Promise<Campaign[]> {
+    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize, delay: number = 100): Promise<Campaign[]> {
         const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize, delay);
         const campaignIds = automationEmails.map(email => {
             return email.id
@@ -448,7 +464,7 @@ export default class MailchimpService {
         return this.getCampaignsByIds(campaignIds);
     }
 
-    async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize, delay?:number): Promise<AutomationEmail[]> {
+    async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize, delay?: number): Promise<AutomationEmail[]> {
         return this.getAllPaginatedResults(pagination => this.getAutomationEmails(workflowId, pagination), result => result.emails, pageSize, delay);
     }
 
@@ -469,7 +485,7 @@ export default class MailchimpService {
         return this.getAllPaginatedResults(pagination => this.getAutomations(pagination), result => result.automations, pageSize);
     }
 
-    async getAllAutomationEmails(listId?: string, pageSize: number = defaultPageSize, delay?:number): Promise<AutomationEmail[]> {
+    async getAllAutomationEmails(listId?: string, pageSize: number = defaultPageSize, delay?: number): Promise<AutomationEmail[]> {
         try {
             const automations = await this.getAllAutomations(pageSize);
             const automationTasks: Promise<AutomationEmail[]>[] = [];
@@ -556,7 +572,7 @@ export default class MailchimpService {
             currentOffset = results.length;
             console.log("fetched ", results.length, "/", listResponse.total_items, "items. # Fetches", fetchCount)
 
-            if (pageDelay > 0){
+            if (pageDelay > 0) {
                 console.log(`delaying between pages for ${pageDelay}ms`);
                 await new Promise(resolve => {
                     setTimeout(() => {

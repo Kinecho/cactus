@@ -131,6 +131,13 @@ export default class AdminFirestoreService {
         return fromDocumentSnapshot(doc, Type);
     }
 
+
+    async getFirst<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<T | undefined> {
+        const response = await this.executeQuery(query, Type, options);
+        const [first] = response.results;
+        return first;
+    }
+
     async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
         let query = originalQuery;
         if (!options.includeDeleted) {
