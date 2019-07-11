@@ -6,15 +6,21 @@
                 <p class="date edited" v-if="updatedDate && responseDate !== updatedDate">Updated {{updatedDate}}</p>
             </div>
 
-            <button @click="toggleMenu()" class="secondary icon dots" v-bind:class="{ open: menuOpen }">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                    <path d="M24,27.0588235 C22.0507597,27.0588235 20.4705882,25.4786521 20.4705882,23.5294118 C20.4705882,21.5801715 22.0507597,20 24,20 C25.9492403,20 27.5294118,21.5801715 27.5294118,23.5294118 C27.5294118,25.4786521 25.9492403,27.0588235 24,27.0588235 Z M40.4705882,27.0588235 C38.5213479,27.0588235 36.9411765,25.4786521 36.9411765,23.5294118 C36.9411765,21.5801715 38.5213479,20 40.4705882,20 C42.4198285,20 44,21.5801715 44,23.5294118 C44,25.4786521 42.4198285,27.0588235 40.4705882,27.0588235 Z M7.52941176,27.0588235 C5.58017147,27.0588235 4,25.4786521 4,23.5294118 C4,21.5801715 5.58017147,20 7.52941176,20 C9.47865206,20 11.0588235,21.5801715 11.0588235,23.5294118 C11.0588235,25.4786521 9.47865206,27.0588235 7.52941176,27.0588235 Z"/>
-                </svg>
-            </button>
-            <nav class="moreMenu" v-show="menuOpen">
-                <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go Deeper</a>
-                <a href="#" v-on:click.prevent="deleteReflection">Delete Reflection</a>
-            </nav>
+            <div v-click-outside="closeMenu">
+                <button @click="toggleMenu()" class="secondary icon dots" v-bind:class="{ open: menuOpen }">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M24,27.0588235 C22.0507597,27.0588235 20.4705882,25.4786521 20.4705882,23.5294118 C20.4705882,21.5801715 22.0507597,20 24,20 C25.9492403,20 27.5294118,21.5801715 27.5294118,23.5294118 C27.5294118,25.4786521 25.9492403,27.0588235 24,27.0588235 Z M40.4705882,27.0588235 C38.5213479,27.0588235 36.9411765,25.4786521 36.9411765,23.5294118 C36.9411765,21.5801715 38.5213479,20 40.4705882,20 C42.4198285,20 44,21.5801715 44,23.5294118 C44,25.4786521 42.4198285,27.0588235 40.4705882,27.0588235 Z M7.52941176,27.0588235 C5.58017147,27.0588235 4,25.4786521 4,23.5294118 C4,21.5801715 5.58017147,20 7.52941176,20 C9.47865206,20 11.0588235,21.5801715 11.0588235,23.5294118 C11.0588235,25.4786521 9.47865206,27.0588235 7.52941176,27.0588235 Z"/>
+                    </svg>
+                </button>
+                <transition name="fade-down">
+                    <nav class="moreMenu" v-show="menuOpen" >
+                        <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go Deeper</a>
+                        <a href="#" v-on:click.prevent="deleteReflection">Delete Reflection</a>
+                    </nav>
+                </transition>
+
+            </div>
+
         </div>
         <h3 class="question">{{questionText}}</h3>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
@@ -100,6 +106,9 @@
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
             },
+            closeMenu(){
+                this.menuOpen = false;
+            },
             cancelEditing() {
                 if (this.editedText.trim() !== (this.response.content.text || "").trim()) {
                     const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
@@ -134,6 +143,7 @@
     @import "~@styles/variables";
     @import "~@styles/common";
     @import "~@styles/modal";
+    @import "~styles/transitions";
 
     .centered {
         text-align: left;
@@ -251,7 +261,7 @@
         margin-right: .8rem;
         outline: transparent none;
 
-        transition: transform .2s ease;
+        transition: all .2s ease;
 
         &.open {
             transform: rotate(90deg);

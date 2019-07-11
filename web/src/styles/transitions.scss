@@ -1,0 +1,114 @@
+@import "~styles/variables";
+
+// Styles for common Vue transitoins. See documentation for more info
+// on the various classes that are applied
+// See more info here: https://vuejs.org/v2/guide/transitions.html
+
+$fast: .1s;
+$normal: .3s;
+$slow: 1.5s;
+
+
+
+/**
+  @prop {key-frame} animation - the name of the animation
+  @prop {duration} duration - the duration of the animation
+  @prop {boolean=true} reverseOut - if the animation should be played in reverse on the way out
+  @prop {duration} outDuration - the duration of the animation on the way out
+ */
+@mixin vue-animation($animation, $duration, $outAnimation, $reverseOut: true, $outDuration: $duration) {
+  &-enter-active {
+    animation: $animation $duration
+  }
+  &-leave-active {
+    animation: $outAnimation $outDuration;
+    @if $reverseOut {
+       animation-direction: reverse;
+    }
+  }
+
+
+
+  &-enter,
+  &-leave-to {
+    @content;
+  }
+
+}
+
+
+/**
+  Provide duration, with units, e.g. 2ms or .5s
+  Provide the props that should be transitioned, such as all
+ */
+@mixin vue-transition($duration, $props:all, $outDuration:null) {
+  &-enter-active {
+    transition: #{$props} $duration;
+  }
+  &-leave-active {
+    transition: #{$props} if($outDuration, $outDuration, $duration);
+  }
+
+  &-enter,
+  &-leave-to {
+    @content;
+  }
+
+}
+
+/**
+  @param {string} name - Provide the name of the transition as a string (i.e. wrapped in quotes)
+  @param {duration} duration - the duration of the animation with units (e.g. 2ms, .5s)
+  @param {attributes} props - the props to transition
+  @param {content} @content - the styles to apply on the transition. Passed as a block after the @include function
+ */
+@mixin createTransition($name, $duration, $props:all, $outDuration: null) {
+  .#{$name} {
+    @include vue-transition($duration, $props, $outDuration: $outDuration) {
+      @content
+    }
+  }
+}
+
+@mixin createAnimation($name,$animation, $duration, $reverseOut: true, $outDuration: $duration, $outAnimation:$animation){
+  .#{$name} {
+    @include vue-animation($animation, $duration, $outAnimation, $reverseOut: $reverseOut, $outDuration: $outDuration)
+  }
+}
+
+@include createTransition("fade", $normal) {
+  opacity: 0;
+}
+
+@include createTransition("fade-down", $normal, $outDuration: $fast) {
+  opacity: 0;
+  transform: translateY(-1rem);
+}
+
+@include createTransition("fade-fast", $fast) {
+  opacity: 0;
+}
+@include createTransition("fade-slow", $slow) {
+  opacity: 0;
+}
+
+@include createAnimation("bounce", bounce-in, $slow, $outAnimation:fade-up, $reverseOut:false, $outDuration:$slow);
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-up {
+  100% {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+}

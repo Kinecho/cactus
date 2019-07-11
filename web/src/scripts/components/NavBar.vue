@@ -3,8 +3,12 @@
         <a href="/"><img class="logo" src="../../assets/images/logo.svg" alt="Cactus logo"/></a>
         <a v-if="!loggedIn && showSignup" class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign
             Up Free</a>
-        <div v-if="loggedIn">
+        <div v-if="loggedIn" class="user-info">
             <span>{{displayName}}</span>&nbsp;<a href="#" @click.prevent=logout>logout</a>
+            <div class="avatar-container" v-if="profileImageUrl">
+                <img :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+            </div>
+
         </div>
 
     </header>
@@ -50,13 +54,16 @@
             },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
+            },
+            profileImageUrl(): string | undefined | null {
+                return this.user ? this.user.photoURL : undefined;
             }
         },
         methods: {
             async logout(): Promise<void> {
                 console.log('Logging out...')
                 await getAuth().signOut();
-                if (this.redirectOnSignOut){
+                if (this.redirectOnSignOut) {
                     window.location.href = this.signOutRedirectUrl || '/';
                 }
 
@@ -71,6 +78,26 @@
             display: flex;
             justify-content: space-between;
         }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+
+            .avatar-container {
+                width: 4rem;
+                height: 4rem;
+                border-radius: 50%;
+                overflow: hidden;
+                display: inline-block;
+                margin: 0 1rem;
+                img {
+                    height: 100%;
+                    width: 100%;
+
+                }
+            }
+        }
+
 
     }
 </style>

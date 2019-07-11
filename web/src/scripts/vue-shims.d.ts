@@ -10,3 +10,7 @@ interface Window {
 interface FirebaseObject {
     [key:string]: any;
 }
+
+interface HTMLElement {
+    __vueClickOutside__: EventListenerOrEventListenerObject|null
+}

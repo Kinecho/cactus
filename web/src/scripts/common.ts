@@ -6,7 +6,6 @@ startFullstory();
 
 initializeFirebase();
 
-
 document.addEventListener('DOMContentLoaded', function () {
     //Nothing to do here
 });
