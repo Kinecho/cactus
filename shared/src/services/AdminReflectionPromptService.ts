@@ -18,7 +18,7 @@ export default class AdminReflectionPromptService {
         return AdminReflectionPromptService.sharedInstance;
     }
 
-    static initialize() {
+    public static initialize() {
         firestoreService = AdminFirestoreService.getSharedInstance();
         AdminReflectionPromptService.sharedInstance = new AdminReflectionPromptService();
     }

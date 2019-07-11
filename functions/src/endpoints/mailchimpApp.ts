@@ -29,7 +29,7 @@ import AdminSentPromptService from "@shared/services/AdminSentPromptService";
 const app = express();
 
 const mailchimpService = MailchimpService.getSharedInstance();
-const sentPromptService = AdminSentPromptService.sharedInstance;
+const sentPromptService = AdminSentPromptService.getSharedInstance();
 // const userService = AdminUserService.getSharedInstance();
 
 // Automatically allow cross-origin requests
@@ -115,7 +115,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
                     promptId: sentCampaign.reflectionPromptId
                 });
             }
-            
+
             const fields = [
                 {
                     title: "Subject",
