@@ -1,9 +1,11 @@
 <template>
+
     <article class="journalEntry new" id="reflectParent">
         <div class="dateContainer menuParent">
             <div class="dates">
                 <p class="date">{{responseDate}}</p>
-                <p class="date edited" v-if="updatedDate && responseDate !== updatedDate">Updated {{updatedDate}}</p>
+                <p class="date edited" v-if="updatedDate && responseDate !== updatedDate">Updated
+                    {{updatedDate}}</p>
             </div>
 
             <div v-click-outside="closeMenu">
@@ -13,8 +15,9 @@
                     </svg>
                 </button>
                 <transition name="fade-down">
-                    <nav class="moreMenu" v-show="menuOpen" >
-                        <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go Deeper</a>
+                    <nav class="moreMenu" v-show="menuOpen">
+                        <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go
+                            Deeper</a>
                         <a href="#" v-on:click.prevent="deleteReflection">Delete Reflection</a>
                     </nav>
                 </transition>
@@ -69,6 +72,7 @@
         doReflect: boolean,
         editedText: string,
         menuOpen: boolean,
+        deleting: boolean,
     }
 
     export default Vue.extend({
@@ -81,6 +85,7 @@
                 doReflect: false,
                 editedText: this.response.content.text || "",
                 menuOpen: false,
+                deleting: false,
             };
         },
         computed: {
@@ -106,7 +111,7 @@
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
             },
-            closeMenu(){
+            closeMenu() {
                 this.menuOpen = false;
             },
             cancelEditing() {
@@ -125,10 +130,8 @@
                 }
             },
             async deleteReflection() {
-                const c = confirm("Are you sure you want to delete this reflection?");
-                if (c) {
-                    await ReflectionResponseService.sharedInstance.delete(this.response);
-                }
+                this.closeMenu();
+                await ReflectionResponseService.sharedInstance.delete(this.response);
             },
             startEditing() {
                 this.doReflect = true;

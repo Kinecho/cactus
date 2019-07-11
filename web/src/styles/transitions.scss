@@ -9,31 +9,24 @@ $normal: .3s;
 $slow: 1.5s;
 
 
-
 /**
   @prop {key-frame} animation - the name of the animation
   @prop {duration} duration - the duration of the animation
   @prop {boolean=true} reverseOut - if the animation should be played in reverse on the way out
   @prop {duration} outDuration - the duration of the animation on the way out
  */
-@mixin vue-animation($animation, $duration, $outAnimation, $reverseOut: true, $outDuration: $duration) {
+@mixin vue-animation($animation, $duration, $outAnimation, $reverseOut: true, $outDuration: $duration, $once:false) {
   &-enter-active {
     animation: $animation $duration
   }
   &-leave-active {
-    animation: $outAnimation $outDuration;
-    @if $reverseOut {
-       animation-direction: reverse;
+    @if (not($once)) {
+      animation: $outAnimation $outDuration;
+      @if $reverseOut {
+        animation-direction: reverse;
+      }
     }
   }
-
-
-
-  &-enter,
-  &-leave-to {
-    @content;
-  }
-
 }
 
 
@@ -41,12 +34,18 @@ $slow: 1.5s;
   Provide duration, with units, e.g. 2ms or .5s
   Provide the props that should be transitioned, such as all
  */
-@mixin vue-transition($duration, $props:all, $outDuration:null) {
+@mixin vue-transition($duration, $props:all, $outDuration:null, $leaveActivePosition:null) {
   &-enter-active {
-    transition: #{$props} $duration;
+    @if (not($leaveActivePosition)) {
+      transition: #{$props} $duration;
+    }
   }
   &-leave-active {
-    transition: #{$props} if($outDuration, $outDuration, $duration);
+    @if ($leaveActivePosition) {
+      position: $leaveActivePosition;
+    } @else {
+      transition: #{$props} if($outDuration, $outDuration, $duration);
+    }
   }
 
   &-enter,
@@ -62,37 +61,47 @@ $slow: 1.5s;
   @param {attributes} props - the props to transition
   @param {content} @content - the styles to apply on the transition. Passed as a block after the @include function
  */
-@mixin createTransition($name, $duration, $props:all, $outDuration: null) {
+@mixin createTransition($name, $duration, $props:all, $outDuration: null, $leaveActivePosition:null) {
   .#{$name} {
-    @include vue-transition($duration, $props, $outDuration: $outDuration) {
+    @include vue-transition($duration, $props, $outDuration: $outDuration, $leaveActivePosition: $leaveActivePosition) {
       @content
     }
   }
 }
 
-@mixin createAnimation($name,$animation, $duration, $reverseOut: true, $outDuration: $duration, $outAnimation:$animation){
+@mixin createAnimation($name,$animation, $duration, $reverseOut: true, $outDuration: $duration, $outAnimation:$animation, $once: false) {
   .#{$name} {
-    @include vue-animation($animation, $duration, $outAnimation, $reverseOut: $reverseOut, $outDuration: $outDuration)
+    @include vue-animation($animation, $duration, $outAnimation, $reverseOut: $reverseOut, $outDuration: $outDuration, $once: $once)
   }
 }
 
-@include createTransition("fade", $normal) {
+@include createTransition("fade-in", $normal) {
   opacity: 0;
 }
 
-@include createTransition("fade-down", $normal, $outDuration: $fast) {
-  opacity: 0;
-  transform: translateY(-1rem);
-}
 
-@include createTransition("fade-fast", $fast) {
-  opacity: 0;
-}
-@include createTransition("fade-slow", $slow) {
+@include createTransition("fade-in-fast", $fast) {
   opacity: 0;
 }
 
-@include createAnimation("bounce", bounce-in, $slow, $outAnimation:fade-up, $reverseOut:false, $outDuration:$slow);
+@include createTransition("fade-in-slow", $slow) {
+  opacity: 0;
+}
+
+@include createTransition("fade-out", .3s, $leaveActivePosition: absolute) {
+  opacity: 0;
+  transform: translateX(50px);
+  //transition: all 2s;
+  //height: 0;
+
+}
+
+;
+
+
+@include createAnimation("bounce", bounce-in, $slow);
+@include createAnimation("fade-down", fade-down ease, $fast, $outDuration: $fast);
+
 
 @keyframes bounce-in {
   0% {
@@ -106,9 +115,32 @@ $slow: 1.5s;
   }
 }
 
-@keyframes fade-up {
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.5);
+  }
   100% {
+    height: 0;
+    transform: scaleY(.2);
+    opacity: 0;
+  }
+
+}
+
+@keyframes fade-down {
+  0% {
     opacity: 0;
     transform: translateY(-15px);
+  }
+  75% {
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

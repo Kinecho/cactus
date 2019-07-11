@@ -18,13 +18,16 @@
                     You have no responses yet
                 </section>
                 <section v-if="preparedResponses.length" class="journalList">
-                    <response-card
-                            v-for="(preparedResponse, index) in preparedResponses"
-                            v-bind:response="preparedResponse.response"
-                            v-bind:prompt="preparedResponse.prompt"
-                            v-bind:index="index"
-                            v-bind:key="preparedResponse.response.id"
-                    ></response-card>
+                    <transition-group name="fade-out" tag="div">
+                        <response-card
+                                class="journalListItem"
+                                v-for="(preparedResponse, index) in preparedResponses"
+                                v-bind:response="preparedResponse.response"
+                                v-bind:prompt="preparedResponse.prompt"
+                                v-bind:index="index"
+                                v-bind:key="preparedResponse.response.id"
+                        ></response-card>
+                    </transition-group>
                 </section>
             </div>
         </div>
@@ -237,6 +240,13 @@
     }
 
     .journalList {
+        display: flex;
+        flex-direction: column;
+        .journalListItem {
+            transition: .3s all;
+            width: 100%;
+            /*display: inline-block;*/
+        }
         &.empty {
             display: flex;
             flex-direction: column;
