@@ -77,8 +77,25 @@
                     window.location.href = "/unauthorized"
                 } else {
                     this.cactusMember = await CactusMemberService.sharedInstance.getByUserId(user.uid);
+
                     if (!this.cactusMember) {
                         console.warn("No cactus member was found for userId", user.uid);
+                    } else {
+                        console.log("fetching small page to start with");
+                        const sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                        console.log(`fetched ${sentPrompts.length} prompts before starting the query observer`);
+                        const promptIds: string[] = [];
+                        sentPrompts.forEach(sent => {
+                            if (sent.promptId) {
+                                promptIds.push(sent.promptId);
+                            }
+                        });
+                        this.sentPrompts = sentPrompts;
+
+                        await this.fetchPromptsForIds(promptIds);
+                        await this.updatePreparedPrompts();
+                        this.sentPromptsLoaded = true;
+
                     }
                 }
             });
@@ -166,7 +183,6 @@
         },
         methods: {
             async updatePreparedPrompts() {
-                console.log("updating prepared prompts");
                 const promptsById = this.promptsById;
                 const responsesByPromptId = this.responsesByPromptId;
 

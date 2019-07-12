@@ -1,8 +1,12 @@
-import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
+import FirestoreService, {
+    ListenerUnsubscriber,
+    Query,
+    QueryCursor,
+    QueryObserverOptions
+} from "@web/services/FirestoreService";
 import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {getAuth} from "@web/firebase";
 import CactusMemberService from "@web/services/CactusMemberService";
 
 export default class SentPromptService {
@@ -21,7 +25,7 @@ export default class SentPromptService {
         return this.firestoreService.getFirst(query, SentPrompt);
     }
 
-    async save(model: SentPrompt): Promise<SentPrompt|undefined> {
+    async save(model: SentPrompt): Promise<SentPrompt | undefined> {
         return this.firestoreService.save(model);
     }
 
@@ -73,6 +77,18 @@ export default class SentPromptService {
 
         options.queryName = "observeSentPromptsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SentPrompt, options);
+    }
+
+    async getPrompts(options: { limit?: number, cursor?: QueryCursor }): Promise<SentPrompt[]> {
+        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!member) {
+            return [];
+        }
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc).limit(options.limit || 10);
+        const results = await this.firestoreService.executeQuery(query, SentPrompt);
+
+        return results.results;
     }
 
 }
