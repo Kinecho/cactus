@@ -67,4 +67,8 @@ export default class AdminReflectionPromptService {
 
         return reflectionPrompt;
     }
+
+    async get(id: string): Promise<ReflectionPrompt | undefined> {
+        return firestoreService.getById(id, ReflectionPrompt);
+    }
 }

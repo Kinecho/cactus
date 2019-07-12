@@ -70,7 +70,7 @@ export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand 
                 }
 
                 if (needsSave) {
-                    console.log("Saving send date as ", prompt.sendDate, "for promptId", prompt.id, ` - ${prompt.question}`);
+                    console.log("Saving send date as ", prompt.sendDate, "for promptId", prompt.id, ` - ${prompt.question} | campaignId = ${campaign ? campaign.id : "unknown"}`);
                     await firestoreService.save(prompt);
                 }
 

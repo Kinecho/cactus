@@ -185,11 +185,7 @@
                         prompt = promptsById[promptId];
                         responses = responsesByPromptId[promptId];
                     } else {
-                        console.warn("no prompt id found on sentPrompt", sentPrompt);
-                    }
-
-                    if (!responses) {
-                        console.warn("no response was found");
+                        // console.warn("no prompt id found on sentPrompt", sentPrompt);
                     }
 
                     if (prompt) {

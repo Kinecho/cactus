@@ -46,7 +46,8 @@ export default class SentPromptService {
         }
 
         try {
-            const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id).where(SentPrompt.Fields.promptId, "==", promptId);
+            const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id)
+                .where(SentPrompt.Fields.promptId, "==", promptId);
             return this.firestoreService.getFirst(query, SentPrompt);
         } catch (e) {
             console.error("failed to get sent prompt by promptId", e);

@@ -50,34 +50,10 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
         }
 
 
-        // const campaigns = await mailchimpService.getAllCampaigns({
-        //     params: {
-        //         status: CampaignStatus.sent,
-        //         list_id: config.mailchimp.audience_id,
-        //         fields: [
-        //             "campaigns.id",
-        //             "campaigns.web_id",
-        //             "campaigns.status",
-        //             "campaigns.settings.title",
-        //             "campaigns.send_time",
-        //             "campaigns.recipients.recipients_count"
-        //         ]
-        //
-        //     },
-        //     pagination: {
-        //         count: 200,
-        //     }
-        // }, 200);
-
-
-        const {campaigns} = await mailchimpService.getCampaigns({
-            pagination: {
-                count: 1,
-            },
+        const campaigns = await mailchimpService.getAllCampaigns({
             params: {
                 status: CampaignStatus.sent,
                 list_id: config.mailchimp.audience_id,
-
                 fields: [
                     "campaigns.id",
                     "campaigns.web_id",
@@ -88,7 +64,32 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
                 ]
 
             },
-        });
+            pagination: {
+                count: 300,
+            }
+        }, 200);
+
+
+        // const {campaigns} = await mailchimpService.getCampaigns({
+        //     pagination: {
+        //         count: 20,
+        //         offset: 5,
+        //     },
+        //     params: {
+        //         status: CampaignStatus.sent,
+        //         list_id: config.mailchimp.audience_id,
+        //
+        //         fields: [
+        //             "campaigns.id",
+        //             "campaigns.web_id",
+        //             "campaigns.status",
+        //             "campaigns.settings.title",
+        //             "campaigns.send_time",
+        //             "campaigns.recipients.recipients_count"
+        //         ]
+        //
+        //     },
+        // });
 
         // const automations = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id, 200, 200);
         // campaigns.push(...automations)
@@ -107,9 +108,9 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
         });
 
         const taskResults = await Promise.all(tasks);
-        console.log(taskResults);
+        console.log(`published ${taskResults.length} messages to pubsub`);
 
-        console.log(JSON.stringify(campaigns, null, 2));
+        // console.log(JSON.stringify(campaigns, null, 2));
 
 
         // console.log("fetched campaigns", JSON.stringify(campaigns, null, 2));

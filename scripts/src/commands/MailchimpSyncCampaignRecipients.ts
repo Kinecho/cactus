@@ -34,12 +34,10 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
         const tasks: Promise<CampaignSentPromptProcessingResult>[] = [];
         const handleBatch = async (recipients: SentToRecipient[]) => {
             recipients.forEach(recipient => {
-
-
                 console.log(`${recipient.email_address} | email_id = ${recipient.email_id} | status=${recipient.status} | lastOpen=${recipient.last_open} | openCount=${recipient.open_count}`)
-                if (prompt && prompt.id) {
+                if (prompt) {
                     tasks.push(new Promise<CampaignSentPromptProcessingResult>(async resolve => {
-                        const sentPrompt = await AdminSentPromptService.getSharedInstance().processMailchimpRecipient(recipient, prompt.id as string);
+                        const sentPrompt = await AdminSentPromptService.getSharedInstance().processMailchimpRecipient(recipient, prompt);
                         console.log("processed SentPrompt", sentPrompt);
                         resolve({sentPrompt, recipient});
                     }))

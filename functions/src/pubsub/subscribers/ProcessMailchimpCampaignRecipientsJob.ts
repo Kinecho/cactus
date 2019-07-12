@@ -51,21 +51,23 @@ export async function onPublish(message: Message, context: functions.EventContex
                     text: `PubSub Payload: \n\`\`\`${JSON.stringify(payload, null, 2)}\`\`\``,
                     color: AttachmentColor.info,
                 },
-                {
-                    text: `Successful Recipients (${results.length - errors.length})\n${JSON.stringify(successes, null, 2)}`,
-                    color: "good",
-
-                }
             ];
 
-            if (warnings.length) {
+            if (successes.length > 0) {
+                attachments.push({
+                    text: `Successful Recipients (${successes.length})\n${JSON.stringify(successes, null, 2)}`,
+                    color: "good",
+                })
+            }
+
+            if (warnings.length > 0) {
                 attachments.push({
                     text: `Warnings (${warnings.length}) \n\`\`\`${JSON.stringify(warnings, null, 2)}\`\`\``,
                     color: "warning"
                 })
             }
 
-            if (errors.length) {
+            if (errors.length > 0) {
                 attachments.push({
                     text: `Failed Items (${errors.length}) \n\`\`\`${JSON.stringify(errors, null, 2)}\`\`\``,
                     color: "danger"
@@ -73,8 +75,12 @@ export async function onPublish(message: Message, context: functions.EventContex
             }
 
             await AdminSlackService.getSharedInstance().sendEngineeringMessage({
-                text: `:warning: MailchimpCampaignRecipientJob finished ${errors.length} errors and ${warnings.length} warnings`,
+                text: `:warning: MailchimpCampaignRecipientJob finished with ${successes.length} successes, ${errors.length} errors and ${warnings.length} warnings`,
                 attachments: attachments,
+            })
+        } else {
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+                text: `:white_check_mark: MailchimpCampaignRecipientJob finished with ${successes.length} successes, ${errors.length} errors and ${warnings.length} warnings. CampaignID ${payload.campaignId} | PromptID ${payload.reflectionPromptId || "not set"}`,
             })
         }
 
