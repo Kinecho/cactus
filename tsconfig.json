@@ -1,14 +1,23 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
+        "outDir": "./build/",
+        "allowJs": true,
+        "strict": true,
+        "checkJs": false,
+        "module": "es2015",
         "moduleResolution": "node",
+        "target": "es5",
         "sourceMap": true,
+        "lib": [
+            "es2015",
+            "dom"
+        ],
         "baseUrl": ".",
-        "paths": {
-            "@shared/*": [
-                "./shared/src/*"
-            ]
-        }
+        "rootDirs": [
+            "./web/src",
+            "./shared/src",
+            "./functions/src",
+            "./scripts/src"
+        ]
     }
 }

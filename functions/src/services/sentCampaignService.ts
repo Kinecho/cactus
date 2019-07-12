@@ -4,10 +4,10 @@ import FirestoreService from "@shared/services/AdminFirestoreService";
 import {CampaignContent} from "@shared/mailchimp/models/CreateCampaignRequest";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 
-const firestoreService = FirestoreService.getSharedInstance();
-const reflectionPromptService = AdminReflectionPromptService.getSharedInstance();
-
 export async function saveSentCampaign(campaign: Campaign | null | undefined, webhookData: CampaignEventData, content?: CampaignContent): Promise<SentCampaign | undefined> {
+    const firestoreService = FirestoreService.getSharedInstance();
+    const reflectionPromptService = AdminReflectionPromptService.getSharedInstance();
+
     try {
         if (!campaign) {
             console.error("No campaign given, can't save");
@@ -29,6 +29,4 @@ export async function saveSentCampaign(campaign: Campaign | null | undefined, we
         console.error("Unable to update reflection prompt's campaign", e);
         return;
     }
-
-
 }

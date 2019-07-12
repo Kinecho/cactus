@@ -1,9 +1,10 @@
 const firebaseTools = require("firebase-tools");
 import * as admin from "firebase-admin";
+
 const prompts = require("prompts");
 import chalk from "chalk";
 import helpers from "@scripts/helpers";
-import {CactusConfig}from "@shared/CactusConfig";
+import {CactusConfig} from "@shared/CactusConfig";
 
 export enum Project {
     STAGE = "stage",
@@ -14,11 +15,11 @@ export interface ConfigOptions {
     useAdmin: boolean
 }
 
-export const DefaultOptions:ConfigOptions = {
+export const DefaultOptions: ConfigOptions = {
     useAdmin: false,
 };
 
-export async function getAdmin(project:Project, opts:ConfigOptions=DefaultOptions):Promise<admin.app.App>{
+export async function getAdmin(project: Project, opts: ConfigOptions = DefaultOptions): Promise<admin.app.App> {
     if (project === Project.PROD) {
         console.log(
             chalk.blue.bgRed.bold(
@@ -35,23 +36,21 @@ export async function getAdmin(project:Project, opts:ConfigOptions=DefaultOption
             name: "doContinue",
         });
 
-        if (!response.doContinue){
+        if (!response.doContinue) {
             console.log("not continuing");
             process.exit(0);
-        } else{
+        } else {
             console.log("Continuing")
         }
 
     }
 
     const config = await getAdminConfig(project, opts);
-
     const app = admin.initializeApp(config);
-    app.firestore().settings({timestampsInSnapshots: true});
     return app;
 }
 
-async function getAdminConfig(project:Project, opts:ConfigOptions=DefaultOptions) {
+async function getAdminConfig(project: Project, opts: ConfigOptions = DefaultOptions) {
     const config = await firebaseTools.setup.web({project: project});
     if (opts && opts.useAdmin) {
         try {
@@ -66,6 +65,7 @@ async function getAdminConfig(project:Project, opts:ConfigOptions=DefaultOptions
     return config;
 }
 
-export async function getCactusConfig(project: Project):Promise<CactusConfig> {
+export async function getCactusConfig(project: Project): Promise<CactusConfig> {
     return firebaseTools.functions.config.get(undefined, {project}) as CactusConfig;
 }
+

@@ -9,7 +9,9 @@ import AdminCactusMemberService from "@shared/services/AdminCactusMemberService"
 
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
-    recipient: SentToRecipient,
+    recipient?: SentToRecipient,
+    error?: { message?: string, error?: any, campaignId?: string }
+    warning?: { message?: string, campaignId?: string }
 }
 
 let firestoreService: AdminFirestoreService;
@@ -124,14 +126,30 @@ export default class AdminSentPromptService {
 
         if (!promptId) {
             console.warn(`No prompt ID found for the given campaign (${campaignId}). Can not process campaign to update SentPrompt record.`);
-            return [];
+            return [{
+                warning: {
+                    campaignId,
+                    message: `No prompt ID found for the given campaign (${campaignId}). Can not process campaign to update SentPrompt record.`
+                }
+            }];
         }
         const recipients = await this.mailchimpService.getAllSentTo(campaignId);
 
         const tasks: Promise<CampaignSentPromptProcessingResult>[] = recipients.map(recipient => {
             return new Promise<CampaignSentPromptProcessingResult>(async resolve => {
-                const sentPrompt = await this.processMailchimpRecipient(recipient, promptId as string);
-                resolve({sentPrompt, recipient});
+                try {
+                    const sentPrompt = await this.processMailchimpRecipient(recipient, promptId as string);
+                    resolve({sentPrompt, recipient});
+                } catch (error) {
+                    resolve({
+                        recipient,
+                        error: {
+                            error,
+                            campaignId,
+                            message: `Unable to process mailchimp recipient for promptId=${promptId} email=${recipient.email_address}`
+                        }
+                    });
+                }
             })
         });
 

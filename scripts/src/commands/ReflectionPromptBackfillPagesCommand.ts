@@ -123,7 +123,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
 
 
         const config = await getCactusConfig(this.project);
-        MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
+        MailchimpService.initialize(config);
 
         console.log(chalk.blue("Pages:"));
 
@@ -138,7 +138,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
             pagination: {count: 100},
         });
 
-        if (emailStatusResponse.includeAutomations){
+        if (emailStatusResponse.includeAutomations) {
             const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
             console.log(`got ${automationCampaigns.length} automation campaigns`);
 
@@ -250,7 +250,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
 
         const tasks = matches.map(match => {
             return new Promise(async resolve => {
-                if (!match.campaignId){
+                if (!match.campaignId) {
                     console.error(chalk.red("No campaign ID found on match. Not processing", match.page.name));
                     resolve();
                     return;
@@ -300,7 +300,7 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
         console.log(chalk.blue(`Need to Create ${matchesToCreate.length} new prompts from existing campaigns`));
 
 
-        if (matchesToCreate.length === 0){
+        if (matchesToCreate.length === 0) {
             console.log("No need to create any question prompts. Existing");
             return;
         }

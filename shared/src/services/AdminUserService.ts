@@ -53,33 +53,6 @@ export default class AdminUserService {
         return firestoreService.save(model);
     }
 
-    // async signupSubscriber(subscription: SubscriptionRequest): Promise<SubscriberSignupResult> {
-    //     const {email} = subscription;
-    //     const signupResult: SubscriberSignupResult = {success: false, sentSignupLink: false};
-    //
-    //     let userRecord = await admin.auth().getUserByEmail(email);
-    //     if (userRecord) {
-    //         signupResult.isNewUser = false;
-    //     } else {
-    //         // user = await this.getByEmail(email);
-    //         // userRecord = await admin.auth().createUser({
-    //         //     email: email,
-    //         //     emailVerified: false,
-    //         //     displayName: `${subscription.firstName} ${subscription.lastName}`.trim() || undefined,
-    //         // });
-    //         const magicLinkResult = await this.getMagicLinkUrl(email);
-    //         signupResult.sentSignupLink = magicLinkResult.success;
-    //
-    //         // admin.app.
-    //
-    //     }
-    //
-    //     signupResult.userRecord = userRecord;
-    //
-    //     return signupResult;
-    // }
-
-
     async getMagicLinkUrl(email: string, options: SendMagicLinkOptions = DefaultSendMagicLinkOptions): Promise<SendMagicLinkResult> {
         let successPath = options.successPath || DefaultSendMagicLinkOptions.successPath;
         if (successPath && successPath.length > 0 && !successPath.startsWith("/")) {
@@ -123,7 +96,7 @@ export default class AdminUserService {
      * @param {string} id
      * @return {Promise<User | undefined>}
      */
-    async delete(id:string):Promise<User|undefined> {
+    async delete(id: string): Promise<User | undefined> {
         const deletedUser = await firestoreService.delete(id, User);
 
         return deletedUser;

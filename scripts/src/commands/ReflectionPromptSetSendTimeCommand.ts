@@ -6,24 +6,21 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {getDateFromISOString} from "@shared/util/DateUtil";
-import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@shared/services/MailchimpService";
+import {CactusConfig} from "@shared/CactusConfig";
 
 export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand {
     description = "Refresh the send time on all reflection prompts";
     name = "Reflection Prompts: update sendDate";
     showInList = true;
 
-    protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
+    protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         // const dateId = (new Date()).getTime();
         const query = await firestoreService.getCollectionRef(Collection.reflectionPrompt);
         const reflectionPrompts = await firestoreService.executeQuery(query, ReflectionPrompt);
 
 
-        const project = this.project || Project.STAGE;
-
-        const config = await getCactusConfig(project);
-        const mailchimpService = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
+        const mailchimpService = MailchimpService.getSharedInstance();
 
 
         const tasks: Promise<void>[] = [];
@@ -47,8 +44,6 @@ export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand 
 
                     if (sentCampaign && sentCampaign.campaign) {
                         campaign = sentCampaign.campaign;
-
-
                         prompt.campaign = campaign;
                         campaignSendTime = campaign.send_time;
                         needsSave = true;
@@ -75,7 +70,7 @@ export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand 
                 }
 
                 if (needsSave) {
-                    console.log("Saving send date as ", prompt.sendDate, "for id", prompt.id);
+                    console.log("Saving send date as ", prompt.sendDate, "for promptId", prompt.id, ` - ${prompt.question}`);
                     await firestoreService.save(prompt);
                 }
 

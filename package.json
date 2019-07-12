@@ -16,10 +16,11 @@
     "deploy:prod": "npm run deploy:prod:api && npm run deploy:prod:web",
     "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
     "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
+    "compile:all": "tsc -p web/ && tsc -p shared/ && tsc -p functions && tsc -p scripts",
     "cmd": "npm --prefix \"scripts\" run cmd",
-    "fe": "npm --prervix \"web\" run fe",
-    "dev": "npm --prervix \"web\" run dev",
-    "api": "npm --prervix \"functions\" run serve"
+    "fe": "npm --prefix \"web\" run fe",
+    "dev": "npm --prefix \"web\" run dev",
+    "api": "npm --prefix \"functions\" run serve"
   },
   "repository": {
     "type": "git",
@@ -33,5 +34,8 @@
   "homepage": "https://github.com/Kinecho/cactus#readme",
   "dependencies": {
     "firebase": "^6.2.4"
+  },
+  "devDependencies": {
+    "typescript": "^3.5.3"
   }
 }

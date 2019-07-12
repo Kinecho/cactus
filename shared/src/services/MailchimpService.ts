@@ -48,6 +48,7 @@ import * as md5 from "md5";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/ApiError";
+import {CactusConfig} from "@shared/CactusConfig";
 
 interface MailchimpAuth {
     username: string,
@@ -73,9 +74,9 @@ export default class MailchimpService {
 
     protected static sharedInstance: MailchimpService;
 
-    static initialize(apiKey: string, audienceId: string | undefined) {
+    static initialize(config: CactusConfig) {
         console.log("initializing mailchimp service");
-        MailchimpService.sharedInstance = new MailchimpService(apiKey, audienceId);
+        MailchimpService.sharedInstance = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
     }
 
     static getSharedInstance() {
@@ -170,7 +171,13 @@ export default class MailchimpService {
             });
             return response.data;
         } catch (error) {
-            console.error("failed to get mailchimp campaign for campaign id", id, error);
+            if (error.isAxiosError) {
+                const axiosError = error as AxiosError;
+                console.error(`${axiosError.code}: failed to get mailchimp campaign for campaignId=${id}. ${axiosError.response ? JSON.stringify(axiosError.response.data) : "no data found"}`);
+            } else {
+                console.error("failed to get mailchimp campaign for campaign id", id, error);
+            }
+
             return undefined;
         }
     }
@@ -184,16 +191,24 @@ export default class MailchimpService {
         set_exclude_fields.add("_links");
         exclude_fields = Array.from(set_exclude_fields);
 
+        const fields = (options.params && options.params.fields) ? options.params.fields.join(",") : undefined;
 
-        console.log("Get Campaigns exclude fields", exclude_fields);
+        const queryParams: any = {
+            ...options.pagination,
+            ...options.params,
+        };
+
+        if (fields) {
+            queryParams.fields = fields;
+            console.log("Get Campaigns with Fields = ", fields);
+        } else if (exclude_fields.length > 0) {
+            console.log("Get Campaigns exclude fields", exclude_fields);
+            queryParams.exclude_fields = exclude_fields.join(",");
+        }
 
         // exclude_fields
         const response = await this.request.get(url, {
-            params: {
-                ...options.pagination,
-                ...options.params,
-                exclude_fields: exclude_fields.join(","),
-            }
+            params: queryParams,
         });
 
         console.log("fetch campaigns config", JSON.stringify(response.config.params, null, 2));
@@ -256,7 +271,13 @@ export default class MailchimpService {
     async getSentTo(campaignId: string, pagination = DEFAULT_PAGINATION): Promise<CampaignSentToListResponse> {
         const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
         const url = `reports/${campaignId}/sent-to`;
-        const response = await this.request.get(url, {params: {offset, count, exclude_fields: "_links,sent_to._links"}});
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: "_links,sent_to._links"
+            }
+        });
         return response.data;
     }
 

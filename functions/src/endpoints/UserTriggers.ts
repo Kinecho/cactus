@@ -2,13 +2,6 @@ import * as admin from "firebase-admin";
 import AdminUserService from "@shared/services/AdminUserService";
 import User from "@shared/models/User";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
-import {
-    AttachmentColor,
-    sendActivityNotification,
-    SlackAttachment,
-    SlackAttachmentField,
-    SlackMessage
-} from "@api/slack/slack";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
@@ -16,20 +9,25 @@ import MailchimpService from "@shared/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import {formatDate} from "@shared/util/DateUtil";
+import AdminSlackService, {
+    AttachmentColor,
+    SlackAttachment,
+    SlackAttachmentField,
+    SlackMessage
+} from "@shared/services/AdminSlackService";
 
 
 const userService = AdminUserService.getSharedInstance();
 const memberService = AdminCactusMemberService.getSharedInstance();
 const mailchimpService = MailchimpService.getSharedInstance();
+const slackService = AdminSlackService.getSharedInstance();
 
 export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     const email = user.email;
     const userId = user.uid;
     const displayName = user.displayName || "";
-
     const fields: SlackAttachmentField[] = [];
-    let attachmentColor = AttachmentColor.success;
-    const attachment: SlackAttachment = {fields, color: attachmentColor};
+    const attachment: SlackAttachment = {fields, color: AttachmentColor.success};
     const attachments = [attachment];
     const slackMessage: SlackMessage = {attachments: attachments};
 
@@ -46,7 +44,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     });
 
 
-    if (user.email){
+    if (user.email) {
         fields.push({
             title: "Email",
             value: user.email,
@@ -54,7 +52,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         })
     }
 
-    if (user.phoneNumber){
+    if (user.phoneNumber) {
         fields.push({
             title: "Phone Number",
             value: user.phoneNumber,
@@ -62,7 +60,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         })
     }
 
-    if (user.displayName){
+    if (user.displayName) {
         fields.push({
             title: "Display Name",
             value: user.displayName,
@@ -75,9 +73,9 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         // await sendActivityNotification(slackMessage);
 
     }
-    let cactusMember:CactusMember|undefined;
-    let mailchimpMember:ListMember|undefined;
-    if (email){
+    let cactusMember: CactusMember | undefined;
+    let mailchimpMember: ListMember | undefined;
+    if (email) {
         cactusMember = await memberService.getMemberByEmail(email);
 
         if (!cactusMember) {
@@ -90,7 +88,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
             if (mailchimpResult.success) {
                 mailchimpMember = mailchimpResult.member;
 
-                if (!mailchimpMember && mailchimpResult.status === SubscriptionResultStatus.existing_subscriber){
+                if (!mailchimpMember && mailchimpResult.status === SubscriptionResultStatus.existing_subscriber) {
                     mailchimpMember = await mailchimpService.getMemberByEmail(email);
                 }
 
@@ -110,8 +108,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
                 cactusMember.signupConfirmedAt = new Date();
 
                 cactusMember.mailchimpListMember = mailchimpMember;
-            }
-            else {
+            } else {
                 console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));
                 attachments.push({
                     text: `Failed to save mailchimp list member\n\`\`\`${JSON.stringify(mailchimpResult.error, null, 2)}\`\`\``,
@@ -174,7 +171,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     console.log("Saved user to db. UserId = ", savedModel.id);
     attachment.ts = `${(new Date()).getTime() / 1000}`;
 
-    await sendActivityNotification(slackMessage);
+    await slackService.sendActivityNotification(slackMessage);
 
 }
 
@@ -200,7 +197,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
         },
     ];
 
-    if (user.phoneNumber){
+    if (user.phoneNumber) {
         fields.push({
             title: "Phone Number",
             value: user.phoneNumber,
@@ -208,7 +205,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
         })
     }
 
-    if (user.displayName){
+    if (user.displayName) {
         fields.push({
             title: "Display Name",
             value: user.displayName,
@@ -238,7 +235,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
 
         let webIdLink: string | undefined;
         if (cactusMember && cactusMember.mailchimpListMember) {
-            webIdLink = `<https://us20.admin.mailchimp.com/lists/members/view?id=${cactusMember.mailchimpListMember.web_id}|${cactusMember.mailchimpListMember.web_id}>`
+            webIdLink = `<https://us20.admin.mailchimp.com/lists/members/view?id=${cactusMember.mailchimpListMember.web_id}|${cactusMember.mailchimpListMember.web_id}>`;
             fields.push({
                 title: "Mailchimp Web ID",
                 value: webIdLink,
@@ -253,7 +250,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
 
 
     const message: SlackMessage = {attachments: [attachment]};
-    await sendActivityNotification(message);
+    await slackService.sendActivityNotification(message);
 
 
 }

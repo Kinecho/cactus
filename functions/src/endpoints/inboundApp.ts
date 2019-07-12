@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
-import {AttachmentColor, sendActivityNotification, SlackAttachmentField, SlackMessage} from "@api/slack/slack";
+import * as functions from "firebase-functions";
 import {processEmail} from "@api/inbound/EmailProcessor"
 import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
@@ -26,11 +26,14 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminSlackService, {
+    AttachmentColor,
+    SlackAttachmentField,
+    SlackMessage
+} from "@shared/services/AdminSlackService";
+
 const app = express();
 
-const firestoreService = AdminFirestoreService.getSharedInstance();
-const mailchimpService = MailchimpService.getSharedInstance();
-const memberService = AdminCactusMemberService.getSharedInstance();
 
 app.use(cors({origin: true}));
 
@@ -43,9 +46,9 @@ app.get('/testModel/:id', async (req, res) => {
         return res.status(400);
     }
 
-    const model = await firestoreService.getById(id, TestModel);
+    const model = await AdminFirestoreService.getSharedInstance().getById(id, TestModel);
 
-    if (!model){
+    if (!model) {
         return res.sendStatus(404);
     }
 
@@ -62,10 +65,10 @@ app.post("/testModel", bodyParser.json(), async (req, res) => {
         console.log("body", JSON.stringify(req.body));
         const model = fromJSON(req.body, TestModel);
         console.log("model", JSON.stringify(model));
-        const saved = await firestoreService.save(model);
+        const saved = await AdminFirestoreService.getSharedInstance().save(model);
         console.log("saved object", saved);
         res.send({data: saved.toJSON()})
-    } catch (e){
+    } catch (e) {
         res.status(500).send({error: e});
     }
 
@@ -81,16 +84,18 @@ app.post("/testModel", bodyParser.json(), async (req, res) => {
  * ref: Doug Stevenson's answer here:
  * https://stackoverflow.com/questions/47242340/how-to-perform-an-http-file-upload-using-express-on-cloud-functions-for-firebase/47319614#47319614
  */
-app.post("/", async (req: express.Request | any, res: express.Response) => {
+app.post("/", async (req: functions.https.Request | any, res: express.Response) => {
+    const mailchimpService = MailchimpService.getSharedInstance();
+    const slackService = AdminSlackService.getSharedInstance();
     try {
         const dateId = (new Date()).getTime();
         const bodyStoragePath = await writeToFile(`./output/${dateId}_body.txt`, req.rawBody || req.body);
         const headersStoragePath = await writeToFile(`./output/${dateId}_headers.txt`, JSON.stringify(req.headers));
 
         const emailReply = await processEmail(req.headers, req.rawBody || req.body);
-        if (!emailReply){
+        if (!emailReply) {
             console.warn("Unable to process an EmailReply");
-            await sendActivityNotification("ERROR: Failed to process incoming email: no email was returned");
+            await slackService.sendActivityNotification("ERROR: Failed to process incoming email: no email was returned");
             res.sendStatus(500);
             return;
         }
@@ -116,26 +121,26 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
         promptResponse.responseMedium = ResponseMedium.EMAIL;
 
         let resetUserResponse;
-        if (listMember){
+        if (listMember) {
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-             resetUserResponse = await resetUserReminder(listMember.email_address);
-            if (!resetUserResponse.success){
+            resetUserResponse = await resetUserReminder(listMember.email_address);
+            if (!resetUserResponse.success) {
                 console.log("reset user reminder failed", resetUserResponse);
-                await sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+                await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
             }
         } else {
-            await sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
+            await slackService.sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
             resetUserResponse = await resetUserReminder(from.email);
-            if (!resetUserResponse.success){
+            if (!resetUserResponse.success) {
                 console.log("reset user reminder failed", resetUserResponse);
-                await sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+                await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
             }
         }
 
-        const savedReflectionResponse = await AdminReflectionResponseService.sharedInstance.save(promptResponse);
-        if (savedReflectionResponse){
+        const savedReflectionResponse = await AdminReflectionResponseService.getSharedInstance().save(promptResponse);
+        if (savedReflectionResponse) {
             console.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
         }
 
@@ -145,11 +150,11 @@ app.post("/", async (req: express.Request | any, res: express.Response) => {
             messageColor = AttachmentColor.error;
             message = `:rotating_light: Unable to save the email reply. The following details from ${from.email} have not been fully saved to Firestore`;
         }
-        await sendSlackMessage(savedEmail || emailReply, prompt, savedReflectionResponse, listMember, message,  messageColor);
+        await sendSlackMessage(savedEmail || emailReply, prompt, savedReflectionResponse, listMember, message, messageColor);
 
         res.send({email: (savedEmail || emailReply).toJSON()});
-    } catch(error) {
-        await sendActivityNotification("ERROR: Failed to process incoming email: " +  `${error}`);
+    } catch (error) {
+        await slackService.sendActivityNotification("ERROR: Failed to process incoming email: " + `${error}`);
         res.sendStatus(500);
     }
 });
@@ -161,10 +166,17 @@ interface ResetUserResponse {
     tagResponse: UpdateTagResponse,
 }
 
-async function resetUserReminder(email?:string):Promise<ResetUserResponse>{
-    if (!email){
+async function resetUserReminder(email?: string): Promise<ResetUserResponse> {
+    const mailchimpService = MailchimpService.getSharedInstance();
+    const memberService = AdminCactusMemberService.getSharedInstance();
+    if (!email) {
         console.warn("No email given provided to resetUserReminder function");
-        return {success: false, unknownError: "No email provided to resetUser function", mergeResponse: {success:false}, tagResponse: {success: false}};
+        return {
+            success: false,
+            unknownError: "No email provided to resetUser function",
+            mergeResponse: {success: false},
+            tagResponse: {success: false}
+        };
     }
 
     const lastReplyString = getMailchimpDateString();
@@ -200,17 +212,17 @@ async function sendSlackMessage(email: EmailReply,
                                 response?: ReflectionResponse,
                                 sentToMember?: ListMember,
                                 message = "Got a reply!",
-                                color = AttachmentColor.info):Promise<void> {
+                                color = AttachmentColor.info): Promise<void> {
     const messageColor = color;
     const msg: SlackMessage = {};
     msg.text = message;
 
     const fromEmail = email.from && email.from.email ? email.from.email : null;
-    const campaign = email.mailchimpCampaignId ? await mailchimpService.getCampaign(email.mailchimpCampaignId) : null;
+    const campaign = email.mailchimpCampaignId ? await MailchimpService.getSharedInstance().getCampaign(email.mailchimpCampaignId) : null;
 
-    const fields:SlackAttachmentField[] = [];
+    const fields: SlackAttachmentField[] = [];
 
-    if (response){
+    if (response) {
         fields.push({
             title: "Response ID",
             value: `${response.id || "?"}`,
@@ -218,7 +230,7 @@ async function sendSlackMessage(email: EmailReply,
         })
     }
 
-    if (prompt){
+    if (prompt) {
         fields.push(
             {
                 title: "Prompt ID",
@@ -232,7 +244,7 @@ async function sendSlackMessage(email: EmailReply,
             },
             {
                 title: "Content Link",
-                value: `https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` :  prompt.contentPath}`,
+                value: `https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath}`,
                 short: false,
             }
         )
@@ -298,7 +310,7 @@ async function sendSlackMessage(email: EmailReply,
         fields,
     }];
 
-    await sendActivityNotification(msg);
+    await AdminSlackService.getSharedInstance().sendActivityNotification(msg);
 
 }
 

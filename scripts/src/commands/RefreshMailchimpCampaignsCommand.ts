@@ -8,9 +8,11 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {Campaign, CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
+
 const prompts = require("prompts");
 import chalk from "chalk";
 import FieldValue = admin.firestore.FieldValue;
+
 interface Page {
     title: string,
     path: string,
@@ -45,12 +47,12 @@ export default class RefreshMailchimpCampaignsCommand extends FirebaseCommand {
 
         // const mail
 
-        if (!this.project){
+        if (!this.project) {
             throw new Error("No project set");
         }
 
         const config = await getCactusConfig(this.project);
-        MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
+        MailchimpService.initialize(config);
         console.log("Loading mailchimp campaigns...");
         const campaigns = await mailchimpService.getAllCampaigns({
             params: {
@@ -85,8 +87,8 @@ export default class RefreshMailchimpCampaignsCommand extends FirebaseCommand {
             message: "Select the campaigns you'd like to refresh",
             type: "autocompleteMultiselect",
             choices: campaignChoices,
-            suggest: (input:string, choices:{title:string, value:string}[]) =>
-                Promise.resolve(choices.filter(choice => choice.title.toLowerCase().includes(input.toLowerCase()) ))
+            suggest: (input: string, choices: { title: string, value: string }[]) =>
+                Promise.resolve(choices.filter(choice => choice.title.toLowerCase().includes(input.toLowerCase())))
         });
 
 
@@ -125,8 +127,7 @@ export default class RefreshMailchimpCampaignsCommand extends FirebaseCommand {
             console.log("Campaign did not exist in DB, creating it now ");
             sentCampaign = new SentCampaign();
             sentCampaign.createdAt = new Date();
-        }
-        else if (campaign && content && sentCampaignDoc.exists){
+        } else if (campaign && content && sentCampaignDoc.exists) {
             //clear the existing content so we don't merge it by accident
             console.log("clearning content so we can reset it for campaignId", campaignId);
             await sentCampaignRef.update({

@@ -22,7 +22,7 @@ export default class AdminFirestoreService {
 
     static getSharedInstance(): AdminFirestoreService {
         if (!AdminFirestoreService.sharedInstance) {
-            throw new Error("No shared instance is available. Ensure you have called the initialize() function before using the shared instance")
+            throw new Error("No shared AdminFirestoreService instance is available. Ensure you have called the initialize() function before using the shared instance")
         }
         return AdminFirestoreService.sharedInstance;
     }
@@ -34,7 +34,7 @@ export default class AdminFirestoreService {
 
     constructor(admin: firebaseAdmin.app.App) {
         this.admin = admin;
-        this.firestore = admin.firestore()
+        this.firestore = admin.firestore();
     }
 
     getCollectionRef(collectionName: Collection): CollectionReference {

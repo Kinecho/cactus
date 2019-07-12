@@ -1,12 +1,11 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
-import {getCactusConfig, Project} from "@scripts/config";
+import {Project} from "@scripts/config";
 import MailchimpService from "@shared/services/MailchimpService";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import AdminSentPromptService, {CampaignSentPromptProcessingResult} from "@shared/services/AdminSentPromptService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 
 const prompts = require("prompts");
 
@@ -18,13 +17,6 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
-
-        const config = await getCactusConfig(project);
-        AdminFirestoreService.initialize(app);
-        MailchimpService.initialize(config.mailchimp.api_key, config.mailchimp.audience_id);
-        AdminCactusMemberService.initialize();
-        AdminReflectionPromptService.initialize();
-        AdminSentPromptService.initialize();
 
         console.log("attempting to initalize mailchimp service");
         const mailchimpService = MailchimpService.getSharedInstance();

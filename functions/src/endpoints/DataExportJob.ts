@@ -1,7 +1,6 @@
 import {getConfig} from "@api/config/configService";
 import {JWT} from "google-auth-library";
 import axios, {AxiosError} from "axios";
-import {sendEngineeringMessage, SlackAttachment} from "@api/slack/slack";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import {Operation} from "@shared/types/FirestoreTypes";
 import {formatDuration} from "@shared/util/DateUtil";
@@ -12,12 +11,15 @@ import {promisify} from "util";
 import {snakeCase} from "lodash";
 import bigqueryTypes from "@google-cloud/bigquery/build/src/types";
 import IJob = bigqueryTypes.IJob;
+import AdminSlackService, {SlackAttachment} from "@shared/services/AdminSlackService";
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const Config = getConfig();
 
 const firestoreService = AdminFirestoreService.getSharedInstance();
+const slackService = AdminSlackService.getSharedInstance();
+
 const firestoreAdminVersion = 'v1';
 const betaVersion = '';
 
@@ -37,7 +39,7 @@ export const latestBigQueryExportFileName = "latest-prefix.txt";
  * @return {Promise<void>}
  */
 export async function exportFirestoreToBigQuery() {
-    // await sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
+    // await slackService.sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
 
     const collectionIds = await getCollectionIds();
     console.log("collectionIds", collectionIds);
@@ -109,11 +111,11 @@ export async function exportFirestoreToBigQuery() {
                 text: `*Big Query Ingest Job* Completed after ${formatDuration(startTime, endTime)}`,
                 color: "good"
             });
-            await sendEngineeringMessage(slackMessage);
+            await slackService.sendEngineeringMessage(slackMessage);
         }
     } catch (e) {
         console.error("failed to backup", e);
-        await sendEngineeringMessage(`Failed to backup ${JSON.stringify(e, null, 2)}`);
+        await slackService.sendEngineeringMessage(`Failed to backup ${JSON.stringify(e, null, 2)}`);
     }
 }
 
@@ -126,7 +128,7 @@ export async function backupFirestore(): Promise<void> {
         console.log("Export firestore for backup finished in ", formatDuration(startTime, endTime));
     } catch (e) {
         console.error("failed to backup", e);
-        await sendEngineeringMessage(`Failed to backup firestore \`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
+        await slackService.sendEngineeringMessage(`Failed to backup firestore \`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
     }
 }
 
@@ -304,7 +306,7 @@ export async function getOperation(name: string): Promise<Operation | undefined>
         if (error.isAxiosError) {
             const axiosError = error as AxiosError;
             console.error(`Failed to get operation. Code ${axiosError.code}. ${JSON.stringify(axiosError.response, null, 2)}`);
-            await sendEngineeringMessage({text: `Failed to get operation. Code ${axiosError.code}.\n\`\`\`${JSON.stringify(axiosError.response, null, 2)}\`\`\``})
+            await slackService.sendEngineeringMessage({text: `Failed to get operation. Code ${axiosError.code}.\n\`\`\`${JSON.stringify(axiosError.response, null, 2)}\`\`\``})
         } else {
             console.error("Failed to get operation" + name, error);
         }
@@ -378,7 +380,7 @@ async function getAuthHeaders(): Promise<{ [key: string]: string }> {
     const accessToken = await getAccessToken();
 
     if (!accessToken) {
-        await sendEngineeringMessage(":rotating-light: Failed to get access token for firestore backup")
+        await slackService.sendEngineeringMessage(":rotating-light: Failed to get access token for firestore backup")
     }
 
     return {

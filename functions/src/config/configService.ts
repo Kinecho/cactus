@@ -4,11 +4,6 @@ import {CactusConfig} from "@shared/CactusConfig";
 
 let _config: CactusConfig;
 
-export enum PubSubTopic {
-    firestore_backup = "firestore_backup",
-    firestore_export_bigquery = "firestore_export_bigquery"
-}
-
 export function getConfig(): CactusConfig {
     //used for testing purposes
     if (getEnvironment() === Environment.test) {

@@ -1,15 +1,18 @@
-import {getAdmin, Project} from "@scripts/config";
+import {getAdmin, getCactusConfig, Project} from "@scripts/config";
 import * as admin from "firebase-admin";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import chalk from "chalk";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
+import {CactusConfig} from "@shared/CactusConfig";
+import {initializeServices} from "@shared/services/AdminServiceConfig";
+import {setTimestamp} from "@shared/util/FirestoreUtil";
 
 const prompts = require("prompts");
 
 export interface Command {
     name: string;
     description?: string;
-    showInList:boolean;
+    showInList: boolean;
     start: () => Promise<void>,
 }
 
@@ -28,11 +31,11 @@ export abstract class FirebaseCommand implements Command {
     useAdmin: boolean;
     abstract name: string;
     description?: string;
-    abstract showInList:boolean;
+    abstract showInList: boolean;
     confirmExecution: boolean = false;
     firestoreService?: AdminFirestoreService;
 
-    protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void>;
+    protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void>;
 
     async start(): Promise<void> {
         if (this.description) {
@@ -55,8 +58,17 @@ export abstract class FirebaseCommand implements Command {
         const app = await this.getFirebaseApp();
         const firestoreService = await this.getFirestoreService();
 
+        const project = this.project || Project.STAGE;
+        console.log("Fetching config for ", project);
+        const config = await getCactusConfig(project);
+
+        console.log("initializing all services");
+        initializeServices(config, app, admin.firestore.Timestamp);
+        setTimestamp(admin.firestore.Timestamp);
+
         console.group(chalk.yellow(`${this.name} Logs:`));
-        await this.run(app, firestoreService);
+
+        await this.run(app, firestoreService, config);
         console.groupEnd();
     }
 
@@ -71,7 +83,7 @@ export abstract class FirebaseCommand implements Command {
 
         const app = await this.getFirebaseApp();
         AdminFirestoreService.initialize(app);
-        this.firestoreService = new AdminFirestoreService(app);
+        this.firestoreService = AdminFirestoreService.getSharedInstance();
         return this.firestoreService;
     }
 

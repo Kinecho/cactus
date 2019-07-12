@@ -1,12 +1,7 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import {
-    sendActivityNotification,
-    SlackMessage,
-    SlackAttachment,
-    getAttachmentForObject
-} from "@api/slack/slack"
+
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
@@ -22,15 +17,11 @@ import {
 import {saveSentCampaign} from "@api/services/sentCampaignService";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
-import AdminSentPromptService from "@shared/services/AdminSentPromptService";
-// import AdminUserService from "@shared/services/AdminUserService";
-
+import {submitJob} from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
+import AdminSlackService, {SlackAttachment, SlackMessage} from "@shared/services/AdminSlackService";
 
 const app = express();
 
-const mailchimpService = MailchimpService.getSharedInstance();
-const sentPromptService = AdminSentPromptService.getSharedInstance();
-// const userService = AdminUserService.getSharedInstance();
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: true}));
@@ -41,6 +32,10 @@ app.get("/", async (req: express.Request, res: express.Response) => {
 
 
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
+
+    const mailchimpService = MailchimpService.getSharedInstance();
+    const slackService = AdminSlackService.getSharedInstance();
+
     const event = req.body as WebhookEvent;
     console.log("webhook event", JSON.stringify(event));
     const date = new Date();
@@ -63,18 +58,18 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             if (listMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
                 if (cactusMember) {
-                    await sendActivityNotification(`${data.email} has confirmed their subscription. They have been added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
+                    await slackService.sendActivityNotification(`${data.email} has confirmed their subscription. They have been added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
                 } else {
-                    await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
+                    await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
                 }
             } else {
-                await sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
+                await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
             }
 
             break;
         case EventType.profile:
             const profile = event.data as ProfileUpdateEventData;
-            const attachment = getAttachmentForObject(profile.merges);
+            const attachment = AdminSlackService.getAttachmentForObject(profile.merges);
             attachment.color = "#FFE4DA";
             message = {
                 text: `${profile.email} updated their profile`,
@@ -85,12 +80,12 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             if (profileMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(profileMember);
                 if (cactusMember) {
-                    await sendActivityNotification(`Updated ${profile.email} in our database. CactusMember ID = ${cactusMember.id}`)
+                    await slackService.sendActivityNotification(`Updated ${profile.email} in our database. CactusMember ID = ${cactusMember.id}`)
                 } else {
-                    await sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
+                    await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
                 }
             } else {
-                await sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
+                await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${profile.email}`);
             }
 
             break;
@@ -110,10 +105,15 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             //this will create the link in the reflection prompt;
             const sentCampaign = await saveSentCampaign(campaign, campaignData, content);
             if (sentCampaign) {
-                await sentPromptService.processSentMailchimpCampaign({
+                await submitJob({
                     campaignId: campaignData.id,
-                    promptId: sentCampaign.reflectionPromptId
+                    reflectionPromptId: sentCampaign.reflectionPromptId
                 });
+
+                // await sentPromptService.processSentMailchimpCampaign({
+                //     campaignId: campaignData.id,
+                //     promptId: sentCampaign.reflectionPromptId
+                // });
             }
 
             const fields = [
@@ -160,12 +160,15 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             break;
     }
 
-    await sendActivityNotification(message);
+    await slackService.sendActivityNotification(message);
 
     res.send({success: true})
 });
 
 app.post("/", async (req: express.Request, res: express.Response) => {
+
+    const mailchimpService = MailchimpService.getSharedInstance();
+    const slackService = AdminSlackService.getSharedInstance();
     console.log("request params", req.body);
     const subscription = SubscriptionRequest.fromData(req.body);
     res.contentType("application/json");
@@ -225,10 +228,10 @@ app.post("/", async (req: express.Request, res: express.Response) => {
                 attachments: [attachmentSummary],
             };
 
-            const slackResult = await sendActivityNotification(message);
+            const slackResult = await slackService.sendActivityNotification(message);
             console.log("slack result", slackResult);
         } else if (!signupResult.success) {
-            await sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
+            await slackService.sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
         }
 
         return res.send(signupResult);
