@@ -10,9 +10,9 @@
             </div>
             <div v-if="loggedIn" class="section-container">
                 <section class="empty journalList" v-if="!preparedPrompts.length && responsesHasLoaded && sentPromptsLoaded">
-                    You have not received any questions yet
+                    Your journal is empty.
                 </section>
-                <section v-if="preparedPrompts.length" class="journalList">
+                <section v-if="preparedPrompts.length && responsesHasLoaded && sentPromptsLoaded" class="journalList">
                     <transition-group
                             name="fade-out"
                             tag="div"
@@ -27,34 +27,6 @@
                                 v-bind:prompt="preparedPrompt.prompt"
                                 v-bind:index="index"
                                 v-bind:key="preparedPrompt.prompt.id + index"
-                                v-bind:data-index="index"
-                        ></response-card>
-                    </transition-group>
-                </section>
-
-                <section class="jounalList">
-                    <h1 class="heading">Old Method Using Reflection Responses</h1>
-                </section>
-                <section class="empty journalList" v-if="!preparedResponses.length && responsesHasLoaded && sentPromptsLoaded">
-                    You have not saved any responses yet
-                </section>
-                <section v-if="preparedResponses.length" class="journalList">
-
-
-                    <transition-group
-                            name="fade-out"
-                            tag="div"
-                            appear
-                            v-bind:css="false"
-                            v-on:before-enter="beforeEnter"
-                            v-on:enter="enter">
-                        <response-card
-                                class="journalListItem"
-                                v-for="(preparedResponse, index) in preparedResponses"
-                                v-bind:response="preparedResponse.response"
-                                v-bind:prompt="preparedResponse.prompt"
-                                v-bind:index="index"
-                                v-bind:key="preparedResponse.response.id"
                                 v-bind:data-index="index"
                         ></response-card>
                     </transition-group>
@@ -151,6 +123,7 @@
                     });
                 }
 
+                //TODO: update this to onlu use Cactus Member id
                 if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
                     const mailchimpMemberId = member.mailchimpListMember.id;
 
@@ -268,7 +241,7 @@
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
-                const delay = Number(el.dataset.index) * 100;
+                const delay = Number(el.dataset.index) * 200;
                 console.log("delay is", delay);
                 setTimeout(function () {
                     el.classList.remove("out");
@@ -278,9 +251,6 @@
 
         },
         computed: {
-            userName(): string | undefined | null {
-                return this.user ? this.user.displayName : null;
-            },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },
@@ -312,18 +282,6 @@
                     return map;
                 }, initialValue)
             },
-            preparedResponses(): { response: ReflectionResponse, prompt?: ReflectionPrompt }[] {
-                const promptsById = this.promptsById;
-                const preparedResponses = this.responses.map(response => {
-                    const prompt = response.promptId ? promptsById[response.promptId] : undefined;
-                    return {
-                        response,
-                        prompt,
-                    }
-                }).filter(prepared => prepared.prompt && prepared.response);
-
-                return preparedResponses;
-            }
         }
     })
 </script>
