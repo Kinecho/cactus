@@ -246,6 +246,13 @@ footer {
       justify-content: space-between;
     }
   }
+  .contact { 
+    text-decoration: underline;
+    color: $white; 
+    &:hover { 
+      @include fancyLink;
+    }
+  }
 }
 
 .footerInfo {
