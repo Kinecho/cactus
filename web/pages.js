@@ -372,7 +372,14 @@ module.exports = {
         "title": "What relationships bring meaning and care into your life?",
         "path": "/what-relationships-bring-meaning-and-care-into-your-life",
         "reflectionPrompt": true,
-        "includeInDev": true,
+        "includeInDev": false,
         "name": "what_relationships_bring_meaning_and_care_into_your_life"
+    },
+    "what_makes_you_laugh": {
+        "title": "What makes you laugh?",
+        "path": "/what-makes-you-laugh",
+        "reflectionPrompt": true,
+        "includeInDev": true,
+        "name": "what_makes_you_laugh"
     }
 }
