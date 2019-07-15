@@ -246,23 +246,39 @@ footer {
       justify-content: space-between;
     }
   }
+
+  .contact {
+    color: $white;
+    text-decoration: underline;
+
+    &:hover {
+      color: $yellow;
+      transition: color .3s ease-in-out;
+    }
+  }
 }
 
 .footerInfo {
   align-items: center;
   display: flex;
+  flex-flow: column nowrap;
   justify-content: center;
   margin-bottom: 1.6rem;
-  text-align: left;
 
   @include r(600) {
+    flex-flow: row nowrap;
     margin-bottom: 0;
+    text-align: left;
   }
 
   .logomark {
     height: 4.4rem;
-    margin-right: .8rem;
+    margin: 0 .8rem .8rem 0;
     width: 2.4rem;
+
+    @include r(600) {
+      margin: 0 .8rem 0 0;
+    }
   }
 
   .copyright {
