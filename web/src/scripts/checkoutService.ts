@@ -1,25 +1,15 @@
 import {Config} from "@web/config";
+
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
-import Stripe = stripe.Stripe;
+// import Stripe = stripe.Stripe;
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import {Endpoint, request} from "@web/requestUtils";
 import {gtag} from "@web/analytics";
-
-// import * as Stripe from "stripe";
-// import Stripe = stripe.Stripe;
-
-// import Stripe = stripe.Stripe;
-//
-// declare interface Stripe{}
-//
-interface CactusStripe extends Stripe {
-    redirectToCheckout(options?: any):{error?: {message?:string}};
-
-}
+import StripeCheckoutOptions = stripe.StripeCheckoutOptions;
 
 export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessionRequest, errorElementId:string|undefined="stripe-error-message"):Promise<any|null|undefined> {
-    const stripe = Stripe(Config.stripe.apiKey) as CactusStripe;
+    const stripe = Stripe(Config.stripe.apiKey);
 
     try {
         const response = await request.post(Endpoint.checkoutSessions, sessionRequest);
@@ -48,7 +38,7 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
         });
 
 
-        const result = await stripe.redirectToCheckout(stripeOptions);
+        const result = await stripe.redirectToCheckout(stripeOptions as StripeCheckoutOptions);
 
         if (result.error) {
             // If `redirectToCheckout` fails due to a browser or network
@@ -67,7 +57,7 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
 
 
 export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.monthlyPlanId) {
-    const stripe = Stripe(Config.stripe.apiKey) as CactusStripe;
+    const stripe = Stripe(Config.stripe.apiKey);
 
     const stripeOptions:any = {
         items: [

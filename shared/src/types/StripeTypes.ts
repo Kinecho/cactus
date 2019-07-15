@@ -1,3 +1,6 @@
+// import * as Stripe from "stripe";
+// import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
+
 import * as Stripe from "stripe";
 import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
 
