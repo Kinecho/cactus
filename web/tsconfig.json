@@ -32,6 +32,9 @@
             ],
             "animations.gsap": [
                 "./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"
+            ],
+            "ScrollToPlugin": [
+                "./node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js"
             ]
         }
     },

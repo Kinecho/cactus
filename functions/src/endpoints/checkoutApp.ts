@@ -22,7 +22,7 @@ const app = express();
 app.use(cors({origin: true}));
 
 app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
-    const mailchimpService = MailchimpService.getSharedInstance()
+    const mailchimpService = MailchimpService.getSharedInstance();
     const slackService = AdminSlackService.getSharedInstance();
     try {
         const event = req.body as CheckoutSessionCompleted;
