@@ -242,7 +242,7 @@ input[type=email] {
   transition: border-color .3s ease-in-out;
 
   @include r(600) {
-    margin: 0 1.6rem 1.6rem 0;
+    margin: 0 1.6rem 0 0;
   }
   @include r(768) {
     min-width: 32rem;

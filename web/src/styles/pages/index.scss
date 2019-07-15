@@ -80,6 +80,16 @@ body {
       max-width: 70rem;
       padding-top: 0;
     }
+
+    input[type=email],
+    button {
+      @include r(768) {
+        margin-bottom: 1.6rem;
+      }
+      @include r(1024) {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 
@@ -134,10 +144,6 @@ form {
     @include r(768) {
       justify-content: center;
     }
-  }
-
-  button {
-    margin: 0 0 1.6rem;
   }
 }
 
