@@ -34,6 +34,10 @@
         ],
         "rewrites": [
             {
+                "source": "/what-relationships-bring-meaning-and-care-into-your-life",
+                "destination": "/what_relationships_bring_meaning_and_care_into_your_life.html"
+            },
+            {
                 "source": "/how-has-a-growth-mindset-improved-your-life",
                 "destination": "/how_has_a_growth_mindset_improved_your_life.html"
             },
