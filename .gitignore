@@ -3,6 +3,7 @@
 web/public/
 web/build
 scripts/lib/
+shared/lib/
 scripts/output/
 
 web/src/pages-index.html
