@@ -8,6 +8,7 @@ import Query = firebaseClient.firestore.Query;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import {getFirestore} from "@web/firebase";
 import {
+    DocObserverOptions,
     GetOptions,
     IQueryObserverOptions,
     IQueryOptions,
@@ -147,6 +148,21 @@ export default class FirestoreService {
                 const [first] = results;
                 options.onData(first);
             }
+        });
+    }
+
+    observeById<T extends BaseModel>(id: string, Type: { new(): T }, options: DocObserverOptions<T>): ListenerUnsubscriber {
+        const type = new Type();
+
+        const collection = this.getCollectionRef(type.collection);
+
+        return collection.doc(id).onSnapshot(snapshot => {
+            if (!options.includeDeleted && snapshot.get("deleted") === true) {
+                console.warn("Document is deleted, and the request options did not include deleted objects");
+                options.onData(undefined);
+                return;
+            }
+            options.onData(fromDocumentSnapshot(snapshot, Type));
         });
     }
 

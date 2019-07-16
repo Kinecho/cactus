@@ -50,11 +50,24 @@ export default class ReflectionResponseService {
         }
     }
 
+    observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber | undefined {
+        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!member) {
+            return;
+        }
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
+            .where(ReflectionResponse.Field.promptId, "==", promptId)
+            .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+
+        options.queryName = "ReflectionResponseService:observeForPromptId";
+        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
+    }
+
     observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(ReflectionResponseField.mailchimpMemberId, "==", memberId)
             .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
 
-        options.queryName = "observeForMailchimpMemberId";
+        options.queryName = "ReflectionResponseService:observeForMailchimpMemberId";
         return this.firestoreService.observeQuery(query, ReflectionResponse, options);
 
     }

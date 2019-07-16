@@ -42,11 +42,11 @@ header {
   top: 0;
   z-index: 10;
 
-  @include isTinyPhone{
+  @include isTinyPhone {
     min-height: 8rem;
   }
 
-  @include biggerThanTinyPhone{
+  @include biggerThanTinyPhone {
     min-height: 10rem;
   }
 
@@ -98,6 +98,7 @@ button, a.button {
   }
 
   &:hover {
+    cursor: pointer;
     background-color: darken($green, 5%);
   }
 

@@ -1,7 +1,7 @@
-import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/FirestoreService";
+import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
-import {getAuth, Unsubscribe} from "@web/firebase";
+import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -48,7 +48,7 @@ export default class CactusMemberService {
         return this.firestoreService.getFirst(query, CactusMember);
     }
 
-    async save(model: CactusMember): Promise<CactusMember|undefined> {
+    async save(model: CactusMember): Promise<CactusMember | undefined> {
         return this.firestoreService.save(model);
     }
 
@@ -64,6 +64,33 @@ export default class CactusMemberService {
     async getByUserId(userId: string): Promise<CactusMember | undefined> {
         const query = this.getCollectionRef().where(Field.userId, "==", userId);
         return await this.getFirst(query);
+    }
+
+    observeCurrentMember(options: { onData: (args: { user: FirebaseUser | undefined, member: CactusMember | undefined }) => void }): ListenerUnsubscriber {
+        let memberUnsubscriber: ListenerUnsubscriber | undefined;
+        const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
+            //reset subscriber
+            if (memberUnsubscriber) {
+                memberUnsubscriber();
+                memberUnsubscriber = undefined;
+            }
+            if (user) {
+                memberUnsubscriber = this.observeByUserId(user.uid, {
+                    onData: (member) => {
+                        options.onData({user: user, member: member})
+                    }
+                })
+            } else {
+                options.onData({user: undefined, member: undefined});
+            }
+        });
+
+        return () => {
+            authUnsubscriber();
+            if (memberUnsubscriber) {
+                memberUnsubscriber();
+            }
+        }
     }
 }
 
