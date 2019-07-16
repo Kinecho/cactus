@@ -216,7 +216,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getCampaignsByIds(campaignIds: string[] = []): Promise<Campaign[]> {
+    async getCampaignsByIds(campaignIds: string[] = [], delay=150): Promise<Campaign[]> {
         if (campaignIds.length === 0) {
             return [];
         }
@@ -226,7 +226,7 @@ export default class MailchimpService {
                 setTimeout(async () => {
                     const campaign = await this.getCampaign(id);
                     resolve(campaign)
-                }, 150 * index) //delay to prevent api throttling
+                }, delay * index) //delay to prevent api throttling
             })
         });
 
@@ -482,7 +482,7 @@ export default class MailchimpService {
             return email.id
         });
 
-        return this.getCampaignsByIds(campaignIds);
+        return this.getCampaignsByIds(campaignIds, delay);
     }
 
     async getAllAutomationEmailsForWorkflow(workflowId: string, pageSize = defaultPageSize, delay?: number): Promise<AutomationEmail[]> {

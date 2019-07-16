@@ -67,32 +67,15 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
             pagination: {
                 count: 300,
             }
-        }, 200);
+        }, 500);
 
 
-        // const {campaigns} = await mailchimpService.getCampaigns({
-        //     pagination: {
-        //         count: 20,
-        //         offset: 5,
-        //     },
-        //     params: {
-        //         status: CampaignStatus.sent,
-        //         list_id: config.mailchimp.audience_id,
-        //
-        //         fields: [
-        //             "campaigns.id",
-        //             "campaigns.web_id",
-        //             "campaigns.status",
-        //             "campaigns.settings.title",
-        //             "campaigns.send_time",
-        //             "campaigns.recipients.recipients_count"
-        //         ]
-        //
-        //     },
-        // });
-
-        // const automations = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id, 200, 200);
-        // campaigns.push(...automations)
+        try {
+            const automations = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id, 200, 500);
+            campaigns.push(...automations);
+        } catch (e) {
+            console.error("unable to fetch automations", e);
+        }
 
 
         const tasks: Promise<string>[] = [];
