@@ -58,7 +58,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             if (listMember) {
                 const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(listMember);
                 if (cactusMember) {
-                    await slackService.sendActivityNotification(`${data.email} has confirmed their subscription. They have been added ${data.email} to database. CactusMember ID = ${cactusMember.id}`)
+                    await slackService.sendActivityNotification(`${data.email} has confirmed their subscription. They have been added to the database. CactusMember ID = ${cactusMember.id}`)
                 } else {
                     await slackService.sendActivityNotification(`:warning: Unable to sync listMember with database for ${data.email}`);
                 }

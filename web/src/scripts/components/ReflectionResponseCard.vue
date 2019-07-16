@@ -72,9 +72,8 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import {getAuth, FirebaseUser} from '@web/firebase'
     import * as DateUtil from "@shared/util/DateUtil";
-    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import SentPromptService from '@web/services/SentPromptService'
@@ -139,7 +138,7 @@
 
                 let response = this.response;
                 if (!this.response && this.prompt && this.prompt.id) {
-                    response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, this.prompt.question)
+                    response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
                 }
                 if (response) {
                     response.content.text = this.editedText;

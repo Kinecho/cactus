@@ -2,7 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {processEmail} from "@api/inbound/EmailProcessor"
-import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
+import {getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
@@ -13,24 +13,14 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
-import bodyParser = require("body-parser");
 import MailchimpService from "@shared/services/MailchimpService";
-import {
-    ListMember,
-    MergeField,
-    TagName,
-    TagStatus,
-    UpdateMergeFieldRequest,
-    UpdateMergeFieldResponse,
-    UpdateTagResponse,
-    UpdateTagsRequest
-} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminSlackService, {
     AttachmentColor,
     SlackAttachmentField,
     SlackMessage
 } from "@shared/services/AdminSlackService";
+import bodyParser = require("body-parser");
 
 const app = express();
 
@@ -125,14 +115,15 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-            resetUserResponse = await resetUserReminder(listMember.email_address);
-            if (!resetUserResponse.success) {
-                console.log("reset user reminder failed", resetUserResponse);
-                await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
-            }
+            // NOTE: this task is now run on the ReflectionResponseTrigger function
+            // resetUserResponse = await AdminReflectionResponseService.resetUserReminder(listMember.email_address);
+            // if (!resetUserResponse.success) {
+            //     console.log("reset user reminder failed", resetUserResponse);
+            //     await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
+            // }
         } else {
             await slackService.sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
-            resetUserResponse = await resetUserReminder(from.email);
+            resetUserResponse = await AdminReflectionResponseService.resetUserReminder(from.email);
             if (!resetUserResponse.success) {
                 console.log("reset user reminder failed", resetUserResponse);
                 await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
@@ -140,6 +131,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         }
 
         const savedReflectionResponse = await AdminReflectionResponseService.getSharedInstance().save(promptResponse);
+
         if (savedReflectionResponse) {
             console.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
         }
@@ -159,53 +151,6 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
     }
 });
 
-interface ResetUserResponse {
-    success: boolean
-    unknownError?: any
-    mergeResponse: UpdateMergeFieldResponse,
-    tagResponse: UpdateTagResponse,
-}
-
-async function resetUserReminder(email?: string): Promise<ResetUserResponse> {
-    const mailchimpService = MailchimpService.getSharedInstance();
-    const memberService = AdminCactusMemberService.getSharedInstance();
-    if (!email) {
-        console.warn("No email given provided to resetUserReminder function");
-        return {
-            success: false,
-            unknownError: "No email provided to resetUser function",
-            mergeResponse: {success: false},
-            tagResponse: {success: false}
-        };
-    }
-
-    const lastReplyString = getMailchimpDateString();
-    const lastReplyDate = getDateFromISOString(lastReplyString);
-    const mergeRequest: UpdateMergeFieldRequest = {
-        email,
-        mergeFields: {
-            [MergeField.LAST_REPLY]: getMailchimpDateString()
-        }
-    };
-
-    const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
-
-    const tagRequest: UpdateTagsRequest = {
-        email,
-        tags: [
-            {
-                name: TagName.NEEDS_ONBOARDING_REMINDER,
-                status: TagStatus.INACTIVE
-            },
-        ]
-    };
-
-    await memberService.updateLastReplyByEmail(email, lastReplyDate);
-
-    const tagResponse = await mailchimpService.updateTags(tagRequest);
-
-    return {success: tagResponse.success && tagResponse.success, tagResponse, mergeResponse};
-}
 
 async function sendSlackMessage(email: EmailReply,
                                 prompt?: ReflectionPrompt,
@@ -222,29 +167,15 @@ async function sendSlackMessage(email: EmailReply,
 
     const fields: SlackAttachmentField[] = [];
 
-    if (response) {
-        fields.push({
-            title: "Response ID",
-            value: `${response.id || "?"}`,
-            short: false,
-        })
-    }
-
     if (prompt) {
+        let contentLink = "";
+        if (prompt.question && prompt.contentPath) {
+            contentLink = `<https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath}|${prompt.question}>`
+        }
         fields.push(
             {
-                title: "Prompt ID",
-                value: `${prompt.id || "?"}`,
-                short: false,
-            },
-            {
                 title: "Prompt Question",
-                value: `${prompt.question || "?"}`,
-                short: false,
-            },
-            {
-                title: "Content Link",
-                value: `https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath}`,
+                value: `${contentLink}`,
                 short: false,
             }
         )

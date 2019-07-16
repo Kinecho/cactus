@@ -26,7 +26,7 @@ function getEnvironmentFromProcess():Environment {
         case "development":
             foundEnv= Environment.development;
             break;
-        case "tet":
+        case "test":
             foundEnv = Environment.test;
             break;
         default:

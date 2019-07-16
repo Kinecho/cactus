@@ -1,8 +1,7 @@
 import FirestoreService, {ListenerUnsubscriber, QueryObserverOptions} from "@web/services/FirestoreService";
-import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {ReflectionResponseField, ResponseMedium} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {getAuth} from "@web/firebase";
 import CactusMemberService from "@web/services/CactusMemberService";
 
 
@@ -14,7 +13,7 @@ export default class ReflectionResponseService {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
     }
 
-    async createReflectionResponse(promptId:string, promptQuestion?:string): Promise<ReflectionResponse | undefined> {
+    async createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): Promise<ReflectionResponse | undefined> {
         const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!cactusMember) {
             console.log("Unable to get cactus member");
@@ -27,6 +26,7 @@ export default class ReflectionResponseService {
         response.userId = cactusMember.userId;
         response.cactusMemberId = cactusMember.id;
         response.memberEmail = cactusMember.email;
+        response.responseMedium = ResponseMedium.JOURNAL_WEB;
         response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
         response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
@@ -34,7 +34,7 @@ export default class ReflectionResponseService {
         return response;
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse|undefined> {
+    async save(model: ReflectionResponse): Promise<ReflectionResponse | undefined> {
         return this.firestoreService.save(model);
     }
 

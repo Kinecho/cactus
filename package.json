@@ -4,7 +4,7 @@
   "description": "Cactus Monorepo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
     "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
     "install:web": "npm --prefix \"web\" install",
     "install:api": "npm --prefix \"functions\" install",

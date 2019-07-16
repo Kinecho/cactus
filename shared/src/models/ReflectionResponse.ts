@@ -5,6 +5,25 @@ export enum ResponseMedium {
     JOURNAL_WEB = "JOURNAL_WEB",
 }
 
+export function getResponseMediumDisplayName(medium?: ResponseMedium): string {
+    if (!medium) {
+        return "Unknown";
+    }
+    let displayName: string;
+    switch (medium) {
+        case ResponseMedium.EMAIL:
+            displayName = "Email";
+            break;
+        case ResponseMedium.JOURNAL_WEB:
+            displayName = "Journal Web";
+            break;
+        default:
+            displayName = "Unknown";
+            break;
+    }
+    return displayName;
+}
+
 export interface ReflectionContent {
     text?: string;
 }
@@ -23,9 +42,9 @@ export enum ReflectionResponseField {
 
 export default class ReflectionResponse extends BaseModel {
     readonly collection = Collection.reflectionResponses;
-
-    userId?:string;
-    cactusMemberId?:string;
+    static Field = ReflectionResponseField;
+    userId?: string;
+    cactusMemberId?: string;
     responseDate?: Date;
     emailReplyId?: string;
     responseMedium?: ResponseMedium;
@@ -35,5 +54,4 @@ export default class ReflectionResponse extends BaseModel {
     content: ReflectionContent = {};
     promptId?: string;
     promptQuestion?: string
-
 }

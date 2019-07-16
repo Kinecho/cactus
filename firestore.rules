@@ -1,7 +1,37 @@
 service cloud.firestore {
   match /databases/{database}/documents {
+    function resourceBelongsToUser() {
+        return request.auth.uid != null && resource.data.userId == request.auth.uid;
+    }
+
+    function getMemberId(){
+    		return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.cactusMemberId
+    }
+
+  	function getMember(id){
+    		return get(/databases/$(database)/documents/members/$(id))
+    }
+
+    function getCurrentMember(){
+    		return getMember(getMemberId())
+    }
+
+    match /reflectionPrompt/{document=**} {
+    	 allow read: if true;
+    }
+    match /members/{document=**} {
+    	 allow read,write: if resourceBelongsToUser()
+    }
+    match /reflectionResponses/{document=**} {
+    	allow read: if getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+      allow update: if resourceBelongsToUser() || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+      allow create: if request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
+    }
+    match /sentPrompts/{document=**} {
+    	allow read,update: if getMemberId() == resource.data.cactusMemberId;
+    }
     match /{document=**} {
-      allow read, write;
+      allow read, write: if false;
     }
   }
 }

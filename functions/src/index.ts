@@ -5,6 +5,7 @@ import checkoutApp from "@api/endpoints/checkoutApp";
 import testApp from "@api/endpoints/testApp";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
+import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 
@@ -25,4 +26,5 @@ export const cloudFunctions = {
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     userCreatedTrigger,
     userDeletedTrigger,
+    reflectionResponseCreatedTrigger: onReflectionResponseCreated,
 };
