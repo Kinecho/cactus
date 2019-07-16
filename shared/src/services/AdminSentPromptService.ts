@@ -106,6 +106,7 @@ export default class AdminSentPromptService {
             // API Docs: https://developer.mailchimp.com/documentation/mailchimp/reference/reports/sent-to/#read-get_reports_campaign_id_sent_to
         } else {
             sentPrompt = new SentPrompt();
+            sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
             sentPrompt.sendHistory.push({
                 sendDate: new Date(),
                 email: recipient.email_address,
