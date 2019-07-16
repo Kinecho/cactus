@@ -16,6 +16,10 @@ service cloud.firestore {
     		return getMember(getMemberId())
     }
 
+    function belongsToMember(){
+    	return resourceBelongsToUser() || getCurrentMember().id == resource.data.cactusMemberId || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+    }
+
     match /reflectionPrompt/{document=**} {
     	 allow read: if true;
     }
@@ -23,8 +27,8 @@ service cloud.firestore {
     	 allow read,write: if resourceBelongsToUser()
     }
     match /reflectionResponses/{document=**} {
-    	allow read: if getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
-      allow update: if resourceBelongsToUser() || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+    	allow read: if belongsToMember();
+      allow update: if belongsToMember();
       allow create: if request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
     }
     match /sentPrompts/{document=**} {
