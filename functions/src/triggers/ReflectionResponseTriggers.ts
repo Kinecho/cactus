@@ -38,6 +38,8 @@ export const onReflectionResponseCreated = functions.firestore
                 if (member) {
                     memberEmail = member.email;
                 }
+            } else if (reflectionResponse.mailchimpUniqueEmailId) {
+                member = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(reflectionResponse.mailchimpUniqueEmailId);
             }
 
             let prompt: ReflectionPrompt | undefined;

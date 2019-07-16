@@ -2,24 +2,18 @@ import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {processEmail} from "@api/inbound/EmailProcessor"
-import {getMailchimpDateString} from "@shared/util/DateUtil";
 import {saveEmailReply} from "@api/services/emailService";
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
 import {fromJSON} from "@shared/util/FirestoreUtil";
-import EmailReply, {EmailStoragePath} from "@shared/models/EmailReply";
+import {EmailStoragePath} from "@shared/models/EmailReply";
 import {writeToFile} from "@api/util/FileUtil";
-import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
 import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
 import MailchimpService from "@shared/services/MailchimpService";
-import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminSlackService, {
-    AttachmentColor,
-    SlackAttachmentField,
-    SlackMessage
-} from "@shared/services/AdminSlackService";
+import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
 
 const app = express();
@@ -94,7 +88,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
 
         const listMember = await mailchimpService.getMemberByUniqueEmailId(mailchimpUniqueEmailId);
         const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(mailchimpCampaignId);
-
+        const cactusMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpUniqueEmailId);
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
         emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
         emailReply.mailchimpMemberId = listMember ? listMember.id : undefined;
@@ -110,17 +104,15 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         promptResponse.promptQuestion = prompt ? prompt.question : undefined;
         promptResponse.responseMedium = ResponseMedium.EMAIL;
 
+        if (cactusMember) {
+            promptResponse.cactusMemberId = cactusMember.id;
+        }
+
         let resetUserResponse;
         if (listMember) {
             promptResponse.memberEmail = listMember.email_address;
             promptResponse.mailchimpUniqueEmailId = listMember.unique_email_id;
             promptResponse.mailchimpMemberId = listMember.id;
-            // NOTE: this task is now run on the ReflectionResponseTrigger function
-            // resetUserResponse = await AdminReflectionResponseService.resetUserReminder(listMember.email_address);
-            // if (!resetUserResponse.success) {
-            //     console.log("reset user reminder failed", resetUserResponse);
-            //     await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${listMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
-            // }
         } else {
             await slackService.sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
             resetUserResponse = await AdminReflectionResponseService.resetUserReminder(from.email);
@@ -136,14 +128,6 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             console.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
         }
 
-        let messageColor = undefined;
-        let message = "Successfully processed a reflection response!";
-        if (!savedEmail) {
-            messageColor = AttachmentColor.error;
-            message = `:rotating_light: Unable to save the email reply. The following details from ${from.email} have not been fully saved to Firestore`;
-        }
-        await sendSlackMessage(savedEmail || emailReply, prompt, savedReflectionResponse, listMember, message, messageColor);
-
         res.send({email: (savedEmail || emailReply).toJSON()});
     } catch (error) {
         await slackService.sendActivityNotification("ERROR: Failed to process incoming email: " + `${error}`);
@@ -151,98 +135,5 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
     }
 });
 
-
-async function sendSlackMessage(email: EmailReply,
-                                prompt?: ReflectionPrompt,
-                                response?: ReflectionResponse,
-                                sentToMember?: ListMember,
-                                message = "Got a reply!",
-                                color = AttachmentColor.info): Promise<void> {
-    const messageColor = color;
-    const msg: SlackMessage = {};
-    msg.text = message;
-
-    const fromEmail = email.from && email.from.email ? email.from.email : null;
-    const campaign = email.mailchimpCampaignId ? await MailchimpService.getSharedInstance().getCampaign(email.mailchimpCampaignId) : null;
-
-    const fields: SlackAttachmentField[] = [];
-
-    if (prompt) {
-        let contentLink = "";
-        if (prompt.question && prompt.contentPath) {
-            contentLink = `<https://cactus.app${prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath}|${prompt.question}>`
-        }
-        fields.push(
-            {
-                title: "Prompt Question",
-                value: `${contentLink}`,
-                short: false,
-            }
-        )
-    } else {
-        fields.push(
-            {
-                title: "from",
-                value: fromEmail || "unknown",
-                short: false,
-            },
-            {
-                title: "subject",
-                value: email.subject || "unknown",
-                short: false,
-            },
-            {
-                title: "Campaign Id",
-                value: email.mailchimpCampaignId || "unknown",
-                short: true,
-            },
-            {
-                title: "Campaign Title",
-                value: campaign ? campaign.settings.title : "",
-                short: false
-            },
-            {
-                title: "Campaign Subject",
-                value: campaign ? campaign.settings.subject_line : "",
-                short: false
-            },
-            {
-                title: "Campaign Send Date",
-                value: campaign ? getMailchimpDateString(new Date(campaign.send_time)) : "unknown",
-                short: true
-            }
-        );
-    }
-
-
-    if (email.mailchimpUniqueEmailId) {
-        console.log("looking for member on list with unique email id = ", email.mailchimpUniqueEmailId);
-        // const sentToMember = await getMemberByEmailId(email.mailchimpUniqueEmailId);
-        console.log("sent to member found to be", sentToMember);
-
-        fields.unshift(
-            {
-                title: "List Member Email",
-                value: (sentToMember && sentToMember.email_address) ? sentToMember.email_address : "not found",
-                short: false,
-            },
-            {
-                title: "Mailchimp Unique Email ID",
-                value: email.mailchimpUniqueEmailId,
-                short: false,
-            })
-    } else {
-        console.log("unable to find email id on processed email");
-    }
-
-    msg.attachments = [{
-        color: messageColor,
-        ts: `${(new Date()).getTime() / 1000}`,
-        fields,
-    }];
-
-    await AdminSlackService.getSharedInstance().sendActivityNotification(msg);
-
-}
 
 export default app;
