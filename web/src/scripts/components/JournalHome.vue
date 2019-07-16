@@ -2,17 +2,20 @@
     <div>
         <NavBar :show-signup="true"/>
         <div class="container centered">
-            <div v-if="loginReady && !loggedIn">
-                <h3>Oops, it looks like you're logged out.</h3>
-                <div class="login-container">
-                    <a class="button primary" :href="loginPath">Sign In</a>
-                </div>
+            <div v-if="loginReady && !loggedIn" class="section-container">
+                <section class="loggedOut journalList">
+                    <h3>Oops, it looks like you're logged out.</h3>
+                    <div class="login-container">
+                        <a class="button primary" :href="loginPath">Sign In</a>
+                    </div>
+                </section>
+
             </div>
             <div v-if="loggedIn" class="section-container">
-                <section class="empty journalList" v-if="!preparedPrompts.length && responsesHasLoaded && sentPromptsLoaded">
+                <section class="empty journalList" v-if="!sentPrompts.length && sentPromptsLoaded">
                     Your journal is empty.
                 </section>
-                <section v-if="preparedPrompts.length && responsesHasLoaded && sentPromptsLoaded" class="journalList">
+                <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group
                             name="fade-out"
                             tag="div"
@@ -20,15 +23,14 @@
                             v-bind:css="false"
                             v-on:before-enter="beforeEnter"
                             v-on:enter="enter">
-                        <response-card
+                        <entry
                                 class="journalListItem"
-                                v-for="(preparedPrompt, index) in preparedPrompts"
-                                v-bind:response="preparedPrompt.response"
-                                v-bind:prompt="preparedPrompt.prompt"
+                                v-for="(sentPrompt, index) in sentPrompts"
+                                v-bind:sentPrompt="sentPrompt"
                                 v-bind:index="index"
-                                v-bind:key="preparedPrompt.prompt.id + index"
+                                v-bind:key="sentPrompt.id"
                                 v-bind:data-index="index"
-                        ></response-card>
+                        ></entry>
                     </transition-group>
                 </section>
             </div>
@@ -38,218 +40,85 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import {FirebaseUser, getAuth} from '@web/firebase';
+    import {FirebaseUser} from '@web/firebase';
+    import JournalEntryCard from "@components/JournayEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
-    import ResponseCard from "@components/ReflectionResponseCard.vue";
-    import ReflectionResponse from '@shared/models/ReflectionResponse';
-    import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {PageRoute} from '@web/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionPromptService from '@web/services/ReflectionPromptService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import SentPrompt from "@shared/models/SentPrompt"
     import SentPromptService from '@web/services/SentPromptService'
 
     declare interface JournalHomeData {
-        user?: FirebaseUser | null,
         cactusMember?: CactusMember,
         authUnsubscribe?: () => void,
+        user?: FirebaseUser,
+        memberUnsubscriber?: ListenerUnsubscriber,
         loginReady: boolean,
-        responses: ReflectionResponse[],
-        prompts: ReflectionPrompt[],
-        responseUnsubscriber?: ListenerUnsubscriber,
-        responsesHasLoaded: boolean,
         sentPromptsUnsubscriber?: ListenerUnsubscriber,
         sentPrompts: SentPrompt[],
         sentPromptsLoaded: boolean,
-        preparedPrompts: { sentPrompt: SentPrompt, response?: ReflectionResponse, prompt: ReflectionPrompt }[]
     }
 
     export default Vue.extend({
         created() {
-            this.authUnsubscribe = getAuth().onAuthStateChanged(async user => {
-                this.user = user;
-                this.loginReady = true;
-
-                if (!user) {
-                    window.location.href = "/unauthorized"
-                } else {
-                    this.cactusMember = await CactusMemberService.sharedInstance.getByUserId(user.uid);
-
-                    if (!this.cactusMember) {
-                        console.warn("No cactus member was found for userId", user.uid);
-                    } else {
-                        console.log("fetching small page to start with");
-                        const sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        console.log(`fetched ${sentPrompts.length} prompts before starting the query observer`);
-                        const promptIds: string[] = [];
-                        sentPrompts.forEach(sent => {
-                            if (sent.promptId) {
-                                promptIds.push(sent.promptId);
-                            }
-                        });
-                        this.sentPrompts = sentPrompts;
-
-                        await this.fetchPromptsForIds(promptIds);
-                        await this.updatePreparedPrompts();
-                        this.sentPromptsLoaded = true;
-
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: async ({member, user}) => {
+                    if (!user) {
+                        // window.location.href = "/unauthorized";
+                        // return;
                     }
+                    this.cactusMember = member;
+                    this.user = user;
+
+                    this.loginReady = true;
+                    this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                    this.sentPromptsLoaded = true;
                 }
             });
         },
-        components: {NavBar, ResponseCard},
+        components: {NavBar, entry: JournalEntryCard},
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP}
         },
         data(): JournalHomeData {
             return {
-                user: null,
                 cactusMember: undefined,
                 loginReady: false,
                 authUnsubscribe: undefined,
-                responses: [],
-                prompts: [],
-                responseUnsubscriber: undefined,
-                responsesHasLoaded: false,
                 sentPromptsUnsubscriber: undefined,
                 sentPrompts: [],
                 sentPromptsLoaded: false,
-                preparedPrompts: []
             };
         },
         watch: {
+            //TODO: add pagination
             async cactusMember(member: CactusMember | undefined | null) {
                 if (member && member.id) {
                     this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(member.id, {
                         onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
                             this.sentPrompts = sentPrompts;
-                            const promptIds: string[] = [];
-                            sentPrompts.forEach(sent => {
-                                if (sent.promptId) {
-                                    promptIds.push(sent.promptId);
-                                }
-                            });
-
-                            await this.fetchPromptsForIds(promptIds);
-                            await this.updatePreparedPrompts();
                             this.sentPromptsLoaded = true;
                         }
                     });
+                } else if (this.sentPromptsUnsubscriber) {
+                    this.sentPromptsUnsubscriber();
                 }
 
-                //TODO: update this to onlu use Cactus Member id
-                if (member && member.mailchimpListMember && member.mailchimpListMember.id) {
-                    const mailchimpMemberId = member.mailchimpListMember.id;
-
-                    this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForMailchimpMemberId(mailchimpMemberId, {
-                        onData: async (models: ReflectionResponse[]): Promise<void> => {
-                            this.responsesHasLoaded = true;
-                            this.responses = models;
-                            // const currentPrompts = this.promptsById;
-                            const promptIds: string[] = [];
-                            this.responses.forEach(response => {
-                                if (response.promptId) {
-                                    promptIds.push(response.promptId);
-                                }
-                            });
-
-                            if (promptIds.length > 0) {
-                                await this.fetchPromptsForIds(promptIds);
-                            }
-                        }
-                    });
-
-                }
-
-            },
-            async prompts(): Promise<void> {
-                await this.updatePreparedPrompts();
-            },
-            async responses(): Promise<void> {
-                await this.updatePreparedPrompts();
             },
         },
-        beforeDestroy() {
+        destroyed() {
             if (this.authUnsubscribe) {
                 this.authUnsubscribe();
             }
-
-            if (this.responseUnsubscriber) {
-                this.responseUnsubscriber();
+            if (this.sentPromptsUnsubscriber) {
+                this.sentPromptsUnsubscriber();
             }
+
         },
         methods: {
-            async updatePreparedPrompts() {
-                const promptsById = this.promptsById;
-                const responsesByPromptId = this.responsesByPromptId;
-
-                const items: {
-                    response?: ReflectionResponse,
-                    sentPrompt: SentPrompt,
-                    prompt: ReflectionPrompt
-                }[] = [];
-
-                this.sentPrompts.forEach(sentPrompt => {
-                    let promptId = sentPrompt.promptId;
-
-                    let responses;
-                    let prompt: ReflectionPrompt | undefined;
-                    if (promptId) {
-                        prompt = promptsById[promptId];
-                        responses = responsesByPromptId[promptId];
-                    } else {
-                        // console.warn("no prompt id found on sentPrompt", sentPrompt);
-                    }
-
-                    if (prompt) {
-                        if (responses && prompt) {
-                            responses.forEach(response => {
-                                items.push({
-                                    prompt: prompt as ReflectionPrompt,
-                                    response,
-                                    sentPrompt,
-                                })
-                            })
-                        } else {
-                            items.push({
-                                prompt,
-                                sentPrompt,
-                            })
-                        }
-
-
-                    }
-                    return;
-
-                });
-
-                this.preparedPrompts = items;
-            },
-            async fetchPromptsForIds(promptIds: string[]): Promise<void> {
-                const currentPrompts = this.promptsById;
-                let promptTasks = promptIds.map(promptId => {
-                    return new Promise(async resolve => {
-                        if (promptId) {
-                            if (currentPrompts[promptId]) {
-                                resolve();
-                                return;
-                            }
-                            const prompt = await ReflectionPromptService.sharedInstance.getById(promptId);
-                            if (prompt) {
-                                this.prompts.push(prompt);
-                            }
-                            resolve();
-                        }
-                    })
-                });
-                await Promise.all(promptTasks);
-                return;
-            },
             beforeEnter: function (el: HTMLElement) {
-
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
@@ -267,32 +136,7 @@
                 return this.user ? this.user.email : null;
             },
             loggedIn(): boolean {
-                return !!this.user;
-            },
-            promptsById(): { [id: string]: ReflectionPrompt } {
-                const initialValue: { [id: string]: ReflectionPrompt } = {};
-                return this.prompts.reduce((map, prompt) => {
-                    if (prompt && prompt.id) {
-                        const id = prompt.id;
-                        map[id] = prompt;
-                    }
-
-                    return map;
-                }, initialValue)
-            },
-            responsesByPromptId(): { [id: string]: ReflectionResponse [] } {
-                const initialValue: { [id: string]: ReflectionResponse[] } = {};
-                return this.responses.reduce((map, response) => {
-                    if (response && response.promptId) {
-                        if (!map[response.promptId]) {
-                            map[response.promptId] = [];
-                        }
-
-                        map[response.promptId].push(response);
-                    }
-
-                    return map;
-                }, initialValue)
+                return !!this.cactusMember;
             },
         }
     })
@@ -360,7 +204,14 @@
                 margin: 0 auto 4.8rem;
                 max-width: 64rem;
                 padding: 3.2rem;
+            }
 
+            &.loggedOut {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 12rem;
             }
         }
     }

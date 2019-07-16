@@ -37,6 +37,9 @@ declare interface GetOptions {
     onlyDeleted?: false,
 }
 
+declare interface DocObserverOptions<IModel extends BaseModel> extends GetOptions {
+    onData: (model?: IModel) => void | Promise<void>
+}
 
 declare interface IQueryOptions<IQueryCursor> extends GetOptions {
     pagination?: {
