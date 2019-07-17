@@ -1,6 +1,6 @@
 <template>
     <div>
-        <NavBar :show-signup="true"/>
+        <NavBar :show-signup="false"/>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -66,8 +66,8 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
-                        // window.location.href = "/unauthorized";
-                        // return;
+                        window.location.href = "/journal";
+                        return;
                     }
                     this.cactusMember = member;
                     this.user = user;
