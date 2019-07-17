@@ -173,10 +173,14 @@
                         if (!response && this.prompt && this.prompt.id) {
                             response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
                         }
-                        if (response) {
+
+                        if (edit.text && edit.text.trim() && response) {
                             response.content.text = edit.text;
                             //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
                             await ReflectionResponseService.sharedInstance.save(response);
+                        } else if (response && response.id) {
+                            //the text was deleted, delete the response;
+                            await ReflectionResponseService.sharedInstance.delete(response);
                         } else {
                             console.error("There was no response available to save... this shouldn't happen");
                         }
