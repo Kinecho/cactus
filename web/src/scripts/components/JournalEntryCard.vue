@@ -33,18 +33,20 @@
             <div v-for="editedResponse in editedResponses">
                 <textarea v-model="editedResponse.text"></textarea>
             </div>
-            <button class="primary small" v-on:click="doneEditing" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                    <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
-                </svg>
-                Done
-            </button>
-            <button class="secondary small" v-on:click="cancelEditing" type="button">
-                Cancel
-            </button>
+            <nav class="buttonContainer">
+                <button class="primary small" v-on:click="doneEditing" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
+                    </svg>
+                    Done
+                </button>
+                <button class="secondary small" v-on:click="cancelEditing" type="button">
+                    Cancel
+                </button>
+            </nav>
         </form>
         <nav v-show="!doReflect && responsesLoaded && (responses.length === 0 || !responseText)" class="buttonContainer">
-            <button v-on:click="startEditing" class="secondary small">
+            <button v-on:click="startEditing" class="primary small">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M34.1225601,5.69480994 C35.5842461,4.23312388 37.7147,3.66227049 39.7114003,4.19728472 C41.7081006,4.73229895 43.267701,6.29189942 43.8027153,8.28859971 C44.3377295,10.2853 43.7668761,12.4157539 42.3051901,13.8774399 L14.7141653,41.4684646 C14.572724,41.609906 14.3955015,41.7102477 14.2014456,41.7587616 L5.37231767,43.9660436 C4.56403257,44.1681149 3.83188511,43.4359674 4.03395638,42.6276823 L6.24123836,33.7985544 C6.28975234,33.6044985 6.39009403,33.427276 6.53153536,33.2858347 L34.1225601,5.69480994 Z M13.3695374,39.6915245 L40.744406,12.3166559 C41.6484776,11.4125842 42.0015578,10.0948711 41.6706446,8.85988633 C41.3397314,7.62490151 40.3750985,6.66026857 39.1401137,6.32935539 C37.9051289,5.9984422 36.5874158,6.35152237 35.6833441,7.255594 L8.30847549,34.6304626 L6.62145487,41.3785451 L13.3695374,39.6915245 Z"/>
                 </svg>
@@ -273,6 +275,8 @@
     button, a.button {
         align-items: center;
         display: inline-flex;
+        flex-grow: 0;
+        margin-right: .8rem;
 
         svg {
             fill: $darkGreen;
@@ -320,7 +324,6 @@
     .dateContainer {
         align-items: center;
         display: flex;
-        /*flex-direction: column;*/
         justify-content: space-between;
         margin-bottom: 1.6rem;
         position: relative;
@@ -334,7 +337,6 @@
             &.edited {
                 color: $lightText;
                 font-size: 1rem;
-
             }
         }
     }
@@ -374,12 +376,14 @@
         border: 1px solid $green;
         border-radius: 6px;
         font-size: 1.6rem;
+        margin-top: .8rem;
         min-height: 11rem;
         padding: 1.6rem;
         width: 100%;
     }
 
     .buttonContainer {
+        display: flex;
         margin-top: 1.6rem;
     }
 
