@@ -197,11 +197,29 @@
                 this.menuOpen = false;
             },
             cancelEditing() {
-                if (this.responseText && this.editedText.trim() !== this.responseText) {
+                const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
+                    if (response.id) {
+                        map[response.id as string] = response;
+                    }
+                    return map;
+                }, {});
+
+                const foundChange = this.editedResponses.find(edit => {
+                    if (!edit.id && edit.text.trim()) {
+                        return true;
+                    } else if (edit.id && responsesById[edit.id]) {
+                        const response = responsesById[edit.id];
+                        const existingText = response.content.text || "";
+                        return existingText.trim() !== edit.text.trim();
+                    }
+                    return false;
+                });
+
+                if (foundChange) {
                     const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
                     if (c) {
                         console.log("confirmed cancel");
-                        this.editedText = this.responseText;
+                        // this.editedText = this.responseText;
                         this.doReflect = false;
                     } else {
                         console.log("don't cancel");
@@ -211,20 +229,9 @@
                     this.doReflect = false;
                 }
             },
-            async deleteReflection() {
-                const c = confirm("Are you sure you want to delete this reflection?");
-                if (c) {
-                    this.closeMenu();
-                    const tasks: Promise<any>[] = [];
-                    this.responses.forEach(response => {
-                        tasks.push(ReflectionResponseService.sharedInstance.delete(response));
-                    });
-                    await Promise.all(tasks);
-                }
-            },
             async deleteSentPrompt() {
 
-                const c = confirm("Are you sure you want to delete this question? It will no longer be available in your journal");
+                const c = confirm("Are you sure you want to ignore this question? It will no longer be available in your journal");
                 if (!c) {
                     return;
                 }
