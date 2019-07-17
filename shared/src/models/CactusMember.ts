@@ -4,6 +4,7 @@ import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
     NONE = "NONE",
+    TESTER = "TESTER"
 }
 
 export enum Field {

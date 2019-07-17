@@ -2,7 +2,7 @@ import "@styles/pages/sign_up.scss"
 import {getAuthUI, getAuthUIConfig} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
-import {setupNavigation} from "@web/util";
+import {LocalStorageKey, setupNavigation} from "@web/util";
 
 setupNavigation({showSignupButton: false, redirectOnSignOut: false});
 
@@ -13,7 +13,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const $loading = document.getElementById("third-party-loading");
     const $welcomeMessage = document.getElementById("welcome-message");
     const $loginContainer = document.getElementById("third-party-logins");
+    const $emailInput = document.getElementById("email-input") as HTMLInputElement;
     configureLoginForm("email-signup");
+
+    let emailFromStorage: string | undefined | null;
+    try {
+        emailFromStorage = localStorage.getItem(LocalStorageKey.emailForSignIn);
+    } catch (error) {
+        console.error("failed to fetch value from localstorage", error);
+    }
+
+    if (emailFromStorage && $emailInput) {
+        $emailInput.value = emailFromStorage;
+        localStorage.removeItem(LocalStorageKey.emailForSignIn);
+    }
 
 
     const ui = getAuthUI();
