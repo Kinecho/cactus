@@ -7,17 +7,25 @@ body {
   overflow-x: hidden;
 }
 
-
 html {
   @include maxW(768) {
     overflow-x: hidden;
   }
-
 }
 
-
-.button.learnMore {
+.buttonContainer {
   z-index: 5;
+
+  .button {
+    display: inline-block;
+    margin: 0 .4rem;
+  }
+
+  .button.white {
+    background-color: white;
+    box-shadow: none;
+    color: $darkGreen;
+  }
 }
 
 .hero {
@@ -547,9 +555,32 @@ a.button {
     text-align: center;
   }
 
+  .inlineActions {
+    align-items: center;
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 1.6rem 0;
+
+    @include r(768) {
+      flex-flow: row nowrap;
+    }
+  }
+
   a.button {
-    display: inline-block;
-    margin: 1.6rem 0 3.2rem;
+    margin: 0 0 1.6rem;
+
+    @include r(768) {
+      margin: 0 1.2rem 0 0;
+    }
+  }
+
+  a.link {
+    color: $darkGreen;
+    margin: 1.6rem .8rem;
+
+    @include r(768) {
+      margin: 0 .8rem;
+    }
   }
 
   .heart {
