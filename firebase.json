@@ -19,12 +19,18 @@
             "npm --prefix \"$RESOURCE_DIR\" run lint",
             "npm --prefix \"$RESOURCE_DIR\" run test",
             "npm --prefix \"$RESOURCE_DIR\" run build"
+        ],
+        "postdeploy": [
+            "npm --prefix scripts run firebase:postdeploy functions"
         ]
     },
     "hosting": {
         "appAssociation": "AUTO",
         "predeploy": [
             "npm --prefix ./web run build:firebase"
+        ],
+        "postdeploy": [
+            "npm --prefix scripts run firebase:postdeploy hosting"
         ],
         "public": "web/public",
         "ignore": [

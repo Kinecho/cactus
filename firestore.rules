@@ -17,7 +17,7 @@ service cloud.firestore {
     }
 
     function belongsToMember(){
-    	return resourceBelongsToUser() || getCurrentMember().id == resource.data.cactusMemberId || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+    	return resourceBelongsToUser() || getMemberId() == resource.data.cactusMemberId || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
     }
 
     match /reflectionPrompt/{document=**} {
@@ -29,7 +29,7 @@ service cloud.firestore {
     match /reflectionResponses/{document=**} {
     	allow read: if belongsToMember();
       allow update: if belongsToMember();
-      allow create: if request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
+      allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
     }
     match /sentPrompts/{document=**} {
     	allow read,update: if getMemberId() == resource.data.cactusMemberId;
