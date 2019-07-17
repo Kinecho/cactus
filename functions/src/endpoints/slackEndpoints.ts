@@ -60,8 +60,9 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
         const pubsub = new PubSub();
         await pubsub.topic(PubSubTopic.firestore_export_bigquery).publishJSON({});
         await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: `BigQuery export job started for project ${config.web.domain}`});
+    } else {
+        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: `Unknown command argument *${commandText}*`});
     }
-
 
     resp.sendStatus(204);
     return;
@@ -102,7 +103,7 @@ app.post("/actions", async (req: functions.https.Request | any, resp: functions.
     const callbackId: string | undefined = payload.callback_id;
     console.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
     if (callbackId === 'get_mailchimp_member') {
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: "This is your response callback "});
+        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: "This doesnt do anything useful... yet"});
 
         resp.send({success: true});
     } else {
