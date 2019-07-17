@@ -147,7 +147,6 @@
     @import "~styles/mixins";
 
     .container {
-        /*max-width: 74rem;*/
         text-align: left;
         padding-top: 2rem;
         padding-bottom: 2rem;
@@ -171,20 +170,12 @@
     }
 
     .section-container {
-        /*display: flex;*/
-        /*flex-direction: column;*/
-        /*justify-content: center;*/
-        /*align-items: center;*/
 
         .journalList {
             display: flex;
             flex-direction: column;
 
             .journalListItem {
-                transition: .3s all;
-                width: 100%;
-                /*display: inline-block;*/
-
                 &.out {
                     transform: translateY(30px);
                     opacity: 0;
@@ -200,7 +191,6 @@
                 @include shadowbox;
                 background: $lightGreen;
                 color: $darkText;
-
                 margin: 0 auto 4.8rem;
                 max-width: 64rem;
                 padding: 3.2rem;
