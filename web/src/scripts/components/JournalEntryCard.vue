@@ -19,20 +19,20 @@
                         <a href="#" v-on:click.prevent="startEditing" v-show="responses.length > 0">Edit Response</a>
                     </nav>
                 </transition>
-
             </div>
-
         </div>
 
         <h3 class="question">{{questionText}}</h3>
         <p v-show="!prompt && promptLoaded" class="warning prompt">
-            There is no Prompt!
+            Oops! We were unable to load the question for this day.
         </p>
 
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
 
         <form v-show="doReflect" v-on:submit.prevent>
-            <textarea v-model="editedText"></textarea>
+            <div v-for="editedResponse in editedResponses">
+                <textarea v-model="editedResponse.text"></textarea>
+            </div>
             <button class="primary small" v-on:click="doneEditing" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
@@ -40,9 +40,6 @@
                 Done
             </button>
             <button class="secondary small" v-on:click="cancelEditing" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                    <path d="M6.00836092,24.4622273 C5.54892058,24.002787 4.8040206,24.002787 4.34458026,24.4622273 C3.88513991,24.9216677 3.88513991,25.6665676 4.34458026,26.126008 L16.1092861,37.8907139 C16.5687265,38.3501542 17.3136265,38.3501542 17.7730668,37.8907139 L43.6554197,12.0083609 C44.1148601,11.5489206 44.1148601,10.8040206 43.6554197,10.3445803 C43.1959794,9.88513991 42.4510794,9.88513991 41.9916391,10.3445803 L16.9411765,35.3950429 L6.00836092,24.4622273 Z"/>
-                </svg>
                 Cancel
             </button>
         </form>
@@ -85,6 +82,7 @@
         responseUnsubscriber?: ListenerUnsubscriber,
         responsesLoaded: boolean,
         promptLoaded: boolean,
+        editedResponses: { id: string | undefined, text: string }[],
     }
 
     export default Vue.extend({
@@ -131,7 +129,8 @@
                 responsesLoaded: false,
                 responseUnsubscriber: undefined,
                 promptLoaded: false,
-            };
+                editedResponses: []
+            }
         },
         watch: {},
         computed: {
@@ -160,17 +159,32 @@
                 this.doReflect = false;
 
 
-                let response = this.responses.length > 0 ? this.responses[this.responses.length - 1] : undefined;
-                if (!response && this.prompt && this.prompt.id) {
-                    response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
-                }
-                if (response) {
-                    response.content.text = this.editedText;
-                    //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
-                    await ReflectionResponseService.sharedInstance.save(response);
-                } else {
-                    console.error("There was no response available to save... this shouldn't happen");
-                }
+                const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
+                    if (response.id) {
+                        map[response.id as string] = response;
+                    }
+                    return map;
+                }, {});
+
+                const tasks: Promise<any>[] = [];
+                this.editedResponses.forEach(edit => {
+                    return new Promise(async resolve => {
+                        let response = edit.id ? responsesById[edit.id] : undefined;
+                        if (!response && this.prompt && this.prompt.id) {
+                            response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
+                        }
+                        if (response) {
+                            response.content.text = edit.text;
+                            //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
+                            await ReflectionResponseService.sharedInstance.save(response);
+                        } else {
+                            console.error("There was no response available to save... this shouldn't happen");
+                        }
+                        resolve();
+                    })
+                });
+                await Promise.all(tasks);
+
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -217,6 +231,15 @@
             },
             startEditing() {
                 this.editedText = this.responseText || "";
+                this.editedResponses = this.responses.map(response => {
+                    return {id: response.id || "", text: response.content.text || ""}
+                });
+
+                if (this.editedResponses.length === 0) {
+                    this.editedResponses = [{id: undefined, text: ""}];
+                }
+
+
                 this.doReflect = true;
                 this.menuOpen = false;
             }
