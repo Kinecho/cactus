@@ -41,7 +41,7 @@
 <script lang="ts">
     import Vue from 'vue'
     import {FirebaseUser} from '@web/firebase';
-    import JournalEntryCard from "@components/JournayEntryCard.vue";
+    import JournalEntryCard from "@components/JournalEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
     import {PageRoute} from '@web/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'

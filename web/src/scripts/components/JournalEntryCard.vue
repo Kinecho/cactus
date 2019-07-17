@@ -12,10 +12,11 @@
                         <path d="M24,27.0588235 C22.0507597,27.0588235 20.4705882,25.4786521 20.4705882,23.5294118 C20.4705882,21.5801715 22.0507597,20 24,20 C25.9492403,20 27.5294118,21.5801715 27.5294118,23.5294118 C27.5294118,25.4786521 25.9492403,27.0588235 24,27.0588235 Z M40.4705882,27.0588235 C38.5213479,27.0588235 36.9411765,25.4786521 36.9411765,23.5294118 C36.9411765,21.5801715 38.5213479,20 40.4705882,20 C42.4198285,20 44,21.5801715 44,23.5294118 C44,25.4786521 42.4198285,27.0588235 40.4705882,27.0588235 Z M7.52941176,27.0588235 C5.58017147,27.0588235 4,25.4786521 4,23.5294118 C4,21.5801715 5.58017147,20 7.52941176,20 C9.47865206,20 11.0588235,21.5801715 11.0588235,23.5294118 C11.0588235,25.4786521 9.47865206,27.0588235 7.52941176,27.0588235 Z"/>
                     </svg>
                 </button>
-                <transition name="fade-down" v-show="prompt">
+                <transition name="fade-down">
                     <nav class="moreMenu" v-show="menuOpen">
-                        <a :href="prompt.contentPath" target="_blank" v-if="prompt && prompt.contentPath">Go&nbsp;Deeper</a>
-                        <a href="#" v-on:click.prevent="deleteSentPrompt" v-if="prompt">Ignore&nbsp;Question</a>
+                        <a :href="prompt? prompt.contentPath : '#'" target="_blank" v-show="prompt && prompt.contentPath">Go&nbsp;Deeper</a>
+                        <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a>
+                        <a href="#" v-on:click.prevent="startEditing" v-show="responses.length > 0">Edit Response</a>
                     </nav>
                 </transition>
 
@@ -26,9 +27,6 @@
         <h3 class="question">{{questionText}}</h3>
         <p v-show="!prompt && promptLoaded" class="warning prompt">
             There is no Prompt!
-        </p>
-        <p v-if="responses.length === 0 && responsesLoaded" class="warning response">
-            There are no Responses!
         </p>
 
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
@@ -48,7 +46,7 @@
                 Cancel
             </button>
         </form>
-        <nav v-if="!doReflect" class="buttonContainer">
+        <nav v-show="!doReflect && responsesLoaded && (responses.length === 0 || !responseText)" class="buttonContainer">
             <button v-on:click="startEditing" class="secondary small">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M34.1225601,5.69480994 C35.5842461,4.23312388 37.7147,3.66227049 39.7114003,4.19728472 C41.7081006,4.73229895 43.267701,6.29189942 43.8027153,8.28859971 C44.3377295,10.2853 43.7668761,12.4157539 42.3051901,13.8774399 L14.7141653,41.4684646 C14.572724,41.609906 14.3955015,41.7102477 14.2014456,41.7587616 L5.37231767,43.9660436 C4.56403257,44.1681149 3.83188511,43.4359674 4.03395638,42.6276823 L6.24123836,33.7985544 C6.28975234,33.6044985 6.39009403,33.427276 6.53153536,33.2858347 L34.1225601,5.69480994 Z M13.3695374,39.6915245 L40.744406,12.3166559 C41.6484776,11.4125842 42.0015578,10.0948711 41.6706446,8.85988633 C41.3397314,7.62490151 40.3750985,6.66026857 39.1401137,6.32935539 C37.9051289,5.9984422 36.5874158,6.35152237 35.6833441,7.255594 L8.30847549,34.6304626 L6.62145487,41.3785451 L13.3695374,39.6915245 Z"/>
@@ -220,6 +218,7 @@
             startEditing() {
                 this.editedText = this.responseText || "";
                 this.doReflect = true;
+                this.menuOpen = false;
             }
         }
     })
