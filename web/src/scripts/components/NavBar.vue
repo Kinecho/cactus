@@ -1,12 +1,13 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn}">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded}">
         <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-        <a v-if="displaySignupButton"
-                class="jump-to-form button"
-                @click.prevent="scrollToSignup"
-                type="button"
-        >Sign Up Free</a>
-
+        <transition name="fade-in-slow" appear>
+            <a v-if="displaySignupButton"
+                    class="jump-to-form button"
+                    @click.prevent="scrollToSignup"
+                    type="button"
+            >Sign Up Free</a>
+        </transition>
         <transition name="fade-in">
             <div v-if="loggedIn" class="user-info">
                 <div v-click-outside="closeMenu">
@@ -151,6 +152,14 @@
     @import "~styles/transitions";
 
     header {
+        button, a.button {
+            flex-grow: 0;
+            font-size: 1.6rem;
+            margin: 0;
+            padding: 1.2rem 2rem 1.6rem;
+
+        }
+
         &.out {
             opacity: 0;
         }

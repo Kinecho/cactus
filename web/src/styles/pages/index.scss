@@ -14,6 +14,15 @@ body {
   }
 }
 
+header {
+  a.button, button {
+    @include r(768) {
+      display: none;
+    }
+  }
+
+}
+
 //This is the target for the sign-up jump button
 #sign-up {
   position: relative;
@@ -25,19 +34,13 @@ body {
 
 .hero {
   display: grid;
-  grid-template-areas:
-     "heroText"
-     "demo"
-     "target"
-     "form";
+  grid-template-areas: "heroText" "demo" "target" "form";
   position: relative;
 
   @include r(768) {
     grid-template-columns: 50% auto;
     grid-template-rows: auto auto;
-    grid-template-areas:
-      "heroText demo"
-      "form     demo";
+    grid-template-areas: "heroText demo" "form     demo";
     text-align: left;
   }
   @include r(1024) {

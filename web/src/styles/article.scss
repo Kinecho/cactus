@@ -24,8 +24,10 @@
 header {
   border-bottom: 1px solid lighten($darkText, 90%);
 
-  a.button {
-    display: block;
+  [data-focus-form] {
+    //display: none;
+    transition: all .5s;
+    opacity: 0;
   }
 }
 
@@ -251,12 +253,20 @@ input[type=email] {
   }
 }
 
-.signup-loggedIn {
-  height: 5rem;
+.signup-loggedIn, #signupAnchor + *:not(.loaded) {
   .email {
-    display: none;
+    opacity: 0;
+    transform: translateY(20px);
   }
 }
+
+#signupAnchor + *.loaded {
+  .email {
+    opacity: 1;
+
+  }
+}
+
 
 .email {
   background: url(assets/images/yellowNeedles.svg) $yellow;
@@ -264,6 +274,7 @@ input[type=email] {
   padding: 5.6rem 0 .8rem;
   position: relative;
   z-index: 1;
+  transition: all .3s;
 
   @include r(768) {
     background-size: 30%;

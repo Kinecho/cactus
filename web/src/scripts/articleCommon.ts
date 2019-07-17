@@ -18,14 +18,23 @@ export function initializeArticlePage() {
             hideEmailSignupFooter();
         }
         else {
-
+            showEmailSignupFooter()
         }
     })
 
 }
 
 function showEmailSignupFooter() {
-
+    const $emails = document.getElementsByClassName("email");
+    if ($emails && $emails.length > 0) {
+        const $emailSection = $emails.item(0);
+        if ($emailSection) {
+            if ($emailSection.parentElement) {
+                $emailSection.parentElement.classList.remove("signup-loggedIn");
+                $emailSection.parentElement.classList.add("loaded");
+            }
+        }
+    }
 }
 
 function hideEmailSignupFooter() {
@@ -34,7 +43,8 @@ function hideEmailSignupFooter() {
         const $emailSection = $emails.item(0);
         if ($emailSection) {
             if ($emailSection.parentElement) {
-                $emailSection.parentElement.classList.add("signup-loggedIn")
+                $emailSection.parentElement.classList.add("signup-loggedIn");
+                $emailSection.parentElement.classList.add("loaded");
             }
         }
     }
