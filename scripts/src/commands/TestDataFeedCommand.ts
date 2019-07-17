@@ -147,6 +147,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
                 sentPrompt.firstSentAt = prompt.sendDate;
                 sentPrompt.lastSentAt = prompt.sendDate;
                 sentPrompt.memberEmail = member.email;
+                sentPrompt.createdAt = new Date();
                 sentPrompt.sendHistory.push({
                     medium: PromptSendMedium.EMAIL_MAILCHIMP,
                     email: member.email,

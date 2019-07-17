@@ -17,13 +17,25 @@ export function initializeArticlePage() {
         if (user) {
             hideEmailSignupFooter();
         }
+        else {
+
+        }
     })
+
+}
+
+function showEmailSignupFooter() {
 
 }
 
 function hideEmailSignupFooter() {
     const $emails = document.getElementsByClassName("email");
-    if ($emails && $emails.length > 0){
-        const $emailSectoin = $emails.item(0);
+    if ($emails && $emails.length > 0) {
+        const $emailSection = $emails.item(0);
+        if ($emailSection) {
+            if ($emailSection.parentElement) {
+                $emailSection.parentElement.classList.add("signup-loggedIn")
+            }
+        }
     }
 }

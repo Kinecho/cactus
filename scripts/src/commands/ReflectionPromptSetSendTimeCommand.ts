@@ -25,7 +25,6 @@ export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand 
 
         const tasks: Promise<void>[] = [];
         reflectionPrompts.results.forEach(prompt => {
-
             tasks.push(new Promise<void>(async resolve => {
                 const promptSendDate = prompt.sendDate;
 
