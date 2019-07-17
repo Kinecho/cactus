@@ -261,10 +261,13 @@ input[type=email] {
 }
 
 #signupAnchor + *.loaded {
-  .email {
-    opacity: 1;
+  &:not(.signup-loggedIn){
+    .email {
+      opacity: 1;
 
+    }
   }
+
 }
 
 
