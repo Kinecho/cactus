@@ -6,7 +6,7 @@ import {
     WebClient,
     ChatPostMessageArguments
 } from "@slack/client";
-
+import axios from "axios";
 
 /**
  * @typedef {{
@@ -151,6 +151,41 @@ export default class AdminSlackService {
 
     getChannel(name: ChannelName): string | undefined {
         return this.config.slack.channels[name];
+    }
+
+    async sendArbitraryMessage(channelId: string, message: string | ChatMessage) {
+        let chatMessage: ChatMessage;
+
+        if (typeof message === "string") {
+            chatMessage = {
+                text: message,
+            }
+        } else {
+            chatMessage = message;
+        }
+
+        const slackMessage: ChatPostMessageArguments = {
+            ...chatMessage,
+            channel: channelId
+        };
+
+        const response = await this.web.chat.postMessage(slackMessage);
+        if (response.ok) {
+            return;
+        }
+
+        if (response.error) {
+            console.error("Failed to post slack message", response.error);
+        }
+    }
+
+    async sendToResponseUrl(responseURL: string, message: IncomingWebhookSendArguments) {
+        try {
+            const response = await axios.post(responseURL, message);
+            console.log("send to response url response success", response.data);
+        } catch (error) {
+            console.error("failed to send to response url", error.code, error.response)
+        }
     }
 
     async sendMessage(channelName: ChannelName, message: string | ChatMessage) {

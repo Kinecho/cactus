@@ -8,6 +8,7 @@ import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExp
 import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
+import slackEndpoints from "@api/endpoints/slackEndpoints";
 
 export const mailchimp = functions.https.onRequest(mailchimpApp);
 export const inbound = functions.https.onRequest(inboundApp);
@@ -21,6 +22,7 @@ export const cloudFunctions = {
     inbound,
     checkout,
     test,
+    slack: functions.https.onRequest(slackEndpoints),
     backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
     exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
