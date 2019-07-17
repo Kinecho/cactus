@@ -39,6 +39,10 @@ export default class AdminReflectionResponseService {
 
     }
 
+    getCollectionRef(){
+        return this.firestoreService.getCollectionRef(Collection.reflectionResponses);
+    }
+
     firestoreService: AdminFirestoreService;
 
     constructor() {

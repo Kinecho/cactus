@@ -62,6 +62,14 @@ export default class AdminSentPromptService {
         return await this.getFirst(query);
     }
 
+    async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
+
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId);
+
+        const results = await firestoreService.executeQuery(query, SentPrompt);
+        return results.results;
+    }
+
     // async getByCampaignId
     async processMailchimpRecipient(recipient: SentToRecipient, prompt: ReflectionPrompt): Promise<SentPrompt | undefined> {
         console.log("processing recipient", recipient.email_address);

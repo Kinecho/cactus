@@ -16,6 +16,8 @@
                     </div>
                     <transition name="fade-down">
                         <nav class="moreMenu" v-show="menuOpen">
+                            <span class="static">{{user.email}}</span>
+                            <div class="divider"></div>
                             <template v-for="(link) in links" v-bind:link="link">
                                 <a v-if="link.href" :href="link.href">{{link.title}}</a>
                                 <span v-if="link.onClick" @click.prevent="link.onClick">{{link.title}}</span>
@@ -191,6 +193,13 @@
                 z-index: 100;
                 @include popoverShadow;
 
+                .divider {
+                    height: 0;
+                    border: .5px solid $lightText;
+                    opacity: .2;
+                    margin: 0 .5rem;
+                }
+
                 a, span {
                     background-color: transparent;
                     color: $darkestPink;
@@ -202,7 +211,11 @@
                     transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
                     white-space: nowrap;
 
-                    &:hover {
+                    &.static {
+                        color: $darkText;
+                    }
+
+                    &:hover:not(.static) {
                         background-color: lighten($lightPink, 2%);
                         opacity: 1;
                         cursor: pointer;
