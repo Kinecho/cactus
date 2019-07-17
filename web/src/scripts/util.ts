@@ -5,7 +5,7 @@ import NavBar from "@components/NavBar.vue";
 import {configureDirectives} from "@web/vueDirectives";
 
 export enum LocalStorageKey {
-    emailForSignIn = 'emailForSignIn'
+    emailForSignIn = 'emailForSignIn',
 }
 
 
@@ -202,8 +202,33 @@ export function addModal(modalId: string, options: {
 
 
 export function getQueryParam(name: QueryParam): string | null {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
+    try {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    } catch (e) {
+        console.error("browser does not support url params", e);
+        return null;
+    }
+
+}
+
+export function removeQueryParam(name: QueryParam) {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params) {
+            params.delete(name);
+            console.log("updated params", params.toString());
+            const queryString = params.toString();
+
+            const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (queryString ? `?${queryString}` : "");
+
+            window.history.pushState({path: newurl}, '', newurl);
+
+        }
+    } catch (e) {
+        console.error("browser does not support URLSearchParams", e);
+    }
+
 }
 
 export function triggerWindowResize() {

@@ -7,7 +7,6 @@ import "firebase/auth";
 
 let isInitialized = false;
 let firebaseApp: firebase.app.App;
-
 export type FirebaseUser = firebase.User;
 export type FirebaseUserCredential = firebase.auth.UserCredential;
 export type Unsubscribe = firebase.Unsubscribe;

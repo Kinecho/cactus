@@ -4,5 +4,6 @@ export enum QueryParam {
     IS_PRE_ORDER = "preorder",
     MAILCHIMP_EMAIL_ID = "mcuid",
     PURCHASE_AMOUNT = "amount",
-    PURCHASE_ITEM_ID = 'productId'
+    PURCHASE_ITEM_ID = 'productId',
+    EMAIL = 'e',
 }
