@@ -79,21 +79,25 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
-                        window.location.href = "/journal";
+                        console.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        window.location.href = PageRoute.JOURNAL_MARKETING;
                         return;
                     }
+                    const isFreshLogin = !this.cactusMember && member;
 
-
-                    if (!this.cactusMember && member) {
-                        this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        this.sentPromptsLoaded = true;
-                    }
 
                     this.cactusMember = member;
                     this.user = user;
                     if (user && member) {
                         this.loginReady = true;
                     }
+
+                    if (isFreshLogin) {
+                        this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                        console.log(`JournalHome fetched ${this.sentPrompts.length} prompts when the current member was loaded`);
+                        this.sentPromptsLoaded = true;
+                    }
+
                 }
             });
         },
@@ -117,13 +121,18 @@
                 const newId = newMember ? newMember.id : undefined;
                 const oldId = oldMember ? oldMember.id : undefined;
                 if (newId && newId !== oldId) {
+                    console.log("configuring prompt observer");
                     this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(newId, {
                         onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
-                            this.sentPrompts = sentPrompts;
+                            console.log(`loaded ${sentPrompts.length} prompts via promptObserver on JournalHome`);
+
+                            //TODO: this is a temporary hack to improve initial pageload. I need to ad infinite scrolling
+                            setTimeout(() => this.sentPrompts = sentPrompts, 2000);
                             this.sentPromptsLoaded = true;
                         }
                     });
                 } else if (!newId && this.sentPromptsUnsubscriber) {
+                    console.log("removing journal prompt subscriber since there is no current member");
                     this.sentPromptsUnsubscriber();
                 }
 
@@ -143,7 +152,7 @@
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
-                const delay = Math.min(Number(el.dataset.index) * 100, 1500);
+                const delay = Math.min(Number(el.dataset.index) * 100, 2000);
                 console.log("delay is", delay);
                 setTimeout(function () {
                     el.classList.remove("out");
@@ -217,8 +226,10 @@
             flex-direction: column;
 
             .journalListItem {
+                transition: all .3s;
+
                 &.out {
-                    transform: translateY(30px);
+                    transform: translateY(-30px);
                     opacity: 0;
                 }
             }
