@@ -1,13 +1,23 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
         <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-        <transition name="fade-in-slow" appear>
-            <a v-if="displaySignupButton"
-                    class="jump-to-form button"
-                    @click.prevent="scrollToSignup"
-                    type="button"
-            >Sign Up Free</a>
-        </transition>
+        <div>
+            <transition name="fade-in-slow" appear>
+                <a v-if="displayLoginButton"
+                        class="link"
+                        @click.prevent="goToLogin"
+                        type="link"
+                >Log In</a>
+            </transition>
+            <transition name="fade-in-slow" appear>
+                <a v-if="displaySignupButton"
+                        class="jump-to-form button"
+                        @click.prevent="scrollToSignup"
+                        type="button"
+                >Sign Up Free</a>
+            </transition>
+        </div>
+
         <transition name="fade-in">
             <div v-if="loggedIn" class="user-info">
                 <div v-click-outside="closeMenu">
@@ -72,6 +82,7 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
+            showLogin: {type: Boolean, default: false}, //NOTE: login is always disabled for now. See computed prop for displayLoginButton
         },
         data(): NavBarData {
             return {
@@ -110,6 +121,12 @@
                 console.log("show signup button", show);
                 return show;
             },
+            displayLoginButton(): boolean {
+                const show = this.showLogin && this.authLoaded && !this.user;
+                //NOTE: login button is always disabled for now.
+                console.log("show login button", show);
+                return false;
+            },
             initials(): string {
                 if (this.user) {
                     return getInitials(this.user.displayName || this.user.email || "")
@@ -125,6 +142,9 @@
                     window.location.href = this.signOutRedirectUrl || '/';
                 }
 
+            },
+            goToLogin() {
+                window.location.href = PageRoute.SIGNUP;
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -158,7 +178,13 @@
             font-size: 1.6rem;
             margin: 0;
             padding: 1.2rem 2rem 1.6rem;
+        }
 
+        a.link {
+            @include fancyLink;
+            &:hover {
+                cursor: pointer;
+            }
         }
 
         &.out {

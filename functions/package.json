@@ -12,7 +12,7 @@
     "lint": "tslint --project tsconfig.json",
     "logs": "firebase functions:log",
     "ngrok": "ngrok http -subdomain=cactuslocal 5000",
-    "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase serve --only functions",
+    "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase  emulators:start --only functions",
     "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions",
     "emulate:funcs:db": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,firestore",
     "emulate:db": "firebase emulators:start --only firestore",
