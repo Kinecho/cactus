@@ -219,6 +219,7 @@ export enum TemplateSection {
     content_link = "content_link",
     inspiration = "inspiration",
     reflectionPromptId = "reflection_prompt_id",
+    prompt_topic = "prompt_topic",
 }
 
 export interface CampaignContentSectionMap {

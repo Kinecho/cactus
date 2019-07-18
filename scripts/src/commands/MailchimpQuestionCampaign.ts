@@ -108,6 +108,7 @@ export default class MailchimpQuestionCampaign implements Command {
     mailchimpService?: MailchimpService;
 
     reflectionPromptId?: string;
+    topic?: string;
 
     async start(): Promise<void> {
         console.log(chalk.bold.cyan("Let's create a mailchimp campaign for a daily question"));
@@ -401,6 +402,10 @@ export default class MailchimpQuestionCampaign implements Command {
 
         if (this.reflectionPromptId) {
             sections[TemplateSection.reflectionPromptId] = this.reflectionPromptId || "";
+        }
+
+        if (this.topic) {
+            sections[TemplateSection.prompt_topic] = this.topic || "";
         }
 
         const contentRequest: CampaignContentRequest = {
