@@ -1,9 +1,12 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {showConfirmEmailModal, addModal, LocalStorageKey, showModal} from "@web/util";
-import {initializeFirebase, getAuth, FirebaseUserCredential} from "@web/firebase";
+import {addModal, LocalStorageKey, showConfirmEmailModal} from "@web/util";
+import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
+import {Endpoint, request} from "@web/requestUtils";
+import {EmailStatusRequest, EmailStatusResponse} from "@shared/api/SignupEndpointTypes";
+import {ApiResponseError} from "@shared/api/ApiTypes";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
@@ -14,6 +17,7 @@ let authUi: AuthUI;
 export interface EmailLinkSignupResult {
     success: boolean,
     credential?: FirebaseUserCredential,
+    existingEmail?: boolean,
     error?: {
         title: string,
         message: string,
@@ -222,17 +226,55 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
     }
 }
 
+export async function getEmailStatus(email: string): Promise<EmailStatusResponse> {
+    try {
+        const statusRequest: EmailStatusRequest = {email};
+        const emailResponse = await request.post(Endpoint.signupEmailStatus, statusRequest);
+        return emailResponse.data;
+    } catch (e) {
+        console.error("Failed to get the email status before sending magic link", e);
+        return {
+            exists: false,
+            email,
+            message: "Failed to get the email status",
+            error: e,
+        };
+    }
+}
+
+
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
-    try {
-        await firebase.auth().sendSignInLinkToEmail(email, {
-            url: `${Config.domain}${PageRoute.SIGNUP_CONFIRMED}`,
-            handleCodeInApp: true,
-        });
-        window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
-        return {success: true};
-    } catch (error) {
-        console.error("failed to send signin link", error);
-        return {success: false, error,}
+    const redirectPath = PageRoute.JOURNAL_HOME;
+
+
+    const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
+        try {
+            await firebase.auth().sendSignInLinkToEmail(email, {
+                url: `${Config.domain}${redirectPath}`,
+                handleCodeInApp: true,
+            });
+
+
+            window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
+            resolve({success: true});
+            return;
+        } catch (error) {
+            console.error("failed to send signin link", error);
+            resolve({success: false, error});
+            return;
+        }
+    });
+
+    const [statusResponse, emailSendResponse]: [EmailStatusResponse, { success: boolean, error?: any }] = await Promise.all([getEmailStatus(email), sendEmailPromise]);
+
+    const existingEmail = statusResponse.exists;
+
+    return {
+        success: emailSendResponse.success,
+        existingEmail,
+        error: statusResponse.error || emailSendResponse.error
     }
+
+
 }

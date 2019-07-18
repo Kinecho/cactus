@@ -47,7 +47,7 @@ import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
-import ApiError from "@shared/ApiError";
+import ApiError from "@shared/api/ApiError";
 import {CactusConfig} from "@shared/CactusConfig";
 
 interface MailchimpAuth {

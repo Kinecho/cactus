@@ -5,7 +5,7 @@ import * as cors from "cors";
 
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
-import ApiError from "@shared/ApiError";
+import ApiError from "@shared/api/ApiError";
 import {writeToFile} from "@api/util/FileUtil";
 import {
     CampaignEventData,
