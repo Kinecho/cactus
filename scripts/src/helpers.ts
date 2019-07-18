@@ -9,6 +9,7 @@ export default {
     projectRoot: path.resolve(scriptsRoot, ".."),
     scriptsRoot: scriptsRoot,
     srcDir: path.resolve(scriptsRoot, "src"),
+    dataDir: path.resolve(scriptsRoot, "src", "data"),
     commandsDirRelativeToSource,
     publicCommandsDirRelativeToSource,
     commandsDir: path.resolve(scriptsRoot, "src", commandsDirRelativeToSource),

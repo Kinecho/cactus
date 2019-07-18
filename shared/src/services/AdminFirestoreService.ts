@@ -113,8 +113,6 @@ export default class AdminFirestoreService {
 
         const collection = this.getCollectionRef(type.collection);
 
-        console.log(`Fetching ${type.collection} with ID = ${id}`);
-
         const doc = await collection.doc(id).get();
 
         if (!doc) {
@@ -125,8 +123,6 @@ export default class AdminFirestoreService {
             console.warn("Document is deleted, and the request options did not include deleted objects");
             return;
         }
-
-        console.log(`doc.data()`, doc.data());
 
         return fromDocumentSnapshot(doc, Type);
     }

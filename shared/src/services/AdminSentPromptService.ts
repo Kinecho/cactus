@@ -124,11 +124,14 @@ export default class AdminSentPromptService {
                 mailchimpEmailStatus: recipient.status
             });
         }
+        if (campaign && campaign.type !== 'automation'){
+            sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
+            sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
+        }
+
         sentPrompt.promptId = prompt.id;
-        sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
         sentPrompt.cactusMemberId = member.id;
         sentPrompt.userId = member.userId;
-        sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
         sentPrompt.memberEmail = member.email;
 
         return await this.save(sentPrompt);

@@ -62,8 +62,12 @@ export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand 
                     }
                 }
 
+                let sendDate:Date|undefined;
+                if (campaignSendTime){
+                    sendDate = getDateFromISOString(campaignSendTime);
+                }
+
                 if (campaignSendTime) {
-                    const sendDate = getDateFromISOString(campaignSendTime);
                     prompt.sendDate = sendDate || undefined;
                     needsSave = true;
                 }
