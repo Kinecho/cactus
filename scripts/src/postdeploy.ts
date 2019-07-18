@@ -2,7 +2,9 @@ import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import AdminSlackService, {ChatMessage} from "@shared/services/AdminSlackService";
 
-const git = require("simple-git")();
+import * as simplegit from 'simple-git/promise';
+
+const git = simplegit();
 
 (async () => {
     const projectId = process.env.GCLOUD_PROJECT;
@@ -28,23 +30,8 @@ const git = require("simple-git")();
     AdminSlackService.initialize(config);
 
 
-    const {username} = await new Promise<{ username?: string }>(resolve => {
-        git.raw(['config', '--global', 'user.name'], (error: any, result: string) => {
-            if (error) {
-                console.error("error");
-            }
-            resolve({username: result});
-        });
-    });
-    const {email} = await new Promise<{ email?: string }>(resolve => {
-        git.raw(['config', '--global', 'user.email'], (error: any, result: string) => {
-            if (error) {
-                console.error("error");
-            }
-            resolve({email: result});
-        });
-    });
-    // const isRepo = await
+    const username: string | undefined | null = await git.raw(['config', '--global', 'user.name']);
+    const email: string | undefined | null = await git.raw(['config', '--global', 'user.email']);
 
     let byLine = "unknown";
     if (username && email) {
@@ -73,6 +60,4 @@ const git = require("simple-git")();
     } else {
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
     }
-
-
 })();

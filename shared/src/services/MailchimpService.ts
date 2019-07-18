@@ -216,7 +216,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getCampaignsByIds(campaignIds: string[] = [], delay=150): Promise<Campaign[]> {
+    async getCampaignsByIds(campaignIds: string[] = [], delay = 150): Promise<Campaign[]> {
         if (campaignIds.length === 0) {
             return [];
         }
@@ -302,6 +302,7 @@ export default class MailchimpService {
         const response = await this.request.post(url, campaign);
 
         // console.log("created campaign", JSON.stringify(response.data));
+        delete response.data._links;
         return response.data;
     }
 

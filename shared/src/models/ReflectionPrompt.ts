@@ -15,20 +15,22 @@ export enum Field {
 
 
 export default class ReflectionPrompt extends BaseModel {
+    static Field = Field;
     readonly collection = Collection.reflectionPrompt;
-    question?:string;
-    protected campaignIds:string[] = [];
-    protected campaignWebIds:string[] = [];
-    campaign?:Campaign;
-    reminderCampaign?:Campaign;
-    contentPath?:string;
-    baseFileName?:string;
+    question?: string;
+    protected campaignIds: string[] = [];
+    protected campaignWebIds: string[] = [];
+    campaign?: Campaign;
+    reminderCampaign?: Campaign;
+    contentPath?: string;
+    baseFileName?: string;
     sendDate?: Date;
+    topic?: string;
 
     prepareForFirestore(): any {
         this.campaignIds = [];
         this.campaignWebIds = [];
-        if (this.campaign){
+        if (this.campaign) {
             this.campaignIds.push(this.campaign.id);
             this.campaignWebIds.push(this.campaign.web_id);
         }
