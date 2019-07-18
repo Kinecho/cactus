@@ -13,7 +13,9 @@
             </div>
             <div v-if="loggedIn" class="section-container">
                 <section class="empty journalList" v-if="!sentPrompts.length && sentPromptsLoaded">
-                    Your journal is empty.
+                    <h1>Welcome to your Cactus Journal</h1>
+                    <p>Your journal will soon fill with questions to reflect on each day. Your first question will arrive in the morning. For now, sit back and be confident in your choice of a healthier, happier mindset.</p>
+                    <img class="graphic" src="assets/images/music2.svg" alt="" />
                 </section>
                 <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group
@@ -186,17 +188,21 @@
             }
 
             &.empty {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
                 align-items: center;
-                min-height: 12rem;
-                @include shadowbox;
-                background: $lightGreen;
-                color: $darkText;
-                margin: 0 auto 4.8rem;
-                max-width: 64rem;
-                padding: 3.2rem;
+                justify-content: center;
+                padding: 2.4rem;
+                text-align: center;
+
+                p {
+                  margin: 1.6rem auto 3.2rem;
+                  max-width: 60rem;
+                  opacity: .8;
+                }
+
+                .graphic {
+                  max-width: 64rem;
+                  width: 90%;
+                }
             }
 
             &.loggedOut {
