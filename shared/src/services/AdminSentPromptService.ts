@@ -116,6 +116,8 @@ export default class AdminSentPromptService {
             sentPrompt = new SentPrompt();
             sentPrompt.createdAt = new Date();
             sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
+            sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
+            sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
             sentPrompt.sendHistory.push({
                 sendDate: new Date(),
                 email: recipient.email_address,
@@ -124,6 +126,8 @@ export default class AdminSentPromptService {
                 mailchimpEmailStatus: recipient.status
             });
         }
+
+        //only update the sendDate if it's not an automation
         if (campaign && campaign.type !== 'automation'){
             sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
             sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;

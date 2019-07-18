@@ -34,6 +34,14 @@ export function formatDate(date?: Date, format = "yyyy-LL-dd"): string | undefin
     return DateTime.fromJSDate(date).toFormat(format);
 }
 
+
+export function formatDateTime(date?: Date, format = "yyyy-LL-dd hh:mm a ZZZZ"): string | undefined {
+    if (!date) {
+        return;
+    }
+    return DateTime.fromJSDate(date).toFormat(format);
+}
+
 export function minusDays(days: number, date: Date = new Date()): Date {
     return DateTime.fromJSDate(date).minus({days: days}).toJSDate();
 }

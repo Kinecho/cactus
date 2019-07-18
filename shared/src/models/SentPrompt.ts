@@ -13,6 +13,7 @@ export enum SentPromptField {
     promptId = "promptId",
     mailchimpMemberId = "mailchimpMemberId",
     sendHistory = "sendHistory",
+    memberEmail = "memberEmail",
 }
 
 export interface SentPromptHistoryItem {
