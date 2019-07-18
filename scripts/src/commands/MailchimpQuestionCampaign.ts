@@ -396,7 +396,7 @@ export default class MailchimpQuestionCampaign implements Command {
         console.log(chalk.bold("creating template content..."));
         const sections: CampaignContentSectionMap = {
             [TemplateSection.question]: contentResponse.question,
-            [TemplateSection.content_link]: `<a href="${getUrlFromInput(contentResponse.contentPath, "cactus.app")}">${contentResponse.contentLinkText}</a>`,
+            [TemplateSection.content_link]: contentResponse.contentPath ? `<a href="${getUrlFromInput(contentResponse.contentPath, "cactus.app")}">${contentResponse.contentLinkText}</a>` : "",
             [TemplateSection.inspiration]: contentResponse.inspirationText || "",
         };
 
