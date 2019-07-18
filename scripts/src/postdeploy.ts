@@ -60,6 +60,4 @@ const git = simplegit();
     } else {
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
     }
-
-
 })();

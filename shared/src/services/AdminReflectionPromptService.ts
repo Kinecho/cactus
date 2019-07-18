@@ -23,6 +23,13 @@ export default class AdminReflectionPromptService {
         AdminReflectionPromptService.sharedInstance = new AdminReflectionPromptService();
     }
 
+    getCollectionRef() {
+        return firestoreService.getCollectionRef(Collection.reflectionPrompt);
+    }
+
+    createDocId(): string {
+        return this.getCollectionRef().doc().id;
+    }
 
     async save(model: ReflectionPrompt): Promise<ReflectionPrompt> {
         return firestoreService.save(model);

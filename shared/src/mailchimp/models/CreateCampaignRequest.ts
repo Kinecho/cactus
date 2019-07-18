@@ -218,6 +218,11 @@ export enum TemplateSection {
     question = "question",
     content_link = "content_link",
     inspiration = "inspiration",
+    reflectionPromptId = "reflection_prompt_id",
+}
+
+export interface CampaignContentSectionMap {
+    [id: string]: string
 }
 
 export interface CampaignContentRequest {
@@ -226,9 +231,7 @@ export interface CampaignContentRequest {
     url?: string,
     template?: {
         id: number,
-        sections: {
-            [key in keyof typeof TemplateSection]: string
-        }
+        sections: CampaignContentSectionMap
     }
 }
 
