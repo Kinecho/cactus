@@ -1,5 +1,5 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded}">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
         <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <transition name="fade-in-slow" appear>
             <a v-if="displaySignupButton"
@@ -71,6 +71,7 @@
             redirectOnSignOut: Boolean,
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
+            isSticky: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {

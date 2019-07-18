@@ -37,10 +37,13 @@ header {
   display: flex;
   justify-content: space-between;
   padding: 1.6rem 2.4rem;
-  position: sticky;
   text-align: left;
-  top: 0;
-  z-index: 10;
+
+  &.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
 
   @include isTinyPhone {
     min-height: 8rem;
@@ -58,8 +61,6 @@ header {
     padding: 2.4rem;
     position: relative;
   }
-
-
 }
 
 .logo {

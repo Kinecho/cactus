@@ -1,6 +1,6 @@
 <template>
     <div>
-        <NavBar :show-signup="false"/>
+        <NavBar :show-signup="false" :isSticky="false"/>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -137,6 +137,9 @@
             },
             loggedIn(): boolean {
                 return !!this.cactusMember;
+            },
+            isSticky(): boolean {
+                return false;
             },
         }
     })
