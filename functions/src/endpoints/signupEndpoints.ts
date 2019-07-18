@@ -27,7 +27,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
     }
 
     await AdminSlackService.getSharedInstance().sendActivityMessage({
-        text: `${email} entered for Magic Link flow. Existing Email = ${exists}`
+        text: `${email} triggered the Magic Link flow. Existing Email = ${exists}`
     });
 
     const response: EmailStatusResponse = {exists, email};
