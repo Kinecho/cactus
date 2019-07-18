@@ -376,7 +376,7 @@ export default class MailchimpQuestionCampaign implements Command {
         let campaignContent;
         if (reminderConfig.useTemplate && reminderConfig.templateId || reminderConfig.useDefaultTemplate) {
             campaignContent = await this.createCampaignContent(reminderCampaign.id,
-                reminderConfig.templateId || DEFAULT_REMINDER_TEMPLATE_ID,
+                reminderConfig.templateId || this.getDefaultReminderTemplateId(),
                 originalContentResponse);
         }
 
@@ -878,7 +878,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 tagSegmentIds: [],
                 environment: Project.PROD,
                 useTemplate: true,
-                templateId: this.getDefaultReminderTemplateId(),
+                templateId: this.getDefaultMorningTemplateId(),
                 segmentMatchType: SegmentMatchType.any,
                 useAutomations: false,
                 automationIds: [],
