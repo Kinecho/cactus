@@ -13,7 +13,9 @@
             </div>
             <div v-if="loggedIn" class="section-container">
                 <section class="empty journalList" v-if="!sentPrompts.length && sentPromptsLoaded">
-                    Your journal is empty.
+                    <p><strong>Welcome to Journal</strong></p>
+                    <p>Your daily questions will be here. Check back in the morning.</p>
+
                 </section>
                 <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group

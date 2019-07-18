@@ -1,7 +1,7 @@
 import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
-import {triggerWindowResize} from "@web/util";
+import {LocalStorageKey, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
 
 const firebase = initializeFirebase();
@@ -37,8 +37,19 @@ function showShareButtons() {
 }
 
 function handleResponse(response: EmailLinkSignupResult) {
-    if (response.credential && response.credential.additionalUserInfo && !response.credential.additionalUserInfo.isNewUser) {
+    if (response.credential) {
         window.location.href = PageRoute.JOURNAL_HOME;
+        try {
+            if (response.credential.additionalUserInfo && response.credential.additionalUserInfo.isNewUser) {
+                localStorage.setItem(LocalStorageKey.newUserSignIn, response.credential.user ? response.credential.user.uid : "true");
+            } else {
+                localStorage.removeItem(LocalStorageKey.newUserSignIn);
+            }
+        } catch (e) {
+            console.error("unable to persist new user status to localstorage");
+        }
+
+
         return;
     }
 

@@ -117,7 +117,7 @@ export function configureLoginForm(formId: string) {
                 const modalId = "signup-success-modal";
                 hideError();
 
-                let title = "Welcome!!";
+                let title = "Welcome!";
                 let message = `Check your ${emailAddress} inbox to get into Journal.`;
                 let imageUrl = '/assets/images/success.svg';
 

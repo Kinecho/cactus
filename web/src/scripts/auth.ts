@@ -245,7 +245,7 @@ export async function getEmailStatus(email: string): Promise<EmailStatusResponse
 
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
-    const redirectPath = PageRoute.JOURNAL_HOME;
+    const redirectPath = PageRoute.SIGNUP_CONFIRMED;
 
 
     const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
