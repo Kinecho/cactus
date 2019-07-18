@@ -7,7 +7,7 @@
             "port": "5005"
         },
         "functions": {
-            "port": "5001"
+            "port": "5000"
         }
     },
     "firestore": {

@@ -239,9 +239,11 @@ export function triggerWindowResize() {
 
 declare interface NavigationOptions {
     showSignupButton?: boolean,
+    showLoginButton?: boolean,
     redirectOnSignOut?: boolean,
     signOutRedirectUrl?: string,
     largeLogoOnDesktop?: boolean,
+    stickyNav?: boolean,
 }
 
 export function setupNavigation(options: NavigationOptions) {
@@ -265,6 +267,8 @@ export function setupNavigation(options: NavigationOptions) {
             redirectOnSignOut: options.redirectOnSignOut || false,
             signOutRedirectUrl: options.signOutRedirectUrl,
             largeLogoOnDesktop: options.largeLogoOnDesktop || false,
+            showLogin: options.showLoginButton || false,
+            isSticky: options.stickyNav,
         },
         components: {NavBar: NavBar}
     });

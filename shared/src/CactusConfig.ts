@@ -25,6 +25,7 @@ export interface CactusConfig {
             engineering: string,
             general: string,
             activity: string,
+            data_log: string,
         }
         app: {
             app_id: string,

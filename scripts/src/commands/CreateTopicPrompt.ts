@@ -72,6 +72,7 @@ export default class CreateTopicPrompt extends FirebaseCommand {
             mailchimpCommand.project = this.project;
             mailchimpCommand.question = question;
             mailchimpCommand.reflectionPromptId = promptId;
+            mailchimpCommand.topic = topic;
             this.mailchimpCommand = mailchimpCommand;
             await mailchimpCommand.start();
 

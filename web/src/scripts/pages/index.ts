@@ -6,7 +6,6 @@ import {setupNavigation} from "@web/util";
 const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {
     console.log("index.js loaded");
-
     try {
         const features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof firebase[feature] === 'function');
         console.log(`Firebase SDK loaded with ${features.join(', ')}`)
@@ -15,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    setupNavigation({showSignupButton: true, largeLogoOnDesktop: true});
+    setupNavigation({stickyNav: true, showSignupButton: true, largeLogoOnDesktop: true, showLoginButton: true});
     //TODO: change these to use the new flows, commented out below
     //these are the mailchimp signup flows
     configureMailchimpSignupForm("email-form-bottom");

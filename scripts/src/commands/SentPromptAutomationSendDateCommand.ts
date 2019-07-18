@@ -10,9 +10,11 @@ import * as  path from "path";
 import SentPrompt from "@shared/models/SentPrompt";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import {DateTime} from "luxon";
-import {formatDate} from "@shared/util/DateUtil";
+import {formatDateTime} from "@shared/util/DateUtil";
+import * as fs from "fs";
+import {writeToFile} from "@scripts/util/FileUtil";
 
-const csv = require('csvtojson')
+const csv = require('csvtojson');
 const prompts = require("prompts");
 
 
@@ -44,6 +46,10 @@ export default class SentPromptCreatedAtBackfillCommand extends FirebaseCommand 
     successes: any = [];
     errors: any = [];
 
+    dateId = `${(new Date()).getTime()}`;
+
+    fileHandlers: { [id: string]: number } = {};
+
     onboardingByPromptId: { [promptId: string]: OnboardingDay } = {};
     onboardingData: OnboardingDay[] = [];
 
@@ -55,7 +61,7 @@ export default class SentPromptCreatedAtBackfillCommand extends FirebaseCommand 
         await this.configData();
 
         const updateTasks: Promise<void>[] = [];
-        const query = AdminSentPromptService.getSharedInstance().getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", "fFKwKrKHggouOmbWmwBv");
+        const query = AdminSentPromptService.getSharedInstance().getCollectionRef()
         const snapshot = await query.get();
 
         const continueResponse: { continue: boolean } = await prompts({
@@ -84,6 +90,12 @@ export default class SentPromptCreatedAtBackfillCommand extends FirebaseCommand 
             console.log(`Finished updating sentPrompts. Success count ${this.successes.length} | Error count ${this.errors.length} `);
         } catch (error) {
             console.error("Error updating responses", error);
+        } finally {
+            console.log("closing file handlers", JSON.stringify(Object.values(this.fileHandlers)));
+            Object.values(this.fileHandlers).forEach(fd => {
+
+                fs.closeSync(fd);
+            })
         }
 
 
@@ -110,6 +122,19 @@ export default class SentPromptCreatedAtBackfillCommand extends FirebaseCommand 
 
     }
 
+    async writeLine(memberId: string, text: string) {
+        let fd: number;
+        if (this.fileHandlers[memberId]) {
+            fd = this.fileHandlers[memberId];
+        } else {
+            const filename = path.join(helpers.outputDir, `${this.dateId}_SentPromptAutomationSendDateCommand`, `${memberId}.txt`);
+            await writeToFile(filename, "");
+            fd = fs.openSync(filename, 'a');
+            this.fileHandlers[memberId] = fd;
+        }
+        fs.appendFileSync(fd, `${text}\n`);
+    }
+
     handleSentPrompt(doc: DocumentSnapshot): Promise<void> {
         return new Promise(async resolve => {
             try {
@@ -133,26 +158,42 @@ export default class SentPromptCreatedAtBackfillCommand extends FirebaseCommand 
                     return
                 }
 
-                let additionalOffset = 0;
+
+                let estimatedDatetime = DateTime.fromJSDate(signupConfirmedAt);
+
+                // console.log("user signed up before onboarding happened immediately. Increasing offset by 1")
+                let additionalOffsetDays = 0;
                 if (DateTime.fromJSDate(signupConfirmedAt) < onboardingDelayedBefore) {
-                    additionalOffset = 1;
-                    // console.log("user signed up before onboarding happened immediately. Increasing offset by 1")
+                    additionalOffsetDays = 1;
+                    estimatedDatetime = estimatedDatetime.setZone('America/Denver')
                 }
 
-                const estimatedSendDate = DateTime.fromJSDate(signupConfirmedAt).plus({days: (offsetDays + additionalOffset)}).toJSDate();
-                console.log(`signup ${formatDate(signupConfirmedAt)} - setting onboarding day ${offsetDays} date to ${formatDate(estimatedSendDate)}`);
+                if (offsetDays + additionalOffsetDays > 0) {
+                    estimatedDatetime = estimatedDatetime.set({hour: 2, minute: 45}).setZone('America/Denver');
+                }
+
+                const estimatedSendDate = estimatedDatetime.plus({days: (offsetDays + additionalOffsetDays)}).toJSDate();
+
+                const message = `${doc.get(SentPrompt.Fields.memberEmail)} | signup ${formatDateTime(signupConfirmedAt)} | onboarding day ${offsetDays} | send date ${formatDateTime(estimatedSendDate)} | signup offset ${offsetDays + additionalOffsetDays} (additional Offset ${additionalOffsetDays})`
+
+                console.log(message);
+                try {
+                    await this.writeLine(`${doc.get(SentPrompt.Fields.cactusMemberId)}_${doc.get(SentPrompt.Fields.memberEmail)}`, message);
+                } catch (e) {
+                    console.error("failed to write to file", e);
+                }
 
 
                 const result = await doc.ref.update({[SentPrompt.Fields.firstSentAt]: admin.firestore.Timestamp.fromDate(estimatedSendDate)});
                 this.successes.push(result);
 
             } catch (error) {
-                console.error(`failed to process sentPrompt ${doc.id}`);
+                console.error(`failed to process sentPrompt ${doc.id}`, error);
                 this.errors.push(error);
             }
 
             resolve()
-        })
+        });
     }
 
 }
