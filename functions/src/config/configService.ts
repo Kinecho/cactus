@@ -46,7 +46,8 @@ const defaultTestConfig = {
         channels: {
             general: "general-test",
             engineering: "engineering-test",
-            activity: "cactus-activity-test"
+            activity: "cactus-activity-test",
+            data_log: "data-log-test",
         },
         app: {
             app_id: "fake",

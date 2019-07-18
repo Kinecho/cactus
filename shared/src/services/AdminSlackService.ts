@@ -49,6 +49,7 @@ export enum ChannelName {
     engineering = "engineering",
     general = "general",
     activity = "activity",
+    data_log = "data_log",
 }
 
 
@@ -150,7 +151,16 @@ export default class AdminSlackService {
     }
 
     getChannel(name: ChannelName): string | undefined {
-        return this.config.slack.channels[name];
+        let channelToUse = this.config.slack.channels[name];
+        if (channelToUse) {
+            return channelToUse;
+        }
+
+        if (this.config.web.domain !== "cactus.app") {
+            return `${name}-test`;
+        } else {
+            return name;
+        }
     }
 
     async sendArbitraryMessage(channelId: string, message: string | ChatMessage) {
@@ -222,6 +232,10 @@ export default class AdminSlackService {
 
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.engineering, message);
+    }
+
+    async sendDataLogMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.data_log, message);
     }
 
     async sendGeneralMessage(message: string | ChatMessage): Promise<void> {

@@ -74,12 +74,12 @@ export async function onPublish(message: Message, context: functions.EventContex
                 })
             }
 
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+            await AdminSlackService.getSharedInstance().sendDataLogMessage({
                 text: `:warning: MailchimpCampaignRecipientJob finished with ${successes.length} successes, ${errors.length} errors and ${warnings.length} warnings`,
                 attachments: attachments,
             })
         } else {
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+            await AdminSlackService.getSharedInstance().sendDataLogMessage({
                 text: `:white_check_mark: MailchimpCampaignRecipientJob finished with ${successes.length} successes, ${errors.length} errors and ${warnings.length} warnings. CampaignID ${payload.campaignId} | PromptID ${payload.reflectionPromptId || "not set"}`,
             })
         }
@@ -87,7 +87,7 @@ export async function onPublish(message: Message, context: functions.EventContex
 
     } catch (error) {
         console.error("Failed to process payload", payload, error);
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+        const msg = {
             text: `:warning: MailchimpCampaignRecipientJob failed`,
             attachments: [
                 {
@@ -100,6 +100,8 @@ export async function onPublish(message: Message, context: functions.EventContex
                 }
 
             ]
-        })
+        }
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(msg);
+        await AdminSlackService.getSharedInstance().sendDataLogMessage(msg);
     }
 }
