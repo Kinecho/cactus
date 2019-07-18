@@ -23,7 +23,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
         }
 
     } catch (e) {
-        console.error("failed to find user due to error", e);
+        console.error("no user found for email", email);
     }
 
     await AdminSlackService.getSharedInstance().sendActivityMessage({
