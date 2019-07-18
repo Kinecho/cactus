@@ -261,10 +261,8 @@ export default class FirestoreService {
                         options.onAdded(model);
                     }
                 }
-
-                options.onData(allResults);
-
             });
+            options.onData(allResults);
         }, error => {
             console.error("Error getting snapshot | queryName=" + options.queryName, error.message);
             if (error.message.includes("The query requires an index")) {

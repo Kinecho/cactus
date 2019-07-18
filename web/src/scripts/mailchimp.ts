@@ -13,12 +13,12 @@ import {isValidEmail} from "@shared/util/StringUtil";
  * @param {SubscriptionRequest} subscription
  * @return {Promise<SubscriptionResult>}
  */
-export async function submitEmail(subscription:SubscriptionRequest): Promise<SubscriptionResult>{
+export async function submitEmail(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
     // subscription.as
     console.log("submitting subscription", subscription);
 
     const result = (await request.post(Endpoint.mailchimp, subscription)).data as SubscriptionResult;
-    if (result.success){
+    if (result.success) {
         console.log("Signup successful", result)
     } else {
         console.warn("not successful getting data from endpoint", result)
@@ -26,10 +26,10 @@ export async function submitEmail(subscription:SubscriptionRequest): Promise<Sub
     return result
 }
 
-export function configureLoginForm(formId:string){
+export function configureLoginForm(formId: string) {
     const form = document.getElementById(formId);
 
-    if (!form){
+    if (!form) {
         console.error("no form found in document for id", formId);
         gtag("event", "exception", {
             description: "no form found on page for formId" + formId,
@@ -38,9 +38,9 @@ export function configureLoginForm(formId:string){
         return
     }
 
-    async function processForm(e:Event) {
+    async function processForm(e: Event) {
         if (e.preventDefault) e.preventDefault();
-        if (!form){
+        if (!form) {
             return;
         }
 
@@ -55,20 +55,20 @@ export function configureLoginForm(formId:string){
         const emailInput = <HTMLInputElement>form.children.namedItem("email");
         const button = <HTMLButtonElement>form.children.namedItem("submit");
         const errors = <HTMLCollection>form.getElementsByClassName("error");
-        let errorDiv:HTMLDivElement|null = null;
-        if (errors && errors.length > 0){
+        let errorDiv: HTMLDivElement | null = null;
+        if (errors && errors.length > 0) {
             errorDiv = <HTMLDivElement>errors.item(0)
         }
 
-        function showError(message: string){
-            if (errorDiv){
+        function showError(message: string) {
+            if (errorDiv) {
                 errorDiv.innerText = message;
                 errorDiv.classList.remove("hidden")
             }
         }
 
-        function hideError(){
-            if (errorDiv){
+        function hideError() {
+            if (errorDiv) {
                 errorDiv.classList.add("hidden")
             }
         }
@@ -90,7 +90,7 @@ export function configureLoginForm(formId:string){
         console.log("submitting email", emailAddress);
 
 
-        if (!isValidEmail(emailAddress)){
+        if (!isValidEmail(emailAddress)) {
             if (emailAddress.trim().length === 0) {
                 showError("Please enter an email address.")
             } else {
@@ -107,20 +107,30 @@ export function configureLoginForm(formId:string){
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-            if (referredParam){
+            if (referredParam) {
                 subscription.referredByEmail = referredParam;
             }
 
             const signupResult = await sendEmailLinkSignIn(subscription);
 
-            if (signupResult.success){
+            if (signupResult.success) {
                 const modalId = "signup-success-modal";
                 hideError();
+
+                let title = "Welcome!";
+                let message = `Check your ${emailAddress} inbox to get into Journal.`;
+                let imageUrl = '/assets/images/success.svg';
+
+                if (signupResult.existingEmail) {
+                    title = "Welcome back!";
+                    message = `Check your ${emailAddress} inbox to get back into the Journal.`;
+                }
+
                 addModal(modalId, {
-                    title: "Success!",
-                    message: `Look for the confirmation email in your ${emailAddress} inbox.`,
-                    imageUrl: '/assets/images/success.svg',
-                    imageAlt: 'Success!',
+                    title,
+                    message,
+                    imageUrl,
+                    imageAlt: 'Email Signup Success!',
                 });
                 gtag('event', 'email_signup_success', {
                     event_category: "email_signup",
@@ -130,7 +140,7 @@ export function configureLoginForm(formId:string){
 
 
                 emailInput.value = "";
-            } else if (signupResult.error){
+            } else if (signupResult.error) {
                 gtag('event', 'email_signup_error', {
                     event_category: "email_signup",
                     event_label: `${formId}`
@@ -144,7 +154,7 @@ export function configureLoginForm(formId:string){
                 });
                 showError("Sorry, it looks like we're having issues. Please try again later");
             }
-        } catch (error){
+        } catch (error) {
             console.error("failed to process form", error);
             showError("Sorry, it looks like we're having issues.");
         } finally {
@@ -159,10 +169,10 @@ export function configureLoginForm(formId:string){
 
 }
 
-export function configureMailchimpSignupForm(formId:string){
+export function configureMailchimpSignupForm(formId: string) {
     const form = document.getElementById(formId);
 
-    if (!form){
+    if (!form) {
         console.error("no form found in document for id", formId);
         gtag("event", "exception", {
             description: "no form found on page for formId" + formId,
@@ -171,9 +181,9 @@ export function configureMailchimpSignupForm(formId:string){
         return
     }
 
-    async function processForm(e:Event) {
+    async function processForm(e: Event) {
         if (e.preventDefault) e.preventDefault();
-        if (!form){
+        if (!form) {
             return;
         }
 
@@ -189,20 +199,20 @@ export function configureMailchimpSignupForm(formId:string){
         const emailInput = <HTMLInputElement>form.children.namedItem("email");
         const button = <HTMLButtonElement>form.children.namedItem("submit");
         const errors = <HTMLCollection>form.getElementsByClassName("error");
-        let errorDiv:HTMLDivElement|null = null;
-        if (errors && errors.length > 0){
+        let errorDiv: HTMLDivElement | null = null;
+        if (errors && errors.length > 0) {
             errorDiv = <HTMLDivElement>errors.item(0)
         }
 
-        function showError(message: string){
-            if (errorDiv){
+        function showError(message: string) {
+            if (errorDiv) {
                 errorDiv.innerText = message;
                 errorDiv.classList.remove("hidden")
             }
         }
 
-        function hideError(){
-            if (errorDiv){
+        function hideError() {
+            if (errorDiv) {
                 errorDiv.classList.add("hidden")
             }
         }
@@ -224,7 +234,7 @@ export function configureMailchimpSignupForm(formId:string){
         console.log("submitting email", emailAddress);
 
 
-        if (!isValidEmail(emailAddress)){
+        if (!isValidEmail(emailAddress)) {
             if (emailAddress.trim().length === 0) {
                 showError("Please enter an email address.")
             } else {
@@ -241,13 +251,13 @@ export function configureMailchimpSignupForm(formId:string){
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-            if (referredParam){
+            if (referredParam) {
                 subscription.referredByEmail = referredParam;
             }
 
             const signupResult = await submitEmail(subscription);
 
-            if (signupResult.success){
+            if (signupResult.success) {
                 const modalId = "signup-success-modal";
                 hideError();
                 addModal(modalId, {
@@ -265,7 +275,7 @@ export function configureMailchimpSignupForm(formId:string){
 
 
                 emailInput.value = "";
-            } else if (signupResult.error){
+            } else if (signupResult.error) {
                 gtag('event', 'email_signup_error', {
                     event_category: "email_signup",
                     event_label: `${formId}`
@@ -279,7 +289,7 @@ export function configureMailchimpSignupForm(formId:string){
                 });
                 showError("Sorry, it looks like we're having issues. Please try again later");
             }
-        } catch (error){
+        } catch (error) {
             console.error("failed to process form", error);
             showError("Sorry, it looks like we're having issues.");
         } finally {
@@ -294,12 +304,11 @@ export function configureMailchimpSignupForm(formId:string){
 }
 
 
-
-export function setupJumpToForm(buttonClass:string="jump-to-form"){
-    const buttons = <HTMLCollectionOf<HTMLButtonElement>> document.getElementsByClassName(buttonClass);
+export function setupJumpToForm(buttonClass: string = "jump-to-form") {
+    const buttons = <HTMLCollectionOf<HTMLButtonElement>>document.getElementsByClassName(buttonClass);
 
     Array.from(buttons).forEach(button => {
-        if (!button){
+        if (!button) {
             return
         }
 
@@ -308,7 +317,7 @@ export function setupJumpToForm(buttonClass:string="jump-to-form"){
         const focusFormId = button.dataset.focusForm;
         console.log("scrolling to", scrollToId);
 
-        if (!scrollToId){
+        if (!scrollToId) {
             console.log("no content to scroll to");
             return;
         }
@@ -318,9 +327,9 @@ export function setupJumpToForm(buttonClass:string="jump-to-form"){
         button.addEventListener("click", () => {
             gtag("event", "scroll_to", {formId: scrollToId});
             if (content) content.scrollIntoView();
-            if (doFocus && focusFormId){
+            if (doFocus && focusFormId) {
                 const form = document.getElementById(focusFormId);
-                if (form){
+                if (form) {
                     const input = form.getElementsByTagName("input").item(0);
                     if (input) {
                         input.focus()

@@ -9,14 +9,24 @@
                         <a class="button primary" :href="loginPath">Sign In</a>
                     </div>
                 </section>
-
             </div>
-            <div v-if="loggedIn" class="section-container">
-                <section class="empty journalList" v-if="!sentPrompts.length && sentPromptsLoaded">
-                    <h1>Welcome to your Cactus Journal</h1>
-                    <p>Your journal will soon fill with questions to reflect on each day. Your first question will arrive in the morning. For now, sit back and be confident in your choice of a healthier, happier mindset.</p>
-                    <img class="graphic" src="assets/images/music2.svg" alt="" />
-                </section>
+
+            <transition name="fade-in-fast" appear mode="out-in">
+                <div v-if="!loginReady" class="loading-container" key="loading">
+                    <span class="loading"><img alt="loading" src="/assets/images/loading.svg"/></span>
+                </div>
+
+                <div class="section-container" v-if="loggedIn && loginReady && !sentPrompts.length && sentPromptsLoaded" key="empty">
+                    <section class="empty journalList">
+                        <h1>Welcome to your Cactus Journal</h1>
+                        <p>Your journal will soon fill with questions to reflect on each day. Your first question will arrive in the morning. For now, sit back and be confident in your choice of a healthier, happier mindset.</p>
+                        <img class="graphic" src="assets/images/music2.svg" alt="" />
+                    </section>
+                </div>
+
+            </transition>
+
+            <div v-if="loggedIn && loginReady" class="section-container">
                 <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group
                             name="fade-out"
@@ -36,6 +46,7 @@
                     </transition-group>
                 </section>
             </div>
+
         </div>
     </div>
 </template>
@@ -68,15 +79,25 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
-                        window.location.href = "/journal";
+                        console.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        window.location.href = PageRoute.JOURNAL_MARKETING;
                         return;
                     }
+                    const isFreshLogin = !this.cactusMember && member;
+
+
                     this.cactusMember = member;
                     this.user = user;
+                    if (user && member) {
+                        this.loginReady = true;
+                    }
 
-                    this.loginReady = true;
-                    this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                    this.sentPromptsLoaded = true;
+                    if (isFreshLogin) {
+                        this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                        console.log(`JournalHome fetched ${this.sentPrompts.length} prompts when the current member was loaded`);
+                        this.sentPromptsLoaded = true;
+                    }
+
                 }
             });
         },
@@ -96,15 +117,22 @@
         },
         watch: {
             //TODO: add pagination
-            async cactusMember(member: CactusMember | undefined | null) {
-                if (member && member.id) {
-                    this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(member.id, {
+            async cactusMember(newMember: CactusMember | undefined | null, oldMember: CactusMember | undefined | null) {
+                const newId = newMember ? newMember.id : undefined;
+                const oldId = oldMember ? oldMember.id : undefined;
+                if (newId && newId !== oldId) {
+                    console.log("configuring prompt observer");
+                    this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(newId, {
                         onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
-                            this.sentPrompts = sentPrompts;
+                            console.log(`loaded ${sentPrompts.length} prompts via promptObserver on JournalHome`);
+
+                            //TODO: this is a temporary hack to improve initial pageload. I need to ad infinite scrolling
+                            setTimeout(() => this.sentPrompts = sentPrompts, 2000);
                             this.sentPromptsLoaded = true;
                         }
                     });
-                } else if (this.sentPromptsUnsubscriber) {
+                } else if (!newId && this.sentPromptsUnsubscriber) {
+                    console.log("removing journal prompt subscriber since there is no current member");
                     this.sentPromptsUnsubscriber();
                 }
 
@@ -124,7 +152,7 @@
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
-                const delay = Math.min(Number(el.dataset.index) * 200, 2000);
+                const delay = Math.min(Number(el.dataset.index) * 100, 2000);
                 console.log("delay is", delay);
                 setTimeout(function () {
                     el.classList.remove("out");
@@ -150,6 +178,7 @@
 <style scoped lang="scss">
     @import "~styles/common";
     @import "~styles/mixins";
+    @import "~styles/transitions";
 
     .container {
         text-align: left;
@@ -174,6 +203,22 @@
         text-align: center;
     }
 
+    .loading-container {
+        display: flex;
+        height: 0;
+        top: 4rem;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+
+        .loading {
+            width: 2rem;
+            height: 2rem;
+            transform-origin: center;
+            animation: rotate 1s linear infinite;
+        }
+    }
+
     .section-container {
 
         .journalList {
@@ -181,8 +226,10 @@
             flex-direction: column;
 
             .journalListItem {
+                transition: all .3s;
+
                 &.out {
-                    transform: translateY(30px);
+                    transform: translateY(-30px);
                     opacity: 0;
                 }
             }

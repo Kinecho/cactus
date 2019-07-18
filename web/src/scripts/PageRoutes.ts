@@ -3,5 +3,6 @@ export enum PageRoute {
     HOME = "/",
     SIGNUP_CONFIRMED = "/confirmed",
     CHECKOUT = "/checkout",
+    JOURNAL_MARKETING = "/journal",
     JOURNAL_HOME = "/home",
 }

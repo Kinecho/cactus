@@ -7,7 +7,8 @@ export enum Endpoint {
     mailchimp = "mailchimp",
     inbound = "inbound",
     checkout = "checkout",
-    checkoutSessions = "checkout/sessions"
+    checkoutSessions = "checkout/sessions",
+    signupEmailStatus = "signup/email-status",
 }
 
 export function initializeAxios(): AxiosInstance{

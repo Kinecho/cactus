@@ -11,7 +11,7 @@ initializeFirebase();
 const email = getQueryParam(QueryParam.EMAIL);
 
 if (email) {
-    window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
+    window.localStorage.setItem(LocalStorageKey.emailAutoFill, email);
     removeQueryParam(QueryParam.EMAIL);
 }
 

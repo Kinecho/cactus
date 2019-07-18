@@ -6,6 +6,8 @@ import {configureDirectives} from "@web/vueDirectives";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn',
+    emailAutoFill = 'emailAutoFill',
+    newUserSignIn = "newUserSignIn",
 }
 
 

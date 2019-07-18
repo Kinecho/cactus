@@ -16,16 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const $emailInput = document.getElementById("email-input") as HTMLInputElement;
     configureLoginForm("email-signup");
 
-    let emailFromStorage: string | undefined | null;
+    let autoFillEmail: string | undefined | null;
     try {
-        emailFromStorage = localStorage.getItem(LocalStorageKey.emailForSignIn);
+        autoFillEmail = localStorage.getItem(LocalStorageKey.emailAutoFill);
     } catch (error) {
         console.error("failed to fetch value from localstorage", error);
     }
 
-    if (emailFromStorage && $emailInput) {
-        $emailInput.value = emailFromStorage;
-        localStorage.removeItem(LocalStorageKey.emailForSignIn);
+    if (autoFillEmail && $emailInput) {
+        $emailInput.value = autoFillEmail;
+        localStorage.removeItem(LocalStorageKey.emailAutoFill);
     }
 
 
