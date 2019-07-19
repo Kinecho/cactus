@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/Kinecho/cactus#readme",
   "dependencies": {
-    "firebase": "^6.3.0"
+    "firebase": "^6.3.1"
   },
   "devDependencies": {
     "typescript": "^3.5.3"
