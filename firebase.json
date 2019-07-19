@@ -32,7 +32,8 @@
             "bash ./sentry-init.sh",
             "bash ./sentry-start.sh",
             "npm --prefix ./web run config:get",
-            "npm --prefix ./web run build:firebase"
+            "npm --prefix ./web run build:firebase",
+            "bash ./sentry-upload.sh"
         ],
         "postdeploy": [
             "npm --prefix scripts run firebase:postdeploy hosting",

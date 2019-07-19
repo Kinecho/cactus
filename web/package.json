@@ -14,10 +14,11 @@
         "copy": "mkdir ./public ; rsync -a ./src/assets ./public ; cp ./src/favicon* ./public",
         "fe": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.fe.js --progress",
         "dev": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.dev.js --progress",
-        "deploy:stage": "firebase deploy --only hosting -P stage && open https://cactus-app-stage.web.app",
-        "deploy:prod": "firebase deploy --only hosting -P prod && open https://cactus.app",
+        "deploy:stage": "firebase deploy --only hosting -P stage ",
+        "deploy:prod": "firebase deploy --only hosting -P prod",
         "lint": "tslint --project tsconfig.json",
         "logo": "cat ./../cactus.txt",
+
         "open": "npm run predeploy && open ./public/index.html",
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
         "page": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
