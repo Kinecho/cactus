@@ -13,12 +13,17 @@ export interface ServiceAccountCredentials {
 
 export interface CactusConfig {
     isEmulator: boolean,
+    app: {
+        environment: string
+    },
     mailchimp: {
         api_key: string,
         audience_id: string,
     },
     sentry: {
         api_token: string,
+        functions_dsn:string,
+        release?: string,
     },
     slack: {
         webhooks: {

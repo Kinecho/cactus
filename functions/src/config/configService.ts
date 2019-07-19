@@ -21,9 +21,14 @@ export function getConfig(): CactusConfig {
 }
 
 function buildConfig(): CactusConfig {
-    const config = functions.config() as CactusConfig;
+    const functionsConfig = functions.config() as CactusConfig;
+
+    const config = {...functionsConfig};
 
     config.isEmulator = process.env.IS_EMULATOR === "true";
+    if (config.isEmulator) {
+        config.app.environment = "dev";
+    }
 
     return config;
 }
@@ -39,8 +44,13 @@ export function resetTestConfig() {
 const defaultTestConfig = {
     isEmulator: true,
     mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
+    app: {
+        environment: "test"
+    },
     sentry: {
-        api_token: "myapitoken"
+        api_token: "myapitoken",
+        functions_dsn: "mydsn",
+        release: "testrelease"
     },
     slack: {
         webhooks: {
@@ -64,7 +74,7 @@ const defaultTestConfig = {
     },
     stripe: {
         api_key: "test_api_key",
-        secret_key: "test_secret_key",
+        secret_key: "test_secret_key"
     },
     dynamic_links: {
         domain: "cactus-app-stage.web.app",

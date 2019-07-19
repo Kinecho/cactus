@@ -16,13 +16,17 @@
     },
     "functions": {
         "predeploy": [
+            "bash ./sentry-init.sh",
+            "bash ./sentry-funcs-start.sh",
             "npm --prefix scripts run firebase:predeploy functions",
             "npm --prefix \"$RESOURCE_DIR\" run lint",
             "npm --prefix \"$RESOURCE_DIR\" run test",
-            "npm --prefix \"$RESOURCE_DIR\" run build"
+            "npm --prefix \"$RESOURCE_DIR\" run build",
+            "bash ./sentry-funcs-upload.sh"
         ],
         "postdeploy": [
-            "npm --prefix scripts run firebase:postdeploy functions"
+            "npm --prefix scripts run firebase:postdeploy functions",
+            "bash ./sentry-funcs-finish.sh"
         ]
     },
     "hosting": {
@@ -30,14 +34,14 @@
         "predeploy": [
             "npm --prefix scripts run firebase:predeploy hosting",
             "bash ./sentry-init.sh",
-            "bash ./sentry-start.sh",
+            "bash ./sentry-web-start.sh",
             "npm --prefix ./web run config:get",
             "npm --prefix ./web run build:firebase",
-            "bash ./sentry-upload.sh"
+            "bash ./sentry-web-upload.sh"
         ],
         "postdeploy": [
             "npm --prefix scripts run firebase:postdeploy hosting",
-            "bash ./sentry-finish.sh"
+            "bash ./sentry-web-finish.sh"
         ],
         "public": "web/public",
         "ignore": [

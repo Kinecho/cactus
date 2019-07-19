@@ -23,4 +23,11 @@ app.get('/bq', async (req, resp) => {
     return resp.send({results: results});
 });
 
+app.get("/error", async (req, resp) => {
+
+    throw new Error("This is a test API Error");
+
+    return resp.sendStatus(500);
+});
+
 export default app;
