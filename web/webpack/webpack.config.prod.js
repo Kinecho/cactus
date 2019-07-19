@@ -12,9 +12,7 @@ module.exports = () => {
             plugins: [
                 new SentryWebpackPlugin({
                     include: './../public',
-                    // ignoreFile: '.sentrycliignore',
                     ignore: ['node_modules']
-                    // configFile: 'sentry.properties'
                 })
             ]
         })
