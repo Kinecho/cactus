@@ -24,7 +24,7 @@
             "npm --prefix \"$RESOURCE_DIR\" run build:deploy",
             "bash ./sentry-funcs-upload.sh"
         ],
-        "postdeploy": [o
+        "postdeploy": [
             "npm --prefix scripts run firebase:postdeploy functions",
             "bash ./sentry-funcs-finish.sh"
         ]
