@@ -27,9 +27,6 @@ const git = simplegit();
     console.log(`got config: ${config.web.domain}`);
 
 
-    AdminSlackService.initialize(config);
-
-
     const username: string | undefined | null = await git.raw(['config', '--global', 'user.name']);
     const email: string | undefined | null = await git.raw(['config', '--global', 'user.email']);
 
@@ -53,6 +50,9 @@ const git = simplegit();
         }],
     };
 
+    const prodConfig = await getCactusConfig(Project.PROD);
+    //always send to engineering
+    AdminSlackService.initialize(prodConfig);
     await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
 
 })();
