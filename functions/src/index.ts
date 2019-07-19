@@ -16,10 +16,13 @@ const Sentry = require('@sentry/node');
 
 const config = getConfig();
 
+const functionName = process.env.FUNCTION_NAME || null;
+
 const sentryOptions = {
     dsn: config.sentry.functions_dsn,
     environment: config.app.environment,
     release: config.sentry.release || null,
+    serverName: functionName
 };
 
 Sentry.init(sentryOptions);
