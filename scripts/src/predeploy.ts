@@ -47,7 +47,7 @@ const git = simplegit();
         text: "",
         attachments: [{
             title: `Starting the deployment process for ${resourceName}`,
-            text: `Version: \`${hash}\`\n_started by ${byLine}_`,
+            text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Version: \`${hash}\`\n_started by ${byLine}_`,
             ts: `${(new Date()).getTime() / 1000}`
         }],
     };

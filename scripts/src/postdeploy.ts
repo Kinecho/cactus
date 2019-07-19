@@ -50,7 +50,7 @@ const git = simplegit();
         text: "",
         attachments: [{
             title: `Finished deploying ${resourceName} :tada:`,
-            text: `Version: \`${hash}\`\n_started by ${byLine}_`,
+            text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Version>: \`${hash}\`\n_started by ${byLine}_`,
             color: "good",
             ts: `${(new Date()).getTime() / 1000}`
         }],
