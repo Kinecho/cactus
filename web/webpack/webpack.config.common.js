@@ -54,6 +54,7 @@ module.exports = (config) => {
                     filename: isDev ? '[name].js' : '[name].[hash].js',
                     publicPath: '/',
                 },
+                stats: 'errors-warnings',
                 resolve: {
                     modules: ['src', 'styles', 'assets', 'images', 'scripts', 'components', 'vue', 'node_modules'],
                     alias: {

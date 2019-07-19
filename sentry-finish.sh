@@ -11,5 +11,5 @@ VERSION=$(sentry-cli releases propose-version)
 echo "In theory source maps were uploaded via webpack already"
 
 echo "Deploying version $VERSION to $ENVIRONMENT"
-sentry-cli releases deploys ${VERSION} new -e ${ENVIRONMENT} --log-level=debug
+sentry-cli releases deploys ${VERSION} new -e ${ENVIRONMENT} --log-level=debug || echo "SENTRY FAILED TO DEPLOY NEW VERSION"
 

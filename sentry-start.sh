@@ -7,6 +7,6 @@ echo "creating sentry release for version $VERSION"
 sentry-cli releases new -p cactus-web $VERSION
 
 # Associate commits with the release
-sentry-cli releases set-commits --auto $VERSION
+sentry-cli releases set-commits --auto $VERSION || echo "FAILED TO SET COMMITS"
 
 export SENTRY_VERSION="${VERSION}"

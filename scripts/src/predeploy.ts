@@ -50,9 +50,7 @@ const git = simplegit();
         }],
     };
 
-    const prodConfig = await getCactusConfig(Project.PROD);
-    //always send to engineering
-    AdminSlackService.initialize(prodConfig);
+    AdminSlackService.initialize(config);
     await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
 
 })();
