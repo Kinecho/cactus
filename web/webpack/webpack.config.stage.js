@@ -12,9 +12,11 @@ module.exports = () => {
             mode: "production",
             plugins: [
                 new SentryWebpackPlugin({
-                    include: './../public',
-                    ignore: ['node_modules']
-                })
+                    include: path.resolve(__dirname, '..', 'public'),
+                    ignore: ['node_modules'],
+                    silent: false,
+                    debug: true,
+                }),
             ]
         })
     })

@@ -40,6 +40,7 @@
         "ignore": [
             "firebase.json",
             "**/.*",
+            "**.*.js.map",
             "**/node_modules/**"
         ],
         "rewrites": [

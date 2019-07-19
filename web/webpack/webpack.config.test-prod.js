@@ -16,7 +16,7 @@ module.exports = () => {
     return getCommitHash().then(commithash => {
         return getCommonWebpackConfig(config).then(common => {
             console.log('Setting the release on SentryWebpackPlugin to', commithash)
-            return merge(common, minimizersConfig, {
+            return merge(common, {
                 devtool: 'source-map',
                 mode: 'production',
                 plugins: [

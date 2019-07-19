@@ -7,6 +7,7 @@
         "build:deploy": "npm run clean && npm run logo && NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js  --progress",
         "build:firebase": "npm run lint && npm run test && npm run build:deploy && npm run copy",
         "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
+        "build:prod:test": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.config.test-prod.js --progress",
         "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
         "clean": "rm -rf ./public",
         "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
