@@ -18,9 +18,9 @@
 
                 <div class="section-container" v-if="loggedIn && loginReady && !sentPrompts.length && sentPromptsLoaded" key="empty">
                     <section class="empty journalList">
-                        <p><strong>Welcome to Journal</strong></p>
-                        <p>Your daily questions will be here. Check back in the morning.</p>
-
+                        <h1>Welcome to your Cactus Journal</h1>
+                        <p>Your journal will soon fill with questions to reflect on each day. Your first question will arrive in the morning. For now, sit back and be confident in your choice of a healthier, happier mindset.</p>
+                        <img class="graphic" src="assets/images/music2.svg" alt="" />
                     </section>
                 </div>
 
@@ -235,17 +235,21 @@
             }
 
             &.empty {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
                 align-items: center;
-                min-height: 12rem;
-                @include shadowbox;
-                background: $lightGreen;
-                color: $darkText;
-                margin: 0 auto 4.8rem;
-                max-width: 64rem;
-                padding: 3.2rem;
+                justify-content: center;
+                padding: 2.4rem;
+                text-align: center;
+
+                p {
+                  margin: 1.6rem auto 3.2rem;
+                  max-width: 60rem;
+                  opacity: .8;
+                }
+
+                .graphic {
+                  max-width: 64rem;
+                  width: 90%;
+                }
             }
 
             &.loggedOut {
