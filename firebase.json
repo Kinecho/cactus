@@ -27,6 +27,7 @@
     "hosting": {
         "appAssociation": "AUTO",
         "predeploy": [
+            "npm --prefix scripts run firebase:predeploy hosting",
             "bash ./sentry-init.sh",
             "bash ./sentry-start.sh",
             "npm --prefix ./web run config:get",
