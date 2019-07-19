@@ -5,8 +5,8 @@ import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 
 import * as Sentry from '@sentry/browser';
-import CactusMember from "@shared/models/CactusMember";
 import {User} from "firebase/app"
+import {getAuth} from "@web/firebase";
 
 declare global {
     interface Window {
@@ -35,12 +35,23 @@ let _gtag: null | ((name: string, event?: any, options?: any) => void) = null;
 export const gtag = createGTag();
 
 
+let hasInit = false;
+
 /**
  * set up the analytics function
  *
  * returns function
  */
 export function init() {
+    if (hasInit) {
+        console.warn("Analytics already initialized, not reinitializing");
+    }
+
+
+    getAuth().onAuthStateChanged(user => {
+        setUser(user);
+    });
+
     const sentryIntegrations = [];
     if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
@@ -62,6 +73,8 @@ export function init() {
     if (mailchimpUserId) {
         setUserId(`mcuid_${mailchimpUserId}`);
     }
+
+    hasInit = true;
 }
 
 export function setUserId(userId?: string) {
@@ -71,7 +84,7 @@ export function setUserId(userId?: string) {
     });
 }
 
-export function setUser(user?: User) {
+export function setUser(user?: User | null) {
     if (user) {
         const email = user.email;
         setUserId(user.uid);

@@ -19,3 +19,17 @@ then
 else
     echo "Sentry config exists"
 fi
+
+
+if ! [ -x  "$(command -v sentry-cli)" ]
+then
+     echo "sentry-cli is not installed. Installing it now"
+     curl -sL https://sentry.io/get-cli/ | bash
+else
+    echo "sentry-cli is installed. Continuing"
+fi
+
+
+echo "finished sentry-cli setup"
+
+
