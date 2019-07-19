@@ -7,7 +7,7 @@ shared/lib/
 scripts/output/
 
 web/src/pages-index.html
-
+.sentryclirc
 .runtimeconfig.json
 
 applicationCredentials.json

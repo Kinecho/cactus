@@ -1,12 +1,18 @@
 import {Config} from './config'
 import {QueryParam} from "@shared/util/queryParams";
 import {getQueryParam} from "@web/util";
+import Vue from 'vue'
+import * as Integrations from '@sentry/integrations';
+
+import * as Sentry from '@sentry/browser';
 
 declare global {
-    interface Window { dataLayer: Array<any>; }
+    interface Window {
+        dataLayer: Array<any>;
+    }
 }
 
-let _gtag:null | ((name:string, event?:any, options?:any) => void) = null;
+let _gtag: null | ((name: string, event?: any, options?: any) => void) = null;
 
 // window.dataLayer = window.dataLayer || {};
 
@@ -25,7 +31,19 @@ export const gtag = createGTag();
  *
  * returns function
  */
-export function init(){
+export function init() {
+    const sentryIntegrations = [];
+    if (!Config.isDev) {
+        sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
+    }
+
+    Sentry.init({
+        dsn: Config.sentry.dsn,
+
+
+        integrations: sentryIntegrations,
+    });
+
     createGTag();
     gtag('js', new Date());
     gtag('config', Config.googleAnalyticsID);
@@ -36,7 +54,7 @@ export function init(){
     }
 }
 
-export function setUserId(userId:string) {
+export function setUserId(userId: string) {
     gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
     gtag('config', 'GA_MEASUREMENT_ID', {
         'custom_map': {'dimension1': userId}
@@ -44,10 +62,10 @@ export function setUserId(userId:string) {
 
 }
 
-function createGTag(){
-    if (!_gtag){
+function createGTag() {
+    if (!_gtag) {
         window.dataLayer = window.dataLayer || [];
-        _gtag = function(){
+        _gtag = function () {
             window.dataLayer.push(arguments)
         }
     }
@@ -57,9 +75,9 @@ function createGTag(){
 
 // tslint:disable
 // @ts-ignore:
-export function startFullstory(){
+export function startFullstory() {
 
-    if (!Config.fullStoryTeamId){
+    if (!Config.fullStoryTeamId) {
         console.log("Full story is disabled. Not loading full story.");
         return;
     }
@@ -77,24 +95,78 @@ export function startFullstory(){
     window['_fs_namespace'] = 'FS';
 
     // tslint:disable
-    (function(m,n,e,t,l,o,g,y){
-        if (e in m) {if(m.console && m.console.log) { m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');} return;}
+    (function (m, n, e, t, l, o, g, y) {
+        if (e in m) {
+            if (m.console && m.console.log) {
+                m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');
+            }
+            return;
+        }
         // @ts-ignore
-        g=m[e]=function(a,b,s){g.q?g.q.push([a,b,s]):g._api(a,b,s);};g.q=[];
+        g = m[e] = function (a, b, s) {
+            // @ts-ignore
+            g.q ? g.q.push([a, b, s]) : g._api(a, b, s);
+        };
         // @ts-ignore
-        o=n.createElement(t);o.async=1;o.crossOrigin='anonymous';o.src='https://'+_fs_host+'/s/fs.js';
+        g.q = [];
         // @ts-ignore
-        y=n.getElementsByTagName(t)[0];y.parentNode.insertBefore(o,y);
+        o = n.createElement(t);
         // @ts-ignore
-        g.identify=function(i,v,s){g(l,{uid:i},s);if(v)g(l,v,s)};g.setUserVars=function(v,s){g(l,v,s)};g.event=function(i,v,s){g('event',{n:i,p:v},s)};
+        o.async = 1;
         // @ts-ignore
-        g.shutdown=function(){g("rec",!1)};g.restart=function(){g("rec",!0)};
+        o.crossOrigin = 'anonymous';
         // @ts-ignore
-        g.consent=function(a){g("consent",!arguments.length||a)};
+        o.src = 'https://' + _fs_host + '/s/fs.js';
         // @ts-ignore
-        g.identifyAccount=function(i,v){o='account';v=v||{};v.acctId=i;g(o,v)};
+        y = n.getElementsByTagName(t)[0];
         // @ts-ignore
-        g.clearUserCookie=function(){};
-    })(window,document,window['_fs_namespace'],'script','user');
+        y.parentNode.insertBefore(o, y);
+        // @ts-ignore
+        g.identify = function (i, v, s) {
+            // @ts-ignore
+            g(l, {uid: i}, s);
+            // @ts-ignore
+            if (v) g(l, v, s)
+        };
+        // @ts-ignore
+        g.setUserVars = function (v, s) {
+            // @ts-ignore
+            g(l, v, s)
+        };
+        // @ts-ignore
+        g.event = function (i, v, s) {
+            // @ts-ignore
+            g('event', {n: i, p: v}, s)
+        };
+        // @ts-ignore
+        g.shutdown = function () {
+            // @ts-ignore
+            g("rec", !1)
+        };
+        // @ts-ignore
+        g.restart = function () {
+            // @ts-ignore
+            g("rec", !0)
+        };
+        // @ts-ignore
+        g.consent = function (a) {
+            // @ts-ignore
+            g("consent", !arguments.length || a)
+        };
+        // @ts-ignore
+        g.identifyAccount = function (i, v) {
+            // @ts-ignore
+            o = 'account';
+            v = v || {};
+            v.acctId = i;
+            // @ts-ignore
+            g(o, v)
+        };
+        // @ts-ignore
+        g.clearUserCookie = function () {
+        };
+        // @ts-ignore
+    })(window, document, window['_fs_namespace'], 'script', 'user');
 }
+
 // tslint:enable

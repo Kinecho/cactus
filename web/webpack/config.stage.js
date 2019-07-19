@@ -3,6 +3,7 @@ module.exports = {
     __API_DOMAIN__: "https://us-central1-cactus-app-stage.cloudfunctions.net",
     __FULL_STORY_TEAM_ID__: "",
     __PUBLIC_DOMAIN__: "https://cactus-app-stage.web.app",
+    __BUILD_ENV__:"stage",
     __FIREBASE_CONFIG__: {
         apiKey: "AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0",
         authDomain: "cactus-app-stage.firebaseapp.com",
@@ -20,6 +21,9 @@ module.exports = {
     __FIREBASE_DYNAMIC_LINK__: {
         domain: "cactusstage.page.link",
         prefix: ""
+    },
+    __SENTRY__: {
+        dsn: 'https://d41561516bba4e04b0d10a1526c83c27@sentry.io/1490133',
     }
 }
 
