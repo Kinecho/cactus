@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
+import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
 import {
     getOperation,
 } from "@api/endpoints/DataExportJob";
@@ -14,6 +15,12 @@ app.get("/operation", async (req, res) => {
     const name = req.query.name;
     const operation = await getOperation(name);
     return res.send(operation);
+});
+
+app.get('/bq', async (req, resp) => {
+    const results = await getActiveUserCountForTrailingDays(1);
+
+    return resp.send({results: results});
 });
 
 export default app;
