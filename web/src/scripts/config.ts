@@ -32,6 +32,8 @@ declare var __STRIPE_CONFIG__: StripeConfig;
 declare var __PUBLIC_DOMAIN__: string;
 declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
 declare var __SENTRY__: SentryConfig;
+declare var __SENTRY_VERSION__: string | undefined;
+
 declare var __BUILD_ENV__: string;
 export const Config = {
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
@@ -45,5 +47,6 @@ export const Config = {
     env: __BUILD_ENV__,
     isDev: __BUILD_ENV__ === "dev",
     isStage: __BUILD_ENV__ === "stage",
-    isProd: __BUILD_ENV__ === "prod"
+    isProd: __BUILD_ENV__ === "prod",
+    version: __SENTRY_VERSION__
 };

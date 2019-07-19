@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-
 filename=.sentryclirc
 
 if [ ! -f $filename ]

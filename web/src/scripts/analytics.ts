@@ -57,10 +57,11 @@ export function init() {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
     }
 
+    console.log("version is ", Config.version);
 
     Sentry.init({
         dsn: Config.sentry.dsn,
-
+        release: Config.version,
         environment: Config.env,
         integrations: sentryIntegrations,
     });

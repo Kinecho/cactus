@@ -5,7 +5,13 @@ const config = require('./config.dev')
 
 config.isDev = true;
 
-module.exports = merge(getCommonWebpackConfig(config), {
-    mode: "development",
-    devtool: "cheap-module-eval-source-map",
-}, getDevServerConfig(config))
+module.exports = () => {
+  return getCommonWebpackConfig(config).then(common => {
+      return merge(common, {
+          mode: "development",
+          devtool: "cheap-module-eval-source-map",
+      }, getDevServerConfig(config))
+  })
+
+
+}
