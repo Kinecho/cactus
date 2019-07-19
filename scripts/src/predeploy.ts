@@ -41,11 +41,13 @@ const git = simplegit();
 
     console.log(`username ${username} | email ${email}`);
 
+    const hash = await git.revparse(["HEAD"]);
+
     const message: ChatMessage = {
         text: "",
         attachments: [{
             title: `Starting the deployment process for ${resourceName}`,
-            text: `_started by ${byLine}_`,
+            text: `Version: \`${hash}\`\n_started by ${byLine}_`,
             ts: `${(new Date()).getTime() / 1000}`
         }],
     };
