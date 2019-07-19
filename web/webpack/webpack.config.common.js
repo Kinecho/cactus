@@ -9,10 +9,12 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const pagesUtil = require('./../pagesUtil')
+
 module.exports = function (config) {
 
     const isDev = config.isDev || false
-
+    // noinspection MissingOrObsoleteGoogRequiresInspection
+    config.__SENTRY_VERSION__ = process.env.SENTRY_VERSION
     let pages = pagesUtil.getPages(config, allPages)
 
     let parsedConfig = {}

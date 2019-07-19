@@ -28,11 +28,13 @@
         "appAssociation": "AUTO",
         "predeploy": [
             "bash ./sentry-init.sh",
+            "bash ./sentry-start.sh",
             "npm --prefix ./web run config:get",
             "npm --prefix ./web run build:firebase"
         ],
         "postdeploy": [
-            "npm --prefix scripts run firebase:postdeploy hosting"
+            "npm --prefix scripts run firebase:postdeploy hosting",
+            "bash ./sentry-finish.sh"
         ],
         "public": "web/public",
         "ignore": [

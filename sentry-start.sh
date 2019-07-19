@@ -8,3 +8,5 @@ sentry-cli releases new -p cactus-web $VERSION
 
 # Associate commits with the release
 sentry-cli releases set-commits --auto $VERSION
+
+export SENTRY_VERSION="${VERSION}"
