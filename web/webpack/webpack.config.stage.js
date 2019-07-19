@@ -11,14 +11,14 @@ module.exports = () => {
         return merge(common, minimizersConfig, {
             devtool: 'source-map',
             mode: "production",
-            plugins: [
-                new SentryWebpackPlugin({
-                    include: path.resolve(__dirname, '..', 'public'),
-                    ignore: ['node_modules'],
-                    silent: false,
-                    debug: true,
-                }),
-            ]
+            // plugins: [
+            //     new SentryWebpackPlugin({
+            //         include: path.resolve(__dirname, '..', 'public'),
+            //         ignore: ['node_modules'],
+            //         silent: false,
+            //         debug: true,
+            //     }),
+            // ]
         })
     })
 }
