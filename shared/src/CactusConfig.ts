@@ -17,6 +17,9 @@ export interface CactusConfig {
         api_key: string,
         audience_id: string,
     },
+    sentry: {
+        api_token: string,
+    },
     slack: {
         webhooks: {
             cactus_activity: string,

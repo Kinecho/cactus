@@ -39,6 +39,9 @@ export function resetTestConfig() {
 const defaultTestConfig = {
     isEmulator: true,
     mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
+    sentry: {
+        api_token: "myapitoken"
+    },
     slack: {
         webhooks: {
             cactus_activity: "https://cactus_activity_webhook.test.com"

@@ -8,14 +8,12 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
-const pagesUtil = require("./../pagesUtil");
-
+const pagesUtil = require('./../pagesUtil')
 module.exports = function (config) {
-
 
     const isDev = config.isDev || false
 
-    let pages = pagesUtil.getPages(config, allPages);
+    let pages = pagesUtil.getPages(config, allPages)
 
     let parsedConfig = {}
     Object.keys(config).forEach(key => {
@@ -28,8 +26,8 @@ module.exports = function (config) {
     }, {common: `${helpers.scriptDir}/common.ts`})
 
 
-    if (isDev){
-        jsEntries["pages-index"] = `${helpers.scriptDir}/pages/pages-index.ts`;
+    if (isDev) {
+        jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
     }
 
     console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
@@ -127,7 +125,7 @@ module.exports = function (config) {
             }),
             ...Object.keys(pages).map(filename => {
                 const page = pages[filename]
-                console.log(chalk.green("Configuring HTML page ", filename));
+                console.log(chalk.green('Configuring HTML page ', filename))
                 return new HtmlWebpackPlugin({
                     chunks: ['common', filename],
                     title: page.title,

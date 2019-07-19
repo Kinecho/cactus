@@ -9,6 +9,7 @@
         "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
         "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
         "clean": "rm -rf ./public",
+        "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
         "copy": "mkdir ./public ; rsync -a ./src/assets ./public ; cp ./src/favicon* ./public",
         "fe": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.fe.js --progress",
         "dev": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.dev.js --progress",

@@ -5,10 +5,18 @@ import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 
 import * as Sentry from '@sentry/browser';
+import CactusMember from "@shared/models/CactusMember";
+import {User} from "firebase/app"
 
 declare global {
     interface Window {
         dataLayer: Array<any>;
+        FS: {
+            identify: (userId: string | boolean, options?: {
+                displayName?: string | null,
+                email?: string | null,
+            }) => void
+        }
     }
 }
 
@@ -26,6 +34,7 @@ let _gtag: null | ((name: string, event?: any, options?: any) => void) = null;
  */
 export const gtag = createGTag();
 
+
 /**
  * set up the analytics function
  *
@@ -37,10 +46,11 @@ export function init() {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
     }
 
+
     Sentry.init({
         dsn: Config.sentry.dsn,
 
-
+        environment: Config.env,
         integrations: sentryIntegrations,
     });
 
@@ -54,12 +64,44 @@ export function init() {
     }
 }
 
-export function setUserId(userId: string) {
+export function setUserId(userId?: string) {
     gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
     gtag('config', 'GA_MEASUREMENT_ID', {
         'custom_map': {'dimension1': userId}
     });
+}
 
+export function setUser(user?: User) {
+    if (user) {
+        const email = user.email;
+        setUserId(user.uid);
+
+        const sentryUser: Sentry.User = {};
+        if (email) {
+            sentryUser.email = email;
+        }
+        if (user.uid) {
+            sentryUser.id = user.uid;
+        }
+
+        Sentry.setUser(sentryUser);
+
+        if (window.FS) {
+            // TODO: Add your own custom user variables here, details at
+            // http://help.fullstory.com/develop-js/setuservars
+            window.FS.identify(user.uid, {
+                email: user.email,
+                displayName: user.displayName
+            })
+        }
+    } else {
+        setUserId(undefined);
+        Sentry.setUser(null);
+        if (window.FS) {
+            window.FS.identify(false);
+        }
+
+    }
 }
 
 function createGTag() {
