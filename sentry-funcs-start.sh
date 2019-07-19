@@ -17,7 +17,7 @@ npx firebase functions:config:set sentry.release=${VERSION} -P ${ENVIRONMENT}
 
 echo "Firebase Functions sentry.release is now set to $(npx firebase functions:config:get sentry.release)"
 
-echo "creating sentry release for version ${VERSION}"
+echo "creating sentry release cactus-functions for version ${VERSION}"
 # Create a release
 sentry-cli releases new -p cactus-functions ${VERSION}
 

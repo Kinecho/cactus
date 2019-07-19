@@ -16,11 +16,15 @@ const Sentry = require('@sentry/node');
 
 const config = getConfig();
 
-Sentry.init({
+const sentryOptions = {
     dsn: config.sentry.functions_dsn,
     environment: config.app.environment,
     release: config.sentry.release || null,
-});
+};
+
+Sentry.init(sentryOptions);
+
+console.log("initialized Sentry with config", JSON.stringify(sentryOptions, null, 2));
 
 
 export const cloudFunctions = {
