@@ -122,6 +122,8 @@ workflows:
   version: 2.1
   web_build_and_test:
     jobs:
+      - get-changes:
+          name: &get_changes_name "Get module changes"
       - install-shared:
           name: &shared_install_name "Shared Install Dependencies"
       - install-web:
