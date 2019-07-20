@@ -34,8 +34,7 @@ jobs:
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
-      - slack/notify:
-        <<: *notify-job-started-slack
+      - slack/notify: *notify-job-started-slack
 
       - checkout
 
@@ -59,8 +58,7 @@ jobs:
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
-      - slack/notify:
-          <<: *notify-job-started-slack
+      - slack/notify: *notify-job-started-slack
 #      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
 #          <<: *webhook-engineering-ci
 #          color: '#42e2f4'
