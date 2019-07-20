@@ -17,6 +17,7 @@ aliases:
   - &restore-web-dependencies
     name: Restore Web Dependency Cache
     <<: *web-dependency-keys
+  - &webhook-engineering-ci: "https://hooks.slack.com/services/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"
 
 jobs:
   install-web:
@@ -27,8 +28,9 @@ jobs:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
           color: '#42e2f4'
           mentions: 'neil,'
-          message: Starting a build job for Cactus Web
-          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
+          message: Starting `install-web` job for *Cactus Web*
+#          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
+          webhook: *webhook-engineering-ci
 
       - checkout
 
@@ -56,7 +58,6 @@ jobs:
     steps:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
           color: '#42e2f4'
-          mentions: 'neil,'
           message: Starting a build job for Cactus Web
           webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
