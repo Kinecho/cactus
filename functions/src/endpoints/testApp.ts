@@ -4,7 +4,9 @@ import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
 import {
     getOperation,
 } from "@api/endpoints/DataExportJob";
+import * as Sentry from "@sentry/node";
 
+// const Sentry = require('@sentry/node');
 const app = express();
 app.use(cors({origin: true}));
 app.get('/', (req, res) => {
@@ -24,10 +26,15 @@ app.get('/bq', async (req, resp) => {
 });
 
 app.get("/error", async (req, resp) => {
+    try {
+        throw new Error("This is a test API Error");
+    } catch (e) {
+        Sentry.captureException(e);
+        return resp.sendStatus(500);
+    }
+    resp.send("done");
+    return;
 
-    throw new Error("This is a test API Error");
-
-    return resp.sendStatus(500);
 });
 
 export default app;

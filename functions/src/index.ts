@@ -11,15 +11,17 @@ import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import {getConfig} from "@api/config/configService";
-
-const Sentry = require('@sentry/node');
+import * as Sentry from '@sentry/node';
 
 const config = getConfig();
 
-const sentryOptions = {
+const functionName = process.env.FUNCTION_NAME || undefined;
+
+const sentryOptions:Sentry.NodeOptions = {
     dsn: config.sentry.functions_dsn,
-    environment: config.app.environment,
-    release: config.sentry.release || null,
+    environment: config.app.environment ,
+    release: config.sentry.release,
+    serverName: functionName
 };
 
 Sentry.init(sentryOptions);

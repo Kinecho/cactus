@@ -21,7 +21,7 @@
             "npm --prefix scripts run firebase:predeploy functions",
             "npm --prefix \"$RESOURCE_DIR\" run lint",
             "npm --prefix \"$RESOURCE_DIR\" run test",
-            "npm --prefix \"$RESOURCE_DIR\" run build",
+            "npm --prefix \"$RESOURCE_DIR\" run build:deploy",
             "bash ./sentry-funcs-upload.sh"
         ],
         "postdeploy": [
