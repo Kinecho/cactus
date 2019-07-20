@@ -92,16 +92,16 @@ jobs:
       - run:
           name: "Determine Modules to Deploy"
           command: |
-          echo "The current build output is"
-          cat /tmp/workspace/modules_to_deploy.txt
-          MODULES=$(cat /tmp/workspace/modules_to_deploy.txt || "NONE")
+            echo "The current build output is"
+            cat /tmp/workspace/modules_to_deploy.txt
+            MODULES=$(cat /tmp/workspace/modules_to_deploy.txt || "NONE")
 
-          if [[ `cat /tmp/workspace/modules_to_deploy.txt` == "NONE" ]]; then
-            echo "Nothing to Deploy";
-            exit 0
-          else
-            echo "Will deploy ${MODULES}"
-          fi
+            if [[ `cat /tmp/workspace/modules_to_deploy.txt` == "NONE" ]]; then
+              echo "Nothing to Deploy";
+              exit 0
+            else
+              echo "Will deploy ${MODULES}"
+            fi
       - run:
           name: "Deploy to Firebase"
           command: |
