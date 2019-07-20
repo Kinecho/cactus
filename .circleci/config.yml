@@ -67,10 +67,12 @@ jobs:
       - run: mkdir -p workspace
       - run: . git-folder.sh
       - run: ls -a | grep modules_to_deploy.txt
-      - run: |
-          echo "Printing output & copying file"
-          cat modules_to_deploy.txt
-          cp modules_to_deploy.txt workspace
+      - run:
+          name: "Determine Modules to Deploy"
+          command: |
+            echo "Printing output & copying file"
+            cat modules_to_deploy.txt
+            cp modules_to_deploy.txt workspace
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
@@ -83,19 +85,30 @@ jobs:
   deploy:
     executor: cactus-web
     steps:
+      - slack/notify: *notify-job-started-slack
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: /tmp/workspace
-      - run: |
+      - run:
+          name: "Determine Modules to Deploy"
+          command: |
           echo "The current build output is"
           cat /tmp/workspace/modules_to_deploy.txt
           MODULES=$(cat /tmp/workspace/modules_to_deploy.txt || "NONE")
 
           if [[ `cat /tmp/workspace/modules_to_deploy.txt` == "NONE" ]]; then
             echo "Nothing to Deploy";
+            exit 0
           else
             echo "Will deploy ${MODULES}"
           fi
+      - run:
+          name: "Deploy to Firebase"
+          command: |
+            echo "Still not actually Deploying :) "
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
 
   install-functions:
     executor: cactus-web
