@@ -14,15 +14,18 @@ aliases:
       - web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
       - web-dependency-{{ .Branch }}-
       - web-dependency-
+
   - &restore-web-dependencies
     name: Restore Web Dependency Cache
     <<: *web-dependency-keys
+
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
-  - &notify-job-started-slack: #see https://github.com/CircleCI-Public/slack-orb
-        <<: *webhook-engineering-ci
-        color: '#42e2f4'
-        message: "\\`$CIRCLE_JOB\\` Starting "
+
+  - &notify-job-started-slack
+    <<: *webhook-engineering-ci
+    color: '#42e2f4'
+    message: "\\`$CIRCLE_JOB\\` Starting "
 
 
 jobs:
