@@ -14,12 +14,9 @@ module.exports = {
     webpackDir: path.resolve(webRoot, "webpack"),
     pagesFile: pages,
     htmlDir: path.resolve(webRoot, "src", "html"),
-
     stylesDir: path.resolve(webRoot, "src", "styles"),
     pagesStylesDir: path.resolve(webRoot, "src", "styles", "pages"),
-
     publicDir: path.resolve(webRoot, "public"),
     sharedDir: path.resolve(webRoot, "..", "shared", "src"),
-
     questionsSiteMap: path.resolve(webRoot, "src", "assets", "sitemaps", "questions.txt"),
 }
