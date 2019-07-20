@@ -25,7 +25,7 @@ aliases:
   - &notify-job-started-slack
     <<: *webhook-engineering-ci
     color: '#42e2f4'
-    message: "\\`$CIRCLE_JOB\\` Starting "
+    message: "Job \\`$CIRCLE_JOB\\` starting on branch *$CIRCLE_BRANCH* <https://circleci.com/workflow-run/CIRCLE_WORKFLOW_ID|Workflow>"
 
 
 jobs:
