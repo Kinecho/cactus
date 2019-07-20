@@ -8,5 +8,5 @@ module.exports = {
         '^@web/(.*)$': '<rootDir>/src/scripts/$1',
         '^@components/(.*)$': '<rootDir>/src/scripts/components/$1',
         '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
-    },
+    }
 }
