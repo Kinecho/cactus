@@ -6,6 +6,12 @@ version: 2.1
 orbs:
   slack: circleci/slack@3.2.0 #https://github.com/CircleCI-Public/slack-orb
 
+executors:
+  cactus-web:
+    working_directory: ~/project
+    docker:
+      - image: circleci/node:8.15.0-browsers
+
 
 aliases:
   ## WEB CACHES
@@ -32,6 +38,18 @@ aliases:
     name: Restore Shared Dependency Cache
     <<: *shared-dependency-keys
 
+  ## FUNCTIONS CACHES
+  - &functions-dependency-key
+    key: v2-functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
+  - &functions-dependency-keys
+    keys:
+      - functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
+      - functions-dependency-{{ .Branch }}-
+      - functions-dependency-
+  - &restore-functions-dependencies
+    name: Restore functionsDependency Cache
+    <<: *functions-dependency-keys
+
   ## Slack Configs
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
@@ -43,17 +61,59 @@ aliases:
 
 jobs:
   get-changes:
-    working_directory: ~/project
-    docker:
-      - image: circleci/node:8.15.0-browsers
+    executor: cactus-web
     steps:
       - checkout
-      - run: . git-folder.sh
+      - run: . git-folder.sh > workspace/build-paths
+      # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: workspace
+          # Must be relative path from root
+          paths:
+            - build-paths
+
+  deploy:
+    executor: cactus-web
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/workspace
+      - run: |
+          echo "The current build output is"
+          cat /tmp/workspace/build-paths
+          if [[ `cat /tmp/workspace/build-paths` == "Hello, world!" ]]; then
+            echo "It worked!";
+          else
+            echo "Nope!"; exit 1
+          fi
+
+  install-functions:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache: *restore-functions-dependencies
+
+      - run: npm --prefix functions install
+
+      - save_cache:
+          name: "Save Functions Dependencies to Cache"
+          paths:
+            - functions/node_modules
+          <<: *functions-dependency-key
+
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+
 
   install-shared:
-    working_directory: ~/project
-    docker:
-      - image: circleci/node:8.15.0-browsers
+    executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
 
@@ -75,9 +135,7 @@ jobs:
           fail_only: true
 
   install-web:
-    working_directory: ~/project
-    docker:
-      - image: circleci/node:8.15.0-browsers
+    executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
 
@@ -98,9 +156,7 @@ jobs:
           <<: *webhook-engineering-ci
           fail_only: true
   test-web:
-    working_directory: ~/project
-    docker:
-      - image: circleci/node:8.15.0-browsers
+    executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
       - checkout
@@ -126,10 +182,18 @@ workflows:
       - get-changes:
           name: &get_changes_name "Get module changes"
       - install-shared:
-          name: &shared_install_name "Shared Install Dependencies"
+          name: &shared_install_name "Shared: Install Dependencies"
       - install-web:
-          name: &web_install_name "Web Install Dependencies"
+          name: &web_install_name "Web: Install Dependencies"
+      - install-functions:
+          name: &functions_install_name "Functions: Install Dependencies"
       - test-web:
           requires:
             - *shared_install_name
             - *web_install_name
+      - deploy:
+          requires:
+            - *shared_install_name
+            - *functions_install_name
+            - *web_install_name
+            - *get_changes_name
