@@ -113,9 +113,9 @@ workflows:
   web_build_and_test:
     jobs:
       - install-shared:
-          name: &shared_install_name "Install Dependencies Shared"
+          name: &shared_install_name "Shared Install Dependencies"
       - install-web:
-          name: &web_install_name "Install Dependencies Web"
+          name: &web_install_name "Web Install Dependencies"
       - test-web:
           requires:
             - *shared_install_name
