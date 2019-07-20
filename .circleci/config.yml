@@ -3,6 +3,8 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
+orbs:
+  slack: circleci/slack@3.2.0
 jobs:
   build:
     working_directory: ~/project
@@ -34,3 +36,8 @@ jobs:
 
       # run tests!
       - run: npm --prefix web test
+      - slack/notify:
+          color: '#42e2f4'
+          mentions: '@neil,'
+          message: This is a custom message notification
+          webhook: webhook
