@@ -26,6 +26,7 @@ aliases:
     <<: *webhook-engineering-ci
     color: '#42e2f4'
     message: "Job \\`$CIRCLE_JOB\\` starting on branch *$CIRCLE_BRANCH* <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|Workflow>"
+  - &web-install-name: "Install Dependencies Web"
 
 
 jobs:
@@ -70,7 +71,7 @@ workflows:
   web_build_and_test:
     jobs:
       - install-web:
-          name: "Install Web Dependencies"
+          name: *web-install-name
       - test-web:
           requires:
-            - install-web
+            - *web-install-name
