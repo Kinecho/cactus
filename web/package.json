@@ -22,7 +22,8 @@
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
         "page": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
         "page:delete": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
-        "test": "jest"
+        "test": "jest",
+        "tsc": "tsc"
     },
     "author": "Neil Poulin",
     "license": "ISC",

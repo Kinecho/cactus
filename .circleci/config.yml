@@ -28,8 +28,6 @@ aliases:
     color: '#42e2f4'
     message: "Job \\`$CIRCLE_JOB\\` starting on branch *$CIRCLE_BRANCH* <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|Workflow>"
 
-  - &web_install_name "Install Dependencies Web"
-
 jobs:
   install-web:
     working_directory: ~/project
@@ -62,7 +60,12 @@ jobs:
       - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-web-dependencies
-      - run: npm --prefix web test
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix web test
+      - run:
+          name: "Compile TypeScript"
+          command: npm --prefix web run tsc
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -72,7 +75,7 @@ workflows:
   web_build_and_test:
     jobs:
       - install-web:
-          name: *web_install_name
+          name: &web_install_name "Install Dependencies Web"
       - test-web:
           requires:
             - *web_install_name
