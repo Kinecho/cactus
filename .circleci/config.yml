@@ -54,12 +54,12 @@ jobs:
       # Download and cache dependencies
       - restore_cache: *restore-shared-dependencies
 
-      - run: npm --prefix web install
+      - run: npm --prefix shared install
 
       - save_cache:
           name: "Save Shared Dependencies to Cache"
           paths:
-            - web/node_modules
+            - shared/node_modules
           <<: *shared-dependency-key
 
       - slack/status:
