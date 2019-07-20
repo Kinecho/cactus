@@ -74,4 +74,4 @@ workflows:
 
       - test-web:
           requires:
-            - install-web
+            - Install Web Dependencies
