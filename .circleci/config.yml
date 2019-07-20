@@ -6,7 +6,7 @@ version: 2.1
 orbs:
   slack: circleci/slack@3.2.0 #https://github.com/CircleCI-Public/slack-orb
 jobs:
-  build:
+  install-web:
     working_directory: ~/project
     docker:
       - image: circleci/node:8.15.0-browsers
@@ -39,7 +39,7 @@ jobs:
           fail_only: false # Optional: if set to `true` then only failure messages will occur.
           webhook: "https://hooks.slack.com/services/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" # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
           # only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
-  test:
+  test-web:
     working_directory: ~/project
     docker:
       - image: circleci/node:8.15.0-browsers
@@ -70,7 +70,9 @@ jobs:
 
 workflows:
   version: 2.1
-  build_and_test:
+  web_build_and_test:
     jobs:
-      - build
-      - test
+      - install-web
+      - test-web:
+          requires:
+            - install-web
