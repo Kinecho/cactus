@@ -64,7 +64,7 @@ jobs:
     executor: cactus-web
     steps:
       - checkout
-      - - run: mkdir -p workspace
+      - run: mkdir -p workspace
       - run: . git-folder.sh > workspace/build-paths
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
