@@ -33,4 +33,4 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm --prefiix web test
+      - run: npm --prefix web test
