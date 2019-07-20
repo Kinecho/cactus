@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  build-web:
+  build:
     working_directory: ~/web
     docker:
       # specify the version you desire here
