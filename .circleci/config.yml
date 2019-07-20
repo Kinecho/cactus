@@ -17,7 +17,8 @@ aliases:
   - &restore-web-dependencies
     name: Restore Web Dependency Cache
     <<: *web-dependency-keys
-  - &webhook-engineering-ci: "https://hooks.slack.com/services/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"
+  - &webhook-engineering-ci:
+    webhook: "https://hooks.slack.com/services/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"
 
 jobs:
   install-web:
@@ -26,11 +27,10 @@ jobs:
       - image: circleci/node:8.15.0-browsers
     steps:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
+          <<: *webhook-engineering-ci
           color: '#42e2f4'
-          mentions: 'neil,'
           message: Starting `install-web` job for *Cactus Web*
-#          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
-          webhook: *webhook-engineering-ci
+      #          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
       - checkout
 
@@ -47,19 +47,17 @@ jobs:
 
       #notify slack of the status. this must be the last step in the job
       - slack/status:
-          # mentions: "USERID1,USERID2" # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
+          <<: *webhook-engineering-ci
           fail_only: false # Optional: if set to `true` then only failure messages will occur.
-          webhook: "https://hooks.slack.com/services/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" # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
-          # only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
   test-web:
     working_directory: ~/project
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
+          <<: *webhook-engineering-ci
           color: '#42e2f4'
           message: Starting a build job for Cactus Web
-          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
       - checkout
       - restore_cache: *restore-web-dependencies
@@ -73,9 +71,9 @@ jobs:
 
       #notify slack of the status. this must be the last step in the job
       - slack/status:
+          <<: *webhook-engineering-ci
           # mentions: "USERID1,USERID2" # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
           fail_only: false # Optional: if set to `true` then only failure messages will occur.
-          webhook: "https://hooks.slack.com/services/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" # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
           # only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
 
 workflows:
