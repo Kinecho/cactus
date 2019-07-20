@@ -4,20 +4,19 @@
 #
 version: 2.1
 orbs:
-  slack: circleci/slack@3.2.0
+  slack: circleci/slack@3.2.0 #https://github.com/CircleCI-Public/slack-orb
 jobs:
   build:
     working_directory: ~/project
     docker:
-      # specify the version you desire here
       - image: circleci/node:8.15.0-browsers
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
-
     steps:
+      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
+          color: '#42e2f4'
+          mentions: 'neil,'
+          message: Starting a build job for Cactus Web
+          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
+
       - checkout
 
       # Download and cache dependencies
@@ -36,8 +35,10 @@ jobs:
 
       # run tests!
       - run: npm --prefix web test
-      - slack/notify:
-          color: '#42e2f4'
-          mentions: '@neil,'
-          message: This is a custom message notification
-          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
+
+      #notify slack of the status. this must be the last step in the job
+      - slack/status:
+#          mentions: "USERID1,USERID2" # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
+          fail_only: false # Optional: if set to `true` then only failure messages will occur.
+          webhook: "https://hooks.slack.com/services/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" # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
+#          only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
