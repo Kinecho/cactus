@@ -68,13 +68,14 @@ jobs:
       - run: . git-folder.sh
       - run: ls -a | grep modules_to_deploy.txt
       - run: |
-          echo "Printing out put"
+          echo "Printing output & copying file"
           cat modules_to_deploy.txt
+          cp modules_to_deploy workspace
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
           # taken to be the root directory of the workspace.
-          root: workspace
+          root: "workspace"
           # Must be relative path from root
           paths:
             - modules_to_deploy.txt
