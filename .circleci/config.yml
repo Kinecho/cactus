@@ -1,4 +1,4 @@
-# Javascript Node CircleCI 2.0 configuration file
+# Javascript Node CircleCI 2.1 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
@@ -40,4 +40,4 @@ jobs:
           color: '#42e2f4'
           mentions: '@neil,'
           message: This is a custom message notification
-          webhook: webhook
+          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
