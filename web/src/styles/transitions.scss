@@ -100,7 +100,7 @@ $slow: 1.5s;
 
 
 @include createAnimation("bounce", bounce-in, $slow);
-@include createAnimation("fade-down", fade-down cubic-bezier(.42,.97,.52,1.49), .5s, $outDuration: $fast);
+@include createAnimation("fade-down", fade-down cubic-bezier(.42,.97,.52,1.49), .3s, $outDuration: $fast);
 
 
 @keyframes bounce-in {
