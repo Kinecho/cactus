@@ -25,7 +25,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: npm --prefix install
+      - run: npm --prefix web install
 
       - save_cache:
           paths:
