@@ -32,7 +32,7 @@ jobs:
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
-      <<: *notify-job-started-slack
+      - <<: *notify-job-started-slack
 #      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
 #          <<: *webhook-engineering-ci
 #          color: '#42e2f4'
@@ -60,10 +60,11 @@ jobs:
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
-      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
-          <<: *webhook-engineering-ci
-          color: '#42e2f4'
-          message: "Starting test-web for *Cactus Web*"
+      - <<: *notify-job-started-slack
+#      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
+#          <<: *webhook-engineering-ci
+#          color: '#42e2f4'
+#          message: "Starting test-web for *Cactus Web*"
 
       - checkout
       - restore_cache: *restore-web-dependencies
