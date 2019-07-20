@@ -5,6 +5,19 @@
 version: 2.1
 orbs:
   slack: circleci/slack@3.2.0 #https://github.com/CircleCI-Public/slack-orb
+
+aliases:
+  - &web-dependency-key
+    key: web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
+  - &web-dependency-keys
+    keys:
+      - web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
+      - web-dependency-{{ .Branch }}-
+      - web-dependency-
+  - &restore-web-dependencies
+    name: Restore Web Dependency Cache
+    <<: *web-dependency-keys
+
 jobs:
   install-web:
     working_directory: ~/project
@@ -20,18 +33,15 @@ jobs:
       - checkout
 
       # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+      - restore_cache: *restore-web-dependencies
 
       - run: npm --prefix web install
 
       - save_cache:
+          name: "Save Web Dependencies"
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - web/node_modules
+          <<: *web-dependency-key
 
       #notify slack of the status. this must be the last step in the job
       - slack/status:
@@ -51,6 +61,7 @@ jobs:
           webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
       - checkout
+      - restore_cache: *restore-web-dependencies
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -65,8 +76,6 @@ jobs:
           fail_only: false # Optional: if set to `true` then only failure messages will occur.
           webhook: "https://hooks.slack.com/services/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" # Optional: Enter a specific webhook here or the default will use $SLACK_WEBHOOK
           # only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
-
-
 
 workflows:
   version: 2.1
