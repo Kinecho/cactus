@@ -29,7 +29,7 @@ jobs:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
           <<: *webhook-engineering-ci
           color: '#42e2f4'
-          message: "Starting \`install-web\` for *Cactus Web*"
+          message: "Starting `install-web` for *Cactus Web*"
       #          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
       - checkout
