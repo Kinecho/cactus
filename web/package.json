@@ -24,7 +24,7 @@
         "page:delete": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
         "test": "jest"
     },
-    "author": "Neil Poulin | Kinecho",
+    "author": "Neil Poulin",
     "license": "ISC",
     "dependencies": {
         "@sentry/browser": "^5.5.0",
