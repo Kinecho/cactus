@@ -47,6 +47,7 @@ jobs:
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
+      - checkout
       - run: . git-folder.sh
 
   install-shared:
