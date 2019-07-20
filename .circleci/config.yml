@@ -70,8 +70,7 @@ workflows:
   web_build_and_test:
     jobs:
       - install-web:
-          - name: "Install Web Dependencies"
-
+          name: "Install Web Dependencies"
       - test-web:
           requires:
-            - Install Web Dependencies
+            - install-web
