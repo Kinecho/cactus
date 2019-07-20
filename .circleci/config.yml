@@ -17,7 +17,7 @@ aliases:
   - &restore-web-dependencies
     name: Restore Web Dependency Cache
     <<: *web-dependency-keys
-  - &webhook-engineering-ci:
+  - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
 
 jobs:
