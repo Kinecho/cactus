@@ -52,7 +52,7 @@ jobs:
       #notify slack of the status. this must be the last step in the job
       - slack/status:
           <<: *webhook-engineering-ci
-          fail_only: false # Optional: if set to `true` then only failure messages will occur.
+          fail_only: true # Optional: if set to `true` then only failure messages will occur.
   test-web:
     working_directory: ~/project
     docker:
@@ -77,7 +77,7 @@ jobs:
       #notify slack of the status. this must be the last step in the job
       - slack/status:
           <<: *webhook-engineering-ci
-          fail_only: false # Optional: if set to `true` then only failure messages will occur.
+          fail_only: true # Optional: if set to `true` then only failure messages will occur.
 
 workflows:
   version: 2.1
