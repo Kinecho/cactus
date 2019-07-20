@@ -399,7 +399,7 @@
     .secondary {
         margin-right: .8rem;
         transition: all .2s ease;
-
+        outline: transparent none;
         &.open {
             transform: rotate(90deg);
             transform-origin: center;

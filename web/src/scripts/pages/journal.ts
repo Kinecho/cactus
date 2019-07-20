@@ -9,7 +9,7 @@ import {ScrollToPlugin} from 'gsap/all';
 const controller = new ScrollMagic.Controller();
 
 //need to reference the plugin here so it doesn't get dropped by webpack during tree shaking
-const plugins = [ScrollToPlugin];
+const plugins = [ScrollToPlugin, TweenMax, Power1];
 console.debug("using plugins", plugins);
 
 document.addEventListener('DOMContentLoaded', () => {
