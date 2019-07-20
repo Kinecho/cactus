@@ -29,7 +29,7 @@ jobs:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
           <<: *webhook-engineering-ci
           color: '#42e2f4'
-          message: Starting `install-web` job for *Cactus Web*
+          message: "Starting \`install-web\` for *Cactus Web*"
       #          webhook: https://hooks.slack.com/services/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 #this is engineering-ci
 
       - checkout
@@ -57,7 +57,7 @@ jobs:
       - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
           <<: *webhook-engineering-ci
           color: '#42e2f4'
-          message: Starting a build job for Cactus Web
+          message: "Starting \`test-web\` for *Cactus Web*"
 
       - checkout
       - restore_cache: *restore-web-dependencies
@@ -72,9 +72,7 @@ jobs:
       #notify slack of the status. this must be the last step in the job
       - slack/status:
           <<: *webhook-engineering-ci
-          # mentions: "USERID1,USERID2" # Optional: Enter the Slack IDs of any user or group (sub_team) to be mentioned
           fail_only: false # Optional: if set to `true` then only failure messages will occur.
-          # only_for_branch: "master" # Optional: If set, a specific branch for which status updates will be sent. In this case, only for pushes to master branch.
 
 workflows:
   version: 2.1
