@@ -49,41 +49,29 @@ jobs:
             - web/node_modules
           <<: *web-dependency-key
 
-      #notify slack of the status. this must be the last step in the job
       - slack/status:
           <<: *webhook-engineering-ci
-          fail_only: true # Optional: if set to `true` then only failure messages will occur.
+          fail_only: true
   test-web:
     working_directory: ~/project
     docker:
       - image: circleci/node:8.15.0-browsers
     steps:
       - slack/notify: *notify-job-started-slack
-#      - slack/notify: #see https://github.com/CircleCI-Public/slack-orb
-#          <<: *webhook-engineering-ci
-#          color: '#42e2f4'
-#          message: "Starting test-web for *Cactus Web*"
-
       - checkout
       - restore_cache: *restore-web-dependencies
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
       - run: npm --prefix web test
-
-      #notify slack of the status. this must be the last step in the job
       - slack/status:
           <<: *webhook-engineering-ci
-          fail_only: true # Optional: if set to `true` then only failure messages will occur.
+          fail_only: true
 
 workflows:
   version: 2.1
   web_build_and_test:
     jobs:
-      - install-web
+      - install-web:
+          - name: "Install Web Dependencies"
+
       - test-web:
           requires:
             - install-web
