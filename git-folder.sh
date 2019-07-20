@@ -106,6 +106,8 @@ FIREBASE_MODULES=$(join_by , ${FIREBASE_COMMANDS[@]})
 echo
 if [[ $(${FIREBASE_MODULES} | xargs) ]]; then
     echo "Will execute firebase command \"firebase deploy --only ${FIREBASE_MODULES}\""
+    echo ${FIREBASE_MODULES} > modules_to_deploy.txt
 else
     echo "Nothing to deploy"
+    echo "NONE" > modules_to_deploy.txt
 fi

@@ -12,7 +12,7 @@ web/src/pages-index.html
 
 applicationCredentials.json
 applicationCredentials*.json
-
+modules_to_deploy.txt
 # Logs
 logs
 *.log

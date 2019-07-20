@@ -65,7 +65,7 @@ jobs:
     steps:
       - checkout
       - run: mkdir -p workspace
-      - run: . git-folder.sh > workspace/build-paths
+      - run: . git-folder.sh
       # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
@@ -73,7 +73,7 @@ jobs:
           root: workspace
           # Must be relative path from root
           paths:
-            - build-paths
+            - modules_to_deploy.txt
 
   deploy:
     executor: cactus-web
@@ -83,11 +83,13 @@ jobs:
           at: /tmp/workspace
       - run: |
           echo "The current build output is"
-          cat /tmp/workspace/build-paths
-          if [[ `cat /tmp/workspace/build-paths` == "Hello, world!" ]]; then
-            echo "It worked!";
+          cat /tmp/workspace/modules_to_deploy.txt
+          MODULES=$(cat /tmp/workspace/modules_to_deploy.txt || "NONE")
+
+          if [[ `cat /tmp/workspace/modules_to_deploy.txt` == "NONE" ]]; then
+            echo "Nothing to Deploy";
           else
-            echo "Nope!"; exit 1
+            echo "Will deploy ${MODULES}"
           fi
 
   install-functions:
