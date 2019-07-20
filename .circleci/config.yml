@@ -42,6 +42,13 @@ aliases:
     message: "Job \\`$CIRCLE_JOB\\` starting on branch *$CIRCLE_BRANCH* <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|Workflow>"
 
 jobs:
+  get-changes:
+    working_directory: ~/project
+    docker:
+      - image: circleci/node:8.15.0-browsers
+    steps:
+      - run: . git-folder.sh
+
   install-shared:
     working_directory: ~/project
     docker:
@@ -99,11 +106,14 @@ jobs:
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-shared-dependencies
       - run:
-          name: "Run Unit Tests"
-          command: npm --prefix web test
+          name: "TSLint"
+          command: npm --prefix web run tslint
       - run:
           name: "Compile TypeScript"
           command: npm --prefix web run tsc
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix web test
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
