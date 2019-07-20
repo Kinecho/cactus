@@ -22,12 +22,12 @@ aliases:
 
   ## SHARED CACHES
   - &shared-dependency-key
-    key: shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
+    key: v2-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
   - &shared-dependency-keys
     keys:
-      - shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
-      - shared-dependency-{{ .Branch }}-
-      - shared-dependency-
+      - v2-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
+      - v2-shared-dependency-{{ .Branch }}-
+      - v2-shared-dependency-
   - &restore-shared-dependencies
     name: Restore Shared Dependency Cache
     <<: *shared-dependency-keys
