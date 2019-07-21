@@ -272,20 +272,24 @@ workflows:
       - test-shared:
           name: &test_shared_name "Shared Tests"
           requires:
+            - *root_install_name
             - *shared_install_name
       - test-web:
           name: &test_web_name "Web Tests"
           requires:
             - *shared_install_name
+            - *root_install_name
             - *web_install_name
       - test-functions:
           name: &test_functions_name "API Tests"
           requires:
+            - *root_install_name
             - *shared_install_name
             - *functions_install_name
       - deploy-stage:
           name: &deploy_stage_name "Deploy Stage"
           requires:
+            - *root_install_name
             - *test_web_name
             - *test_shared_name
             - *shared_install_name
