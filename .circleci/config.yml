@@ -216,7 +216,7 @@ jobs:
     steps:
       - slack/notify: *notify-job-started-slack
       - checkout
-      - restore_cache: *restore-web-dependencies
+      - restore_cache: *restore-functions-dependencies
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
