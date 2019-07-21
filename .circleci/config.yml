@@ -114,7 +114,7 @@ jobs:
               exit 0
             else
               echo "Starting firebase deploy for --only ${MODULES}"
-              cd  web && npx firebase deploy --only $MODULES -P stage
+              npx firebase deploy --only $MODULES -P stage
             fi
       - slack/status:
           <<: *webhook-engineering-ci
