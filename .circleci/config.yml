@@ -124,14 +124,9 @@ jobs:
     executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
-
       - checkout
-
-      # Download and cache dependencies
       - restore_cache: *restore-functions-dependencies
-
       - run: npm --prefix functions install
-
       - save_cache:
           name: "Save Functions Dependencies to Cache"
           paths:
@@ -142,25 +137,18 @@ jobs:
           <<: *webhook-engineering-ci
           fail_only: true
 
-
   install-shared:
     executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
-
       - checkout
-
-      # Download and cache dependencies
       - restore_cache: *restore-shared-dependencies
-
       - run: npm --prefix shared install
-
       - save_cache:
           name: "Save Shared Dependencies to Cache"
           paths:
             - shared/node_modules
           <<: *shared-dependency-key
-
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -203,6 +191,7 @@ jobs:
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
+
   test-web:
     executor: cactus-web
     steps:
@@ -219,6 +208,41 @@ jobs:
       - run:
           name: "Run Unit Tests"
           command: npm --prefix web test
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+  test-functions:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      - restore_cache: *restore-web-dependencies
+      - restore_cache: *restore-shared-dependencies
+      - run:
+          name: "TSLint"
+          command: npm --prefix functions run lint
+      - run:
+          name: "Build Sources"
+          command: npm --prefix functions run build
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix functions test
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+
+  test-shared:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - run:
+          name: "TSLint"
+          command: npm --prefix shared run lint
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix shared test
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -245,16 +269,27 @@ workflows:
           name: &functions_install_name "Functions: Install Dependencies"
           requires:
             - *get_changes_name
+      - test-shared:
+          name: &test_shared_name "Shared Tests"
+          requires:
+            - *shared_install_name
       - test-web:
           name: &test_web_name "Web Tests"
           requires:
             - *shared_install_name
             - *web_install_name
+      - test-functions:
+          name: &test_functions_name "API Tests"
+          requires:
+            - *shared_install_name
+            - *functions_install_name
       - deploy-stage:
           name: &deploy_stage_name "Deploy Stage"
           requires:
             - *test_web_name
+            - *test_shared_name
             - *shared_install_name
+            - *test_functions_name
             - *functions_install_name
             - *web_install_name
             - *get_changes_name
