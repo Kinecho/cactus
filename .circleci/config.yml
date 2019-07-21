@@ -268,6 +268,7 @@ jobs:
     steps:
       - slack/notify: *notify-job-started-slack
       - checkout
+      - restore_cache: *restore-root-dependencies
       - restore_cache: *restore-shared-dependencies
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-functions-dependencies
@@ -341,6 +342,7 @@ workflows:
           modules: "hosting"
           project: "stage"
           requires:
+            - *ready_for_deploy_name
             - *deploy_stage_web_approval
 
       # FUNCTIONS Stage Deploy
@@ -354,6 +356,7 @@ workflows:
           modules: "functions"
           project: "stage"
           requires:
+            - *ready_for_deploy_name
             - *deploy_stage_api_approval
 
       # ALL Stage Deploy
@@ -367,5 +370,6 @@ workflows:
           modules: "functions,hosting"
           project: "stage"
           requires:
+            - *ready_for_deploy_name
             - *deploy_stage_all_approval
 
