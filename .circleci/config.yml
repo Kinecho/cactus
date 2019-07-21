@@ -95,6 +95,7 @@ jobs:
           paths:
             - modules_to_deploy.txt
 
+
   deploy-stage:
     executor: cactus-web
     steps:
@@ -246,6 +247,36 @@ jobs:
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
+  ready-for-deploy:
+    executor: cactus-web
+    steps:
+      - run: echo "Ready for deployments"
+
+  firebase-deploy:
+    description: "Deploy selected modules to the selected project"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - restore_cache: *restore-web-dependencies
+      - restore_cache: *restore-functions-dependencies
+      - run:
+          name: Deploy to Firebase
+          command: |
+            echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+            firebase deploy --only << parameters.modules >> -P << parameters.project >>
+
 
 workflows:
   version: 2.1
@@ -286,8 +317,9 @@ workflows:
             - *root_install_name
             - *shared_install_name
             - *functions_install_name
-      - deploy-stage:
-          name: &deploy_stage_name "Deploy Stage"
+
+      - ready-for-deploy:
+          name: &ready_for_deploy_name "Ready for Deployments"
           requires:
             - *root_install_name
             - *test_web_name
@@ -297,7 +329,26 @@ workflows:
             - *functions_install_name
             - *web_install_name
             - *get_changes_name
-      - stage-approval:
+      - stage-web-approval:
+          name: &deploy_stage_web_approval "Deploy Web to Stage"
           type: approval
+          reqires:
+            - *ready_for_deploy_name
+      - stage-functions-approval:
+          name: &deploy_stage_api_approval "Deploy API to Stage"
+          type: approval
+          reqires:
+            - *ready_for_deploy_name
+      - firebase-deploy:
+          name: &deploy_stage_web_name "Deploy Web"
+          modules: "hosting"
+          project: "stage"
           requires:
-            - *deploy_stage_name
+            - *deploy_stage_web_approval
+      - firebase-deploy:
+          name: &deploy_stage_api_name "Deploy API"
+          modules: "functions"
+          project: "stage"
+          requires:
+            - *deploy_stage_api_approval
+
