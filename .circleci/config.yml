@@ -275,7 +275,7 @@ jobs:
           name: Deploy to Firebase
           command: |
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-            firebase deploy --only << parameters.modules >> -P << parameters.project >>
+            npx firebase deploy --only << parameters.modules >> -P << parameters.project >>
 
 
 workflows:
@@ -329,26 +329,43 @@ workflows:
             - *functions_install_name
             - *web_install_name
             - *get_changes_name
+
+      # WEB Stage Deploy
       - stage-web-approval:
           name: &deploy_stage_web_approval "Deploy Web to Stage"
           type: approval
           requires:
             - *ready_for_deploy_name
+      - firebase-deploy:
+          name: &deploy_stage_web_name "Stage: Deploy Web"
+          modules: "hosting"
+          project: "stage"
+          requires:
+            - *deploy_stage_web_approval
+
+      # FUNCTIONS Stage Deploy
       - stage-functions-approval:
           name: &deploy_stage_api_approval "Deploy API to Stage"
           type: approval
           requires:
             - *ready_for_deploy_name
       - firebase-deploy:
-          name: &deploy_stage_web_name "Deploy Web"
-          modules: "hosting"
-          project: "stage"
-          requires:
-            - *deploy_stage_web_approval
-      - firebase-deploy:
-          name: &deploy_stage_api_name "Deploy API"
+          name: &deploy_stage_api_name "Stage: Deploy API"
           modules: "functions"
           project: "stage"
           requires:
             - *deploy_stage_api_approval
+
+      # ALL Stage Deploy
+      - stage-deploy-all-approval:
+          name: &deploy_stage_all_approval "Deploy All to Stage"
+          type: approval
+          requires:
+            - *ready_for_deploy_name
+      - firebase-deploy:
+          name: &deploy_stage_api_name "Stage: Deploy All"
+          modules: "functions,hosting"
+          project: "stage"
+          requires:
+            - *deploy_stage_all_approval
 
