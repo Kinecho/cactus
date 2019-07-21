@@ -50,6 +50,19 @@ aliases:
     name: Restore functionsDependency Cache
     <<: *functions-dependency-keys
 
+  ## ROOT CACHES
+  - &root-dependency-key
+    key: root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+  - &root-dependency-keys
+    keys:
+      - root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+      - root-dependency-{{ .Branch }}-
+      - root-dependency-
+  - &restore-root-dependencies
+    name: Restore RootDependency Cache
+    <<: *root-dependency-keys
+
+
   ## Slack Configs
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
@@ -103,10 +116,6 @@ jobs:
               echo "Starting firebase deploy for --only ${MODULES}"
               cd  web && npx firebase deploy --only $MODULES -P stage
             fi
-      - run:
-          name: "Deploy to Firebase"
-          command: |
-
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -156,6 +165,23 @@ jobs:
           <<: *webhook-engineering-ci
           fail_only: true
 
+  install-root:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      # Download and cache dependencies
+      - restore_cache: *restore-root-dependencies
+      - run: npm --prefix shared install
+      - save_cache:
+          name: "Save Shared Dependencies to Cache"
+          paths:
+            - shared/node_modules
+          <<: *root-dependency-key
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+
   install-web:
     executor: cactus-web
     steps:
@@ -201,21 +227,33 @@ workflows:
   version: 2.1
   web_build_and_test:
     jobs:
+      - install-root:
+          name: &root_install_name "Root: Install Dependencies"
       - get-changes:
           name: &get_changes_name "Get module changes"
+          requires:
+            - *root_install_name
       - install-shared:
           name: &shared_install_name "Shared: Install Dependencies"
+          requires:
+            - *get_changes_name
       - install-web:
           name: &web_install_name "Web: Install Dependencies"
+          requires:
+            - *get_changes_name
       - install-functions:
           name: &functions_install_name "Functions: Install Dependencies"
+          requires:
+            - *get_changes_name
       - test-web:
+          name: &test_web_name "Web Tests"
           requires:
             - *shared_install_name
             - *web_install_name
       - deploy-stage:
           name: &deploy_stage_name "Deploy Stage"
           requires:
+            - *test_web_name
             - *shared_install_name
             - *functions_install_name
             - *web_install_name
