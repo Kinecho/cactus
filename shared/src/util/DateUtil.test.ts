@@ -21,10 +21,12 @@ describe("convert timezones, keep time", () => {
     test("keep time", () => {
         const denverTime = 1560924000000; //at midnight
         const date = new Date(denverTime);
+        date.setHours(0, 0, 0, 0);
+
 
         const converted = makeUTCDateIntoMailchimpDate(date, true, "Europe/Paris");
-
-        expect(converted).toContain("00:00:00.000+02:00");
+        //2019-06-19T06:00:00.000+02:00
+        expect(converted).toContain(`00:00:00.000+02:00`);
     });
 
     test("don't keep time", () => {
@@ -45,7 +47,7 @@ test("date formatting", () => {
     expect(format).toEqual("Wednesday 2019-06-19 at 12:00 AM")
 });
 
-test("date formatting 2" , () => {
+test("date formatting 2", () => {
     // const denverTime = 1560924000000; //2019-06-19 at midnight
     // const date = new Date(denverTime);
 
@@ -64,7 +66,7 @@ describe("format duration", () => {
     test("minute scale formatting", () => {
         const denverTime = 1560924000000; //2019-06-19 at midnight
         const start = new Date(denverTime);
-        const end = new Date(denverTime + (1000 * 60 * 3 + 30000) );
+        const end = new Date(denverTime + (1000 * 60 * 3 + 30000));
         expect(formatDuration(start, end)).toEqual("3m 30s")
     });
 });
