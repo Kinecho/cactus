@@ -40,8 +40,10 @@ describe("convert timezones, keep time", () => {
 });
 
 test("date formatting", () => {
-    const denverTime = 1560924000000; //2019-06-19 at midnight
-    const date = new Date(denverTime);
+    const dateMs = 1560924000000; //2019-06-19 at midnight in denver
+    const date = new Date(dateMs);
+    //set the house so that it's midnight in whatever timezone is running this test.
+    date.setHours(0, 0, 0, 0);
     const format = DateTime.fromISO(date.toISOString()).toFormat("cccc yyyy-LL-dd 'at' h:mm a");
     expect(format).not.toBeNull();
     expect(format).toEqual("Wednesday 2019-06-19 at 12:00 AM")
