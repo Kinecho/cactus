@@ -40,7 +40,7 @@ aliases:
 
   ## FUNCTIONS CACHES
   - &functions-dependency-key
-    key: v2-functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
+    key: functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
   - &functions-dependency-keys
     keys:
       - functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
