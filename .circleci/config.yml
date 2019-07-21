@@ -332,12 +332,12 @@ workflows:
       - stage-web-approval:
           name: &deploy_stage_web_approval "Deploy Web to Stage"
           type: approval
-          reqires:
+          requires:
             - *ready_for_deploy_name
       - stage-functions-approval:
           name: &deploy_stage_api_approval "Deploy API to Stage"
           type: approval
-          reqires:
+          requires:
             - *ready_for_deploy_name
       - firebase-deploy:
           name: &deploy_stage_web_name "Deploy Web"
