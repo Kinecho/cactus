@@ -82,7 +82,7 @@ jobs:
           paths:
             - modules_to_deploy.txt
 
-  deploy:
+  deploy-stage:
     executor: cactus-web
     steps:
       - slack/notify: *notify-job-started-slack
@@ -90,22 +90,23 @@ jobs:
           # Must be absolute path or relative path from working_directory
           at: /tmp/workspace
       - run:
-          name: "Determine Modules to Deploy"
+          name: "Deploy to Modules Firebase"
           command: |
             echo "The current build output is"
-            cat /tmp/workspace/modules_to_deploy.txt
+            echo "Deploy Modules: $(cat /tmp/workspace/modules_to_deploy.txt)"
             MODULES=$(cat /tmp/workspace/modules_to_deploy.txt || "NONE")
 
             if [[ `cat /tmp/workspace/modules_to_deploy.txt` == "NONE" ]]; then
               echo "Nothing to Deploy";
               exit 0
             else
-              echo "Will deploy ${MODULES}"
+              echo "Starting firebase deploy for --only ${MODULES}"
+              cd  web && npx firebase deploy --only $MODULES -P stage
             fi
       - run:
           name: "Deploy to Firebase"
           command: |
-            echo "Still not actually Deploying :) "
+
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -212,9 +213,14 @@ workflows:
           requires:
             - *shared_install_name
             - *web_install_name
-      - deploy:
+      - deploy-stage:
+          name: &deploy_stage_name "Deploy Stage"
           requires:
             - *shared_install_name
             - *functions_install_name
             - *web_install_name
             - *get_changes_name
+      - stage-approval:
+          type: approval
+          requires:
+            - *deploy_stage_name
