@@ -1,8 +1,9 @@
 ## Compiled JavaScript files
-**/*.js
+lib/
+output/
 **/*.js.map
 
-/tmp/
+tmp/
 
 .runtimeconfig.json
 .runtimeconfig*
