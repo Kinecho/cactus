@@ -348,6 +348,11 @@ workflows:
           name: &shared_install_name "Shared: Install Dependencies"
           requires:
             - *get_changes_name
+      - install-scripts:
+          name: &scripts_install_name "Scripts: Install Dependencies"
+          requires:
+            - *get_changes_name
+
       - install-web:
           name: &web_install_name "Web: Install Dependencies"
           requires:
@@ -377,6 +382,7 @@ workflows:
       - ready-for-deploy:
           name: &ready_for_deploy_name "Ready for Deployments"
           requires:
+            - *scripts_install_name
             - *root_install_name
             - *test_web_name
             - *test_shared_name
