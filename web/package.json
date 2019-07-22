@@ -24,7 +24,7 @@
         "page": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
         "page:delete": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
         "test": "jest",
-        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/junit/js-test-results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
+        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/junit/jest.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "tsc": "tsc",
         "tslint": "tslint -p tsconfig.json"
     },
