@@ -28,7 +28,6 @@
                     <transition name="fade-down">
                         <nav class="moreMenu" v-show="menuOpen">
                             <span class="static">{{user.email}}</span>
-                            <div class="divider"></div>
                             <template v-for="(link) in links" v-bind:link="link">
                                 <a v-if="link.href" :href="link.href">{{link.title}}</a>
                                 <span v-if="link.onClick" @click.prevent="link.onClick">{{link.title}}</span>
@@ -229,13 +228,6 @@
                 z-index: 100;
                 @include popoverShadow;
 
-                .divider {
-                    height: 0;
-                    border: .5px solid $lightText;
-                    opacity: .2;
-                    margin: 0 .5rem;
-                }
-
                 a, span {
                     background-color: transparent;
                     color: $darkestPink;
@@ -248,7 +240,10 @@
                     white-space: nowrap;
 
                     &.static {
+                        border-bottom: 1px solid darken($pink, 5%);
                         color: $darkText;
+                        margin-bottom: .8rem;
+                        padding-bottom: 1.6rem;
                     }
 
                     &:hover:not(.static) {
@@ -260,21 +255,16 @@
             }
 
             .avatar-container {
+                cursor: pointer;
                 width: 4rem;
                 height: 4rem;
                 border-radius: 50%;
                 overflow: hidden;
                 display: inline-block;
-                margin: 0 1rem;
+                transition: transform .2s ease-in-out;
 
                 &.open {
-                    filter: grayscale(50%);
-                    box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
-                }
-
-                :hover {
-                    cursor: pointer;
-                    filter: grayscale(50%);
+                    transform: scale(.9);
                 }
 
                 .initials {
