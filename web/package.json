@@ -17,7 +17,7 @@
         "deploy:stage": "firebase deploy --only hosting -P stage ",
         "deploy:prod": "firebase deploy --only hosting -P prod",
         "lint": "tslint --project tsconfig.json",
-        "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tslint/results.xml",
+        "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
         "logo": "cat ./../cactus.txt",
         "open": "npm run predeploy && open ./public/index.html",
         "open:prod": "npm run predeploy:prod && open ./public/index.html",

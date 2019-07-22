@@ -7,8 +7,8 @@
     "test": "jest",
     "test:db": "jest -c ./jest.db.config.js",
     "lint": "tslint --project tsconfig.json",
-    "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tslint/results.xml",
-    "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/test/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit"
+    "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
+    "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit"
   },
   "author": "",
   "license": "ISC",

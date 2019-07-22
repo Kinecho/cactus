@@ -119,7 +119,7 @@ export function configureLoginForm(formId: string) {
 
                 let title = "Welcome!";
                 let message = `Check your ${emailAddress} inbox to get into Journal.`;
-                let imageUrl = '/assets/images/success.svg';
+                const imageUrl = '/assets/images/success.svg';
 
                 if (signupResult.existingEmail) {
                     title = "Welcome back!";

@@ -241,7 +241,7 @@ jobs:
           name: "Run Unit Tests"
           command: npm --prefix web run test:ci
       - store_test_results:
-          path: web/reports/test
+          path: web/reports/tests
       - store_test_results:
           path: web/reports/coverage
       - store_artifacts:
@@ -266,7 +266,7 @@ jobs:
           name: "Run Unit Tests"
           command: npm --prefix functions run test:ci
       - store_test_results:
-          path: functions/reports/test
+          path: functions/reports/tests
       - store_test_results:
           path: functions/reports/coverage
       - store_artifacts:
@@ -288,7 +288,7 @@ jobs:
           name: "Run Unit Tests"
           command: npm --prefix shared run test:ci
       - store_test_results:
-          path: shared/reports/test
+          path: shared/reports/tests
       - store_test_results:
           path: shared/reports/coverage
       - store_artifacts:
@@ -310,7 +310,7 @@ jobs:
           name: "Run Unit Tests"
           command: npm --prefix scripts run test:ci
       - store_test_results:
-          path: scripts/reports/test
+          path: scripts/reports/tests
       - store_artifacts:
           path: scripts/reports
       - slack/status:

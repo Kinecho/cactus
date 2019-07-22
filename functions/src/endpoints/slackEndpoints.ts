@@ -63,7 +63,7 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
     const payload: CommandPayload = req.body;
 
     const commandText = payload.text;
-    const [commandName, ...rest] = commandText.split(" ")
+    const [commandName, ...rest] = commandText.split(" ");
 
 
     let commandResponse: CommandResponse;
@@ -100,7 +100,7 @@ async function _cmdBigQuery(payload: CommandPayload, params: string[]): Promise<
 async function _cmdActiveUserCount(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
     let days = 1;
     if (params.length > 0) {
-        let [dayArg] = params;
+        const [dayArg] = params;
         days = Number(dayArg);
     }
 
@@ -114,7 +114,7 @@ async function _cmdActiveUserCount(payload: CommandPayload, params: string[]): P
 async function _cmdDuruMuruToday(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
     let days = 1;
     if (params.length > 0) {
-        let [dayArg] = params;
+        const [dayArg] = params;
         days = Number(dayArg);
     }
 

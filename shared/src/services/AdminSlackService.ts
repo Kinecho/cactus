@@ -151,7 +151,7 @@ export default class AdminSlackService {
     }
 
     getChannel(name: ChannelName): string | undefined {
-        let channelToUse = this.config.slack.channels[name];
+        const channelToUse = this.config.slack.channels[name];
         if (channelToUse) {
             return channelToUse;
         }
