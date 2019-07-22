@@ -12,6 +12,9 @@ module.exports = {
             diagnostics: true,
         },
     },
+    setupFiles: [
+        './src/test/jestsetup.ts',
+    ],
     collectCoverage: true,
     collectCoverageFrom: [
         'src/**/*.{js,ts,vue}',
@@ -30,6 +33,6 @@ module.exports = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'vue', 'node'],
     modulePathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/public/'],
 
-    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths /*, { prefix: '<rootDir>/' } */),
+    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {prefix: '<rootDir>'}),
 
 }

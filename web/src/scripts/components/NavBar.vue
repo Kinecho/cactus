@@ -11,6 +11,7 @@
             </transition>
             <transition name="fade-in-slow" appear>
                 <a v-if="displaySignupButton"
+                        data-test="signup-button"
                         class="jump-to-form button"
                         @click.prevent="scrollToSignup"
                         type="button"
@@ -65,6 +66,7 @@
     export default Vue.extend({
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
+                console.log("auth state changed", user);
                 this.user = user;
                 this.authLoaded = true;
             })
@@ -181,6 +183,7 @@
 
         a.link {
             @include fancyLink;
+
             &:hover {
                 cursor: pointer;
             }
