@@ -115,7 +115,7 @@ jobs:
               exit 0
             else
               echo "Starting firebase deploy for --only ${MODULES}"
-              npx firebase deploy --only $MODULES -P stage
+              firebase deploy --only $MODULES -P stage
             fi
       - slack/status:
           <<: *webhook-engineering-ci
@@ -162,6 +162,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache: *restore-root-dependencies
       - run: npm install
+      - run:
+          name: "Verify firebase is available"
+          command: npx firebase --version
       - save_cache:
           name: "Save Root Dependencies to Cache"
           paths:
