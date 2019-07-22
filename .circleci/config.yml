@@ -338,6 +338,7 @@ jobs:
         default: "error"
         description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
     executor: cactus-web
+    resource_class: large
     steps:
       - slack/notify: *notify-job-started-slack
       - checkout
