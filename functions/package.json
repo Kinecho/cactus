@@ -11,6 +11,7 @@
         "deploy:prod:func": "func() { npx firebase deploy -P prod --only functions:\"$1\"; }; func",
         "emulator:start": "firebase emulators:start --only functions",
         "lint": "tslint --project tsconfig.json",
+        "lint:ci": "tslint --project tsconfig.json --format junit --out reports/junit/tslint-results.xml",
         "logs": "firebase functions:log",
         "ngrok": "ngrok http -subdomain=cactuslocal 5000",
         "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase  emulators:start --only functions",

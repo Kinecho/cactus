@@ -233,7 +233,7 @@ jobs:
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix web run tslint
+          command: npm --prefix web run lint:ci
       - run:
           name: "Compile TypeScript"
           command: npm --prefix web run tsc
@@ -256,7 +256,7 @@ jobs:
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix functions run lint
+          command: npm --prefix functions run lint:ci
       - run:
           name: "Build Sources"
           command: npm --prefix functions run build
@@ -279,7 +279,7 @@ jobs:
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix shared run lint
+          command: npm --prefix shared run lint:ci
       - run:
           name: "Run Unit Tests"
           command: npm --prefix shared run test:ci
@@ -299,7 +299,7 @@ jobs:
       - restore_cache: *restore-scripts-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix scripts run lint
+          command: npm --prefix scripts run lint:ci
       - run:
           name: "Run Unit Tests"
           command: npm --prefix scripts run test:ci
