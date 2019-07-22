@@ -34,6 +34,7 @@
     "@types/qs": "^6.5.3",
     "@types/stripe": "^6.30.3",
     "jest": "^24.8.0",
+    "jest-junit": "^6.4.0",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.2.0",
     "tsconfig-paths": "^3.8.0",
