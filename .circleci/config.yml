@@ -239,7 +239,7 @@ jobs:
           command: npm --prefix web run tsc
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix web test:ci
+          command: npm --prefix web run test:ci
       - store_test_results:
           path: web/reports/junit
       - store_test_results:
@@ -262,7 +262,7 @@ jobs:
           command: npm --prefix functions run build
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix functions test:ci
+          command: npm --prefix functions run test:ci
       - store_test_results:
           path: functions/reports/junit
       - store_test_results:
@@ -282,7 +282,7 @@ jobs:
           command: npm --prefix shared run lint
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix shared test:ci
+          command: npm --prefix shared run test:ci
       - store_test_results:
           path: shared/reports/junit
       - store_test_results:
@@ -302,7 +302,7 @@ jobs:
           command: npm --prefix scripts run lint
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix scripts test:ci
+          command: npm --prefix scripts run test:ci
       - store_test_results:
           path: scripts/reports/junit
       - store_test_results:
