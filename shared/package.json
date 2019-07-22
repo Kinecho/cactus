@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "test:db": "jest -c ./jest.db.config.js",
-    "lint": "tslint --project tsconfig.json"
+    "lint": "tslint --project tsconfig.json",
+    "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/junit/js-test-results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit"
   },
   "author": "",
   "license": "ISC",

@@ -239,7 +239,11 @@ jobs:
           command: npm --prefix web run tsc
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix web test
+          command: npm --prefix web test:ci
+      - store_test_results:
+          path: web/reports/junit
+      - store_test_results:
+          path: web/reports/coverage
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -258,7 +262,11 @@ jobs:
           command: npm --prefix functions run build
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix functions test
+          command: npm --prefix functions test:ci
+      - store_test_results:
+          path: functions/reports/junit
+      - store_test_results:
+          path: functions/reports/coverage
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -274,7 +282,31 @@ jobs:
           command: npm --prefix shared run lint
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix shared test
+          command: npm --prefix shared test:ci
+      - store_test_results:
+          path: shared/reports/junit
+      - store_test_results:
+          path: shared/reports/coverage
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+  test-scripts:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - restore_cache: *restore-scripts-dependencies
+      - run:
+          name: "TSLint"
+          command: npm --prefix scripts run lint
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix scripts test:ci
+      - store_test_results:
+          path: scripts/reports/junit
+      - store_test_results:
+          path: scripts/reports/coverage
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -352,7 +384,6 @@ workflows:
           name: &scripts_install_name "Scripts: Install Dependencies"
           requires:
             - *get_changes_name
-
       - install-web:
           name: &web_install_name "Web: Install Dependencies"
           requires:
@@ -378,7 +409,6 @@ workflows:
             - *root_install_name
             - *shared_install_name
             - *functions_install_name
-
       - ready-for-deploy:
           name: &ready_for_deploy_name "Ready for Deployments"
           requires:
