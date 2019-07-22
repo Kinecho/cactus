@@ -161,11 +161,11 @@ jobs:
       - checkout
       # Download and cache dependencies
       - restore_cache: *restore-root-dependencies
-      - run: npm --prefix shared install
+      - run: npm install
       - save_cache:
-          name: "Save Shared Dependencies to Cache"
+          name: "Save Root Dependencies to Cache"
           paths:
-            - shared/node_modules
+            - /node_modules
           <<: *root-dependency-key
       - slack/status:
           <<: *webhook-engineering-ci
