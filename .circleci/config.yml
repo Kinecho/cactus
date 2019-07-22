@@ -52,12 +52,12 @@ aliases:
 
   ## ROOT CACHES
   - &root-dependency-key
-    key: root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+    key: v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
   - &root-dependency-keys
     keys:
-      - root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
-      - root-dependency-{{ .Branch }}-
-      - root-dependency-
+      - v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+      - v2-root-dependency-{{ .Branch }}-
+      - v2-root-dependency-
   - &restore-root-dependencies
     name: Restore RootDependency Cache
     <<: *root-dependency-keys
