@@ -8,7 +8,7 @@ then
     touch $filename
 
     echo "[auth]" >> $filename
-    echo "token=$(npx firebase functions:config:get sentry.api_token | sed -e 's/^"//' -e 's/"$//' )" >> $filename
+    echo "token=$(npx firebase functions:config:get sentry.api_token -P prod | sed -e 's/^"//' -e 's/"$//' )" >> $filename
     echo "[defaults]" >> $filename
     echo "org=kinecho" >> $filename
     echo "project=cactus-web" >> $filename

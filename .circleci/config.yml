@@ -254,6 +254,10 @@ jobs:
     executor: cactus-web
     steps:
       - run: echo "Ready for deployments"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          message: "Stage Deployment Jobs are now Available. Go to the <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow here>"
 
   firebase-deploy:
     description: "Deploy selected modules to the selected project"
@@ -278,14 +282,33 @@ jobs:
       - run:
           name: Deploy to Firebase
           command: |
+            echo "Setting default project to be << parameters.project >>"
+            npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >>
-
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: false
+  notify-workflow-started:
+    description: "Notify slack that a workflow has started and provide a link"
+    parameters:
+      workflow_name:
+        type: string
+        default: "DEFAULT"
+        description: "The message to send to slack"
+    executor: cactus-web
+    steps:
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          message: "Starting <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow << parameters.workflow_name >> >"
 
 workflows:
   version: 2.1
-  web_build_and_test:
+  cactus_release_pipeline:
     jobs:
+      - notify-workflow-started:
+          name: &workflow_name Cactus Release Pipeline
+          workflow_name: *workflow_name
       - install-root:
           name: &root_install_name "Root: Install Dependencies"
       - get-changes:
