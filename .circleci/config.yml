@@ -244,6 +244,8 @@ jobs:
           path: web/reports/junit
       - store_test_results:
           path: web/reports/coverage
+      - store_artifacts:
+          path: web/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -267,6 +269,8 @@ jobs:
           path: functions/reports/junit
       - store_test_results:
           path: functions/reports/coverage
+      - store_artifacts:
+          path: functions/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -287,6 +291,8 @@ jobs:
           path: shared/reports/junit
       - store_test_results:
           path: shared/reports/coverage
+      - store_artifacts:
+          path: shared/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -307,6 +313,8 @@ jobs:
           path: scripts/reports/junit
       - store_test_results:
           path: scripts/reports/coverage
+      - store_artifacts:
+          path: scripts/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
