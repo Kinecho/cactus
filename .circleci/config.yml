@@ -47,7 +47,7 @@ aliases:
       - functions-dependency-{{ .Branch }}-
       - functions-dependency-
   - &restore-functions-dependencies
-    name: Restore functionsDependency Cache
+    name: Restore Functions Dependency Cache
     <<: *functions-dependency-keys
 
   ## ROOT CACHES
@@ -59,7 +59,7 @@ aliases:
       - v2-root-dependency-{{ .Branch }}-
       - v2-root-dependency-
   - &restore-root-dependencies
-    name: Restore RootDependency Cache
+    name: Restore Root Dependency Cache
     <<: *root-dependency-keys
 
 
@@ -168,7 +168,7 @@ jobs:
       - save_cache:
           name: "Save Root Dependencies to Cache"
           paths:
-            - /node_modules
+            - node_modules
           <<: *root-dependency-key
       - slack/status:
           <<: *webhook-engineering-ci

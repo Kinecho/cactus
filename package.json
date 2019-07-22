@@ -1,43 +1,52 @@
 {
-  "name": "cactus",
-  "version": "1.0.0",
-  "description": "Cactus Monorepo",
-  "main": "index.js",
-  "scripts": {
-    "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
-    "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
-    "install:web": "npm --prefix \"web\" install",
-    "install:api": "npm --prefix \"functions\" install",
-    "install:shared": "npm --prefix \"shared\" install",
-    "install:scripts": "npm --prefix \"scripts\" install",
-    "deploy:stage": "firebase deploy --only hosting,functions -P stage",
-    "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
-    "deploy:stage:web": "npm --prefix \"web\" run deploy:stage",
-    "deploy:prod": "firebase deploy --only hosting,functions -P prod",
-    "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
-    "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
-    "compile:all": "tsc -p web/ && tsc -p shared/ && tsc -p functions && tsc -p scripts",
-    "cmd": "npm --prefix \"scripts\" run cmd",
-    "fe": "npm --prefix \"web\" run fe",
-    "dev": "npm --prefix \"web\" run dev",
-    "api": "npm --prefix \"functions\" run serve"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Kinecho/cactus.git"
-  },
-  "author": "Neil Poulin",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Kinecho/cactus/issues"
-  },
-  "homepage": "https://github.com/Kinecho/cactus#readme",
-  "dependencies": {
-    "firebase": "^6.3.1"
-  },
-  "devDependencies": {
-    "firebase-tools": "^7.1.1",
-    "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
-  }
+    "name": "cactus",
+    "version": "1.0.0",
+    "description": "Cactus Monorepo",
+    "main": "index.js",
+    "scripts": {
+        "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
+        "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
+        "install:web": "npm --prefix \"web\" install",
+        "install:api": "npm --prefix \"functions\" install",
+        "install:shared": "npm --prefix \"shared\" install",
+        "install:scripts": "npm --prefix \"scripts\" install",
+        "deploy:stage": "firebase deploy --only hosting,functions -P stage",
+        "deploy:stage:api": "npm --prefix \"functions\" run deploy:stage",
+        "deploy:stage:web": "npm --prefix \"web\" run deploy:stage",
+        "deploy:prod": "firebase deploy --only hosting,functions -P prod",
+        "deploy:prod:api": "npm --prefix \"functions\" run deploy:prod",
+        "deploy:prod:web": "npm --prefix \"web\" run deploy:prod",
+        "compile:all": "tsc -p web/ && tsc -p shared/ && tsc -p functions && tsc -p scripts",
+        "cmd": "npm --prefix \"scripts\" run cmd",
+        "fe": "npm --prefix \"web\" run fe",
+        "dev": "npm --prefix \"web\" run dev",
+        "api": "npm --prefix \"functions\" run serve"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kinecho/cactus.git"
+    },
+    "author": {
+        "name": "Neil Poulin",
+        "email": "neil@kinecho.com",
+        "url": "https://www.neilpoulin.com"
+    },
+    "contributors": [
+        "Katie Blackman <katie@kinecho.com>",
+        "Scott Rocher <scott@kinecho.com>",
+        "Neil Poulin <neil@kinecho.com>"
+    ],
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Kinecho/cactus/issues"
+    },
+    "homepage": "https://github.com/Kinecho/cactus#readme",
+    "dependencies": {
+        "firebase": "^6.3.1"
+    },
+    "devDependencies": {
+        "firebase-tools": "^7.1.1",
+        "tslint": "^5.18.0",
+        "typescript": "^3.5.3"
+    }
 }
