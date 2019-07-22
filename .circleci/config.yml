@@ -50,6 +50,19 @@ aliases:
     name: Restore Functions Dependency Cache
     <<: *functions-dependency-keys
 
+  ## SCRIPTS CACHES
+  - &scripts-dependency-key
+    key: scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+  - &scripts-dependency-keys
+    keys:
+      - scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+      - scripts-dependency-{{ .Branch }}-
+      - scripts-dependency-
+  - &restore-scripts-dependencies
+    name: Restore Scripts Dependency Cache
+    <<: *scripts-dependency-keys
+
+
   ## ROOT CACHES
   - &root-dependency-key
     key: v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
@@ -150,6 +163,21 @@ jobs:
           paths:
             - shared/node_modules
           <<: *shared-dependency-key
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+  install-scripts:
+    executor: cactus-web
+    steps:
+      - slack/notify: *notify-job-started-slack
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - run: npm --prefix scripts install
+      - save_cache:
+          name: "Save Scripts Dependencies to Cache"
+          paths:
+            - scripts/node_modules
+          <<: *scripts-dependency-key
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -279,6 +307,7 @@ jobs:
       - restore_cache: *restore-shared-dependencies
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-functions-dependencies
+      - restore_cache: *restore-scripts-dependencies
       - run:
           name: Deploy to Firebase
           command: |
