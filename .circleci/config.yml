@@ -397,6 +397,12 @@ workflows:
           requires:
             - *root_install_name
             - *shared_install_name
+      - test-scripts:
+          name: &test_scripts_name "Scripts Tests"
+          requires:
+            - *root_install_name
+            - *shared_install_name
+            - *scripts_install_name
       - test-web:
           name: &test_web_name "Web Tests"
           requires:
@@ -419,6 +425,7 @@ workflows:
             - *shared_install_name
             - *test_functions_name
             - *functions_install_name
+            - *test_scripts_name
             - *web_install_name
             - *get_changes_name
 
