@@ -5,10 +5,10 @@
     "main": "src/index.ts",
     "scripts": {
         "test": "jest",
-        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/junit/jest.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
+        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "start": "npm run cmd",
         "lint": "tslint --project tsconfig.json",
-        "lint:ci": "tslint --project tsconfig.json --format junit --out reports/junit/tslint-results.xml",
+        "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tslint/results.xml",
         "cmd": "ts-node -r tsconfig-paths/register src/index.ts",
         "page": "npm run cmd CreateLandingPage",
         "prompt": "npm run cmd CreateReflectionPrompt",
