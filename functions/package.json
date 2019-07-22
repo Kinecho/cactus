@@ -21,7 +21,7 @@
         "shell": "npm run build && firebase functions:shell",
         "start": "npm run shell",
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
-        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
+        "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "test:watch": "jest --watch",
         "watch": "tsc -w"
     },
