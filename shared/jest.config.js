@@ -9,5 +9,6 @@ module.exports = {
     moduleNameMapper: {
         '^@shared/(.*)$': '<rootDir>/src/$1',
     },
-    modulePathIgnorePatterns: [".db.test.ts"]
+    modulePathIgnorePatterns: [".db.test.ts"],
+    reporters: ["default", "jest-junit"]
 }
