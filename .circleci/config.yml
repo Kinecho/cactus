@@ -101,7 +101,7 @@ commands:
             - restore_cache:
                 name: "Restore << parameters.module >> Cache"
                 keys:
-                  - v3-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>package.json" }}
+                  - v3-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
                   - v3-<< parameters.module >>-dependency-{{ .Branch }}-
                   - v3-<< parameters.module >>-dependency-
       - unless:
