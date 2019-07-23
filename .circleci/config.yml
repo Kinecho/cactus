@@ -133,6 +133,47 @@ jobs:
           <<: *webhook-engineering-ci
           fail_only: true
 
+  install-all:
+    executor: cactus-web
+    steps:
+      - checkout
+      - restore_cache: *restore-functions-dependencies
+      - run: npm install
+      - run: npm --prefix functions install
+      - run: npm --prefix shared install
+      - run: npm --prefix scripts install
+      - run: npm --prefix web install
+      - save_cache:
+          name: "Save Root Dependencies to Cache"
+          paths:
+            - node_modules
+          <<: *root-dependency-key
+      - save_cache:
+          name: "Save Functions Dependencies to Cache"
+          paths:
+            - functions/node_modules
+          <<: *functions-dependency-key
+      - save_cache:
+          name: "Save Shared Dependencies to Cache"
+          paths:
+            - shared/node_modules
+          <<: *shared-dependency-key
+      - save_cache:
+          name: "Save Scripts Dependencies to Cache"
+          paths:
+            - scripts/node_modules
+          <<: *scripts-dependency-key
+      - save_cache:
+          name: "Save Web Dependencies to Cache"
+          paths:
+            - web/node_modules
+          <<: *web-dependency-key
+
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+
+
   install-functions:
     executor: cactus-web
     steps:
@@ -362,68 +403,38 @@ workflows:
       - notify-workflow-started:
           name: &workflow_name Cactus Release Pipeline
           workflow_name: *workflow_name
-      - install-root:
-          name: &root_install_name "Root: Install Dependencies"
-      - get-changes:
-          name: &get_changes_name "Get module changes"
-          requires:
-            - *root_install_name
-      - install-shared:
-          name: &shared_install_name "Shared: Install Dependencies"
-          requires:
-            - *get_changes_name
-      - install-scripts:
-          name: &scripts_install_name "Scripts: Install Dependencies"
-          requires:
-            - *get_changes_name
-      - install-web:
-          name: &web_install_name "Web: Install Dependencies"
-          requires:
-            - *get_changes_name
-      - install-functions:
-          name: &functions_install_name "Functions: Install Dependencies"
-          requires:
-            - *get_changes_name
+      - install-all:
+          name: &install_all_name "Install Dependencies"
       - test-shared:
           name: &test_shared_name "Shared Tests"
           requires:
-            - *root_install_name
-            - *shared_install_name
+            - *install_all_name
       - test-scripts:
           name: &test_scripts_name "Scripts Tests"
           requires:
-            - *root_install_name
-            - *shared_install_name
-            - *scripts_install_name
+            - *install_all_name
       - test-web:
           name: &test_web_name "Web Tests"
           requires:
-            - *shared_install_name
-            - *root_install_name
-            - *web_install_name
+            - *install_all_name
+#            - *shared_install_name
+#            - *root_install_name
+#            - *web_install_name
       - test-functions:
           name: &test_functions_name "API Tests"
           requires:
-            - *root_install_name
-            - *shared_install_name
-            - *functions_install_name
+            - *install_all_name
       - ready-for-deploy:
           filters:
             branches:
               only: "master"
           name: &ready_for_deploy_name "Ready for Deployments"
           requires:
-            - *scripts_install_name
-            - *root_install_name
+            - *install_all_name
             - *test_web_name
             - *test_shared_name
-            - *shared_install_name
             - *test_functions_name
-            - *functions_install_name
             - *test_scripts_name
-            - *web_install_name
-            - *get_changes_name
-
       # WEB Stage Deploy
       - stage-web-approval:
           name: &deploy_stage_web_approval "Deploy Web to Stage"
