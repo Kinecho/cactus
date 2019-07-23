@@ -1,8 +1,8 @@
 import {QueryParam} from "@shared/util/queryParams";
 import {isValidEmail} from "@shared/util/StringUtil";
-import Vue from "vue";
 import NavBar from "@components/NavBar.vue";
 import {configureDirectives} from "@web/vueDirectives";
+import * as qs from "qs";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn',
@@ -205,8 +205,13 @@ export function addModal(modalId: string, options: {
 
 export function getQueryParam(name: QueryParam): string | null {
     try {
-        const params = new URLSearchParams(window.location.search);
-        return params.get(name);
+        const params = qs.parse(window.location.search, {
+            ignoreQueryPrefix: true
+        });
+
+
+        return params[name];
+        // return params.get(name);
     } catch (e) {
         console.error("browser does not support url params", e);
         return null;
@@ -216,13 +221,13 @@ export function getQueryParam(name: QueryParam): string | null {
 
 export function removeQueryParam(name: QueryParam) {
     try {
-        const params = new URLSearchParams(window.location.search);
+        const params = qs.parse(window.location.search, {ignoreQueryPrefix: true});
         if (params) {
-            params.delete(name);
-            console.log("updated params", params.toString());
-            const queryString = params.toString();
-
-            const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (queryString ? `?${queryString}` : "");
+            console.log("before removal query params;",  qs.stringify(params));
+            delete params[name];
+            const updatedQs = qs.stringify(params);
+            console.log("updated params",  updatedQs);
+            const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
 
             window.history.pushState({path: newurl}, '', newurl);
 
