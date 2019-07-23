@@ -12,5 +12,6 @@ module.exports = {
         '^@api/(.*)$': '<rootDir>/../functions/src/$1',
         '^@web/(.*)$': '<rootDir>/../web/src/$1',
 
-    }
+    },
+    reporters: ["default", "jest-junit"]
 }

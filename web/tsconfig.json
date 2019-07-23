@@ -7,6 +7,7 @@
         "module": "es2015",
         "moduleResolution": "node",
         "target": "es5",
+        "esModuleInterop": false,
         "sourceMap": true,
         "lib": [
             "es2015",
@@ -14,27 +15,30 @@
         ],
         "baseUrl": ".",
         "rootDirs": [
-            "./src",
+            "src",
             "../shared/src"
         ],
         "paths": {
             "@web/*": [
-                "./src/scripts/*"
+                "src/scripts/*"
+            ],
+            "@test/*": [
+                "src/test/*"
             ],
             "@components/*": [
-                "./src/scripts/components/*"
+                "src/scripts/components/*"
             ],
             "@styles/*": [
-                "./src/styles/*"
+                "src/styles/*"
             ],
             "@shared/*": [
                 "../shared/src/*"
             ],
             "animations.gsap": [
-                "./node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"
+                "node_modules/scrollmagic/scrollmagic/uncompressed/plugins/animation.gsap.js"
             ],
             "ScrollToPlugin": [
-                "./node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js"
+                "node_modules/gsap/src/uncompressed/plugins/ScrollToPlugin.js"
             ]
         }
     },

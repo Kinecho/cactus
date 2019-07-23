@@ -4,6 +4,7 @@ output/
 **/*.js.map
 
 tmp/
+reports/
 
 .runtimeconfig.json
 .runtimeconfig*

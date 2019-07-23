@@ -50,6 +50,19 @@ aliases:
     name: Restore Functions Dependency Cache
     <<: *functions-dependency-keys
 
+  ## SCRIPTS CACHES
+  - &scripts-dependency-key
+    key: scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+  - &scripts-dependency-keys
+    keys:
+      - scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+      - scripts-dependency-{{ .Branch }}-
+      - scripts-dependency-
+  - &restore-scripts-dependencies
+    name: Restore Scripts Dependency Cache
+    <<: *scripts-dependency-keys
+
+
   ## ROOT CACHES
   - &root-dependency-key
     key: v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
@@ -99,7 +112,6 @@ jobs:
   deploy-stage:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: /tmp/workspace
@@ -121,10 +133,50 @@ jobs:
           <<: *webhook-engineering-ci
           fail_only: true
 
+  install-all:
+    executor: cactus-web
+    steps:
+      - checkout
+      - restore_cache: *restore-functions-dependencies
+      - run: npm install
+      - run: npm --prefix functions install
+      - run: npm --prefix shared install
+      - run: npm --prefix scripts install
+      - run: npm --prefix web install
+      - save_cache:
+          name: "Save Root Dependencies to Cache"
+          paths:
+            - node_modules
+          <<: *root-dependency-key
+      - save_cache:
+          name: "Save Functions Dependencies to Cache"
+          paths:
+            - functions/node_modules
+          <<: *functions-dependency-key
+      - save_cache:
+          name: "Save Shared Dependencies to Cache"
+          paths:
+            - shared/node_modules
+          <<: *shared-dependency-key
+      - save_cache:
+          name: "Save Scripts Dependencies to Cache"
+          paths:
+            - scripts/node_modules
+          <<: *scripts-dependency-key
+      - save_cache:
+          name: "Save Web Dependencies to Cache"
+          paths:
+            - web/node_modules
+          <<: *web-dependency-key
+
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+
+
   install-functions:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-functions-dependencies
       - run: npm --prefix functions install
@@ -141,7 +193,6 @@ jobs:
   install-shared:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - run: npm --prefix shared install
@@ -153,11 +204,24 @@ jobs:
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
+  install-scripts:
+    executor: cactus-web
+    steps:
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - run: npm --prefix scripts install
+      - save_cache:
+          name: "Save Scripts Dependencies to Cache"
+          paths:
+            - scripts/node_modules
+          <<: *scripts-dependency-key
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
 
   install-root:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       # Download and cache dependencies
       - restore_cache: *restore-root-dependencies
@@ -177,21 +241,15 @@ jobs:
   install-web:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
-
       - checkout
-
       # Download and cache dependencies
       - restore_cache: *restore-web-dependencies
-
       - run: npm --prefix web install
-
       - save_cache:
           name: "Save Web Dependencies to Cache"
           paths:
             - web/node_modules
           <<: *web-dependency-key
-
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -199,38 +257,48 @@ jobs:
   test-web:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix web run tslint
+          command: npm --prefix web run lint:ci
       - run:
           name: "Compile TypeScript"
           command: npm --prefix web run tsc
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix web test
+          command: npm --prefix web run test:ci
+      - store_test_results:
+          path: web/reports/tests
+      - store_test_results:
+          path: web/reports/coverage
+      - store_artifacts:
+          path: web/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
   test-functions:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-functions-dependencies
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix functions run lint
+          command: npm --prefix functions run lint:ci
       - run:
           name: "Build Sources"
           command: npm --prefix functions run build
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix functions test
+          command: npm --prefix functions run test:ci
+      - store_test_results:
+          path: functions/reports/tests
+      - store_test_results:
+          path: functions/reports/coverage
+      - store_artifacts:
+          path: functions/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -238,15 +306,39 @@ jobs:
   test-shared:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
-          command: npm --prefix shared run lint
+          command: npm --prefix shared run lint:ci
       - run:
           name: "Run Unit Tests"
-          command: npm --prefix shared test
+          command: npm --prefix shared run test:ci
+      - store_test_results:
+          path: shared/reports/tests
+      - store_test_results:
+          path: shared/reports/coverage
+      - store_artifacts:
+          path: shared/reports
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+  test-scripts:
+    executor: cactus-web
+    steps:
+      - checkout
+      - restore_cache: *restore-shared-dependencies
+      - restore_cache: *restore-scripts-dependencies
+      - run:
+          name: "TSLint"
+          command: npm --prefix scripts run lint:ci
+      - run:
+          name: "Run Unit Tests"
+          command: npm --prefix scripts run test:ci
+      - store_test_results:
+          path: scripts/reports/tests
+      - store_artifacts:
+          path: scripts/reports
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -272,6 +364,7 @@ jobs:
         default: "error"
         description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
     executor: cactus-web
+    resource_class: large
     steps:
       - slack/notify: *notify-job-started-slack
       - checkout
@@ -279,9 +372,11 @@ jobs:
       - restore_cache: *restore-shared-dependencies
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-functions-dependencies
+      - restore_cache: *restore-scripts-dependencies
       - run:
           name: Deploy to Firebase
           command: |
+            git config --global user.name = CircleCI
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
@@ -301,7 +396,6 @@ jobs:
       - slack/notify:
           <<: *webhook-engineering-ci
           message: "Starting <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow << parameters.workflow_name >> >"
-
 workflows:
   version: 2.1
   cactus_release_pipeline:
@@ -309,54 +403,38 @@ workflows:
       - notify-workflow-started:
           name: &workflow_name Cactus Release Pipeline
           workflow_name: *workflow_name
-      - install-root:
-          name: &root_install_name "Root: Install Dependencies"
-      - get-changes:
-          name: &get_changes_name "Get module changes"
-          requires:
-            - *root_install_name
-      - install-shared:
-          name: &shared_install_name "Shared: Install Dependencies"
-          requires:
-            - *get_changes_name
-      - install-web:
-          name: &web_install_name "Web: Install Dependencies"
-          requires:
-            - *get_changes_name
-      - install-functions:
-          name: &functions_install_name "Functions: Install Dependencies"
-          requires:
-            - *get_changes_name
+      - install-all:
+          name: &install_all_name "Install Dependencies"
       - test-shared:
           name: &test_shared_name "Shared Tests"
           requires:
-            - *root_install_name
-            - *shared_install_name
+            - *install_all_name
+      - test-scripts:
+          name: &test_scripts_name "Scripts Tests"
+          requires:
+            - *install_all_name
       - test-web:
           name: &test_web_name "Web Tests"
           requires:
-            - *shared_install_name
-            - *root_install_name
-            - *web_install_name
+            - *install_all_name
+#            - *shared_install_name
+#            - *root_install_name
+#            - *web_install_name
       - test-functions:
           name: &test_functions_name "API Tests"
           requires:
-            - *root_install_name
-            - *shared_install_name
-            - *functions_install_name
-
+            - *install_all_name
       - ready-for-deploy:
+          filters:
+            branches:
+              only: "master"
           name: &ready_for_deploy_name "Ready for Deployments"
           requires:
-            - *root_install_name
+            - *install_all_name
             - *test_web_name
             - *test_shared_name
-            - *shared_install_name
             - *test_functions_name
-            - *functions_install_name
-            - *web_install_name
-            - *get_changes_name
-
+            - *test_scripts_name
       # WEB Stage Deploy
       - stage-web-approval:
           name: &deploy_stage_web_approval "Deploy Web to Stage"

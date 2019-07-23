@@ -320,8 +320,8 @@ export default class ReflectionPromptBackfillPagesCommand extends FirebaseComman
                 }
             });
 
-        for (let i = 0; i < matchesToCreate.length; i++) {
-            const match = matchesToCreate[i];
+        for (const match of matchesToCreate ) {
+            // const match = matchesToCreate[i];
             if (match.campaign && (!match.reminderId && !match.reminderCampaign)) {
                 const questionName = match.campaign.id || "unknown";
                 console.log("setting up question name", questionName);

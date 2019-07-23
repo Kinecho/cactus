@@ -62,4 +62,4 @@ const git = simplegit();
     } else {
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
     }
-})();
+})().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));

@@ -106,7 +106,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
                 }
             });
 
-            batch.commit();
+            await batch.commit();
 
             batch = firestoreService.firestore.batch();
             const responsesSnapshot = await AdminReflectionResponseService.getSharedInstance()
@@ -116,7 +116,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
             responsesSnapshot.forEach(doc => {
                 batch.delete(doc.ref);
             });
-            batch.commit();
+            await batch.commit();
 
         }
 
@@ -176,7 +176,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
 
                 const transform = (value: any) => {
                     if (typeof value === "string") {
-                        const buff = new Buffer(value, "base64");
+                        const buff = Buffer.from(value, "base64");
                         return buff.toString("ascii");
                     }
                     return value;

@@ -20,6 +20,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+web/reports/
+functions/reports
+shared/reports/
+scripts/reports
+
 # Runtime data
 pids
 *.pid
