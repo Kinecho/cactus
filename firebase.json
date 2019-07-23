@@ -19,8 +19,6 @@
             "bash ./sentry-init.sh",
             "bash ./sentry-funcs-start.sh",
             "npm --prefix scripts run firebase:predeploy functions",
-            "npm --prefix \"$RESOURCE_DIR\" run lint",
-            "npm --prefix \"$RESOURCE_DIR\" run test:ci",
             "npm --prefix \"$RESOURCE_DIR\" run build:deploy",
             "bash ./sentry-funcs-upload.sh"
         ],
