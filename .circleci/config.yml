@@ -11,53 +11,52 @@ executors:
     working_directory: ~/project
     docker:
       - image: circleci/node:8.15.0-browsers
-
-
 aliases:
+  - &cache-version "v2"
   ## WEB CACHES
   - &web-dependency-key
-    key: web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
+    key: v3-web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
   - &web-dependency-keys
     keys:
-      - web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
-      - web-dependency-{{ .Branch }}-
-      - web-dependency-
+      - v3-web-dependency-{{ .Branch }}-{{ checksum "web/package.json" }}
+      - v3-web-dependency-{{ .Branch }}-
+      - v3-web-dependency-
   - &restore-web-dependencies
     name: Restore Web Dependency Cache
     <<: *web-dependency-keys
 
   ## SHARED CACHES
   - &shared-dependency-key
-    key: v2-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
+    key: v3-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
   - &shared-dependency-keys
     keys:
-      - v2-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
-      - v2-shared-dependency-{{ .Branch }}-
-      - v2-shared-dependency-
+      - v3-shared-dependency-{{ .Branch }}-{{ checksum "shared/package.json" }}
+      - v3-shared-dependency-{{ .Branch }}-
+      - v3-shared-dependency-
   - &restore-shared-dependencies
     name: Restore Shared Dependency Cache
     <<: *shared-dependency-keys
 
   ## FUNCTIONS CACHES
   - &functions-dependency-key
-    key: functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
+    key: v3-functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
   - &functions-dependency-keys
     keys:
-      - functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
-      - functions-dependency-{{ .Branch }}-
-      - functions-dependency-
+      - v3-functions-dependency-{{ .Branch }}-{{ checksum "functions/package.json" }}
+      - v3-functions-dependency-{{ .Branch }}-
+      - v3-functions-dependency-
   - &restore-functions-dependencies
     name: Restore Functions Dependency Cache
     <<: *functions-dependency-keys
 
   ## SCRIPTS CACHES
   - &scripts-dependency-key
-    key: scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+    key: v3-scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
   - &scripts-dependency-keys
     keys:
-      - scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
-      - scripts-dependency-{{ .Branch }}-
-      - scripts-dependency-
+      - v3-scripts-dependency-{{ .Branch }}-{{ checksum "scripts/package.json" }}
+      - v3-scripts-dependency-{{ .Branch }}-
+      - v3-scripts-dependency-
   - &restore-scripts-dependencies
     name: Restore Scripts Dependency Cache
     <<: *scripts-dependency-keys
@@ -65,12 +64,12 @@ aliases:
 
   ## ROOT CACHES
   - &root-dependency-key
-    key: v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+    key: v3-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
   - &root-dependency-keys
     keys:
-      - v2-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
-      - v2-root-dependency-{{ .Branch }}-
-      - v2-root-dependency-
+      - v3-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+      - v3-root-dependency-{{ .Branch }}-
+      - v3-root-dependency-
   - &restore-root-dependencies
     name: Restore Root Dependency Cache
     <<: *root-dependency-keys
@@ -84,6 +83,65 @@ aliases:
     <<: *webhook-engineering-ci
     color: '#42e2f4'
     message: "Job \\`$CIRCLE_JOB\\` starting on branch *$CIRCLE_BRANCH* <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|Workflow>"
+
+
+commands:
+  restore-module:
+    parameters:
+      module:
+        type: enum
+        default: ""
+        enum: ["", "web", "functions", "shared", "scripts"]
+        description: "The module name, e.g. web, functions, etc"
+    steps:
+      - checkout
+      - when:
+          condition: << parameters.module >>
+          steps:
+            - restore_cache:
+                name: "Restore << parameters.module >> Cache"
+                keys:
+                  - v3-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>package.json" }}
+                  - v3-<< parameters.module >>-dependency-{{ .Branch }}-
+                  - v3-<< parameters.module >>-dependency-
+      - unless:
+          condition: << parameters.module >>
+          steps:
+            - restore_cache:
+                name: "Save Root Dependencies to Cache"
+                keys:
+                  - v3-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+                  - v3-root-dependency-{{ .Branch }}-
+                  - v3-root-dependency-
+  install-module:
+    parameters:
+      module:
+        type: enum
+        enum: ["", "web", "functions", "shared", "scripts"]
+        default: ""
+        description: "The module name, e.g. web, functions, etc"
+    steps:
+      - checkout
+      - restore-module:
+          module: << parameters.module >>
+      - when:
+          condition: << parameters.module >>
+          steps:
+            - run: npm --prefix << parameters.module >> install
+            - save_cache:
+                name: "Save << parameters.module >> Dependencies to Cache"
+                paths:
+                  - << parameters.module >>/node_modules
+                key: v3-<< parameters.module >>-dependency-{{ .Branch }}-{{ checksum "<< parameters.module >>/package.json" }}
+      - unless:
+          condition: << parameters.module >>
+          steps:
+            - run: npm install
+            - save_cache:
+                name: "Save Root Dependencies to Cache"
+                paths:
+                  - node_modules
+                key: v3-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
 
 jobs:
   get-changes:
@@ -137,37 +195,47 @@ jobs:
     executor: cactus-web
     steps:
       - checkout
-      - restore_cache: *restore-functions-dependencies
-      - run: npm install
-      - run: npm --prefix functions install
-      - run: npm --prefix shared install
-      - run: npm --prefix scripts install
-      - run: npm --prefix web install
-      - save_cache:
-          name: "Save Root Dependencies to Cache"
-          paths:
-            - node_modules
-          <<: *root-dependency-key
-      - save_cache:
-          name: "Save Functions Dependencies to Cache"
-          paths:
-            - functions/node_modules
-          <<: *functions-dependency-key
-      - save_cache:
-          name: "Save Shared Dependencies to Cache"
-          paths:
-            - shared/node_modules
-          <<: *shared-dependency-key
-      - save_cache:
-          name: "Save Scripts Dependencies to Cache"
-          paths:
-            - scripts/node_modules
-          <<: *scripts-dependency-key
-      - save_cache:
-          name: "Save Web Dependencies to Cache"
-          paths:
-            - web/node_modules
-          <<: *web-dependency-key
+      - install-module:
+          module: ""
+      - install-module:
+          module: functions
+      - install-module:
+          module: web
+      - install-module:
+          module: shared
+      - install-module:
+          module: scripts
+
+      #      - run: npm install
+      #      - run: npm --prefix functions install
+      #      - run: npm --prefix shared install
+      #      - run: npm --prefix scripts install
+      #      - run: npm --prefix web install
+      #      - save_cache:
+      #          name: "Save Root Dependencies to Cache"
+      #          paths:
+      #            - node_modules
+      #          <<: *root-dependency-key
+      #      - save_cache:
+      #          name: "Save Functions Dependencies to Cache"
+      #          paths:
+      #            - functions/node_modules
+      #          <<: *functions-dependency-key
+      #      - save_cache:
+      #          name: "Save Shared Dependencies to Cache"
+      #          paths:
+      #            - shared/node_modules
+      #          <<: *shared-dependency-key
+      #      - save_cache:
+      #          name: "Save Scripts Dependencies to Cache"
+      #          paths:
+      #            - scripts/node_modules
+      #          <<: *scripts-dependency-key
+      #      - save_cache:
+      #          name: "Save Web Dependencies to Cache"
+      #          paths:
+      #            - web/node_modules
+      #          <<: *web-dependency-key
 
       - slack/status:
           <<: *webhook-engineering-ci
@@ -258,8 +326,12 @@ jobs:
     executor: cactus-web
     steps:
       - checkout
-      - restore_cache: *restore-web-dependencies
-      - restore_cache: *restore-shared-dependencies
+      - restore-module:
+          module: web
+      - restore-module:
+          module: shared
+      #      - restore_cache: *restore-web-dependencies
+      #      - restore_cache: *restore-shared-dependencies
       - run:
           name: "TSLint"
           command: npm --prefix web run lint:ci
@@ -282,8 +354,12 @@ jobs:
     executor: cactus-web
     steps:
       - checkout
-      - restore_cache: *restore-functions-dependencies
-      - restore_cache: *restore-shared-dependencies
+      #      - restore_cache: *restore-functions-dependencies
+      #      - restore_cache: *restore-shared-dependencies
+      - restore-module:
+          module: functions
+      - restore-module:
+          module: shared
       - run:
           name: "TSLint"
           command: npm --prefix functions run lint:ci
@@ -417,9 +493,9 @@ workflows:
           name: &test_web_name "Web Tests"
           requires:
             - *install_all_name
-#            - *shared_install_name
-#            - *root_install_name
-#            - *web_install_name
+      #            - *shared_install_name
+      #            - *root_install_name
+      #            - *web_install_name
       - test-functions:
           name: &test_functions_name "API Tests"
           requires:
