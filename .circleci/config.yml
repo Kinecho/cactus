@@ -112,7 +112,6 @@ jobs:
   deploy-stage:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: /tmp/workspace
@@ -137,7 +136,6 @@ jobs:
   install-functions:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-functions-dependencies
       - run: npm --prefix functions install
@@ -154,7 +152,6 @@ jobs:
   install-shared:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - run: npm --prefix shared install
@@ -169,7 +166,6 @@ jobs:
   install-scripts:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - run: npm --prefix scripts install
@@ -185,7 +181,6 @@ jobs:
   install-root:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       # Download and cache dependencies
       - restore_cache: *restore-root-dependencies
@@ -205,21 +200,15 @@ jobs:
   install-web:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
-
       - checkout
-
       # Download and cache dependencies
       - restore_cache: *restore-web-dependencies
-
       - run: npm --prefix web install
-
       - save_cache:
           name: "Save Web Dependencies to Cache"
           paths:
             - web/node_modules
           <<: *web-dependency-key
-
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
@@ -227,7 +216,6 @@ jobs:
   test-web:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-web-dependencies
       - restore_cache: *restore-shared-dependencies
@@ -252,7 +240,6 @@ jobs:
   test-functions:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-functions-dependencies
       - restore_cache: *restore-shared-dependencies
@@ -278,7 +265,6 @@ jobs:
   test-shared:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - run:
@@ -299,7 +285,6 @@ jobs:
   test-scripts:
     executor: cactus-web
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore_cache: *restore-shared-dependencies
       - restore_cache: *restore-scripts-dependencies
@@ -350,6 +335,7 @@ jobs:
       - run:
           name: Deploy to Firebase
           command: |
+            git config --global user.name = CircleCI
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
@@ -369,7 +355,6 @@ jobs:
       - slack/notify:
           <<: *webhook-engineering-ci
           message: "Starting <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow << parameters.workflow_name >> >"
-
 workflows:
   version: 2.1
   cactus_release_pipeline:
@@ -423,6 +408,9 @@ workflows:
             - *shared_install_name
             - *functions_install_name
       - ready-for-deploy:
+          filters:
+            branches:
+              only: "master"
           name: &ready_for_deploy_name "Ready for Deployments"
           requires:
             - *scripts_install_name
