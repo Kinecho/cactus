@@ -34,5 +34,5 @@ module.exports = {
     modulePathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/public/'],
 
     moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {prefix: '<rootDir>'}),
-
+    reporters: ["default", "jest-junit"]
 }

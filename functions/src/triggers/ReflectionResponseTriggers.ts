@@ -83,11 +83,15 @@ export const onReflectionResponseCreated = functions.firestore
                 });
 
 
-            if (prompt && prompt.question && prompt.contentPath) {
-                let contentLink = "";
+            if (prompt && prompt.question) {
+                let contentLink = prompt.question;
 
                 const link = buildPromptContentURL(prompt);
-                contentLink = `<${link}|${prompt.question}>`
+
+                if (prompt.contentPath) {
+                    contentLink = `<${link}|${prompt.question}>`
+                }
+
                 fields.push(
                     {
                         title: "Prompt Question",

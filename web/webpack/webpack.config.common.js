@@ -5,7 +5,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const allPages = require('./../pages')
 const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
 const pagesUtil = require('./../pagesUtil')
@@ -96,7 +95,6 @@ module.exports = (config) => {
                             loader: 'ts-loader',
                             options: {
                                 appendTsSuffixTo: [/\.vue$/],
-                                transpileOnly: true,
                             },
                         },
                         {
@@ -132,7 +130,6 @@ module.exports = (config) => {
                     ],
                 },
                 plugins: [
-                    new ForkTsCheckerWebpackPlugin(),
                     new MiniCssExtractPlugin({
                         filename: isDev ? '[name].css' : '[id].[hash].css',
                         chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
