@@ -278,7 +278,6 @@ jobs:
     executor: cactus-web
     resource_class: large
     steps:
-      - slack/notify: *notify-job-started-slack
       - checkout
       - restore-all
       - run:
