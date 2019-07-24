@@ -259,7 +259,9 @@ jobs:
       - slack/notify:
           <<: *webhook-engineering-ci
           color: 'good'
-          message: "A build is ready for promotion to prod. Approve the stage build <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|here>"
+          include_job_number_field: false
+          include_visit_job_action: false
+          message: "A Stage Build is <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|ready for promotion>"
 
   firebase-deploy:
     description: "Deploy selected modules to the selected project"
@@ -289,7 +291,20 @@ jobs:
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >>
       - slack/status:
           <<: *webhook-engineering-ci
-          fail_only: false
+          fail_only: true
+  notify-workflow-finished:
+    description: "Notify slack that a workflow has finished and provide a link"
+    parameters:
+      workflow_name:
+        type: string
+        default: "DEFAULT"
+        description: "The message to send to slack"
+    executor: cactus-web
+    steps:
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: "good"
+          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
   notify-workflow-started:
     description: "Notify slack that a workflow has started and provide a link"
     parameters:
@@ -345,6 +360,12 @@ workflows:
               ignore: master
           requires:
             - *install_all_name
+      - notify-workflow-finished:
+          name: Notify Workflow Complete
+          workflow_name: *workflow_name
+          filters:
+            branches:
+              ignore: master
 
   cactus_release_pipeline:
     jobs:
