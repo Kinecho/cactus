@@ -24,7 +24,7 @@ export interface InputResponse extends PageConfig {
     looksGood: boolean,
 }
 
-export default class CreateReflectionPrompt implements Command {
+export default class CreateReflectionPromptPage implements Command {
     name = "Pages: Create A Reflection Prompt";
     mailchimpCommand?:MailchimpQuestionCampaign;
     response?: InputResponse;
