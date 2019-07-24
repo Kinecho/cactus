@@ -48,6 +48,10 @@ h1 {
   background-position: center 10rem;
   background-repeat: no-repeat;
   background-size: 110vw;
+
+  &.extraBottom {
+    padding-bottom: 1.6rem;
+  }
 }
 
 .graphic {
