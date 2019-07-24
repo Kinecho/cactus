@@ -168,9 +168,12 @@ form {
 
 .why {
   background-color: $lightPink;
-  padding: 5.6rem 2.4rem 0;
+  padding: 8rem 2.4rem;
   position: relative;
 
+  @include r(768) {
+      padding: 11rem 2.4rem;
+  }
   @include r(1024) {
     &:before {
       background: no-repeat;
@@ -212,6 +215,7 @@ form {
 
     @include r(768) {
       flex-basis: 33%;
+      padding-bottom: 0;
     }
 
     .text {
@@ -240,7 +244,11 @@ form {
 }
 
 .how {
-  padding: 7.2rem 2.4rem 3.2rem;
+  padding: 8rem 2.4rem;
+
+  @include r(768) {
+      padding: 11rem 2.4rem;
+  }
 
   .flexContainer {
     background: url(assets/images/lineMobile.svg) no-repeat 18px center;
@@ -322,13 +330,14 @@ form {
 }
 
 .testimonials {
-  padding: 5.6rem 0 7.2rem;
+  padding: 8rem 0;
 
   @include r(768) {
     background: no-repeat;
     background-image: url(assets/images/greenVs.svg), url(assets/images/pinkBlob.svg);
     background-position: right -16rem center, right -24rem center;
     background-size: 39rem, 45rem;
+    padding: 11rem 0 4rem;
   }
 
   .flexContainer {
@@ -392,7 +401,7 @@ form {
     z-index: 0;
 
     @include r(768) {
-        padding: 9rem 2.4rem;
+        padding: 11rem 2.4rem;
     }
 
     /* &:before {
