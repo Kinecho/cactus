@@ -9,5 +9,6 @@ exports.getPages = function(config, allPages){
         return entries
     }, {})
 
-    return pages;
+    // return pages;
+    return allPages;
 }

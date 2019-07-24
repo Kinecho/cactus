@@ -34,8 +34,8 @@ commands:
     parameters:
       module:
         type: enum
-        default: ""
-        enum: ["", "web", "functions", "shared", "scripts"]
+        default: *root-module
+        enum: [*root-module, *web-module, *functions-module, *shared-module, *scripts-module]
         description: "The module name, e.g. web, functions, etc"
     steps:
       - when:
@@ -73,8 +73,8 @@ commands:
     parameters:
       module:
         type: enum
-        enum: ["", "web", "functions", "shared", "scripts"]
-        default: ""
+        enum: [*root-module, *web-module, *functions-module, *shared-module, *scripts-module]
+        default: *root-module
         description: "The module name, e.g. web, functions, etc"
     steps:
       - restore-module:
@@ -112,16 +112,10 @@ jobs:
             echo "Printing output & copying file"
             cat modules_to_deploy.txt
             cp modules_to_deploy.txt workspace
-      # Persist the specified paths (workspace/echo-output) into the workspace for use in downstream job.
       - persist_to_workspace:
-          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
-          # taken to be the root directory of the workspace.
           root: "workspace"
-          # Must be relative path from root
           paths:
             - modules_to_deploy.txt
-
-
   deploy-stage:
     executor: cactus-web
     steps:

@@ -2,19 +2,19 @@ import chalk from "chalk";
 import MailchimpQuestionCampaign from "@scripts/commands/MailchimpQuestionCampaign";
 import {getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
 import SaveQuestionCommand from "@scripts/commands/SaveQuestionCommand";
-const prompts = require('prompts');
-
 import {
     addToSitemap,
     createHtml,
-    createJS,
-    createScss,
     PageConfig,
     updateFirebaseJson,
-    updatePagesFile, validatePageName, validateUrl
+    updatePagesFile,
+    validatePageName,
+    validateUrl
 } from "@scripts/util/CreatePageUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {Command} from "@scripts/CommandTypes";
+
+const prompts = require('prompts');
 
 export interface InputResponse extends PageConfig {
     pageName: string,
@@ -78,8 +78,8 @@ export default class CreateReflectionPrompt implements Command {
 
         const fileTasks = [
             createHtml(response),
-            createJS(response),
-            createScss(response),
+            //NOTE: We are no longer using custom javascript and css files for page prompts!
+            // IF creating a landing page, we will still create those.
             addToSitemap(response),
             updateFirebaseJson(response),
             updatePagesFile(response)
