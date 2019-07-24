@@ -22,7 +22,7 @@ export async function onPublish() {
         updates.push({cactusMember, mailchimpListMember: unsubscriber});
     }
 
-    const summary = updates.map(u => {
+    const summary = updates.filter(u => u.cactusMember).map(u => {
         return {
             cactusMemberId: u.cactusMember ? u.cactusMember.id : undefined,
             email: u.cactusMember ? u.cactusMember.email : u.mailchimpListMember.email_address,
@@ -39,5 +39,4 @@ export async function onPublish() {
             text: `\`\`\`${JSON.stringify(summary, null, 2)}\`\`\``
         }]
     })
-
 }
