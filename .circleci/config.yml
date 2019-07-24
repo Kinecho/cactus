@@ -307,7 +307,7 @@ workflows:
   branch_build_and_test:
     jobs:
       - notify-workflow-started:
-          name: &workflow_name Pull Request Build
+          name: &workflow_name Feature Branch Build & Test
           workflow_name: *workflow_name
           filters:
             branches:
