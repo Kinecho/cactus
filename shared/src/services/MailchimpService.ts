@@ -41,7 +41,7 @@ import {
     UpdateMergeFieldResponse,
     MergeField,
     ListMemberStatus,
-    ListMember, CampaignSentToListResponse, SentToRecipient, defaultPageDelay
+    ListMember, CampaignSentToListResponse, SentToRecipient, defaultPageDelay, SegmentMemberListResponse
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
@@ -261,6 +261,36 @@ export default class MailchimpService {
             return;
         }
     }
+
+    async getAudienceSegmentMembers(segmentId: number, pagination = DEFAULT_PAGINATION): Promise<SegmentMemberListResponse> {
+        const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
+        const url = `/lists/${this.audienceId}/segments/${segmentId}/members`;
+        const response = await this.request.get(url, {
+            params: {
+                offset,
+                count,
+                exclude_fields: "members._links, _links"
+            }
+        });
+        return response.data;
+    }
+
+    async getAllAudienceSegmentMembers(segmentId: number, options: {
+        pageSize?: number,
+        delayMs?: number,
+        onPage?: (values: ListMember[]) => Promise<void>
+    } = {}): Promise<ListMember[]> {
+
+        const pageSize = options.pageSize || defaultPageSize;
+        const delayMs = options.pageSize || defaultPageDelay;
+
+        return this.getAllPaginatedResults(pagination => this.getAudienceSegmentMembers(segmentId, pagination),
+            (membersResponse: SegmentMemberListResponse) => membersResponse.members,
+            pageSize,
+            delayMs,
+            options.onPage,)
+    }
+
 
     async getAudienceSegment(listId: string, segmentId: number): Promise<Segment> {
         const url = `/lists/${listId}/segments/${segmentId}`;

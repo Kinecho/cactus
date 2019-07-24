@@ -758,6 +758,12 @@ export interface GetListMembersOptions {
     unsubscribed_since?: ISODate
 }
 
+export interface SegmentMemberListResponse extends ListResponse {
+    members: ListMember[],
+    list_id: string,
+    segment_id: string,
+}
+
 export interface ListMemberListResponse extends ListResponse {
     members: ListMember[]
     list_id: string
@@ -809,6 +815,8 @@ export enum CampaignMemberSendStatus {
     hard = "hard", //hard bounce
     sort = "sort" //soft bounce
 }
+
+
 
 
 export interface CampaignSentToListResponse extends ListResponse {
