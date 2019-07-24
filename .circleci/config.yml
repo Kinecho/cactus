@@ -259,7 +259,7 @@ jobs:
       - slack/notify:
           <<: *webhook-engineering-ci
           color: 'good'
-          message: "Stage Deployment Jobs are now Available. Go to the <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow here>"
+          message: "A build is ready for promotion to prod. Approve the stage build <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|here>"
 
   firebase-deploy:
     description: "Deploy selected modules to the selected project"
@@ -282,7 +282,7 @@ jobs:
       - run:
           name: Deploy to Firebase
           command: |
-            git config --global user.name = CircleCI
+            git config --global user.name CircleCI
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
@@ -301,14 +301,17 @@ jobs:
     steps:
       - slack/notify:
           <<: *webhook-engineering-ci
-          message: "Starting <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|workflow << parameters.workflow_name >> >"
+          message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > for branch \\`${CIRCLE_BRANCH}\\`"
 workflows:
   version: 2.1
-  cactus_release_pipeline:
+  branch_build_and_test:
     jobs:
       - notify-workflow-started:
-          name: &workflow_name Cactus Release Pipeline
+          name: &workflow_name Pull Request Build
           workflow_name: *workflow_name
+          filters:
+            branches:
+              ignore: "master"
       - install-all:
           name: &install_all_name "Install Dependencies"
       - test-shared:
@@ -327,56 +330,52 @@ workflows:
           name: &test_functions_name "API Tests"
           requires:
             - *install_all_name
-      - ready-for-deploy:
+
+  cactus_release_pipeline:
+    jobs:
+      - notify-workflow-started:
+          name: &workflow_name Cactus Release Pipeline
+          workflow_name: *workflow_name
           filters:
             branches:
               only: "master"
-          name: &ready_for_deploy_name "Ready for Deployments"
+      - install-all:
+          name: &install_all_name "Install Dependencies"
+      - test-shared:
+          name: &test_shared_name "Shared Tests"
+          requires:
+            - *install_all_name
+      - test-scripts:
+          name: &test_scripts_name "Scripts Tests"
+          requires:
+            - *install_all_name
+      - test-web:
+          name: &test_web_name "Web Tests"
+          requires:
+            - *install_all_name
+      - test-functions:
+          name: &test_functions_name "API Tests"
+          requires:
+            - *install_all_name
+      - firebase-deploy:
+          name: &deploy_stage_name "Stage: Deploy All"
+          modules: "functions,hosting"
+          project: "stage"
           requires:
             - *install_all_name
             - *test_web_name
             - *test_shared_name
             - *test_functions_name
             - *test_scripts_name
-      # WEB Stage Deploy
-      - stage-web-approval:
-          name: &deploy_stage_web_approval "Deploy Web to Stage"
-          type: approval
+      - ready-for-deploy
+      - prod_deploy_approval:
+          type: approval,
+          name: &prod_approval_name "Deploy To Prod Approval"
           requires:
-            - *ready_for_deploy_name
+            - *deploy_stage_name
       - firebase-deploy:
-          name: &deploy_stage_web_name "Stage: Deploy Web"
-          modules: "hosting"
-          project: "stage"
-          requires:
-            - *ready_for_deploy_name
-            - *deploy_stage_web_approval
-
-      # FUNCTIONS Stage Deploy
-      - stage-functions-approval:
-          name: &deploy_stage_api_approval "Deploy API to Stage"
-          type: approval
-          requires:
-            - *ready_for_deploy_name
-      - firebase-deploy:
-          name: &deploy_stage_api_name "Stage: Deploy API"
-          modules: "functions"
-          project: "stage"
-          requires:
-            - *ready_for_deploy_name
-            - *deploy_stage_api_approval
-
-      # ALL Stage Deploy
-      - stage-deploy-all-approval:
-          name: &deploy_stage_all_approval "Deploy All to Stage"
-          type: approval
-          requires:
-            - *ready_for_deploy_name
-      - firebase-deploy:
-          name: &deploy_stage_api_name "Stage: Deploy All"
+          name: "Prod: Deploy All"
+          project: "prod"
           modules: "functions,hosting"
-          project: "stage"
           requires:
-            - *ready_for_deploy_name
-            - *deploy_stage_all_approval
-
+            - *prod_approval_name
