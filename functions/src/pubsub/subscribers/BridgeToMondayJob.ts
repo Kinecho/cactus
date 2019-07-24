@@ -3,22 +3,24 @@ import * as functions from "firebase-functions";
 import MailchimpService from "@shared/services/MailchimpService";
 import AdminSlackService, {ChatMessage, SlackAttachment} from "@shared/services/AdminSlackService";
 import {TagName, TagStatus, UpdateTagsRequest} from "@shared/mailchimp/models/MailchimpTypes";
+import {getConfig} from "@api/config/configService";
 
+const config = getConfig();
 
-const mailchimpBridgeSegmentId = 58045;
+const mailchimpBridgeSegmentId = config.mailchimp.bridge_to_monday_segment_id;
 
 export async function onPublish(message: Message, context: functions.EventContext) {
     try {
         const members = await MailchimpService.getSharedInstance().getAllAudienceSegmentMembers(mailchimpBridgeSegmentId);
 
         const slackService = AdminSlackService.getSharedInstance();
-        await slackService.sendDataLogMessage("Starting Bridge To Monday Job...");
+        await slackService.sendDataLogMessage(`Starting Bridge To Monday Job for segmentId = ${mailchimpBridgeSegmentId}`);
 
         const attachments: SlackAttachment[] = [];
 
         attachments.push({
-            title: "Members to apply \`onboarding_suppressed\`",
-            text: `Not Actually Processing yet:\nMembers:\n${members.length === 0 ? "<none>" : members.map(member => member.email_address).join('\n')}`
+            title: `${members.length} Members to apply \`${TagName.ONBOARDING_SUPPRESSED}\``,
+            text: `Not Actually Processing yet:\nMember List:\n${members.length === 0 ? "<none>" : members.map(member => member.email_address).join('\n')}`
         });
 
         const tagRequests: UpdateTagsRequest[] = members.map(member => {
@@ -37,9 +39,8 @@ export async function onPublish(message: Message, context: functions.EventContex
         }
 
         attachments.push({
-            text: `Tag Requests (not sending yet)\n${JSON.stringify(tagRequests, null, 2)}`
+            text: `${tagRequests.length} Tag Requests  (not sending yet)\n${JSON.stringify(tagRequests, null, 2)}`
         });
-
 
 
         //TODO: Don't send the batch request
