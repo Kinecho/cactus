@@ -58,7 +58,7 @@ export enum MergeField {
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
     JOURNAL_PREMIUM = "journal_premium",
-    ONBOARDING_SUPPRESSED = "onboarding_supressed", //[sic] this typo is in the tag in prod, whoops
+    ONBOARDING_SUPPRESSED = "onboarding_suppressed",
 }
 
 export enum TagStatus {

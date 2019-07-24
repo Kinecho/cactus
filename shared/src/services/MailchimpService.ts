@@ -411,6 +411,13 @@ export default class MailchimpService {
 
     async submitBatchJob(job: BatchOperationsRequest): Promise<BatchCreateResponse> {
         const url = `/batches`;
+
+        job.operations.forEach(op => {
+            if (typeof op.body !== "string") {
+                op.body = JSON.stringify(op.body);
+            }
+        });
+
         const response = await this.request.post(url, job);
         return response.data;
     }
