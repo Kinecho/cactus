@@ -81,7 +81,7 @@ export default class AdminCactusMemberService {
         }
 
         if (result.size > 1) {
-            console.warn("Found more than one CactusMember for mailchimp memberId", id);
+            console.warn("Found more than one CactusMember for mailchimp member web_id", id);
         }
 
         const [member] = result.results;
