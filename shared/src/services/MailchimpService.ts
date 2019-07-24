@@ -30,7 +30,7 @@ import {
     ListMember,
     ListMemberListResponse,
     ListMemberStatus,
-    ListResponse, MailchimpApiError, MemberUnsubscribeReport,
+    ListResponse, MailchimpApiError, MemberActivityListResponse, MemberUnsubscribeReport,
     MergeField,
     PaginationParameters,
     SearchMembersOptions,
@@ -829,6 +829,28 @@ export default class MailchimpService {
         }
 
         return result;
+    }
+
+    /**
+     * This is limited to the last 50 results
+     */
+    async getMemberActivity(email: string): Promise<MemberActivityListResponse | undefined> {
+        try {
+            const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/activity`;
+            console.log("fetching activity via", url);
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links",
+                    count: 50,
+                }
+            });
+
+            return response.data;
+        } catch (e) {
+            const error = e as AxiosError;
+            console.error(`Unable to get member activity for ${email}`, error.response ? {config: error.config, data: error.response.data} : error);
+            return undefined;
+        }
     }
 }
 

@@ -98,6 +98,7 @@ export default class AdminCactusMemberService {
         if (cactusMember) {
             cactusMember.unsubscribedAt = getDateFromISOString(unsubscribeReport.timestamp);
             cactusMember.unsubscribeReason = unsubscribeReport.reason;
+            cactusMember.unsubscribeCampaignId = unsubscribeReport.campaign_id;
             cactusMember = await this.save(cactusMember);
         }
 
@@ -116,6 +117,7 @@ export default class AdminCactusMemberService {
         if (unsubscribeReport) {
             cactusMember.unsubscribedAt = getDateFromISOString(unsubscribeReport.timestamp);
             cactusMember.unsubscribeReason = unsubscribeReport.reason;
+            cactusMember.unsubscribeCampaignId = unsubscribeReport.campaign_id;
         }
 
         cactusMember.mailchimpListMember = listMember;

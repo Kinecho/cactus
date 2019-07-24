@@ -35,6 +35,7 @@ export default class CactusMember extends BaseModel {
 
     unsubscribeReason?:string;
     unsubscribedAt?:Date;
+    unsubscribeCampaignId?: string;
 
     journalStatus=JournalStatus.NONE;
 

@@ -16,6 +16,8 @@ export enum CampaignType {
     absplit = "absplit",
     rss = "rss",
     variate = "variate",
+    automation = "automation",
+    C = "C"
 }
 
 export enum UnsubscribeAction {
@@ -889,4 +891,27 @@ export interface MailchimpApiError {
     status: number,
     detail: string,
     instance: string,
+}
+
+export enum ActivityActionType {
+    unsub = 'unsub',
+    sent = 'sent',
+    open = 'open',
+    click = 'click',
+
+}
+
+export interface MemberActivity {
+    action: ActivityActionType,
+    timestamp: ISODate,
+    url: string,
+    type?: CampaignType,
+    campaign_id: string,
+    title: string,
+    parent_campaign?: string,
+}
+
+export interface MemberActivityListResponse extends ListResponse {
+    activity: MemberActivity[],
+    email_id: string,
 }
