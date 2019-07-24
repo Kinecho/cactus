@@ -311,7 +311,7 @@ workflows:
           workflow_name: *workflow_name
           filters:
             branches:
-              ignore: "master"
+              ignore: master
       - install-all:
           name: &install_all_name "Install Dependencies"
       - test-shared:
@@ -338,7 +338,7 @@ workflows:
           workflow_name: *workflow_name
           filters:
             branches:
-              only: "master"
+              only: master
       - install-all:
           name: &install_all_name "Install Dependencies"
       - test-shared:
