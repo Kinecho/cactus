@@ -314,20 +314,35 @@ workflows:
               ignore: master
       - install-all:
           name: &install_all_name "Install Dependencies"
+          filters:
+            branches:
+              ignore: master
       - test-shared:
           name: &test_shared_name "Shared Tests"
+          filters:
+            branches:
+              ignore: master
           requires:
             - *install_all_name
       - test-scripts:
           name: &test_scripts_name "Scripts Tests"
+          filters:
+            branches:
+              ignore: master
           requires:
             - *install_all_name
       - test-web:
           name: &test_web_name "Web Tests"
+          filters:
+            branches:
+              ignore: master
           requires:
             - *install_all_name
       - test-functions:
           name: &test_functions_name "API Tests"
+          filters:
+            branches:
+              ignore: master
           requires:
             - *install_all_name
 
@@ -341,8 +356,14 @@ workflows:
               only: master
       - install-all:
           name: &install_all_name "Install Dependencies"
+          filters:
+            branches:
+              only: master
       - test-shared:
           name: &test_shared_name "Shared Tests"
+          filters:
+            branches:
+              only: master
           requires:
             - *install_all_name
       - test-scripts:
