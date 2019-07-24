@@ -301,7 +301,7 @@ jobs:
     steps:
       - slack/notify:
           <<: *webhook-engineering-ci
-          message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > for branch \\`${CIRCLE_BRANCH}\\`"
+          message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
 workflows:
   version: 2.1
   branch_build_and_test:
