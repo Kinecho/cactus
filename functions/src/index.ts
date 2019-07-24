@@ -6,6 +6,7 @@ import testApp from "@api/endpoints/testApp";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
+import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
@@ -40,6 +41,7 @@ export const cloudFunctions = {
     exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
+    unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
     userCreatedTrigger: functions.auth.user().onCreate(onCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,

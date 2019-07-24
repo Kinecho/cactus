@@ -622,7 +622,7 @@ export interface PaginationParameters {
     offset?: number
 }
 
-export const defaultPageSize = 30;
+export const defaultPageSize = 100;
 export const defaultOffset = 0;
 export const defaultPageDelay = 100;
 
