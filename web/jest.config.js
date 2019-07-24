@@ -15,7 +15,7 @@ module.exports = {
     setupFiles: [
         './src/test/jestsetup.ts',
     ],
-    collectCoverage: true,
+    // collectCoverage: true,
     collectCoverageFrom: [
         'src/**/*.{js,ts,vue}',
     ],
@@ -24,6 +24,8 @@ module.exports = {
         'clover',
         'html',
     ],
+
+    coverageDirectory: "reports/coverage",
     testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$',
     moduleDirectories: [
         'src',
@@ -34,5 +36,5 @@ module.exports = {
     modulePathIgnorePatterns: ['<rootDir>/build/', '<rootDir>/public/'],
 
     moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {prefix: '<rootDir>'}),
-    reporters: ["default", "jest-junit"]
+    // reporters: ["default", "jest-junit"]
 }

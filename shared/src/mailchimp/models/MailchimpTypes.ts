@@ -58,6 +58,7 @@ export enum MergeField {
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
     JOURNAL_PREMIUM = "journal_premium",
+    ONBOARDING_SUPPRESSED = "onboarding_supressed", //[sic] this typo is in the tag in prod, whoops
 }
 
 export enum TagStatus {
@@ -758,6 +759,12 @@ export interface GetListMembersOptions {
     unsubscribed_since?: ISODate
 }
 
+export interface SegmentMemberListResponse extends ListResponse {
+    members: ListMember[],
+    list_id: string,
+    segment_id: string,
+}
+
 export interface ListMemberListResponse extends ListResponse {
     members: ListMember[]
     list_id: string
@@ -811,6 +818,8 @@ export enum CampaignMemberSendStatus {
 }
 
 
+
+
 export interface CampaignSentToListResponse extends ListResponse {
     sent_to: SentToRecipient[],
     campaign_id: string,
@@ -829,4 +838,37 @@ export interface SentToRecipient {
     campaign_id: string,
     list_id: string,
     list_is_active: boolean,
+}
+
+
+export interface BatchOperation {
+    method: string,
+    path: string,
+    params?: any,
+    body?: any|string,
+    operation_id?: string,
+}
+
+export interface BatchOperationsRequest {
+    operations: BatchOperation[],
+
+}
+
+export enum OperationStatus {
+    pending = "pending",
+    preprocessing = "preprocessing",
+    started = "started",
+    finalizing = "finalizing",
+    finished = "finished",
+}
+
+export interface BatchCreateResponse {
+    id: string,
+    status: OperationStatus,
+    total_operations: number,
+    finished_operations: number,
+    errored_operations: number,
+    submitted_at: ISODate,
+    completed_at?: ISODate,
+    response_body_url?: string,
 }

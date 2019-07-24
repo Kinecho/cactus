@@ -11,7 +11,7 @@
         "build:stage": "npm run logo && GCLOUD_PROJECT=cactus-app-stage NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
         "clean": "rm -rf ./public",
         "config:get": "firebase functions:config:get > .runtimeconfig.json -P stage",
-        "copy": "mkdir ./public ; rsync -a ./src/assets ./public ; cp ./src/favicon* ./public",
+        "copy": "mkdir ./public ; cp -r src/assets/ public/assets ; cp ./src/favicon* ./public",
         "fe": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.fe.js --progress",
         "dev": "npm run logo && NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server --config webpack/webpack.config.dev.js --progress",
         "deploy:stage": "firebase deploy --only hosting -P stage ",
@@ -23,7 +23,7 @@
         "open:prod": "npm run predeploy:prod && open ./public/index.html",
         "page": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
         "page:delete": "echo \"*********************\nThis command has been moved to the scripts directory\n*********************\n\"",
-        "test": "jest",
+        "test": "JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest",
         "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "tsc": "tsc",
         "tslint": "tslint -p tsconfig.json"
