@@ -25,24 +25,32 @@ module.exports = (config) => {
 
             console.log('got git commit hash', gitcommit)
 
-            let pages = pagesUtil.getPages(config, allPages)
-
             let parsedConfig = {}
+
             Object.keys(config).forEach(key => {
                 parsedConfig[key] = JSON.stringify(config[key])
             })
 
+            let pages = pagesUtil.getPages(config, allPages)
             let jsEntries = Object.keys(pages).reduce((entries, title) => {
-                entries[title] = `${helpers.scriptDir}/pages/${title}.ts`
+                const page = pages[title]
+                if (!page.reflectionPrompt) {
+                    console.log(chalk.yellow('adding entry ', title))
+                    entries[title] = `${helpers.scriptDir}/pages/${title}.ts`
+                } else {
+                    console.log(chalk.gray('skipping entry for article page', title))
+                }
                 return entries
-            }, {common: `${helpers.scriptDir}/common.ts`})
-
+            }, {
+                common: `${helpers.scriptDir}/common.ts`,
+                article: `${helpers.scriptDir}/articleCommon.ts`,
+            })
 
             if (isDev) {
                 jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
             }
 
-            console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
+            // console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 
             return resolve({
@@ -137,8 +145,14 @@ module.exports = (config) => {
                     ...Object.keys(pages).map(filename => {
                         const page = pages[filename]
                         console.log(chalk.green('Configuring HTML page ', filename))
+                        const chunks = ['common']
+                        if (page.reflectionPrompt) {
+                            chunks.push('article')
+                        } else {
+                            chunks.push(filename)
+                        }
                         return new HtmlWebpackPlugin({
-                            chunks: ['common', filename],
+                            chunks,
                             title: page.title,
                             template: `${helpers.htmlDir}/${filename}.html`,
                             filename: `${filename}.html`,

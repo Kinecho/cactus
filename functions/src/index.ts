@@ -5,6 +5,7 @@ import checkoutApp from "@api/endpoints/checkoutApp";
 import testApp from "@api/endpoints/testApp";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
+import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
@@ -17,9 +18,9 @@ const config = getConfig();
 
 const functionName = process.env.FUNCTION_NAME || undefined;
 
-const sentryOptions:Sentry.NodeOptions = {
+const sentryOptions: Sentry.NodeOptions = {
     dsn: config.sentry.functions_dsn,
-    environment: config.app.environment ,
+    environment: config.app.environment,
     release: config.sentry.release,
     serverName: functionName
 };
@@ -38,6 +39,7 @@ export const cloudFunctions = {
     backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
     exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
+    bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
     userCreatedTrigger: functions.auth.user().onCreate(onCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,
