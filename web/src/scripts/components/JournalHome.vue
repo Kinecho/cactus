@@ -153,7 +153,6 @@
             },
             enter: function (el: HTMLElement, done: () => void) {
                 const delay = Math.min(Number(el.dataset.index) * 100, 2000);
-                console.log("delay is", delay);
                 setTimeout(function () {
                     el.classList.remove("out");
                     done();
