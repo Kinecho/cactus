@@ -10,7 +10,7 @@ import {writeToFile} from "@api/util/FileUtil";
 import {
     CampaignEventData,
     CleanedEmailEventData, EmailChangeEventData,
-    EventType, ProfileUpdateEventData, SubscribeEventData,
+    EventType, MemberUnsubscribeReport, ProfileUpdateEventData, SubscribeEventData,
     UnsubscribeEventData,
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
@@ -325,8 +325,15 @@ export async function handleUnsubscribeEvent(event: UnsubscribeEventData): Promi
     const {email, campaign_id: campaignId, reason} = event;
     //TODO: get the unsub reason
 
-    const unsubData = await MailchimpService.getSharedInstance().getUnsubscribeReportForMember({campaignId, email});
+    let unsubData: Partial<MemberUnsubscribeReport | undefined> = await MailchimpService.getSharedInstance().getUnsubscribeReportForMember({
+        campaignId,
+        email
+    });
     const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(email);
+
+    if (!unsubData) {
+        unsubData = {timestamp: (new Date()).toISOString()}
+    }
 
     let updatedCactusMember: CactusMember | undefined = undefined;
     if (mailchimpMember) {

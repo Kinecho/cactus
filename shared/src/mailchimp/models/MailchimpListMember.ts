@@ -10,7 +10,7 @@ import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreU
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
 
-export default class MailchimpListMember implements ListMember{
+export default class MailchimpListMember implements ListMember {
     id?: string;
     web_id?: string;
     email_type?: string;
@@ -26,7 +26,7 @@ export default class MailchimpListMember implements ListMember{
     list_id?: string;
     timestamp_signup?: ISODate;
     timestamp_opt?: ISODate;
-    email_client?:string;
+    email_client?: string;
     location?: {
         latitude: number,
         longitude: number,
@@ -35,10 +35,10 @@ export default class MailchimpListMember implements ListMember{
         country_code: string,
         timezone: string,
     };
-    marketing_permissions:{
-        marketing_permission_id:string,
-        text:string,
-        enabled:boolean,
+    marketing_permissions: {
+        marketing_permission_id: string,
+        text: string,
+        enabled: boolean,
     }[] = [];
     last_note?: {
         note_id: number,
@@ -48,29 +48,29 @@ export default class MailchimpListMember implements ListMember{
     };
     source?: string;
     tags_count?: number;
+    unsubscribe_reason?: string;
 
-
-    constructor(email?:string){
+    constructor(email?: string) {
         this.email_address = email;
     }
 
-    addMergeField(field:MergeField, value?:String|Number){
+    addMergeField(field: MergeField, value?: String | Number) {
         console.log("setting merge field", field, value);
         // this.merge_fields.set(field, value);
         this.merge_fields[field] = value;
         console.log("merge fields to json", JSON.stringify(this.merge_fields));
     }
 
-    removeMergeField(field:MergeField){
+    removeMergeField(field: MergeField) {
         delete this.merge_fields[field];
     }
 
-    toFirestoreData(){
+    toFirestoreData() {
         let data = Object.assign({}, this) as any;
         data.timestamp_signup = getDateFromISOString(data.timestamp_signup);
         data.timestamp_opt = getDateFromISOString(data.timestamp_opt);
 
-        if (data.last_note){
+        if (data.last_note) {
             data.last_note = getDateFromISOString(data.last_note);
         }
 
@@ -86,12 +86,12 @@ export default class MailchimpListMember implements ListMember{
         return data;
     }
 
-    toJSON(){
+    toJSON() {
         let data = Object.assign({}, this) as any;
         data.timestamp_signup = getDateFromISOString(data.timestamp_signup);
         data.timestamp_opt = getDateFromISOString(data.timestamp_opt);
 
-        if (data.last_note){
+        if (data.last_note) {
             data.last_note = getDateFromISOString(data.last_note);
         }
 

@@ -32,14 +32,31 @@ export default class MailchimpSyncMembersCommand extends FirebaseCommand {
 
             const tasks: Promise<CactusMember | undefined>[] = members.map(listMember => {
                 return new Promise<CactusMember | undefined>(async resolve => {
-                    let unsubReport: MemberUnsubscribeReport | undefined = undefined;
-                    if (listMember.status === ListMemberStatus.unsubscribed && listMember.email_address) {
+                    let unsubReport: Partial<MemberUnsubscribeReport> | undefined = undefined;
+
+                    const existingCactusMember = await cactusMemberService.getMemberByEmail(listMember.email_address);
+
+                    if ((!existingCactusMember || !existingCactusMember.unsubscribedAt)
+                        && listMember.status === ListMemberStatus.unsubscribed
+                        && listMember.email_address) {
+                        console.log(chalk.yellow("Getting unsubscribe activity"));
                         const unsubActivity = await this.getUnsubActivity(listMember.email_address, mailchimpService);
                         if (unsubActivity) {
-                            unsubReport = await mailchimpService.getUnsubscribeReportForMember({
-                                campaignId: unsubActivity.campaign_id,
-                                email: listMember.email_address
-                            })
+                            if (unsubActivity.campaign_id) {
+                                unsubReport = await mailchimpService.getUnsubscribeReportForMember({
+                                    campaignId: unsubActivity.campaign_id,
+                                    email: listMember.email_address
+                                });
+                            }
+
+                            if (!unsubReport) {
+                                unsubReport = {
+                                    timestamp: unsubActivity.timestamp,
+                                    reason: listMember.unsubscribe_reason
+                                };
+                                console.log(chalk.cyan(`Creating unsub report manually for ${listMember.email_address}\n${JSON.stringify(unsubReport, null, 2)}`))
+                            }
+
                         }
                     }
 
@@ -62,7 +79,7 @@ export default class MailchimpSyncMembersCommand extends FirebaseCommand {
         if (memberActivityPage && memberActivityPage.activity.length > 0) {
             const unsubActivity = memberActivityPage.activity.find(activity => activity.action === ActivityActionType.unsub);
 
-            console.log(chalk.yellow(`Found unsub report for ${email} \n`, JSON.stringify(unsubActivity, null, 2)));
+            console.log(chalk.yellow(`Found unsub activity for ${email} \n`, JSON.stringify(unsubActivity, null, 2)));
             return unsubActivity;
         }
         return;

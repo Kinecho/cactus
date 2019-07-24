@@ -88,8 +88,8 @@ export default class AdminCactusMemberService {
         return member;
     }
 
-    async updateUnsubscribe(unsubscribeReport?: MemberUnsubscribeReport): Promise<CactusMember | undefined> {
-        if (!unsubscribeReport) {
+    async updateUnsubscribe(unsubscribeReport?: Partial<MemberUnsubscribeReport>): Promise<CactusMember | undefined> {
+        if (!unsubscribeReport || !unsubscribeReport.email_address) {
             return undefined;
         }
         const email = unsubscribeReport.email_address;
@@ -105,13 +105,17 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
-    async updateFromMailchimpListMember(listMember: ListMember, unsubscribeReport: MemberUnsubscribeReport | undefined = undefined): Promise<CactusMember | undefined> {
+    async updateFromMailchimpListMember(listMember: ListMember, unsubscribeReport: Partial<MemberUnsubscribeReport> | undefined = undefined): Promise<CactusMember | undefined> {
         let cactusMember = await this.getByMailchimpWebId(listMember.web_id);
         if (cactusMember) {
             console.log("Got cactus member", cactusMember.email);
         } else {
             cactusMember = new CactusMember();
             cactusMember.createdAt = new Date()
+        }
+
+        if (listMember.unsubscribe_reason) {
+            cactusMember.unsubscribeReason = listMember.unsubscribe_reason;
         }
 
         if (unsubscribeReport) {
@@ -143,7 +147,10 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
-    async getMemberByEmail(emailInput: string): Promise<CactusMember | undefined> {
+    async getMemberByEmail(emailInput?: string): Promise<CactusMember | undefined> {
+        if (!emailInput) {
+            return undefined;
+        }
         const email = emailInput.toLowerCase().trim();
         const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
         const result = await firestoreService.executeQuery(query, CactusMember);

@@ -810,6 +810,7 @@ export interface ListMember {
     };
     source?: string;
     tags_count?: number;
+    unsubscribe_reason?: string;
 
 }
 
@@ -906,7 +907,7 @@ export interface MemberActivity {
     timestamp: ISODate,
     url: string,
     type?: CampaignType,
-    campaign_id: string,
+    campaign_id?: string,
     title: string,
     parent_campaign?: string,
 }
