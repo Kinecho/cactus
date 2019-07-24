@@ -304,6 +304,8 @@ jobs:
       - slack/notify:
           <<: *webhook-engineering-ci
           color: "good"
+          include_job_number_field: false
+          include_visit_job_action: false
           message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
   notify-workflow-started:
     description: "Notify slack that a workflow has started and provide a link"
@@ -316,6 +318,9 @@ jobs:
     steps:
       - slack/notify:
           <<: *webhook-engineering-ci
+          include_job_number_field: false
+          include_visit_job_action: false
+          color: "#d8d8d8"
           message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
 workflows:
   version: 2.1
