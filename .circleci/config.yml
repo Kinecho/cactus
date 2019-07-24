@@ -367,9 +367,12 @@ workflows:
             - *test_shared_name
             - *test_functions_name
             - *test_scripts_name
-      - ready-for-deploy
+      - ready-for-deploy:
+          name: "Notify Promotion Ready"
+          requires:
+            - *deploy_stage_name
       - prod_deploy_approval:
-          type: approval,
+          type: approval
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
             - *deploy_stage_name
