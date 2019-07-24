@@ -1,47 +1,55 @@
 import axios, {AxiosError, AxiosInstance} from "axios";
 import {
-    CampaignContentRequest,
     CampaignContent,
-    CreateCampaignRequest, UpdateCampaignRequest
+    CampaignContentRequest,
+    CreateCampaignRequest,
+    UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
     Audience,
     AudienceListResponse,
     Automation,
+    AutomationEmail,
+    AutomationEmailListResponse,
     AutomationListResponse,
+    BatchCreateResponse,
+    BatchOperation,
+    BatchOperationsRequest,
     Campaign,
-    SendChecklist,
+    CampaignListResponse,
+    CampaignScheduleBody,
+    CampaignSearchResultListResponse,
+    CampaignSentToListResponse,
+    DEFAULT_PAGINATION,
+    defaultPageDelay,
+    defaultPageSize,
+    GetCampaignsOptions,
+    getDefaultCampaignFetchOptions,
+    GetListMembersOptions,
+    getSearchMemberOptionsDefaults,
+    ListMember,
+    ListMemberListResponse,
+    ListMemberStatus,
     ListResponse,
+    MergeField,
+    PaginationParameters,
+    SearchMembersOptions,
+    SearchMembersResult,
     Segment,
     SegmentListResponse,
+    SegmentMemberListResponse,
     SegmentType,
+    SendChecklist,
+    SentToRecipient,
+    TagResponseError,
     Template,
     TemplateListResponse,
     TemplateSortField,
     TemplateType,
-    CampaignScheduleBody,
-    PaginationParameters,
-    CampaignListResponse,
-    GetCampaignsOptions,
-    DEFAULT_PAGINATION,
-    defaultPageSize,
-    getDefaultCampaignFetchOptions,
-    UpdateTagsRequest,
     UpdateMergeFieldRequest,
-    CampaignSearchResultListResponse,
-    SearchMembersResult,
-    SearchMembersOptions,
-    getSearchMemberOptionsDefaults,
-    AutomationEmailListResponse,
-    AutomationEmail,
-    ListMemberListResponse,
-    GetListMembersOptions,
-    UpdateTagResponse,
-    TagResponseError,
     UpdateMergeFieldResponse,
-    MergeField,
-    ListMemberStatus,
-    ListMember, CampaignSentToListResponse, SentToRecipient, defaultPageDelay, SegmentMemberListResponse
+    UpdateTagResponse,
+    UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
@@ -373,6 +381,37 @@ export default class MailchimpService {
                 count
             }
         });
+        return response.data;
+    }
+
+    async bulkUpdateTags(tagRequests: UpdateTagsRequest[]): Promise<BatchCreateResponse> {
+        const operations: BatchOperation[] = tagRequests.map(t => {
+            return {
+                method: "POST",
+                path: `/lists/${this.audienceId}/members/${getMemberIdFromEmail(t.email)}/tags`,
+                body: {
+                    tags: t.tags,
+                }
+            }
+        });
+
+        const job: BatchOperationsRequest = {
+            operations,
+        };
+
+
+        return this.submitBatchJob(job);
+    }
+
+    async getBatchStatus(batch: BatchCreateResponse): Promise<BatchCreateResponse> {
+        const url = `/batches/${batch.id}`;
+        const response = await this.request.get(url);
+        return response.data;
+    }
+
+    async submitBatchJob(job: BatchOperationsRequest): Promise<BatchCreateResponse> {
+        const url = `/batches`;
+        const response = await this.request.post(url, job);
         return response.data;
     }
 
