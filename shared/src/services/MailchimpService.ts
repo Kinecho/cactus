@@ -30,7 +30,7 @@ import {
     ListMember,
     ListMemberListResponse,
     ListMemberStatus,
-    ListResponse,
+    ListResponse, MailchimpApiError, MemberUnsubscribeReport,
     MergeField,
     PaginationParameters,
     SearchMembersOptions,
@@ -634,6 +634,31 @@ export default class MailchimpService {
             }
         });
         return response.data;
+    }
+
+    async getUnsubscribeReportForMember(options: { campaignId: string, email: string }): Promise<MemberUnsubscribeReport | undefined> {
+        const url = `/reports/${options.campaignId}/unsubscribed/${getMemberIdFromEmail(options.email)}`;
+        try {
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links"
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.isAxiosError) {
+                const e = error as AxiosError<MailchimpApiError>;
+                if (e.response && e.response.data) {
+                    console.error(`${e.response.data.title}: ${e.response.data.detail}`, e)
+                } else {
+                    console.error("Failed to get unsubscribe reason", e);
+                }
+
+            }
+
+            return undefined;
+        }
+
     }
 
     async getAllAudiences(pageSize = defaultPageSize): Promise<Audience[]> {

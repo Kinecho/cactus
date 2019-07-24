@@ -818,8 +818,6 @@ export enum CampaignMemberSendStatus {
 }
 
 
-
-
 export interface CampaignSentToListResponse extends ListResponse {
     sent_to: SentToRecipient[],
     campaign_id: string,
@@ -845,7 +843,7 @@ export interface BatchOperation {
     method: string,
     path: string,
     params?: any,
-    body?: any|string,
+    body?: any | string,
     operation_id?: string,
 }
 
@@ -871,4 +869,24 @@ export interface BatchCreateResponse {
     submitted_at: ISODate,
     completed_at?: ISODate,
     response_body_url?: string,
+}
+
+export interface MemberUnsubscribeReport {
+    email_id: string,
+    email_address: string,
+    merge_fields: MergeFields,
+    vip: boolean,
+    timestamp: ISODate,
+    reason?: string, //this is the user entered reason
+    campaign_id: string,
+    list_id: string,
+    list_is_active: boolean,
+}
+
+export interface MailchimpApiError {
+    type: string,
+    title: string,
+    status: number,
+    detail: string,
+    instance: string,
 }
