@@ -4,6 +4,16 @@
 @import "~styles/modal";
 
 body {
+  overflow-x: hidden;
+}
+
+html {
+  @include maxW(768) {
+    overflow-x: hidden;
+  }
+}
+
+body {
   background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
   background-position: center 365px, center 285px;
   background-size: 745px, 740px;
@@ -251,7 +261,8 @@ form {
   }
 
   .flexContainer {
-    background: url(assets/images/lineMobile.svg) no-repeat 18px center;
+    background: url(assets/images/lineMobile.svg) no-repeat 12px 35px;
+    background-size: 9% 80%;
     margin: 0 auto;
     max-width: 40rem;
 
@@ -270,12 +281,15 @@ form {
     align-items: flex-start;
     display: flex;
     margin-bottom: 4rem;
+    min-height: 7.5rem;
     text-align: left;
 
     @include r(768) {
       align-items: center;
       flex-basis: 25%;
       flex-flow: column wrap;
+      margin-bottom: 0;
+      min-height: none;
       text-align: center;
     }
   }
