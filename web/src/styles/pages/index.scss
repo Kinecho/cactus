@@ -4,6 +4,16 @@
 @import "~styles/modal";
 
 body {
+  overflow-x: hidden;
+}
+
+html {
+  @include maxW(768) {
+    overflow-x: hidden;
+  }
+}
+
+body {
   background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
   background-position: center 365px, center 285px;
   background-size: 745px, 740px;
@@ -168,9 +178,12 @@ form {
 
 .why {
   background-color: $lightPink;
-  padding: 5.6rem 2.4rem 0;
+  padding: 8rem 2.4rem;
   position: relative;
 
+  @include r(768) {
+      padding: 11rem 2.4rem;
+  }
   @include r(1024) {
     &:before {
       background: no-repeat;
@@ -212,6 +225,7 @@ form {
 
     @include r(768) {
       flex-basis: 33%;
+      padding-bottom: 0;
     }
 
     .text {
@@ -227,6 +241,8 @@ form {
 
   .illustration {
     margin-bottom: 2.4rem;
+    height: 21rem;
+    width: 23rem;
   }
 }
 
@@ -238,10 +254,15 @@ form {
 }
 
 .how {
-  padding: 5.6rem 2.4rem 1.6rem;
+  padding: 8rem 2.4rem;
+
+  @include r(768) {
+      padding: 11rem 2.4rem;
+  }
 
   .flexContainer {
-    background: url(assets/images/lineMobile.svg) no-repeat 18px center;
+    background: url(assets/images/lineMobile.svg) no-repeat 12px 35px;
+    background-size: 9% 80%;
     margin: 0 auto;
     max-width: 40rem;
 
@@ -260,12 +281,15 @@ form {
     align-items: flex-start;
     display: flex;
     margin-bottom: 4rem;
+    min-height: 7.5rem;
     text-align: left;
 
     @include r(768) {
       align-items: center;
       flex-basis: 25%;
       flex-flow: column wrap;
+      margin-bottom: 0;
+      min-height: none;
       text-align: center;
     }
   }
@@ -310,7 +334,8 @@ form {
 }
 
 .how h2,
-.testimonials h2 {
+.testimonials h2,
+.private h2 {
   margin: 0 0 3.2rem;
 
   @include r(768) {
@@ -319,13 +344,14 @@ form {
 }
 
 .testimonials {
-  padding: 5.6rem 0 7.2rem;
+  padding: 8rem 0;
 
   @include r(768) {
     background: no-repeat;
     background-image: url(assets/images/greenVs.svg), url(assets/images/pinkBlob.svg);
     background-position: right -16rem center, right -24rem center;
     background-size: 39rem, 45rem;
+    padding: 11rem 0 4rem;
   }
 
   .flexContainer {
@@ -380,6 +406,170 @@ form {
   .quoteText {
     margin: 0;
   }
+}
+
+.private {
+    background-color: lighten($lightGreen, 10%);
+    padding: 8rem 2.4rem;
+    position: relative;
+    z-index: 0;
+
+    @include r(768) {
+        padding: 11rem 2.4rem;
+    }
+
+    &:before {
+        background-image: url(assets/images/yellowBlob.svg);
+        background-repeat: no-repeat;
+        background-size: 170px;
+        content: "";
+        height: 170px;
+        position: absolute;
+        right: -110px;
+        top: -30px;
+        width: 170px;
+
+        @include r(768) {
+            background-position: calc(50% - 72px) 0;
+            right: 0;
+            top: 62px;
+            width: 100%;
+            z-index: -1;
+        }
+    }
+
+    &:after {
+        @include r(768) {
+            background-image: url(assets/images/maroonTriangleBlob.svg);
+            background-position: calc(50% - 32px) 0;
+            background-repeat: no-repeat;
+            background-size: 290px;
+            content: "";
+            height: 250px;
+            position: absolute;
+            right: 87px;
+            top: 140px;
+            width: 100%;
+            z-index: -1;
+        }
+    }
+
+    .centered {
+        max-width: 60rem;
+        text-align: left;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            max-width: 1200px;
+        }
+    }
+
+    .text {
+        @include r(768) {
+            margin-left: 12.8rem;
+            max-width: 42rem;
+        }
+
+        p {
+            margin-bottom: 1.6rem;
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+        }
+    }
+
+    .reflection {
+        @include shadowbox;
+        margin-bottom: 5.6rem;
+        padding: 2.4rem;
+        position: relative;
+        text-align: left;
+
+        @include r(768) {
+            max-width: 48rem;
+            width: 50%;
+        }
+
+        &:before {
+            @include shadowbox;
+            background-color: mix($lightGreen, white, 33%);
+            bottom: -1.6rem;
+            content: '';
+            filter: blur(2px);
+            height: 50px;
+            left: 0;
+            margin: 0 auto;
+            position: absolute;
+            right: 0;
+            width: 80%;
+            z-index: -1;
+
+            @include r(768) {
+                bottom: -3.2rem;
+            }
+        }
+
+        &:after {
+            @include shadowbox;
+            background-color: mix($lightGreen, white, 50%);
+            bottom: -3.2rem;
+            content: '';
+            filter: blur(4px);
+            height: 50px;
+            left: 0;
+            margin: 0 auto;
+            position: absolute;
+            right: 0;
+            width: 60%;
+            z-index: -2;
+
+            @include r(768) {
+                bottom: -6.4rem;
+            }
+        }
+
+        .flexContainer {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.6rem;
+        }
+
+        .date {
+            color: $darkestPink;
+            font-size: 1.6rem;
+            }
+
+        button {
+            background: transparent;
+            border: 1px solid $lightGreen;
+            box-shadow: none;
+            display: flex;
+            flex-grow: 0;
+            height: 3rem;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            width: 3rem;
+        }
+
+        .iconImg {
+            height: 2rem;
+            width: 2rem;
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: .8rem;
+        }
+    }
+
+    .blink {
+        animation: blink 1s infinite;
+    }
 }
 
 .email {
