@@ -68,7 +68,7 @@ export function init() {
 
     createGTag();
     gtag('js', new Date());
-    gtag('config', Config.googleAnalyticsID);
+    gtag('config', Config.googleAnalyticsID, { 'optimize_id': 'GTM-KFBRFFG'});
 
     const mailchimpUserId = getQueryParam(QueryParam.MAILCHIMP_EMAIL_ID);
     if (mailchimpUserId) {
