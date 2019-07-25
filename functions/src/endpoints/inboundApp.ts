@@ -129,7 +129,6 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         }
 
 
-
         console.log("Saving the EmailReply to the database");
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
         emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
@@ -182,6 +181,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
                     }
                 ]
             });
+            res.sendStatus(204);
             return;
         }
 
