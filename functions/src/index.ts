@@ -28,9 +28,6 @@ const sentryOptions: Sentry.NodeOptions = {
 
 Sentry.init(sentryOptions);
 
-console.log("initialized Sentry with config", JSON.stringify(sentryOptions, null, 2));
-
-
 export const cloudFunctions = {
     mailchimp: functions.https.onRequest(mailchimpApp),
     inbound: functions.https.onRequest(inboundApp),

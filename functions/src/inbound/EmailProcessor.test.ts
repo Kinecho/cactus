@@ -8,6 +8,7 @@ import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
 import realBody from "./test_data/emailBody1";
 import scottEmail from "./test_data/emailBody2";
 import * as nonMailchimp from "./test_data/email3";
+import * as promptInEmail from "./test_data/email_prompt_in_to";
 import EmailReply from "@shared/models/EmailReply";
 
 
@@ -258,6 +259,23 @@ describe("process email", () => {
             email: "neil@kinecho.com",
             name: "Neil Poulin",
             domain: "kinecho.com",
+            local: "neil"
+        });
+    });
+
+    test("prompt in email", async () => {
+        const email = await processEmail(promptInEmail.headers, promptInEmail.body);
+        console.log("processed email", email);
+        expect(email).not.toBeNull();
+        if (email === null) {
+            return;
+        }
+        expect(email.reflectionPromptId).toEqual("P6iR5hBc7nLezSZV66dA");
+
+        expect(email.from).toEqual({
+            email: "neil@neilpoulin.com",
+            name: "Neil Poulin",
+            domain: "neilpoulin.com",
             local: "neil"
         });
     })

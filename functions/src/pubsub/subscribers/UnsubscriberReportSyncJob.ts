@@ -33,7 +33,7 @@ export async function onPublish() {
     });
 
     await AdminSlackService.getSharedInstance().sendDataLogMessage({
-        text: `Updated unsubscriber info for ${updates.length} members`,
+        text: `Synced unsubscriber info for members that unsubscribed in the last 2 days. ${summary.length} members were updated.`,
         attachments: [{
             title: 'Unsubscribe Details',
             text: `\`\`\`${JSON.stringify(summary, null, 2)}\`\`\``

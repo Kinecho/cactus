@@ -17,7 +17,7 @@ export interface InboundEmailFiles {
 }
 
 export type EmailStorageFiles = {
-    [key in EmailStoragePath]: string|null;
+    [key in EmailStoragePath]: string | null;
 };
 
 export interface InboundEmail {
@@ -28,20 +28,20 @@ export interface InboundEmail {
     text?: string;
     html?: string;
     subject?: string;
-    envelope?: {to: string[], from: string}
+    envelope?: { to: string[], from: string }
     attachments?: Array<AttachmentInfo>;
     mailchimpEmailId?: string;
-    mailchimpCampaignId?:string;
+    mailchimpCampaignId?: string;
 }
 
-export default class EmailReply extends BaseModel{
+export default class EmailReply extends BaseModel {
     collection = Collection.emailReply;
 
     headers: EmailHeaders = {};
     to: EmailAddress = {};
     cc: EmailAddress = {};
     from: EmailAddress = {};
-    envelope?: {to: EmailAddress[], from: EmailAddress};
+    envelope?: { to: EmailAddress[], from: EmailAddress };
     replyText?: string;
     content: {
         text?: string;
@@ -51,11 +51,12 @@ export default class EmailReply extends BaseModel{
     attachments?: Array<AttachmentInfo>;
     mailchimpMemberId?: string;
     mailchimpUniqueEmailId?: string;
-    mailchimpCampaignId?:string;
+    mailchimpCampaignId?: string;
     originalEmailStoragePaths: EmailStorageFiles = {HEADERS: null, BODY: null};
     reflectionPromptId?: string;
+
     //models need an empty constructor
-    constructor(input:InboundEmail|undefined=undefined){
+    constructor(input: InboundEmail | undefined = undefined) {
         super();
 
         if (!input) {
@@ -73,7 +74,7 @@ export default class EmailReply extends BaseModel{
         this.mailchimpUniqueEmailId = input.mailchimpEmailId;
         this.mailchimpCampaignId = input.mailchimpCampaignId;
 
-        if (input.fromRaw){
+        if (input.fromRaw) {
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
             this.from = {
                 email: fromParsed.address,
@@ -83,8 +84,17 @@ export default class EmailReply extends BaseModel{
             }
         }
 
-        if (input.toRaw){
+        if (input.toRaw) {
             const toParsed = parseEmail.parseOneAddress(input.toRaw) as ParsedMailbox;
+
+            if (toParsed.local && toParsed.local.includes("hello+p_")) {
+                const [, promptId] = toParsed.local.split("hello+p_");
+                if (promptId) {
+                    console.log("Parsed prompt ID from to address", promptId);
+                    this.reflectionPromptId = promptId
+                }
+            }
+
             this.to = {
                 email: toParsed.address,
                 name: toParsed.name,
@@ -92,7 +102,7 @@ export default class EmailReply extends BaseModel{
                 domain: toParsed.domain
             }
         }
-        if (input.ccRaw){
+        if (input.ccRaw) {
             const ccParsed = parseEmail.parseOneAddress(input.ccRaw) as ParsedMailbox;
             this.cc = {
                 email: ccParsed.address,
@@ -102,14 +112,14 @@ export default class EmailReply extends BaseModel{
             }
         }
 
-        if (input.envelope){
+        if (input.envelope) {
             const env = input.envelope;
 
             const parsedFrom = parseEmail.parseOneAddress(env.from) as ParsedMailbox;
 
             const envTo = !env.to ? [] : env.to.map(raw => {
                 const parsed = parseEmail.parseOneAddress(raw) as ParsedMailbox;
-                return  {
+                return {
                     email: parsed.address,
                     name: parsed.name,
                     local: parsed.local,
@@ -119,7 +129,7 @@ export default class EmailReply extends BaseModel{
 
             this.envelope = {
                 to: envTo,
-                from:  {
+                from: {
                     email: parsedFrom.address,
                     name: parsedFrom.name,
                     local: parsedFrom.local,
@@ -130,8 +140,8 @@ export default class EmailReply extends BaseModel{
 
     }
 
-    setStoragePath(type: EmailStoragePath, path: string|null|boolean){
-        if (path && path !== true){
+    setStoragePath(type: EmailStoragePath, path: string | null | boolean) {
+        if (path && path !== true) {
             this.originalEmailStoragePaths[type] = path;
         }
     }
