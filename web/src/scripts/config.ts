@@ -25,6 +25,7 @@ export interface SentryConfig {
 
 //these variables come from the webpack Define plugin
 declare var __GOOGLE_ANALYTICS_ID__: string;
+declare var __GOOGLE_OPTIMIZE_ID__: string;
 declare var __FIREBASE_CONFIG__: FirebaseConfig;
 declare var __API_DOMAIN__: string;
 declare var __FULL_STORY_TEAM_ID__: string;
@@ -37,6 +38,7 @@ declare var __SENTRY_VERSION__: string | undefined;
 declare var __BUILD_ENV__: string;
 export const Config = {
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
+    googleOptimizeID: __GOOGLE_OPTIMIZE_ID__,
     firebase: __FIREBASE_CONFIG__,
     apiDomain: __API_DOMAIN__,
     fullStoryTeamId: __FULL_STORY_TEAM_ID__,
