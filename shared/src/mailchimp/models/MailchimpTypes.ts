@@ -16,6 +16,8 @@ export enum CampaignType {
     absplit = "absplit",
     rss = "rss",
     variate = "variate",
+    automation = "automation",
+    C = "C"
 }
 
 export enum UnsubscribeAction {
@@ -58,7 +60,7 @@ export enum MergeField {
 export enum TagName {
     NEEDS_ONBOARDING_REMINDER = "needs_onboarding_reminder",
     JOURNAL_PREMIUM = "journal_premium",
-    ONBOARDING_SUPPRESSED = "onboarding_supressed", //[sic] this typo is in the tag in prod, whoops
+    ONBOARDING_SUPPRESSED = "onboarding_suppressed",
 }
 
 export enum TagStatus {
@@ -620,7 +622,7 @@ export interface PaginationParameters {
     offset?: number
 }
 
-export const defaultPageSize = 30;
+export const defaultPageSize = 100;
 export const defaultOffset = 0;
 export const defaultPageDelay = 100;
 
@@ -808,6 +810,7 @@ export interface ListMember {
     };
     source?: string;
     tags_count?: number;
+    unsubscribe_reason?: string;
 
 }
 
@@ -816,8 +819,6 @@ export enum CampaignMemberSendStatus {
     hard = "hard", //hard bounce
     sort = "sort" //soft bounce
 }
-
-
 
 
 export interface CampaignSentToListResponse extends ListResponse {
@@ -845,7 +846,7 @@ export interface BatchOperation {
     method: string,
     path: string,
     params?: any,
-    body?: any|string,
+    body?: any | string,
     operation_id?: string,
 }
 
@@ -871,4 +872,47 @@ export interface BatchCreateResponse {
     submitted_at: ISODate,
     completed_at?: ISODate,
     response_body_url?: string,
+}
+
+export interface MemberUnsubscribeReport {
+    email_id: string,
+    email_address: string,
+    merge_fields: MergeFields,
+    vip: boolean,
+    timestamp: ISODate,
+    reason?: string, //this is the user entered reason
+    campaign_id: string,
+    list_id: string,
+    list_is_active: boolean,
+}
+
+export interface MailchimpApiError {
+    type: string,
+    title: string,
+    status: number,
+    detail: string,
+    instance: string,
+}
+
+export enum ActivityActionType {
+    unsub = 'unsub',
+    sent = 'sent',
+    open = 'open',
+    click = 'click',
+
+}
+
+export interface MemberActivity {
+    action: ActivityActionType,
+    timestamp: ISODate,
+    url: string,
+    type?: CampaignType,
+    campaign_id?: string,
+    title: string,
+    parent_campaign?: string,
+}
+
+export interface MemberActivityListResponse extends ListResponse {
+    activity: MemberActivity[],
+    email_id: string,
 }

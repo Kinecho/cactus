@@ -33,6 +33,10 @@ export default class CactusMember extends BaseModel {
     lastSyncedAt?:Date;
     lastReplyAt?: Date;
 
+    unsubscribeReason?:string;
+    unsubscribedAt?:Date;
+    unsubscribeCampaignId?: string;
+
     journalStatus=JournalStatus.NONE;
 
     prepareForFirestore(): any {

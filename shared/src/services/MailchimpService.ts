@@ -30,7 +30,7 @@ import {
     ListMember,
     ListMemberListResponse,
     ListMemberStatus,
-    ListResponse,
+    ListResponse, MailchimpApiError, MemberActivityListResponse, MemberUnsubscribeReport,
     MergeField,
     PaginationParameters,
     SearchMembersOptions,
@@ -411,6 +411,13 @@ export default class MailchimpService {
 
     async submitBatchJob(job: BatchOperationsRequest): Promise<BatchCreateResponse> {
         const url = `/batches`;
+
+        job.operations.forEach(op => {
+            if (typeof op.body !== "string") {
+                op.body = JSON.stringify(op.body);
+            }
+        });
+
         const response = await this.request.post(url, job);
         return response.data;
     }
@@ -629,6 +636,31 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async getUnsubscribeReportForMember(options: { campaignId: string, email: string }): Promise<MemberUnsubscribeReport | undefined> {
+        const url = `/reports/${options.campaignId}/unsubscribed/${getMemberIdFromEmail(options.email)}`;
+        try {
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links"
+                }
+            });
+            return response.data;
+        } catch (error) {
+            if (error.isAxiosError) {
+                const e = error as AxiosError<MailchimpApiError>;
+                if (e.response && e.response.data) {
+                    console.error(`${e.response.data.title}: ${e.response.data.detail}`, e)
+                } else {
+                    console.error("Failed to get unsubscribe reason", e);
+                }
+
+            }
+
+            return undefined;
+        }
+
+    }
+
     async getAllAudiences(pageSize = defaultPageSize): Promise<Audience[]> {
         return this.getAllPaginatedResults(pagination => this.getAudiences(pagination), result => result.lists, pageSize);
     }
@@ -797,6 +829,28 @@ export default class MailchimpService {
         }
 
         return result;
+    }
+
+    /**
+     * This is limited to the last 50 results
+     */
+    async getMemberActivity(email: string): Promise<MemberActivityListResponse | undefined> {
+        try {
+            const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/activity`;
+            console.log("fetching activity via", url);
+            const response = await this.request.get(url, {
+                params: {
+                    exclude_fields: "_links",
+                    count: 50,
+                }
+            });
+
+            return response.data;
+        } catch (e) {
+            const error = e as AxiosError;
+            console.error(`Unable to get member activity for ${email}`, error.response ? {config: error.config, data: error.response.data} : error);
+            return undefined;
+        }
     }
 }
 

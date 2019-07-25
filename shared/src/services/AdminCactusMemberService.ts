@@ -2,7 +2,7 @@ import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {getDateFromISOString} from "@shared/util/DateUtil";
-import {ListMember, TagName} from "@shared/mailchimp/models/MailchimpTypes";
+import {ListMember, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 
 let firestoreService: AdminFirestoreService;
 
@@ -81,20 +81,47 @@ export default class AdminCactusMemberService {
         }
 
         if (result.size > 1) {
-            console.warn("Found more than one CactusMember for mailchimp memberId", id);
+            console.warn("Found more than one CactusMember for mailchimp member web_id", id);
         }
 
         const [member] = result.results;
         return member;
     }
 
-    async updateFromMailchimpListMember(listMember: ListMember): Promise<CactusMember | undefined> {
+    async updateUnsubscribe(unsubscribeReport?: Partial<MemberUnsubscribeReport>): Promise<CactusMember | undefined> {
+        if (!unsubscribeReport || !unsubscribeReport.email_address) {
+            return undefined;
+        }
+        const email = unsubscribeReport.email_address;
+        let cactusMember = await this.getMemberByEmail(email);
+
+        if (cactusMember) {
+            cactusMember.unsubscribedAt = getDateFromISOString(unsubscribeReport.timestamp);
+            cactusMember.unsubscribeReason = unsubscribeReport.reason;
+            cactusMember.unsubscribeCampaignId = unsubscribeReport.campaign_id;
+            cactusMember = await this.save(cactusMember);
+        }
+
+        return cactusMember;
+    }
+
+    async updateFromMailchimpListMember(listMember: ListMember, unsubscribeReport: Partial<MemberUnsubscribeReport> | undefined = undefined): Promise<CactusMember | undefined> {
         let cactusMember = await this.getByMailchimpWebId(listMember.web_id);
         if (cactusMember) {
             console.log("Got cactus member", cactusMember.email);
         } else {
             cactusMember = new CactusMember();
             cactusMember.createdAt = new Date()
+        }
+
+        if (listMember.unsubscribe_reason) {
+            cactusMember.unsubscribeReason = listMember.unsubscribe_reason;
+        }
+
+        if (unsubscribeReport) {
+            cactusMember.unsubscribedAt = getDateFromISOString(unsubscribeReport.timestamp);
+            cactusMember.unsubscribeReason = unsubscribeReport.reason;
+            cactusMember.unsubscribeCampaignId = unsubscribeReport.campaign_id;
         }
 
         cactusMember.mailchimpListMember = listMember;
@@ -120,7 +147,10 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
-    async getMemberByEmail(emailInput: string): Promise<CactusMember | undefined> {
+    async getMemberByEmail(emailInput?: string): Promise<CactusMember | undefined> {
+        if (!emailInput) {
+            return undefined;
+        }
         const email = emailInput.toLowerCase().trim();
         const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
         const result = await firestoreService.executeQuery(query, CactusMember);

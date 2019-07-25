@@ -15,6 +15,8 @@ import MailchimpService from "@shared/services/MailchimpService";
 import AdminSlackService from "@shared/services/AdminSlackService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
 
 const app = express();
 
@@ -84,11 +86,50 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             return;
         }
 
-        const {mailchimpCampaignId, mailchimpUniqueEmailId, from} = emailReply;
+        const {mailchimpCampaignId, mailchimpUniqueEmailId, from, reflectionPromptId} = emailReply;
+
+        let prompt: ReflectionPrompt | undefined = undefined;
+        if (reflectionPromptId) {
+            console.log("fetching reflection prompt by reflectionPromptId found on email address");
+            prompt = await AdminReflectionPromptService.getSharedInstance().get(reflectionPromptId);
+        }
+
+        if (!prompt) {
+            console.log("Prompt still not found, trying to fetch it via campaign id");
+            try {
+                prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(mailchimpCampaignId);
+            } catch (promptError) {
+                console.error("Failed to get prompt by campaign id - error", promptError);
+            }
+            if (!prompt) {
+                console.log("Unable to find prompt by campaign id");
+            } else {
+                console.log("found prompt by campaign id", prompt.id);
+            }
+
+        }
 
         const listMember = await mailchimpService.getMemberByUniqueEmailId(mailchimpUniqueEmailId);
-        const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(mailchimpCampaignId);
-        const cactusMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpUniqueEmailId);
+        let cactusMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpUniqueEmailId);
+        const sentCampaign = await AdminSentCampaignService.getSharedInstance().getByCampaignId(mailchimpCampaignId);
+
+        let campaignLink: string | undefined = undefined;
+        if (sentCampaign && sentCampaign.campaign) {
+            campaignLink = `<https://us20.admin.mailchimp.com/reports/summary?id=${sentCampaign.campaign.web_id}|${sentCampaign.campaign.settings.title}>`
+        }
+
+        if (!cactusMember) {
+            console.log("No cactus member was found using mailchimp unique id, trying with the from email " + emailReply.from.email);
+            cactusMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(emailReply.from.email);
+        }
+
+        let listMemberLink: string | undefined = undefined;
+        if (listMember) {
+            listMemberLink = `<https://us20.admin.mailchimp.com/lists/members/view?id=${listMember.web_id}|Mailchimp Member ${listMember.id}>`
+        }
+
+
+        console.log("Saving the EmailReply to the database");
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
         emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
         emailReply.mailchimpMemberId = listMember ? listMember.id : undefined;
@@ -97,10 +138,57 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         //TODO: Make this a real service with models and stuff
         const savedEmail = await saveEmailReply(emailReply);
 
+
+        if (!prompt) {
+            console.warn(`No reflection prompt found still, not saving response from email ${cactusMember ? cactusMember.email : emailReply.from.email}`);
+            await AdminSlackService.getSharedInstance().sendActivityMessage({
+                text: `:warning: Received an email from cactus member ${cactusMember ? cactusMember.email : "unknown"} (sent from ${emailReply.from.email}) but no Reflection Prompt could be found from the email`,
+                attachments: [
+                    {
+                        color: "warning",
+                        fields: [
+                            {
+                                title: "Subject",
+                                value: emailReply.subject || "--",
+                                short: false,
+                            },
+                            {
+                                title: "Sent From",
+                                value: emailReply.from.email || "--",
+                                short: false,
+                            },
+                            {
+                                title: "Sent To",
+                                value: emailReply.to.email || "--",
+                                short: false,
+                            },
+                            {
+                                title: campaignLink ? "Mailchimp Campaign" : "Mailchimp Campaign ID",
+                                value: campaignLink ? campaignLink : mailchimpCampaignId || "--",
+                                short: false,
+                            },
+                            {
+                                title: listMemberLink ? "Mailchimp List Member" : "Mailchimp List Member ID",
+                                value: listMemberLink || (listMember ? listMember.id || "--" : "--"),
+                                short: false,
+                            },
+                            {
+                                title: "Cactus Member ID",
+                                value: cactusMember ? cactusMember.id || "--" : "--",
+                                short: false,
+                            }
+                        ]
+                    }
+                ]
+            });
+            res.sendStatus(204);
+            return;
+        }
+
         const promptResponse = new ReflectionResponse();
         promptResponse.content.text = emailReply.replyText;
         promptResponse.emailReplyId = savedEmail ? savedEmail.id : undefined;
-        promptResponse.promptId = prompt ? prompt.id : undefined;
+        promptResponse.promptId = prompt.id;
         promptResponse.promptQuestion = prompt ? prompt.question : undefined;
         promptResponse.responseMedium = ResponseMedium.EMAIL;
 
@@ -130,6 +218,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
 
         res.send({email: (savedEmail || emailReply).toJSON()});
     } catch (error) {
+        console.error("Failed to process incoming email", error);
         await slackService.sendActivityNotification("ERROR: Failed to process incoming email: " + `${error}`);
         res.sendStatus(500);
     }

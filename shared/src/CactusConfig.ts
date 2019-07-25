@@ -19,6 +19,7 @@ export interface CactusConfig {
     mailchimp: {
         api_key: string,
         audience_id: string,
+        bridge_to_monday_segment_id: number,
     },
     sentry: {
         api_token: string,

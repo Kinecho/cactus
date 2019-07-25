@@ -41,9 +41,13 @@ export function resetTestConfig() {
     _testConfigOverrides = {};
 }
 
-const defaultTestConfig = {
+const defaultTestConfig:CactusConfig = {
     isEmulator: true,
-    mailchimp: {api_key: "fake_key-us20", audience_id: "testing"},
+    mailchimp: {
+        api_key: "fake_key-us20",
+        audience_id: "testing",
+        bridge_to_monday_segment_id: 1234
+    },
     app: {
         environment: "test"
     },
