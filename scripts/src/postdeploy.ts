@@ -18,6 +18,7 @@ const git = simplegit();
 
     console.log(chalk.green(`${resource} Deploy Finished! ${isProd ? "Prod" : "Stage"}`));
 
+    const envName = isProd ? 'Prod' : 'Stage';
     const config = await getCactusConfig(isProd ? Project.PROD : Project.STAGE);
 
     let resourceName = resource;
@@ -49,7 +50,7 @@ const git = simplegit();
     const message: ChatMessage = {
         text: "",
         attachments: [{
-            title: `Finished deploying ${resourceName} :tada:`,
+            title: `Finished deploying ${resourceName} to ${envName} :tada:`,
             text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Release>: \`${hash}\`\n_started by ${byLine}_`,
             color: "good",
             ts: `${(new Date()).getTime() / 1000}`

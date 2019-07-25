@@ -16,6 +16,7 @@ const git = simplegit();
         resource = process.argv[2];
     }
 
+    const envName = isProd ? 'Prod' : 'Stage';
     console.log(chalk.green(`${resource} Starting Deploy to ${isProd ? "Prod" : "Stage"}`));
 
     const config = await getCactusConfig(isProd ? Project.PROD : Project.STAGE);
@@ -46,7 +47,7 @@ const git = simplegit();
     const message: ChatMessage = {
         text: "",
         attachments: [{
-            title: `Starting the deployment process for ${resourceName}`,
+            title: `Starting the deployment process for ${resourceName} - ${envName}`,
             text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Release>: \`${hash}\`\n_started by ${byLine}_`,
             ts: `${(new Date()).getTime() / 1000}`
         }],
