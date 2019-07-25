@@ -128,6 +128,18 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             listMemberLink = `<https://us20.admin.mailchimp.com/lists/members/view?id=${listMember.web_id}|Mailchimp Member ${listMember.id}>`
         }
 
+
+
+        console.log("Saving the EmailReply to the database");
+        emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
+        emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
+        emailReply.mailchimpMemberId = listMember ? listMember.id : undefined;
+        emailReply.reflectionPromptId = prompt ? prompt.id : undefined;
+
+        //TODO: Make this a real service with models and stuff
+        const savedEmail = await saveEmailReply(emailReply);
+
+
         if (!prompt) {
             console.warn(`No reflection prompt found still, not saving response from email ${cactusMember ? cactusMember.email : emailReply.from.email}`);
             await AdminSlackService.getSharedInstance().sendActivityMessage({
@@ -172,15 +184,6 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             });
             return;
         }
-
-        // console.log("Saving reply");
-        emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
-        emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
-        emailReply.mailchimpMemberId = listMember ? listMember.id : undefined;
-        emailReply.reflectionPromptId = prompt.id;
-
-        //TODO: Make this a real service with models and stuff
-        const savedEmail = await saveEmailReply(emailReply);
 
         const promptResponse = new ReflectionResponse();
         promptResponse.content.text = emailReply.replyText;
