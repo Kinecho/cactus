@@ -241,7 +241,7 @@ export default class MailchimpService {
         return await Promise.all(campaignTasks);
     }
 
-    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions(), delay: number = 100): Promise<Campaign[]> {
+    async getAllCampaigns(options: GetCampaignsOptions = getDefaultCampaignFetchOptions(), delay: number = 200): Promise<Campaign[]> {
         // options.
         const pageSize = (options.pagination && options.pagination.count) ? options.pagination.count : defaultPageSize;
 
@@ -553,7 +553,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize, delay: number = 100): Promise<Campaign[]> {
+    async getAllAutomationEmailCampaigns(audienceId?: string, pageSize = defaultPageSize, delay: number = 200): Promise<Campaign[]> {
         const automationEmails = await this.getAllAutomationEmails(audienceId, pageSize, delay);
         const campaignIds = automationEmails.map(email => {
             return email.id

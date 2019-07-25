@@ -51,22 +51,66 @@ export default class RefreshMailchimpCampaignsCommand extends FirebaseCommand {
             throw new Error("No project set");
         }
 
+        const setupResponse: { status: CampaignStatus | undefined, includeAutomation: boolean } = await prompts([
+            {
+                type: "select",
+                choices: [
+                    {
+                        title: CampaignStatus.sent,
+                        value: CampaignStatus.sent
+                    },
+                    {
+                        title: CampaignStatus.sending,
+                        value: CampaignStatus.sending
+                    },
+                    {
+                        title: CampaignStatus.save,
+                        value: CampaignStatus.save
+                    },
+                    {
+                        title: CampaignStatus.paused,
+                        value: CampaignStatus.paused
+                    },
+                    {
+                        title: CampaignStatus.schedule,
+                        value: CampaignStatus.schedule
+                    },
+                    {
+                        title: "ALL",
+                        value: undefined
+                    },
+                ],
+                name: "status",
+                message: "Filter on campaign status",
+            },
+            {
+                type: "confirm",
+                name: "includeAutomation",
+                message: "Include Automation Campaigns?"
+            }
+        ]);
+
+
         const config = await getCactusConfig(this.project);
         MailchimpService.initialize(config);
         console.log("Loading mailchimp campaigns...");
         const campaigns = await mailchimpService.getAllCampaigns({
             params: {
                 list_id: config.mailchimp.audience_id,
-                status: CampaignStatus.sent,
+                status: setupResponse.status,
                 exclude_fields: ["campaigns._links"]
             },
-            pagination: {count: 100}
+            pagination: {count: 200}
         });
 
-        const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
-        console.log(`got ${automationCampaigns.length} automation campaigns`);
-        campaigns.push(...automationCampaigns);
-        // const campaigns = (await mailchimpService.getCampaigns({pagination: {count: 4, offset: 1}})).campaigns;
+
+        if (setupResponse.includeAutomation) {
+            const automationCampaigns = await mailchimpService.getAllAutomationEmailCampaigns(config.mailchimp.audience_id);
+            console.log(`got ${automationCampaigns.length} automation campaigns`);
+            campaigns.push(...automationCampaigns);
+            // const campaigns = (await mailchimpService.getCampaigns({pagination: {count: 4, offset: 1}})).campaigns;
+        }
+
 
         campaigns.forEach(campaign => {
             this.campaignsById[campaign.id] = campaign;

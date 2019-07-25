@@ -81,6 +81,7 @@ export function init() {
 export function setUserId(userId?: string) {
     gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
     gtag('config', 'GA_MEASUREMENT_ID', {
+        'user_id': userId,
         'custom_map': {'dimension1': userId}
     });
 }
