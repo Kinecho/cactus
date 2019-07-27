@@ -19,12 +19,45 @@ export function getResponseMediumDisplayName(medium?: ResponseMedium): string {
         case ResponseMedium.JOURNAL_WEB:
             displayName = "Journal Web";
             break;
+        case ResponseMedium.JOURNAL_IOS:
+            displayName = "Journal iOS";
+            break;
+        case ResponseMedium.JOURNAL_ANDROID:
+            displayName = "Journal Android";
+            break
         default:
             displayName = "Unknown";
             break;
     }
     return displayName;
 }
+
+
+export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
+    if (!medium) {
+        return "Unknown";
+    }
+    let displayName: string;
+    switch (medium) {
+        case ResponseMedium.EMAIL:
+            displayName = ":email:";
+            break;
+        case ResponseMedium.JOURNAL_WEB:
+            displayName = ":computer:";
+            break;
+        case ResponseMedium.JOURNAL_IOS:
+            displayName = ":ios:";
+            break;
+        case ResponseMedium.JOURNAL_ANDROID:
+            displayName = ":android:";
+            break;
+        default:
+            displayName = `Unknown (${medium})`;
+            break;
+    }
+    return displayName;
+}
+
 
 export interface ReflectionContent {
     text?: string;

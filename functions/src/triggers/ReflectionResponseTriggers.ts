@@ -1,7 +1,10 @@
 import * as functions from "firebase-functions";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
-import ReflectionResponse, {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {
+    getResponseMediumDisplayName,
+    getResponseMediumSlackEmoji
+} from "@shared/models/ReflectionResponse";
 import AdminSlackService, {
     AttachmentColor,
     SlackAttachment,
@@ -52,7 +55,7 @@ export const onReflectionResponseCreated = functions.firestore
 
 
             const attachments: SlackAttachment[] = [];
-            let messageText = `${memberEmail} recorded a Reflection Response via *${getResponseMediumDisplayName(reflectionResponse.responseMedium)}*`;
+            let messageText = `${getResponseMediumSlackEmoji(reflectionResponse.responseMedium)} ${memberEmail} recorded a Reflection Response via *${getResponseMediumDisplayName(reflectionResponse.responseMedium)}*`;
             const fields: SlackAttachmentField[] = [];
 
             let resetReminderResult = "Not attempted";
