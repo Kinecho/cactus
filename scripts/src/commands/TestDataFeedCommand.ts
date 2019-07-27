@@ -129,34 +129,40 @@ export default class TestDataFeedCommand extends FirebaseCommand {
 
         for (let i = 0; i < numPrompts; i++) {
             tasks.push(new Promise(async resolve => {
-                const promptId = `auto_test_${i + 1}`;
-                const prompt = new ReflectionPrompt();
-                const trivia = triviaQuestions[i % triviaQuestions.length];
-                prompt.id = promptId;
-                prompt.question = `Question ${i + 1}: ${decodeURIComponent(trivia.question)}`;
-                prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: numPrompts - i}).toJSDate();
-                prompt.contentPath = `/test-${i + 1}`;
+                try {
+                    const promptId = `auto_test_${i + 1}`;
+                    const prompt = new ReflectionPrompt();
+                    const trivia = triviaQuestions[i % triviaQuestions.length];
+                    prompt.id = promptId;
+                    prompt.question = `Question ${i + 1}: ${decodeURIComponent(trivia.question)}`;
+                    prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: numPrompts - i}).toJSDate();
+                    prompt.contentPath = `/test-${i + 1}`;
 
-                await AdminReflectionPromptService.getSharedInstance().save(prompt);
+                    await AdminReflectionPromptService.getSharedInstance().save(prompt);
 
 
-                const sentPrompt = new SentPrompt();
-                sentPrompt.promptId = promptId;
-                sentPrompt.cactusMemberId = member.id;
-                sentPrompt.id = `${member.id}_${prompt.id}`;
-                sentPrompt.firstSentAt = prompt.sendDate;
-                sentPrompt.lastSentAt = prompt.sendDate;
-                sentPrompt.memberEmail = member.email;
-                sentPrompt.createdAt = new Date();
-                sentPrompt.sendHistory.push({
-                    medium: PromptSendMedium.EMAIL_MAILCHIMP,
-                    email: member.email,
-                    sendDate: prompt.sendDate
-                });
+                    const sentPrompt = new SentPrompt();
+                    sentPrompt.promptId = promptId;
+                    sentPrompt.cactusMemberId = member.id;
+                    sentPrompt.id = `${member.id}_${prompt.id}`;
+                    sentPrompt.firstSentAt = prompt.sendDate;
+                    sentPrompt.lastSentAt = prompt.sendDate;
+                    sentPrompt.memberEmail = member.email;
+                    sentPrompt.createdAt = new Date();
+                    sentPrompt.sendHistory.push({
+                        medium: PromptSendMedium.EMAIL_MAILCHIMP,
+                        email: member.email,
+                        sendDate: prompt.sendDate
+                    });
 
-                await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+                    await AdminSentPromptService.getSharedInstance().save(sentPrompt);
 
-                resolve();
+                    resolve();
+                } catch (e) {
+                    console.log("Failed to process the prompt", e);
+                    resolve()
+                }
+
             }));
         }
         await Promise.all(tasks);

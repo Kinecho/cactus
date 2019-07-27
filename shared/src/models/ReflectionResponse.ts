@@ -3,6 +3,8 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 export enum ResponseMedium {
     EMAIL = "EMAIL",
     JOURNAL_WEB = "JOURNAL_WEB",
+    JOURNAL_IOS = "JOURNAL_IOS",
+    JOURNAL_ANDROID = "JOURNAL_ANDROID"
 }
 
 export function getResponseMediumDisplayName(medium?: ResponseMedium): string {
