@@ -8,6 +8,8 @@ import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExp
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
+
+import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
@@ -43,4 +45,5 @@ export const cloudFunctions = {
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,
     signup: functions.https.onRequest(signupEndpoints),
+    sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
 };

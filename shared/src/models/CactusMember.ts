@@ -39,6 +39,8 @@ export default class CactusMember extends BaseModel {
 
     journalStatus=JournalStatus.NONE;
 
+    fcmTokens?: [string];
+
     prepareForFirestore(): any {
         super.prepareForFirestore();
         this.email = this.email ? this.email.toLowerCase().trim() : this.email;

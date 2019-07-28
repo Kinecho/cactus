@@ -15,6 +15,7 @@ import AdminReflectionResponseService from "@shared/services/AdminReflectionResp
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import axios from "axios";
 import {transformObjectSync} from "@shared/util/ObjectUtil";
+import md5 = require("md5");
 
 const prompts = require("prompts");
 
@@ -130,9 +131,9 @@ export default class TestDataFeedCommand extends FirebaseCommand {
         for (let i = 0; i < numPrompts; i++) {
             tasks.push(new Promise(async resolve => {
                 try {
-                    const promptId = `auto_test_${i + 1}`;
                     const prompt = new ReflectionPrompt();
                     const trivia = triviaQuestions[i % triviaQuestions.length];
+                    const promptId = `auto_test_${md5(trivia.question)}`;
                     prompt.id = promptId;
                     prompt.question = `Question ${i + 1}: ${decodeURIComponent(trivia.question)}`;
                     prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: numPrompts - i}).toJSDate();
