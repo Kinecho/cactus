@@ -76,18 +76,23 @@ export default class EmailReply extends BaseModel {
 
         if (input.fromRaw) {
             const fromParsed = parseEmail.parseOneAddress(input.fromRaw) as ParsedMailbox;
-            this.from = {
-                email: fromParsed.address,
-                name: fromParsed.name,
-                local: fromParsed.local,
-                domain: fromParsed.domain
+            if (fromParsed){
+                this.from = {
+                    email: fromParsed.address,
+                    name: fromParsed.name,
+                    local: fromParsed.local,
+                    domain: fromParsed.domain
+                }
+            } else {
+                console.error("EmailReply.ts Unable to parse raw input value", input.fromRaw);
             }
         }
 
         if (input.toRaw) {
             const toParsed = parseEmail.parseOneAddress(input.toRaw) as ParsedMailbox;
 
-            if (toParsed.local && toParsed.local.includes("hello+p_")) {
+
+            if (toParsed && toParsed.local && toParsed.local.includes("hello+p_")) {
                 const [, promptId] = toParsed.local.split("hello+p_");
                 if (promptId) {
                     console.log("Parsed prompt ID from to address", promptId);
