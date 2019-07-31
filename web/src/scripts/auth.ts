@@ -1,6 +1,6 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {addModal, LocalStorageKey, showConfirmEmailModal} from "@web/util";
+import {addModal, getQueryParam, LocalStorageKey, showConfirmEmailModal} from "@web/util";
 import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
@@ -8,6 +8,7 @@ import {Endpoint, request} from "@web/requestUtils";
 import {EmailStatusRequest, EmailStatusResponse} from "@shared/api/SignupEndpointTypes";
 import {ApiResponseError} from "@shared/api/ApiTypes";
 import AuthUI = firebaseui.auth.AuthUI;
+import {QueryParam} from "@shared/util/queryParams";
 
 const firebase = initializeFirebase();
 
@@ -245,13 +246,17 @@ export async function getEmailStatus(email: string): Promise<EmailStatusResponse
 
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
-    const redirectPath = PageRoute.SIGNUP_CONFIRMED;
+    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
+    let emailLinkRedirectUrl:string = PageRoute.SIGNUP_CONFIRMED;
+    if (redirectUrlParam){
+        emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
+    }
 
-
+    console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
     const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
         try {
             await firebase.auth().sendSignInLinkToEmail(email, {
-                url: `${Config.domain}${redirectPath}`,
+                url: `${Config.domain}${emailLinkRedirectUrl}`,
                 handleCodeInApp: true,
             });
 

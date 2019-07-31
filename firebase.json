@@ -50,6 +50,10 @@
         "rewrites": [
             {
                 "source": "/values",
+                "destination": "/values_home.html"
+            },
+            {
+                "source": "/core-values",
                 "destination": "/values.html"
             },
             {

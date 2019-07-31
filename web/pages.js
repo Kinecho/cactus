@@ -405,9 +405,16 @@ module.exports = {
     },
     "values": {
         "title": "Core Values",
-        "path": "/values",
+        "path": "/core-values",
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "values"
+    },
+    "values_home": {
+        "title": "Values",
+        "path": "/values",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "values_home"
     }
 }

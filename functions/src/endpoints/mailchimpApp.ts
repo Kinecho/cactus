@@ -104,7 +104,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
                 {
                     title: "Email",
                     value: subscription.email,
-                    short: true
+                    short: false
                 }
             ];
 
@@ -119,7 +119,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
                 fields.push({
                     title: "Name",
                     value: `${subscription.firstName} ${subscription.lastName}`.trim(),
-                    short: true
+                    short: false
                 });
             }
 
@@ -127,7 +127,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
                 fields.push({
                     title: "Referred By",
                     value: subscription.referredByEmail,
-                    short: true,
+                    short: false,
                 })
             }
 
@@ -141,7 +141,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
             }
 
             const message: SlackMessage = {
-                text: "Got a new signup!",
+                text: "Got a new email (added in Mailchimp as \`Pending\`)!",
                 attachments: [attachmentSummary],
             };
 
