@@ -403,13 +403,6 @@ module.exports = {
         "includeInDev": true,
         "name": "who_is_the_best_teacher_you_ever_had"
     },
-    "values": {
-        "title": "Core Values",
-        "path": "/core-values",
-        "reflectionPrompt": false,
-        "includeInDev": true,
-        "name": "values"
-    },
     "values_home": {
         "title": "Values",
         "path": "/values",

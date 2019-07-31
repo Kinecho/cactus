@@ -53,10 +53,6 @@
                 "destination": "/values_home.html"
             },
             {
-                "source": "/core-values",
-                "destination": "/values.html"
-            },
-            {
                 "source": "/who-is-the-best-teacher-you-ever-had",
                 "destination": "/who_is_the_best_teacher_you_ever_had.html"
             },
