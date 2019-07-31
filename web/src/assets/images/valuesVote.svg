@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="294" height="202" viewBox="0 0 294 202">
+  <defs>
+    <rect id="valuesvote-b" width="255" height="162" x=".785" y="0" rx="6"/>
+    <filter id="valuesvote-a" width="127.8%" height="143.8%" x="-13.9%" y="-15.1%" filterUnits="objectBoundingBox">
+      <feMorphology in="SourceAlpha" radius="4" result="shadowSpreadOuter1"/>
+      <feOffset dy="11" in="shadowSpreadOuter1" result="shadowOffsetOuter1"/>
+      <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="14"/>
+      <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0.478431373   0 0 0 0 0.219607843   0 0 0 0 0.0784313725  0 0 0 0.18 0"/>
+    </filter>
+  </defs>
+  <g fill="none" fill-rule="evenodd" transform="translate(19 9)">
+    <use fill="#000" filter="url(#valuesvote-a)" xlink:href="#valuesvote-b"/>
+    <use fill="#FFF" xlink:href="#valuesvote-b"/>
+    <circle cx="177.785" cy="44" r="6" fill="#29A389"/>
+    <circle cx="197.785" cy="44" r="6" fill="#33CCAB"/>
+    <circle cx="177.785" cy="82" r="6" fill="#FFBCA3"/>
+    <circle cx="177.785" cy="120" r="6" fill="#33CCAB"/>
+    <circle cx="197.785" cy="82" r="6" fill="#29A389"/>
+    <circle cx="217.785" cy="82" r="6" fill="#F5DD48"/>
+    <text fill="#07454C" font-family="Lato-Bold, Lato" font-size="18" font-weight="bold">
+      <tspan x="32.785" y="50">Community</tspan> <tspan x="32.785" y="88">Motivation</tspan> <tspan x="32.785" y="126">Creativity</tspan>
+    </text>
+  </g>
+</svg>
