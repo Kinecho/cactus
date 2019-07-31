@@ -247,8 +247,8 @@ export async function getEmailStatus(email: string): Promise<EmailStatusResponse
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    let emailLinkRedirectUrl:string = PageRoute.SIGNUP_CONFIRMED;
-    if (redirectUrlParam){
+    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
     }
 
