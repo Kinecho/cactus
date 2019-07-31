@@ -1,10 +1,11 @@
 import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
-import {LocalStorageKey, triggerWindowResize} from "@web/util";
+import {getQueryParam, LocalStorageKey, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
+import {QueryParam} from "@shared/util/queryParams";
 
-const firebase = initializeFirebase();
+initializeFirebase();
 
 let hasLoaded = false;
 getAuth().onAuthStateChanged(async user => {
@@ -28,8 +29,9 @@ getAuth().onAuthStateChanged(async user => {
 function handleExistingUserLoginSuccess(user: FirebaseUser) {
     console.log("redirecting...");
     setTimeout(() => {
-        window.location.href = PageRoute.JOURNAL_HOME;
-    }, 1000);
+        const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+        window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
+    }, 500);
 }
 
 function showShareButtons() {
@@ -38,7 +40,7 @@ function showShareButtons() {
 
 function handleResponse(response: EmailLinkSignupResult) {
     if (response.credential) {
-        window.location.href = PageRoute.JOURNAL_HOME;
+
         try {
             if (response.credential.additionalUserInfo && response.credential.additionalUserInfo.isNewUser) {
                 localStorage.setItem(LocalStorageKey.newUserSignIn, response.credential.user ? response.credential.user.uid : "true");
@@ -47,6 +49,9 @@ function handleResponse(response: EmailLinkSignupResult) {
             }
         } catch (e) {
             console.error("unable to persist new user status to localstorage");
+        } finally {
+            const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+            window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
         }
 
 
