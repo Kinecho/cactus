@@ -10,6 +10,7 @@ export default class CactusMemberService {
     authUnsubscriber?: Unsubscribe;
     protected currentMemberUnsubscriber?: ListenerUnsubscriber;
     protected currentMember?: CactusMember;
+    protected memberHasLoaded = false
 
     constructor() {
         this.authUnsubscriber = getAuth().onAuthStateChanged(async user => {
@@ -22,6 +23,7 @@ export default class CactusMemberService {
                     onData: member => {
                         console.log("********* Got current cactus member", member);
                         this.currentMember = member;
+                        this.memberHasLoaded = true;
                     }
                 })
             } else {

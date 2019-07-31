@@ -76,6 +76,12 @@ a.button {
   text-decoration: none;
 }
 
+.link {
+  &.fancy {
+    @include fancyLink
+  }
+}
+
 button, a.button {
   background-color: $green;
   border: 0;
@@ -102,13 +108,13 @@ button, a.button {
     box-shadow: none;
   }
 
-  &:disabled {
+  &:disabled, &.disabled {
     background-color: #ccc;
     box-shadow: none;
     color: $darkText;
     cursor: default;
 
-    &:before {
+    &:before:not(.no-loading) {
       animation: rotate 1s linear infinite;
       background: url(assets/images/loading.svg) no-repeat;
       background-size: 2rem;

@@ -6,4 +6,5 @@ export enum QueryParam {
     PURCHASE_AMOUNT = "amount",
     PURCHASE_ITEM_ID = 'productId',
     EMAIL = 'e',
+    REDIRECT_URL = 'signInSuccessUrl',
 }
