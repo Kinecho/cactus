@@ -226,16 +226,6 @@
     @import "variables";
     @import "mixins";
 
-    body {
-        overflow-x: hidden;
-    }
-
-    html {
-        @include maxW(768) {
-            overflow-x: hidden;
-        }
-    }
-
     header {
         background: transparent;
         left: 0;
@@ -267,17 +257,19 @@
         height: 100vh;
         position: relative;
 
-        &:before {
-            background-image: url(assets/images/yellowNeedleBlob.svg);
-            background-repeat: no-repeat;
-            background-size: 730px;
-            content: "";
-            height: 74rem;
-            position: absolute;
-            left: 0;
-            top: 0;
-            transform: rotate(-39deg) translate(64vw, 49vh);
-            width: 74rem;
+        @include h(768) {
+            &:before {
+                background-image: url(assets/images/yellowNeedleBlob.svg);
+                background-repeat: no-repeat;
+                background-size: 730px;
+                content: "";
+                height: 74rem;
+                position: absolute;
+                left: 0;
+                top: 0;
+                transform: rotate(-39deg) translate(64vw, 49vh);
+                width: 74rem;
+            }
         }
 
         &:after {
@@ -337,13 +329,15 @@
         display: none;
 
         @include r(768) {
-            display: block;
-            height: 60rem;
-            position: absolute;
-            right: -13vw;
-            top: -25vh;
-            transform: rotate(-140deg);
-            width: 57rem;
+            @include h(768) {
+                display: block;
+                height: 60rem;
+                position: absolute;
+                right: -13vw;
+                top: -25vh;
+                transform: rotate(-140deg);
+                width: 57rem;
+            }
         }
     }
 
@@ -376,10 +370,14 @@
     }
 
     #stem {
-        bottom: -12vh;
+        bottom: -32vh;
         display: block;
         left: -12rem;
         position: absolute;
+
+        @include r(1024) {
+            bottom: -12vh;
+        }
 
         @include r(1024) {
             bottom: -17vh;
