@@ -162,7 +162,7 @@
 
                         this.error = undefined;
                     } catch (revertError){
-                        console.error(revertError);¬
+                        console.error(revertError);
                         this.successMessage = undefined;
                         this.error = "Unable to recover your email address. Please try again later";
                         this.submitting = false;
