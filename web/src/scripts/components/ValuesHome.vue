@@ -236,6 +236,17 @@
         }
     }
 
+    header {
+        background: transparent;
+        left: 0;
+        margin: auto;
+        max-width: 1200px;
+        position: absolute;
+        right: 0;
+        width: 100%;
+        z-index: 10;
+    }
+
     .buttonContainer {
         z-index: 5;
 
