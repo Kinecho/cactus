@@ -14,7 +14,7 @@
                         <!--Start Survey Button Logic (logged in state)-->
                         <div v-bind:class="['wrapper', {loading: loading}]">
                             <div class="container logged-in" v-show="member && !loading">
-                                <a class="button" v-show="surveyLink" v-bind:href="surveyLink">Take the Survey</a>
+                                <a class="button" v-show="surveyLink" v-bind:href="surveyLink">Begin Activity</a>
                             </div>
                             <div class="container logged-out" v-show="!member && !loading">
                                 <AuthButton linkText="Sign in to Continue" linkUrl="/values" variant="button"></AuthButton>
