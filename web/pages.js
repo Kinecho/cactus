@@ -402,5 +402,12 @@ module.exports = {
         "reflectionPrompt": true,
         "includeInDev": true,
         "name": "who_is_the_best_teacher_you_ever_had"
+    },
+    "values": {
+        "title": "Core Values",
+        "path": "/values",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "values"
     }
 }
