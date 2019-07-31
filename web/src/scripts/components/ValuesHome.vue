@@ -301,12 +301,11 @@
       }
 
       .subtext {
-        margin-bottom: 3.2rem;
+        margin: 0 auto 3.2rem;
+        max-width: 47rem;
 
         @include r(768) {
           font-size: 2.4rem;
-          margin: 0 auto 3.2rem;
-          max-width: 47rem;
         }
       }
 
