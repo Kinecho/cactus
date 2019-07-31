@@ -148,13 +148,14 @@ html {
 }
 
 #stem {
-    display: none;
+    bottom: -12vh;
+    display: block;
+    left: -12rem;
+    position: absolute;
 
-    @include r(768) {
+    @include r(1024) {
         bottom: -17vh;
-        display: block;
-        left: -4vw;
-        position: absolute;
+        left: -6vw;
     }
 }
 
@@ -192,11 +193,15 @@ html {
   }
 
   .benefit {
-    padding-bottom: 5.6rem;
+    padding-bottom: 7.2rem;
+
+    &:last-of-type {
+        padding-bottom: 0;
+    }
 
     @include r(768) {
       flex-basis: 33%;
-      padding-bottom: 0;
+      padding: 0 .8rem;
     }
 
     .text {
@@ -212,8 +217,9 @@ html {
 
   .illustration {
     margin-bottom: 2.4rem;
-    height: 20rem;
-    width: 30rem;
+    max-width: 30rem;
+    height: auto;
+    width: 100%;
   }
 }
 
@@ -254,14 +260,10 @@ html {
         text-align: left;
 
         @include r(768) {
-            /* align-items: center;
-            display: flex;
-            flex-flow: row-reverse; */
             align-items: center;
             display: grid;
             grid-column-gap: 6.4rem;
-            /* justify-content: center; */
-            grid-template-columns: 50% 50%;
+            grid-template-columns: 1fr 1fr;
             justify-items: center;
             max-width: 120rem;
         }
@@ -305,10 +307,31 @@ html {
     }
 
     .cropped {
-        margin-bottom: -6.4rem;
+        align-items: flex-start;
+        display: flex;
+        justify-content: center;
+        margin: 0 -2.4rem -6.4rem;
         max-height: 53rem;
         overflow: hidden;
-        padding: 0 4.4rem;
         transform: translateY(-6.4rem);
+
+        .graphic {
+            width: 120%;
+        }
+
+        @include r(600) {
+            margin: 0 auto -6.4rem;
+            max-width: 57rem;
+        }
+
+        @include r(768) {
+            display: block;
+            margin: 0 0 -6.4rem;
+            padding: 0 4.4rem;
+
+            .graphic {
+                width: 100%;
+            }
+        }
     }
 }
