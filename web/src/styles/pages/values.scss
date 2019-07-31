@@ -119,6 +119,45 @@ html {
   }
 }
 
+#pinkBlob {
+  display: none;
+
+  @include r(1140) {
+    display: block;
+    height: 21rem;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: translate(-7vw, 28vh);
+    width: 21rem;
+  }
+}
+
+#greenBlob {
+  display: none;
+
+  @include r(1140) {
+    display: block;
+    height: 52rem;
+    left: 0;
+    position: absolute;
+    top: 0;
+    transform: rotate(55deg) translate(13vw, 39vh);
+    width: 50rem;
+  }
+}
+
+#stem {
+    display: none;
+
+    @include r(768) {
+        bottom: -17vh;
+        display: block;
+        left: -4vw;
+        position: absolute;
+    }
+}
+
 // End Hero
 
 .listHeader {
