@@ -25,6 +25,7 @@
     "md5": "^2.2.1",
     "pretty-ms": "^5.0.0",
     "qs": "^6.7.0",
+    "query-string": "^6.8.2",
     "stripe": "^7.3.0"
   },
   "devDependencies": {

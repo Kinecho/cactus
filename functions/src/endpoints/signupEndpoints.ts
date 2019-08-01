@@ -9,12 +9,12 @@ import {
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
 import AdminSlackService from "@shared/services/AdminSlackService";
-import UserRecord = admin.auth.UserRecord;
-import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
-import {getUrlFromInput} from "@shared/util/StringUtil";
+import {appendDomain} from "@shared/util/StringUtil";
+import UserRecord = admin.auth.UserRecord;
+import ActionCodeSettings = admin.auth.ActionCodeSettings;
 
 const Config = getConfig();
 
@@ -73,12 +73,16 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         text: `${email} triggered the Magic Link flow. Existing Email = ${exists}`
     });
 
+    // const parsed = stripQueryParams(payload.continuePath);
+    const url = appendDomain(payload.continuePath, Config.web.domain);
+
+    // url = url + encodeURIComponent("?" + queryString.stringify(parsed.query));
 
     const actionCodeSettings: ActionCodeSettings = {
         handleCodeInApp: true,
         // dynamicLinkDomain: Config.dynamic_links.domain,
         // dynamicLinkDomain: "cactus-app-stage.web.app",
-        url: getUrlFromInput(payload.continuePath, Config.web.domain),
+        url,
         // iOS: {
         //     bundleId: Config.ios.bundle_id,
         // }
@@ -88,9 +92,12 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     try {
         const link = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
 
+
+        // const combinedLink = appendQueryParams(link, parsed.query);
+
         console.log(`Generated signing link for ${email}: ${link}`);
 
-        await AdminSendgridService.getSharedInstance().sendMagicLink({displayName, email, link});
+        await AdminSendgridService.getSharedInstance().sendMagicLink({displayName, email, link: link});
 
         const response: MagicLinkResponse = {
             exists,

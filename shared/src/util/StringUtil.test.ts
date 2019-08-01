@@ -1,4 +1,11 @@
-import {destructureDisplayName, getFilenameFromInput, getUrlFromInput} from "@shared/util/StringUtil";
+import {
+    appendDomain,
+    appendQueryParams,
+    destructureDisplayName,
+    getFilenameFromInput,
+    getUrlFromInput,
+    stripQueryParams
+} from "@shared/util/StringUtil";
 
 describe("get filename from input", () => {
     test("all lowercase, valid", () => {
@@ -115,5 +122,69 @@ describe("Destructure displayName", () => {
         const input = "  Neil  King James   Poulin   ";
         const output = destructureDisplayName(input);
         expect(output).toEqual({firstName: "Neil", lastName: "Poulin"});
+    });
+});
+
+describe("Parse query string from url", () => {
+    test("plain path", () => {
+        const input = "/test";
+        expect(stripQueryParams(input)).toEqual({url: "/test", query: {}});
+    });
+
+    test("single param", () => {
+        const input = "/test?one=1";
+        expect(stripQueryParams(input)).toEqual({url: "/test", query: {one: "1"}});
+    });
+
+    test("multiple params", () => {
+        const input = "/test?one=1&url=test.com";
+        expect(stripQueryParams(input)).toEqual({url: "/test", query: {one: "1", url: "test.com"}});
+    });
+});
+
+describe("appendDomain", () => {
+    test("no query params, with localhost", () => {
+        const path = "/test";
+        const domain = "localhost:8080";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test");
+    });
+    test("no query params, with localhost", () => {
+        const path = "/test?key=value";
+        const domain = "localhost:8080";
+        expect(appendDomain(path, domain)).toEqual("http://localhost:8080/test?key=value");
+    });
+    test("no query params, with localhost", () => {
+        const path = "/test?key=value";
+        const domain = "cactus.app";
+        expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
+    });
+})
+
+describe("Combine query strings", () => {
+    test("url with no params", () => {
+        const url = "/test";
+        const params = {test: "value"};
+
+        expect(appendQueryParams(url, params)).toEqual("/test?test=value")
+    });
+    test("url with one params", () => {
+        const url = "/test?my=code";
+        const params = {test: "value"};
+
+        expect(appendQueryParams(url, params)).toEqual("/test?my=code&test=value")
+    });
+
+    test("url with multiple params", () => {
+        const url = "/test?my=code&foo=bar";
+        const params = {test: "value", other: "stuff"};
+
+        expect(appendQueryParams(url, params)).toEqual("/test?foo=bar&my=code&other=stuff&test=value")
+    });
+
+    test("url with with params but no additional params", () => {
+        const url = "/test?my=code&foo=bar";
+        const params = {};
+
+        expect(appendQueryParams(url, params)).toEqual("/test?my=code&foo=bar")
     });
 });

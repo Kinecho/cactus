@@ -1,3 +1,5 @@
+import * as queryString from "query-string";
+
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
         .replace(/[^a-z0-9-_\s\\\/]/g, "") //remove special characters
@@ -13,6 +15,52 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     } else {
         return name;
     }
+}
+
+export function stripQueryParams(url:string): {url:string,query?:any}{
+    const query = queryString.parseUrl(url);
+    console.log(query);
+
+
+
+    return {url: query.url, query: query.query};
+
+}
+
+export function appendQueryParams(url:string, params:any):string{
+    if (!params || Object.keys(params).length === 0){
+        return url;
+    }
+
+    let parsed = queryString.parseUrl(url);
+    const combined = {...params, ...parsed.query};
+    return `${parsed.url}?${queryString.stringify(combined)}`;
+
+}
+
+export function appendDomain(input:string|null|undefined, domain:string|undefined=undefined): string {
+    let toProcess = input;
+
+    if (!toProcess) {
+        return "";
+    }
+
+    if (toProcess && toProcess.indexOf("/") === 0) {
+        toProcess = toProcess.slice(1);
+    }
+
+    let name = toProcess;
+    if (!name.startsWith("/")) {
+        name = `/${name}`;
+    }
+
+    if (domain && !name.startsWith("http") && !domain.includes("localhost")) {
+        return `https://${domain}${name}`;
+    } else if (domain && !name.startsWith("http")){
+        return `http://${domain}${name}`;
+    }
+
+    return name;
 }
 
 export function getUrlFromInput(input: string | null | undefined, domain: string | undefined = undefined): string {
