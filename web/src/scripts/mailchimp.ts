@@ -118,12 +118,12 @@ export function configureLoginForm(formId: string) {
                 hideError();
 
                 let title = "Welcome!";
-                let message = `Check your ${emailAddress} inbox to get into Journal.`;
+                const message = `To confirm your email address and securely sign in, tap the button in the email sent to ${emailAddress}.`;
                 const imageUrl = '/assets/images/success.svg';
 
                 if (signupResult.existingEmail) {
                     title = "Welcome back!";
-                    message = `Check your ${emailAddress} inbox to get back into the Journal.`;
+                    // message = `Check your ${emailAddress} inbox to get your Magic Link to finish signing in.`;
                 }
 
                 addModal(modalId, {
