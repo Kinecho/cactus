@@ -101,7 +101,7 @@ export function showConfirmEmailModal(options: {
         // $emailInput.addEventListener("")
 
         const $inputContainer = document.createElement("div");
-        const $form = document.createElement("form") as HTMLFormElement;
+        const $form = document.createElement("form");
         $form.appendChild($inputContainer);
 
         $inputContainer.appendChild($emailInput);
