@@ -7,4 +7,9 @@ export enum QueryParam {
     PURCHASE_ITEM_ID = 'productId',
     EMAIL = 'e',
     REDIRECT_URL = 'signInSuccessUrl',
+    MODE = "mode",
+    OOB_CODE = "oobCode",
+    API_KEY= "apiKey",
+    CONTINUE_URL = "continueUrl",
+    LANG = "lang",
 }

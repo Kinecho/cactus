@@ -101,24 +101,18 @@ export function showConfirmEmailModal(options: {
         // $emailInput.addEventListener("")
 
         const $inputContainer = document.createElement("div");
+        const $form = document.createElement("form");
+        $form.appendChild($inputContainer);
+
         $inputContainer.appendChild($emailInput);
 
         const $confirmButton = createElementFromString(`<button class="button confirm">Confirm</button>`);
 
+        $form.appendChild($inputContainer);
+        $form.appendChild($confirmButton);
+        $content.appendChild($form);
 
-        $content.appendChild($inputContainer);
-
-
-        const $error = createElementFromString(`<div class="error hidden">${options.error || "Unable to sign in"}</div>`) as HTMLDivElement;
-        $content.appendChild($error);
-
-        if (options.error) {
-            $error.classList.remove("hidden");
-        }
-
-        $content.appendChild($confirmButton);
-
-        $confirmButton.addEventListener("click", () => {
+        function onFormSubmit(){
             const email = $emailInput.value;
             const isValid = isValidEmail(email);
             if (!isValid) {
@@ -129,11 +123,29 @@ export function showConfirmEmailModal(options: {
                 resolve({canceled: false, email});
                 closeModal(modalId);
             }
+        }
 
+        $form.onsubmit = (e) => {
+            e.preventDefault();
+            onFormSubmit()
+        };
+
+        const $error = createElementFromString(`<div class="error hidden">${options.error || "Unable to sign in"}</div>`) as HTMLDivElement;
+        $content.appendChild($error);
+
+        if (options.error) {
+            $error.classList.remove("hidden");
+        }
+
+
+
+        $confirmButton.addEventListener("click", () => {
+           onFormSubmit();
         });
 
 
         showModal(modalId);
+        $emailInput.focus();
 
     })
 

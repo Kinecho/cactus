@@ -11,6 +11,12 @@ export type FirebaseUser = firebase.User;
 export type FirebaseUserCredential = firebase.auth.UserCredential;
 export type Unsubscribe = firebase.Unsubscribe;
 
+export enum EmailActionMode {
+    resetPassword = "resetPassword",
+    recoverEmail = "recoverEmail",
+    verifyEmail = "verifyEmail",
+}
+
 export function initializeFirebase(): FirebaseObject {
     if (!isInitialized) {
         setTimestamp(firebase.firestore.Timestamp);

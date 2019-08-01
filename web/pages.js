@@ -409,5 +409,12 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "values_home"
+    },
+    "email_action": {
+        "title": "Email Action",
+        "path": "/auth-actions",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "email_action"
     }
 }

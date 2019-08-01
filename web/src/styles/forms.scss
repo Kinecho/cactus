@@ -4,7 +4,7 @@
 
 
 
-@mixin emailInput {
+@mixin textInput {
   border: 1px solid $green;
   border-radius: 3rem;
   display: block;
@@ -50,5 +50,10 @@
 
 
 input[type=email] {
-  @include emailInput();
+  @include textInput();
+}
+
+
+input[type=password] {
+  @include textInput();
 }

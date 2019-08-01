@@ -64,5 +64,14 @@ export interface CactusConfig {
     },
     web: {
         domain: string,
+    },
+    ios: {
+        bundle_id: string,
+    },
+    sendgrid: {
+        api_key: string,
+        template_ids: {
+            magic_link: string,
+        }
     }
 }

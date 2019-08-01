@@ -78,6 +78,12 @@ describe("get url from input", () => {
         const domain = "cactus.app";
         expect(getUrlFromInput(input, domain)).toEqual("https://cactus.app/test-page");
     });
+
+    test("get a localhost domain", () => {
+        const input = "test_page";
+        const domain = "localhost:8080";
+        expect(getUrlFromInput(input, domain)).toEqual("http://localhost:8080/test-page");
+    });
 });
 
 describe("Destructure displayName", () => {
