@@ -8,10 +8,10 @@
       <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0.478431373   0 0 0 0 0.219607843   0 0 0 0 0.0784313725  0 0 0 0.18 0"/>
     </filter>
     <polyline id="valuesselect-d" points="22 25.112 28 31.112 47.111 12"/>
-    <filter id="valuesselect-c" width="165%" height="176.7%" x="-32.5%" y="-42.7%" filterUnits="objectBoundingBox">
-      <feMorphology in="SourceAlpha" operator="dilate" radius="4" result="shadowSpreadOuter1"/>
+    <filter id="valuesselect-c" width="159.3%" height="170.4%" x="-29.7%" y="-39%" filterUnits="objectBoundingBox">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="3.5" result="shadowSpreadOuter1"/>
       <feOffset in="shadowSpreadOuter1" result="shadowOffsetOuter1"/>
-      <feMorphology in="SourceAlpha" radius="4" result="shadowInner"/>
+      <feMorphology in="SourceAlpha" radius="3.5" result="shadowInner"/>
       <feOffset in="shadowInner" result="shadowInner"/>
       <feComposite in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"/>
       <feColorMatrix in="shadowOffsetOuter1" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 1 0"/>
@@ -33,7 +33,7 @@
       </text>
       <g stroke-linecap="round" stroke-linejoin="round">
         <use fill="#000" filter="url(#valuesselect-c)" xlink:href="#valuesselect-d"/>
-        <use stroke="#33CCAB" stroke-width="3" xlink:href="#valuesselect-d"/>
+        <use stroke="#33CCAB" stroke-width="2" xlink:href="#valuesselect-d"/>
       </g>
       <polyline stroke="#B28D7B" stroke-linecap="round" stroke-linejoin="round" points="229 27 234.421 31.612 239.842 27"/>
     </g>

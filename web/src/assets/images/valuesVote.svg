@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="294" height="202" viewBox="0 0 294 202">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="304" height="202" viewBox="0 0 304 202">
   <defs>
     <rect id="valuesvote-b" width="255" height="162" x=".785" y="0" rx="6"/>
     <filter id="valuesvote-a" width="127.8%" height="143.8%" x="-13.9%" y="-15.1%" filterUnits="objectBoundingBox">
@@ -8,7 +8,7 @@
       <feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 0.478431373   0 0 0 0 0.219607843   0 0 0 0 0.0784313725  0 0 0 0.18 0"/>
     </filter>
   </defs>
-  <g fill="none" fill-rule="evenodd" transform="translate(19 9)">
+  <g fill="none" fill-rule="evenodd" transform="translate(24 20)">
     <use fill="#000" filter="url(#valuesvote-a)" xlink:href="#valuesvote-b"/>
     <use fill="#FFF" xlink:href="#valuesvote-b"/>
     <circle cx="177.785" cy="44" r="6" fill="#29A389"/>

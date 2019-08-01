@@ -54,7 +54,7 @@
                 <div class="centered">
                     <img class="graphic flip" src="assets/images/relax2.svg" alt=""/>
                     <div class="text">
-                        <h2>What is most important  for&nbsp;you?</h2>
+                        <h2>What is most important for&nbsp;you?</h2>
                         <p>Knowing your core values will help you achieve a higher level of self-awareness. You’ll start
                             to understand past decisions and make better decisions for your happiness in the future.</p>
                     </div>
@@ -63,7 +63,7 @@
             <section class="twoUp screenshot noPaddingBtm">
                 <div class="centered">
                     <div class="text">
-                        <h2>Your daily Cactus starts to  get personal</h2>
+                        <h2>Your daily Cactus starts to get personal</h2>
                         <p>Your core values results will help guide your future Cactus reflections and prompts.</p>
                     </div>
                     <div class="cropped">
