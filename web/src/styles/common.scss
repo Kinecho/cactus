@@ -114,17 +114,19 @@ button, a.button {
     color: $darkText;
     cursor: default;
 
-    &:before:not(.no-loading) {
-      animation: rotate 1s linear infinite;
-      background: url(assets/images/loading.svg) no-repeat;
-      background-size: 2rem;
-      content: '';
-      display: block;
-      height: 2rem;
-      position: absolute;
-      transform-origin: center;
-      width: 2rem;
-      z-index: 1;
+    &:not(.no-loading) {
+      &:before {
+        animation: rotate 1s linear infinite;
+        background: url(assets/images/loading.svg) no-repeat;
+        background-size: 2rem;
+        content: '';
+        display: block;
+        height: 2rem;
+        position: absolute;
+        transform-origin: center;
+        width: 2rem;
+        z-index: 1;
+      }
     }
   }
 

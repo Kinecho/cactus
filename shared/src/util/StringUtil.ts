@@ -31,8 +31,10 @@ export function getUrlFromInput(input: string | null | undefined, domain: string
         name = `/${name}`;
     }
 
-    if (domain && !name.startsWith("http")) {
+    if (domain && !name.startsWith("http") && !domain.includes("localhost")) {
         return `https://${domain}${name}`;
+    } else if (domain && !name.startsWith("http")){
+        return `http://${domain}${name}`;
     }
 
     return name;

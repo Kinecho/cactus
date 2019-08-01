@@ -5,7 +5,12 @@ import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
 import {Endpoint, request} from "@web/requestUtils";
-import {EmailStatusRequest, EmailStatusResponse} from "@shared/api/SignupEndpointTypes";
+import {
+    EmailStatusRequest,
+    EmailStatusResponse,
+    MagicLinkRequest,
+    MagicLinkResponse
+} from "@shared/api/SignupEndpointTypes";
 import {ApiResponseError} from "@shared/api/ApiTypes";
 import AuthUI = firebaseui.auth.AuthUI;
 import {QueryParam} from "@shared/util/queryParams";
@@ -168,7 +173,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
     if (!email) {
         const {email: confirmedEmail, canceled} = await showConfirmEmailModal({
-            title: "Confirm email",
+            title: "Confirm your email",
             message: "Please enter the email address that you signed up with",
             error,
         });
@@ -210,7 +215,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
                 return {
                     success: false,
                     error: {
-                        title: "Oh Oh!",
+                        title: "Uh Oh!",
                         message: "This link is invalid. This can happen if the link is malformed, expired, or has already been used."
                     },
                     continue: {
@@ -243,6 +248,22 @@ export async function getEmailStatus(email: string): Promise<EmailStatusResponse
     }
 }
 
+export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLinkResponse> {
+    try {
+        const response = await request.post(Endpoint.sendMagicLink, options);
+        return response.data;
+    } catch (e) {
+        console.error("Failed to get a success response from magic link endpoint", e);
+        return {
+            sendSuccess: false,
+            exists: false,
+            email: options.email,
+            message: "Failed to send magic link",
+            error: e,
+        }
+    }
+}
+
 
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
@@ -253,32 +274,33 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     }
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
-    const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
-        try {
-            await firebase.auth().sendSignInLinkToEmail(email, {
-                url: `${Config.domain}${emailLinkRedirectUrl}`,
-                handleCodeInApp: true,
-            });
+    // const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
+    //     try {
+    //         await firebase.auth().sendSignInLinkToEmail(email, {
+    //             url: `${Config.domain}${emailLinkRedirectUrl}`,
+    //             handleCodeInApp: true,
+    //         });
+    //
+    //
+    //         window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
+    //         resolve({success: true});
+    //         return;
+    //     } catch (error) {
+    //         console.error("failed to send signin link", error);
+    //         resolve({success: false, error});
+    //         return;
+    //     }
+    // });
+    //
+    // const [statusResponse, emailSendResponse]: [EmailStatusResponse, { success: boolean, error?: any }] = await Promise.all([getEmailStatus(email), sendEmailPromise]);
 
-
-            window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
-            resolve({success: true});
-            return;
-        } catch (error) {
-            console.error("failed to send signin link", error);
-            resolve({success: false, error});
-            return;
-        }
-    });
-
-    const [statusResponse, emailSendResponse]: [EmailStatusResponse, { success: boolean, error?: any }] = await Promise.all([getEmailStatus(email), sendEmailPromise]);
-
-    const existingEmail = statusResponse.exists;
+    const statusResponse = await sendMagicLink({email: email, continuePath: emailLinkRedirectUrl});
+    window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 
     return {
-        success: emailSendResponse.success,
-        existingEmail,
-        error: statusResponse.error || emailSendResponse.error
+        success: statusResponse.sendSuccess,
+        existingEmail: statusResponse.exists,
+        error: statusResponse.error
     }
 
 

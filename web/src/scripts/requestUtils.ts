@@ -9,6 +9,7 @@ export enum Endpoint {
     checkout = "checkout",
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
+    sendMagicLink = "signup/magic-link",
 }
 
 export function initializeAxios(): AxiosInstance{

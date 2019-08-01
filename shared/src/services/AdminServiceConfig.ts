@@ -9,12 +9,14 @@ import AdminReflectionPromptService from "@shared/services/AdminReflectionPrompt
 import AdminSlackService from "@shared/services/AdminSlackService";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
+import AdminSendgridService from "@shared/services/AdminSendgridService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any) {
     console.log("initializing all services");
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     AdminFirestoreService.initialize(app);
+    AdminSendgridService.initialize(config);
     AdminSlackService.initialize(config);
     MailchimpService.initialize(config);
     AdminCactusMemberService.initialize();

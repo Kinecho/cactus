@@ -28,6 +28,7 @@ function buildConfig(): CactusConfig {
     config.isEmulator = process.env.IS_EMULATOR === "true";
     if (config.isEmulator) {
         config.app.environment = "dev";
+        config.web.domain = "localhost:8080";
     }
 
     return config;
@@ -41,7 +42,7 @@ export function resetTestConfig() {
     _testConfigOverrides = {};
 }
 
-const defaultTestConfig:CactusConfig = {
+const defaultTestConfig: CactusConfig = {
     isEmulator: true,
     mailchimp: {
         api_key: "fake_key-us20",
@@ -87,6 +88,9 @@ const defaultTestConfig:CactusConfig = {
     web: {
         domain: "cactus-app-stage.web.app",
     },
+    ios: {
+        bundle_id: "com.cactus.TestApp"
+    },
     bigquery_service_account: {
         "type": "service_account",
         "project_id": "analytics",
@@ -116,6 +120,12 @@ const defaultTestConfig:CactusConfig = {
         bigquery_import_bucket: "fake-bigquery-bucket",
         firestore_backups_bucket: "fake-backup-bucket",
         bigquery_dataset_id: "fake_dataset_id",
+    },
+    sendgrid: {
+        api_key: "test-api-key",
+        template_ids: {
+            magic_link: "1234",
+        }
     }
 };
 

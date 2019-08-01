@@ -58,6 +58,16 @@
       color: red;
       margin-bottom: 1rem;
     }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      input {
+        margin: 1.6rem 0;
+        width: 100%;
+      }
+    }
+
   }
 
 }

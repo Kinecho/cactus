@@ -10,3 +10,16 @@ export interface EmailStatusResponse extends ApiResponse {
     error?: any,
     message?:string,
 }
+
+export interface MagicLinkRequest {
+    email: string,
+    continuePath: string,
+}
+
+export interface MagicLinkResponse extends ApiResponse{
+    exists: boolean,
+    sendSuccess: boolean,
+    email: string,
+    error?:any,
+    message?: string,
+}
