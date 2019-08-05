@@ -49,6 +49,7 @@
     import {getInitials} from '@shared/util/StringUtil'
     import {PageRoute} from '@web/PageRoutes'
     import {gtag} from "@web/analytics"
+    import {configureDirectives} from '@web/vueDirectives'
 
     declare interface LinkData {
         title: string,
@@ -62,6 +63,8 @@
         menuOpen: boolean,
         authLoaded: boolean,
     }
+
+    configureDirectives();
 
     export default Vue.extend({
         created() {

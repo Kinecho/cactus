@@ -7,6 +7,21 @@ export enum JournalStatus {
     TESTER = "TESTER"
 }
 
+export enum NotificationStatus {
+    NOT_SET = "NOT_SET",
+    ACTIVE = "ACTIVE",
+    INACTIVE = "INACTIVE"
+}
+
+export enum NotificationChannel {
+    email = "email",
+    push = "push"
+}
+
+export type NotificationSettings = {
+    [key in NotificationChannel]: NotificationStatus;
+};
+
 export enum Field {
     firstName = "firstName",
     lastName = "lastName",
@@ -18,28 +33,34 @@ export enum Field {
     mailchimpListMemberUniqueEmailId = "mailchimpListMember.unique_email_id",
     mailchimpListMemberWebId = "mailchimpListMember.web_id",
     journalStatus = "journalStatus",
+    fcmTokens = "fcmTokens",
 }
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
-    firstName?:string;
-    lastName?:string;
-    email?:string;
-    signupAt?:Date;
-    signupConfirmedAt?:Date;
-    userId?:string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    signupAt?: Date;
+    signupConfirmedAt?: Date;
+    userId?: string;
 
-    mailchimpListMember?:ListMember;
-    lastSyncedAt?:Date;
+    mailchimpListMember?: ListMember;
+    lastSyncedAt?: Date;
     lastReplyAt?: Date;
 
-    unsubscribeReason?:string;
-    unsubscribedAt?:Date;
+    unsubscribeReason?: string;
+    unsubscribedAt?: Date;
     unsubscribeCampaignId?: string;
 
-    journalStatus=JournalStatus.NONE;
+    journalStatus = JournalStatus.NONE;
 
     fcmTokens?: [string];
+    notificationSettings: NotificationSettings = {
+        [NotificationChannel.email]: NotificationStatus.ACTIVE,
+        [NotificationChannel.push]: NotificationStatus.NOT_SET,
+    };
+
 
     prepareForFirestore(): any {
         super.prepareForFirestore();

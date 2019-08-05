@@ -1,0 +1,48 @@
+<template>
+    <transition name="fade-in" appear>
+        <div class="spinner-container">
+            <img src="/assets/images/loading.svg" alt="Loading" class="spinner"/>
+            <span v-if="message" class="message">{{message}}</span>
+        </div>
+    </transition>
+
+</template>
+
+<script lang="ts">
+    import Vue from "vue";
+
+    export default Vue.extend({
+        props: {
+            message: String,
+        },
+    })
+</script>
+
+<style scoped lang="scss">
+    @import "common";
+    @import "mixins";
+
+    .spinner-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        .spinner {
+            animation: rotate 1s linear infinite;
+            background: url(/assets/images/loading.svg) no-repeat;
+            background-size: 2rem;
+            content: '';
+            display: inline-block;
+            height: 2rem;
+            transform-origin: center;
+            width: 2rem;
+            z-index: 1;
+            /*margin-right: 1rem;*/
+        }
+
+        .message {
+            margin-left: 1rem;
+        }
+    }
+
+
+</style>
