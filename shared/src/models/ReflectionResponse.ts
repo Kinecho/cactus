@@ -1,5 +1,4 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {JournalStatus} from "@shared/models/CactusMember";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",

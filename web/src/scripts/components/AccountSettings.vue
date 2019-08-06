@@ -74,6 +74,7 @@ import {NotificationStatus} from '@shared/models/CactusMember'
     import TimezonePicker from "@components/TimezonePicker.vue"
     import {ZoneInfo} from '@web/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
+    import {PageRoute} from '@web/PageRoutes'
 
     export default Vue.extend({
         components: {
@@ -88,6 +89,10 @@ import {NotificationStatus} from '@shared/models/CactusMember'
                 onData: ({member}) => {
                     this.member = member;
                     this.authLoaded = true;
+
+                    if (!member) {
+                        window.location.href = PageRoute.HOME;
+                    }
                 }
             })
         },
@@ -139,11 +144,18 @@ import {NotificationStatus} from '@shared/models/CactusMember'
                 console.log("Saving status...", status);
                 this.error = undefined;
                 if (this.member && this.member.email) {
-                    const result = await updateSubscriptionStatus(status, this.member.email)
+                    const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
                         console.log("Unsetting notification status change since the update failed");
+
+                        let errorMessage = "Oops, we were unable to save your email notification settings right now. Please try again later";
+
+                        if (result.error && result.error.title === "Member In Compliance State") {
+                            errorMessage = "Cactus is unable to subscribe you to receive email notifications because you  previously unsubscribed. Please email help@cactus.app to resolve this issue."
+                        }
+
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
-                        this.error = "Oops, we were unable to save your email notification settings right now. Please try again later";
+                        this.error = errorMessage;
                     }
                 }
             },

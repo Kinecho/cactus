@@ -418,7 +418,7 @@ module.exports = {
         "name": "email_action"
     },
     "account_settings": {
-        "title": "Account Settings",
+        "title": "Account | Cactus",
         "path": "/account",
         "reflectionPrompt": false,
         "includeInDev": true,
