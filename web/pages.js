@@ -416,5 +416,12 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "email_action"
+    },
+    "account_settings": {
+        "title": "Account Settings",
+        "path": "/account",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "account_settings"
     }
 }

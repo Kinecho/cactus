@@ -9,8 +9,13 @@ import ApiError from "@shared/api/ApiError";
 import {writeToFile} from "@api/util/FileUtil";
 import {
     CampaignEventData,
-    CleanedEmailEventData, EmailChangeEventData,
-    EventType, MemberUnsubscribeReport, ProfileUpdateEventData, SubscribeEventData,
+    CleanedEmailEventData,
+    EmailChangeEventData,
+    EventType,
+    ListMemberStatus,
+    MemberUnsubscribeReport,
+    ProfileUpdateEventData,
+    SubscribeEventData,
     UnsubscribeEventData,
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
@@ -27,6 +32,8 @@ import AdminSlackService, {
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import CactusMember from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
+import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
+import {getAuthUser} from "@api/util/RequestUtil";
 
 const app = express();
 
@@ -168,6 +175,72 @@ app.post("/", async (req: express.Request, res: express.Response) => {
 
         return res.send(result)
     }
+});
+
+app.put("/status", async (req: express.Request, res: express.Response) => {
+    const statusRequest = req.body as UpdateStatusRequest;
+
+
+    // return res.sendStatus(500)
+
+    const user = await getAuthUser(req);
+    if (!user) {
+        res.sendStatus(401);
+        return;
+    }
+
+    if (user.email !== statusRequest.email) {
+        res.sendStatus(403);
+        return;
+    }
+
+    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+    let cactusMember: CactusMember | undefined = undefined;
+    if (response.listMember) {
+        cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
+        console.log("updated member after changing the status", cactusMember);
+    }
+
+
+    const attachments: SlackAttachment[] = [];
+    const fields: SlackAttachmentField[] = [
+        {
+            title: "Email",
+            value: statusRequest.email,
+            short: false,
+        },
+        {
+            title: "Reason Code",
+            value: `Manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"} from the App`,
+            short: false,
+        },
+
+        {
+            title: "Cactus Member ID",
+            value: (cactusMember ? cactusMember.id : "") || "not found",
+            short: false,
+        },
+        {
+            title: "Sign Up Date",
+            value: (cactusMember && cactusMember.signupConfirmedAt) ? getISODate(cactusMember.signupConfirmedAt) : "Unknown"
+        }
+    ];
+
+    attachments.push({
+        title: `${statusRequest.email} ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        fields: fields
+    });
+
+    const message = {
+        text: `User Has manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        attachments
+    };
+
+    await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+
+
+    res.send(response);
+
 });
 
 

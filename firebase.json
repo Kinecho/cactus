@@ -49,6 +49,10 @@
         ],
         "rewrites": [
             {
+                "source": "/account",
+                "destination": "/account_settings.html"
+            },
+            {
                 "source": "/auth-actions",
                 "destination": "/email_action.html"
             },

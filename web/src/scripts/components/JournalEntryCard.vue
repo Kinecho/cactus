@@ -8,7 +8,9 @@
 
             <div v-click-outside="closeMenu">
                 <button @click="toggleMenu()" class="secondary icon dots wiggle" v-bind:class="{ open: menuOpen }" v-show="!doReflect && responsesLoaded && (responses.length > 0 || responseText)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M24 27.059A3.53 3.53 0 1 1 24 20a3.53 3.53 0 0 1 0 7.059zm16.47 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059zm-32.94 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M24 27.059A3.53 3.53 0 1 1 24 20a3.53 3.53 0 0 1 0 7.059zm16.47 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059zm-32.94 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059z"/>
+                    </svg>
                 </button>
                 <transition name="fade-down">
                     <nav class="moreMenu" v-show="menuOpen">
@@ -33,22 +35,30 @@
             </div>
             <nav class="buttonContainer">
                 <button class="primary small" v-on:click="doneEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M6.008 24.462a1.176 1.176 0 0 0-1.663 1.664l11.764 11.765c.46.46 1.205.46 1.664 0l25.882-25.883a1.176 1.176 0 1 0-1.663-1.663l-25.05 25.05L6.007 24.462z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M6.008 24.462a1.176 1.176 0 0 0-1.663 1.664l11.764 11.765c.46.46 1.205.46 1.664 0l25.882-25.883a1.176 1.176 0 1 0-1.663-1.663l-25.05 25.05L6.007 24.462z"/>
+                    </svg>
                     Done
                 </button>
                 <button class="secondary small" v-on:click="cancelEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M13.851 12l7.762 7.761a1.3 1.3 0 0 1 0 1.852c-.249.248-.58.387-.926.387-.347 0-.678-.14-.926-.387L12 13.85l-7.761 7.762c-.248.248-.58.387-.926.387-.346 0-.677-.14-.926-.387a1.3 1.3 0 0 1 0-1.852L10.15 12 2.387 4.239a1.3 1.3 0 0 1 0-1.852 1.3 1.3 0 0 1 1.852 0L12 10.15l7.761-7.762a1.3 1.3 0 0 1 1.852 0 1.3 1.3 0 0 1 0 1.852L13.85 12z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M13.851 12l7.762 7.761a1.3 1.3 0 0 1 0 1.852c-.249.248-.58.387-.926.387-.347 0-.678-.14-.926-.387L12 13.85l-7.761 7.762c-.248.248-.58.387-.926.387-.346 0-.677-.14-.926-.387a1.3 1.3 0 0 1 0-1.852L10.15 12 2.387 4.239a1.3 1.3 0 0 1 0-1.852 1.3 1.3 0 0 1 1.852 0L12 10.15l7.761-7.762a1.3 1.3 0 0 1 1.852 0 1.3 1.3 0 0 1 0 1.852L13.85 12z"/>
+                    </svg>
                     Cancel
                 </button>
             </nav>
         </form>
         <nav v-show="!doReflect && responsesLoaded && (responses.length === 0 || !responseText)" class="buttonContainer">
             <button v-on:click="startEditing" class="primary small wiggle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M34.123 5.695a5.786 5.786 0 1 1 8.182 8.182l-27.59 27.591a1.104 1.104 0 0 1-.514.29l-8.829 2.208a1.104 1.104 0 0 1-1.338-1.338l2.207-8.83c.049-.194.15-.37.29-.512L34.124 5.695zM13.37 39.692l27.374-27.375a3.579 3.579 0 0 0-5.06-5.061L8.307 34.63 6.621 41.38l6.749-1.687z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                    <path d="M34.123 5.695a5.786 5.786 0 1 1 8.182 8.182l-27.59 27.591a1.104 1.104 0 0 1-.514.29l-8.829 2.208a1.104 1.104 0 0 1-1.338-1.338l2.207-8.83c.049-.194.15-.37.29-.512L34.124 5.695zM13.37 39.692l27.374-27.375a3.579 3.579 0 0 0-5.06-5.061L8.307 34.63 6.621 41.38l6.749-1.687z"/>
+                </svg>
                 Reflect
             </button>
             <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="secondary small button wiggle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                    <path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/>
+                </svg>
                 Go Deeper
             </a>
         </nav>
@@ -65,6 +75,7 @@
     import ReflectionPromptService from "@web/services/ReflectionPromptService"
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import SentPromptService from "@web/services/SentPromptService"
+    import {clickOutsideDirective} from '@web/vueDirectives'
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -81,6 +92,9 @@
     }
 
     export default Vue.extend({
+        directives: {
+            'click-outside': clickOutsideDirective(),
+        },
         props: {
             sentPrompt: SentPrompt
         },
@@ -400,6 +414,7 @@
         margin-right: .8rem;
         transition: all .2s ease;
         outline: transparent none;
+
         &.open {
             transform: rotate(90deg);
             transform-origin: center;
@@ -413,7 +428,7 @@
     }
 
     .wiggle:hover svg {
-      animation: wiggle .5s forwards;
+        animation: wiggle .5s forwards;
     }
 
 </style>

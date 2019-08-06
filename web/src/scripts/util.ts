@@ -1,7 +1,6 @@
 import {QueryParam} from "@shared/util/queryParams";
 import {isValidEmail} from "@shared/util/StringUtil";
 import NavBar from "@components/NavBar.vue";
-import {configureDirectives} from "@web/vueDirectives";
 import * as qs from "qs";
 
 export enum LocalStorageKey {
@@ -270,7 +269,7 @@ export function setupNavigation(options: NavigationOptions) {
     const $header = $headers ? $headers.item(0) : undefined;
     const $nav = document.getElementById("#top-nav");
 
-    configureDirectives();
+
 
     if (!$nav && !$header) {
         console.warn("Can not find the Vue root element for the nav bar. Not initializing");

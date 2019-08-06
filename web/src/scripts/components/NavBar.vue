@@ -49,6 +49,7 @@
     import {getInitials} from '@shared/util/StringUtil'
     import {PageRoute} from '@web/PageRoutes'
     import {gtag} from "@web/analytics"
+    import {clickOutsideDirective} from '@web/vueDirectives'
 
     declare interface LinkData {
         title: string,
@@ -63,7 +64,11 @@
         authLoaded: boolean,
     }
 
+
     export default Vue.extend({
+        directives: {
+            'click-outside': clickOutsideDirective(),
+        },
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
                 console.log("auth state changed", user);

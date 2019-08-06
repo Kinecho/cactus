@@ -57,6 +57,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
 import {CactusConfig} from "@shared/CactusConfig";
+import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
 
 interface MailchimpAuth {
     username: string,
@@ -421,6 +422,32 @@ export default class MailchimpService {
         const response = await this.request.post(url, job);
         return response.data;
     }
+
+    async updateMemberStatus(updateRequest: UpdateStatusRequest): Promise<UpdateStatusResponse> {
+        const memberId = getMemberIdFromEmail(updateRequest.email);
+        console.log("Updating member status with patch", updateRequest);
+
+        try {
+            const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}`, {
+                status: updateRequest.status
+            });
+
+
+            const member:ListMember = response.data ;
+
+            return {success: true, listMember: member};
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            if (axiosError.response) {
+                console.error("failed to update status", error.response);
+                return {success: false, error: error.response.data}
+            } else {
+                console.error("Unknown error while updating member status", error);
+                return {success: false,  error: error};
+            }
+        }
+    }
+
 
     async updateTags(tagRequest: UpdateTagsRequest): Promise<UpdateTagResponse> {
         const memberId = getMemberIdFromEmail(tagRequest.email);

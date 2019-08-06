@@ -106,7 +106,7 @@ module.exports = (config) => {
                             },
                         },
                         {
-                            test: /\.scss$/,
+                            test: /\.(css|scss)$/,
                             use: [
                                 'style-loader',
                                 MiniCssExtractPlugin.loader,
