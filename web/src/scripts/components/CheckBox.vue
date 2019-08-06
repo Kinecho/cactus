@@ -127,7 +127,7 @@
             }
 
             &:checked ~ .checkmark {
-                background-color: #2196F3;
+                background-color: $green;
                 &:after {
                     display: block;
                 }

@@ -345,7 +345,7 @@ export function setupJumpToForm(buttonClass: string = "jump-to-form") {
 
 export async function updateSubscriptionStatus(status: NotificationStatus, email: string): Promise<UpdateStatusResponse> {
 
-    const updateRequest: UpdateStatusRequest = {status: ListMemberStatus.subscribed, email:email + "badmeail"};
+    const updateRequest: UpdateStatusRequest = {status: ListMemberStatus.subscribed, email: email};
     switch (status) {
         case NotificationStatus.NOT_SET:
             //nothing to do here
@@ -359,7 +359,14 @@ export async function updateSubscriptionStatus(status: NotificationStatus, email
     }
 
     const headers = await getAuthHeaders();
-    const response = await request.put(Endpoint.updateSubscriberStatus, updateRequest, {headers: {...headers}});
+    try {
+        const response = await request.put(Endpoint.updateSubscriberStatus, updateRequest, {headers: {...headers}});
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        console.error("Unable to update the user's status");
+        //TODO: Show snackbar error;
+        return {error: error, success: false};
+    }
+
 }

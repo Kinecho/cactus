@@ -1,11 +1,19 @@
+import {NotificationStatus} from '@shared/models/CactusMember'
+import {NotificationStatus} from '@shared/models/CactusMember'
+import {NotificationStatus} from '@shared/models/CactusMember'
 <template>
     <div>
         <NavBar/>
         <div class="container">
-            <h1>Account Settings</h1>
+            <h1>Account</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
             </div>
+            <div v-if="error" class="alert error">
+                {{error}}
+            </div>
+
+
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <div class="item">
@@ -42,21 +50,6 @@
                         <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
                     </div>
-
-                    <hr/>
-                    <div class="item muted">
-                        <label class="label">
-                            Member ID
-                        </label>
-                        <pre class="value">{{member.id}}</pre>
-                    </div>
-                    <div class="item muted">
-                        <label class="label">
-                            User ID
-                        </label>
-                        <pre class="value">{{member.userId}}</pre>
-                    </div>
-
                 </div>
             </transition>
             <div>
@@ -107,6 +100,7 @@
             authLoaded: boolean,
             member: CactusMember | undefined | null,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
+            error: string | undefined,
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -116,6 +110,7 @@
                 authLoaded: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
+                error: undefined,
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -142,8 +137,14 @@
             },
             async saveEmailStatus(status: NotificationStatus) {
                 console.log("Saving status...", status);
+                this.error = undefined;
                 if (this.member && this.member.email) {
-                    await updateSubscriptionStatus(status, this.member.email)
+                    const result = await updateSubscriptionStatus(status, this.member.email)
+                    if (!result.success) {
+                        console.log("Unsetting notification status change since the update failed");
+                        this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
+                        this.error = "Oops, we were unable to save your email notification settings right now. Please try again later";
+                    }
                 }
             },
             async tzSelected(value: ZoneInfo | null | undefined) {
