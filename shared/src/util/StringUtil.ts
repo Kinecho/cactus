@@ -32,7 +32,7 @@ export function appendQueryParams(url:string, params:any):string{
         return url;
     }
 
-    let parsed = queryString.parseUrl(url);
+    const parsed = queryString.parseUrl(url);
     const combined = {...params, ...parsed.query};
     return `${parsed.url}?${queryString.stringify(combined)}`;
 

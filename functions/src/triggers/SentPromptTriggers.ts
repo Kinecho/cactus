@@ -44,14 +44,14 @@ export const sentPromptPushNotificationTrigger = functions.firestore
 
 async function sendPush(member: CactusMember, prompt: ReflectionPrompt): Promise<any> {
 
-    let messaging = admin.messaging();
+    const messaging = admin.messaging();
 
     if (!member.fcmTokens || !member.fcmTokens.length) {
         console.log("Member doesn't have any device tokens. Returning");
         return
     }
 
-    let tokens = member.fcmTokens;
+    const tokens = member.fcmTokens;
     const tasks: Promise<any>[] = tokens.map(token => {
         return new Promise(async (resolve, reject) => {
             try {
@@ -76,7 +76,7 @@ async function sendPush(member: CactusMember, prompt: ReflectionPrompt): Promise
         })
     });
 
-    const resutls = await Promise.all(tasks);
-    console.log(`Got ${resutls.length} resuluts`);
+    const results = await Promise.all(tasks);
+    console.log(`Got ${results.length} resuluts`);
 
 }
