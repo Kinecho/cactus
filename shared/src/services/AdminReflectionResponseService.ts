@@ -11,6 +11,7 @@ import {
     UpdateMergeFieldRequest, UpdateMergeFieldResponse, UpdateTagResponse,
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
+import {ApiResponse} from "@shared/api/ApiTypes";
 
 
 export interface ResetUserResponse {
@@ -18,7 +19,7 @@ export interface ResetUserResponse {
     unknownError?: any
     mergeResponse: UpdateMergeFieldResponse,
     tagResponse: UpdateTagResponse,
-    lastReplyString?:string,
+    lastReplyString?: string,
 }
 
 
@@ -39,7 +40,7 @@ export default class AdminReflectionResponseService {
 
     }
 
-    getCollectionRef(){
+    getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses);
     }
 
@@ -61,6 +62,29 @@ export default class AdminReflectionResponseService {
         console.log("getting response from collection", collection);
 
         throw new Error("Not implemented");
+    }
+
+    static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
+        const mailchimpService = MailchimpService.getSharedInstance();
+
+        if (!email) {
+            console.warn("No email provided to setLastJournalDate function");
+            return {success: false, error: "No email provided"};
+        }
+
+        const lastJournalString = getMailchimpDateString(date);
+        const lastJournalDate = getDateFromISOString(lastJournalString);
+        const mergeRequest: UpdateMergeFieldRequest = {
+            email,
+            mergeFields: {
+                [MergeField.LAST_JNL]: lastJournalString
+            }
+        };
+
+        const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+        await AdminCactusMemberService.getSharedInstance().updateLastJournalByEmail(email, lastJournalDate);
+        return mergeResponse;
+
     }
 
     static async resetUserReminder(email?: string): Promise<ResetUserResponse> {
@@ -101,6 +125,11 @@ export default class AdminReflectionResponseService {
 
         const tagResponse = await mailchimpService.updateTags(tagRequest);
 
-        return {success: tagResponse.success && tagResponse.success, tagResponse, mergeResponse, lastReplyString: lastReplyString};
+        return {
+            success: tagResponse.success && tagResponse.success,
+            tagResponse,
+            mergeResponse,
+            lastReplyString: lastReplyString
+        };
     }
 }

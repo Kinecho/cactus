@@ -1,10 +1,15 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import {JournalStatus} from "@shared/models/CactusMember";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
     JOURNAL_WEB = "JOURNAL_WEB",
     JOURNAL_IOS = "JOURNAL_IOS",
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
+}
+
+export function isJournal(medium?: ResponseMedium): boolean {
+    return medium && [ResponseMedium.JOURNAL_ANDROID, ResponseMedium.JOURNAL_IOS, ResponseMedium.JOURNAL_WEB].includes(medium) || false;
 }
 
 export function getResponseMediumDisplayName(medium?: ResponseMedium): string {

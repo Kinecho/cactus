@@ -55,6 +55,7 @@ export enum MergeField {
     REF_EMAIL = "REF_EMAIL",
     LAST_REPLY = "LAST_REPLY",
     JNL_STATUS = "JNL_STATUS",
+    LAST_JNL = "LAST_JNL",
 }
 
 export enum TagName {

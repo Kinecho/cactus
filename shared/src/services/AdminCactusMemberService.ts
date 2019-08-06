@@ -203,4 +203,16 @@ export default class AdminCactusMemberService {
         await this.save(member);
         return member;
     }
+
+
+    async updateLastJournalByEmail(email: string, lastJournal: Date = new Date()): Promise<CactusMember | undefined> {
+        const member = await this.getMemberByEmail(email);
+        if (!member) {
+            return
+        }
+
+        member.lastJournalEntryAt = lastJournal;
+        await this.save(member);
+        return member;
+    }
 }

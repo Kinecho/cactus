@@ -3,7 +3,8 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import ReflectionResponse, {
     getResponseMediumDisplayName,
-    getResponseMediumSlackEmoji
+    getResponseMediumSlackEmoji,
+    isJournal
 } from "@shared/models/ReflectionResponse";
 import AdminSlackService, {
     AttachmentColor,
@@ -75,6 +76,14 @@ export const onReflectionResponseCreated = functions.firestore
                 }
             } else {
                 console.log("not resetting user reminder for email " + memberEmail)
+            }
+
+
+            if (member && memberEmail &&  isJournal(reflectionResponse.responseMedium)) {
+                const setLastJournalDateResult = await AdminReflectionResponseService.setLastJournalDate(memberEmail);
+                if (setLastJournalDateResult.error) {
+                    console.error("Failed to set the last journal date", setLastJournalDateResult.error);
+                }
             }
 
 

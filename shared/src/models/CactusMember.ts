@@ -48,6 +48,7 @@ export default class CactusMember extends BaseModel {
     mailchimpListMember?: ListMember;
     lastSyncedAt?: Date;
     lastReplyAt?: Date;
+    lastJournalEntryAt?: Date;
 
     unsubscribeReason?: string;
     unsubscribedAt?: Date;
