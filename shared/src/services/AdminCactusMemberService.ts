@@ -1,8 +1,8 @@
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
-import CactusMember, {Field, JournalStatus} from "@shared/models/CactusMember";
+import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {getDateFromISOString} from "@shared/util/DateUtil";
-import {ListMember, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
+import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 
 let firestoreService: AdminFirestoreService;
 
@@ -105,13 +105,39 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
+    getNotificationStatusFromSubscriberStatus(status: ListMemberStatus): NotificationStatus {
+        let notification = NotificationStatus.NOT_SET;
+
+        switch (status) {
+            case ListMemberStatus.subscribed:
+                notification = NotificationStatus.ACTIVE;
+                break;
+            case ListMemberStatus.unsubscribed:
+                notification = NotificationStatus.INACTIVE;
+                break;
+            case ListMemberStatus.cleaned:
+                notification = NotificationStatus.INACTIVE;
+                break;
+            case ListMemberStatus.pending:
+                notification = NotificationStatus.NOT_SET;
+                break;
+            default:
+                console.warn(`Unable to handle list member status ${status}`);
+        }
+        return notification;
+    }
+
     async updateFromMailchimpListMember(listMember: ListMember, unsubscribeReport: Partial<MemberUnsubscribeReport> | undefined = undefined): Promise<CactusMember | undefined> {
         let cactusMember = await this.getByMailchimpWebId(listMember.web_id);
-        if (cactusMember) {
-            console.log("Got cactus member", cactusMember.email);
-        } else {
+        if (!cactusMember) {
+            cactusMember = await this.getMemberByEmail(listMember.email_address);
+        }
+
+        if (!cactusMember) {
             cactusMember = new CactusMember();
             cactusMember.createdAt = new Date()
+        } else {
+            console.log("Got cactus member", cactusMember.email);
         }
 
         if (listMember.unsubscribe_reason) {
@@ -123,6 +149,9 @@ export default class AdminCactusMemberService {
             cactusMember.unsubscribeReason = unsubscribeReport.reason;
             cactusMember.unsubscribeCampaignId = unsubscribeReport.campaign_id;
         }
+
+
+        cactusMember.notificationSettings.email = this.getNotificationStatusFromSubscriberStatus(listMember.status);
 
         cactusMember.mailchimpListMember = listMember;
         cactusMember.email = listMember.email_address || cactusMember.email;

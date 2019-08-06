@@ -1,6 +1,6 @@
 <template>
-    <label class="checkbox-container">
-        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput">
+    <label :class="['checkbox-container', {disabled}]">
+        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
         <span class="checkmark"></span>
         <span class="checkbox-label">{{ label }}</span>
     </label>
@@ -16,6 +16,10 @@
         props: {
             value: {
                 type: String,
+            },
+            disabled: {
+                type: Boolean,
+                default: false,
             },
             modelValue: {
                 default: false,
@@ -84,6 +88,11 @@
         position: relative;
         cursor: pointer;
         margin-bottom: 1rem;
+        user-select: none;
+        &.disabled {
+            cursor: default;
+            color: $lightText;
+        }
 
         .checkbox-label {
             font-weight: normal;
@@ -102,6 +111,20 @@
             cursor: pointer;
             height: 0;
             width: 0;
+
+            &:disabled ~ .checkmark {
+                background-color: $lightText;
+                cursor: default;
+            }
+
+
+
+            &:disabled:checked ~ .checkmark {
+                background-color: $lightText;
+                &:after {
+                    display: block;
+                }
+            }
 
             &:checked ~ .checkmark {
                 background-color: #2196F3;

@@ -60,6 +60,7 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
+    timeZone?: string|null;
 
 
     prepareForFirestore(): any {

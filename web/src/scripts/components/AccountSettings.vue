@@ -7,19 +7,15 @@
                 <Spinner message="Loading"/>
             </div>
             <transition name="fade-in" appear>
-                <div v-if="member">
+                <div v-if="member" class="member-container">
                     <div class="item">
                         <label class="label">
-                            Member ID
+                            Member Since
                         </label>
-                        <span class="value">{{member.id}}</span>
+                        <span class="value">{{ memberSince }}</span>
                     </div>
-                    <div class="item">
-                        <label class="label">
-                            User ID
-                        </label>
-                        <span class="value">{{member.userId}}</span>
-                    </div>
+
+
                     <div class="item">
                         <label class="label">
                             Email
@@ -34,22 +30,33 @@
                     </div>
                     <div class="item">
                         <label class="label">
-                            Member Since
+                            Time Zone
                         </label>
-                        <span class="value">{{ memberSince }}</span>
+                        <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                     </div>
 
                     <div class="item">
                         <label class="label">
                             Notifications
                         </label>
-                        <CheckBox label="Email" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
-                        <CheckBox label="Push" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                        <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                        <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
                     </div>
 
-                    <div>
-                        <button class="button" @click="save">Save</button>
+                    <hr/>
+                    <div class="item muted">
+                        <label class="label">
+                            Member ID
+                        </label>
+                        <pre class="value">{{member.id}}</pre>
                     </div>
+                    <div class="item muted">
+                        <label class="label">
+                            User ID
+                        </label>
+                        <pre class="value">{{member.userId}}</pre>
+                    </div>
+
                 </div>
             </transition>
             <div>
@@ -71,6 +78,9 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
+    import TimezonePicker from "@components/TimezonePicker.vue"
+    import {ZoneInfo} from '@web/timezones'
+    import {updateSubscriptionStatus} from '@web/mailchimp'
 
     export default Vue.extend({
         components: {
@@ -78,6 +88,7 @@
             Footer,
             Spinner,
             CheckBox,
+            TimezonePicker,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -120,12 +131,25 @@
             },
             displayName(): string {
                 return this.member ? `${this.member.firstName} ${this.member.lastName}`.trim() : '';
-            }
+            },
         },
         methods: {
-            async save(){
-                if (this.member){
-                    await CactusMemberService.sharedInstance.save(this.member)
+            async save() {
+                if (this.member) {
+                    await CactusMemberService.sharedInstance.save(this.member);
+                    console.log("Save success");
+                }
+            },
+            async saveEmailStatus(status: NotificationStatus) {
+                console.log("Saving status...", status);
+                if (this.member && this.member.email) {
+                    await updateSubscriptionStatus(status, this.member.email)
+                }
+            },
+            async tzSelected(value: ZoneInfo | null | undefined) {
+                if (this.member) {
+                    this.member.timeZone = value ? value.zoneName : null;
+                    await this.save();
                 }
             }
         }
@@ -140,15 +164,23 @@
 
     .container {
         padding: 1rem;
+        max-width: 90rem;
+        margin: 0 auto;
 
         .loading {
             padding: 0 4rem;
         }
 
+        .member-container {
+
+        }
+
         .item {
             display: flex;
             flex-direction: column;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
+            max-width: 50rem;
+
 
             .label {
                 font-weight: bold;
@@ -159,7 +191,18 @@
             .value {
                 font-size: 1.8rem;
                 color: $darkText;
+
+
             }
+
+            &.muted {
+                color: $lightText
+            }
+
+        }
+
+        hr {
+            margin: 2rem 0;
         }
     }
 

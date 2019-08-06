@@ -1,12 +1,15 @@
 import "firebase/functions"
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {Endpoint, request} from "@web/requestUtils";
+import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag} from "@web/analytics";
 import {addModal, getQueryParam, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
 import {isValidEmail} from "@shared/util/StringUtil";
+import {NotificationStatus} from "@shared/models/CactusMember";
+import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
+import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 /**
  *
@@ -338,4 +341,25 @@ export function setupJumpToForm(buttonClass: string = "jump-to-form") {
             }
         })
     })
+}
+
+export async function updateSubscriptionStatus(status: NotificationStatus, email: string): Promise<UpdateStatusResponse> {
+
+    const updateRequest: UpdateStatusRequest = {status: ListMemberStatus.subscribed, email:email + "badmeail"};
+    switch (status) {
+        case NotificationStatus.NOT_SET:
+            //nothing to do here
+            return {success: true};
+        case NotificationStatus.ACTIVE:
+            updateRequest.status = ListMemberStatus.subscribed;
+            break;
+        case NotificationStatus.INACTIVE:
+            updateRequest.status = ListMemberStatus.unsubscribed;
+            break;
+    }
+
+    const headers = await getAuthHeaders();
+    const response = await request.put(Endpoint.updateSubscriberStatus, updateRequest, {headers: {...headers}});
+
+    return response.data;
 }

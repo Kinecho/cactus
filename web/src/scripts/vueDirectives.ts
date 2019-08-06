@@ -1,7 +1,7 @@
-import Vue from "vue";
+import Vue, {DirectiveOptions} from "vue";
 
-export function configureDirectives() {
-    Vue.directive('click-outside', {
+export function clickOutsideDirective():DirectiveOptions{
+    return {
         bind: function (el, binding, vNode) {
             // Provided expression must evaluate to a function.
             if (typeof binding.value !== 'function') {
@@ -35,5 +35,9 @@ export function configureDirectives() {
             }
         }
 
-    })
+    }
 }
+
+// export function configureDirectives() {
+//     Vue.directive('click-outside', clickOutsideDirective())
+// }

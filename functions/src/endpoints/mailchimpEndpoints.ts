@@ -27,6 +27,8 @@ import AdminSlackService, {
 import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
 import CactusMember from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
+import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
+import {getAuthUser} from "@api/util/RequestUtil";
 
 const app = express();
 
@@ -168,6 +170,30 @@ app.post("/", async (req: express.Request, res: express.Response) => {
 
         return res.send(result)
     }
+});
+
+app.put("/status", async (req: express.Request, res: express.Response) => {
+    const statusRequest = req.body as UpdateStatusRequest;
+    const user = await getAuthUser(req);
+    if (!user) {
+        res.sendStatus(401);
+        return;
+    }
+
+    if (user.email !== statusRequest.email) {
+        res.sendStatus(403);
+        return;
+    }
+
+    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+    if (response.listMember) {
+        const updateResponse = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
+        console.log("updated member after changing the status", updateResponse);
+    }
+
+
+    res.send(response);
+
 });
 
 
