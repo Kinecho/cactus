@@ -4,10 +4,12 @@ import * as functions from "firebase-functions";
 import chalk from "chalk";
 import * as crypto from "crypto";
 import {getConfig} from "@api/config/configService";
-import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminSlackService, {SlackAttachmentField, SlackMessage} from "@shared/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import {getDateAtMidnightDenver, getISODate} from "@shared/util/DateUtil";
 
 
 const app = express();
@@ -32,7 +34,7 @@ export interface CommandPayload {
     trigger_id: string,
 }
 
-export interface CommandResponse {
+export interface CommandResponse extends SlackMessage {
     text: string,
 }
 
@@ -62,9 +64,11 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
 
     const payload: CommandPayload = req.body;
 
+
     const commandText = payload.text;
     const [commandName, ...rest] = commandText.split(" ");
 
+    resp.status(200).send({text: `:hourglass_flowing_sand: Processing your request \`${commandName} ${rest}\``});
 
     let commandResponse: CommandResponse;
     switch (commandName) {
@@ -77,14 +81,17 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
         case "durumuru":
             commandResponse = await _cmdDuruMuruToday(payload, rest);
             break;
+        case "today":
+            commandResponse = await _cmdToday(payload, rest);
+            break;
         default:
             commandResponse = {text: `Unknown command argument *${commandText}*`};
             break;
     }
+    console.log("got command response", commandResponse);
+    await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, commandResponse);
 
-    await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: commandResponse.text});
 
-    resp.sendStatus(204);
     return;
 });
 
@@ -110,6 +117,30 @@ async function _cmdActiveUserCount(payload: CommandPayload, params: string[]): P
     return {text: `There have been *${activeUsers}* unique users with a reflection response over the last *${days}* days`}
 }
 
+async function _cmdToday(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
+    console.log("Getting today's stuff");
+    const todayDate = getDateAtMidnightDenver(new Date());
+
+
+    const fields: SlackAttachmentField[] = [];
+    const tasks = [
+        AdminCactusMemberService.getSharedInstance().getConfirmedSignupsSinceDate(todayDate),
+    ];
+    const [signups] = await Promise.all(tasks);
+
+    console.log(`Got ${signups.length} members singed up since ${getISODate(todayDate)}`);
+    fields.push({
+        title: "Confirmed Signups",
+        value: `${signups.length}`,
+        short: false,
+    });
+
+    let text = "Here are today's stats";
+    const attachments = [{fields}];
+    const response = {text, attachments};
+
+    return response;
+}
 
 async function _cmdDuruMuruToday(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
     let days = 1;
@@ -122,7 +153,7 @@ async function _cmdDuruMuruToday(payload: CommandPayload, params: string[]): Pro
     const activeUsersToday = await getActiveUserCountForTrailingDays(1);
     const activeUsersL30 = await getActiveUserCountForTrailingDays(30);
 
-    return {text: `*${(activeUsersToday/activeUsersL30).toFixed(3)} (${activeUsersToday}/${activeUsersL30})* is today's DURU/MURU\nThat is, ${activeUsersToday} unique users have reflected in the last 24 hours, and ${activeUsersL30} unique users have reflected in the last 30 days.`}
+    return {text: `*${(activeUsersToday / activeUsersL30).toFixed(3)} (${activeUsersToday}/${activeUsersL30})* is today's DURU/MURU\nThat is, ${activeUsersToday} unique users have reflected in the last 24 hours, and ${activeUsersL30} unique users have reflected in the last 30 days.`}
 }
 
 app.post("/actions", async (req: functions.https.Request | any, resp: functions.Response) => {

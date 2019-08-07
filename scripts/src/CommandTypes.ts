@@ -63,7 +63,7 @@ export abstract class FirebaseCommand implements Command {
         const config = await getCactusConfig(project);
 
         console.log("initializing all services");
-        initializeServices(config, app, admin.firestore.Timestamp);
+        initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
 
         console.group(chalk.yellow(`${this.name} Logs:`));

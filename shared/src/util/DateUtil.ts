@@ -71,6 +71,16 @@ export function getDateFromISOString(input?: ISODate): Date | undefined {
     return DateTime.fromISO(input).toUTC().toJSDate() || undefined;
 }
 
+export function getDateAtMidnightDenver(date: Date = new Date()): Date {
+    const dt = DateTime.fromJSDate(date).set({
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0
+    }).setZone(mailchimpTimeZone, {keepLocalTime: true});
+    return dt.toJSDate();
+}
+
 export function stringFromISODate(input?: ISODate | null, format = "yyyy-LL-dd") {
     if (!input) {
         return null;
