@@ -10,6 +10,7 @@ import AdminSlackService from "@shared/services/AdminSlackService";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
+import GoogleSheetsService from "@shared/services/GoogleSheetsService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any) {
     console.log("initializing all services");
@@ -24,6 +25,5 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminReflectionPromptService.initialize();
     AdminSentPromptService.initialize();
     AdminSentCampaignService.initialize();
-
-
+    GoogleSheetsService.initialize(config);
 }

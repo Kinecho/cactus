@@ -36,6 +36,7 @@
         "firebase-tools": "^7.0.0",
         "fs-extra": "^8.1.0",
         "get-urls": "^9.1.0",
+        "googleapis": "^42.0.0",
         "luxon": "^1.16.0",
         "md5": "^2.2.1",
         "module-alias": "^2.2.0",
