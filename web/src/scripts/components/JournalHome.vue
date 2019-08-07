@@ -18,8 +18,8 @@
 
                 <div class="section-container" v-if="loggedIn && loginReady && !sentPrompts.length && sentPromptsLoaded" key="empty">
                     <section class="empty journalList">
-                        <h1>Welcome to your Cactus Journal</h1>
-                        <p>Your journal will soon fill with questions to reflect on each day. Your first question will arrive in the morning. For now, sit back and be confident in your choice of a healthier, happier mindset.</p>
+                        <h1>Welcome to Cactus</h1>
+                        <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in your choice to develop a healthier, happier mindset.</p>
                         <img class="graphic" src="assets/images/music2.svg" alt="" />
                     </section>
                 </div>

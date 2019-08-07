@@ -1,4 +1,5 @@
 import * as queryString from "query-string";
+import CactusMember from "@shared/models/CactusMember";
 import * as camelcase from "camelcase";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
@@ -18,18 +19,17 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
-export function stripQueryParams(url:string): {url:string,query?:any}{
+export function stripQueryParams(url: string): { url: string, query?: any } {
     const query = queryString.parseUrl(url);
     console.log(query);
-
 
 
     return {url: query.url, query: query.query};
 
 }
 
-export function appendQueryParams(url:string, params:any):string{
-    if (!params || Object.keys(params).length === 0){
+export function appendQueryParams(url: string, params: any): string {
+    if (!params || Object.keys(params).length === 0) {
         return url;
     }
 
@@ -39,7 +39,7 @@ export function appendQueryParams(url:string, params:any):string{
 
 }
 
-export function appendDomain(input:string|null|undefined, domain:string|undefined=undefined): string {
+export function appendDomain(input: string | null | undefined, domain: string | undefined = undefined): string {
     let toProcess = input;
 
     if (!toProcess) {
@@ -57,7 +57,7 @@ export function appendDomain(input:string|null|undefined, domain:string|undefine
 
     if (domain && !name.startsWith("http") && !domain.includes("localhost")) {
         return `https://${domain}${name}`;
-    } else if (domain && !name.startsWith("http")){
+    } else if (domain && !name.startsWith("http")) {
         return `http://${domain}${name}`;
     }
 
@@ -82,7 +82,7 @@ export function getUrlFromInput(input: string | null | undefined, domain: string
 
     if (domain && !name.startsWith("http") && !domain.includes("localhost")) {
         return `https://${domain}${name}`;
-    } else if (domain && !name.startsWith("http")){
+    } else if (domain && !name.startsWith("http")) {
         return `http://${domain}${name}`;
     }
 
@@ -116,6 +116,13 @@ export function destructureDisplayName(displayName?: string | null): { firstName
 
     return {}
 
+}
+
+export function getFullName(member?: CactusMember): string {
+    if (!member) {
+        return "";
+    }
+    return `${member.firstName || ""} ${member.lastName || ""}`.trim();
 }
 
 export function getInitials(input: string): string {

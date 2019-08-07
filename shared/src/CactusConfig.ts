@@ -35,6 +35,7 @@ export interface CactusConfig {
             general: string,
             activity: string,
             data_log: string,
+            [key: string] : string,
         }
         app: {
             app_id: string,
@@ -72,6 +73,7 @@ export interface CactusConfig {
         api_key: string,
         template_ids: {
             magic_link: string,
+            magic_link_new_user: string,
         }
     },
     sheets: {

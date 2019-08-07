@@ -1,5 +1,5 @@
 import "@styles/pages/index.scss"
-import {configureMailchimpSignupForm, setupJumpToForm} from '@web/mailchimp'
+import {configureLoginForm, setupJumpToForm} from '@web/mailchimp'
 import {initializeFirebase} from "@web/firebase";
 import {setupNavigation} from "@web/util";
 
@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', function () {
     setupNavigation({stickyNav: true, showSignupButton: true, largeLogoOnDesktop: true, showLoginButton: true});
     //TODO: change these to use the new flows, commented out below
     //these are the mailchimp signup flows
-    configureMailchimpSignupForm("email-form-bottom");
-    configureMailchimpSignupForm("sign-up-top");
+    // configureMailchimpSignupForm("email-form-bottom");
+    // configureMailchimpSignupForm("sign-up-top");
 
     //Below is the new, firebase auth method
-    // configureLoginForm("email-form-bottom");
-    // configureLoginForm("sign-up-top");
+    configureLoginForm("email-form-bottom");
+    configureLoginForm("sign-up-top");
 
     setupJumpToForm();
 });
