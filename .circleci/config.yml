@@ -41,6 +41,7 @@ commands:
             fi
             echo "Slack GIT Link is \"${SLACK_GIT_LINK}\""
             export SLACK_GIT_LINK
+            echo 'export SLACK_GIT_LINK=$SLACK_GIT_LINK' >> $BASH_ENV
   restore-module:
     parameters:
       module:
