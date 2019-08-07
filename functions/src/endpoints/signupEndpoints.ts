@@ -13,10 +13,9 @@ import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
 import {appendDomain, getFullName} from "@shared/util/StringUtil";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
-import CactusMember from "@shared/models/CactusMember";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 
 const Config = getConfig();
 
@@ -59,29 +58,34 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     const email = payload.email;
     let userExists = false;
     let memberExists = false;
-    let user: UserRecord | undefined | null = undefined;
-    let member: CactusMember | undefined = undefined;
     let displayName: string | undefined;
-    try {
-        user = await admin.auth().getUserByEmail(email);
-        if (user) {
-            displayName = user.displayName || undefined;
-            userExists = true;
+
+    const getUserTask = new Promise<UserRecord | undefined>(async (resolve) => {
+        try {
+            const foundUser = await admin.auth().getUserByEmail(email);
+            resolve(foundUser);
+        } catch (error) {
+            console.log("No user found for email", email);
+            resolve(undefined);
         }
-    } catch (e) {
-        console.error("no user found for email", email);
+    });
+
+    const [user, member] = await Promise.all([
+        getUserTask,
+        AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
+    ]);
+
+    if (user) {
+        displayName = user.displayName || undefined;
+        userExists = true;
     }
 
-    if (!user) {
-        console.log(`No user was found for ${email}, attempting to find cactusMember `);
-        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
-        if (member) {
-            console.log(`Found cactus member for ${email}`);
-            memberExists = true;
-            displayName = getFullName(member);
-        } else {
-            console.log(`no cactus member found for ${email}`);
-        }
+    if (member) {
+        console.log(`Found cactus member for ${email}`);
+        memberExists = true;
+        displayName = getFullName(member);
+    } else {
+        console.log(`no cactus member found for ${email}`);
     }
 
     await AdminSlackService.getSharedInstance().sendActivityMessage({
@@ -114,9 +118,17 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
         let emailSendSuccess = false;
         if (userExists || memberExists) {
-            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLink({displayName, email, link: link});
+            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLink({
+                displayName,
+                email,
+                link: link
+            });
         } else {
-            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({displayName, email, link: link});
+            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
+                displayName,
+                email,
+                link: link
+            });
         }
 
         const response: MagicLinkResponse = {
