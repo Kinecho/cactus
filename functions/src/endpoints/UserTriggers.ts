@@ -116,6 +116,13 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
                 });
             }
         } else {
+            try {
+                await MailchimpService.getSharedInstance().updateMemberStatus({email: email, status: ListMemberStatus.subscribed})
+            } catch (e){
+                console.error("failed to updated subscriber status", e);
+                await AdminSlackService.getSharedInstance().sendActivityMessage({text: `:warning: Unable to set mailchimp subscriber status to Subscribed during the User Created trigger for email ${email}\`\`\``})
+            }
+
             fields.push({
                 title: "Existing Cactus Member",
                 value: `Yes, since ${formatDate(cactusMember.signupAt || cactusMember.createdAt) || 'unknown'}`,
