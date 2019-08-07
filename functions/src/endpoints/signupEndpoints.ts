@@ -12,9 +12,11 @@ import AdminSlackService from "@shared/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
-import {appendDomain} from "@shared/util/StringUtil";
+import {appendDomain, getFullName} from "@shared/util/StringUtil";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
+import CactusMember from "@shared/models/CactusMember";
+import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 
 const Config = getConfig();
 
@@ -55,54 +57,72 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     const payload: MagicLinkRequest = req.body;
 
     const email = payload.email;
-    let exists = false;
+    let userExists = false;
+    let memberExists = false;
     let user: UserRecord | undefined | null = undefined;
+    let member: CactusMember | undefined = undefined;
     let displayName: string | undefined;
     try {
         user = await admin.auth().getUserByEmail(email);
         if (user) {
             displayName = user.displayName || undefined;
-            exists = true;
+            userExists = true;
         }
-
     } catch (e) {
         console.error("no user found for email", email);
     }
 
+    if (!user) {
+        console.log(`No user was found for ${email}, attempting to find cactusMember `);
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+        if (member) {
+            console.log(`Found cactus member for ${email}`);
+            memberExists = true;
+            displayName = getFullName(member);
+        } else {
+            console.log(`no cactus member found for ${email}`);
+        }
+    }
+
     await AdminSlackService.getSharedInstance().sendActivityMessage({
-        text: `${email} triggered the Magic Link flow. Existing Email = ${exists}`
+        text: `${email} triggered the Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
+        attachments: [{
+            fields: [{
+                title: "Auth User",
+                value: `${user ? user.uid : "none"}`,
+                short: true,
+            }, {
+                title: "Cactus Member",
+                value: `${member ? member.id : "none"}`,
+                short: true,
+            }]
+        }]
     });
 
-    // const parsed = stripQueryParams(payload.continuePath);
     const url = appendDomain(payload.continuePath, Config.web.domain);
-
-    // url = url + encodeURIComponent("?" + queryString.stringify(parsed.query));
 
     const actionCodeSettings: ActionCodeSettings = {
         handleCodeInApp: true,
-        // dynamicLinkDomain: Config.dynamic_links.domain,
-        // dynamicLinkDomain: "cactus-app-stage.web.app",
         url,
-        // iOS: {
-        //     bundleId: Config.ios.bundle_id,
-        // }
     };
 
-    console.log("action code settings:", JSON.stringify(actionCodeSettings, null, 2));
+    console.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
         const link = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
 
-
-        // const combinedLink = appendQueryParams(link, parsed.query);
-
         console.log(`Generated signing link for ${email}: ${link}`);
 
-        await AdminSendgridService.getSharedInstance().sendMagicLink({displayName, email, link: link});
+        let emailSendSuccess = false;
+        if (userExists || memberExists) {
+            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLink({displayName, email, link: link});
+        } else {
+            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({displayName, email, link: link});
+        }
 
         const response: MagicLinkResponse = {
-            exists,
+            exists: userExists || memberExists,
             email,
-            sendSuccess: true
+            sendSuccess: emailSendSuccess
         };
         resp.send(response);
 
@@ -111,7 +131,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         console.error(error);
 
         resp.status(500).send({
-            exists,
+            exists: userExists || memberExists,
             email,
             sendSuccess: false,
             error: error,

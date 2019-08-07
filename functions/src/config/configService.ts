@@ -125,6 +125,7 @@ const defaultTestConfig: CactusConfig = {
         api_key: "test-api-key",
         template_ids: {
             magic_link: "1234",
+            magic_link_new_user: '1234ra',
         }
     }
 };

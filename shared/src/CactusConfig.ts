@@ -72,6 +72,7 @@ export interface CactusConfig {
         api_key: string,
         template_ids: {
             magic_link: string,
+            magic_link_new_user: string,
         }
     }
 }
