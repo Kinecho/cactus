@@ -339,8 +339,8 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           color: "#d8d8d8"
-          ts: date +%s
-          message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+          ts: "$(date +%s)"
+          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
   notify-branch-workflow-finished:
     description: "Notify slack that a branch workflow has finished and provide a link"
     parameters:
