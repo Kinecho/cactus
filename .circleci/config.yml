@@ -39,7 +39,7 @@ commands:
             if [[ ! -z $CIRCLE_PULL_REQUEST ]] ; then
               SLACK_GIT_LINK = "<$CIRCLE_PULL_REQUEST|View Pull Request>"
             fi
-            export SLACK_GIT_LINK
+            export $SLACK_GIT_LINK
   restore-module:
     parameters:
       module:
