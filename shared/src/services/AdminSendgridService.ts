@@ -6,7 +6,7 @@ import {MagicLinkEmail} from "@shared/services/SendgridServiceTypes";
 
 export default class AdminSendgridService {
     apiKey: string;
-    config:CactusConfig;
+    config: CactusConfig;
 
     protected static sharedInstance: AdminSendgridService;
 
@@ -29,31 +29,69 @@ export default class AdminSendgridService {
         sgMail.setApiKey(this.apiKey);
     }
 
-    async sendMagicLink(options: MagicLinkEmail): Promise<void> {
+    async sendMagicLink(options: MagicLinkEmail): Promise<boolean> {
 
         // SgHelpers.classes.Mail.MailData
 
         try {
-            await sgMail.send({
+            const params = {
                 to: options.email,
-                from: {name: "Cactus", email: "support@cactus.app"},
+                from: {name: "Cactus", email: "help@cactus.app"},
                 templateId: this.config.sendgrid.template_ids.magic_link,
                 categories: ["Authentication"],
                 dynamicTemplateData: {
-
-                    subject: "Your Magic Sign In Link from Cactus",
                     link: options.link,
                     displayName: options.displayName,
                 }
-            });
+            };
+            console.log("Sending magic link email with params", params);
+            await sgMail.send(params);
 
             console.log("Sendgrid email sent successfully");
-
-        } catch (error){
-            console.error("Failed to send Magic Link email", error);
+            return true
+        } catch (error) {
+            if (error.response && error.response.body) {
+                console.error("Failed to send Magic Link email", error.response.body);
+            } else {
+                console.error("Failed to send Magic Link email", error);
+            }
+            return false;
         }
 
-        return;
+    }
+
+    async sendMagicLinkNewUser(options: MagicLinkEmail): Promise<boolean> {
+
+        // SgHelpers.classes.Mail.MailData
+
+        try {
+            const mailParams = {
+                to: options.email,
+                from: {name: "Cactus", email: "help@cactus.app"},
+                templateId: this.config.sendgrid.template_ids.magic_link_new_user,
+                categories: ["Confirm Email"],
+                dynamicTemplateData: {
+                    link: options.link,
+                    displayName: options.displayName,
+                }
+            };
+
+            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+
+            await sgMail.send(mailParams);
+
+            console.log("Sendgrid email sent successfully");
+            return true;
+
+        } catch (error) {
+            if (error.response && error.response.body) {
+                console.error("Failed to send Magic Link New User email", error.response.body);
+            } else {
+                console.error("Failed to send Magic Link New User email", error);
+            }
+            return false;
+        }
+
     }
 
 

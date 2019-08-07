@@ -30,6 +30,19 @@ aliases:
 
 
 commands:
+  get-repo-link:
+    steps:
+      - run:
+          name: Get Repo Link
+          command: |
+            SLACK_GIT_LINK="<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+            if [[ ! -z $CIRCLE_PULL_REQUEST ]] ; then
+              SLACK_GIT_LINK="<$CIRCLE_PULL_REQUEST|View Pull Request>"
+            fi
+            echo "Slack GIT Link is \"${SLACK_GIT_LINK}\""
+            export SLACK_GIT_LINK
+            echo $SLACK_GIT_LINK >> .slack_git_url.txt
+            echo 'export SLACK_GIT_LINK="$SLACK_GIT_LINK"' >> $BASH_ENV
   restore-module:
     parameters:
       module:
@@ -261,6 +274,8 @@ jobs:
           color: 'good'
           include_job_number_field: false
           include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
           message: "A Stage Build is <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|ready for promotion>"
 
   firebase-deploy:
@@ -305,6 +320,8 @@ jobs:
           color: "good"
           include_job_number_field: false
           include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
           message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
   notify-workflow-started:
     description: "Notify slack that a workflow has started and provide a link"
@@ -319,13 +336,53 @@ jobs:
           <<: *webhook-engineering-ci
           include_job_number_field: false
           include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
           color: "#d8d8d8"
           message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
+  notify-branch-workflow-started:
+    description: "Notify slack that a branch workflow has started and provide a link"
+    parameters:
+      workflow_name:
+        type: string
+        default: "DEFAULT"
+        description: "The message to send to slack"
+    executor: cactus-web
+    steps:
+      - get-repo-link
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          color: "#d8d8d8"
+          ts: "$(date +%s)"
+          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n$(cat .slack_git_url.txt)"
+  notify-branch-workflow-finished:
+    description: "Notify slack that a branch workflow has finished and provide a link"
+    parameters:
+      workflow_name:
+        type: string
+        default: "DEFAULT"
+        description: "The message to send to slack"
+    executor: cactus-web
+    steps:
+      - get-repo-link
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: "good"
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n$(cat .slack_git_url.txt)"
+
+
 workflows:
   version: 2.1
   branch_build_and_test:
     jobs:
-      - notify-workflow-started:
+      - notify-branch-workflow-started:
           name: &workflow_name Feature Branch Build & Test
           workflow_name: *workflow_name
           filters:
@@ -333,6 +390,8 @@ workflows:
               ignore: master
       - install-all:
           name: &install_all_name "Install Dependencies"
+          requires:
+            - *workflow_name
           filters:
             branches:
               ignore: master
@@ -364,9 +423,15 @@ workflows:
               ignore: master
           requires:
             - *install_all_name
-      - notify-workflow-finished:
+      - notify-branch-workflow-finished:
           name: Notify Workflow Complete
           workflow_name: *workflow_name
+          requires:
+            - *install_all_name
+            - *test_functions_name
+            - *test_scripts_name
+            - *test_shared_name
+            - *test_web_name
           filters:
             branches:
               ignore: master

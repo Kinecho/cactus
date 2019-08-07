@@ -50,6 +50,7 @@ export enum ChannelName {
     general = "general",
     activity = "activity",
     data_log = "data_log",
+    email_sends = "email_sends",
 }
 
 
@@ -157,7 +158,7 @@ export default class AdminSlackService {
         }
 
         if (this.config.web.domain !== "cactus.app") {
-            return `${name}-test`;
+            return `${name.replace("_", "-")}-test`;
         } else {
             return name;
         }
