@@ -24,6 +24,7 @@ import MailchimpService from "@shared/services/MailchimpService";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import {submitJob} from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import AdminSlackService, {
+    ChannelName,
     ChatMessage,
     SlackAttachment,
     SlackAttachmentField,
@@ -300,7 +301,7 @@ export async function handleCampaignEvent(campaignData: CampaignEventData): Prom
         }]
     };
 
-    await AdminSlackService.getSharedInstance().sendActivityMessage(message)
+    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.email_sends, message)
 }
 
 export async function handleSubscribeEvent(eventData: SubscribeEventData): Promise<void> {

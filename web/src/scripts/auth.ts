@@ -171,7 +171,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
         email = currentUser.email
     }
 
-    if (!email) {
+    if (!email || error) {
         const {email: confirmedEmail, canceled} = await showConfirmEmailModal({
             title: "Confirm your email",
             message: "Please enter the email address that you signed up with",
@@ -210,6 +210,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
         } catch (error) {
             console.error("failed to login with email", error);
             if (error.code === "auth/invalid-email") {
+                console.log("invalid email error, should prompt user to confirm it");
                 return handleEmailLinkSignIn("The email you entered does not match the email used to sign in.");
             } else if (error.code === "auth/invalid-action-code") {
                 return {

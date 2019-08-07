@@ -35,6 +35,7 @@ export interface CactusConfig {
             general: string,
             activity: string,
             data_log: string,
+            [key: string] : string,
         }
         app: {
             app_id: string,
