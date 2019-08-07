@@ -415,6 +415,9 @@ workflows:
           requires:
             - *install_all_name
             - *test_functions_name
+            - *test_scripts_name
+            - *test_shared_name
+            - *test_web_name
           filters:
             branches:
               ignore: master
