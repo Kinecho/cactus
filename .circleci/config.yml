@@ -412,6 +412,9 @@ workflows:
       - notify-branch-workflow-finished:
           name: Notify Workflow Complete
           workflow_name: *workflow_name
+          requires:
+            - *install_all_name
+            - *test_functions_name
           filters:
             branches:
               ignore: master
