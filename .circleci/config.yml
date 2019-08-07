@@ -35,11 +35,12 @@ commands:
       - run:
           name: Get Repo Link
           command: |
-            SLACK_GIT_LINK = "<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+            SLACK_GIT_LINK="<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
             if [[ ! -z $CIRCLE_PULL_REQUEST ]] ; then
-              SLACK_GIT_LINK = "<$CIRCLE_PULL_REQUEST|View Pull Request>"
+              SLACK_GIT_LINK="<$CIRCLE_PULL_REQUEST|View Pull Request>"
             fi
-            export $SLACK_GIT_LINK
+            echo "Slack GIT Link is \"${SLACK_GIT_LINK}\""
+            export SLACK_GIT_LINK
   restore-module:
     parameters:
       module:
