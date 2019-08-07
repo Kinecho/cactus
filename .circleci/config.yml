@@ -378,6 +378,8 @@ workflows:
               ignore: master
       - install-all:
           name: &install_all_name "Install Dependencies"
+          requires:
+            - *workflow_name
           filters:
             branches:
               ignore: master
