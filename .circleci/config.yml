@@ -41,6 +41,7 @@ commands:
             fi
             echo "Slack GIT Link is \"${SLACK_GIT_LINK}\""
             export SLACK_GIT_LINK
+            echo $SLACK_GIT_LINK >> .slack_git_url.txt
             echo 'export SLACK_GIT_LINK="$SLACK_GIT_LINK"' >> $BASH_ENV
   restore-module:
     parameters:
@@ -357,7 +358,7 @@ jobs:
           include_project_field: false
           color: "#d8d8d8"
           ts: "$(date +%s)"
-          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n$SLACK_GIT_LINK"
+          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n$(cat .slack_git_url.txt)"
   notify-branch-workflow-finished:
     description: "Notify slack that a branch workflow has finished and provide a link"
     parameters:
@@ -375,7 +376,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n$SLACK_GIT_LINK"
+          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n$(cat .slack_git_url.txt)"
 
 
 workflows:
