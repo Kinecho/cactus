@@ -330,7 +330,9 @@ jobs:
         description: "The message to send to slack"
     executor: cactus-web
     steps:
-      - run DATENOW=`date +%s`
+      - run:
+          name: Set Current Date
+          command: DATENOW=`date +%s`
       - slack/notify:
           <<: *webhook-engineering-ci
           include_job_number_field: false
