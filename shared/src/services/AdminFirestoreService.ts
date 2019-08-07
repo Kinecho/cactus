@@ -169,7 +169,7 @@ export default class AdminFirestoreService {
         } catch (e) {
             console.error("Failed to execute query", e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${JSON.stringify(e)}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
             return {size: 0, results: [], error: e};
         }
 

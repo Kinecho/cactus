@@ -4,7 +4,11 @@ import * as functions from "firebase-functions";
 import chalk from "chalk";
 import * as crypto from "crypto";
 import {getConfig} from "@api/config/configService";
-import AdminSlackService, {SlackAttachmentField, SlackMessage} from "@shared/services/AdminSlackService";
+import AdminSlackService, {
+    SlackAttachmentField,
+    SlackResponseType,
+    SlashCommandResponse
+} from "@shared/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
@@ -34,11 +38,9 @@ export interface CommandPayload {
     trigger_id: string,
 }
 
-export interface CommandResponse extends SlackMessage {
-    text: string,
-}
-
 const versionNumber = "v0";
+
+type CommandResponse = SlashCommandResponse;
 
 const signatureHandler = (req: functions.https.Request | any, resp: functions.Response, next: Function) => {
     const headers = req.headers;
@@ -70,7 +72,8 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
 
     resp.status(200).send({text: `:hourglass_flowing_sand: Processing your request \`${commandName} ${rest}\``});
 
-    let commandResponse: CommandResponse;
+    let commandResponse: SlashCommandResponse;
+    let responseType = SlackResponseType.in_channel;
     switch (commandName) {
         case "bigquery":
             commandResponse = await _cmdBigQuery(payload, rest);
@@ -89,6 +92,7 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
             break;
     }
     console.log("got command response", commandResponse);
+    commandResponse.response_type = responseType;
     await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, commandResponse);
 
 
@@ -135,9 +139,12 @@ async function _cmdToday(payload: CommandPayload, params: string[]): Promise<Com
         short: false,
     });
 
-    let text = "Here are today's stats";
-    const attachments = [{fields}];
-    const response = {text, attachments};
+    const attachments = [{
+        // text: "",
+        fields,
+        footer: `These stats are pulled real-time from the database, not big query. \nYou can run this command yourself by typing \`/cactus today\``
+    }];
+    const response = {text: ":bar_chart: Here are today's stats so far.", attachments};
 
     return response;
 }

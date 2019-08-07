@@ -52,6 +52,15 @@ export enum ChannelName {
     data_log = "data_log",
 }
 
+export enum SlackResponseType {
+    in_channel = "in_channel",
+    ephemeral = "ephermeral",
+}
+
+export interface SlashCommandResponse extends Partial<ChatMessage> {
+    response_type?: SlackResponseType
+}
+
 
 export default class AdminSlackService {
     protected static sharedInstance: AdminSlackService;
@@ -189,7 +198,8 @@ export default class AdminSlackService {
         }
     }
 
-    async sendToResponseUrl(responseURL: string, message: IncomingWebhookSendArguments) {
+
+    async sendToResponseUrl(responseURL: string, message: SlashCommandResponse) {
         try {
             const response = await axios.post(responseURL, message);
             console.log("send to response url response success", response.data);
