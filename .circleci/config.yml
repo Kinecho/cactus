@@ -30,6 +30,16 @@ aliases:
 
 
 commands:
+  get-repo-link:
+    steps:
+      - run:
+          name: Get Repo Link
+          command: |
+            SLACK_GIT_LINK = "<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+            if [[ ! -z $CIRCLE_PULL_REQUEST ]] ; then
+              SLACK_GIT_LINK = "<$CIRCLE_PULL_REQUEST|View Pull Request>"
+            fi
+            export SLACK_GIT_LINK
   restore-module:
     parameters:
       module:
@@ -336,9 +346,7 @@ jobs:
         description: "The message to send to slack"
     executor: cactus-web
     steps:
-      - run:
-          name: Set Current Date
-          command: DATENOW=`date +%s`
+      - get-repo-link
       - slack/notify:
           <<: *webhook-engineering-ci
           include_job_number_field: false
@@ -346,7 +354,7 @@ jobs:
           include_project_field: false
           color: "#d8d8d8"
           ts: "$(date +%s)"
-          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+          message: ":building_construction: Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`\n${SLACK_GIT_LINK}"
   notify-branch-workflow-finished:
     description: "Notify slack that a branch workflow has finished and provide a link"
     parameters:
@@ -356,6 +364,7 @@ jobs:
         description: "The message to send to slack"
     executor: cactus-web
     steps:
+      - get-repo-link
       - slack/notify:
           <<: *webhook-engineering-ci
           color: "good"
@@ -363,7 +372,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n<https://github.com/Kinecho/cactus/compare/${CIRCLE_BRANCH}?expand=1|Open Pull Request>"
+          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n${SLACK_GIT_LINK}"
 
 
 workflows:
