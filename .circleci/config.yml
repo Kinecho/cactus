@@ -349,6 +349,7 @@ jobs:
     executor: cactus-web
     steps:
       - get-repo-link
+      - run: echo "Slack Git LINK in job is ${SLACK_GIT_LINK}"
       - slack/notify:
           <<: *webhook-engineering-ci
           include_job_number_field: false
