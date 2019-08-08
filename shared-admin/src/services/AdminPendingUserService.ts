@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import PendingUser, {PendingUserStatus} from "@shared/models/PendingUser";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";

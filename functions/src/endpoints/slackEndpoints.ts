@@ -8,11 +8,11 @@ import AdminSlackService, {
     SlackAttachmentField,
     SlackResponseType,
     SlashCommandResponse
-} from "@shared/services/AdminSlackService";
+} from "@admin/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getDateAtMidnightDenver, getISODate} from "@shared/util/DateUtil";
 
 

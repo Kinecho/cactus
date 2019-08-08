@@ -1,8 +1,8 @@
 import {Campaign, CampaignEventData} from "@shared/mailchimp/models/MailchimpTypes";
 import SentCampaign from "@shared/models/SentCampaign";
-import FirestoreService from "@shared/services/AdminFirestoreService";
+import FirestoreService from "@admin/services/AdminFirestoreService";
 import {CampaignContent} from "@shared/mailchimp/models/CreateCampaignRequest";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 
 export async function saveSentCampaign(campaign: Campaign | null | undefined, webhookData: CampaignEventData, content?: CampaignContent): Promise<SentCampaign | undefined> {
     const firestoreService = FirestoreService.getSharedInstance();

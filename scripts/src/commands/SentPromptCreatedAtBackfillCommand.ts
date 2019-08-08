@@ -1,11 +1,11 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
 import {CactusConfig} from "@shared/CactusConfig";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import chalk from "chalk";
-import AdminSentPromptService from "@shared/services/AdminSentPromptService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 
 const prompts = require("prompts");
 

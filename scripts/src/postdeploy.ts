@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
-import AdminSlackService, {ChatMessage} from "@shared/services/AdminSlackService";
+import AdminSlackService, {ChatMessage} from "@admin/services/AdminSlackService";
 
 import * as simplegit from 'simple-git/promise';
 

@@ -17,7 +17,8 @@
             "./web/src",
             "./shared/src",
             "./functions/src",
-            "./scripts/src"
+            "./scripts/src",
+            "./shared-admin/src"
         ]
     }
 }

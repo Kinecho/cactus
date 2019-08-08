@@ -20,8 +20,8 @@ import {
     WebhookEvent
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {saveSentCampaign} from "@api/services/sentCampaignService";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {submitJob} from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import AdminSlackService, {
     ChannelName,
@@ -29,8 +29,8 @@ import AdminSlackService, {
     SlackAttachment,
     SlackAttachmentField,
     SlackMessage
-} from "@shared/services/AdminSlackService";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+} from "@admin/services/AdminSlackService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import CactusMember from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
 import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";

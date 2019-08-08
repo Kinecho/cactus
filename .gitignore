@@ -4,7 +4,9 @@ web/public/
 web/build
 scripts/lib/
 shared/lib/
+shared-admin/lib/
 scripts/output/
+
 
 web/src/pages-index.html
 .sentryclirc

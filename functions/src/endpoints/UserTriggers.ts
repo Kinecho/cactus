@@ -1,11 +1,11 @@
 import * as admin from "firebase-admin";
-import AdminUserService from "@shared/services/AdminUserService";
+import AdminUserService from "@admin/services/AdminUserService";
 import User from "@shared/models/User";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import {formatDate} from "@shared/util/DateUtil";
@@ -14,8 +14,8 @@ import AdminSlackService, {
     SlackAttachment,
     SlackAttachmentField,
     SlackMessage
-} from "@shared/services/AdminSlackService";
-import AdminPendingUserService from "@shared/services/AdminPendingUserService";
+} from "@admin/services/AdminSlackService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import PendingUser from "@shared/models/PendingUser";
 
 

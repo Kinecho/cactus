@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
-import AdminSentPromptService from "@shared/services/AdminSentPromptService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {CampaignRecipientJobPayload, PubSubTopic} from "@shared/types/PubSubTypes";
-import AdminSlackService, {AttachmentColor, SlackAttachment} from "@shared/services/AdminSlackService";
+import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/services/AdminSlackService";
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import {PubSub} from "@google-cloud/pubsub";
 

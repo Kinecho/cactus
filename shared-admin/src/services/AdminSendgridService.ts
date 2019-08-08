@@ -1,6 +1,6 @@
 import {CactusConfig} from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
-import {MagicLinkEmail} from "@shared/services/SendgridServiceTypes";
+import {MagicLinkEmail} from "@admin/services/SendgridServiceTypes";
 
 // declare type MailService = sgMail.MailService;
 

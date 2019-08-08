@@ -7,8 +7,9 @@ module.exports = {
         "^.+\\.tsx?$": "ts-jest"
     },
     moduleNameMapper: {
-        '^@shared/(.*)$': '<rootDir>/src/$1',
+        '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
+        '^@admin/(.*)$': '<rootDir>/src/$1',
     },
     modulePathIgnorePatterns: [".db.test.ts"],
-    // reporters: ["default", "jest-junit"]
+    reporters: ["default", "jest-junit"]
 }

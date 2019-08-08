@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Collection} from "@shared/FirestoreBaseModels";
 import FieldValue = admin.firestore.FieldValue;

@@ -1,12 +1,12 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Automation, Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 import chalk from "chalk";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 
 const prompts = require("prompts");

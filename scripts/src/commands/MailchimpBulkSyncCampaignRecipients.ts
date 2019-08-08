@@ -1,8 +1,8 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {CampaignStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {PubSub} from "@google-cloud/pubsub";
 import {CampaignRecipientJobPayload, PubSubTopic} from "@shared/types/PubSubTypes";

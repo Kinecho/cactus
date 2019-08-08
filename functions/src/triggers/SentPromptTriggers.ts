@@ -3,12 +3,12 @@ import * as admin from "firebase-admin"
 import {Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentPrompt from "@shared/models/SentPrompt";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import * as Sentry from "@sentry/node";
-import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 /**
  * The purpose of this method is to send a push notification to the recipient of a new SentPrompt!

@@ -1,14 +1,14 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
 import {CactusConfig} from "@shared/CactusConfig";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import AdminSentPromptService from "@shared/services/AdminSentPromptService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import helpers from "@scripts/helpers";
 import * as  path from "path";
 import SentPrompt from "@shared/models/SentPrompt";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {DateTime} from "luxon";
 import {formatDateTime} from "@shared/util/DateUtil";
 import * as fs from "fs";

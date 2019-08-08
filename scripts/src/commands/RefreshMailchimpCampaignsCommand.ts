@@ -1,9 +1,9 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import helpers from "@scripts/helpers";
 import {getCactusConfig, Project} from "@scripts/config";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";

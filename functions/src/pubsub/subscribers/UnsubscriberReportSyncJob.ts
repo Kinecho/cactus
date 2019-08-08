@@ -1,9 +1,9 @@
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {DateTime} from "luxon";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 import {getISODate} from "@shared/util/DateUtil";
 
 

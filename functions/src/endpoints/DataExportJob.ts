@@ -1,7 +1,7 @@
 import {getConfig} from "@api/config/configService";
 import {JWT} from "google-auth-library";
 import axios, {AxiosError} from "axios";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {Operation} from "@shared/types/FirestoreTypes";
 import {formatDuration} from "@shared/util/DateUtil";
 import {Storage} from "@google-cloud/storage";
@@ -11,7 +11,7 @@ import {promisify} from "util";
 import {snakeCase} from "lodash";
 import bigqueryTypes from "@google-cloud/bigquery/build/src/types";
 import IJob = bigqueryTypes.IJob;
-import AdminSlackService, {SlackAttachment} from "@shared/services/AdminSlackService";
+import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);

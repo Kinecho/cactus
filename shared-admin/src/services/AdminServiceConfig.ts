@@ -1,17 +1,17 @@
 import * as admin from 'firebase-admin'
 import {CactusConfig} from "@shared/CactusConfig";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
-import AdminUserService from "@shared/services/AdminUserService";
-import AdminSentPromptService from "@shared/services/AdminSentPromptService";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
-import AdminSlackService from "@shared/services/AdminSlackService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminUserService from "@admin/services/AdminUserService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
-import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
-import AdminSendgridService from "@shared/services/AdminSendgridService";
-import AdminPendingUserService from "@shared/services/AdminPendingUserService";
-import GoogleSheetsService from "@shared/services/GoogleSheetsService";
+import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import GoogleSheetsService from "@admin/services/GoogleSheetsService";
 import * as Sentry from "@sentry/node";
 import chalk from "chalk";
 

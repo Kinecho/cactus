@@ -20,6 +20,9 @@
             ],
             "@shared/*": [
                 "../shared/src/*"
+            ],
+            "@admin/*": [
+                "../shared-admin/src/*"
             ]
         }
     },

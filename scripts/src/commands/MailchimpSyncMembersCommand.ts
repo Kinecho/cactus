@@ -1,11 +1,11 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {getCactusConfig, Project} from "@scripts/config";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 
 import CactusMember from "@shared/models/CactusMember";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {
     ActivityActionType,
     ListMemberStatus,

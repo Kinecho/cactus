@@ -22,6 +22,9 @@
             "@shared/*": [
                 "../shared/src/*"
             ],
+            "@admin/*": [
+                "../shared-admin/src/*"
+            ],
             "@api/*": [
                 "../functions/src/*"
             ],

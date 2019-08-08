@@ -4,9 +4,9 @@ import {PageConfig} from "@scripts/util/CreatePageUtil";
 import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
 const prompts = require('prompts');

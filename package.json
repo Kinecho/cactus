@@ -5,9 +5,10 @@
     "main": "index.js",
     "scripts": {
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
-        "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
-        "install:all": "npm install & npm run install:api & npm run install:web & npm run install:shared & npm run install:scripts",
+        "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts && npm run install:admin",
+        "install:all": "npm install & npm run install:api & npm run install:web & npm run install:shared & npm run install:scripts & npm run install:admin",
         "install:web": "npm --prefix \"web\" install",
+        "install:admin": "npm --prefix \"shared-admin\" install",
         "install:api": "npm --prefix \"functions\" install",
         "install:shared": "npm --prefix \"shared\" install",
         "install:scripts": "npm --prefix \"scripts\" install",

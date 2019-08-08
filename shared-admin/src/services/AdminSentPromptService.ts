@@ -1,10 +1,10 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {Collection} from "@shared/FirestoreBaseModels";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 

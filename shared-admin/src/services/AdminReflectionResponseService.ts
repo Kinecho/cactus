@@ -1,8 +1,8 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import {Collection} from "@shared/FirestoreBaseModels";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {
     MergeField,

@@ -8,7 +8,7 @@ import Timestamp = firebaseAdmin.firestore.Timestamp;
 import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
 import * as Sentry from "@sentry/node"
-import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 

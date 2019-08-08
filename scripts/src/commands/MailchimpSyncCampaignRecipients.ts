@@ -1,11 +1,11 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
-import AdminSentPromptService, {CampaignSentPromptProcessingResult} from "@shared/services/AdminSentPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
+import AdminSentPromptService, {CampaignSentPromptProcessingResult} from "@admin/services/AdminSentPromptService";
 
 const prompts = require("prompts");
 

@@ -31,7 +31,8 @@
     "main": "lib/functions/src/main.js",
     "_moduleAliases": {
         "@api": "lib/functions/src",
-        "@shared": "lib/shared/src"
+        "@shared": "lib/shared/src",
+        "@admin": "lib/shared-admin/src"
     },
     "dependencies": {
         "@google-cloud/bigquery": "^4.1.4",

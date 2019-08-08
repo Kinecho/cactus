@@ -5,7 +5,7 @@ import {
     getOperation,
 } from "@api/endpoints/DataExportJob";
 import * as Sentry from "@sentry/node";
-import GoogleSheetsService, {DataResult} from "@shared/services/GoogleSheetsService";
+import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
 import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
 // const Sentry = require('@sentry/node');

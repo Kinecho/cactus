@@ -1,6 +1,6 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {stringFromISODate} from "@shared/util/DateUtil";

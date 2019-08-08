@@ -1,5 +1,5 @@
 require("module-alias/register");
-import {initializeServices} from "@shared/services/AdminServiceConfig";
+import {initializeServices} from "@admin/services/AdminServiceConfig";
 
 import * as admin from "firebase-admin";
 import {getConfig} from "@api/config/configService";

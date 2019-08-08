@@ -1,7 +1,7 @@
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminSlackService, {ChatMessage, SlackAttachment} from "@shared/services/AdminSlackService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminSlackService, {ChatMessage, SlackAttachment} from "@admin/services/AdminSlackService";
 import {
     BatchCreateResponse,
     OperationStatus,

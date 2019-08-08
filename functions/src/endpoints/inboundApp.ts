@@ -3,20 +3,20 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {processEmail} from "@api/inbound/EmailProcessor"
 import {saveEmailReply} from "@api/services/emailService";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import TestModel from "@shared/models/TestModel";
 import {fromJSON} from "@shared/util/FirestoreUtil";
 import {EmailStoragePath} from "@shared/models/EmailReply";
 import {writeToFile} from "@api/util/FileUtil";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse";
-import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
-import MailchimpService from "@shared/services/MailchimpService";
-import AdminSlackService from "@shared/services/AdminSlackService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import MailchimpService from "@admin/services/MailchimpService";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
+import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 
 const app = express();
 

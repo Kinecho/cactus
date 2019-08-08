@@ -1,5 +1,5 @@
 import EmailReply from "@shared/models/EmailReply";
-import FirestoreService from "@shared/services/AdminFirestoreService";
+import FirestoreService from "@admin/services/AdminFirestoreService";
 
 
 export async function saveEmailReply(email: EmailReply): Promise<EmailReply | undefined> {

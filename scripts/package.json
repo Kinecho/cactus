@@ -19,7 +19,8 @@
     "_moduleAliases": {
         "@scripts": "lib/scripts/src",
         "@shared": "lib/shared/src",
-        "@api": "lib/api/src"
+        "@api": "lib/api/src",
+        "@admin": "lib/scripts-admin/src"
     },
     "author": "Neil Poulin",
     "license": "ISC",

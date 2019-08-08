@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";

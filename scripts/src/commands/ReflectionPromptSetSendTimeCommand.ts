@@ -1,12 +1,12 @@
 import {FirebaseCommand} from "@scripts/CommandTypes";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import SentCampaign from "@shared/models/SentCampaign";
 import {getDateFromISOString} from "@shared/util/DateUtil";
-import MailchimpService from "@shared/services/MailchimpService";
+import MailchimpService from "@admin/services/MailchimpService";
 import {CactusConfig} from "@shared/CactusConfig";
 
 export default class ReflectionPromptSetSendTimeCommand extends FirebaseCommand {

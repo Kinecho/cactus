@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import SentCampaign from "@shared/models/SentCampaign";
 import {Collection} from "@shared/FirestoreBaseModels";
 

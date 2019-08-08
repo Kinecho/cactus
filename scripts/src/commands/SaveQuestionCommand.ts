@@ -2,7 +2,7 @@ import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {Project} from "@scripts/config";
 import * as admin from "firebase-admin";
-import AdminFirestoreService from "@shared/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import chalk from "chalk";
 import {FirebaseCommand} from "@scripts/CommandTypes";
 

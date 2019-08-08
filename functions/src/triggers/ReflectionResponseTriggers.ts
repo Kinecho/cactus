@@ -11,11 +11,11 @@ import AdminSlackService, {
     SlackAttachment,
     SlackAttachmentField,
     SlackMessage
-} from "@shared/services/AdminSlackService";
-import AdminReflectionResponseService from "@shared/services/AdminReflectionResponseService";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+} from "@admin/services/AdminSlackService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import AdminReflectionPromptService from "@shared/services/AdminReflectionPromptService";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptContentURL} from "@api/util/StringUtil";
 

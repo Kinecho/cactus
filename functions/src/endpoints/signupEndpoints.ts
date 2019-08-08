@@ -8,15 +8,15 @@ import {
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
-import AdminSlackService, {SlackAttachment} from "@shared/services/AdminSlackService";
+import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
-import AdminSendgridService from "@shared/services/AdminSendgridService";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {appendDomain, getFullName} from "@shared/util/StringUtil";
-import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
-import AdminPendingUserService from "@shared/services/AdminPendingUserService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 
 const Config = getConfig();
 
