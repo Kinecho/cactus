@@ -107,6 +107,9 @@
                     title: "My Journal",
                     href: PageRoute.JOURNAL_HOME,
                 }, {
+                    title: "Invite Friends",
+                    href: PageRoute.REFERRAL_PROGRAM,
+                }, {
                     title: "Log Out",
                     onClick: async () => {
                         await this.logout()

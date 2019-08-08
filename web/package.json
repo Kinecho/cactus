@@ -49,6 +49,7 @@
         "query-string": "^6.8.2",
         "scrollmagic": "^2.0.7",
         "vue": "^2.6.10",
+        "vue-clipboard2": "^0.3.0",
         "vue-multiselect": "^2.1.6"
     },
     "devDependencies": {

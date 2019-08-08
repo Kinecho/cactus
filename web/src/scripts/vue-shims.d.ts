@@ -3,6 +3,12 @@ declare module '*.vue' {
     export default Vue;
 }
 
+declare module 'vue-clipboard2' {
+  import { PluginObject } from 'vue';
+  const VueClipboard: PluginObject<any>;
+  export default VueClipboard;
+}
+
 interface Window {
     [key:string]: any; // Add index signature
 }
