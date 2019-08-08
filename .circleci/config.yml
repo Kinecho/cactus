@@ -18,7 +18,7 @@ aliases:
   - &functions-module "functions"
   - &shared-module "shared"
   - &scripts-module "scripts"
-  - &admin-module "scripts"
+  - &admin-module "shared-admin"
 
   ## Slack Configs
   - &webhook-engineering-ci
@@ -206,11 +206,11 @@ jobs:
     steps:
       - checkout
       - restore-module:
-          module: functions
+          module: *functions-module
       - restore-module:
-          module: shared
+          module: *shared-module
       - restore-module:
-          module: admin
+          module: *admin-module
       - run:
           name: "TSLint"
           command: npm --prefix functions run lint:ci
@@ -260,7 +260,7 @@ jobs:
       - restore-module:
           module: scripts
       - restore-module:
-          module: admin
+          module: *admin-module
       - run:
           name: "TSLint"
           command: npm --prefix scripts run lint:ci

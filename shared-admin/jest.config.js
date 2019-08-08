@@ -11,5 +11,4 @@ module.exports = {
         '^@admin/(.*)$': '<rootDir>/src/$1',
     },
     modulePathIgnorePatterns: [".db.test.ts"],
-    reporters: ["default", "jest-junit"]
 }
