@@ -14,11 +14,12 @@ export interface EmailStatusResponse extends ApiResponse {
 export interface MagicLinkRequest {
     email: string,
     continuePath: string,
+    referredBy?: string|undefined,
 }
 
 export interface MagicLinkResponse extends ApiResponse{
     exists: boolean,
-    sendSuccess: boolean,
+    success: boolean,
     email: string,
     error?:any,
     message?: string,

@@ -3,7 +3,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag} from "@web/analytics";
-import {addModal, getQueryParam, showModal} from "@web/util";
+import {addModal, getQueryParam, LocalStorageKey, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
 import {isValidEmail} from "@shared/util/StringUtil";
@@ -109,9 +109,17 @@ export function configureLoginForm(formId: string) {
             const subscription = new SubscriptionRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
-            const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-            if (referredParam) {
-                subscription.referredByEmail = referredParam;
+            let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+            if (!referredByEmail) {
+                try {
+                    referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
+                } catch (e) {
+                    console.error("error trying to get referredByEmail from local storage", e)
+                }
+            }
+
+            if (referredByEmail) {
+                subscription.referredByEmail = referredByEmail;
             }
 
             const signupResult = await sendEmailLinkSignIn(subscription);

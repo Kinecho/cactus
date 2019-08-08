@@ -256,7 +256,7 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     } catch (e) {
         console.error("Failed to get a success response from magic link endpoint", e);
         return {
-            sendSuccess: false,
+            success: false,
             exists: false,
             email: options.email,
             message: "Failed to send magic link",
@@ -264,6 +264,7 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
         }
     }
 }
+
 
 
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
@@ -275,31 +276,16 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     }
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
-    // const sendEmailPromise = new Promise<{ success: boolean, error?: any }>(async resolve => {
-    //     try {
-    //         await firebase.auth().sendSignInLinkToEmail(email, {
-    //             url: `${Config.domain}${emailLinkRedirectUrl}`,
-    //             handleCodeInApp: true,
-    //         });
-    //
-    //
-    //         window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
-    //         resolve({success: true});
-    //         return;
-    //     } catch (error) {
-    //         console.error("failed to send signin link", error);
-    //         resolve({success: false, error});
-    //         return;
-    //     }
-    // });
-    //
-    // const [statusResponse, emailSendResponse]: [EmailStatusResponse, { success: boolean, error?: any }] = await Promise.all([getEmailStatus(email), sendEmailPromise]);
 
-    const statusResponse = await sendMagicLink({email: email, continuePath: emailLinkRedirectUrl});
+    const statusResponse = await sendMagicLink({
+        email: email,
+        referredBy: subscription.referredByEmail,
+        continuePath: emailLinkRedirectUrl
+    });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 
     return {
-        success: statusResponse.sendSuccess,
+        success: statusResponse.success,
         existingEmail: statusResponse.exists,
         error: statusResponse.error
     }

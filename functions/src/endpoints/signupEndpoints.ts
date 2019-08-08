@@ -8,7 +8,7 @@ import {
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
-import AdminSlackService from "@shared/services/AdminSlackService";
+import AdminSlackService, {SlackAttachment} from "@shared/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
@@ -16,6 +16,7 @@ import {appendDomain, getFullName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@shared/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
+import AdminPendingUserService from "@shared/services/AdminPendingUserService";
 
 const Config = getConfig();
 
@@ -55,7 +56,9 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
     const payload: MagicLinkRequest = req.body;
 
-    const email = payload.email;
+
+    const {email, referredBy} = payload;
+
     let userExists = false;
     let memberExists = false;
     let displayName: string | undefined;
@@ -88,19 +91,55 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         console.log(`no cactus member found for ${email}`);
     }
 
+    const existingMember = userExists || memberExists;
+
+    const attachments: SlackAttachment[] = [];
+
+
+    /*
+        Return ths response now, and finish everything afterwards, so that the user has a faster experience.
+     */
+    const response: MagicLinkResponse = {
+        exists: userExists || memberExists,
+        success: true,
+        email,
+    };
+    resp.send(response);
+
+
+    if (!existingMember) {
+        const pendingUser = await AdminPendingUserService.getSharedInstance().addPendingSignup({
+            email,
+            referredByEmail: referredBy
+        });
+        attachments.push({
+            text: `Added PendingUser \`${pendingUser.id}\``,
+        })
+    }
+
+    const fields = [{
+        title: "Auth User",
+        value: `${user ? user.uid : "none"}`,
+        short: true,
+    }, {
+        title: "Cactus Member",
+        value: `${member ? member.id : "none"}`,
+        short: true,
+    }];
+    if (referredBy) {
+        fields.push({
+            title: "Referred By Email",
+            value: `${referredBy || "--"}`,
+            short: false,
+        })
+    }
+
+    attachments.push({
+        fields,
+    });
     await AdminSlackService.getSharedInstance().sendActivityMessage({
         text: `${email} triggered the Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
-        attachments: [{
-            fields: [{
-                title: "Auth User",
-                value: `${user ? user.uid : "none"}`,
-                short: true,
-            }, {
-                title: "Cactus Member",
-                value: `${member ? member.id : "none"}`,
-                short: true,
-            }]
-        }]
+        attachments: attachments
     });
 
     const url = appendDomain(payload.continuePath, Config.web.domain);
@@ -116,27 +155,21 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
         console.log(`Generated signing link for ${email}: ${link}`);
 
-        let emailSendSuccess = false;
         if (userExists || memberExists) {
-            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLink({
+            await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
                 link: link
             });
         } else {
-            emailSendSuccess = await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
+            await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
                 link: link
             });
         }
 
-        const response: MagicLinkResponse = {
-            exists: userExists || memberExists,
-            email,
-            sendSuccess: emailSendSuccess
-        };
-        resp.send(response);
+
 
     } catch (error) {
         Sentry.captureException(error);

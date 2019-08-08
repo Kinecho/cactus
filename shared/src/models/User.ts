@@ -10,7 +10,7 @@ export default class User extends BaseModel {
     email?: string;
     cactusMemberId?:string;
     phoneNumber?:string;
-
+    providerIds:string[] = [];
 
     prepareForFirestore(): any {
         const object = super.prepareForFirestore();

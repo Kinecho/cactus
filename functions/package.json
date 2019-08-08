@@ -46,6 +46,7 @@
         "axios": "^0.19.0",
         "body-parser": "^1.19.0",
         "busboy": "^0.3.1",
+        "camelcase": "^5.3.1",
         "chalk": "^2.4.2",
         "cors": "^2.8.5",
         "email-addresses": "^3.0.3",

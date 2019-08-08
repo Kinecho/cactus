@@ -800,10 +800,10 @@ export default class MailchimpService {
     }
 
     async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
-        const member = new MailchimpListMember(subscription.email);
-        member.status = status;
+        const listMember = new MailchimpListMember(subscription.email);
+        listMember.status = status;
         if (subscription.referredByEmail) {
-            member.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
+            listMember.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
         }
 
         const url = `/lists/${this.audienceId}/members`;
@@ -811,7 +811,7 @@ export default class MailchimpService {
         const result = new SubscriptionResult();
 
         try {
-            const response = await this.request.post(url, member);
+            const response = await this.request.post(url, listMember);
             console.log("mailchimp response", response.data);
             result.member = response.data;
             result.success = true;

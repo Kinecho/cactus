@@ -166,13 +166,16 @@ export default class AdminCactusMemberService {
         cactusMember.signupAt = getDateFromISOString(listMember.timestamp_signup);
         cactusMember.signupConfirmedAt = getDateFromISOString(listMember.timestamp_opt);
 
+        if (!cactusMember.referredByEmail && listMember.merge_fields.REF_EMAIL) {
+            cactusMember.referredByEmail = listMember.merge_fields.REF_EMAIL as string;
+        }
+
         const premiumJournal = listMember.tags.find(tag => tag.name === TagName.JOURNAL_PREMIUM);
         if (premiumJournal) {
             cactusMember.journalStatus = JournalStatus.PREMIUM;
         } else {
             cactusMember.journalStatus = JournalStatus.NONE;
         }
-
 
         console.log("Saving cactus member", cactusMember.email);
 

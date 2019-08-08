@@ -10,6 +10,7 @@ export enum Collection {
     members = "members",
     reflectionPrompt = "reflectionPrompt",
     sentPrompts = "sentPrompts",
+    pendingUsers = "pendingUsers",
 }
 
 export interface FirestoreIdentifiable {

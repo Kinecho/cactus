@@ -15,6 +15,8 @@ import AdminSlackService, {
     SlackAttachmentField,
     SlackMessage
 } from "@shared/services/AdminSlackService";
+import AdminPendingUserService from "@shared/services/AdminPendingUserService";
+import PendingUser from "@shared/models/PendingUser";
 
 
 const userService = AdminUserService.getSharedInstance();
@@ -68,13 +70,18 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         })
     }
 
+    let pendingUser: PendingUser | undefined;
     if (!email) {
         attachment.text = ":warning: No email found on newly created Admin user " + user.uid;
         // await sendActivityNotification(slackMessage);
-
+    } else {
+        pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({email, userId});
+        console.log("Fetched pending user", JSON.stringify(pendingUser, null, 2));
     }
+
     let cactusMember: CactusMember | undefined;
     let mailchimpMember: ListMember | undefined;
+
     if (email) {
         cactusMember = await memberService.getMemberByEmail(email);
 
@@ -83,6 +90,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
             const subscription: SubscriptionRequest = new SubscriptionRequest(email);
             subscription.lastName = lastName;
             subscription.firstName = firstName;
+            subscription.referredByEmail = pendingUser ? pendingUser.referredByEmail : undefined;
 
             const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
             if (mailchimpResult.success) {
@@ -117,8 +125,11 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
             }
         } else {
             try {
-                await MailchimpService.getSharedInstance().updateMemberStatus({email: email, status: ListMemberStatus.subscribed})
-            } catch (e){
+                await MailchimpService.getSharedInstance().updateMemberStatus({
+                    email: email,
+                    status: ListMemberStatus.subscribed
+                });
+            } catch (e) {
                 console.error("failed to updated subscriber status", e);
                 await AdminSlackService.getSharedInstance().sendActivityMessage({text: `:warning: Unable to set mailchimp subscriber status to Subscribed during the User Created trigger for email ${email}\`\`\``})
             }
@@ -132,17 +143,31 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     }
 
 
-    const model = new User();
-    model.createdAt = new Date();
-    model.email = user.email;
-    model.id = userId;
-    model.phoneNumber = user.phoneNumber;
-
+    const userModel = new User();
+    userModel.createdAt = new Date();
+    userModel.email = user.email;
+    userModel.id = userId;
+    userModel.phoneNumber = user.phoneNumber;
+    userModel.providerIds = user.providerData.map(provider => provider.providerId);
     if (cactusMember) {
         cactusMember.userId = userId;
-        cactusMember = await memberService.save(cactusMember);
+
+        let referredByEmail = cactusMember.referredByEmail || (cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.merge_fields.REF_EMAIL as string : undefined);
+        if (!referredByEmail && pendingUser && pendingUser.referredByEmail) {
+            referredByEmail = pendingUser.referredByEmail;
+            if (email) {
+                console.log("Updating mailchimp referred by email merge field to ", referredByEmail);
+                await MailchimpService.getSharedInstance().updateMergeFields({
+                    email: email,
+                    mergeFields: {REF_EMAIL: pendingUser.referredByEmail}
+                })
+            }
+        }
+        cactusMember.referredByEmail = referredByEmail;
+
         mailchimpMember = cactusMember.mailchimpListMember;
-        model.cactusMemberId = cactusMember.id;
+        cactusMember = await memberService.save(cactusMember);
+        userModel.cactusMemberId = cactusMember.id;
         fields.push({
             title: "Cactus Member ID",
             value: cactusMember.id || '--',
@@ -151,6 +176,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     }
 
     if (mailchimpMember) {
+
         let webId = mailchimpMember.web_id || '--';
         if (mailchimpMember.web_id) {
             webId = `<https://us20.admin.mailchimp.com/lists/members/view?id=${mailchimpMember.web_id}|${mailchimpMember.web_id}>`
@@ -172,9 +198,16 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
             });
     }
 
+    if (cactusMember && cactusMember.referredByEmail) {
+        fields.push({
+            title: "Referred By",
+            value: cactusMember.referredByEmail || "--"
+        })
+    }
 
-    const savedModel = await userService.save(model);
-    attachment.title = `${user.email || user.phoneNumber} has signed up :wave:`;
+
+    const savedModel = await userService.save(userModel);
+    attachment.title = `:wave: ${user.email || user.phoneNumber} has signed up `;
     console.log("Saved user to db. UserId = ", savedModel.id);
     attachment.ts = `${(new Date()).getTime() / 1000}`;
 

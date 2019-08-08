@@ -10,6 +10,7 @@ import AdminSlackService from "@shared/services/AdminSlackService";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
+import AdminPendingUserService from "@shared/services/AdminPendingUserService";
 import GoogleSheetsService from "@shared/services/GoogleSheetsService";
 import * as Sentry from "@sentry/node";
 import chalk from "chalk";
@@ -26,6 +27,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminUserService.initialize(config);
     AdminReflectionPromptService.initialize();
     AdminSentPromptService.initialize();
+    AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
 

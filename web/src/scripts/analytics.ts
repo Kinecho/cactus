@@ -1,6 +1,6 @@
 import {Config} from './config'
 import {QueryParam} from "@shared/util/queryParams";
-import {getQueryParam} from "@web/util";
+import {getQueryParam, LocalStorageKey} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 
@@ -50,6 +50,10 @@ export function init() {
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
+        if (user) {
+            console.log("User has logged in, removing any tracking/referral info");
+        }
+
     });
 
     const sentryIntegrations = [];
@@ -68,7 +72,7 @@ export function init() {
 
     createGTag();
     gtag('js', new Date());
-    gtag('config', Config.googleAnalyticsID, { 'optimize_id': Config.googleOptimizeID});
+    gtag('config', Config.googleAnalyticsID, {'optimize_id': Config.googleOptimizeID});
 
     const mailchimpUserId = getQueryParam(QueryParam.MAILCHIMP_EMAIL_ID);
     if (mailchimpUserId) {
@@ -76,6 +80,18 @@ export function init() {
     }
 
     hasInit = true;
+}
+
+/**
+ * Clear tracking cookies and local storage items
+ */
+export function clearTrackingData() {
+    try {
+        window.localStorage.removeItem(LocalStorageKey.referredByEmail);
+        window.localStorage.removeItem(LocalStorageKey.emailAutoFill);
+    } catch (e) {
+        console.error("Failed to clear tracking data", e);
+    }
 }
 
 export function setUserId(userId?: string) {

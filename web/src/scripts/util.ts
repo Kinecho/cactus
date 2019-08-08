@@ -7,6 +7,7 @@ export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn',
     emailAutoFill = 'emailAutoFill',
     newUserSignIn = "newUserSignIn",
+    referredByEmail = "referredByEmail",
 }
 
 
