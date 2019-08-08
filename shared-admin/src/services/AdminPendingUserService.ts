@@ -118,6 +118,7 @@ export default class AdminPendingUserService {
             pendingUser.signupCompletedAt = new Date();
             pendingUser.signupCompleted = true;
             pendingUser.userId = userId;
+            pendingUser.status = PendingUserStatus.COMPLETED;
             return await this.save(pendingUser);
         }
 

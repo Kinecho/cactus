@@ -184,18 +184,10 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
 
         fields.push(
             {
-                title: "Mailchimp Status",
-                value: `${mailchimpMember.status || 'not sure'}`,
-                short: true,
-            }, {
-                title: "Mailchimp Member Web ID",
+                title: "Mailchimp Web ID",
                 value: webId,
                 short: false
-            }, {
-                title: "Mailchimp Member ID",
-                value: mailchimpMember.id || '--',
-                short: false
-            });
+            })
     }
 
     if (cactusMember && cactusMember.referredByEmail) {
