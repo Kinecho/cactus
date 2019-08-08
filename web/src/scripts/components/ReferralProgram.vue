@@ -28,6 +28,26 @@
                             </span>
                         </div>
                     </div>
+                    <div class="item">
+                        <social-sharing :url="referralLink"
+                                        title="I'm inviting you to Cactus"
+                                        description="See yourself and the world more positively."
+                                        quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
+                                        twitter-user="itscalledcactus"
+                                        inline-template>
+                          <div class="sharing">
+                              <network network="email">
+                                <font-awesome-icon icon="envelope" size="lg" /> Email
+                              </network>
+                              <network network="twitter">
+                                <font-awesome-icon :icon="['fab', 'twitter']" size="lg" /> Twitter
+                              </network>
+                              <network network="facebook">
+                                <font-awesome-icon :icon="['fab', 'facebook']" size="lg" /> Facebook
+                              </network>
+                           </div>
+                        </social-sharing>
+                    </div>
                 </div>
             </transition>
             <div>
@@ -174,6 +194,13 @@
                     background: $white;
                 }
                 
+            }
+
+            .sharing {
+                span {
+                    margin-right: 30px;
+                    cursor: pointer;
+                }
             }
 
         }

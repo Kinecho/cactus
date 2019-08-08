@@ -9,6 +9,12 @@ declare module 'vue-clipboard2' {
   export default VueClipboard;
 }
 
+declare module 'vue-social-sharing' {
+  import { PluginObject } from 'vue';
+  const SocialSharing: PluginObject<any>;
+  export default SocialSharing;
+}
+
 interface Window {
     [key:string]: any; // Add index signature
 }
