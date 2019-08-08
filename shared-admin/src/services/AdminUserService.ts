@@ -87,7 +87,10 @@ export default class AdminUserService {
         return foundUser;
     }
 
-    async getById(id: string): Promise<User | undefined> {
+    async getById(id?: string|undefined): Promise<User | undefined> {
+        if (!id) {
+            return undefined;
+        }
         return await firestoreService.getById(id, User);
     }
 

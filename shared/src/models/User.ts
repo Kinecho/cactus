@@ -2,10 +2,13 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum Field {
     email = "email",
-
+    providerIds = "providerIds",
+    phoneNumber = "phoneNumber",
+    cactusMemberId = "cactusMemberId",
 }
 
 export default class User extends BaseModel {
+    static Field = Field;
     collection = Collection.users;
     email?: string;
     cactusMemberId?:string;
