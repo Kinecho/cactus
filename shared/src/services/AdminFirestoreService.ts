@@ -7,6 +7,8 @@ import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 import Timestamp = firebaseAdmin.firestore.Timestamp;
 import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
+import * as Sentry from "@sentry/node"
+import AdminSlackService from "@shared/services/AdminSlackService";
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
@@ -16,7 +18,7 @@ export interface QueryOptions extends IQueryOptions<QueryCursor> {
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
-
+    static Timestamp = Timestamp;
 
     protected static sharedInstance: AdminFirestoreService;
 
@@ -135,34 +137,42 @@ export default class AdminFirestoreService {
     }
 
     async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
-        let query = originalQuery;
-        if (!options.includeDeleted) {
-            query = query.where("deleted", "==", false);
-        } else if (options.onlyDeleted) {
-            query = query.where("deleted", "==", true)
-        }
-
-        if (options.pagination) {
-            query = query.limit(options.pagination.limit).orderBy(options.pagination.orderBy, options.pagination.sortDirection);
-
-            if (options.pagination.startAfter) {
-                query = query.startAfter(options.pagination.startAfter);
-            } else if (options.pagination.startAt) {
-                query = query.startAt(options.pagination.startAt);
-            } else if (options.pagination.endAt) {
-                query = query.endAt(options.pagination.endAt);
-            } else if (options.pagination.endBefore) {
-                query.endBefore(options.pagination.endBefore);
+        try {
+            let query = originalQuery;
+            if (!options.includeDeleted) {
+                query = query.where("deleted", "==", false);
+            } else if (options.onlyDeleted) {
+                query = query.where("deleted", "==", true)
             }
+
+            if (options.pagination) {
+                query = query.limit(options.pagination.limit).orderBy(options.pagination.orderBy, options.pagination.sortDirection);
+
+                if (options.pagination.startAfter) {
+                    query = query.startAfter(options.pagination.startAfter);
+                } else if (options.pagination.startAt) {
+                    query = query.startAt(options.pagination.startAt);
+                } else if (options.pagination.endAt) {
+                    query = query.endAt(options.pagination.endAt);
+                } else if (options.pagination.endBefore) {
+                    query.endBefore(options.pagination.endBefore);
+                }
+            }
+
+
+            const snapshot = await query.get();
+
+            const size = snapshot.size;
+            const results: T[] = fromQuerySnapshot(snapshot, Type);
+
+            return {results, size};
+        } catch (e) {
+            console.error("Failed to execute query", e);
+            Sentry.captureException(e);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
+            return {size: 0, results: [], error: e};
         }
 
-
-        const snapshot = await query.get();
-
-        const size = snapshot.size;
-        const results: T[] = fromQuerySnapshot(snapshot, Type);
-
-        return {results, size};
     }
 
     async delete<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {

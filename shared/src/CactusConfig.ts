@@ -75,5 +75,11 @@ export interface CactusConfig {
             magic_link: string,
             magic_link_new_user: string,
         }
+    },
+    sheets: {
+        client_id: string,
+        client_secret: string,
+        prompt_content_sheet_id: string,
+        service_account: ServiceAccountCredentials,
     }
 }

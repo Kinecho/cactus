@@ -1,7 +1,7 @@
 import AdminFirestoreService from "@shared/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
-import {getDateFromISOString} from "@shared/util/DateUtil";
+import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 
 let firestoreService: AdminFirestoreService;
@@ -19,6 +19,10 @@ export default class AdminCactusMemberService {
     static initialize() {
         firestoreService = AdminFirestoreService.getSharedInstance();
         AdminCactusMemberService.sharedInstance = new AdminCactusMemberService();
+    }
+
+    getCollectionRef() {
+        return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.members);
     }
 
     async save(model: CactusMember): Promise<CactusMember> {
@@ -214,5 +218,21 @@ export default class AdminCactusMemberService {
         member.lastJournalEntryAt = lastJournal;
         await this.save(member);
         return member;
+    }
+
+    async getConfirmedSignupsSinceDate(date: Date = new Date()): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+
+        const query = this.getCollectionRef().where(CactusMember.Field.signupConfirmedAt, ">=", ts);
+
+        try {
+            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
+
+            return results.results;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+
     }
 }

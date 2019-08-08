@@ -10,9 +10,12 @@ import AdminSlackService from "@shared/services/AdminSlackService";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import AdminSentCampaignService from "@shared/services/AdminSentCampaignService";
 import AdminSendgridService from "@shared/services/AdminSendgridService";
+import GoogleSheetsService from "@shared/services/GoogleSheetsService";
+import * as Sentry from "@sentry/node";
+import chalk from "chalk";
 
-export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any) {
-    console.log("initializing all services");
+export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
+    console.log(chalk.green("initializing all services"));
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     AdminFirestoreService.initialize(app);
@@ -24,6 +27,18 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminReflectionPromptService.initialize();
     AdminSentPromptService.initialize();
     AdminSentCampaignService.initialize();
+    GoogleSheetsService.initialize(config);
+
+
+    console.log("Initializing Sentry");
+    const sentryOptions: Sentry.NodeOptions = {
+        dsn: config.sentry.functions_dsn,
+        environment: config.app.environment,
+        release: config.sentry.release,
+        serverName: functionName || "unknown"
+    };
+
+    Sentry.init(sentryOptions);
 
 
 }

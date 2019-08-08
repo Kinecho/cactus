@@ -27,17 +27,20 @@ export enum Field {
     lastName = "lastName",
     email = "email",
     userId = "userId",
-    joinedAt = "joinedAt",
+    signupAt = "signupAt",
     lastSyncedAt = "lastSyncedAt",
     mailchimpListMemberId = "mailchimpListMember.id",
     mailchimpListMemberUniqueEmailId = "mailchimpListMember.unique_email_id",
     mailchimpListMemberWebId = "mailchimpListMember.web_id",
     journalStatus = "journalStatus",
     fcmTokens = "fcmTokens",
+    signupConfirmedAt = "signupConfirmedAt",
+    lastJournalEntryAt = "lastJournalEntryAt",
 }
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
+    static Field = Field;
     firstName?: string;
     lastName?: string;
     email?: string;

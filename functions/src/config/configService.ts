@@ -127,6 +127,23 @@ const defaultTestConfig: CactusConfig = {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
         }
+    },
+    sheets: {
+        client_id: "test",
+        client_secret: "test",
+        prompt_content_sheet_id: "test",
+        service_account: {
+            type: "service_account",
+            project_id: "cactus-app-stage",
+            private_key_id: "id123",
+            private_key: "-----BEGIN PRIVATE KEY-----\nFAKE PRIVATE KEY\n-----END PRIVATE KEY-----\n",
+            client_email: "firestore-backups@cactus-app-stage.iam.gserviceaccount.com",
+            client_id: "fake_id",
+            auth_uri: "https://accounts.google.com/o/oauth2/auth",
+            token_uri: "https://oauth2.googleapis.com/token",
+            auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+            client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firestore-backups%40cactus-app-stage.iam.gserviceaccount.com"
+        },
     }
 };
 

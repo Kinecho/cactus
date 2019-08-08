@@ -7,8 +7,8 @@ import {getConfig} from "@api/config/configService";
 admin.initializeApp();
 const app = admin.app();
 const config = getConfig();
-
-initializeServices(config, app, admin.firestore.Timestamp);
+const functionName = process.env.FUNCTION_NAME || undefined;
+initializeServices(config, app, admin.firestore.Timestamp, functionName);
 
 /**
  * this is a special pass-through file to ensure we require & register the module alias mapper before any other code.

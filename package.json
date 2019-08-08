@@ -6,6 +6,7 @@
     "scripts": {
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
         "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts",
+        "install:all": "npm install & npm run install:api & npm run install:web & npm run install:shared & npm run install:scripts",
         "install:web": "npm --prefix \"web\" install",
         "install:api": "npm --prefix \"functions\" install",
         "install:shared": "npm --prefix \"shared\" install",

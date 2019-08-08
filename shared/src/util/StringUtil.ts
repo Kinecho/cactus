@@ -1,5 +1,6 @@
 import * as queryString from "query-string";
 import CactusMember from "@shared/models/CactusMember";
+import * as camelcase from "camelcase";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -135,4 +136,9 @@ export function getInitials(input: string): string {
     }
 
     return initials;
+}
+
+
+export function toCamelCamse(input:string):string{
+    return camelcase(input);
 }

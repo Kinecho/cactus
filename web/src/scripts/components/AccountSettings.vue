@@ -1,6 +1,3 @@
-import {NotificationStatus} from '@shared/models/CactusMember'
-import {NotificationStatus} from '@shared/models/CactusMember'
-import {NotificationStatus} from '@shared/models/CactusMember'
 <template>
     <div>
         <NavBar/>
