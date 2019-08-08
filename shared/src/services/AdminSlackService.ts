@@ -201,34 +201,41 @@ export default class AdminSlackService {
     }
 
     async sendMessage(channelName: ChannelName, message: string | ChatMessage) {
-        let chatMessage: ChatMessage;
-        const channel = this.getChannel(channelName);
+        try {
 
-        if (!channel) {
-            throw new Error("Unable to find the chanel for the ChannelName: " + channelName);
-        }
 
-        if (typeof message === "string") {
-            chatMessage = {
-                text: message,
+            let chatMessage: ChatMessage;
+            const channel = this.getChannel(channelName);
+
+            if (!channel) {
+                throw new Error("Unable to find the chanel for the ChannelName: " + channelName);
             }
-        } else {
-            chatMessage = message;
-        }
 
-        const slackMessage: ChatPostMessageArguments = {
-            ...chatMessage,
-            channel: channel
-        };
+            if (typeof message === "string") {
+                chatMessage = {
+                    text: message,
+                }
+            } else {
+                chatMessage = message;
+            }
+
+            const slackMessage: ChatPostMessageArguments = {
+                ...chatMessage,
+                channel: channel
+            };
 
 
-        const response = await this.web.chat.postMessage(slackMessage);
-        if (response.ok) {
-            return;
-        }
+            const response = await this.web.chat.postMessage(slackMessage);
+            if (response.ok) {
+                return;
+            }
 
-        if (response.error) {
-            console.error("Failed to post slack message", response.error);
+            if (response.error) {
+                console.error("Failed to post slack message", response.error);
+            }
+
+        } catch (error) {
+            console.error(`Failed to send slack message to ${channelName}`, error);
         }
     }
 
