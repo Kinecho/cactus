@@ -157,10 +157,11 @@ export default class AdminSlackService {
             return channelToUse;
         }
 
+        const channel = name.replace("_", "-");
         if (this.config.web.domain !== "cactus.app") {
-            return `${name.replace("_", "-")}-test`;
+            return `${channel}-test`;
         } else {
-            return name;
+            return channel;
         }
     }
 
