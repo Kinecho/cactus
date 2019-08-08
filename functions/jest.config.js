@@ -10,5 +10,4 @@ module.exports = {
         '^@api/(.*)$': '<rootDir>/src/$1',
         '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
     },
-    reporters: ["default", "jest-junit"]
 }

@@ -73,7 +73,7 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
     resp.status(200).send({text: `:hourglass_flowing_sand: Processing your request \`${commandName} ${rest}\``});
 
     let commandResponse: SlashCommandResponse;
-    let responseType = SlackResponseType.in_channel;
+    const responseType = SlackResponseType.in_channel;
     switch (commandName) {
         case "bigquery":
             commandResponse = await _cmdBigQuery(payload, rest);
