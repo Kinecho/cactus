@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 Vue.use(VueClipboard);
 Vue.use(SocialSharing);
 
-library.add(faEnvelope, faSms);
+library.add(faEnvelope);
 library.add(faTwitter, faFacebook);
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
