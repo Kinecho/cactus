@@ -8,7 +8,6 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faEnvelope, faSms } from '@fortawesome/free-solid-svg-icons';
 import { faTwitter, faFacebook } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { dom } from '@fortawesome/fontawesome-svg-core';
 
 Vue.use(VueClipboard);
 Vue.use(SocialSharing);
