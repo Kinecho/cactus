@@ -423,5 +423,12 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "account_settings"
+    },
+    "prompt": {
+        "title": "Prompts",
+        "path": "/prompts",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "prompt"
     }
 }
