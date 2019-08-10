@@ -1,9 +1,10 @@
 import "@styles/pages/sign_up.scss"
-import {getAuthUI, getAuthUIConfig} from "@web/auth";
+import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
 import {getQueryParam, LocalStorageKey, setupNavigation} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
+import {getAuth} from "@web/firebase";
 
 setupNavigation({showSignupButton: false, redirectOnSignOut: false});
 
@@ -31,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem(LocalStorageKey.emailAutoFill);
     }
 
-    let emailLinkRedirectUrl:string = PageRoute.SIGNUP_CONFIRMED;
-    if (redirectUrlParam){
+    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
     }
 
@@ -42,6 +43,29 @@ document.addEventListener('DOMContentLoaded', () => {
         emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
         signInSuccess: (authResult, redirectUrl) => {
             console.log("Redirect URL is", redirectUrl);
+            console.log("Auth Result", authResult);
+
+            console.log("additonalUserInfo", JSON.stringify(authResult.additionalUserInfo, null, 2));
+            console.log("credential", JSON.stringify(authResult.credential, null, 2));
+            console.log("user", authResult.user ? authResult.user.toJSON() : "undefined");
+            console.log("operationType", authResult.operationType);
+
+            console.log("Current auth user is = ", getAuth().currentUser);
+
+            if (authResult.user && authResult.additionalUserInfo) {
+                try {
+                    sendLoginEvent({
+                        user: authResult.user,
+                        additionalUserInfo: authResult.additionalUserInfo
+                    }).then(() => console.log("successfully logged the login event"))
+                        .catch(error => console.error("Failed to send login event", error))
+                } catch (e) {
+                    console.error("failed to log login event");
+                }
+
+            }
+
+
             console.log("Just returning true");
             return true;
         }

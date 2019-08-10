@@ -1,7 +1,7 @@
 import axios, {AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
-
+import {FirebaseUser} from "@web/firebase"
 let _request: AxiosInstance;
 
 export enum Endpoint {
@@ -11,7 +11,8 @@ export enum Endpoint {
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
-    updateSubscriberStatus = "mailchimp/status"
+    updateSubscriberStatus = "mailchimp/status",
+    loginEvent = "signup/login-event",
 }
 
 export function initializeAxios(): AxiosInstance {
@@ -29,8 +30,8 @@ export function initializeAxios(): AxiosInstance {
 
 }
 
-export async function getAuthHeaders(): Promise<{Authorization: string}|undefined> {
-    const user = getAuth().currentUser;
+export async function getAuthHeaders(userToUse:FirebaseUser|null=null): Promise<{Authorization: string}|undefined> {
+    const user = userToUse || getAuth().currentUser;
     if (user) {
         const token = await user.getIdToken();
 

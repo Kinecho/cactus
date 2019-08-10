@@ -142,6 +142,8 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         }
     }
 
+    const existingUser = await AdminUserService.getSharedInstance().getById(userId);
+    console.log("Found existing user when attempting to create it", existingUser);
 
     const userModel = new User();
     userModel.createdAt = new Date();
@@ -152,7 +154,7 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
     if (cactusMember) {
         cactusMember.userId = userId;
 
-        let referredByEmail = cactusMember.referredByEmail || (cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.merge_fields.REF_EMAIL as string : undefined);
+        let referredByEmail = (existingUser ? existingUser.referredByEmail : undefined) || cactusMember.referredByEmail || (cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.merge_fields.REF_EMAIL as string : undefined);
         if (!referredByEmail && pendingUser && pendingUser.referredByEmail) {
             referredByEmail = pendingUser.referredByEmail;
             if (email) {
