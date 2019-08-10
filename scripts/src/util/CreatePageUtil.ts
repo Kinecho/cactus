@@ -16,6 +16,7 @@ export interface PageEntry {
     name: string,
     includeInDev?:boolean,
     reflectionPrompt?: boolean,
+    indexPath?: boolean,
 }
 
 const pages = require(pagesPath) as { [name: string]: PageEntry };
@@ -27,6 +28,7 @@ export interface PageConfig {
     title: string,
     pagePath: string,
     reflectionPrompt: boolean,
+    indexPath?: boolean,
 }
 
 
