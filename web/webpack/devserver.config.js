@@ -51,7 +51,10 @@ module.exports = function (config) {
                     }).map(filename => {
                         let page = pages[filename]
                         console.log('DevServer: adding page', page.path)
-                        let pattern = new RegExp('^' + page.path + '$')
+
+                        const suffix = page.indexPath ? '/(.+)' : '$'
+
+                        let pattern = new RegExp('^' + page.path + suffix)
                         return {from: pattern, to: `/${filename}.html`}
                     }),
                     {from: /./, to: '/404.html'},

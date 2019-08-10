@@ -429,6 +429,7 @@ module.exports = {
         "path": "/prompts",
         "reflectionPrompt": false,
         "includeInDev": true,
-        "name": "prompt"
+        "name": "prompt",
+        "indexPath": true,
     }
 }

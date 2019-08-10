@@ -3,9 +3,12 @@
     <div>
         <h1>Hello!</h1>
         <div v-if="loading">Loading</div>
-        <div v-if="!loading">
+        <div v-if="!loading && this.prompt">
             some content:
             {{prompt.question}}
+        </div>
+        <div v-if="!loading && !prompt">
+            No prompt found for id
         </div>
     </div>
 </template>
@@ -14,6 +17,7 @@
     import Vue from "vue";
     import {getFlamelink} from '@web/firebase';
     import {getQueryParam} from '@web/util'
+    import {PageRoute} from '@web/PageRoutes'
 
 
     export default Vue.extend({
@@ -21,7 +25,7 @@
             //get content
             const flamelink = getFlamelink();
 
-            const entryId = "NtCjgJiz2dAfraoEFzkU";
+            const entryId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
 
             const promptsUnsubscriber = await flamelink.content.subscribe({
                 entryId,
