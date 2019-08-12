@@ -26,6 +26,7 @@ export default class ReflectionPrompt extends BaseModel {
     baseFileName?: string;
     sendDate?: Date;
     topic?: string;
+    hasPromptContent?:boolean;
 
     prepareForFirestore(): any {
         this.campaignIds = [];
