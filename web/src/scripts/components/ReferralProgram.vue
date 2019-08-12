@@ -2,6 +2,7 @@
     <div class="referralContainer">
         <NavBar/>
         <div class="centered content">
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running" />
             <h1>Invite Friends</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
@@ -32,13 +33,13 @@
                                     inline-template>
                       <div class="sharing">
                           <network network="email">
-                            <button class="emailBtn btn wiggle"><img class="icon" src="/assets/images/envelopeSolid.svg" alt="twitter" />Email</button>
+                            <button class="emailBtn btn wiggle"><img class="icon" src="/assets/images/envelopeSolid.svg" alt="" />Email</button>
                           </network>
                           <network network="twitter">
-                            <button class="twBtn btn wiggle"><img class="icon" src="/assets/images/twitter.svg" alt="twitter" />Twitter</button>
+                            <button class="twBtn btn wiggle"><img class="icon" src="/assets/images/twitter.svg" alt="" />Twitter</button>
                           </network>
                           <network network="facebook">
-                            <button class="fbBtn btn wiggle"><img class="icon" src="/assets/images/facebook.svg" alt="facebook" />Facebook</button>
+                            <button class="fbBtn btn wiggle"><img class="icon" src="/assets/images/facebook.svg" alt="" />Facebook</button>
                           </network>
                        </div>
                     </social-sharing>
@@ -151,6 +152,12 @@
     .loading {
         display: flex;
         justify-content: center;
+    }
+
+    .graphic {
+        margin-bottom: 2.4rem;
+        max-width: 40rem;
+        width: 100%;
     }
 
     .member-container {
