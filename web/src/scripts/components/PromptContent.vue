@@ -40,14 +40,23 @@
         components: {
             ContentCard,
         },
+        props: {
+            promptId: String,
+        },
         async created(): Promise<void> {
             //get content
+            let promptId = this.promptId;
+            if (!this.promptId){
+                promptId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
+                console.log("using path for prompt id", promptId);
+            } else {
+                console.log("using prop for prompt id", promptId)
+            }
 
-            const entryId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
 
             const mockPrompt = new PromptContent();
             mockPrompt.id = "fake_id";
-            mockPrompt.promptId = entryId;
+            mockPrompt.promptId = promptId;
             mockPrompt.content = [
                 {
                     contentType: ContentType.content,

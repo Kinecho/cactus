@@ -70,8 +70,8 @@
                 Go Deeper
             </button>
         </nav>
-        <modal v-bind:show="showContent" v-on:close="showContent = false">
-            <PromptContent slot="body"/>
+        <modal v-if="prompt && prompt.id" v-bind:show="showContent" v-on:close="showContent = false">
+            <PromptContent slot="body" v-bind:promptId="prompt.id"/>
         </modal>
     </article>
 </template>
@@ -88,7 +88,7 @@
     import SentPromptService from "@web/services/SentPromptService"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import Modal from "@components/Modal.vue";
-    import PromptContent from "@components/PromptContent"
+    import PromptContent from "@components/PromptContent.vue"
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
         editedText: string,
