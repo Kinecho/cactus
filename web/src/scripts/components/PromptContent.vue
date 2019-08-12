@@ -1,12 +1,12 @@
 <template>
 
-    <div>
+    <div class="page-wrapper">
         <div v-if="loading">Loading</div>
         <div v-if="!loading && !prompt">
             No prompt found for id
         </div>
         <section class="content-container centered" v-if="!loading">
-            <button class="previous arrow" @click="previous" v-if="hasPrevious">Previous</button>
+
             <transition appear name="fade-in" mode="out-in">
                 <content-card
                         v-bind:content="prompt.content[activeIndex]"
@@ -15,7 +15,8 @@
                         v-on:previous="previous"
                         v-on:complete="complete"/>
             </transition>
-            <button class="next arrow" @click="next" v-if="hasNext">Next </button>
+            <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
+            <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next</button>
         </section>
 
 
@@ -105,7 +106,7 @@
             prompt: any | undefined,
             loading: boolean,
             activeIndex: number,
-            activeContent:Content|undefined
+            activeContent: Content | undefined
         } {
             return {
                 prompt: undefined,
@@ -146,3 +147,54 @@
         }
     })
 </script>
+
+<style lang="scss" scoped>
+    @import "common";
+    @import "variables";
+    @import "mixins";
+    @import "transitions";
+
+    .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+
+
+        .content-container {
+
+            .arrow {
+                position: absolute;
+                top: 50vh;
+
+                &.previous {
+                    left: 3rem;
+                }
+
+                &.next {
+                    right: 3rem;
+                }
+            }
+        }
+    }
+
+
+    button.secondary {
+        margin-right: .8rem;
+        transition: all .2s ease;
+        outline: transparent none;
+
+        &:hover {
+            svg {
+                fill: $darkestGreen;
+            }
+        }
+    }
+
+    .wiggle:hover svg {
+        animation: wiggle .5s forwards;
+    }
+
+
+</style>
