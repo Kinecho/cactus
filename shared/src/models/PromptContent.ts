@@ -3,22 +3,39 @@ export interface Image {
     url?: string
 }
 
+export interface ContentFile {
+    idontknowyet: any,
+}
+
 export interface Video {
     youtubeEmbedUrl?:string;
     url?:string;
+    file?: ContentFile;
 }
 
 export enum ContentButtonAction {
     next = "next",
     previous = "previous",
     complete = "complete",
-    path = "path"
+    navigate = "navigate"
+}
+
+enum LinkTarget {
+    blank = "_blank",
+    self = "_self",
+    parent = "_parent",
+    top = "_top"
+}
+
+export interface NavigationInfo {
+    href: string,
+    target: LinkTarget,
 }
 
 export interface ContentButton {
     label: string,
     action: ContentButtonAction,
-    path?:string,
+    navigation?: NavigationInfo,
 }
 
 export interface Quote {
@@ -53,7 +70,7 @@ export interface Content {
     label?: string;
     video?:Video;
     image?: Image;
-    actionButton?: ContentButton
+    button?: ContentButton
 }
 
 export default class PromptContent {
