@@ -56,3 +56,4 @@ https://cactus.app/who-is-the-best-teacher-you-ever-had
 https://cactus.app/values
 https://cactus.app/auth-actions
 https://cactus.app/account
+https://cactus.app/prompts
