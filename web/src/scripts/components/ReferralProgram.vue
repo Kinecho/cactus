@@ -62,6 +62,7 @@
     import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
+    import {Config} from "@web/config";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
     import {updateSubscriptionStatus} from '@web/mailchimp';
@@ -114,7 +115,7 @@
                 return !this.authLoaded;
             },
             referralLink(): string | undefined {
-                return this.member ? "https://cactus.app?ref=" + this.member.email : undefined;
+                return this.member ? `${Config.domain}?ref=${this.member.email}` : undefined;
             },
             displayName(): string {
                 return this.member ? `${this.member.firstName || ""} ${this.member.lastName || ""}`.trim() : '';
