@@ -32,13 +32,13 @@
                                     inline-template>
                       <div class="sharing">
                           <network network="email">
-                            <button class="emailBtn btn"><img class="icon" src="/assets/images/envelopeSolid.svg" alt="twitter" />Email</button>
+                            <button class="emailBtn btn wiggle"><img class="icon" src="/assets/images/envelopeSolid.svg" alt="twitter" />Email</button>
                           </network>
                           <network network="twitter">
-                            <button class="twBtn btn"><img class="icon" src="/assets/images/twitter.svg" alt="twitter" />Twitter</button>
+                            <button class="twBtn btn wiggle"><img class="icon" src="/assets/images/twitter.svg" alt="twitter" />Twitter</button>
                           </network>
                           <network network="facebook">
-                            <button class="fbBtn btn"><img class="icon" src="/assets/images/facebook.svg" alt="facebook" />Facebook</button>
+                            <button class="fbBtn btn wiggle"><img class="icon" src="/assets/images/facebook.svg" alt="facebook" />Facebook</button>
                           </network>
                        </div>
                     </social-sharing>
@@ -247,6 +247,10 @@
         &:hover {
             background-color: darken($facebook, 5%)
         }
+    }
+
+    .wiggle:hover img {
+        animation: wiggle .5s forwards;
     }
 
 </style>
