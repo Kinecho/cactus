@@ -10,6 +10,7 @@
             <transition appear name="fade-in" mode="out-in">
                 <content-card
                         v-bind:content="prompt.content[activeIndex]"
+                        v-bind:hasNext="hasNext && activeIndex > 0"
                         v-bind:key="activeIndex"
                         v-on:next="next"
                         v-on:previous="previous"
@@ -167,13 +168,17 @@
             .arrow {
                 position: absolute;
                 top: 50vh;
-
+                z-index: 10;
                 &.previous {
                     left: 3rem;
                 }
 
                 &.next {
                     right: 3rem;
+                }
+
+                @include maxW($widthTablet){
+                    display: none;
                 }
             }
         }

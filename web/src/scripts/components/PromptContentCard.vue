@@ -26,8 +26,8 @@
 
             <!--    START Video -->
             <div class="video-container" v-if="content.video">
-                <div v-if="content.video.youtubeEmbedUrl">
-                    <iframe width="560" height="315" :src="content.video.youtubeEmbedUrl" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <div v-if="content.video.youtubeEmbedUrl" class="iframe-wrapper">
+                    <iframe width="320" height="203" :src="content.video.youtubeEmbedUrl" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div v-if="content.video.url">
                     <video :src="content.video.url" controls></video>
@@ -36,13 +36,20 @@
             <!--    END Video -->
         </section>
         <section class="bottom">
+            <div class="mobile-nav-buttons" v-if="!isReflectScreen">
+                <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
+            </div>
+
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen" class="reflect-container">
                 <div class="grow-container">
                     <img src="/assets/images/cactusPots.svg" alt="Cactus Pots"/>
                 </div>
-                <input type="text" placeholder="Write your thoughts"/>
+                <div class="mobile-nav-buttons">
+                    <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
+                </div>
+                <textarea type="text" placeholder="Write your thoughts"/>
             </div>
             <!--    END Reflect-->
             <div class="actions" v-if="content.button">
@@ -136,8 +143,6 @@
         position: relative;
         overflow: hidden;
 
-
-
         .content, .bottom {
             z-index: 2;
         }
@@ -148,6 +153,7 @@
             position: absolute;
 
             height: 50%;
+
             &.top {
                 top: 0;
             }
@@ -221,6 +227,44 @@
                 }
             }
 
+            .video-container {
+                .iframe-wrapper {
+                    position: relative;
+                    padding-bottom: 56.25%;
+                    padding-top: 2.5rem;
+
+                    iframe {
+                        position: absolute;;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+
+                    }
+                }
+
+            }
+
+        }
+
+        .bottom {
+            .mobile-nav-buttons {
+                position: relative;
+                height: 3rem;
+                @include minW($widthTablet) {
+                    display: none;
+                }
+
+                .inline-arrow {
+                    &.next {
+                        position: absolute;
+                        right: 1rem;
+                    }
+
+
+
+                }
+            }
         }
 
     }
