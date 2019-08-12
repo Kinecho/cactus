@@ -86,6 +86,11 @@
                 }
             })
         },
+        destroyed() {
+            if (this.memberUnsubscriber) {
+                this.memberUnsubscriber();
+            }
+        },
         data(): {
             authLoaded: boolean,
             copySucceeded: boolean,
