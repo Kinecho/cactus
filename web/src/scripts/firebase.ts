@@ -6,16 +6,9 @@ import "firebase/firestore";
 import "firebase/auth";
 
 
-import * as flamelink from "flamelink";
-import 'flamelink/settings'
-import 'flamelink/content'
-import 'flamelink/storage'
-import 'flamelink/navigation'
-import 'flamelink/users'
 
 let isInitialized = false;
 let firebaseApp: firebase.app.App;
-let flamelinkApp: flamelink.app.App;
 
 export type FirebaseUser = firebase.User;
 export type FirebaseUserCredential = firebase.auth.UserCredential;
@@ -32,24 +25,11 @@ export function initializeFirebase(): FirebaseObject {
         setTimestamp(firebase.firestore.Timestamp);
         firebaseApp = firebase.initializeApp(Config.firebase);
 
-        flamelinkApp = flamelink({
-            firebaseApp, // required
-            dbType: 'cf', // can be either 'rtdb' or 'cf' for Realtime DB or Cloud Firestore
-            env: 'production', // optional, default shown
-            locale: 'en-US', // optional, default shown
-            precache: true // optional, default shown. Currently it only precaches "schemas" for better performance
-        });
-
         isInitialized = true;
     }
 
     return firebase;
 
-}
-
-export function getFlamelink(): flamelink.app.App {
-    initializeFirebase();
-    return flamelinkApp;
 }
 
 export function getAuth(): firebase.auth.Auth {

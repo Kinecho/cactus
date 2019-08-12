@@ -8,6 +8,19 @@ export interface Video {
     url?:string;
 }
 
+export enum ContentButtonAction {
+    next = "next",
+    previous = "previous",
+    complete = "complete",
+    path = "path"
+}
+
+export interface ContentButton {
+    label: string,
+    action: ContentButtonAction,
+    path?:string,
+}
+
 export interface Quote {
     text: string,
     authorName: string
@@ -26,20 +39,21 @@ export interface ContentBackgroundImage {
     image: Image,
 }
 
-export enum ScreenType {
+export enum ContentType {
     reflect = "reflect",
     content = "content",
     intention = "intention",
 }
 
 export interface Content {
-    screenType: ScreenType;
+    contentType: ContentType;
     quote?: Quote;
     text?: string;
     backgroundImage?: ContentBackgroundImage;
     label?: string;
     video?:Video;
     image?: Image;
+    actionButton?: ContentButton
 }
 
 export default class PromptContent {

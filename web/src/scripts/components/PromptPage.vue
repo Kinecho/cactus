@@ -1,3 +1,6 @@
+import {ContentButtonAction} from '@shared/models/PromptContent'
+import {ScreenType} from '@shared/models/PromptContent'
+import {ContentImagePosition} from '@shared/models/PromptContent'
 <template>
 
     <div>
@@ -15,31 +18,44 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {getFlamelink} from '@web/firebase';
-    import {getQueryParam} from '@web/util'
     import {PageRoute} from '@web/PageRoutes'
+    import PromptContent, {ContentButtonAction, ContentImagePosition, ContentType} from '@shared/models/PromptContent'
 
 
     export default Vue.extend({
         async created(): Promise<void> {
             //get content
-            const flamelink = getFlamelink();
 
             const entryId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
 
-            const promptsUnsubscriber = await flamelink.content.subscribe({
-                entryId,
-                schemaKey: "prompt",
-                callback: (error: any, prompt: any) => {
-                    if (error) {
-                        this.loading = false;
-                        return console.error("Failed to load prompts", error)
+            const mockPrompt = new PromptContent();
+            mockPrompt.id = "fake_id";
+            mockPrompt.promptId = entryId;
+            mockPrompt.content = [
+                {
+                    contentType: ContentType.content,
+                    label: "Day 1 of 4 about nature",
+                    text: "Today you'll reflect on your facorite thing ot do on a sunny day.",
+                    backgroundImage: {
+                        position: ContentImagePosition.bottom,
+                        image: {
+                            url: "/assets/images/celebrate.svg",
+                        },
+                    },
+                    actionButton: {
+                        action: ContentButtonAction.next,
+                        label: "Let's go"
                     }
-                    console.log("prompt", prompt);
-                    this.prompt = prompt;
-                    this.loading = false;
-                }
-            });
+                },
+
+            ];
+
+
+            setTimeout(() => {
+                this.prompt = prompt;
+                this.loading = false;
+            }, 1500)
+
 
 
         },
