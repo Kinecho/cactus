@@ -121,10 +121,7 @@
             },
             referralLink(): string | undefined {
                 return this.member ? `${Config.domain}?ref=${this.member.email}` : undefined;
-            },
-            displayName(): string {
-                return this.member ? `${this.member.firstName || ""} ${this.member.lastName || ""}`.trim() : '';
-            },
+            }
         }
     })
 </script>
