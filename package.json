@@ -46,7 +46,8 @@
     "dependencies": {
         "firebase": "^6.3.1",
         "vue-clipboard2": "^0.3.0",
-        "vue-social-sharing": "^2.4.6"
+        "vue-social-sharing": "^2.4.6",
+        "vue2-touch-events": "^2.0.0"
     },
     "devDependencies": {
         "firebase-tools": "^7.1.1",
