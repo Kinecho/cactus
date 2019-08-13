@@ -2,11 +2,19 @@
 import "@styles/pages/prompt.scss"
 import Vue from "vue";
 import PromptPage from "@components/PromptContent.vue";
+import NavBar from "@components/NavBar.vue";
+import Footer from "@components/StardardFooter.vue";
 
 new Vue({
     el: "#app",
-    template: `<Prompt/>`,
+    template: `<div>
+    <NavBar/>
+    <Prompt/>
+    <Footer/>
+</div>`,
     components: {
         Prompt: PromptPage,
+        NavBar,
+        Footer,
     }
 })

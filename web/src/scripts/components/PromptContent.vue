@@ -11,6 +11,9 @@
 
                 <transition :name="transitionName" mode="out-in">
                     <div class="card-container" v-bind:key="activeIndex">
+                        <div class="progress">
+                            <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                        </div>
                         <content-card
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
@@ -183,6 +186,8 @@
     @import "mixins";
     @import "transitions";
 
+    $cardWidth: 50rem;
+
     .page-wrapper {
         min-height: 100vh;
         display: flex;
@@ -193,11 +198,37 @@
 
         .content-container {
 
+
+
             .card-container {
                 margin: 1rem 0;
                 width: 100vw;
                 display: flex;
                 justify-content: center;
+                flex-direction: column;
+                align-items: center;
+
+                .progress{
+                    display: flex;
+                    width: $cardWidth - 1rem;
+                    position: relative;
+                    top: 3rem;
+                    z-index: 5;
+                    .segment {
+                        flex-grow: 1;
+                        height: .4rem;
+                        background-color: $lightPink;
+                        transition: all .3s;
+                        &:not(:last-child){
+                            border-right: 1px solid white;
+                        }
+
+                        &.complete {
+                            background-color: $darkPink;
+                        }
+                    }
+                }
+
             }
 
             .arrow {
