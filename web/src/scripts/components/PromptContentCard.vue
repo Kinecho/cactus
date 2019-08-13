@@ -37,6 +37,12 @@
                 </div>
             </div>
             <!--    END Video -->
+
+            <!--    START Grow -->
+            <div class="grow-container" v-if="isReflectScreen">
+                <img src="/assets/images/cactusPots.svg" alt="Cactus Pots"/>
+            </div>
+            <!--    END Grow -->
         </section>
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
@@ -46,9 +52,6 @@
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen" class="reflect-container">
-                <div class="grow-container">
-                    <img src="/assets/images/cactusPots.svg" alt="Cactus Pots"/>
-                </div>
                 <div class="mobile-nav-buttons">
                     <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
                 </div>
@@ -289,23 +292,22 @@
                 display: flex;
                 justify-content: flex-end;
                 margin-bottom: 1rem;
+
                 @include minW($widthTablet) {
                     display: none;
                 }
 
                 .inline-arrow {
                     flex-grow: 0;
-                    &.next {
-                    }
                 }
             }
         }
 
         .reflect-container {
             textarea {
-                width: 100%;
                 @include textArea;
-                font-size: 1.4rem;
+                font-family: $font-stack;
+                width: 100%;
             }
         }
 
