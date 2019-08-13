@@ -45,8 +45,10 @@
     } from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
+    import {getFlamelink} from '@web/firebase'
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
-
+    const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
 
@@ -68,65 +70,29 @@
                 console.log("using prop for prompt id", promptId)
             }
 
-
-            const mockPrompt = new PromptContent();
-            mockPrompt.id = "fake_id";
-            mockPrompt.promptId = promptId;
-            mockPrompt.content = [
-                {
-                    contentType: ContentType.content,
-                    label: "Day 1 of 4 about nature",
-                    text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
-                    backgroundImage: {
-                        position: ContentImagePosition.bottom,
-                        image: {
-                            url: "/assets/images/celebrate.svg",
-                        },
-                    },
-                    button: {
-                        action: ContentButtonAction.next,
-                        label: "Let's go"
+            this.promptsUnsubscriber = await flamelink.content.subscribe({
+                entryId: promptId,
+                schemaKey: "promptContent",
+                populate: [{
+                    field: 'content',
+                    subFields: [{field: 'backgroundImage', subFields: "imageIds"}]
+                }],
+                callback: (error: any, prompt: PromptContent) => {
+                    if (error) {
+                        this.loading = false;
+                        return console.error("Failed to load prompts", error)
                     }
-                },
-                {
-                    contentType: ContentType.content,
-                    quote: {
-                        text: "Every magical happens between June and August",
-                        authorName: "Jenny Han",
-                        authorTitle: "Author",
-                        avatarImage: {
-                            url: "/assets/images/cameron.svg"
-                        }
-                    }
-                },
-                {
-                    contentType: ContentType.content,
-                    text: "Exposure to sunshine can increase your life satisfaction.",
-                    video: {
-                        youtubeEmbedUrl: "https://www.youtube.com/embed/OordOJDwV10",
-                    }
-                },
-                {
-                    label: "Reflect",
-                    contentType: ContentType.reflect,
-                    text: "What's your favorite thing to do on a sunny day?",
-                },
-                {
-                    contentType: ContentType.intention,
-                    text: "Find time today to appreciate and enjoy the benefits of sunny days",
-                    button: {
-                        action: ContentButtonAction.complete,
-                        label: "Done!"
-                    }
+                    console.log("prompt", prompt);
+                    this.prompt = prompt;
+                    this.loading = false;
                 }
-            ];
-
-
-            setTimeout(() => {
-                this.prompt = mockPrompt;
-                this.loading = false;
-            }, 1500)
-
+            });
+        },
+        destroyed() {
+            if (this.promptsUnsubscriber) {
+                console.log("Unsubscribing from flamelink promptContent listener");
+                this.promptsUnsubscriber();
+            }
         },
         data(): {
             prompt: any | undefined,
@@ -134,13 +100,15 @@
             activeIndex: number,
             activeContent: Content | undefined,
             transitionName: string,
+            promptsUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
                 prompt: undefined,
                 loading: true,
                 activeIndex: 0,
                 activeContent: undefined,
-                transitionName: "slide"
+                transitionName: "slide",
+                promptsUnsubscriber: undefined,
             };
         },
         computed: {

@@ -1,7 +1,7 @@
 <template>
     <div class="content-card">
-        <div :class="['background-image', content.backgroundImage.position]" v-if="content.backgroundImage && content.backgroundImage.image && content.backgroundImage.image.url">
-            <img :src="content.backgroundImage.image.url" alt="Image"/>
+        <div :class="['background-image', content.backgroundImage.position]" v-if="content.backgroundImage && content.backgroundImage.imageIds && content.backgroundImage.imageIds.length > 0">
+            <flamelink-image v-bind:imageId="content.backgroundImage.imageIds[0]"/>
         </div>
 
         <section class="content">
@@ -71,11 +71,13 @@
     import {Content, ContentButtonAction, ContentType} from "@shared/models/PromptContent"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import Spinner from "@components/Spinner.vue";
+    import FlamelinkImage from "@components/FlamelinkImage.vue";
 
     export default Vue.extend({
-        components:{
+        components: {
             ResizableTextarea,
             Spinner,
+            FlamelinkImage,
         },
         props: {
             content: {
@@ -86,7 +88,7 @@
         },
         data(): {
             youtubeVideoLoading: boolean
-        }{
+        } {
             return {
                 youtubeVideoLoading: true,
             }
@@ -163,6 +165,7 @@
         overflow-y: auto;
         align-items: center;
         text-align: center;
+
         .content, .bottom {
             z-index: 2;
         }
@@ -249,10 +252,12 @@
 
             .video-container {
                 margin-top: 2rem;
+
                 .iframe-wrapper {
                     position: relative;
                     padding-bottom: 56.25%; //makes a 16:9 aspect ratio
                     padding-top: 2.5rem;
+
                     .loading {
                         position: absolute;
                         top: 0;
@@ -264,6 +269,7 @@
                         justify-content: center;
                         align-items: center;
                     }
+
                     iframe {
                         position: absolute;
                         top: 0;
@@ -295,9 +301,9 @@
 
                 .inline-arrow {
                     flex-grow: 0;
+
                     &.next {
                     }
-
 
 
                 }

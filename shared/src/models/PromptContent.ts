@@ -53,7 +53,7 @@ export enum ContentImagePosition {
 
 export interface ContentBackgroundImage {
     position?: ContentImagePosition
-    image: Image,
+    imageIds: string[],
 }
 
 export enum ContentType {
