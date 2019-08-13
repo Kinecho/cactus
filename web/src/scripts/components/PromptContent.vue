@@ -1,5 +1,4 @@
 <template>
-
     <div class="page-wrapper">
         <button class="share tertiary" v-if="!loading">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>Share Today's Prompt
@@ -9,15 +8,14 @@
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
-
-            <section class="content-container centered" v-if="!loading">
+            <section class="content-container centered" v-if="!loading && prompt">
                 <div class="progress">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
-                <transition :name="transitionName" mode="out-in">
-
-                    <div class="card-container" v-bind:key="activeIndex">
+                <div class="card-container">
+                    <transition :name="transitionName" mode="out-in">
                         <content-card
+                                v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
                                 v-bind:content="prompt.content[activeIndex]"
@@ -25,19 +23,16 @@
                                 v-on:next="next"
                                 v-on:previous="previous"
                                 v-on:complete="complete"/>
-                    </div>
-
-                </transition>
-                <button class="previous arrow secondary" @click="previous" v-if="hasPrevious">
+                    </transition>
+                </div>
+                <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
                 </button>
-                <button class="next arrow secondary" @click="next" v-if="hasNext && activeIndex > 0">
+                <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
-                </svg>
+                    </svg>
                 </button>
             </section>
-
-
         </transition>
 
     </div>
@@ -285,11 +280,12 @@
     }
 
     button.secondary {
-        margin-right: .8rem;
         transition: all .2s ease;
         outline: transparent none;
 
         &:hover {
+            background-color: $lightGreen;
+
             svg {
                 fill: $darkestGreen;
             }
