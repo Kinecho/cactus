@@ -142,7 +142,8 @@
         justify-content: space-between;
         position: relative;
         overflow: hidden;
-
+        align-items: center;
+        text-align: center;
         .content, .bottom {
             z-index: 2;
         }

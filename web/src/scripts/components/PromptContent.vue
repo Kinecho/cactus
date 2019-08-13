@@ -5,16 +5,20 @@
         <div v-if="!loading && !prompt">
             No prompt found for id
         </div>
-        <section class="content-container centered" v-if="!loading">
+        <section class="content-container" v-if="!loading">
 
-            <transition appear name="fade-in" mode="out-in">
-                <content-card
-                        v-bind:content="prompt.content[activeIndex]"
-                        v-bind:hasNext="hasNext && activeIndex > 0"
-                        v-bind:key="activeIndex"
-                        v-on:next="next"
-                        v-on:previous="previous"
-                        v-on:complete="complete"/>
+            <transition :name="transitionName" mode="out-in">
+                <div class="card-container" v-bind:key="activeIndex">
+                    <content-card
+                            v-touch:swipe.left="next"
+                            v-touch:swipe.right="previous"
+                            v-bind:content="prompt.content[activeIndex]"
+                            v-bind:hasNext="hasNext && activeIndex > 0"
+                            v-on:next="next"
+                            v-on:previous="previous"
+                            v-on:complete="complete"/>
+                </div>
+
             </transition>
             <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
             <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next</button>
@@ -34,6 +38,8 @@
         ContentImagePosition,
         ContentType
     } from '@shared/models/PromptContent'
+    import Vue2TouchEvents from 'vue2-touch-events'
+    Vue.use(Vue2TouchEvents)
 
 
     export default Vue.extend({
@@ -46,7 +52,7 @@
         async created(): Promise<void> {
             //get content
             let promptId = this.promptId;
-            if (!this.promptId){
+            if (!this.promptId) {
                 promptId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
                 console.log("using path for prompt id", promptId);
             } else {
@@ -116,13 +122,15 @@
             prompt: any | undefined,
             loading: boolean,
             activeIndex: number,
-            activeContent: Content | undefined
+            activeContent: Content | undefined,
+            transitionName: string,
         } {
             return {
                 prompt: undefined,
                 loading: true,
                 activeIndex: 0,
                 activeContent: undefined,
+                transitionName: "slide"
             };
         },
         computed: {
@@ -135,6 +143,7 @@
         },
         methods: {
             next() {
+                this.transitionName = "slide";
                 console.log("going to next");
                 const content = this.prompt ? this.prompt.content : [];
                 if (this.hasNext) {
@@ -145,6 +154,7 @@
             },
             previous() {
                 console.log("going to previous");
+                this.transitionName = "slide-out";
                 if (this.hasPrevious) {
                     console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
@@ -174,10 +184,17 @@
 
         .content-container {
 
+            .card-container {
+                width: 100vw;
+                display: flex;
+                justify-content: center;
+            }
+
             .arrow {
                 position: absolute;
                 top: 50vh;
                 z-index: 10;
+
                 &.previous {
                     left: 3rem;
                 }
@@ -186,7 +203,7 @@
                     right: 3rem;
                 }
 
-                @include maxW($widthTablet){
+                @include maxW($widthTablet) {
                     display: none;
                 }
             }
