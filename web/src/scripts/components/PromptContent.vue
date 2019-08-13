@@ -1,5 +1,4 @@
 <template>
-
     <div class="page-wrapper">
 
         <transition appear name="fade-in" mode="out-in">
@@ -7,14 +6,14 @@
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
-            <section class="content-container" v-if="!loading">
+            <section class="content-container" v-if="!loading && prompt">
                 <div class="progress">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
-                <transition :name="transitionName" mode="out-in">
-
-                    <div class="card-container" v-bind:key="activeIndex">
+                <div class="card-container">
+                    <transition :name="transitionName" mode="out-in">
                         <content-card
+                                v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
                                 v-bind:content="prompt.content[activeIndex]"
@@ -22,16 +21,14 @@
                                 v-on:next="next"
                                 v-on:previous="previous"
                                 v-on:complete="complete"/>
-                    </div>
-
-                </transition>
-                <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
-                <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next
+                    </transition>
+                </div>
+                <button class="previous arrow secondary wiggle" @click="previous" v-show="hasPrevious">&larr;</button>
+                <button class="next arrow secondary wiggle" @click="next" v-show="hasNext && activeIndex > 0">&rarr;
                 </button>
             </section>
-
-
         </transition>
+
 
     </div>
 </template>
@@ -198,15 +195,17 @@
 
 
         .content-container {
-            overflow: hidden;
+            /*overflow: hidden;*/
             @include shadowbox;
             background-color: $lightBlue;
+            position: relative;
 
             .progress {
                 display: flex;
                 width: $cardWidth;
+                max-width: 100vw;
                 padding: 0 1rem;
-                position: relative;
+                position: absolute;
                 top: 3rem;
                 z-index: 5;
 
@@ -227,46 +226,56 @@
             }
 
             .card-container {
-                margin: 1rem 0;
                 height: 60rem;
-                max-height: 90vh;
+                max-height: 100vh;
                 width: $cardWidth;
-                max-width: 90vw;
-
+                max-width: 100vw;
                 display: flex;
                 justify-content: center;
                 flex-direction: column;
                 align-items: center;
-
-            }
-
-            .arrow {
-                position: absolute;
-                top: 50%;
-                z-index: 10;
-
-                &.previous {
-                    left: 3rem;
-                }
-
-                &.next {
-                    right: 3rem;
-                }
-
-                @include maxW($widthTablet) {
-                    display: none;
-                }
+                overflow: hidden;
+                position: relative;
             }
         }
     }
 
 
     button.secondary {
-        margin-right: .8rem;
         transition: all .2s ease;
         outline: transparent none;
 
+        &.arrow {
+            $arrowWidth: 5rem;
+            z-index: 10;
+            margin: 0 1rem;
+            flex-grow: 0;
+            height: $arrowWidth;
+            width: $arrowWidth;
+            background-color: $white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+
+            &.previous {
+                left: -$arrowWidth - $arrowWidth/2;
+            }
+
+            &.next {
+                right: -$arrowWidth - $arrowWidth/2;
+            }
+
+            @include maxW($widthTablet) {
+                display: none;
+            }
+
+        }
+
         &:hover {
+            background-color: $lightGreen;
+
             svg {
                 fill: $darkestGreen;
             }

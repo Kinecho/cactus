@@ -80,7 +80,7 @@
     }
 
     .modal-body {
-        margin: 2rem 0;
+        margin: 0 0;
     }
 
     .modal-default-button {
