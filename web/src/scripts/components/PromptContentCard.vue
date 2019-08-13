@@ -18,8 +18,8 @@
                     {{content.quote.text}}
                 </p>
                 <div class="author">
-                    <strong class="name">{{content.quote.authorName}}</strong>
-                    <span class="title" v-if="content.quote.authorTitle">{{content.quote.authorTitle}}</span>
+                    <p class="name">{{content.quote.authorName}}</p>
+                    <p class="title" v-if="content.quote.authorTitle">{{content.quote.authorTitle}}</p>
                 </div>
             </div>
             <!--    END QUOTE    -->
@@ -37,8 +37,14 @@
                 </div>
             </div>
             <!--    END Video -->
+
+            <!--    START Grow -->
+            <div class="grow-container" v-if="isReflectScreen">
+                <img src="/assets/images/cactusPots.svg" alt="Cactus Pots"/>
+            </div>
+            <!--    END Grow -->
         </section>
-        <section class="bottom">
+        <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
                 <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
             </div>
@@ -46,9 +52,6 @@
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen" class="reflect-container">
-                <div class="grow-container">
-                    <img src="/assets/images/cactusPots.svg" alt="Cactus Pots"/>
-                </div>
                 <div class="mobile-nav-buttons">
                     <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
                 </div>
@@ -60,7 +63,7 @@
             <!--    END Reflect-->
             <div class="actions" v-if="content.button">
                 <a v-if="isLink" :href="content.button.navigation.href" :target="content.button.navigation.target">{{content.button.label}}</a>
-                <button v-if="!isLink" @click="doButtonAction">{{content.button.label}}</button>
+                <button class="primaryBtn" v-if="!isLink" @click="doButtonAction">{{content.button.label}}</button>
             </div>
         </section>
     </div>
@@ -153,62 +156,59 @@
     @import "forms";
 
     .content-card {
-
-        width: 100%;
-        height: 100%;
-        padding: 2rem;
+        background-color: $lightBlue;
         display: flex;
         flex-direction: column;
+        height: 100vh;
         justify-content: space-between;
-        position: relative;
-        overflow-x: hidden;
-        overflow-y: auto;
-        align-items: center;
-        text-align: center;
+        padding: 2.4rem;
+        width: 100%;
 
-        .content, .bottom {
+        @include r(600) {
+            border-radius: 12px;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            max-height: 66rem;
+            max-width: 48rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content, .lowerActions {
             z-index: 2;
         }
 
-
         .background-image {
-            z-index: 1;
-            position: absolute;
-
-            height: 50%;
+            display: flex;
+            justify-content: center;
+            margin: 0 -2.4rem;
+            order: 1;
 
             &.top {
-                top: 0;
+                margin-top: -2.4rem;
             }
 
             &.bottom {
-                bottom: 0;
+                margin-bottom: -2.4rem;
             }
 
-            left: 0;
-            right: 0;
-
-            overflow: hidden;
-
             img {
-                width: 100%;
+                transform: translateY(11px);
+                width: 111%;
             }
         }
 
         .text {
-            font-size: 2.6rem;
-
+            font-size: 2.4rem;
         }
 
         .label {
             color: $darkestPink;
-            margin-bottom: 1rem;
+            margin-bottom: 1.6rem;
         }
 
-
         .content {
-            flex: 1;
             display: flex;
+            flex: 1;
             flex-direction: column;
             justify-content: center;
 
@@ -217,9 +217,10 @@
                 flex-direction: column;
 
                 .avatar-container {
-                    $avatarSize: 6rem;
+                    margin-bottom: 2.4rem;
 
                     img {
+                        $avatarSize: 5.6rem;
                         height: $avatarSize;
                         width: $avatarSize;
                     }
@@ -227,36 +228,31 @@
 
                 .quote {
                     font-size: 2.4rem;
-                    padding: 0 4rem;
+                    margin-bottom: 2.4rem;
 
                     &:before, &:after {
                         content: "\"";
-                        font-size: 3rem;
                     }
                 }
 
-                .author {
-                    margin-top: 1.5rem;
-                    display: flex;
-                    flex-direction: column;
+                .name {
+                    font-weight: bold;
+                }
 
-                    .name {
-                        /*font-weight: 400;*/
-                    }
-
-                    .title {
-                        color: $lightText;
-                    }
+                .title {
+                    opacity: .8;
                 }
             }
 
             .video-container {
-                margin-top: 2rem;
+                border-radius: 12px;
+                margin-top: 4rem;
+                overflow: hidden;
 
                 .iframe-wrapper {
                     position: relative;
                     padding-bottom: 56.25%; //makes a 16:9 aspect ratio
-                    padding-top: 2.5rem;
+                    padding-top: 2.4rem;
 
                     .loading {
                         position: absolute;
@@ -279,9 +275,7 @@
                         z-index: 2;
                     }
                 }
-
             }
-
         }
 
         .grow-container {
@@ -290,34 +284,41 @@
             }
         }
 
-        .bottom {
+        .lowerActions {
+            bottom: 3.2rem;
+            left: 2.4rem;
+            position: absolute;
+            right: 2.4rem;
+
             .mobile-nav-buttons {
                 display: flex;
                 justify-content: flex-end;
                 margin-bottom: 1rem;
+
                 @include minW($widthTablet) {
                     display: none;
                 }
 
                 .inline-arrow {
                     flex-grow: 0;
-
-                    &.next {
-                    }
-
-
                 }
             }
         }
 
         .reflect-container {
             textarea {
-                width: 100%;
                 @include textArea;
-                font-size: 1.4rem;
+                font-family: $font-stack;
+                width: 100%;
             }
         }
 
+        .primaryBtn {
+            width: 100%;
 
+            @include r(600) {
+                width: 50%;
+            }
+        }
     }
 </style>

@@ -1,12 +1,16 @@
 <template>
     <div class="page-wrapper">
-
+        <div class="shareContainer">
+            <button class="share tertiary wiggle" v-if="!loading">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>Share Today's Prompt
+            </button>
+        </div>
         <transition appear name="fade-in" mode="out-in">
             <spinner v-if="loading" message="Loading..."/>
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
-            <section class="content-container" v-if="!loading && prompt">
+            <section class="content-container centered" v-if="!loading && prompt">
                 <div class="progress">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
@@ -23,12 +27,15 @@
                                 v-on:complete="complete"/>
                     </transition>
                 </div>
-                <button class="previous arrow secondary wiggle" @click="previous" v-show="hasPrevious">&larr;</button>
-                <button class="next arrow secondary wiggle" @click="next" v-show="hasNext && activeIndex > 0">&rarr;
+                <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                </button>
+                <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                    </svg>
                 </button>
             </section>
         </transition>
-
 
     </div>
 </template>
@@ -152,39 +159,31 @@
     @import "mixins";
     /*@import "transitions";*/
 
-    $cardWidth: 50rem;
-
     .page-wrapper {
-        min-height: 70vh;
         display: flex;
+        flex-flow: column nowrap;
         justify-content: center;
-        align-items: center;
         position: relative;
 
-
         .content-container {
-            /*overflow: hidden;*/
-            @include shadowbox;
-            background-color: $lightBlue;
-            position: relative;
+            margin-bottom: 12rem;
 
             .progress {
                 display: flex;
-                width: $cardWidth;
-                max-width: 100vw;
-                padding: 0 1rem;
-                position: absolute;
-                top: 3rem;
+                margin: 0 auto;
+                position: relative;
+                transform: translateY(1.6rem);
+                width: 94%;
                 z-index: 5;
 
                 .segment {
+                    border-radius: .8rem;
                     flex-grow: 1;
                     height: .4rem;
                     background-color: $lightPink;
-                    transition: all .3s;
 
                     &:not(:last-child) {
-                        border-right: 1px solid white;
+                        border-right: 1px solid $lightBlue;
                     }
 
                     &.complete {
@@ -193,53 +192,68 @@
                 }
             }
 
-            .card-container {
-                height: 60rem;
-                max-height: 100vh;
-                width: $cardWidth;
-                max-width: 100vw;
-                display: flex;
-                justify-content: center;
-                flex-direction: column;
+            .arrow {
                 align-items: center;
-                overflow: hidden;
-                position: relative;
+                display: flex;
+                height: 4.8rem;
+                left: 0;
+                justify-content: center;
+                margin: auto;
+                padding: 0;
+                position: absolute;
+                right: 0;
+                top: 32vh;
+                width: 4.8rem;
+                z-index: 10;
+
+                svg {
+                    height: 1.6rem;
+                    width: 1.6rem;
+                }
+
+                &.previous {
+                    transform: translateX(-32rem);
+                }
+
+                &.next {
+                    transform: translateX(32rem);
+
+                    svg {
+                        transform: scale(-1);
+                    }
+                }
             }
         }
     }
 
+    .shareContainer {
+        margin: 0 auto;
+        width: 48rem;
+    }
+
+    button.share {
+        align-items: center;
+        display: flex;
+        left: 0;
+        position: absolute;
+        top: 0;
+
+        @include r(600) {
+            position: static;
+        }
+
+        &:hover {
+            background-color: transparent;
+        }
+
+        svg {
+            margin-right: .8rem;
+        }
+    }
 
     button.secondary {
         transition: all .2s ease;
         outline: transparent none;
-
-        &.arrow {
-            $arrowWidth: 5rem;
-            z-index: 10;
-            margin: 0 1rem;
-            flex-grow: 0;
-            height: $arrowWidth;
-            width: $arrowWidth;
-            background-color: $white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            top: 50%;
-
-            &.previous {
-                left: -$arrowWidth - $arrowWidth/2;
-            }
-
-            &.next {
-                right: -$arrowWidth - $arrowWidth/2;
-            }
-
-            @include maxW($widthTablet) {
-                display: none;
-            }
-
-        }
 
         &:hover {
             background-color: $lightGreen;
@@ -281,6 +295,4 @@
     .slide-out-leave-to {
         transform: translate(100%, 0);
     }
-
-
 </style>
