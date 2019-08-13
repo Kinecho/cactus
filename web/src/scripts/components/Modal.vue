@@ -62,7 +62,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(255, 255, 255, .8);
+        background-color: rgba(255, 255, 255, .9);
         transition: opacity .3s ease;
         overflow-y: auto;
     }
