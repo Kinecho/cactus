@@ -1,42 +1,45 @@
 <template>
     <div class="content-card">
-        <div :class="['background-image', content.backgroundImage.position]" v-if="content.backgroundImage && content.backgroundImage.imageIds && content.backgroundImage.imageIds.length > 0">
-            <flamelink-image v-bind:imageId="content.backgroundImage.imageIds[0]"/>
+        <div :class="['background-image', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage.imageIds && processedContent.backgroundImage.imageIds.length > 0">
+            <flamelink-image v-bind:imageId="processedContent.backgroundImage.imageIds[0]"/>
         </div>
 
         <section class="content">
-            <div v-if="content.text" class="text">
-                <h4 v-if="content.label" class="label">{{content.label}}</h4>
-                <p>{{content.text}}</p>
+            <div v-if="processedContent.text" class="text">
+                <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
+                <p>{{processedContent.text}}</p>
             </div>
             <!--    START QUOTE    -->
-            <div class="quote-container" v-if="content.quote">
+            <div class="quote-container" v-if="processedContent.quote">
                 <div class="avatar-container" v-if="quoteAvatarUrl">
-                    <img :src="quoteAvatarUrl" :alt="content.quote.authorName"/>
+                    <img :src="quoteAvatarUrl" :alt="processedContent.quote.authorName"/>
                 </div>
                 <p class="quote">
-                    {{content.quote.text}}
+                    {{processedContent.quote.text}}
                 </p>
                 <div class="author">
-                    <p class="name">{{content.quote.authorName}}</p>
-                    <p class="title" v-if="content.quote.authorTitle">{{content.quote.authorTitle}}</p>
+                    <p class="name">{{processedContent.quote.authorName}}</p>
+                    <p class="title" v-if="processedContent.quote.authorTitle">{{processedContent.quote.authorTitle}}</p>
                 </div>
             </div>
             <!--    END QUOTE    -->
 
             <!--    START Video -->
-            <div class="video-container" v-if="content.video">
-                <div v-if="content.video.youtubeEmbedUrl" class="iframe-wrapper">
+            <div class="video-container" v-if="processedContent.video">
+                <div v-if="processedContent.video.youtubeVideoId" class="iframe-wrapper">
                     <div class="loading" v-if="youtubeVideoLoading">
                         <spinner message="Loading Video..."/>
                     </div>
-                    <iframe v-on:load="youtubeVideoLoading = false" width="320" height="203" :src="content.video.youtubeEmbedUrl" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe v-on:load="youtubeVideoLoading = false" width="320" height="203" :src="`https://www.youtube.com/embed/${processedContent.video.youtubeVideoId}`" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
-                <div v-if="content.video.url">
-                    <video :src="content.video.url" controls></video>
+                <div v-if="processedContent.video.url">
+                    <video :src="processedContent.video.url" controls></video>
                 </div>
             </div>
             <!--    END Video -->
+
+
+            <a v-if="processedContent.link" :href="processedContent.link.destinationHref" :target="processedContent.link.linkTarget" :class="[processedContent.link.style]">{{processedContent.link.linkLabel}}</a>
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
@@ -61,9 +64,8 @@
 
             </div>
             <!--    END Reflect-->
-            <div class="actions" v-if="content.button">
-                <a v-if="isLink" :href="content.button.navigation.href" :target="content.button.navigation.target">{{content.button.label}}</a>
-                <button class="primaryBtn" v-if="!isLink" @click="doButtonAction">{{content.button.label}}</button>
+            <div class="actions" v-if="processedContent.actionButton">
+                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>
             </div>
         </section>
     </div>
@@ -71,7 +73,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {Content, ContentButtonAction, ContentType} from "@shared/models/PromptContent"
+    import {Content, ContentAction, ContentType, processContent} from "@shared/models/PromptContent"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
@@ -97,8 +99,8 @@
             }
         },
         computed: {
-            isLink(): boolean {
-                return this.content.button && this.content.button.navigation && this.content.button.action === ContentButtonAction.navigate || false
+            processedContent(): Content {
+                return processContent(this.content);
             },
             quoteAvatarUrl(): string | undefined | null {
                 if (!this.content.quote || !this.content.quote.avatarImage) {
@@ -114,25 +116,20 @@
         },
         methods: {
             doButtonAction(): void {
-                if (!this.content.button) {
+                if (!this.content.actionButton) {
                     return;
                 }
 
-                const action: ContentButtonAction = this.content.button.action;
+                const action: ContentAction = this.content.actionButton.action;
                 switch (action) {
-                    case ContentButtonAction.next:
+                    case ContentAction.next:
                         this.next();
                         break;
-                    case ContentButtonAction.previous:
+                    case ContentAction.previous:
                         this.previous();
                         break;
-                    case ContentButtonAction.complete:
+                    case ContentAction.complete:
                         this.complete();
-                        break;
-                    case ContentButtonAction.navigate:
-                        if (this.content.button.navigation) {
-                            alert(`Navigate to some page: ${this.content.button.navigation.href}`)
-                        }
                         break;
                 }
 

@@ -46,7 +46,7 @@
         "firebase-app": "0.0.1",
         "firebase-functions": "^2.3.1",
         "firebaseui": "^4.0.0",
-        "flamelink": "^1.0.0-alpha.21",
+        "flamelink": "^1.0.0-alpha.22",
         "gsap": "^2.1.3",
         "luxon": "^1.16.0",
         "prompts": "^2.1.0",
@@ -54,10 +54,10 @@
         "query-string": "^6.8.2",
         "scrollmagic": "^2.0.7",
         "vue": "^2.6.10",
-        "vue-multiselect": "^2.1.6",
-        "vue2-touch-events": "^2.0.0",
         "vue-clipboard2": "^0.3.0",
-        "vue-social-sharing": "^2.4.5"
+        "vue-multiselect": "^2.1.6",
+        "vue-social-sharing": "^2.4.5",
+        "vue2-touch-events": "^2.0.0"
     },
     "devDependencies": {
         "@sentry/cli": "^1.46.0",

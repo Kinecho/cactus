@@ -46,7 +46,7 @@
     import ContentCard from "@components/PromptContentCard.vue"
     import PromptContent, {
         Content,
-        ContentButtonAction,
+        ContentAction,
         ContentImagePosition,
         ContentType
     } from '@shared/models/PromptContent'
@@ -276,10 +276,12 @@
 
     .slide-enter {
         transform: translate(100%, 0);
+        opacity: 0;
     }
 
     .slide-leave-to {
         transform: translate(-100%, 0);
+        opacity: 0;
     }
 
 
@@ -290,9 +292,11 @@
 
     .slide-out-enter {
         transform: translate(-100%, 0);
+        opacity: 0;
     }
 
     .slide-out-leave-to {
         transform: translate(100%, 0);
+        opacity: 0;
     }
 </style>

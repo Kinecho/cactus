@@ -1,23 +1,30 @@
+import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 
-export interface Image {
-    url?: string
+export interface FlamelinkFile {
+    fileIds?: string[]
 }
 
-export interface ContentFile {
-    idontknowyet: any,
+export interface Image extends FlamelinkFile {
+    url?: string,
+    cloudinaryId?: string,
+    fileIds?: string[]
 }
 
-export interface Video {
-    youtubeEmbedUrl?:string;
-    url?:string;
-    file?: ContentFile;
+export interface Video extends FlamelinkFile {
+    youtubeVideoId?: string,
+    url?: string;
+    fileIds?: string[];
 }
 
-export enum ContentButtonAction {
+export interface Audio extends FlamelinkFile {
+    url?: string;
+    fileIds?: string[];
+}
+
+export enum ContentAction {
     next = "next",
     previous = "previous",
     complete = "complete",
-    navigate = "navigate"
 }
 
 enum LinkTarget {
@@ -27,15 +34,22 @@ enum LinkTarget {
     top = "_top"
 }
 
-export interface NavigationInfo {
-    href: string,
-    target: LinkTarget,
+enum LinkStyle {
+    button = "button",
+    fancyLink = "fancyLink",
+    link = "link",
 }
 
-export interface ContentButton {
+export interface ContentLink {
+    linkLabel: string,
+    destinationHref: string,
+    linkTarget: LinkTarget,
+    linkStyle: LinkStyle,
+}
+
+export interface ActionButton {
+    action: ContentAction,
     label: string,
-    action: ContentButtonAction,
-    navigation?: NavigationInfo,
 }
 
 export interface Quote {
@@ -57,10 +71,63 @@ export interface ContentBackgroundImage {
 }
 
 export enum ContentType {
+    text = "text",
+    quote = "quote",
+    video = "video",
+    photo = "photo",
+    audio = "audio",
     reflect = "reflect",
-    content = "content",
-    intention = "intention",
+    link = "link",
 }
+
+
+/**
+ * Removes unneeded fields from the content for easier display
+ * @param {Content} content
+ * @return {Content}
+ */
+export function processContent(content: Content): Content {
+    const processed: Content = {
+        contentType: content.contentType,
+        label: content.label,
+        actionButton: (content.actionButton && content.actionButton.label && content.actionButton.action) ? content.actionButton : undefined,
+        backgroundImage: content.backgroundImage,
+    };
+
+    switch (content.contentType) {
+        case ContentType.text:
+
+            processed.text = content.text;
+            break;
+        case ContentType.quote:
+            processed.quote = content.quote;
+            break;
+        case ContentType.video:
+            processed.text = content.text;
+            processed.video = content.video;
+            break;
+        case ContentType.photo:
+            processed.text = content.text;
+            processed.photo = content.photo;
+            break;
+        case ContentType.audio:
+            processed.text = content.text;
+            processed.audio = content.audio;
+            break;
+        case ContentType.reflect:
+            processed.text = content.text;
+            break;
+        case ContentType.link:
+            processed.text = content.text;
+            processed.link = content.link;
+            break;
+
+    }
+
+    return processed;
+
+}
+
 
 export interface Content {
     contentType: ContentType;
@@ -68,13 +135,17 @@ export interface Content {
     text?: string;
     backgroundImage?: ContentBackgroundImage;
     label?: string;
-    video?:Video;
-    image?: Image;
-    button?: ContentButton
+    video?: Video;
+    photo?: Image;
+    audio?: Audio;
+    link?: ContentLink;
+    actionButton?: ActionButton;
 }
 
 export default class PromptContent {
-    id?:string;
-    promptId?:string;
-    content: Content[] = []
+    id?: string;
+    promptId?: string;
+    content: Content[] = [];
+    subjectLine?: string;
+    scheduledSendAt?: ISODate;
 }

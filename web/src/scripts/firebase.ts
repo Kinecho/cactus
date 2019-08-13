@@ -7,12 +7,9 @@ import "firebase/auth";
 import "firebase/storage";
 
 
-import * as flamelink from "flamelink";
-import 'flamelink/settings'
+import flamelink from "flamelink/app";
 import 'flamelink/content'
 import 'flamelink/storage'
-import 'flamelink/navigation'
-import 'flamelink/users'
 
 let isInitialized = false;
 let firebaseApp: firebase.app.App;
