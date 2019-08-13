@@ -1,29 +1,34 @@
 <template>
 
     <div class="page-wrapper">
-        <div v-if="loading">Loading</div>
-        <div v-if="!loading && !prompt">
-            No prompt found for id
-        </div>
-        <section class="content-container" v-if="!loading">
 
-            <transition :name="transitionName" mode="out-in">
-                <div class="card-container" v-bind:key="activeIndex">
-                    <content-card
-                            v-touch:swipe.left="next"
-                            v-touch:swipe.right="previous"
-                            v-bind:content="prompt.content[activeIndex]"
-                            v-bind:hasNext="hasNext && activeIndex > 0"
-                            v-on:next="next"
-                            v-on:previous="previous"
-                            v-on:complete="complete"/>
-                </div>
+        <transition appear name="fade-in" mode="out-in">
+            <spinner v-if="loading" message="Loading..."/>
+            <div v-if="!loading && !prompt">
+                No prompt found for id
+            </div>
+            <section class="content-container" v-if="!loading">
 
-            </transition>
-            <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
-            <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next</button>
-        </section>
+                <transition :name="transitionName" mode="out-in">
+                    <div class="card-container" v-bind:key="activeIndex">
+                        <content-card
+                                v-touch:swipe.left="next"
+                                v-touch:swipe.right="previous"
+                                v-bind:content="prompt.content[activeIndex]"
+                                v-bind:hasNext="hasNext && activeIndex > 0"
+                                v-on:next="next"
+                                v-on:previous="previous"
+                                v-on:complete="complete"/>
+                    </div>
 
+                </transition>
+                <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
+                <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next
+                </button>
+            </section>
+
+
+        </transition>
 
     </div>
 </template>
@@ -38,13 +43,17 @@
         ContentImagePosition,
         ContentType
     } from '@shared/models/PromptContent'
+    import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
-    Vue.use(Vue2TouchEvents)
+
+
+    Vue.use(Vue2TouchEvents);
 
 
     export default Vue.extend({
         components: {
             ContentCard,
+            Spinner,
         },
         props: {
             promptId: String,
@@ -64,51 +73,51 @@
             mockPrompt.id = "fake_id";
             mockPrompt.promptId = promptId;
             mockPrompt.content = [
-                {
-                    contentType: ContentType.content,
-                    label: "Day 1 of 4 about nature",
-                    text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
-                    backgroundImage: {
-                        position: ContentImagePosition.bottom,
-                        image: {
-                            url: "/assets/images/celebrate.svg",
-                        },
-                    },
-                    button: {
-                        action: ContentButtonAction.next,
-                        label: "Let's go"
-                    }
-                },
-                {
-                    contentType: ContentType.content,
-                    quote: {
-                        text: "Every magical happens between June and August",
-                        authorName: "Jenny Han",
-                        authorTitle: "Author",
-                        avatarImage: {
-                            url: "/assets/images/cameron.svg"
-                        }
-                    }
-                },
-                {
-                    contentType: ContentType.content,
-                    text: "Exposure to sunshine can increase your life satisfaction.",
-                    video: {
-                        youtubeEmbedUrl: "https://www.youtube.com/embed/OordOJDwV10",
-                    }
-                },
+                // {
+                //     contentType: ContentType.content,
+                //     label: "Day 1 of 4 about nature",
+                //     text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
+                //     backgroundImage: {
+                //         position: ContentImagePosition.bottom,
+                //         image: {
+                //             url: "/assets/images/celebrate.svg",
+                //         },
+                //     },
+                //     button: {
+                //         action: ContentButtonAction.next,
+                //         label: "Let's go"
+                //     }
+                // },
+                // {
+                //     contentType: ContentType.content,
+                //     quote: {
+                //         text: "Every magical happens between June and August",
+                //         authorName: "Jenny Han",
+                //         authorTitle: "Author",
+                //         avatarImage: {
+                //             url: "/assets/images/cameron.svg"
+                //         }
+                //     }
+                // },
+                // {
+                //     contentType: ContentType.content,
+                //     text: "Exposure to sunshine can increase your life satisfaction.",
+                //     video: {
+                //         youtubeEmbedUrl: "https://www.youtube.com/embed/OordOJDwV10",
+                //     }
+                // },
                 {
                     contentType: ContentType.reflect,
                     text: "What's your favorite thing to do on a sunny day?",
                 },
-                {
-                    contentType: ContentType.intention,
-                    text: "Find time today to appreciate and enjoy the benefits of sunny days",
-                    button: {
-                        action: ContentButtonAction.complete,
-                        label: "Done!"
-                    }
-                }
+                // {
+                //     contentType: ContentType.intention,
+                //     text: "Find time today to appreciate and enjoy the benefits of sunny days",
+                //     button: {
+                //         action: ContentButtonAction.complete,
+                //         label: "Done!"
+                //     }
+                // }
             ];
 
 
@@ -185,6 +194,7 @@
         .content-container {
 
             .card-container {
+                margin: 1rem 0;
                 width: 100vw;
                 display: flex;
                 justify-content: center;

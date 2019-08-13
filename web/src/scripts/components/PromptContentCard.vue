@@ -49,7 +49,10 @@
                 <div class="mobile-nav-buttons">
                     <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
                 </div>
-                <textarea type="text" placeholder="Write your thoughts"/>
+                <resizable-textarea v-bind:maxLines="4">
+                    <textarea ref="reflectionInput" type="text" placeholder="Write your thoughts" rows="1"/>
+                </resizable-textarea>
+
             </div>
             <!--    END Reflect-->
             <div class="actions" v-if="content.button">
@@ -63,8 +66,13 @@
 <script lang="ts">
     import Vue from "vue";
     import {Content, ContentButtonAction, ContentType} from "@shared/models/PromptContent"
+    import ResizableTextarea from "@components/ResizableTextarea.vue";
+
 
     export default Vue.extend({
+        components:{
+            ResizableTextarea,
+        },
         props: {
             content: {
                 type: Object as () => Content
@@ -129,10 +137,12 @@
 <style lang="scss" scoped>
     @import "variables";
     @import "mixins";
+    @import "forms";
 
     .content-card {
         @include shadowbox;
         height: 60rem;
+        max-height: 90vh;
         width: 50rem;
         max-width: 90vw;
         background-color: $lightBlue;
@@ -141,7 +151,8 @@
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         align-items: center;
         text-align: center;
         .content, .bottom {
@@ -248,18 +259,24 @@
 
         }
 
+        .grow-container {
+            img {
+                max-width: 100%;
+            }
+        }
+
         .bottom {
             .mobile-nav-buttons {
-                position: relative;
-                height: 3rem;
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 1rem;
                 @include minW($widthTablet) {
                     display: none;
                 }
 
                 .inline-arrow {
+                    flex-grow: 0;
                     &.next {
-                        position: absolute;
-                        right: 1rem;
                     }
 
 
@@ -267,6 +284,15 @@
                 }
             }
         }
+
+        .reflect-container {
+            textarea {
+                width: 100%;
+                @include textArea;
+                font-size: 1.4rem;
+            }
+        }
+
 
     }
 </style>
