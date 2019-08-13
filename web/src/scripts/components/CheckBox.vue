@@ -101,7 +101,7 @@
         }
 
         &:hover input:not(:checked) ~ .checkmark{
-            background-color: #ccc;
+            border-color: $darkGreen;
         }
 
         /* Hide the browser's default checkbox */
@@ -116,8 +116,6 @@
                 background-color: $lightText;
                 cursor: default;
             }
-
-
 
             &:disabled:checked ~ .checkmark {
                 background-color: $lightText;
@@ -136,16 +134,16 @@
 
         /* Create a custom checkbox */
         .checkmark {
+            border: 1px solid $green;
+            border-radius: .7rem;
             height: $checkHeight;
             width: $checkHeight;
-            background-color: #eee;
             margin-right: .8rem;
             /* Create the checkmark/indicator (hidden when not checked) */
             &:after {
                 content: "";
                 position: absolute;
                 display: none;
-
                 left: 9px;
                 top: 5px;
                 width: 5px;
