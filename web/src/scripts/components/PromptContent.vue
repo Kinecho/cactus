@@ -73,51 +73,51 @@
             mockPrompt.id = "fake_id";
             mockPrompt.promptId = promptId;
             mockPrompt.content = [
-                // {
-                //     contentType: ContentType.content,
-                //     label: "Day 1 of 4 about nature",
-                //     text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
-                //     backgroundImage: {
-                //         position: ContentImagePosition.bottom,
-                //         image: {
-                //             url: "/assets/images/celebrate.svg",
-                //         },
-                //     },
-                //     button: {
-                //         action: ContentButtonAction.next,
-                //         label: "Let's go"
-                //     }
-                // },
-                // {
-                //     contentType: ContentType.content,
-                //     quote: {
-                //         text: "Every magical happens between June and August",
-                //         authorName: "Jenny Han",
-                //         authorTitle: "Author",
-                //         avatarImage: {
-                //             url: "/assets/images/cameron.svg"
-                //         }
-                //     }
-                // },
-                // {
-                //     contentType: ContentType.content,
-                //     text: "Exposure to sunshine can increase your life satisfaction.",
-                //     video: {
-                //         youtubeEmbedUrl: "https://www.youtube.com/embed/OordOJDwV10",
-                //     }
-                // },
+                {
+                    contentType: ContentType.content,
+                    label: "Day 1 of 4 about nature",
+                    text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
+                    backgroundImage: {
+                        position: ContentImagePosition.bottom,
+                        image: {
+                            url: "/assets/images/celebrate.svg",
+                        },
+                    },
+                    button: {
+                        action: ContentButtonAction.next,
+                        label: "Let's go"
+                    }
+                },
+                {
+                    contentType: ContentType.content,
+                    quote: {
+                        text: "Every magical happens between June and August",
+                        authorName: "Jenny Han",
+                        authorTitle: "Author",
+                        avatarImage: {
+                            url: "/assets/images/cameron.svg"
+                        }
+                    }
+                },
+                {
+                    contentType: ContentType.content,
+                    text: "Exposure to sunshine can increase your life satisfaction.",
+                    video: {
+                        youtubeEmbedUrl: "https://www.youtube.com/embed/OordOJDwV10",
+                    }
+                },
                 {
                     contentType: ContentType.reflect,
                     text: "What's your favorite thing to do on a sunny day?",
                 },
-                // {
-                //     contentType: ContentType.intention,
-                //     text: "Find time today to appreciate and enjoy the benefits of sunny days",
-                //     button: {
-                //         action: ContentButtonAction.complete,
-                //         label: "Done!"
-                //     }
-                // }
+                {
+                    contentType: ContentType.intention,
+                    text: "Find time today to appreciate and enjoy the benefits of sunny days",
+                    button: {
+                        action: ContentButtonAction.complete,
+                        label: "Done!"
+                    }
+                }
             ];
 
 

@@ -27,7 +27,10 @@
             <!--    START Video -->
             <div class="video-container" v-if="content.video">
                 <div v-if="content.video.youtubeEmbedUrl" class="iframe-wrapper">
-                    <iframe width="320" height="203" :src="content.video.youtubeEmbedUrl" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <div class="loading" v-if="youtubeVideoLoading">
+                        <spinner message="Loading Video..."/>
+                    </div>
+                    <iframe v-on:load="youtubeVideoLoading = false" width="320" height="203" :src="content.video.youtubeEmbedUrl" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
                 <div v-if="content.video.url">
                     <video :src="content.video.url" controls></video>
@@ -67,11 +70,12 @@
     import Vue from "vue";
     import {Content, ContentButtonAction, ContentType} from "@shared/models/PromptContent"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
-
+    import Spinner from "@components/Spinner.vue";
 
     export default Vue.extend({
         components:{
             ResizableTextarea,
+            Spinner,
         },
         props: {
             content: {
@@ -79,6 +83,13 @@
             },
             hasNext: Boolean,
             hasPrevious: Boolean,
+        },
+        data(): {
+            youtubeVideoLoading: boolean
+        }{
+            return {
+                youtubeVideoLoading: true,
+            }
         },
         computed: {
             isLink(): boolean {
@@ -240,18 +251,29 @@
             }
 
             .video-container {
+                margin-top: 2rem;
                 .iframe-wrapper {
                     position: relative;
-                    padding-bottom: 56.25%;
+                    padding-bottom: 56.25%; //makes a 16:9 aspect ratio
                     padding-top: 2.5rem;
-
-                    iframe {
-                        position: absolute;;
+                    .loading {
+                        position: absolute;
                         top: 0;
                         left: 0;
                         width: 100%;
                         height: 100%;
-
+                        z-index: 1;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    iframe {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 2;
                     }
                 }
 
