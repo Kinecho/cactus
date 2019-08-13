@@ -151,12 +151,9 @@
     @import "forms";
 
     .content-card {
-        @include shadowbox;
-        height: 60rem;
-        max-height: 90vh;
-        width: 50rem;
-        max-width: 90vw;
-        background-color: $lightBlue;
+
+        width: 100%;
+        height: 100%;
         padding: 2rem;
         display: flex;
         flex-direction: column;

@@ -8,12 +8,12 @@
                 No prompt found for id
             </div>
             <section class="content-container" v-if="!loading">
-
+                <div class="progress">
+                    <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                </div>
                 <transition :name="transitionName" mode="out-in">
+
                     <div class="card-container" v-bind:key="activeIndex">
-                        <div class="progress">
-                            <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
-                        </div>
                         <content-card
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
@@ -110,6 +110,7 @@
                     }
                 },
                 {
+                    label: "Reflect",
                     contentType: ContentType.reflect,
                     text: "What's your favorite thing to do on a sunny day?",
                 },
@@ -184,12 +185,12 @@
     @import "common";
     @import "variables";
     @import "mixins";
-    @import "transitions";
+    /*@import "transitions";*/
 
     $cardWidth: 50rem;
 
     .page-wrapper {
-        min-height: 100vh;
+        min-height: 70vh;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -197,43 +198,51 @@
 
 
         .content-container {
+            overflow: hidden;
+            @include shadowbox;
+            background-color: $lightBlue;
 
+            .progress {
+                display: flex;
+                width: $cardWidth;
+                padding: 0 1rem;
+                position: relative;
+                top: 3rem;
+                z-index: 5;
 
+                .segment {
+                    flex-grow: 1;
+                    height: .4rem;
+                    background-color: $lightPink;
+                    transition: all .3s;
+
+                    &:not(:last-child) {
+                        border-right: 1px solid white;
+                    }
+
+                    &.complete {
+                        background-color: $darkPink;
+                    }
+                }
+            }
 
             .card-container {
                 margin: 1rem 0;
-                width: 100vw;
+                height: 60rem;
+                max-height: 90vh;
+                width: $cardWidth;
+                max-width: 90vw;
+
                 display: flex;
                 justify-content: center;
                 flex-direction: column;
                 align-items: center;
 
-                .progress{
-                    display: flex;
-                    width: $cardWidth - 1rem;
-                    position: relative;
-                    top: 3rem;
-                    z-index: 5;
-                    .segment {
-                        flex-grow: 1;
-                        height: .4rem;
-                        background-color: $lightPink;
-                        transition: all .3s;
-                        &:not(:last-child){
-                            border-right: 1px solid white;
-                        }
-
-                        &.complete {
-                            background-color: $darkPink;
-                        }
-                    }
-                }
-
             }
 
             .arrow {
                 position: absolute;
-                top: 50vh;
+                top: 50%;
                 z-index: 10;
 
                 &.previous {
@@ -266,6 +275,34 @@
 
     .wiggle:hover svg {
         animation: wiggle .5s forwards;
+    }
+
+
+    .slide-leave-active,
+    .slide-enter-active {
+        transition: .2s;
+    }
+
+    .slide-enter {
+        transform: translate(100%, 0);
+    }
+
+    .slide-leave-to {
+        transform: translate(-100%, 0);
+    }
+
+
+    .slide-out-leave-active,
+    .slide-out-enter-active {
+        transition: .2s;
+    }
+
+    .slide-out-enter {
+        transform: translate(-100%, 0);
+    }
+
+    .slide-out-leave-to {
+        transform: translate(100%, 0);
     }
 
 
