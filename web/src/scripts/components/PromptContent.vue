@@ -318,28 +318,34 @@
 
     .slide-leave-active,
     .slide-enter-active {
-        transition: .2s;
+        opacity: 1;
+        transition: .2s ease-in-out;
     }
 
     .slide-enter {
+        opacity: 0;
         transform: translate(100%, 0);
     }
 
     .slide-leave-to {
+        opacity: 0;
         transform: translate(-100%, 0);
     }
 
 
     .slide-out-leave-active,
     .slide-out-enter-active {
-        transition: .2s;
+        opacity: 1;
+        transition: .2s ease-in-out;
     }
 
     .slide-out-enter {
+        opacity: 0;
         transform: translate(-100%, 0);
     }
 
     .slide-out-leave-to {
+        opacity: 0;
         transform: translate(100%, 0);
     }
 </style>
