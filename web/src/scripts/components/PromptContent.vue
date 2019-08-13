@@ -1,7 +1,9 @@
 <template>
 
     <div class="page-wrapper">
-
+        <button class="share tertiary" v-if="!loading">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>Share Today's Prompt
+        </button>
         <transition appear name="fade-in" mode="out-in">
             <spinner v-if="loading" message="Loading..."/>
             <div v-if="!loading && !prompt">
@@ -25,8 +27,12 @@
                     </div>
 
                 </transition>
-                <button class="previous arrow secondary wiggle" @click="previous" v-if="hasPrevious">Previous</button>
-                <button class="next arrow secondary wiggle" @click="next" v-if="hasNext && activeIndex > 0">Next
+                <button class="previous arrow secondary" @click="previous" v-if="hasPrevious">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                </button>
+                <button class="next arrow secondary" @click="next" v-if="hasNext && activeIndex > 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                </svg>
                 </button>
             </section>
 
@@ -79,22 +85,22 @@
                 {
                     contentType: ContentType.content,
                     label: "Day 1 of 4 about nature",
-                    text: "Today you'll reflect on your favorite thing ot do on a sunny day.",
+                    text: "Today you'll reflect on your favorite thing to do on a sunny day.",
                     backgroundImage: {
                         position: ContentImagePosition.bottom,
                         image: {
-                            url: "/assets/images/celebrate.svg",
+                            url: "/assets/images/nature.svg",
                         },
                     },
                     button: {
                         action: ContentButtonAction.next,
-                        label: "Let's go"
+                        label: "Let's Go"
                     }
                 },
                 {
                     contentType: ContentType.content,
                     quote: {
-                        text: "Every magical happens between June and August",
+                        text: "Everything magical happens between June and August",
                         authorName: "Jenny Han",
                         authorTitle: "Author",
                         avatarImage: {
