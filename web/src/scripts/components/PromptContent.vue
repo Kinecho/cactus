@@ -9,7 +9,8 @@
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
-            <section class="content-container" v-if="!loading">
+
+            <section class="content-container centered" v-if="!loading">
                 <div class="progress">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
@@ -193,37 +194,31 @@
     @import "mixins";
     /*@import "transitions";*/
 
-    $cardWidth: 50rem;
-
     .page-wrapper {
-        min-height: 70vh;
         display: flex;
+        flex-flow: column nowrap;
         justify-content: center;
-        align-items: center;
         position: relative;
 
-
         .content-container {
-            overflow: hidden;
-            @include shadowbox;
-            background-color: $lightBlue;
+            margin-bottom: 12rem;
 
             .progress {
                 display: flex;
-                width: $cardWidth;
-                padding: 0 1rem;
+                margin: 0 auto;
                 position: relative;
-                top: 3rem;
+                transform: translateY(1.6rem);
+                width: 94%;
                 z-index: 5;
 
                 .segment {
+                    border-radius: .8rem;
                     flex-grow: 1;
                     height: .4rem;
                     background-color: $lightPink;
-                    transition: all .3s;
 
                     &:not(:last-child) {
-                        border-right: 1px solid white;
+                        border-right: 1px solid $lightBlue;
                     }
 
                     &.complete {
@@ -233,39 +228,61 @@
             }
 
             .card-container {
-                margin: 1rem 0;
-                height: 60rem;
-                max-height: 90vh;
-                width: $cardWidth;
-                max-width: 90vw;
-
-                display: flex;
-                justify-content: center;
-                flex-direction: column;
-                align-items: center;
-
             }
 
             .arrow {
+                align-items: center;
+                display: flex;
+                height: 4.8rem;
+                left: 0;
+                justify-content: center;
+                margin: auto;
+                padding: 0;
                 position: absolute;
-                top: 50%;
+                right: 0;
+                top: 32vh;
+                width: 4.8rem;
                 z-index: 10;
 
+                svg {
+                    height: 1.6rem;
+                    width: 1.6rem;
+                }
+
                 &.previous {
-                    left: 3rem;
+                    transform: translateX(-32rem);
                 }
 
                 &.next {
-                    right: 3rem;
-                }
+                    transform: translateX(32rem);
 
-                @include maxW($widthTablet) {
-                    display: none;
+                    svg {
+                        transform: scale(-1);
+                    }
                 }
             }
         }
     }
 
+    button.share {
+        align-items: center;
+        display: flex;
+        left: 0;
+        position: absolute;
+        top: 0;
+
+        @include r(600) {
+            position: static;
+        }
+
+        &:hover {
+            background-color: transparent;
+        }
+
+        svg {
+            margin-right: .8rem;
+        }
+    }
 
     button.secondary {
         margin-right: .8rem;
@@ -310,6 +327,4 @@
     .slide-out-leave-to {
         transform: translate(100%, 0);
     }
-
-
 </style>
