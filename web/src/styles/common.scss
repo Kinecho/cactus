@@ -20,6 +20,10 @@ body {
   font: 1.8rem $font-stack;
   line-height: 1.43;
   margin: 0;
+
+  &.no-scroll {
+    overflow-y: hidden;
+  }
 }
 
 .centered {

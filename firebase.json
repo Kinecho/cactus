@@ -65,6 +65,10 @@
                 "destination": "/values_home.html"
             },
             {
+                "source": "/invite",
+                "destination": "/referral_program.html"
+            },
+            {
                 "source": "/who-is-the-best-teacher-you-ever-had",
                 "destination": "/who_is_the_best_teacher_you_ever_had.html"
             },

@@ -424,6 +424,13 @@ module.exports = {
         "includeInDev": true,
         "name": "account_settings"
     },
+    "referral_program": {
+        "title": "Invite a Friend | Cactus",
+        "path": "/invite",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "referral_program"
+    },
     "prompt": {
         "title": "Prompts",
         "path": "/prompts",
