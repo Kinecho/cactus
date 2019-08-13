@@ -135,8 +135,13 @@
     .referralContainer {
         display: flex;
         flex-flow: column nowrap;
-        height: 100vh;
         justify-content: space-between;
+
+        @include r(600) {
+          @include h(960) {
+            height: 100vh;
+          }
+        }
 
         header, .centered {
             width: 100%;
