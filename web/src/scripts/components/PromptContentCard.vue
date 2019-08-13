@@ -54,14 +54,18 @@
         </section>
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
-                <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
+                <button class="next inline-arrow primary" @click="next" v-if="hasNext">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#fff" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                </button>
             </div>
 
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen" class="reflect-container">
                 <div class="mobile-nav-buttons">
-                    <button class="next inline-arrow secondary wiggle" @click="next" v-if="hasNext">Next</button>
+                    <button class="next inline-arrow primary" @click="next" v-if="hasNext">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#fff" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                    </button>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput" type="text" placeholder="Write your thoughts" rows="1"/>
@@ -178,188 +182,208 @@
             position: relative;
             overflow: hidden;
         }
+    }
 
-        .content, .lowerActions {
-            z-index: 2;
-        }
+    .content, .lowerActions {
+        z-index: 2;
+    }
 
-        .background-image {
+    .background-image {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+
+        @include r(600) {
             display: flex;
             justify-content: center;
             margin: 0 -2.4rem;
             order: 1;
+            position: static;
+        }
 
-            &.top {
-                margin-top: -2.4rem;
-            }
+        &.top {
+            margin-top: -2.4rem;
+        }
 
-            &.bottom {
-                margin-bottom: -2.4rem;
-            }
+        &.bottom {
+            margin-bottom: -2.4rem;
+        }
+
+        img {
+            transform: translateY(11px);
+            width: 111%;
+        }
+    }
+
+    .text {
+        font-size: 2.4rem;
+    }
+
+    .label {
+        color: $darkestPink;
+        margin-bottom: 1.6rem;
+    }
+
+    .content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .quote-container {
+        display: flex;
+        flex-direction: column;
+
+        .avatar-container {
+            margin-bottom: 2.4rem;
 
             img {
-                transform: translateY(11px);
-                width: 111%;
+                $avatarSize: 5.6rem;
+                height: $avatarSize;
+                width: $avatarSize;
             }
         }
 
-        .text {
+        .quote {
             font-size: 2.4rem;
+            margin-bottom: 2.4rem;
+
+            &:before, &:after {
+                content: "\"";
+            }
         }
 
-        .label {
-            color: $darkestPink;
-            margin-bottom: 1.6rem;
+        .name {
+            font-weight: bold;
         }
 
-        .content {
+        .title {
+            opacity: .8;
+        }
+    }
+
+    .video-container {
+        border-radius: 12px;
+        margin-top: 4rem;
+        overflow: hidden;
+
+        .iframe-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; //makes a 16:9 aspect ratio
+            padding-top: 2.4rem;
+
+            .loading {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 2;
+            }
+        }
+    }
+
+    .grow-container {
+        margin-top: 4.8rem;
+    }
+
+    .leaf3 {
+        animation: growingLeaves 15s forwards;
+        transform: scale(0.3) translate(20px, 25px);
+        transform-origin: center;
+    }
+    .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
+        animation: growingLeaves2 15s forwards;
+        opacity: 0;
+    }
+    .leaf7 {
+        animation-delay: 6s;
+    }
+    .leaf5 {
+        animation-delay: 12s;
+    }
+    .leaf1 {
+        animation-delay: 18s;
+    }
+    .leaf4 {
+        animation-delay: 24s;
+    }
+    .leaf2 {
+        animation-delay: 36s;
+    }
+    .leaf6 {
+        animation-delay: 42s;
+    }
+
+    .grow5 {
+        animation: grow 60s forwards;
+    }
+
+    .lowerActions {
+        bottom: 3.2rem;
+        left: 2.4rem;
+        position: absolute;
+        right: 2.4rem;
+    }
+
+    .mobile-nav-buttons {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+
+        @include r(600) {
+            display: none;
+        }
+
+        .inline-arrow {
+            flex-grow: 0;
+        }
+
+        .next {
             display: flex;
-            flex: 1;
-            flex-direction: column;
+            height: 4.8rem;
             justify-content: center;
+            padding: 0;
+            width: 4.8rem;
 
-            .quote-container {
-                display: flex;
-                flex-direction: column;
-
-                .avatar-container {
-                    margin-bottom: 2.4rem;
-
-                    img {
-                        $avatarSize: 5.6rem;
-                        height: $avatarSize;
-                        width: $avatarSize;
-                    }
-                }
-
-                .quote {
-                    font-size: 2.4rem;
-                    margin-bottom: 2.4rem;
-
-                    &:before, &:after {
-                        content: "\"";
-                    }
-                }
-
-                .name {
-                    font-weight: bold;
-                }
-
-                .title {
-                    opacity: .8;
-                }
-            }
-
-            .video-container {
-                border-radius: 12px;
-                margin-top: 4rem;
-                overflow: hidden;
-
-                .iframe-wrapper {
-                    position: relative;
-                    padding-bottom: 56.25%; //makes a 16:9 aspect ratio
-                    padding-top: 2.4rem;
-
-                    .loading {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        z-index: 1;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-
-                    iframe {
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        z-index: 2;
-                    }
-                }
+            svg {
+                transform: scale(-1);
             }
         }
+    }
 
-        .grow-container {
-            margin-top: 4.8rem;
-        }
+    .reflect-container textarea {
+        @include textArea;
+        background-color: transparent;
+        border-radius: 3rem;
+        font-family: $font-stack;
+        width: 100%;
 
-        .leaf3 {
-            animation: growingLeaves 15s forwards;
-            transform: scale(0.3) translate(20px, 25px);
-            transform-origin: center;
+        &:focus {
+            background-color: $white;
+            border-radius: 6px;
         }
-        .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
-            animation: growingLeaves2 15s forwards;
-            opacity: 0;
-        }
-        .leaf7 {
-            animation-delay: 6s;
-        }
-        .leaf5 {
-            animation-delay: 12s;
-        }
-        .leaf1 {
-            animation-delay: 18s;
-        }
-        .leaf4 {
-            animation-delay: 24s;
-        }
-        .leaf2 {
-            animation-delay: 36s;
-        }
-        .leaf6 {
-            animation-delay: 42s;
-        }
+    }
 
-        .grow5 {
-            animation: grow 60s forwards;
-        }
+    .primaryBtn {
+        width: 100%;
 
-        .lowerActions {
-            bottom: 3.2rem;
-            left: 2.4rem;
-            position: absolute;
-            right: 2.4rem;
-
-            .mobile-nav-buttons {
-                display: flex;
-                justify-content: flex-end;
-                margin-bottom: 1rem;
-
-                @include minW($widthTablet) {
-                    display: none;
-                }
-
-                .inline-arrow {
-                    flex-grow: 0;
-                }
-            }
-        }
-
-        .reflect-container textarea {
-            @include textArea;
-            background-color: transparent;
-            border-radius: 3rem;
-            font-family: $font-stack;
-            width: 100%;
-
-            &:focus {
-                background-color: $white;
-                border-radius: 6px;
-            }
-        }
-
-        .primaryBtn {
-            width: 100%;
-
-            @include r(600) {
-                width: 50%;
-            }
+        @include r(600) {
+            width: 50%;
         }
     }
 </style>

@@ -2,7 +2,8 @@
     <div class="page-wrapper">
         <div class="shareContainer">
             <button class="share tertiary wiggle" v-if="!loading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>Share Today's Prompt
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>
+                <span class="buttonText">Share Today's Prompt</span>
             </button>
         </div>
         <transition appear name="fade-in" mode="out-in">
@@ -195,10 +196,14 @@
         display: flex;
         flex-flow: column nowrap;
         justify-content: center;
+        overflow: hidden;
         position: relative;
 
         .content-container {
-            margin-bottom: 12rem;
+
+            @include r(600) {
+                margin-bottom: 12rem;
+            }
 
             .progress {
                 display: flex;
@@ -259,27 +264,37 @@
     }
 
     .shareContainer {
-        margin: 0 auto;
-        width: 48rem;
+        left: 0;
+        position: absolute;
+        top: 2.4rem;
+
+        @include r(600) {
+            margin: 0 auto;
+            position: static;
+            width: 48rem;
+        }
+
+        .buttonText {
+            display: none;
+
+            @include r(600) {
+                display: block;
+            }
+        }
     }
 
     button.share {
         align-items: center;
         display: flex;
-        left: 0;
-        position: absolute;
-        top: 0;
-
-        @include r(600) {
-            position: static;
-        }
 
         &:hover {
             background-color: transparent;
         }
 
-        svg {
-            margin-right: .8rem;
+        @include r(600) {
+            svg {
+                margin-right: .8rem;
+            }
         }
     }
 
