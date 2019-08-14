@@ -267,7 +267,7 @@
         left: 0;
         position: absolute;
         top: 2.4rem;
-
+        z-index: 5;
         @include r(600) {
             margin: 0 auto;
             position: static;
