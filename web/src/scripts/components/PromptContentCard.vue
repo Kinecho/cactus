@@ -68,7 +68,7 @@
                     </button>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
-                    <textarea ref="reflectionInput" type="text" placeholder="Write your thoughts" rows="1"/>
+                    <textarea ref="reflectionInput" type="text" placeholder="Add your reflection" rows="1"/>
                 </resizable-textarea>
 
             </div>

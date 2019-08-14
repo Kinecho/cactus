@@ -23,9 +23,11 @@
     @import "mixins";
 
     .spinner-container {
+        align-items: center;
         display: flex;
         flex-direction: row;
-        align-items: center;
+        justify-content: center;
+
         .spinner {
             animation: rotate 1s linear infinite;
             background: url(/assets/images/loading.svg) no-repeat;
