@@ -1,26 +1,31 @@
 import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="page-wrapper">
-        <div class="shareContainer">
-            <button class="share tertiary wiggle" v-if="!loading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
-                    <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
-                </svg>
-                <span class="buttonText">Share Today's Prompt</span>
-            </button>
-        </div>
         <transition appear name="fade-in" mode="out-in">
-            <spinner v-if="loading" message="Loading..."/>
+            <div class="centered" v-if="loading">
+                <spinner message="Loading..." :delay="1000"/>
+            </div>
+
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
+
             <section class="content-container centered" v-if="!loading && prompt">
-                <div class="progress">
+                <div class="shareContainer">
+                    <button class="share tertiary wiggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
+                            <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
+                        </svg>
+                        <span class="buttonText">Share Today's Prompt</span>
+                    </button>
+                </div>
+                <div class="progress" v-if="!completed">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
-                <div class="card-container">
+                <div v-if="!completed">
                     <transition :name="transitionName" mode="out-in">
                         <content-card
+
                                 v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
@@ -31,6 +36,13 @@ import {QueryParam} from '@shared/util/queryParams'
                                 v-on:complete="complete"/>
                     </transition>
                 </div>
+                <div v-if="completed">
+                    <transition name="celebrate" appear mode="out-in">
+                        <celebrate v-on:back="completed = false" v-on:restart="restart" v-on:close="close"/>
+                    </transition>
+                </div>
+
+
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                         <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
@@ -42,7 +54,9 @@ import {QueryParam} from '@shared/util/queryParams'
                     </svg>
                 </button>
             </section>
+
         </transition>
+
 
     </div>
 </template>
@@ -51,7 +65,10 @@ import {QueryParam} from '@shared/util/queryParams'
     import Vue from "vue";
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
-    import PromptContent, {Content} from '@shared/models/PromptContent'
+    import Celebrate from "@components/ReflectionCelebrateCard.vue";
+    import PromptContent, {
+        Content,
+    } from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
@@ -67,6 +84,7 @@ import {QueryParam} from '@shared/util/queryParams'
         components: {
             ContentCard,
             Spinner,
+            Celebrate,
         },
         props: {
             promptId: String,
@@ -115,6 +133,7 @@ import {QueryParam} from '@shared/util/queryParams'
             activeIndex: number,
             activeContent: Content | undefined,
             transitionName: string,
+            completed: boolean,
             promptsUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
@@ -124,6 +143,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 activeContent: undefined,
                 transitionName: "slide",
                 promptsUnsubscriber: undefined,
+                completed: false,
             };
         },
         computed: {
@@ -153,6 +173,12 @@ import {QueryParam} from '@shared/util/queryParams'
             previous() {
                 console.log("going to previous");
                 this.transitionName = "slide-out";
+
+                if (this.completed) {
+                    this.completed = false;
+                    return;
+                }
+
                 if (this.hasPrevious) {
                     console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
@@ -160,7 +186,15 @@ import {QueryParam} from '@shared/util/queryParams'
                 console.log(`new active index is ${this.activeIndex}`)
             },
             complete() {
-                alert("Complete!")
+                this.transitionName = "slide";
+                this.completed = true;
+            },
+            restart() {
+                this.activeIndex = 0;
+                this.completed = false;
+            },
+            close() {
+                alert("Will close this and redirect?");
             }
         }
     })
@@ -170,11 +204,12 @@ import {QueryParam} from '@shared/util/queryParams'
     @import "common";
     @import "variables";
     @import "mixins";
-    /*@import "transitions";*/
+    @import "transitions";
 
     .page-wrapper {
         display: flex;
         flex-flow: column nowrap;
+        height: 100vh;
         justify-content: center;
         overflow: hidden;
         position: relative;
@@ -220,7 +255,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 padding: 0;
                 position: absolute;
                 right: 0;
-                top: 32vh;
+                top: 44vh;
                 width: 4.8rem;
                 z-index: 10;
 
