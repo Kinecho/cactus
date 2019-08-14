@@ -1,23 +1,30 @@
 <template>
     <div class="page-wrapper">
-        <div class="shareContainer">
-            <button class="share tertiary wiggle" v-if="!loading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>
-                <span class="buttonText">Share Today's Prompt</span>
-            </button>
-        </div>
         <transition appear name="fade-in" mode="out-in">
-            <spinner v-if="loading" message="Loading..."/>
+            <div class="centered" v-if="loading">
+                <spinner message="Loading..." :delay="1000"/>
+            </div>
+
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
+
             <section class="content-container centered" v-if="!loading && prompt">
-                <div class="progress">
+                <div class="shareContainer">
+                    <button class="share tertiary wiggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
+                            <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
+                        </svg>
+                        <span class="buttonText">Share Today's Prompt</span>
+                    </button>
+                </div>
+                <div class="progress" v-if="!completed">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
-                <div class="card-container">
+                <div v-if="!completed">
                     <transition :name="transitionName" mode="out-in">
                         <content-card
+
                                 v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
@@ -28,15 +35,27 @@
                                 v-on:complete="complete"/>
                     </transition>
                 </div>
+                <div v-if="completed">
+                    <transition name="celebrate" appear mode="out-in">
+                        <celebrate v-on:back="completed = false" v-on:restart="restart" v-on:close="close"/>
+                    </transition>
+                </div>
+
+
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                        <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                    </svg>
                 </button>
                 <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                        <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
                     </svg>
                 </button>
             </section>
+
         </transition>
+
 
     </div>
 </template>
@@ -45,6 +64,7 @@
     import Vue from "vue";
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
+    import Celebrate from "@components/ReflectionCelebrateCard.vue";
     import PromptContent, {
         Content,
         ContentButtonAction,
@@ -53,6 +73,8 @@
     } from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
+    import {getQueryParam, updateQueryParam} from '@web/util'
+    import {QueryParam} from "@shared/util/queryParams"
 
 
     Vue.use(Vue2TouchEvents);
@@ -62,6 +84,7 @@
         components: {
             ContentCard,
             Spinner,
+            Celebrate,
         },
         props: {
             promptId: String,
@@ -131,7 +154,9 @@
 
 
             setTimeout(() => {
+                this.activeIndex = Math.min(mockPrompt.content.length - 1, Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0));
                 this.prompt = mockPrompt;
+
                 this.loading = false;
             }, 1500)
 
@@ -142,13 +167,15 @@
             activeIndex: number,
             activeContent: Content | undefined,
             transitionName: string,
+            completed: boolean,
         } {
             return {
                 prompt: undefined,
                 loading: true,
                 activeIndex: 0,
                 activeContent: undefined,
-                transitionName: "slide"
+                transitionName: "slide",
+                completed: false,
             };
         },
         computed: {
@@ -158,6 +185,11 @@
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
             }
+        },
+        watch: {
+            activeIndex(index: number) {
+                updateQueryParam(QueryParam.CONTENT_INDEX, index)
+            },
         },
         methods: {
             next() {
@@ -173,6 +205,12 @@
             previous() {
                 console.log("going to previous");
                 this.transitionName = "slide-out";
+
+                if (this.completed) {
+                    this.completed = false;
+                    return;
+                }
+
                 if (this.hasPrevious) {
                     console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
@@ -180,7 +218,15 @@
                 console.log(`new active index is ${this.activeIndex}`)
             },
             complete() {
-                alert("Complete!")
+                this.transitionName = "slide";
+                this.completed = true;
+            },
+            restart() {
+                this.activeIndex = 0;
+                this.completed = false;
+            },
+            close() {
+                alert("Will close this and redirect?");
             }
         }
     })
@@ -190,7 +236,7 @@
     @import "common";
     @import "variables";
     @import "mixins";
-    /*@import "transitions";*/
+    @import "transitions";
 
     .page-wrapper {
         display: flex;
@@ -214,6 +260,7 @@
                 width: 94%;
                 z-index: 5;
                 height: 0;
+
                 .segment {
                     border-radius: .8rem;
                     flex-grow: 1;

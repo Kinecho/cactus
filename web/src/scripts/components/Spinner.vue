@@ -1,5 +1,5 @@
 <template>
-    <transition name="fade-in" appear>
+    <transition name="fade-in" appear v-if="visible">
         <div class="spinner-container">
             <img src="/assets/images/loading.svg" alt="Loading" class="spinner"/>
             <span v-if="message" class="message">{{message}}</span>
@@ -14,7 +14,36 @@
     export default Vue.extend({
         props: {
             message: String,
+            delay: {
+                type: Number,
+                default: 0,
+            }
         },
+        created() {
+            if (this.delay > 0) {
+                this.delayTimeout = setTimeout(() => {
+                    this.visible = true;
+                }, this.delay)
+            } else {
+                this.visible = true;
+            }
+        },
+        destroyed() {
+            if (this.delayTimeout) {
+                clearTimeout(this.delayTimeout);
+            }
+        },
+        data(): {
+            visible: boolean,
+            delayTimeout: any | undefined
+        } {
+            return {
+                visible: false,
+                delayTimeout: undefined,
+            }
+        }
+
+
     })
 </script>
 
