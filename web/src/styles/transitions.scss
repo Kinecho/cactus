@@ -124,6 +124,8 @@ $slow: 1.5s;
 @include createAnimation("bounce", bounce-in, $normal);
 @include createAnimation("fade-down", fade-down cubic-bezier(.42,.97,.52,1.49), .3s, $outDuration: $fast);
 
+@include createAnimation("celebrate", bounce-in, $normal, $reverseOut: false, $outAnimation: fade-out, $outDuration: $normal)
+
 
 @keyframes bounce-in {
   0% {
@@ -142,12 +144,7 @@ $slow: 1.5s;
     opacity: 1;
   }
 
-  50% {
-    transform: scale(1.5);
-  }
   100% {
-    height: 0;
-    transform: scaleY(.2);
     opacity: 0;
   }
 

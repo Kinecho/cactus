@@ -8,18 +8,19 @@
                 <span class="buttonText">Share Today's Prompt</span>
             </button>
         </div>
-        <transition appear name="fade-in" mode="out-in" >
+        <transition appear name="fade-in" mode="out-in">
             <spinner v-if="loading" message="Loading..."/>
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
-            <section class="content-container centered" v-if="!loading && prompt && !completed">
-                <div class="progress">
+            <section class="content-container centered" v-if="!loading && prompt">
+                <div class="progress" v-if="!completed">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
-                <div class="card-container">
+                <div v-if="!completed">
                     <transition :name="transitionName" mode="out-in">
                         <content-card
+
                                 v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
@@ -30,6 +31,13 @@
                                 v-on:complete="complete"/>
                     </transition>
                 </div>
+                <div v-if="completed">
+                    <transition name="celebrate" appear mode="out-in">
+                        <celebrate v-on:back="completed = false" v-on:restart="restart" v-on:close="close"/>
+                    </transition>
+                </div>
+
+
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                         <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
@@ -40,10 +48,6 @@
                         <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
                     </svg>
                 </button>
-            </section>
-
-            <section v-if="completed" class="content-container centered">
-                <celebrate />
             </section>
 
         </transition>
@@ -197,6 +201,12 @@
             previous() {
                 console.log("going to previous");
                 this.transitionName = "slide-out";
+
+                if (this.completed) {
+                    this.completed = false;
+                    return;
+                }
+
                 if (this.hasPrevious) {
                     console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
@@ -204,7 +214,15 @@
                 console.log(`new active index is ${this.activeIndex}`)
             },
             complete() {
+                this.transitionName = "slide";
                 this.completed = true;
+            },
+            restart() {
+                this.activeIndex = 0;
+                this.completed = false;
+            },
+            close() {
+                alert("Will close this and redirect?");
             }
         }
     })
@@ -214,7 +232,7 @@
     @import "common";
     @import "variables";
     @import "mixins";
-    /*@import "transitions";*/
+    @import "transitions";
 
     .page-wrapper {
         display: flex;

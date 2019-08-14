@@ -1,32 +1,34 @@
 <template>
-    <transition name="bounce" appear>
-        <div class="celebrate-container">
-            <h1>Whoop, whoop!<br/>You did it!</h1>
-            <img src="/assets/images/celebrate.svg" class="illustration" alt="Celebrate!"/>
-            <div class="stats-container">
-                <section class="metric">
-                    <span class="label">{{reflectionCount}}<spinner v-if="loading"/></span>
+    <div class="celebrate-container">
+        <h1>Whoop, whoop!<br/>You did it!</h1>
+        <img src="/assets/images/celebrate.svg" class="illustration" alt="Celebrate!"/>
+        <div class="stats-container">
+            <section class="metric">
+                <span class="label">{{reflectionCount}}<spinner v-if="loading"/></span>
 
-                    <h4>
-                        Reflections
-                    </h4>
-                </section>
-                <section class="metric">
-                    <span class="label">{{totalMinutes}}<spinner v-if="loading"/></span>
-                    <h4>
-                        Minutes
-                    </h4>
-                </section>
-                <section class="metric">
-                    <span class="label">{{streakDays}}<spinner v-if="loading"/></span>
-                    <h4>
-                        Streak
-                    </h4>
-                </section>
-            </div>
+                <h4>
+                    Reflections
+                </h4>
+            </section>
+            <section class="metric">
+                <span class="label">{{totalMinutes}}<spinner v-if="loading"/></span>
+                <h4>
+                    Minutes
+                </h4>
+            </section>
+            <section class="metric">
+                <span class="label">{{streakDays}}<spinner v-if="loading"/></span>
+                <h4>
+                    Streak
+                </h4>
+            </section>
         </div>
-    </transition>
-
+        <div class="actions">
+            <button class="button secondary" @click="back">Back</button>
+            <button class="button secondary" @click="restart">Restart</button>
+            <button class="button secondary" @click="close">Close</button>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -41,9 +43,9 @@
 
 
             setTimeout(() => {
-                this.reflectionCount = Math.floor( Math.random() * 100);
-                this.totalMinutes = Math.floor( Math.random() * 100);
-                this.streakDays= Math.floor( Math.random() * 30);
+                this.reflectionCount = Math.floor(Math.random() * 100);
+                this.totalMinutes = Math.floor(Math.random() * 100);
+                this.streakDays = Math.floor(Math.random() * 30);
                 this.loading = false;
 
             }, 1000);
@@ -61,11 +63,22 @@
                 streakDays: undefined,
                 loading: true,
             }
+        },
+        methods: {
+            back() {
+                this.$emit("back");
+            },
+            close() {
+                this.$emit("close");
+            },
+            restart() {
+                this.$emit("restart");
+            }
         }
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -88,6 +101,11 @@
         .illustration {
             width: 100%;
             padding: 1rem;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
         }
 
         .stats-container {
