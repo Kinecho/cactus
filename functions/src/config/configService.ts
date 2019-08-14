@@ -66,6 +66,7 @@ const defaultTestConfig: CactusConfig = {
             engineering: "engineering-test",
             activity: "cactus-activity-test",
             data_log: "data-log-test",
+            ci: "engineering-ci",
         },
         app: {
             app_id: "fake",

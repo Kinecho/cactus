@@ -51,6 +51,7 @@ export enum ChannelName {
     activity = "activity",
     data_log = "data_log",
     email_sends = "email_sends",
+    ci = "ci"
 }
 
 export enum SlackResponseType {
@@ -266,5 +267,8 @@ export default class AdminSlackService {
         await this.sendMessage(ChannelName.activity, message);
     }
 
+    async sendCIMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.ci, message);
+    }
 
 }

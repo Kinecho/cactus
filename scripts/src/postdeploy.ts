@@ -59,8 +59,8 @@ const git = simplegit();
 
 
     if (isProd && resource === "hosting") {
-        await AdminSlackService.getSharedInstance().sendGeneralMessage(message);
-    } else {
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage(message);
+        await AdminSlackService.getSharedInstance().sendGeneralMessage({text: `A new version of the website has been released! See it <https://cactus.app|here>`});
     }
+    await AdminSlackService.getSharedInstance().sendCIMessage(message);
+
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));

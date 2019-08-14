@@ -8,9 +8,7 @@ import Footer from "@components/StardardFooter.vue";
 new Vue({
     el: "#app",
     template: `<div>
-    <NavBar/>
     <Prompt/>
-    <Footer/>
 </div>`,
     components: {
         Prompt: PromptPage,
