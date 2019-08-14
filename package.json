@@ -22,7 +22,9 @@
         "cmd": "npm --prefix \"scripts\" run cmd",
         "fe": "npm --prefix \"web\" run fe",
         "dev": "npm --prefix \"web\" run dev",
-        "api": "npm --prefix \"functions\" run serve"
+        "api": "npm --prefix \"functions\" run serve",
+        "add:all:dev": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save-dev;npm --prefix \"shared-admin\" install $1 --save-dev;npm --prefix \"functions\" install $1 --save-dev;npm --prefix \"shared\" install $1 --save-dev;npm --prefix \"scripts\" install $1 --save-dev; }; func",
+        "add:all:prod": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save;npm --prefix \"shared-admin\" install $1 --save;npm --prefix \"functions\" install $1 --save;npm --prefix \"shared\" install $1 --save;npm --prefix \"scripts\" install $1 --save; }; func"
     },
     "repository": {
         "type": "git",
