@@ -195,6 +195,7 @@
     .page-wrapper {
         display: flex;
         flex-flow: column nowrap;
+        height: 100vh;
         justify-content: center;
         overflow: hidden;
         position: relative;
@@ -239,7 +240,7 @@
                 padding: 0;
                 position: absolute;
                 right: 0;
-                top: 32vh;
+                top: 44vh;
                 width: 4.8rem;
                 z-index: 10;
 
