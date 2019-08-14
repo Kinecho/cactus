@@ -212,7 +212,7 @@
                 transform: translateY(1.6rem);
                 width: 94%;
                 z-index: 5;
-
+                height: 0;
                 .segment {
                     border-radius: .8rem;
                     flex-grow: 1;
