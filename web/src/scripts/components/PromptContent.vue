@@ -1,19 +1,23 @@
 <template>
     <div class="page-wrapper">
-        <div class="shareContainer">
-            <button class="share tertiary wiggle" v-if="!loading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
-                    <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
-                </svg>
-                <span class="buttonText">Share Today's Prompt</span>
-            </button>
-        </div>
         <transition appear name="fade-in" mode="out-in">
-            <spinner v-if="loading" message="Loading..."/>
+            <div class="centered" v-if="loading">
+                <spinner message="Loading..." :delay="1000"/>
+            </div>
+
             <div v-if="!loading && !prompt">
                 No prompt found for id
             </div>
+
             <section class="content-container centered" v-if="!loading && prompt">
+                <div class="shareContainer">
+                    <button class="share tertiary wiggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
+                            <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
+                        </svg>
+                        <span class="buttonText">Share Today's Prompt</span>
+                    </button>
+                </div>
                 <div class="progress" v-if="!completed">
                     <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>

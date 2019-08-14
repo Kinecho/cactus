@@ -4,20 +4,35 @@
         <img src="/assets/images/celebrate.svg" class="illustration" alt="Celebrate!"/>
         <div class="stats-container">
             <section class="metric">
-                <span class="label">{{reflectionCount}}<spinner v-if="loading"/></span>
+                <div class="label">
+                    <transition mode="out-in">
+                        <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                        <spinner v-if="!reflectionCount"/>
+                    </transition>
+                </div>
 
                 <h4>
                     Reflections
                 </h4>
             </section>
             <section class="metric">
-                <span class="label">{{totalMinutes}}<spinner v-if="loading"/></span>
+                <div class="label">
+                    <transition mode="out-in">
+                        <span v-if="totalMinutes !== undefined">{{totalMinutes}}</span>
+                        <spinner v-if="!totalMinutes"/>
+                    </transition>
+                </div>
                 <h4>
                     Minutes
                 </h4>
             </section>
             <section class="metric">
-                <span class="label">{{streakDays}}<spinner v-if="loading"/></span>
+                <div class="label">
+                    <transition mode="out-in">
+                        <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                        <spinner v-if="!streakDays"/>
+                    </transition>
+                </div>
                 <h4>
                     Streak
                 </h4>
@@ -118,11 +133,14 @@
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                flex-grow: 0;
 
                 .label {
                     font-size: 6rem;
                     display: block;
+
                     text-align: center;
+                    min-height: 7rem;
                 }
             }
 
