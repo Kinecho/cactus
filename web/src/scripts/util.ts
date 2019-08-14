@@ -112,7 +112,7 @@ export function showConfirmEmailModal(options: {
         $form.appendChild($confirmButton);
         $content.appendChild($form);
 
-        function onFormSubmit(){
+        function onFormSubmit() {
             const email = $emailInput.value;
             const isValid = isValidEmail(email);
             if (!isValid) {
@@ -138,9 +138,8 @@ export function showConfirmEmailModal(options: {
         }
 
 
-
         $confirmButton.addEventListener("click", () => {
-           onFormSubmit();
+            onFormSubmit();
         });
 
 
@@ -235,19 +234,30 @@ export function removeQueryParam(name: QueryParam) {
     try {
         const params = qs.parse(window.location.search, {ignoreQueryPrefix: true});
         if (params) {
-            console.log("before removal query params;",  qs.stringify(params));
+            console.log("before removal query params;", qs.stringify(params));
             delete params[name];
             const updatedQs = qs.stringify(params);
-            console.log("updated params",  updatedQs);
+            console.log("updated params", updatedQs);
             const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
-
             window.history.pushState({path: newurl}, '', newurl);
 
         }
     } catch (e) {
-        console.error("browser does not support URLSearchParams", e);
+        console.error("Error removing query param", e);
     }
 
+}
+
+export function updateQueryParam(name: QueryParam, value: string | number) {
+    try {
+        const params = qs.parse(window.location.search, {ignoreQueryPrefix: true}) || {};
+        params[name] = value;
+        const updatedQs = qs.stringify(params);
+        const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
+        window.history.pushState({path: newurl}, '', newurl);
+    } catch (error) {
+        console.error(`Failed to update query param value: ${name}=${value}`, error);
+    }
 }
 
 export function triggerWindowResize() {
@@ -269,7 +279,6 @@ export function setupNavigation(options: NavigationOptions) {
     const $headers = document.getElementsByTagName("header");
     const $header = $headers ? $headers.item(0) : undefined;
     const $nav = document.getElementById("#top-nav");
-
 
 
     if (!$nav && !$header) {
