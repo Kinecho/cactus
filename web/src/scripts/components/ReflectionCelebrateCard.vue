@@ -1,5 +1,5 @@
 <template>
-    <transition name="bounce-in" appear>
+    <transition name="bounce" appear>
         <div class="celebrate-container">
             <h1>Whoop, whoop!<br/>You did it!</h1>
             <img src="/assets/images/celebrate.svg" class="illustration" alt="Celebrate!"/>
@@ -69,6 +69,7 @@
     @import "common";
     @import "mixins";
     @import "variables";
+    @import "transitions";
 
     .celebrate-container {
         width: 100%;
