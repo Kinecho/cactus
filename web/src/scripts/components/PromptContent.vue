@@ -1,8 +1,11 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="page-wrapper">
         <div class="shareContainer">
             <button class="share tertiary wiggle" v-if="!loading">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22"><path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="22">
+                    <path fill="#29A389" d="M8.5 2.207L5.354 5.354a.5.5 0 1 1-.708-.708l4-4a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1-.708.708L9.5 2.207V14a.5.5 0 1 1-1 0V2.207zM.5 11a.5.5 0 1 1 1 0v8A1.5 1.5 0 0 0 3 20.5h12a1.5 1.5 0 0 0 1.5-1.5v-8a.5.5 0 1 1 1 0v8a2.5 2.5 0 0 1-2.5 2.5H3A2.5 2.5 0 0 1 .5 19v-8z"/>
+                </svg>
                 <span class="buttonText">Share Today's Prompt</span>
             </button>
         </div>
@@ -29,10 +32,13 @@
                     </transition>
                 </div>
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                        <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                    </svg>
                 </button>
                 <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                        <path fill="#29A389" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
                     </svg>
                 </button>
             </section>
@@ -45,16 +51,13 @@
     import Vue from "vue";
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
-    import PromptContent, {
-        Content,
-        ContentAction,
-        ContentImagePosition,
-        ContentType
-    } from '@shared/models/PromptContent'
+    import PromptContent, {Content} from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import {getQueryParam, updateQueryParam} from '@web/util'
+    import {QueryParam} from "@shared/util/queryParams"
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -78,6 +81,9 @@
                 console.log("using prop for prompt id", promptId)
             }
 
+            const slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
+
+
             this.promptsUnsubscriber = await flamelink.content.subscribe({
                 entryId: promptId,
                 schemaKey: "promptContent",
@@ -91,6 +97,7 @@
                         return console.error("Failed to load prompts", error)
                     }
                     console.log("prompt", prompt);
+                    this.activeIndex = slideNumber;
                     this.prompt = prompt;
                     this.loading = false;
                 }
@@ -126,6 +133,11 @@
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
             }
+        },
+        watch: {
+            activeIndex(index: number) {
+                updateQueryParam(QueryParam.CONTENT_INDEX, index)
+            },
         },
         methods: {
             next() {
@@ -181,6 +193,7 @@
                 width: 94%;
                 z-index: 5;
                 height: 0;
+
                 .segment {
                     border-radius: .8rem;
                     flex-grow: 1;
