@@ -11,13 +11,19 @@ import flamelink from "flamelink/app";
 import 'flamelink/content'
 import 'flamelink/storage'
 
-let isInitialized = false;
-let firebaseApp: firebase.app.App;
-let flamelinkApp: flamelink.app.App;
+import FirebaseApp = firebase.app.App;
 
+let isInitialized = false;
+let firebaseApp: FirebaseApp;
+let flamelinkApp: flamelink.app.App;
 export type FirebaseUser = firebase.User;
 export type FirebaseUserCredential = firebase.auth.UserCredential;
 export type Unsubscribe = firebase.Unsubscribe;
+
+
+export enum FirebaseAppName {
+    flamelink = "flamelink",
+}
 
 export enum EmailActionMode {
     resetPassword = "resetPassword",
@@ -28,12 +34,14 @@ export enum EmailActionMode {
 export function initializeFirebase(): FirebaseObject {
     if (!isInitialized) {
         setTimestamp(firebase.firestore.Timestamp);
-        firebaseApp = firebase.initializeApp(Config.firebase);
+        firebaseApp = firebase.initializeApp(Config.firebase); //this is the default app, used in all the services
 
+
+        const flamelinkFirebaseApp = firebase.initializeApp(Config.flamelinkFirebaseConfig, FirebaseAppName.flamelink); //this is the flamelink version
         flamelinkApp = flamelink({
-            firebaseApp, // required
+            firebaseApp: flamelinkFirebaseApp, // required
             dbType: 'cf', // can be either 'rtdb' or 'cf' for Realtime DB or Cloud Firestore
-            env: 'production', // optional, default shown
+            env: Config.flamelinkEnvironmentId, // optional, default shown
             locale: 'en-US', // optional, default shown
             precache: true // optional, default shown. Currently it only precaches "schemas" for better performance
         });
@@ -42,8 +50,8 @@ export function initializeFirebase(): FirebaseObject {
     }
 
     return firebase;
-
 }
+
 
 export function getFlamelink(): flamelink.app.App {
     initializeFirebase();
@@ -51,21 +59,14 @@ export function getFlamelink(): flamelink.app.App {
 }
 
 export function getAuth(): firebase.auth.Auth {
-    initializeFirebase();
-    return firebase.auth();
+    return getFirebase().auth();
 }
 
 export function getFirestore(): firebase.firestore.Firestore {
-    initializeFirebase();
-    return firebase.firestore();
-}
-
-export function getStorage(): firebase.storage.Storage {
-    initializeFirebase();
-    return firebase.storage();
+    return getFirebase().firestore();
 }
 
 export function getFirebase() {
     initializeFirebase();
-    return firebase;
+    return firebaseApp;
 }

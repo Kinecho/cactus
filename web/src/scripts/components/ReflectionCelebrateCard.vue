@@ -5,9 +5,9 @@
         <div class="stats-container">
             <section class="metric">
                 <div class="label">
-                    <transition mode="out-in">
+                    <transition name="fade-in" mode="out-in" appear>
                         <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                        <spinner v-if="!reflectionCount"/>
+                        <spinner v-if="reflectionCount === undefined" :delay="1000"/>
                     </transition>
                 </div>
 
@@ -17,9 +17,9 @@
             </section>
             <section class="metric">
                 <div class="label">
-                    <transition mode="out-in">
+                    <transition name="fade-in" mode="out-in" appear>
                         <span v-if="totalMinutes !== undefined">{{totalMinutes}}</span>
-                        <spinner v-if="!totalMinutes"/>
+                        <spinner v-if="totalMinutes === undefined" :delay="1000"/>
                     </transition>
                 </div>
                 <h4>
@@ -28,9 +28,9 @@
             </section>
             <section class="metric">
                 <div class="label">
-                    <transition mode="out-in">
+                    <transition name="fade-in" mode="out-in" appear>
                         <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                        <spinner v-if="!streakDays"/>
+                        <spinner v-if="streakDays === undefined" :delay="1000"/>
                     </transition>
                 </div>
                 <h4>
@@ -58,12 +58,12 @@
 
 
             setTimeout(() => {
-                this.reflectionCount = Math.floor(Math.random() * 100);
-                this.totalMinutes = Math.floor(Math.random() * 100);
+                this.reflectionCount = Math.floor(Math.random() * 200);
+                this.totalMinutes = Math.floor(Math.random() * 1000);
                 this.streakDays = Math.floor(Math.random() * 30);
                 this.loading = false;
 
-            }, 1000);
+            }, 1500);
         },
         props: {},
         data(): {
@@ -134,13 +134,15 @@
                 justify-content: center;
                 align-items: center;
                 flex-grow: 0;
+                flex-basis: 100%;
 
                 .label {
                     font-size: 6rem;
-                    display: block;
-
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     text-align: center;
-                    min-height: 7rem;
+                    min-height: 8.5rem;
                 }
             }
 

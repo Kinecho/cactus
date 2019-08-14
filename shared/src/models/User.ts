@@ -14,7 +14,8 @@ export default class User extends BaseModel {
     cactusMemberId?:string;
     phoneNumber?:string;
     providerIds:string[] = [];
-
+    claims: string[] = [];
+    isAdmin:boolean = false;
     prepareForFirestore(): any {
         const object = super.prepareForFirestore();
         object.email = this.email ? this.email.toLowerCase().trim() : undefined;

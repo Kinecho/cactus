@@ -27,6 +27,9 @@ export interface SentryConfig {
 declare var __GOOGLE_ANALYTICS_ID__: string;
 declare var __GOOGLE_OPTIMIZE_ID__: string;
 declare var __FIREBASE_CONFIG__: FirebaseConfig;
+declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
+declare var __FLAMELINK_ENV_ID__: string;
+
 declare var __API_DOMAIN__: string;
 declare var __FULL_STORY_TEAM_ID__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
@@ -40,6 +43,8 @@ export const Config = {
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
     googleOptimizeID: __GOOGLE_OPTIMIZE_ID__,
     firebase: __FIREBASE_CONFIG__,
+    flamelinkFirebaseConfig: __FLAMELINK_FIREBASE_CONFIG__,
+    flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
     apiDomain: __API_DOMAIN__,
     fullStoryTeamId: __FULL_STORY_TEAM_ID__,
     stripe: __STRIPE_CONFIG__,
