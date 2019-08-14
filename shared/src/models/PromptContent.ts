@@ -6,7 +6,8 @@ export interface FlamelinkFile {
 
 export interface Image extends FlamelinkFile {
     url?: string,
-    cloudinaryId?: string,
+    flamelinkFileName?: string,
+    storageUrl?:string,
     fileIds?: string[]
 }
 
@@ -56,7 +57,7 @@ export interface Quote {
     text: string,
     authorName: string
     authorTitle?: string,
-    avatarImage?: Image;
+    authorAvatar?: Image;
 }
 
 export enum ContentImagePosition {
@@ -65,9 +66,8 @@ export enum ContentImagePosition {
     center = "center"
 }
 
-export interface ContentBackgroundImage {
+export interface ContentBackgroundImage extends Image{
     position?: ContentImagePosition
-    imageIds: string[],
 }
 
 export enum ContentType {
@@ -96,7 +96,6 @@ export function processContent(content: Content): Content {
 
     switch (content.contentType) {
         case ContentType.text:
-
             processed.text = content.text;
             break;
         case ContentType.quote:

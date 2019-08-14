@@ -139,6 +139,6 @@ export function getInitials(input: string): string {
 }
 
 
-export function toCamelCamse(input:string):string{
+export function toCamelCamse(input: string): string {
     return camelcase(input);
 }

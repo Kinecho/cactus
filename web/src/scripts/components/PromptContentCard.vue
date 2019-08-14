@@ -1,7 +1,7 @@
 <template>
     <div class="content-card">
-        <div :class="['background-image', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage.imageIds && processedContent.backgroundImage.imageIds.length > 0">
-            <flamelink-image v-bind:imageId="processedContent.backgroundImage.imageIds[0]"/>
+        <div :class="['background-image', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
+            <flamelink-image v-bind:image="processedContent.backgroundImage"/>
         </div>
 
         <section class="content">
@@ -11,15 +11,16 @@
             </div>
             <!--    START QUOTE    -->
             <div class="quote-container" v-if="processedContent.quote">
-                <div class="avatar-container" v-if="quoteAvatarUrl">
-                    <img :src="quoteAvatarUrl" :alt="processedContent.quote.authorName"/>
+                <div class="avatar-container" v-if="quoteAvatar">
+                    <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
                 <p class="quote">
                     {{processedContent.quote.text}}
                 </p>
                 <div class="author">
                     <p class="name">{{processedContent.quote.authorName}}</p>
-                    <p class="title" v-if="processedContent.quote.authorTitle">{{processedContent.quote.authorTitle}}</p>
+                    <p class="title" v-if="processedContent.quote.authorTitle">
+                        {{processedContent.quote.authorTitle}}</p>
                 </div>
             </div>
             <!--    END QUOTE    -->
@@ -73,7 +74,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {Content, ContentAction, ContentType, processContent} from "@shared/models/PromptContent"
+    import {Content, ContentAction, ContentType, Image as ContentImage, processContent} from "@shared/models/PromptContent"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
@@ -102,12 +103,12 @@
             processedContent(): Content {
                 return processContent(this.content);
             },
-            quoteAvatarUrl(): string | undefined | null {
-                if (!this.content.quote || !this.content.quote.avatarImage) {
+            quoteAvatar(): ContentImage | undefined | null {
+                if (!this.content.quote || !this.content.quote.authorAvatar) {
                     return undefined;
                 }
 
-                return this.content.quote.avatarImage.url;
+                return this.content.quote.authorAvatar;
             },
             isReflectScreen(): boolean {
                 return this.content.contentType === ContentType.reflect

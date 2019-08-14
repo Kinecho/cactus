@@ -13,5 +13,4 @@ module.exports = {
         '^@web/(.*)$': '<rootDir>/../web/src/$1',
 
     },
-    reporters: ["default", "jest-junit"]
 }
