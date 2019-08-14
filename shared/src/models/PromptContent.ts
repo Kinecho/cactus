@@ -35,8 +35,9 @@ enum LinkTarget {
     top = "_top"
 }
 
-enum LinkStyle {
-    button = "button",
+export enum LinkStyle {
+    buttonPrimary = "buttonPrimary",
+    buttonSecondary = "buttonSecondary",
     fancyLink = "fancyLink",
     link = "link",
 }
@@ -77,7 +78,6 @@ export enum ContentType {
     photo = "photo",
     audio = "audio",
     reflect = "reflect",
-    link = "link",
 }
 
 
@@ -91,6 +91,7 @@ export function processContent(content: Content): Content {
         contentType: content.contentType,
         label: content.label,
         actionButton: (content.actionButton && content.actionButton.label && content.actionButton.action) ? content.actionButton : undefined,
+        link: (content.link && content.link.destinationHref && content.link.linkLabel) ? content.link : undefined,
         backgroundImage: content.backgroundImage,
     };
 
@@ -115,10 +116,6 @@ export function processContent(content: Content): Content {
             break;
         case ContentType.reflect:
             processed.text = content.text;
-            break;
-        case ContentType.link:
-            processed.text = content.text;
-            processed.link = content.link;
             break;
 
     }

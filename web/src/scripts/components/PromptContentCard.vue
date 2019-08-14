@@ -48,7 +48,11 @@
 
 
             <!--      START Link      -->
-            <a v-if="processedContent.link" :href="processedContent.link.destinationHref" :target="processedContent.link.linkTarget" :class="[processedContent.link.style]">{{processedContent.link.linkLabel}}</a>
+            <div v-if="processedContent.link">
+                <a :href="processedContent.link.destinationHref"
+                        :target="processedContent.link.linkTarget"
+                        :class="linkClasses">{{processedContent.link.linkLabel}}</a>
+            </div>
             <!--      END Link      -->
 
 
@@ -129,6 +133,7 @@
         Content,
         ContentAction,
         ContentType,
+        LinkStyle,
         Image as ContentImage,
         processContent
     } from "@shared/models/PromptContent"
@@ -170,7 +175,31 @@
             isReflectScreen(): boolean {
                 return this.content.contentType === ContentType.reflect
             },
+            linkClasses(): string | undefined {
+                if (!this.processedContent || !this.processedContent.link) {
+                    return;
+                }
 
+                const linkStyle = this.processedContent.link.linkStyle || LinkStyle.link;
+                let classes = "";
+                switch (linkStyle) {
+                    case LinkStyle.buttonPrimary:
+                        classes = "button primary";
+                        break;
+                    case LinkStyle.buttonSecondary:
+                        classes = "button secondary";
+                        break;
+                    case LinkStyle.fancyLink:
+                        classes = "link fancy";
+                        break;
+                    case LinkStyle.link:
+                        classes = "link";
+                        break;
+
+                }
+
+                return classes;
+            }
         },
         methods: {
             doButtonAction(): void {
@@ -209,6 +238,7 @@
     @import "variables";
     @import "mixins";
     @import "forms";
+    @import "common";
 
     .content-card {
         background-color: $lightBlue;
@@ -312,6 +342,7 @@
     .photo-container {
         width: 100%;
         margin: 4rem 0;
+
         img {
             width: 100%;
         }
