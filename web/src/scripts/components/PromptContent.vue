@@ -238,6 +238,14 @@
     @import "mixins";
     @import "transitions";
 
+    .centered {
+        width: 100%;
+
+        @include r(600) {
+            width: auto;
+        }
+    }
+
     .page-wrapper {
         display: flex;
         flex-flow: column nowrap;

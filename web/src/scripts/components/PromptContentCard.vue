@@ -309,24 +309,25 @@
     .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
         animation: growingLeaves2 15s forwards;
         opacity: 0;
+        transform: scale(0.7) translate(19px, 18px);
     }
     .leaf7 {
         animation-delay: 6s;
     }
     .leaf5 {
-        animation-delay: 12s;
+        animation-delay: 16s;
     }
     .leaf1 {
-        animation-delay: 18s;
+        animation-delay: 21s;
     }
     .leaf4 {
-        animation-delay: 24s;
+        animation-delay: 30s;
     }
     .leaf2 {
-        animation-delay: 36s;
+        animation-delay: 32s;
     }
     .leaf6 {
-        animation-delay: 42s;
+        animation-delay: 44s;
     }
 
     .grow5 {
