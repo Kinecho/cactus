@@ -310,8 +310,12 @@
             width: 1.6rem;
         }
 
-        &.icon svg {
-            margin-right: 0;
+        &.icon {
+            padding: .9rem;
+
+            svg {
+                margin-right: 0;
+            }
         }
 
         &.primary svg {

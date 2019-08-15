@@ -1,7 +1,7 @@
 <template>
     <div class="celebrate-container">
-        <h1>Whoop, whoop!<br/>You did it!</h1>
-        <img src="/assets/images/celebrate.svg" class="illustration" alt="Celebrate!"/>
+        <h2>Whoop, whoop!<br/>You did it!</h2>
+        <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
         <div class="stats-container">
             <section class="metric">
                 <div class="label">
@@ -10,10 +10,9 @@
                         <spinner v-if="reflectionCount === undefined" :delay="1000"/>
                     </transition>
                 </div>
-
-                <h4>
+                <p>
                     Reflections
-                </h4>
+                </p>
             </section>
             <section class="metric">
                 <div class="label">
@@ -22,9 +21,9 @@
                         <spinner v-if="totalMinutes === undefined" :delay="1000"/>
                     </transition>
                 </div>
-                <h4>
+                <p>
                     Minutes
-                </h4>
+                </p>
             </section>
             <section class="metric">
                 <div class="label">
@@ -33,15 +32,10 @@
                         <spinner v-if="streakDays === undefined" :delay="1000"/>
                     </transition>
                 </div>
-                <h4>
-                    Streak
-                </h4>
+                <p>
+                    Day Streak
+                </p>
             </section>
-        </div>
-        <div class="actions">
-            <button class="button secondary" @click="back">Back</button>
-            <button class="button secondary" @click="restart">Restart</button>
-            <button class="button secondary" @click="close">Close</button>
         </div>
     </div>
 </template>
@@ -100,9 +94,13 @@
     @import "transitions";
 
     .celebrate-container {
-        width: 100%;
+        background-color: lighten($lightPink, 3%);
         display: flex;
         flex-direction: column;
+        height: 100vh;
+        justify-content: center;
+        padding: 2.4rem;
+        width: 100%;
 
         @include r(600) {
             border-radius: 12px;
@@ -112,41 +110,43 @@
             position: relative;
             overflow: hidden;
         }
+    }
 
-        .illustration {
-            width: 100%;
-            padding: 1rem;
+    h2 {
+        color: $darkestPink;
+        margin-bottom: 2.4rem;
+
+        @include r(600) {
+            margin-bottom: 3.2rem;
+        }
+    }
+
+    .illustration {
+        margin-bottom: 3.2rem;
+        width: 100%;
+    }
+
+    .stats-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .metric {
+        width: 10rem;
+
+        @include r(600) {
+            width: 11rem;
         }
 
-        .actions {
-            display: flex;
-            justify-content: space-between;
+        p {
+            font-size: 1.6rem;
         }
+    }
 
-        .stats-container {
-            display: flex;
-            justify-content: space-around;
-            padding: 2rem;
-
-            .metric {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                flex-grow: 0;
-                flex-basis: 100%;
-
-                .label {
-                    font-size: 6rem;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    min-height: 8.5rem;
-                }
-            }
-
-        }
+    .label {
+        font-size: 4.8rem;
+        font-weight: bold;
+        text-align: center;
     }
 
 

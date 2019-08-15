@@ -98,9 +98,7 @@
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
                 <button class="next inline-arrow primary" @click="next" v-if="hasNext">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                        <path fill="#fff" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
                 </button>
             </div>
 
@@ -109,13 +107,11 @@
             <div v-if="isReflectScreen" class="reflect-container">
                 <div class="mobile-nav-buttons">
                     <button class="next inline-arrow primary" @click="next" v-if="hasNext">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                            <path fill="#fff" d="M2.207 7.5l6.147-6.146a.5.5 0 1 0-.708-.708l-7 7a.5.5 0 0 0 0 .708l7 7a.5.5 0 0 0 .708-.708L2.207 8.5H15a.5.5 0 0 0 0-1H2.207z"/>
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
                     </button>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
-                    <textarea ref="reflectionInput" type="text" placeholder="Write your thoughts" rows="1"/>
+                    <textarea ref="reflectionInput" type="text" placeholder="Add your reflection" rows="1"/>
                 </resizable-textarea>
 
             </div>
@@ -394,6 +390,7 @@
     .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
         animation: growingLeaves2 15s forwards;
         opacity: 0;
+        transform: scale(0.7) translate(19px, 18px);
     }
 
     .leaf7 {
@@ -401,23 +398,23 @@
     }
 
     .leaf5 {
-        animation-delay: 12s;
+        animation-delay: 16s;
     }
 
     .leaf1 {
-        animation-delay: 18s;
+        animation-delay: 21s;
     }
 
     .leaf4 {
-        animation-delay: 24s;
+        animation-delay: 30s;
     }
 
     .leaf2 {
-        animation-delay: 36s;
+        animation-delay: 32s;
     }
 
     .leaf6 {
-        animation-delay: 42s;
+        animation-delay: 44s;
     }
 
     .grow5 {
@@ -446,13 +443,14 @@
 
         .next {
             display: flex;
-            height: 4.8rem;
+            height: 5.6rem;
             justify-content: center;
             padding: 0;
-            width: 4.8rem;
+            width: 5.6rem;
 
             svg {
-                transform: scale(-1);
+                height: 1.8rem;
+                width: 1.8rem;
             }
         }
     }
