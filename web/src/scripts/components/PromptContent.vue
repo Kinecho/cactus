@@ -270,10 +270,10 @@
                     border-radius: .8rem;
                     flex-grow: 1;
                     height: .4rem;
-                    background-color: $lightPink;
+                    background-color: $lightGreen;
 
                     &:not(:last-child) {
-                        border-right: 1px solid $lightBlue;
+                        margin-right: 2px;
                     }
 
                     &.complete {
