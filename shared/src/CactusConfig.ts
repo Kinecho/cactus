@@ -82,5 +82,13 @@ export interface CactusConfig {
         client_secret: string,
         prompt_content_sheet_id: string,
         service_account: ServiceAccountCredentials,
+    },
+    flamelink: {
+        service_account: ServiceAccountCredentials,
+        environments: {
+            prod_id: string,
+            stage_id: string,
+            dev_id: string,
+        }
     }
 }

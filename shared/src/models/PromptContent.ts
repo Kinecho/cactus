@@ -1,4 +1,5 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -138,7 +139,8 @@ export interface Content {
     actionButton?: ActionButton;
 }
 
-export default class PromptContent {
+export default class PromptContent extends FlamelinkModel {
+    schema = SchemaName.promptContent;
     id?: string;
     promptId?: string;
     content: Content[] = [];

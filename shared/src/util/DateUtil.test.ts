@@ -1,4 +1,9 @@
-import {formatDuration, getMailchimpDateString, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
+import {
+    differenceInMinutes,
+    formatDuration,
+    getMailchimpDateString,
+    makeUTCDateIntoMailchimpDate
+} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
 describe("getMailchimpCurrentDateString test", () => {
@@ -71,4 +76,25 @@ describe("format duration", () => {
         const end = new Date(denverTime + (1000 * 60 * 3 + 30000));
         expect(formatDuration(start, end)).toEqual("3m 30s")
     });
+});
+
+
+describe("get difference in minutes", () => {
+    test("-5 minutes", () => {
+        const start = 1560924000000;
+        const end = start + (1000 * 5 * 60); //5 minutes;
+        expect(differenceInMinutes(new Date(start), new Date(end))).toEqual(-5);
+    });
+
+    test("5 minutes", () => {
+        const start = 1560924000000;
+        const end = start - (1000 * 5 * 60); //5 minutes;
+        expect(differenceInMinutes(new Date(start), new Date(end))).toEqual(5);
+    })
+
+    test("5.5 minutes", () => {
+        const start = 1560924000000;
+        const end = start - (1000 * 5.5 * 60); //5 minutes;
+        expect(differenceInMinutes(new Date(start), new Date(end))).toEqual(5.5);
+    })
 });

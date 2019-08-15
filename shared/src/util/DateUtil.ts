@@ -88,3 +88,10 @@ export function stringFromISODate(input?: ISODate | null, format = "yyyy-LL-dd")
 
     return DateTime.fromISO(input).toFormat(format);
 }
+
+export function differenceInMinutes(d1: Date, d2: Date): number {
+    const dt1 = DateTime.fromJSDate(d1);
+    const dt2 = DateTime.fromJSDate(d2);
+
+    return dt1.diff(dt2).as("minutes")
+}

@@ -14,6 +14,7 @@ import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
+import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 
 export const cloudFunctions = {
     mailchimp: functions.https.onRequest(mailchimpApp),
@@ -31,4 +32,5 @@ export const cloudFunctions = {
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,
     signup: functions.https.onRequest(signupEndpoints),
     sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
+    flamelink: functions.https.onRequest(flamelinkEndpoints),
 };
