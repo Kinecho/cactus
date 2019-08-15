@@ -355,10 +355,10 @@
 
         .next {
             display: flex;
-            height: 4.8rem;
+            height: 5.6rem;
             justify-content: center;
             padding: 0;
-            width: 4.8rem;
+            width: 5.6rem;
 
             svg {
                 transform: scale(-1);
