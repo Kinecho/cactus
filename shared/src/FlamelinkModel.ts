@@ -1,4 +1,3 @@
-import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
 
 export enum SchemaName {
