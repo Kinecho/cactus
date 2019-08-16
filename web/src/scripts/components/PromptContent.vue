@@ -92,23 +92,27 @@ import {QueryParam} from '@shared/util/queryParams'
             Celebrate,
         },
         props: {
-            promptId: String,
+            promptContentId: String,
+            onClose: {
+                type: Function, default: function () {
+                    this.$emit("close")
+                }
+            }
         },
         async created(): Promise<void> {
-            //get content
-            let promptId = this.promptId;
-            if (!this.promptId) {
-                promptId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
-                console.log("using path for prompt id", promptId);
+            let promptContentId = this.promptContentId;
+            if (!this.promptContentId) {
+                promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
+                console.log("using path for promptContentId", promptContentId);
             } else {
-                console.log("using prop for prompt id", promptId)
+                console.log("using prop for promptContentId", promptContentId)
             }
 
             const slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
 
-
+            //TODO: use a promptContentService
             this.promptsUnsubscriber = await flamelink.content.subscribe({
-                entryId: promptId,
+                entryId: promptContentId,
                 schemaKey: "promptContent",
                 populate: [{
                     field: 'content',
@@ -127,6 +131,14 @@ import {QueryParam} from '@shared/util/queryParams'
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     this.prompt = prompt;
                     this.loading = false;
+
+                    const [firstContent] = prompt.content;
+                    if (firstContent && firstContent.text){
+                        document.title = `${firstContent.text} | Cactus`;
+                    } else {
+                        document.title = 'Daily Prompt | Cactus'
+                    }
+
                 }
             });
         },
@@ -203,7 +215,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 this.completed = false;
             },
             close() {
-                alert("Will close this and redirect?");
+                this.onClose();
             }
         }
     })

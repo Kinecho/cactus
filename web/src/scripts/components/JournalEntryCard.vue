@@ -62,17 +62,20 @@
                 </svg>
                 Go Deeper
             </a>
+            <div v-if="prompt && prompt.promptContentId">
+                <button  @click="showContent = true" class="secondary small button wiggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/>
+                    </svg>
+                    Go Deeper
+                </button>
+                <modal v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="false">
+                    <PromptContent slot="body" v-bind:promptContentId="prompt.promptContentId" v-on:close="showContent = false"/>
+                </modal>
+            </div>
 
-            <button v-if="prompt && prompt.hasPromptContent" @click="showContent = true" class="secondary small button wiggle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                    <path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/>
-                </svg>
-                Go Deeper
-            </button>
         </nav>
-        <modal v-if="prompt && prompt.id" v-bind:show="showContent" v-on:close="showContent = false">
-            <PromptContent slot="body" v-bind:promptId="prompt.id"/>
-        </modal>
+
     </article>
 </template>
 

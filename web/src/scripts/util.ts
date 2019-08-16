@@ -252,7 +252,7 @@ export function updateQueryParam(name: QueryParam, value: string | number) {
         params[name] = value;
         const updatedQs = qs.stringify(params);
         const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
-        window.history.pushState({path: newurl}, '', newurl);
+        window.history.replaceState({path: newurl}, '', newurl);
     } catch (error) {
         console.error(`Failed to update query param value: ${name}=${value}`, error);
     }
