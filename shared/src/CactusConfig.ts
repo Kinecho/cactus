@@ -85,7 +85,7 @@ export interface CactusConfig {
     },
     flamelink: {
         service_account: ServiceAccountCredentials,
-        robotUserId: string,
+        robot_user_id: string,
         environments: {
             prod_id: string,
             stage_id: string,

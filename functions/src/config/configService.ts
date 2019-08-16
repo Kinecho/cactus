@@ -147,7 +147,7 @@ const defaultTestConfig: CactusConfig = {
         },
     },
     flamelink: {
-        robotUserId: "1234",
+        robot_user_id: "1234",
         environments: {
             prod_id: "production",
             stage_id: "stage",
