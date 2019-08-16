@@ -32,7 +32,7 @@ export default class SetAdminClaimsCommand extends FirebaseCommand {
                 } else {
                     emails = input.split(",");
                 }
-                let invalid: string[] = [];
+                const invalid: string[] = [];
                 const isValid = emails.reduce((valid, email: string) => {
                     const emailValid = isValidEmail(email.trim());
                     if (!emailValid) {

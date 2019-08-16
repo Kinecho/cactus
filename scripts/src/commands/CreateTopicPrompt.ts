@@ -95,7 +95,6 @@ export default class CreateTopicPrompt extends FirebaseCommand {
 
         if (saveFirestore) {
             const savedPrompt = await AdminReflectionPromptService.getSharedInstance().save(prompt);
-            const promptId = savedPrompt.id;
             console.log("saved the prompt successfully. Id", promptId);
 
             const content = new PromptContent();
