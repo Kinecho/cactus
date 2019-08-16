@@ -10,13 +10,13 @@
             </div>
 
             <section class="content-container centered" v-if="!loading && promptContent">
-                <button class="close tertiary icon" @click="close">
+                <button class="close tertiary icon" @click="close" v-show="!showSharing">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                         <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                     </svg>
                 </button>
                 <div class="shareContainer">
-                    <button class="share tertiary wiggle">
+                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
                         </svg>
@@ -58,11 +58,15 @@
                     </svg>
                 </button>
             </section>
-
         </transition>
-        <div v-if="promptContent">
-            <prompt-content-sharing v-bind:promptContent="promptContent"/>
-        </div>
+
+
+        <modal :show="promptContent && showSharing" v-on:close="showSharing = false" :showCloseButton="true">
+            <div slot="body" class="centered share-modal-body">
+                <prompt-content-sharing v-bind:promptContent="promptContent"/>
+            </div>
+
+        </modal>
 
 
     </div>
@@ -83,6 +87,7 @@
     import {getQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
+    import Modal from "@components/Modal.vue";
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -94,6 +99,7 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
+            Modal,
         },
         props: {
             promptContentId: String,
@@ -162,6 +168,7 @@
             transitionName: string,
             completed: boolean,
             promptsUnsubscriber: ListenerUnsubscriber | undefined,
+            showSharing: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -171,6 +178,7 @@
                 transitionName: "slide",
                 promptsUnsubscriber: undefined,
                 completed: false,
+                showSharing: false,
             };
         },
         computed: {
@@ -410,6 +418,16 @@
         animation: wiggle .5s forwards;
     }
 
+
+    .share-modal-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        margin-top: 2rem;
+        @include shadowbox;
+    }
 
     .slide-leave-active,
     .slide-enter-active {

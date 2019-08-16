@@ -1,27 +1,21 @@
 <template>
     <transition name="modal" v-if="show">
-        <div :class="['modal-mask', {show}]">
+        <div :class="['modal-mask', {show, opaque, light, dark}]">
             <div class="modal-wrapper">
                 <div class="modal-container">
+                    <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                            <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                        </svg>
+                    </button>
 
                     <div class="modal-header">
-                        <slot name="header">
-                            <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="18" height="18">
-                                    <path fill="#33ccab" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                                </svg>
-                            </button>
-                        </slot>
+                        <slot name="header"></slot>
                     </div>
-
                     <div class="modal-body">
                         <slot name="body">
                             default body
                         </slot>
-                    </div>
-
-                    <div class="modal-footer">
-                        <slot name="footer"></slot>
                     </div>
                 </div>
             </div>
@@ -37,6 +31,10 @@
         props: {
             show: Boolean,
             showCloseButton: {type: Boolean, default: true},
+            opaque: Boolean,
+            light: {type: Boolean, default: true},
+            dark: Boolean,
+        //
         },
         methods: {
             close() {
@@ -57,6 +55,9 @@
 </script>
 
 <style lang="scss">
+    @import "common";
+    @import "variables";
+    @import "mixins";
 
     .modal-mask {
         position: fixed;
@@ -65,30 +66,67 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(255, 255, 255, .9);
+
+        &.light {
+            background-color: rgba(255, 255, 255, .9);
+            &.opaque {
+                background-color: rgba(255, 255, 255, .1);
+            }
+        }
+
+        &.dark {
+            background-color: rgba(0, 0, 0, .9);
+            &.opaque {
+                background-color: rgba(0, 0, 0, 1);
+            }
+        }
+
+
+
         transition: opacity .3s ease;
         overflow-y: auto;
-    }
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-    .modal-container {
-        margin: 0 auto;
-        border-radius: 2px;
-        transition: all .3s ease;
-    }
+        .modal-wrapper {
+            .modal-container {
+                position: relative;
+                margin: 0 auto;
+                border-radius: 2px;
+                transition: all .3s ease;
 
-    .modal-header {
-        .modal-close {
-            z-index: 100;
+                .modal-close {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+
+                    z-index: 100;
+                    height: 4.8rem;
+                    width: 4.8rem;
+
+
+                    svg {
+                        height: 1.8rem;
+                        width: 1.8rem;
+                    }
+                }
+
+
+                .modal-header {
+
+
+                }
+
+                .modal-body {
+                    margin: 0 0;
+                }
+
+
+            }
         }
     }
 
-    .modal-body {
-        margin: 0 0;
-    }
-
-    .modal-default-button {
-        float: right;
-    }
 
     /*
      * The following styles are auto-applied to elements with

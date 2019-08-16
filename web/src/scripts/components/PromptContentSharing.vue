@@ -1,9 +1,14 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
-        <h2>Share this with a friend</h2>
+        <div class="info">
+            <h2>Share this with a friend</h2>
+            <p>
+                {{meta.description}}
+            </p>
+        </div>
         <div class="referral-link">
             <input type="text" class="link-input" name="referral-link" :value="attributedLink">
-            <button class="copy secondary" v-clipboard:copy="attributedLink"
+            <button class="copy secondary btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
                 <span v-if="copySucceeded === true">Copied</span>
@@ -128,45 +133,50 @@
     @import "variables";
     @import "social";
 
+    .info {
+        margin: 2.4rem 0;
+    }
 
     .referral-link {
-        margin-bottom: 3.2rem;
         position: relative;
-    }
 
-    .link-input {
-        @include textInput;
-        color: $lightText;
-        margin-bottom: .8rem;
-        max-width: none;
-        width: 100%;
-
-        @include r(600) {
-            margin-bottom: 1.6rem;
-        }
-    }
-
-    button.copy {
-        width: 100%;
-
-        @include r(600) {
-            border: none;
-            box-shadow: none;
-            padding: 1.2rem 2.4rem;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
-
-            &:hover {
-                background: transparent;
-            }
-
-            &:active {
-                background-color: $darkGreen;
-                color: $white;
+        .link-input {
+            @include textInput;
+            color: $lightText;
+            margin-bottom: .8rem;
+            max-width: none;
+            width: 100%;
+            text-overflow: ellipsis;
+            @include r(600) {
+                margin-bottom: 1.6rem;
+                padding-right: 9rem;
             }
         }
+
+        button.copy {
+            width: 100%;
+            margin-bottom: 1.2rem;
+
+            @include r(600) {
+                border: none;
+                box-shadow: none;
+                padding: 1.2rem 2.4rem;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+
+                &:hover {
+                    background: transparent;
+                }
+
+                &:active {
+                    background-color: $darkGreen;
+                    color: $white;
+                }
+            }
+        }
+
     }
 
     .sharing {
