@@ -14,7 +14,7 @@ export interface FlamelinkMeta {
     lastModifiedBy: string,
     lastModifiedDate: FlamelinkTimestamp,
     locale: string,
-    schema: string,
+    schema: SchemaName,
     schemaRef: any,
     schemaType: string,
 

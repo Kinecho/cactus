@@ -53,17 +53,17 @@ async function handlePromptContentEvent(event: FlamelinkWebhookEvent, action: Ev
     try {
         console.log(`Handing prompt content ${action}`);
 
-        const {_fl_meta_: meta, ...rest} = event.data;
-        const promptContent = rest as unknown as PromptContent;
+        const {_fl_meta_: meta} = event.data;
+        const promptContent = new PromptContent(event.data);
         console.log("Prompt content is", JSON.stringify(promptContent, null, 2));
-        const updatedUserId = meta.lastModifiedBy;
+        const updatedUserId = meta ? meta.lastModifiedBy : undefined;
         const updatedUser = await AdminUserService.getSharedInstance().getById(updatedUserId);
         if (updatedUser) {
             console.log(`Updated by ${updatedUser.email}`);
         }
 
 
-        const promptFromDb = await AdminPromptContentService.getSharedInstance().getById(promptContent.id);
+        const promptFromDb = await AdminPromptContentService.getSharedInstance().getById(promptContent.entryId);
         console.log(chalk.green("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2)));
 
         return {success: true, message: "Not yet implemented"}

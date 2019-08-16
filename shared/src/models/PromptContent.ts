@@ -1,5 +1,5 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-import FlamelinkModel, {FlamelinkData, FlamelinkIdentifiable, SchemaName} from "@shared/FlamelinkModel";
+import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 
 export interface FlamelinkFile {
     fileIds?: string[]

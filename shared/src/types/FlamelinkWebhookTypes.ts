@@ -1,4 +1,4 @@
-import {SchemaName} from "@shared/FlamelinkModel";
+import {FlamelinkData, SchemaName} from "@shared/FlamelinkModel";
 
 export interface FlamelinkTimestamp {
     _seconds: number,
@@ -18,14 +18,6 @@ export interface FlamelinkContentMeta {
     schemaType: string,
     schemaRef: any,
     schema: SchemaName,
-}
-
-
-export interface FlamelinkData {
-    _fl_meta_: FlamelinkContentMeta,
-    id: string,
-
-    [key: string]: any
 }
 
 
