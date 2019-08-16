@@ -1,5 +1,5 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import FlamelinkModel, {FlamelinkData, FlamelinkIdentifiable, SchemaName} from "@shared/FlamelinkModel";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -8,7 +8,7 @@ export interface FlamelinkFile {
 export interface Image extends FlamelinkFile {
     url?: string,
     flamelinkFileName?: string,
-    storageUrl?:string,
+    storageUrl?: string,
     fileIds?: string[]
 }
 
@@ -68,7 +68,7 @@ export enum ContentImagePosition {
     center = "center"
 }
 
-export interface ContentBackgroundImage extends Image{
+export interface ContentBackgroundImage extends Image {
     position?: ContentImagePosition
 }
 
@@ -139,11 +139,23 @@ export interface Content {
     actionButton?: ActionButton;
 }
 
+
 export default class PromptContent extends FlamelinkModel {
     schema = SchemaName.promptContent;
-    id?: string;
     promptId?: string;
     content: Content[] = [];
     subjectLine?: string;
     scheduledSendAt?: ISODate;
+
+    constructor(data?: Partial<PromptContent>) {
+        super(data);
+        if (data) {
+            this.promptId = data.promptId;
+            this.content = data.content || [];
+            this.subjectLine = data.subjectLine;
+            this.scheduledSendAt = data.scheduledSendAt
+        }
+
+    }
+
 }

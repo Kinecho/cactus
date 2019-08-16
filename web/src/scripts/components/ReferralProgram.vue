@@ -1,8 +1,8 @@
-<template>
+<template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="referralContainer">
         <NavBar/>
         <div class="centered content">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running" />
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
             <h1>Invite Friends</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
@@ -19,29 +19,35 @@
                     <div class="referral-link">
                         <input type="text" class="link-input" name="referral-link" :value="referralLink">
                         <button class="copy secondary" v-clipboard:copy="referralLink"
-                                           v-clipboard:success="handleCopySuccess"
-                                           v-clipboard:error="handleCopyError">
+                                v-clipboard:success="handleCopySuccess"
+                                v-clipboard:error="handleCopyError">
                             <span v-if="copySucceeded === true">Copied</span>
                             <span v-if="copySucceeded === false">Copy</span>
                         </button>
                     </div>
                     <social-sharing :url="referralLink"
-                                    title="I'm inviting you to Cactus"
-                                    description="See yourself and the world more positively."
-                                    quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
-                                    twitter-user="itscalledcactus"
-                                    inline-template>
-                      <div class="sharing">
-                          <network network="email">
-                            <button class="emailBtn btn wiggle"><img class="icon" src="/assets/images/envelopeSolid.svg" alt="" />Email</button>
-                          </network>
-                          <network network="twitter">
-                            <button class="twBtn btn wiggle"><img class="icon" src="/assets/images/twitter.svg" alt="" />Twitter</button>
-                          </network>
-                          <network network="facebook">
-                            <button class="fbBtn btn wiggle"><img class="icon" src="/assets/images/facebook.svg" alt="" />Facebook</button>
-                          </network>
-                       </div>
+                            title="I'm inviting you to Cactus"
+                            description="See yourself and the world more positively."
+                            quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
+                            twitter-user="itscalledcactus"
+                            inline-template>
+                        <div class="sharing">
+                            <network network="email">
+                                <button class="emailBtn btn wiggle">
+                                    <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
+                                </button>
+                            </network>
+                            <network network="twitter">
+                                <button class="twBtn btn wiggle">
+                                    <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
+                                </button>
+                            </network>
+                            <network network="facebook">
+                                <button class="fbBtn btn wiggle">
+                                    <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
+                                </button>
+                            </network>
+                        </div>
                     </social-sharing>
                 </div>
             </transition>
@@ -59,14 +65,17 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StardardFooter.vue";
     import Spinner from "@components/Spinner.vue";
-    import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
-    import CheckBox from "@components/CheckBox.vue";
+    import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {formatDate} from '@shared/util/DateUtil';
-    import {updateSubscriptionStatus} from '@web/mailchimp';
     import {PageRoute} from '@web/PageRoutes';
+    import VueClipboard from 'vue-clipboard2';
+    import SocialSharing from 'vue-social-sharing';
+
+    Vue.use(VueClipboard);
+    Vue.use(SocialSharing);
+
 
     export default Vue.extend({
         components: {
@@ -108,11 +117,11 @@
         },
         methods: {
             handleCopyError() {
-              alert("Copied Failed");
+                alert("Copied Failed");
             },
             handleCopySuccess() {
-              this.copySucceeded = true;
-              setTimeout(() => this.copySucceeded = false, 2000);
+                this.copySucceeded = true;
+                setTimeout(() => this.copySucceeded = false, 2000);
             }
         },
         computed: {
@@ -131,6 +140,7 @@
     @import "mixins";
     @import "variables";
     @import "forms";
+    @import "social";
 
     .referralContainer {
         display: flex;
@@ -186,7 +196,7 @@
         width: 100%;
 
         @include r(600) {
-          margin-bottom: 1.6rem;
+            margin-bottom: 1.6rem;
         }
     }
 
@@ -194,22 +204,22 @@
         width: 100%;
 
         @include r(600) {
-          border: none;
-          box-shadow: none;
-          padding: 1.2rem 2.4rem;
-          position: absolute;
-          right: 0;
-          top: 0;
-          width: auto;
+            border: none;
+            box-shadow: none;
+            padding: 1.2rem 2.4rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
 
-          &:hover {
-              background: transparent;
-          }
+            &:hover {
+                background: transparent;
+            }
 
-          &:active {
-              background-color: $darkGreen;
-              color: $white;
-          }
+            &:active {
+                background-color: $darkGreen;
+                color: $white;
+            }
         }
     }
 
@@ -220,7 +230,7 @@
         margin-bottom: 4.8rem;
 
         @include r(600) {
-          flex-flow: row wrap;
+            flex-flow: row wrap;
         }
     }
 
@@ -232,8 +242,8 @@
         width: 100%;
 
         @include r(600) {
-          margin: 0 .4rem;
-          width: auto;
+            margin: 0 .4rem;
+            width: auto;
         }
     }
 
@@ -243,24 +253,5 @@
         width: 2rem;
     }
 
-    .twBtn {
-        background-color: $twitter;
-
-        &:hover {
-            background-color: darken($twitter, 5%)
-        }
-    }
-
-    .fbBtn {
-        background-color: $facebook;
-
-        &:hover {
-            background-color: darken($facebook, 5%)
-        }
-    }
-
-    .wiggle:hover img {
-        animation: wiggle .5s forwards;
-    }
 
 </style>

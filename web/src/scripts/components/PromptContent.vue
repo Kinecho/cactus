@@ -1,4 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="page-wrapper">
         <transition appear name="fade-in" mode="out-in">
@@ -6,11 +5,11 @@ import {QueryParam} from '@shared/util/queryParams'
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
-            <div v-if="!loading && !prompt">
+            <div v-if="!loading && !promptContent">
                 No prompt found for id
             </div>
 
-            <section class="content-container centered" v-if="!loading && prompt">
+            <section class="content-container centered" v-if="!loading && promptContent">
                 <button class="close tertiary icon" @click="close">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                         <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
@@ -25,7 +24,7 @@ import {QueryParam} from '@shared/util/queryParams'
                     </button>
                 </div>
                 <div class="progress" v-if="!completed">
-                    <span v-for="(content, index) in prompt.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                    <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                 </div>
                 <div v-if="!completed">
                     <transition :name="transitionName" mode="out-in">
@@ -34,7 +33,7 @@ import {QueryParam} from '@shared/util/queryParams'
                                 v-bind:key="activeIndex"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
-                                v-bind:content="prompt.content[activeIndex]"
+                                v-bind:content="promptContent.content[activeIndex]"
                                 v-bind:hasNext="hasNext && activeIndex > 0"
                                 v-on:next="next"
                                 v-on:previous="previous"
@@ -61,6 +60,9 @@ import {QueryParam} from '@shared/util/queryParams'
             </section>
 
         </transition>
+        <div v-if="promptContent">
+            <prompt-content-sharing v-bind:promptContent="promptContent"/>
+        </div>
 
 
     </div>
@@ -80,6 +82,7 @@ import {QueryParam} from '@shared/util/queryParams'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import {getQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
+    import PromptContentSharing from "@components/PromptContentSharing.vue";
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -90,6 +93,7 @@ import {QueryParam} from '@shared/util/queryParams'
             ContentCard,
             Spinner,
             Celebrate,
+            PromptContentSharing,
         },
         props: {
             promptContentId: String,
@@ -118,22 +122,24 @@ import {QueryParam} from '@shared/util/queryParams'
                     field: 'content',
                     subFields: [{field: 'backgroundImage', subFields: "imageIds"}]
                 }],
-                callback: (error: any, prompt: PromptContent) => {
-                    if (error) {
+                callback: (error: any, data: Partial<PromptContent>) => {
+                    if (error || !data) {
+                        this.promptContent = undefined;
                         this.loading = false;
                         return console.error("Failed to load prompts", error)
                     }
-                    console.log("prompt", prompt);
-                    if (slideNumber > prompt.content.length) {
+                    console.log("raw promptContent data", data);
 
-                    }
-                    this.activeIndex = (slideNumber > prompt.content.length - 1) ? 0 : slideNumber;
+                    const promptContent = new PromptContent(data);
+                    // promptContent.en
+
+                    this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
-                    this.prompt = prompt;
+                    this.promptContent = promptContent;
                     this.loading = false;
 
-                    const [firstContent] = prompt.content;
-                    if (firstContent && firstContent.text){
+                    const [firstContent] = promptContent.content;
+                    if (firstContent && firstContent.text) {
                         document.title = `${firstContent.text} | Cactus`;
                     } else {
                         document.title = 'Daily Prompt | Cactus'
@@ -149,7 +155,7 @@ import {QueryParam} from '@shared/util/queryParams'
             }
         },
         data(): {
-            prompt: any | undefined,
+            promptContent: PromptContent | undefined,
             loading: boolean,
             activeIndex: number,
             activeContent: Content | undefined,
@@ -158,7 +164,7 @@ import {QueryParam} from '@shared/util/queryParams'
             promptsUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
-                prompt: undefined,
+                promptContent: undefined,
                 loading: true,
                 activeIndex: 0,
                 activeContent: undefined,
@@ -169,11 +175,11 @@ import {QueryParam} from '@shared/util/queryParams'
         },
         computed: {
             hasNext(): boolean {
-                return this.prompt && this.prompt.content && this.activeIndex < this.prompt.content.length - 1
+                return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
             },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
-            }
+            },
         },
         watch: {
             activeIndex(index: number) {
@@ -184,7 +190,7 @@ import {QueryParam} from '@shared/util/queryParams'
             next() {
                 this.transitionName = "slide";
                 console.log("going to next");
-                const content = this.prompt ? this.prompt.content : [];
+                const content = this.promptContent ? this.promptContent.content : [];
                 if (this.hasNext) {
                     console.log("this.hasNext is true");
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
