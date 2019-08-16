@@ -253,6 +253,7 @@
         display: flex;
         flex-flow: column nowrap;
         height: 100vh;
+        width: 100vw;
         justify-content: center;
         overflow: hidden;
         position: relative;
