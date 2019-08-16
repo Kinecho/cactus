@@ -20,6 +20,21 @@ export interface TimestampInterface {
     isEqual(other: TimestampInterface): boolean;
 }
 
+export function isTimestamp(value: any): boolean {
+    return isNotNull(value) && (value instanceof TimestampClass || (value.seconds && value.nanoseconds))
+}
+
+export function timestampToDate(timestamp: any): Date | undefined {
+    if (isTimestamp(timestamp)) {
+        if (timestamp.hasOwnProperty("toDate")) {
+            return timestamp.toDate();
+        } else if (timestamp.hasOwnProperty("seconds")) {
+            return new Date(timestamp.seconds * 1000);
+        }
+    }
+    return;
+}
+
 export function setTimestamp(timestamp: any) {
     TimestampClass = timestamp;
 }
@@ -73,9 +88,13 @@ export function convertTimestampToDate(input: any): any {
     const copy = Object.assign({}, input);
 
     return transformObjectSync(copy, (value) => {
-        if (isNotNull(value) && value instanceof TimestampClass) {
-            return value.toDate();
+        // if (isNotNull(value) && value instanceof TimestampClass) {
+        //     return value.toDate();
+        // }
+        if (isTimestamp(value)) {
+            return timestampToDate(value);
         }
+
         return value;
     })
 }

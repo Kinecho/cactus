@@ -1,5 +1,6 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -82,6 +83,14 @@ export enum ContentType {
 }
 
 
+export enum ContentStatus {
+    in_progress = "in_progress",
+    submitted = "submitted",
+    processing = "processing",
+    needs_changes = "needs_changes",
+    published = "published",
+}
+
 /**
  * Removes unneeded fields from the content for easier display
  * @param {Content} content
@@ -145,7 +154,13 @@ export default class PromptContent extends FlamelinkModel {
     promptId?: string;
     content: Content[] = [];
     subjectLine?: string;
-    scheduledSendAt?: ISODate;
+    scheduledSendAt?: ISODate|Date|FlamelinkTimestamp;
+    mailchimpCampaignId?: string;
+    mailchimpCampaignWebId?: string;
+    contentStatus: ContentStatus = ContentStatus.in_progress;
+    errorMessage?: string;
+    topic?:string;
+
 
     constructor(data?: Partial<PromptContent>) {
         super(data);

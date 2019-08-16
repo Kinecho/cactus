@@ -1,6 +1,7 @@
 import {DateTime, Duration} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
+import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -25,6 +26,10 @@ export function formatDuration(start: Date, end: Date): string {
 
 export function getISODate(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).toISODate();
+}
+
+export function getISODateTime(date:Date = new Date()):string {
+    return DateTime.fromJSDate(date).toISO();
 }
 
 export function formatDate(date?: Date, format = "yyyy-LL-dd"): string | undefined {
@@ -94,4 +99,29 @@ export function differenceInMinutes(d1: Date, d2: Date): number {
     const dt2 = DateTime.fromJSDate(d2);
 
     return dt1.diff(dt2).as("minutes")
+}
+
+export function asDate(input: any): Date | undefined {
+    if (!input) {
+        return;
+    }
+
+    if (input instanceof Date) {
+        return input
+    }
+
+    if (isTimestamp(input)) {
+        return timestampToDate(input)
+    }
+    if (typeof input === "string") {
+        return getDateFromISOString(input);
+    }
+
+    if (typeof input === "number") {
+        return new Date(input);
+    }
+
+    console.warn("Could not convert input of ", input, "to date");
+    return;
+
 }

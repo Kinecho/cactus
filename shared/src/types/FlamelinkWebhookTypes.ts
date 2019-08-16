@@ -1,8 +1,8 @@
 import {FlamelinkData, SchemaName} from "@shared/FlamelinkModel";
 
 export interface FlamelinkTimestamp {
-    _seconds: number,
-    _nanoseconds: number,
+    seconds: number,
+    nanoseconds: number,
 }
 
 

@@ -8,6 +8,8 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import PromptContent, {Content, ContentType} from "@shared/models/PromptContent";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
 const prompts = require('prompts');
 
@@ -84,7 +86,7 @@ export default class CreateTopicPrompt extends FirebaseCommand {
 
         const {saveFirestore} = await prompts([{
             type: "toggle",
-            message: "Save this question to the database?",
+            message: "Save this question to the database? This will also create a record in Flamelink.",
             name: "saveFirestore",
             initial: true,
             active: 'yes',
@@ -92,7 +94,35 @@ export default class CreateTopicPrompt extends FirebaseCommand {
         }]);
 
         if (saveFirestore) {
-            await AdminReflectionPromptService.getSharedInstance().save(prompt);
+            const savedPrompt = await AdminReflectionPromptService.getSharedInstance().save(prompt);
+            const promptId = savedPrompt.id;
+            console.log("saved the prompt successfully. Id", promptId);
+
+            const content = new PromptContent();
+            content.promptId = promptId;
+            content.scheduledSendAt = prompt.campaign ? prompt.campaign.send_time : undefined;
+            console.log("scheduledSendAt ", content.scheduledSendAt);
+            content.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
+            content.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
+            content.mailchimpCampaignWebId = prompt.campaign ? prompt.campaign.web_id : undefined;
+            content.topic = prompt.topic;
+            console.log("attempting to save the prompt content to flamelink");
+
+            const reflection: Content = {
+                contentType: ContentType.reflect,
+                text: prompt.question,
+            };
+
+            content.content = [reflection];
+
+            const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
+            if (savedContent) {
+                savedPrompt.promptContentId = savedContent.entryId;
+                await AdminReflectionPromptService.getSharedInstance().save(savedPrompt);
+                console.log("Updated the admin prompt to have the content id", savedContent.entryId);
+            }
+
+
             console.log(chalk.green(`Saved prompt ${promptId} successfully`));
         } else {
             console.warn(chalk.red("DID NOT SAVE PROMPT TO DATABASE"));

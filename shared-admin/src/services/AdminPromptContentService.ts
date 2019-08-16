@@ -24,6 +24,10 @@ export default class AdminPromptContentService {
         this.flamelinkService = AdminFlamelinkService.getSharedInstance();
     }
 
+    async save(model: PromptContent): Promise<PromptContent | undefined> {
+        return this.flamelinkService.save(model);
+    }
+
     async getById(id?: string): Promise<PromptContent | undefined> {
         if (!id) {
             return undefined;
