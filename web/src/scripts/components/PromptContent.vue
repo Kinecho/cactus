@@ -12,11 +12,15 @@ import {QueryParam} from '@shared/util/queryParams'
 
             <section class="content-container centered" v-if="!loading && prompt">
                 <button class="close tertiary icon" @click="close">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                        <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                    </svg>
                 </button>
                 <div class="shareContainer">
                     <button class="share tertiary wiggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22"><path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
+                            <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
+                        </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
                 </div>
@@ -45,10 +49,14 @@ import {QueryParam} from '@shared/util/queryParams'
 
 
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
                 </button>
                 <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
                 </button>
             </section>
 
@@ -112,7 +120,11 @@ import {QueryParam} from '@shared/util/queryParams'
                         return console.error("Failed to load prompts", error)
                     }
                     console.log("prompt", prompt);
-                    this.activeIndex = slideNumber;
+                    if (slideNumber > prompt.content.length) {
+
+                    }
+                    this.activeIndex = (slideNumber > prompt.content.length - 1) ? 0 : slideNumber;
+                    updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     this.prompt = prompt;
                     this.loading = false;
                 }
