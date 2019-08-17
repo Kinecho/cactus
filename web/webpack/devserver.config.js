@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const writeFile = util.promisify(fs.writeFile)
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HTMLWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 
 module.exports = function (config) {
     const pages = pagesUtil.getPages(config, allPages)
@@ -69,6 +70,9 @@ module.exports = function (config) {
             template: indexPath,
             filename: `pages-index.html`,
             favicon: `${helpers.srcDir}/favicon.ico`,
+            alwaysWriteToDisk: true,
+        }), new HTMLWebpackHarddiskPlugin({
+            outputPath: helpers.publicDir
         })],
     }
 }

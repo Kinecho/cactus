@@ -26,3 +26,7 @@ interface FirebaseObject {
 interface HTMLElement {
     __vueClickOutside__: EventListenerOrEventListenerObject|null
 }
+
+interface NodeModule {
+    hot: any,
+}

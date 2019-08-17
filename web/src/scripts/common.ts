@@ -31,6 +31,12 @@ if (referredByEmail){
 document.addEventListener('DOMContentLoaded', function () {
     //Nothing to do here
 
-
-
 });
+
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

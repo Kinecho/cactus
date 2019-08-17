@@ -66,5 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // The start method will wait until the DOM is loaded.
         ui.start('#signup-app', config);
     }
-
 });
+
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

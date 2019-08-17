@@ -76,6 +76,7 @@
 
     export default Vue.extend({
         created() {
+            console.log("Journal Home calling Created function");
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {

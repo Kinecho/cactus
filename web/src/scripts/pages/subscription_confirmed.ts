@@ -94,3 +94,11 @@ function handleResponse(response: EmailLinkSignupResult) {
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("Subscription Confirmed Page Loaded");
 });
+
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

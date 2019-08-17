@@ -18,8 +18,15 @@ new Vue({
         NavBar,
         Footer,
     }, methods: {
-        redirectToJournal():void {
+        redirectToJournal(): void {
             window.location.href = PageRoute.JOURNAL_HOME;
         }
     }
-})
+});
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}
