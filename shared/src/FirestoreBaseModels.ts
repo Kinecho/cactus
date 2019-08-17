@@ -40,6 +40,10 @@ export abstract class BaseModel implements FirestoreIdentifiable {
         return this;
     }
 
+    prepareFromFirestore(data:any){
+        return this;
+    }
+
     toFirestoreData(removeKeys = ["id", "collection"]): any {
         const prepared = this.prepareForFirestore();
         if (!prepared) {

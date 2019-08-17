@@ -16,7 +16,7 @@ import {
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import {
     Campaign,
-    CampaignType,
+    CampaignType, ISODate,
     MergeField,
     SendChecklistItemType,
     TemplateType
@@ -110,6 +110,8 @@ export default class MailchimpQuestionCampaign implements Command {
     reflectionPromptId?: string;
     topic?: string;
 
+    scheduleDateISO?: ISODate;
+
     async start(): Promise<void> {
         console.log(chalk.bold.cyan("Let's create a mailchimp campaign for a daily question"));
         console.log(chalk.cyan("This program will walk you through creating the campaign. \n" +
@@ -152,6 +154,7 @@ export default class MailchimpQuestionCampaign implements Command {
         const {campaign, content} = await this.createCampaign(contentResponse, recipientsConfig);
         this.campaign = campaign;
         this.campaignContent = content;
+        this.scheduleDateISO = contentResponse.sendDateISO;
 
         const reminderConfig = await this.askReminderQuestions(contentResponse);
         if (reminderConfig.scheduleReminder) {
@@ -989,7 +992,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 console.log(chalk.green(`${campaign.settings.title} scheduled successfully!`));
 
             } else {
-                console.warn(chalk.yellow("Unable to schedule the campaign. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}"));
+                console.warn(chalk.yellow(`Unable to schedule the campaign. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
             }
         }
 

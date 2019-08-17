@@ -102,7 +102,7 @@
             Modal,
         },
         props: {
-            promptContentId: String,
+            promptContentEntryId: String,
             onClose: {
                 type: Function, default: function () {
                     this.$emit("close")
@@ -110,8 +110,8 @@
             }
         },
         async created(): Promise<void> {
-            let promptContentId = this.promptContentId;
-            if (!this.promptContentId) {
+            let promptContentId = this.promptContentEntryId;
+            if (!this.promptContentEntryId) {
                 promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
                 console.log("using path for promptContentId", promptContentId);
             } else {
@@ -258,6 +258,21 @@
         overflow: hidden;
         position: relative;
 
+
+        button.secondary {
+            transition: all .2s ease;
+            outline: transparent none;
+
+            &:hover {
+                background-color: $lightGreen;
+
+                svg {
+                    fill: $darkestGreen;
+                }
+            }
+        }
+
+
         .content-container {
 
             @include r(600) {
@@ -402,19 +417,6 @@
         }
     }
 
-    button.secondary {
-        transition: all .2s ease;
-        outline: transparent none;
-
-        &:hover {
-            background-color: $lightGreen;
-
-            svg {
-                fill: $darkestGreen;
-            }
-        }
-    }
-
     .wiggle:hover svg {
         animation: wiggle .5s forwards;
     }
@@ -437,13 +439,11 @@
     }
 
     .slide-enter {
-        opacity: 0;
         transform: translate(100%, 0);
         opacity: 0;
     }
 
     .slide-leave-to {
-        opacity: 0;
         transform: translate(-100%, 0);
         opacity: 0;
     }
@@ -456,13 +456,11 @@
     }
 
     .slide-out-enter {
-        opacity: 0;
         transform: translate(-100%, 0);
         opacity: 0;
     }
 
     .slide-out-leave-to {
-        opacity: 0;
         transform: translate(100%, 0);
         opacity: 0;
     }

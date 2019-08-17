@@ -148,7 +148,10 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
     const transformed = convertTimestampToDate(data);
     const model = new Type();
-    return Object.assign(model, transformed) as T;
+    const t = Object.assign(model, transformed) as T;
+    t.prepareFromFirestore(data);
+
+    return t;
 }
 
 export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T {

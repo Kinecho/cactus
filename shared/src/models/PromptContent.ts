@@ -162,6 +162,7 @@ export default class PromptContent extends FlamelinkModel {
     topic?:string;
 
 
+
     constructor(data?: Partial<PromptContent>) {
         super(data);
         if (data) {

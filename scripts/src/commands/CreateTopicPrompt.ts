@@ -99,7 +99,7 @@ export default class CreateTopicPrompt extends FirebaseCommand {
 
             const content = new PromptContent();
             content.promptId = promptId;
-            content.scheduledSendAt = prompt.campaign ? prompt.campaign.send_time : undefined;
+            content.scheduledSendAt = this.mailchimpCommand ? this.mailchimpCommand.scheduleDateISO : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
             content.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
             content.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
@@ -116,7 +116,7 @@ export default class CreateTopicPrompt extends FirebaseCommand {
 
             const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
             if (savedContent) {
-                savedPrompt.promptContentId = savedContent.entryId;
+                savedPrompt.promptContentEntryId = savedContent.entryId;
                 await AdminReflectionPromptService.getSharedInstance().save(savedPrompt);
                 console.log("Updated the admin prompt to have the content id", savedContent.entryId);
             }
