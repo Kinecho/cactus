@@ -127,86 +127,116 @@
     })
 </script>
 
+<!--NOT SCOPED-->
+<style lang=scss>
+    @import "social";
+
+    .content-sharing {
+        .sharing {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            margin-bottom: 4.8rem;
+
+            @include r(600) {
+                flex-flow: row wrap;
+            }
+
+            .btn {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+                margin-bottom: .8rem;
+                width: 100%;
+
+                @include r(600) {
+                    margin: 0 .4rem;
+                    width: auto;
+                }
+            }
+
+            .icon {
+                height: 2rem;
+                margin-right: .8rem;
+                width: 2rem;
+            }
+
+            .twBtn {
+                background-color: $twitter;
+
+                &:hover {
+                    background-color: darken($twitter, 5%)
+                }
+            }
+
+            .fbBtn {
+                background-color: $facebook;
+
+                &:hover {
+                    background-color: darken($facebook, 5%)
+                }
+            }
+        }
+    }
+
+
+</style>
+
+<!--SCOPED-->
 <style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
     @import "social";
 
-    .info {
-        margin: 2.4rem 0;
-    }
-
-    .referral-link {
-        position: relative;
-
-        .link-input {
-            @include textInput;
-            color: $lightText;
-            margin-bottom: .8rem;
-            max-width: none;
-            width: 100%;
-            text-overflow: ellipsis;
-            @include r(600) {
-                margin-bottom: 1.6rem;
-                padding-right: 9rem;
-            }
+    .content-sharing {
+        .info {
+            margin: 2.4rem 0;
         }
 
-        button.copy {
-            width: 100%;
-            margin-bottom: 1.2rem;
+        .referral-link {
+            position: relative;
 
-            @include r(600) {
-                border: none;
-                box-shadow: none;
-                padding: 1.2rem 2.4rem;
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: auto;
-
-                &:hover {
-                    background: transparent;
-                }
-
-                &:active {
-                    background-color: $darkGreen;
-                    color: $white;
+            .link-input {
+                @include textInput;
+                color: $lightText;
+                margin-bottom: .8rem;
+                max-width: none;
+                width: 100%;
+                text-overflow: ellipsis;
+                @include r(600) {
+                    margin-bottom: 1.6rem;
+                    padding-right: 9rem;
                 }
             }
+
+            button.copy {
+                width: 100%;
+                margin-bottom: 1.2rem;
+
+                @include r(600) {
+                    border: none;
+                    box-shadow: none;
+                    padding: 1.2rem 2.4rem;
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    width: auto;
+
+                    &:hover {
+                        background: transparent;
+                    }
+
+                    &:active {
+                        background-color: $darkGreen;
+                        color: $white;
+                    }
+                }
+            }
+
         }
 
-    }
 
-    .sharing {
-        display: flex;
-        flex-flow: column nowrap;
-        justify-content: center;
-        margin-bottom: 4.8rem;
-
-        @include r(600) {
-            flex-flow: row wrap;
-        }
-    }
-
-    .btn {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-        margin-bottom: .8rem;
-        width: 100%;
-
-        @include r(600) {
-            margin: 0 .4rem;
-            width: auto;
-        }
-    }
-
-    .icon {
-        height: 2rem;
-        margin-right: .8rem;
-        width: 2rem;
     }
 
 

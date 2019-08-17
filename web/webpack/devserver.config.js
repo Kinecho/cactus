@@ -42,6 +42,7 @@ module.exports = function (config) {
             open: false,
             contentBase: helpers.srcDir,
             stats: 'errors-warnings',
+            hot: true,
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [
