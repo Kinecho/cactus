@@ -26,10 +26,10 @@ export function isTimestamp(value: any): boolean {
 
 export function timestampToDate(timestamp: any): Date | undefined {
     if (isTimestamp(timestamp)) {
-        if (timestamp.hasOwnProperty("toDate")) {
+        if (timestamp.toDate) {
             return timestamp.toDate();
-        } else if (timestamp.hasOwnProperty("seconds")) {
-            return new Date(timestamp.seconds * 1000);
+        } else if (timestamp.hasOwnProperty("seconds") && timestamp.hasOwnProperty("nanoseconds")) {
+            return new Date(timestamp.seconds * 1000 + (timestamp.nanoseconds / 1000000));
         }
     }
     return;
