@@ -43,9 +43,13 @@
             <div class="photo-container">
                 <flamelink-image v-if="processedContent.photo" v-bind:image="processedContent.photo"/>
             </div>
-
             <!--      END Photo      -->
 
+            <!--    START AUDIO     -->
+            <div class="audio-container" v-if="processedContent.audio">
+                <audio controls :src="processedContent.audio.url"/>
+            </div>
+            <!--    END AUDIO     -->
 
             <!--      START Link      -->
             <div v-if="processedContent.link">
