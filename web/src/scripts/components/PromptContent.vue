@@ -1,3 +1,5 @@
+import {ContentType} from '@shared/models/PromptContent'
+import {ResponseMedium} from '@shared/models/ReflectionResponse'
 <template>
     <div class="page-wrapper">
         <transition appear name="fade-in" mode="out-in">
@@ -31,13 +33,15 @@
                         <content-card
 
                                 v-bind:key="activeIndex"
+                                v-bind:content="promptContent.content[activeIndex]"
+                                v-bind:response="reflectionResponse"
+                                v-bind:hasNext="hasNext && activeIndex > 0"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
-                                v-bind:content="promptContent.content[activeIndex]"
-                                v-bind:hasNext="hasNext && activeIndex > 0"
                                 v-on:next="next"
                                 v-on:previous="previous"
-                                v-on:complete="complete"/>
+                                v-on:complete="complete"
+                                v-on:save="save"/>
                     </transition>
                 </div>
                 <div v-if="completed">
@@ -77,9 +81,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {
-        Content,
-    } from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
@@ -88,6 +90,8 @@
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import Modal from "@components/Modal.vue";
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -120,6 +124,8 @@
 
             const slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
 
+            // flamelink.content.subscribe()
+
             //TODO: use a promptContentService
             this.promptsUnsubscriber = await flamelink.content.subscribe({
                 entryId: promptContentId,
@@ -137,7 +143,6 @@
                     console.log("raw promptContent data", data);
 
                     const promptContent = new PromptContent(data);
-                    // promptContent.en
 
                     this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
@@ -159,6 +164,10 @@
                 console.log("Unsubscribing from flamelink promptContent listener");
                 this.promptsUnsubscriber();
             }
+
+            if (this.reflectionResponseUnsubscriber) {
+                this.reflectionResponseUnsubscriber();
+            }
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -169,6 +178,10 @@
             completed: boolean,
             promptsUnsubscriber: ListenerUnsubscriber | undefined,
             showSharing: boolean,
+            reflectionResponseUnsubscriber: ListenerUnsubscriber | undefined,
+            reflectionResponses: ReflectionResponse[],
+            reflectionResponse: ReflectionResponse | undefined,
+            saving: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -179,6 +192,10 @@
                 promptsUnsubscriber: undefined,
                 completed: false,
                 showSharing: false,
+                reflectionResponseUnsubscriber: undefined,
+                reflectionResponses: [],
+                reflectionResponse: undefined,
+                saving: false,
             };
         },
         computed: {
@@ -193,20 +210,63 @@
             activeIndex(index: number) {
                 updateQueryParam(QueryParam.CONTENT_INDEX, index)
             },
+            promptContent(newContent: PromptContent | undefined, oldContent: PromptContent | undefined) {
+                if (!newContent || (!oldContent || newContent.promptId !== oldContent.promptId)) {
+                    this.subscribeToResponse();
+                }
+            }
         },
         methods: {
-            next() {
+            subscribeToResponse() {
+                console.log("subscribing to reflection responses ");
+                if (this.reflectionResponseUnsubscriber) {
+                    this.reflectionResponseUnsubscriber();
+                }
+                let promptId = this.promptContent && this.promptContent.promptId;
+                const promptContent = this.promptContent && this.promptContent.content.find(content => content.contentType === ContentType.reflect);
+                const promptQuestion = promptContent ? promptContent.text : undefined;
+
+                if (promptId) {
+                    const createdResponse = ReflectionResponseService.sharedInstance.createReflectionResponse(promptId as string, ResponseMedium.JOURNAL_WEB, promptQuestion);
+                    this.reflectionResponse = createdResponse;
+
+                    console.log("subscribing to responses for promptId", promptId);
+                    this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
+                        onData: (responses) => {
+                            console.log("Fetched reflection responses from subscriber", responses);
+
+                            const [first] = responses;
+                            //TODO: combine if there are multiple?
+                            const response = first || createdResponse;
+                            console.log("Got response as", response.toJSON());
+                            this.reflectionResponses = responses;
+                            this.reflectionResponse = response
+                        }
+                    })
+                }
+            },
+            async save() {
+                // if (this.ac)
+                if (this.reflectionResponse) {
+
+                    await ReflectionResponseService.sharedInstance.save(this.reflectionResponse);
+                }
+            },
+            async next() {
                 this.transitionName = "slide";
                 console.log("going to next");
+                const saveTask = this.save();
                 const content = this.promptContent ? this.promptContent.content : [];
                 if (this.hasNext) {
                     console.log("this.hasNext is true");
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                 }
                 console.log(`new active index is ${this.activeIndex}`)
+                await saveTask;
             },
-            previous() {
+            async previous() {
                 console.log("going to previous");
+                const saveTask = this.save();
                 this.transitionName = "slide-out";
 
                 if (this.completed) {
@@ -218,15 +278,21 @@
                     console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
                 }
-                console.log(`new active index is ${this.activeIndex}`)
+                console.log(`new active index is ${this.activeIndex}`);
+                await saveTask;
             },
-            complete() {
+            async complete() {
+                const saveTask = this.save();
                 this.transitionName = "slide";
+                this.activeIndex = 0;
                 this.completed = true;
+                await saveTask;
             },
-            restart() {
+            async restart() {
+                const saveTask = this.save();
                 this.activeIndex = 0;
                 this.completed = false;
+                await saveTask;
             },
             close() {
                 this.onClose();

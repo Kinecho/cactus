@@ -1,6 +1,7 @@
 import * as queryString from "query-string";
 import CactusMember from "@shared/models/CactusMember";
 import * as camelcase from "camelcase";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -141,4 +142,16 @@ export function getInitials(input: string): string {
 
 export function toCamelCamse(input: string): string {
     return camelcase(input);
+}
+
+
+export function getResponseText(responses?: ReflectionResponse[]): string |undefined {
+    if (!responses){
+        return;
+    }
+
+    if (responses.length === 0) {
+        return;
+    }
+    return responses.map(r => (r.content.text || "").trim()).join("\n\n").trim();
 }

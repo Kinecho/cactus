@@ -3,6 +3,7 @@ import ReflectionResponse, {ReflectionResponseField, ResponseMedium} from "@shar
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
+import CactusMember from "@shared/models/CactusMember";
 
 
 export default class ReflectionResponseService {
@@ -13,7 +14,7 @@ export default class ReflectionResponseService {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
     }
 
-    async createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): Promise<ReflectionResponse | undefined> {
+    createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
         const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!cactusMember) {
             console.log("Unable to get cactus member");
@@ -51,16 +52,40 @@ export default class ReflectionResponseService {
     }
 
     observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber | undefined {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
-        if (!member) {
-            return;
-        }
-        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
-            .where(ReflectionResponse.Field.promptId, "==", promptId)
-            .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        let queryUnsubscriber: ListenerUnsubscriber | undefined = undefined;
+        let currentMember: CactusMember | undefined = undefined;
+        const memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+            onData: ({member}) => {
+                const currentId = currentMember && currentMember.id;
+                const newId = member && member.id;
+                if (currentId !== newId) {
+                    if (queryUnsubscriber) {
+                        queryUnsubscriber();
+                    }
+                }
 
-        options.queryName = "ReflectionResponseService:observeForPromptId";
-        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
+                if (!member) {
+                    return;
+                }
+
+                const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
+                    .where(ReflectionResponse.Field.promptId, "==", promptId)
+                    .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+
+                options.queryName = "ReflectionResponseService:observeForPromptId";
+                queryUnsubscriber = this.firestoreService.observeQuery(query, ReflectionResponse, options);
+            }
+
+        });
+
+        return () => {
+            if (queryUnsubscriber) {
+                queryUnsubscriber();
+            }
+            if (memberUnsubscriber) {
+                memberUnsubscriber();
+            }
+        }
     }
 
     observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {

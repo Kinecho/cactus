@@ -98,20 +98,30 @@
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
                 <button class="next inline-arrow primary" @click="next" v-if="hasNext">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
                 </button>
             </div>
 
 
             <!--    START Reflect -->
-            <div v-if="isReflectScreen" class="reflect-container">
+            <div v-if="isReflectScreen && response" class="reflect-container">
                 <div class="mobile-nav-buttons">
                     <button class="next inline-arrow primary" @click="next" v-if="hasNext">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
                     </button>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
-                    <textarea ref="reflectionInput" type="text" placeholder="Add your reflection" rows="1"/>
+                    <textarea ref="reflectionInput"
+                            type="text"
+                            placeholder="Add your reflection"
+                            rows="1"
+                            v-model="response.content.text"
+                            v-on:input="autosave"
+                    />
                 </resizable-textarea>
 
             </div>
@@ -129,13 +139,16 @@
         Content,
         ContentAction,
         ContentType,
-        LinkStyle,
         Image as ContentImage,
+        LinkStyle,
         processContent
     } from "@shared/models/PromptContent"
     import ResizableTextarea from "@components/ResizableTextarea.vue";
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
+    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import {debounce} from "debounce";
 
     export default Vue.extend({
         components: {
@@ -149,14 +162,20 @@
             },
             hasNext: Boolean,
             hasPrevious: Boolean,
+            response: Object as () => ReflectionResponse
         },
         data(): {
-            youtubeVideoLoading: boolean
+            youtubeVideoLoading: boolean,
+            editingResponse: string,
+            saving: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
+                editingResponse: "",
+                saving: false,
             }
         },
+        watch: {},
         computed: {
             processedContent(): Content {
                 return processContent(this.content);
@@ -198,7 +217,14 @@
             }
         },
         methods: {
-            doButtonAction(): void {
+            autosave: debounce(function (this: any) {
+                this.save()
+            }, 1000),
+            save() {
+                console.log("debounced save");
+                this.$emit("save")
+            },
+            async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
                 }
@@ -206,7 +232,7 @@
                 const action: ContentAction = this.content.actionButton.action;
                 switch (action) {
                     case ContentAction.next:
-                        this.next();
+                        await this.next();
                         break;
                     case ContentAction.previous:
                         this.previous();
@@ -217,7 +243,14 @@
                 }
 
             },
-            next() {
+            async saveReflectionResponse() {
+                this.saving = true;
+                if (this.response) {
+                    await ReflectionResponseService.sharedInstance.save(this.response);
+                }
+                this.saving = false;
+            },
+            async next() {
                 this.$emit("next")
             },
             previous() {
