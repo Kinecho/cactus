@@ -16,15 +16,15 @@ module.exports = {
         appId: '1:88457335033:web:e731bd6b336daeb6',
     },
     //Stage uses the prod app for flamelink
-    __FLAMELINK_ENV_ID__: "stage",
+    __FLAMELINK_ENV_ID__: "dev",
     __FLAMELINK_FIREBASE_CONFIG__: {
-        apiKey: 'AIzaSyDu_-z20lelwf58ZtPurwNagHL0UBdMb4U',
-        authDomain: 'cactus-app-prod.firebaseapp.com',
-        databaseURL: 'https://cactus-app-prod.firebaseio.com',
-        projectId: 'cactus-app-prod',
-        storageBucket: 'cactus-app-prod.appspot.com',
-        messagingSenderId: '654981460803',
-        appId: '1:654981460803:web:183ae7005e0dd805',
+        apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
+        authDomain: 'cactus-app-stage.firebaseapp.com',
+        databaseURL: 'https://cactus-app-stage.firebaseio.com',
+        projectId: 'cactus-app-stage',
+        storageBucket: 'cactus-app-stage.appspot.com',
+        messagingSenderId: '88457335033',
+        appId: '1:88457335033:web:e731bd6b336daeb6',
     },
     __STRIPE_CONFIG__: {
         apiKey: 'pk_test_cFV6bK7YpxB2QrTRYOJie00B', //this is the test id. update for prod
