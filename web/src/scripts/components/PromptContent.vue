@@ -297,6 +297,7 @@
                 if (promptId) {
                     const createdResponse = ReflectionResponseService.sharedInstance.createReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                     this.reflectionResponse = createdResponse;
+                    this.reflectionDuration = 0;
 
                     console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
@@ -308,7 +309,8 @@
                             const response = first || createdResponse;
                             console.log("Got response as", response.toJSON());
                             this.reflectionResponses = responses;
-                            this.reflectionResponse = response
+                            this.reflectionResponse = response;
+                            this.reflectionDuration = response.reflectionDurationMs || 0;
                         }
                     })
                 }
