@@ -512,4 +512,11 @@
             width: 50%;
         }
     }
+
+    audio {
+        border: 1px solid $lightGreen;
+        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+        border-radius: 5.4rem;
+        width: 100%;
+    }
 </style>
