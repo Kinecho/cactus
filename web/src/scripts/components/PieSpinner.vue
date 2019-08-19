@@ -60,14 +60,13 @@
             height: 100%;
             transform-origin: 100% 50%;
             position: absolute;
-            background: lightgray;
+            background: $lightGreen;
             border: $pieBorderSize solid rgba(0, 0, 0, 0.4);
 
             &.spinner {
                 border-radius: 100% 0 0 100% / 50% 0 0 50%;
                 z-index: 200;
                 border-right: none;
-
             }
 
             &.filler {
@@ -76,7 +75,6 @@
                 border-left: none;
                 left: 50%;
                 opacity: 0;
-
             }
         }
 
@@ -88,8 +86,6 @@
             opacity: 1;
             background: inherit;
         }
-
-
     }
 
 </style>
