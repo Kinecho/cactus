@@ -57,7 +57,7 @@
 
                 <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
@@ -69,7 +69,7 @@
                     </div>
 
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
             </section>
@@ -391,13 +391,8 @@
 
             &:hover {
                 background-color: $lightGreen;
-
-                svg {
-                    fill: $darkestGreen;
-                }
             }
         }
-
 
         .content-container {
 
@@ -479,6 +474,7 @@
                 }
 
                 svg {
+                    fill: $darkGreen;
                     height: 1.6rem;
                     width: 1.6rem;
                 }
@@ -488,15 +484,21 @@
                 }
 
                 &.reflection {
-                    /*background: red;*/
+                    border: 0;
+
                     &:hover:not(.complete) {
+                        background-color: $white;
                         cursor: default;
-                        /*background-color: n;*/
                     }
 
                     &.complete {
                         cursor: pointer;
-                        /*background: green;*/
+                        background-color: $green;
+
+                        svg {
+                            fill: $white;
+                        }
+
                         .progress-circle {
                             opacity: 0;
                         }
