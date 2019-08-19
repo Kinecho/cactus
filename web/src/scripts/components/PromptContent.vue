@@ -217,8 +217,8 @@
             };
         },
         computed: {
-            slideNumberClass():string {
-              return `slide-${this.activeIndex}`
+            slideNumberClass(): string {
+                return `slide-${this.activeIndex}`
             },
             hasNext(): boolean {
                 return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
@@ -235,13 +235,7 @@
             isReflection(): boolean {
                 if (this.promptContent && this.promptContent.content.length > this.activeIndex) {
                     const activeContent = this.promptContent.content[this.activeIndex];
-                    let isReflect = activeContent.contentType === ContentType.reflect || false;
-
-                    if (isReflect) {
-                        this.startReflectionTimer();
-                    } else {
-                        this.stopReflectionTimer();
-                    }
+                    const isReflect = activeContent.contentType === ContentType.reflect || false;
                     return isReflect
                 }
                 return false;
@@ -259,6 +253,18 @@
         watch: {
             activeIndex(index: number) {
                 updateQueryParam(QueryParam.CONTENT_INDEX, index)
+
+                if (this.promptContent && this.promptContent.content.length > index) {
+                    const activeContent = this.promptContent.content[index];
+                    let isReflect = activeContent.contentType === ContentType.reflect || false;
+
+                    if (isReflect) {
+                        this.startReflectionTimer();
+                    } else {
+                        this.stopReflectionTimer();
+                    }
+                }
+
             },
             promptContent(newContent: PromptContent | undefined, oldContent: PromptContent | undefined) {
                 if (!newContent || (!oldContent || newContent.promptId !== oldContent.promptId)) {
@@ -269,6 +275,7 @@
         methods: {
             stopReflectionTimer() {
                 clearInterval(this.reflectionTimerInterval);
+                this.reflectionTimerInterval = undefined;
             },
             startReflectionTimer() {
                 if (!this.reflectionTimerInterval) {
@@ -307,9 +314,8 @@
                 }
             },
             async save() {
-                // if (this.ac)
                 if (this.reflectionResponse) {
-
+                    this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     await ReflectionResponseService.sharedInstance.save(this.reflectionResponse);
                 }
             },

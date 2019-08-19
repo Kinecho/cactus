@@ -97,5 +97,6 @@ export default class ReflectionResponse extends BaseModel {
     memberEmail?: string;
     content: ReflectionContent = {};
     promptId?: string;
-    promptQuestion?: string
+    promptQuestion?: string;
+    reflectionDurationMs?:number = 0;
 }
