@@ -27,10 +27,6 @@
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                     </div>
-                    <div class="reflection-progress" v-if="isReflection">
-                        <progress max="1" :value="reflectionProgress"/>
-                    </div>
-
                 </div>
 
                 <div v-if="!completed">
