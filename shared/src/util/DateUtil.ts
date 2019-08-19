@@ -28,7 +28,7 @@ export function getISODate(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).toISODate();
 }
 
-export function getISODateTime(date:Date = new Date()):string {
+export function getISODateTime(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).toISO();
 }
 
@@ -123,5 +123,15 @@ export function asDate(input: any): Date | undefined {
 
     console.warn("Could not convert input of ", input, "to date");
     return;
+
+}
+
+export function formatDurationAsTime(duration: number): string {
+    const minutes = Math.floor(duration / 60 / 1000);
+    const seconds = (Math.floor(duration / 1000)) % 60;
+
+    const ss = seconds < 10 ? `0${seconds}` : `${seconds}`;
+    const mm = minutes < 10 ? `0${minutes}` : `${minutes}`;
+    return `${mm}:${ss}`
 
 }

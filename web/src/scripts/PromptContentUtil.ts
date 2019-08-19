@@ -1,0 +1,1 @@
+export const MINIMUM_REFLECT_DURATION_MS = 10000;

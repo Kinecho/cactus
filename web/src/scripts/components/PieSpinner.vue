@@ -18,7 +18,6 @@
         },
         data(): {} {
             return {
-                percent: undefined,
             }
         },
         computed: {

@@ -112,11 +112,17 @@
             <!--    START Reflect -->
             <div v-if="isReflectScreen && response" class="reflect-container">
                 <div class="mobile-nav-buttons">
-                    <button class="next inline-arrow primary" @click="next" v-if="hasNext">
+                    <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
+                        <div class="progress-circle">
+                            <pie-spinner :percent="reflectionProgress"/>
+                        </div>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                             <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
                     </button>
+                </div>
+                <div>
+                    <h5>{{formattedDuration}}</h5>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
@@ -152,13 +158,19 @@
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import * as prettyMilliseconds from "pretty-ms";
     import {debounce} from "debounce";
+    import {formatDurationAsTime} from '@shared/util/DateUtil'
+    import PieSpinner from "@components/PieSpinner.vue"
+
+    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
 
     export default Vue.extend({
         components: {
             ResizableTextarea,
             Spinner,
             FlamelinkImage,
+            PieSpinner,
         },
         props: {
             content: {
@@ -166,7 +178,8 @@
             },
             hasNext: Boolean,
             hasPrevious: Boolean,
-            response: Object as () => ReflectionResponse
+            response: Object as () => ReflectionResponse,
+            reflectionDuration: Number,
         },
         data(): {
             youtubeVideoLoading: boolean,
@@ -181,6 +194,12 @@
         },
         watch: {},
         computed: {
+            reflectionProgress(): number {
+                return Math.min(this.reflectionDuration / MINIMUM_REFLECT_DURATION_MS, 1);
+            },
+            formattedDuration(): string {
+                return formatDurationAsTime(this.reflectionDuration);
+            },
             processedContent(): Content {
                 return processContent(this.content);
             },
@@ -255,6 +274,11 @@
                 this.saving = false;
             },
             async next() {
+                if (this.isReflectScreen && this.reflectionProgress < 1){
+                    return;
+                }
+
+
                 this.$emit("next")
             },
             previous() {
@@ -497,6 +521,38 @@
 
         .inline-arrow {
             flex-grow: 0;
+            position: relative;
+            overflow: hidden;
+            &.reflection {
+                position: relative;
+                &:hover:not(.complete) {
+                    cursor: default;
+                }
+
+                &:not(.complete){
+                    svg {
+                        opacity:0;
+                    }
+                }
+
+                &.complete {
+                    cursor: pointer;
+                    .progress-circle {
+                        opacity: 0;
+                    }
+                }
+
+                .progress-circle {
+                    transition: opacity .3s;
+                    z-index: 0;
+                    opacity: .6;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                }
+            }
         }
 
         .next {
@@ -511,6 +567,10 @@
                 width: 1.8rem;
             }
         }
+
+
+
+
     }
 
     .reflect-container textarea {

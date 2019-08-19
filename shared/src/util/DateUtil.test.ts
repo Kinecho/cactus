@@ -1,6 +1,6 @@
 import {
     differenceInMinutes,
-    formatDuration,
+    formatDuration, formatDurationAsTime,
     getMailchimpDateString,
     makeUTCDateIntoMailchimpDate
 } from "@shared/util/DateUtil";
@@ -97,4 +97,58 @@ describe("get difference in minutes", () => {
         const end = start - (1000 * 5.5 * 60); //5 minutes;
         expect(differenceInMinutes(new Date(start), new Date(end))).toEqual(5.5);
     })
+});
+
+describe("format duration as time", () => {
+    test("5 seconds", () => {
+        const input = 5000;
+        expect(formatDurationAsTime(input)).toEqual("00:05");
+    });
+
+    test("10 seconds", () => {
+        const input = 10000;
+        expect(formatDurationAsTime(input)).toEqual("00:10");
+    });
+    test("12 seconds", () => {
+        const input = 12000;
+        expect(formatDurationAsTime(input)).toEqual("00:12");
+    });
+
+
+    test("93 seconds", () => {
+        const input = 93000;
+        expect(formatDurationAsTime(input)).toEqual("01:33");
+    });
+
+    test("61 seconds", () => {
+        const input = 61000;
+        expect(formatDurationAsTime(input)).toEqual("01:01");
+    });
+
+    test("610100 seconds", () => {
+        const input = 610100;
+        expect(formatDurationAsTime(input)).toEqual("10:10");
+    });
+
+    test("610800 seconds", () => {
+        const input = 610800;
+        expect(formatDurationAsTime(input)).toEqual("10:10");
+    });
+
+
+    test("611000 seconds", () => {
+        const input = 611000;
+        expect(formatDurationAsTime(input)).toEqual("10:11");
+    });
+
+
+    test(".1 seconds", () => {
+        const input = 100;
+        expect(formatDurationAsTime(input)).toEqual("00:00");
+    });
+
+    test(".9 seconds", () => {
+        const input = 100;
+        expect(formatDurationAsTime(input)).toEqual("00:00");
+    });
 });

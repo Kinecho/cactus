@@ -40,6 +40,7 @@
                                 v-bind:content="promptContent.content[activeIndex]"
                                 v-bind:response="reflectionResponse"
                                 v-bind:hasNext="hasNext && activeIndex > 0"
+                                v-bind:reflectionDuration="reflectionDuration"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
                                 v-on:next="next"
@@ -103,11 +104,13 @@
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
     import PieSpinner from "@components/PieSpinner.vue"
+    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
-    const MIN_REFLECTION_MS = 10000;
+    const MIN_REFLECTION_MS = MINIMUM_REFLECT_DURATION_MS;
+    const REFLECT_UPDATE_INTERVAL_MS = 100;
 
     export default Vue.extend({
         components: {
@@ -269,7 +272,7 @@
             },
             startReflectionTimer() {
                 if (!this.reflectionTimerInterval) {
-                    const interval = 50;
+                    const interval = REFLECT_UPDATE_INTERVAL_MS;
                     this.reflectionTimerInterval = setInterval(() => {
                         this.reflectionDuration += interval
                     }, interval)
