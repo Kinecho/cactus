@@ -21,7 +21,7 @@ export interface Video extends FlamelinkFile {
 
 export interface Audio extends FlamelinkFile {
     url?: string;
-    fileIds?: string[];
+    // fileIds?: string[];
 }
 
 export enum ContentAction {

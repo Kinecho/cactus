@@ -1,5 +1,3 @@
-import {ContentType} from '@shared/models/PromptContent'
-import {ResponseMedium} from '@shared/models/ReflectionResponse'
 <template>
     <div class="page-wrapper">
         <transition appear name="fade-in" mode="out-in">
@@ -25,13 +23,19 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
                 </div>
-                <div class="progress" v-if="!completed">
-                    <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                <div class="progress-wrapper" v-if="!completed">
+                    <div class="progress">
+                        <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
+                    </div>
+                    <div class="reflection-progress" v-if="isReflection">
+                        <progress max="1" :value="reflectionProgress"/>
+                    </div>
+
                 </div>
+
                 <div v-if="!completed">
                     <transition :name="transitionName" mode="out-in">
                         <content-card
-
                                 v-bind:key="activeIndex"
                                 v-bind:content="promptContent.content[activeIndex]"
                                 v-bind:response="reflectionResponse"
@@ -56,7 +60,14 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                         <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
-                <button class="next arrow secondary" @click="next" v-show="hasNext && activeIndex > 0">
+                <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
+                        @click="next"
+                        v-show="hasNext && activeIndex > 0"
+                >
+                    <div class="progress-circle" v-if="isReflection">
+                        <pie-spinner :percent="reflectionProgress"/>
+                    </div>
+
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
@@ -71,7 +82,6 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             </div>
 
         </modal>
-
 
     </div>
 </template>
@@ -92,10 +102,12 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
     import Modal from "@components/Modal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
+    import PieSpinner from "@components/PieSpinner.vue"
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
+    const MIN_REFLECTION_MS = 10000;
 
     export default Vue.extend({
         components: {
@@ -104,6 +116,7 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             Celebrate,
             PromptContentSharing,
             Modal,
+            PieSpinner,
         },
         props: {
             promptContentEntryId: String,
@@ -173,7 +186,6 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             promptContent: PromptContent | undefined,
             loading: boolean,
             activeIndex: number,
-            activeContent: Content | undefined,
             transitionName: string,
             completed: boolean,
             promptsUnsubscriber: ListenerUnsubscriber | undefined,
@@ -182,12 +194,13 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             reflectionResponses: ReflectionResponse[],
             reflectionResponse: ReflectionResponse | undefined,
             saving: boolean,
+            reflectionDuration: number,
+            reflectionTimerInterval: any,
         } {
             return {
                 promptContent: undefined,
                 loading: true,
                 activeIndex: 0,
-                activeContent: undefined,
                 transitionName: "slide",
                 promptsUnsubscriber: undefined,
                 completed: false,
@@ -196,6 +209,8 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                 reflectionResponses: [],
                 reflectionResponse: undefined,
                 saving: false,
+                reflectionDuration: 0,
+                reflectionTimerInterval: undefined,
             };
         },
         computed: {
@@ -205,6 +220,35 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
             },
+            reflectionProgress(): number {
+                return Math.min(this.reflectionDuration / MIN_REFLECTION_MS, 1)
+            },
+            reflectionComplete(): boolean {
+                return this.reflectionDuration >= MIN_REFLECTION_MS
+            },
+            isReflection(): boolean {
+                if (this.promptContent && this.promptContent.content.length > this.activeIndex) {
+                    const activeContent = this.promptContent.content[this.activeIndex];
+                    let isReflect = activeContent.contentType === ContentType.reflect || false;
+
+                    if (isReflect) {
+                        this.startReflectionTimer();
+                    } else {
+                        this.stopReflectionTimer();
+                    }
+                    return isReflect
+                }
+                return false;
+            },
+            reflectionProgressStyles(): any | undefined {
+                if (this.isReflection) {
+                    const styles = {
+                        transform: `rotate(${Math.min(this.reflectionProgress, 1) * 360}deg)`,
+                    };
+                    console.log("Style object", styles);
+                    return styles;
+                }
+            }
         },
         watch: {
             activeIndex(index: number) {
@@ -217,6 +261,17 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
             }
         },
         methods: {
+            stopReflectionTimer() {
+                clearInterval(this.reflectionTimerInterval);
+            },
+            startReflectionTimer() {
+                if (!this.reflectionTimerInterval) {
+                    const interval = 50;
+                    this.reflectionTimerInterval = setInterval(() => {
+                        this.reflectionDuration += interval
+                    }, interval)
+                }
+            },
             subscribeToResponse() {
                 console.log("subscribing to reflection responses ");
                 if (this.reflectionResponseUnsubscriber) {
@@ -227,7 +282,7 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-                    const createdResponse = ReflectionResponseService.sharedInstance.createReflectionResponse(promptId as string, ResponseMedium.JOURNAL_WEB, promptQuestion);
+                    const createdResponse = ReflectionResponseService.sharedInstance.createReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                     this.reflectionResponse = createdResponse;
 
                     console.log("subscribing to responses for promptId", promptId);
@@ -253,6 +308,11 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                 }
             },
             async next() {
+                if (this.isReflection && !this.reflectionComplete) {
+                    return;
+                }
+
+
                 this.transitionName = "slide";
                 console.log("going to next");
                 const saveTask = this.save();
@@ -345,30 +405,42 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
                 margin-bottom: 12rem;
             }
 
-            .progress {
-                display: flex;
-                margin: 0 auto;
+            .progress-wrapper {
                 position: relative;
                 transform: translateY(1.6rem);
                 width: 94%;
                 z-index: 5;
                 height: 0;
+                margin: 0 auto;
 
-                .segment {
-                    border-radius: .8rem;
-                    flex-grow: 1;
-                    height: .4rem;
-                    background-color: $lightGreen;
+                .progress {
+                    display: flex;
 
-                    &:not(:last-child) {
-                        margin-right: 2px;
+                    .segment {
+                        border-radius: .8rem;
+                        flex-grow: 1;
+                        height: .4rem;
+                        background-color: $lightGreen;
+
+                        &:not(:last-child) {
+                            margin-right: 2px;
+                        }
+
+                        &.complete {
+                            background-color: $darkPink;
+                        }
                     }
+                }
 
-                    &.complete {
-                        background-color: $darkPink;
+                .reflection-progress {
+                    display: flex;
+
+                    progress {
+                        flex: 1
                     }
                 }
             }
+
 
             .arrow {
                 display: none;
@@ -413,6 +485,33 @@ import {ResponseMedium} from '@shared/models/ReflectionResponse'
 
                 &.previous svg {
                     transform: scale(-1);
+                }
+
+                &.reflection {
+                    /*background: red;*/
+                    &:hover:not(.complete) {
+                        cursor: default;
+                        /*background-color: n;*/
+                    }
+
+                    &.complete {
+                        cursor: pointer;
+                        /*background: green;*/
+                        .progress-circle {
+                            opacity: 0;
+                        }
+                    }
+
+                    .progress-circle {
+                        transition: opacity .3s;
+                        z-index: -1;
+                        opacity: .6;
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                    }
                 }
             }
         }

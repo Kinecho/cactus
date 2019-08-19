@@ -2,6 +2,9 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
+    PROMPT_WEB = "PROMPT_WEB",
+    PROMPT_IOS = "PROMPT_IOS",
+    PROMPT_ANDROID = "PROMPT_ANDROID",
     JOURNAL_WEB = "JOURNAL_WEB",
     JOURNAL_IOS = "JOURNAL_IOS",
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
