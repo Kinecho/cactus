@@ -82,6 +82,7 @@ export enum ReflectionResponseField {
     content = "content",
     promptId = "promptId",
     promptQuestion = "promptQuestion",
+    reflectionDurationMs = "reflectionDurationMs",
 }
 
 export default class ReflectionResponse extends BaseModel {

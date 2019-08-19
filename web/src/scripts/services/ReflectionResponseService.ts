@@ -4,6 +4,7 @@ import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
+import {getStreak, numDaysAgoFromMidnights} from "@shared/util/DateUtil";
 
 
 export default class ReflectionResponseService {
@@ -106,6 +107,35 @@ export default class ReflectionResponseService {
             return;
         }
         return this.firestoreService.delete(response.id, ReflectionResponse);
+    }
+
+    async getAllReflections(): Promise<ReflectionResponse[]> {
+        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!member) {
+            console.warn("ReflectionResponseService.getTotalReflectionDurationMsL No current cactus member found");
+            return [];
+        }
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id).orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        const responses = await this.firestoreService.executeQuery(query, ReflectionResponse);
+        return responses.results;
+    }
+
+    async getTotalReflectionDurationMs(): Promise<number> {
+        const reflections = await this.getAllReflections();
+        const totalDuration = reflections.reduce((duration, doc) => {
+            const current = doc.reflectionDurationMs || 0;
+            console.log("current response duration ", current);
+            return duration + (Number(current) || 0);
+        }, 0);
+        console.log("total duration is", totalDuration);
+        return totalDuration;
+    }
+
+    static getCurrentStreak(reflections: ReflectionResponse[]): number {
+        const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
+
+
+        return getStreak(dates);
     }
 
 }

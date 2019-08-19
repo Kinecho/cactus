@@ -43,26 +43,31 @@
 <script lang="ts">
     import Vue from "vue";
     import Spinner from "@components/Spinner.vue";
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import {millisecondsToMinutes} from '@shared/util/DateUtil'
 
     export default Vue.extend({
         components: {
             Spinner,
         },
-        created() {
+        async created() {
 
+            const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
+            const totalDuration = reflections.reduce((duration, doc) => {
+                const current = doc.reflectionDurationMs || 0;
+                console.log("current response duration ", current);
+                return duration + (Number(current) || 0);
+            }, 0);
 
-            setTimeout(() => {
-                this.reflectionCount = Math.floor(Math.random() * 200);
-                this.totalMinutes = Math.floor(Math.random() * 1000);
-                this.streakDays = Math.floor(Math.random() * 30);
-                this.loading = false;
-
-            }, 1500);
+            this.totalMinutes = millisecondsToMinutes(totalDuration);
+            this.reflectionCount = reflections.length;
+            this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
+            this.loading = false;
         },
         props: {},
         data(): {
             reflectionCount: number | undefined,
-            totalMinutes: number | undefined,
+            totalMinutes: string | undefined,
             streakDays: number | undefined,
             loading: boolean,
         } {

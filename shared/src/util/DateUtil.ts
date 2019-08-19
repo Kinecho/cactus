@@ -135,3 +135,54 @@ export function formatDurationAsTime(duration: number): string {
     return `${mm}:${ss}`
 
 }
+
+export function millisecondsToMinutes(duration: number, decimals: number = 1): string {
+    const seconds = duration / 1000;
+    const minutes = seconds / 60;
+    return minutes.toFixed(decimals);
+}
+
+export function numDaysAgoFromMidnights(date: Date, today: Date = new Date()): number {
+    const dt = DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0});
+    const t = DateTime.fromJSDate(today).set({hour: 0, minute: 0, millisecond: 0, second: 0});
+
+    return t.diff(dt).as("day")
+}
+
+export function atMidnight(date: Date): Date {
+    return DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0}).toJSDate();
+}
+
+/**
+ * Assumes ordered by date DESC already
+ * @param {Date[]} dates
+ * @param {Date} start
+ */
+export function getStreak(dates: Date[], start: Date = new Date()) {
+    if (dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 0;
+    let currentDate = start;
+    let next = dates[0];
+    let i = 1;
+    let diff = numDaysAgoFromMidnights(next, currentDate);
+
+    if (diff < 2) {
+        streak = 1;
+    }
+
+    while (i < dates.length && diff < 2) {
+        currentDate = next;
+        next = dates[i];
+        diff = numDaysAgoFromMidnights(next, currentDate);
+        if (diff > 0 && diff < 2) {
+            streak++;
+        }
+        i++;
+    }
+
+    return streak;
+
+}

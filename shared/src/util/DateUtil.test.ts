@@ -1,8 +1,11 @@
 import {
     differenceInMinutes,
-    formatDuration, formatDurationAsTime,
+    formatDuration,
+    formatDurationAsTime,
     getMailchimpDateString,
-    makeUTCDateIntoMailchimpDate
+    getStreak,
+    makeUTCDateIntoMailchimpDate,
+    numDaysAgoFromMidnights
 } from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
@@ -151,4 +154,117 @@ describe("format duration as time", () => {
         const input = 100;
         expect(formatDurationAsTime(input)).toEqual("00:00");
     });
+});
+
+
+describe("numDaysAgo", () => {
+    test("same date", () => {
+        const t = new Date();
+        const y = t;
+
+        expect(numDaysAgoFromMidnights(y, t)).toEqual(0);
+    });
+
+    test("1 hour ago", () => {
+        const t = new Date();
+        const y = new Date(t.getTime());
+        y.setHours(t.getHours() - 1);
+
+        expect(numDaysAgoFromMidnights(y, t)).toEqual(0);
+    });
+
+    test("24 hours ago", () => {
+        const t = new Date();
+        const y = new Date(t.getTime());
+        y.setHours(t.getHours() - 24);
+
+        expect(numDaysAgoFromMidnights(y, t)).toEqual(1);
+    });
+
+    test("36 hours ago", () => {
+        const t = new Date();
+        const y = new Date(t.getTime());
+        y.setHours(t.getHours() - 36);
+
+        expect(numDaysAgoFromMidnights(y, t)).toEqual(1);
+    });
+
+    test("48 hours ago", () => {
+        const t = new Date();
+        const y = new Date(t.getTime());
+        y.setHours(t.getHours() - 48);
+
+        expect(numDaysAgoFromMidnights(y, t)).toEqual(2);
+    });
+});
+
+describe("get streak", () => {
+    test("empty list", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [];
+        expect(getStreak(dates, startTime)).toEqual(0);
+    });
+
+    test("with today", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [
+            new Date(),
+        ];
+        expect(getStreak(dates, startTime)).toEqual(1);
+    });
+
+    test("2 days in streak, 2 dates", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.minus({hours: 6}).toJSDate(),
+            startTime.minus({hours: 13}).toJSDate(),
+            // DateTime.local().minus({days: 5}).toJSDate(),
+        ];
+        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+    });
+
+
+    test("2 days in streak, 3 dates, exactly 2 days ago", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.minus({hours: 6}).toJSDate(),
+            startTime.minus({hours: 13}).toJSDate(),
+            startTime.minus({hours: 36, minutes: 0}).toJSDate(),
+        ];
+        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+    });
+
+    test("3 days in streak, 3 dates", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.minus({hours: 6}).toJSDate(),
+            startTime.minus({hours: 13}).toJSDate(),
+            startTime.minus({hours: 36, minutes: 1}).toJSDate(),
+        ];
+        expect(getStreak(dates, startTime.toJSDate())).toEqual(3);
+    });
+
+    test("broken streak after 2 days, 4 dates", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.minus({hours: 6}).toJSDate(),
+            startTime.minus({hours: 13}).toJSDate(),
+            startTime.minus({hours: 90}).toJSDate(),
+            startTime.minus({hours: 100, minutes: 1}).toJSDate(),
+        ];
+        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+    });
+
+    test("broken streak after 3 days, 4 dates", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.minus({hours: 6}).toJSDate(),
+            startTime.minus({hours: 13}).toJSDate(),
+            startTime.minus({hours: 37}).toJSDate(),
+            startTime.minus({hours: 100, minutes: 1}).toJSDate(),
+        ];
+        expect(getStreak(dates, startTime.toJSDate())).toEqual(3);
+    });
+
+
 });
