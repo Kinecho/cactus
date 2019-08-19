@@ -373,16 +373,17 @@
     }
 
     .photo-container {
-        width: 100%;
         margin-top: 4rem;
 
         img {
-            width: 100%;
+            border-radius: 4px;
+            display: block;
+            max-width: 100%;
         }
     }
 
     .video-container {
-        border-radius: 12px;
+        border-radius: 4px;
         margin-top: 4rem;
         overflow: hidden;
 
