@@ -40,8 +40,8 @@
             <!--    END Video -->
 
             <!--      START Photo      -->
-            <div class="photo-container">
-                <flamelink-image v-if="processedContent.photo" v-bind:image="processedContent.photo"/>
+            <div class="photo-container" v-if="processedContent.photo">
+                <flamelink-image v-bind:image="processedContent.photo"/>
             </div>
             <!--      END Photo      -->
 
@@ -52,7 +52,7 @@
             <!--    END AUDIO     -->
 
             <!--      START Link      -->
-            <div v-if="processedContent.link">
+            <div class="link-container" v-if="processedContent.link">
                 <a :href="processedContent.link.destinationHref"
                         :target="processedContent.link.linkTarget"
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
@@ -374,7 +374,7 @@
 
     .photo-container {
         width: 100%;
-        margin: 4rem 0;
+        margin-top: 4rem;
 
         img {
             width: 100%;
@@ -411,6 +411,26 @@
                 height: 100%;
                 z-index: 2;
             }
+        }
+    }
+
+    .link-container {
+        margin: 4rem 0;
+
+        a {
+            display: inline-block;
+            margin: 0 auto;
+        }
+    }
+
+    .audio-container {
+        margin-top: 4rem;
+
+        audio {
+            border: 1px solid $lightGreen;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            border-radius: 5.4rem;
+            width: 100%;
         }
     }
 
@@ -511,12 +531,5 @@
         @include r(600) {
             width: 50%;
         }
-    }
-
-    audio {
-        border: 1px solid $lightGreen;
-        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-        border-radius: 5.4rem;
-        width: 100%;
     }
 </style>
