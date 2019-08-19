@@ -4,6 +4,8 @@
 # cactus
 Cactus App
 
+See the [Flamelink Docs](FLAMELINK.md)
+
 ## Versions
 You must use node version >= 8.13.0. The suggested version is v8.15.0
 
