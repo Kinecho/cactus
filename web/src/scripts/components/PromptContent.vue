@@ -1,5 +1,5 @@
 <template>
-    <div class="page-wrapper">
+    <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
             <div class="centered" v-if="loading">
                 <spinner message="Loading..." :delay="1000"/>
@@ -214,6 +214,9 @@
             };
         },
         computed: {
+            slideNumberClass():string {
+              return `slide-${this.activeIndex}`
+            },
             hasNext(): boolean {
                 return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
             },
@@ -494,9 +497,14 @@
                         /*background-color: n;*/
                     }
 
+                    &:not(.complete){
+                        svg {
+                            opacity:0;
+                        }
+                    }
+
                     &.complete {
                         cursor: pointer;
-                        /*background: green;*/
                         .progress-circle {
                             opacity: 0;
                         }
