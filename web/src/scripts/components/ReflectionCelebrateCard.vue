@@ -1,47 +1,57 @@
-import {LocalStorageKey} from '@web/util'
 <template>
-    <div class="celebrate-container">
-        <h2>Whoop, whoop!<br/>You did it!</h2>
-        <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
-        <div class="stats-container">
-            <section class="metric">
-                <div class="label">
-                    <transition name="fade-in" mode="out-in" appear>
-                        <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                        <spinner v-if="reflectionCount === undefined" :delay="1000"/>
-                    </transition>
-                </div>
-                <p>
-                    Reflections
-                </p>
-            </section>
-            <section class="metric">
-                <div class="label">
-                    <transition name="fade-in" mode="out-in" appear>
-                        <span v-if="totalMinutes !== undefined">{{totalMinutes}}</span>
-                        <spinner v-if="totalMinutes === undefined" :delay="1000"/>
-                    </transition>
-                </div>
-                <p>
-                    Minutes
-                </p>
-            </section>
-            <section class="metric">
-                <div class="label">
-                    <transition name="fade-in" mode="out-in" appear>
-                        <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                        <spinner v-if="streakDays === undefined" :delay="1000"/>
-                    </transition>
-                </div>
-                <p>
-                    Day Streak
-                </p>
-            </section>
+    <div :class="['flip-container', 'celebrate-container', {flipped: showLogin}]">
+        <div class="flipper">
+            <div :class="['front', 'flip-card']">
+                <h2>Whoop, whoop!<br/>You did it!</h2>
+                <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
+                <div class="stats-container">
+                    <section class="metric">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                                <spinner v-if="reflectionCount === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p>
+                            Reflections
+                        </p>
+                    </section>
+                    <section class="metric">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="totalMinutes !== undefined">{{totalMinutes}}</span>
+                                <spinner v-if="totalMinutes === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p>
+                            Minutes
+                        </p>
+                    </section>
+                    <section class="metric">
+                        <div class="label">
+                            <transition name="fade-in" mode="out-in" appear>
+                                <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                                <spinner v-if="streakDays === undefined" :delay="1000"/>
+                            </transition>
+                        </div>
+                        <p>
+                            Day Streak
+                        </p>
+                    </section>
 
-        </div>
-        <button class="primary authBtn" v-if="authLoaded && !loggedIn">Save My Stats</button>
-        <div class="auth" v-if="authLoaded && !loggedIn">
-            <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
+                </div>
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save My Stats
+                </button>
+            </div>
+            <div :class="[ 'flip-card', 'back']">
+                <div class="auth-card">
+                    <h1>Sign in to save your work</h1>
+                    <button @click="showLogin = false" class="button secondary">&larr; Back</button>
+                    <div class="auth" v-if="authLoaded && !loggedIn">
+                        <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -106,6 +116,7 @@ import {LocalStorageKey} from '@web/util'
             loggedIn: boolean,
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
+            showLogin: boolean,
         } {
             return {
                 reflectionCount: undefined,
@@ -116,6 +127,7 @@ import {LocalStorageKey} from '@web/util'
                 authLoaded: false,
                 authUnsubscriber: undefined,
                 member: undefined,
+                showLogin: false,
             }
         },
         destroyed() {
@@ -160,21 +172,20 @@ import {LocalStorageKey} from '@web/util'
     @import "transitions";
 
     .celebrate-container {
-        background-color: lighten($lightPink, 3%);
+
         display: flex;
         flex-direction: column;
         height: 100vh;
         justify-content: center;
-        padding: 2.4rem;
         width: 100%;
 
         @include r(600) {
-            border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            //border-radius: 12px;
+            //box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             max-height: 66rem;
             max-width: 48rem;
             position: relative;
-            overflow: hidden;
+            //overflow: hidden;
         }
     }
 
@@ -220,8 +231,56 @@ import {LocalStorageKey} from '@web/util'
         margin: 3.2rem auto 0;
     }
 
-    .auth {
-        display: none;
+    .auth-card {
+        margin-top: 4rem;
+        /*padding: 2rem;*/
+    }
+
+    .flip-container {
+        perspective: 1000px;
+
+
+        .flipper {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: 0.6s;
+            height: 100%;
+
+
+            @include r(600) {
+                border-radius: 12px;
+                box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+
+            }
+        }
+
+        &.flipped {
+            .flipper {
+                transform: rotateY(180deg);
+            }
+
+        }
+
+        .flip-card {
+            background-color: lighten($lightPink, 3%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            overflow: hidden;
+            padding: 2.4rem;
+        }
+
+        .front {
+            z-index: 2;
+            transform: rotateY(0);
+        }
+
+        .back {
+            transform: rotateY(180deg);
+        }
     }
 
 

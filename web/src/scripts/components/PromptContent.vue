@@ -1,4 +1,3 @@
-import {LocalStorageKey} from '@web/util'
 <template>
     <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
@@ -145,7 +144,15 @@ import {LocalStorageKey} from '@web/util'
                 console.log("using prop for promptContentId", promptContentId)
             }
 
-            const slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
+            let slideParam = getQueryParam(QueryParam.CONTENT_INDEX);
+            let slideNumber = 0;
+            let isDone = false;
+            if (slideParam === "done") {
+                isDone = true;
+            } else {
+                slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
+            }
+
 
             // flamelink.content.subscribe()
 
@@ -168,6 +175,9 @@ import {LocalStorageKey} from '@web/util'
                     const promptContent = new PromptContent(data);
 
                     this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
+                    if (isDone) {
+                        this.completed = true;
+                    }
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     this.promptContent = promptContent;
                     this.loading = false;
@@ -270,7 +280,7 @@ import {LocalStorageKey} from '@web/util'
         },
         watch: {
             activeIndex(index: number) {
-                updateQueryParam(QueryParam.CONTENT_INDEX, index)
+                updateQueryParam(QueryParam.CONTENT_INDEX, index);
 
                 if (this.promptContent && this.promptContent.content.length > index) {
                     const activeContent = this.promptContent.content[index];
