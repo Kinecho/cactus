@@ -167,6 +167,7 @@ describe("numDaysAgo", () => {
 
     test("1 hour ago", () => {
         const t = new Date();
+        t.setHours(12);
         const y = new Date(t.getTime());
         y.setHours(t.getHours() - 1);
 
@@ -175,6 +176,7 @@ describe("numDaysAgo", () => {
 
     test("24 hours ago", () => {
         const t = new Date();
+        t.setHours(12);
         const y = new Date(t.getTime());
         y.setHours(t.getHours() - 24);
 
@@ -183,6 +185,7 @@ describe("numDaysAgo", () => {
 
     test("36 hours ago", () => {
         const t = new Date();
+        t.setHours(12);
         const y = new Date(t.getTime());
         y.setHours(t.getHours() - 36);
 
