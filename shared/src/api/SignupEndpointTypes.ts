@@ -15,6 +15,7 @@ export interface MagicLinkRequest {
     email: string,
     continuePath: string,
     referredBy?: string|undefined,
+    reflectionResponseIds?: string[]
 }
 
 export interface MagicLinkResponse extends ApiResponse{

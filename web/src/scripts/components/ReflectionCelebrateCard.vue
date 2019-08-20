@@ -36,6 +36,11 @@
                     Day Streak
                 </p>
             </section>
+
+        </div>
+        <div class="auth" v-if="authLoaded && !loggedIn">
+            <h3>Sign Up</h3>
+            <magic-link/>
         </div>
     </div>
 </template>
@@ -45,38 +50,82 @@
     import Spinner from "@components/Spinner.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
+    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import CactusMember from '@shared/models/CactusMember'
+    import {PageRoute} from '@web/PageRoutes'
+    import MagicLink from "@components/MagicLinkInput.vue";
 
     export default Vue.extend({
         components: {
             Spinner,
+            MagicLink,
         },
         async created() {
 
-            const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
-            const totalDuration = reflections.reduce((duration, doc) => {
-                const current = doc.reflectionDurationMs || 0;
-                console.log("current response duration ", current);
-                return duration + (Number(current) || 0);
-            }, 0);
+            CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: async ({member}) => {
+                    this.member = member;
+                    this.authLoaded = true;
+                    this.loggedIn = !!member;
 
-            this.totalMinutes = millisecondsToMinutes(totalDuration);
-            this.reflectionCount = reflections.length;
-            this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
-            this.loading = false;
+                    const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
+
+                    if (reflections.length === 0 && this.reflectionResponse) {
+                        reflections.push(this.reflectionResponse);
+                    }
+
+                    const totalDuration = reflections.reduce((duration, doc) => {
+                        const current = doc.reflectionDurationMs || 0;
+                        console.log("current response duration ", current);
+                        return duration + (Number(current) || 0);
+                    }, 0);
+
+                    this.totalMinutes = millisecondsToMinutes(totalDuration);
+                    this.reflectionCount = reflections.length;
+                    this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
+                    this.loading = false;
+                }
+            });
         },
-        props: {},
+        props: {
+            reflectionResponse: {
+                type: Object as () => ReflectionResponse
+            }
+        },
         data(): {
             reflectionCount: number | undefined,
             totalMinutes: string | undefined,
             streakDays: number | undefined,
             loading: boolean,
+            authLoaded: boolean,
+            loggedIn: boolean,
+            authUnsubscriber: ListenerUnsubscriber | undefined,
+            member: CactusMember | undefined,
         } {
             return {
                 reflectionCount: undefined,
                 totalMinutes: undefined,
                 streakDays: undefined,
                 loading: true,
+                loggedIn: false,
+                authLoaded: false,
+                authUnsubscriber: undefined,
+                member: undefined,
             }
+        },
+        destroyed() {
+            if (this.authUnsubscriber) {
+                this.authUnsubscriber();
+            }
+        },
+        computed: {
+            loginUrl(): string {
+                const base = `${PageRoute.SIGNUP}`;
+                // const params = {}
+                return base;
+            },
         },
         methods: {
             back() {

@@ -1,5 +1,5 @@
 const {compilerOptions} = require('./tsconfig')
-const {pathsToModuleNameMapper} = require('ts-jest')
+const {pathsToModuleNameMapper} = require('ts-jest/utils')
 
 module.exports = {
     preset: 'ts-jest',
@@ -14,6 +14,7 @@ module.exports = {
     },
     setupFiles: [
         './src/test/jestsetup.ts',
+        "jest-localstorage-mock"
     ],
     // collectCoverage: true,
     collectCoverageFrom: [

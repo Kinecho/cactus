@@ -11,9 +11,10 @@ import {
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
-import {ApiResponseError} from "@shared/api/ApiTypes";
-import AuthUI = firebaseui.auth.AuthUI;
 import {QueryParam} from "@shared/util/queryParams";
+import StorageService from "@web/services/StorageService";
+import AuthUI = firebaseui.auth.AuthUI;
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 const firebase = initializeFirebase();
 
@@ -266,7 +267,6 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
 }
 
 
-
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -277,10 +277,14 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
+    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
+
+
     const statusResponse = await sendMagicLink({
         email: email,
         referredBy: subscription.referredByEmail,
-        continuePath: emailLinkRedirectUrl
+        continuePath: emailLinkRedirectUrl,
+        reflectionResponseIds: anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : []
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 

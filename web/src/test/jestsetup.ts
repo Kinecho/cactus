@@ -57,4 +57,4 @@ export const mockFirebase = new firebasemock.MockFirebaseSdk(
     () => {
         return null
     },
-)
+);

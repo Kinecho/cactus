@@ -31,7 +31,16 @@ export function getResponseMediumDisplayName(medium?: ResponseMedium): string {
             break;
         case ResponseMedium.JOURNAL_ANDROID:
             displayName = "Journal Android";
-            break
+            break;
+        case ResponseMedium.PROMPT_WEB:
+            displayName = "Prompt Web";
+            break;
+        case ResponseMedium.PROMPT_IOS:
+            displayName = "Prompt iOS";
+            break;
+        case ResponseMedium.PROMPT_ANDROID:
+            displayName = "Prompt Android";
+            break;
         default:
             displayName = "Unknown";
             break;
@@ -50,12 +59,15 @@ export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
             displayName = ":email:";
             break;
         case ResponseMedium.JOURNAL_WEB:
+        case ResponseMedium.PROMPT_WEB:
             displayName = ":computer:";
             break;
         case ResponseMedium.JOURNAL_IOS:
+        case ResponseMedium.PROMPT_IOS:
             displayName = ":ios:";
             break;
         case ResponseMedium.JOURNAL_ANDROID:
+        case ResponseMedium.PROMPT_ANDROID:
             displayName = ":android:";
             break;
         default:
@@ -90,6 +102,7 @@ export default class ReflectionResponse extends BaseModel {
     static Field = ReflectionResponseField;
     userId?: string;
     cactusMemberId?: string;
+    anonymous: boolean = false;
     responseDate?: Date;
     emailReplyId?: string;
     responseMedium?: ResponseMedium;
@@ -99,5 +112,5 @@ export default class ReflectionResponse extends BaseModel {
     content: ReflectionContent = {};
     promptId?: string;
     promptQuestion?: string;
-    reflectionDurationMs?:number = 0;
+    reflectionDurationMs?: number = 0;
 }
