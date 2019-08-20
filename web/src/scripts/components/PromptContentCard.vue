@@ -327,8 +327,6 @@
         @include r(600) {
             border-radius: 12px;
             box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            //    max-height: 66rem;
-            //    max-width: 48rem;
             position: relative;
             overflow: hidden;
         }

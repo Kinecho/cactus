@@ -685,6 +685,8 @@
         display: flex;
         flex-direction: column;
         height: 100vh;
+        max-height: 66rem;
+        max-width: 48rem;
         justify-content: space-between;
         //padding: 2.4rem;
         width: 100%;
