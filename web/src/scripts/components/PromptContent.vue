@@ -45,10 +45,15 @@
                                     v-bind:saved="saved"
                                     v-touch:swipe.left="next"
                                     v-touch:swipe.right="previous"
+                                    v-touch:moving="touchMoveHandler"
+                                    v-touch:end="touchEndHandler"
+                                    v-touch:start="touchStartHandler"
                                     v-on:next="next"
                                     v-on:previous="previous"
                                     v-on:complete="complete"
-                                    v-on:save="save"/>
+                                    v-on:save="save"
+                                    :style="cardStyles"
+                            />
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
@@ -221,6 +226,8 @@
             authLoaded: boolean,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
+            touchStart: MouseEvent | undefined,
+            cardStyles: any,
         } {
             return {
                 promptContent: undefined,
@@ -240,6 +247,8 @@
                 authLoaded: false,
                 memberUnsubscriber: undefined,
                 member: undefined,
+                touchStart: undefined,
+                cardStyles: {}
             };
         },
         computed: {
@@ -304,6 +313,32 @@
             }
         },
         methods: {
+            touchStartHandler(args: MouseEvent) {
+                console.log("Touch Start", args);
+                this.touchStart = args;
+            },
+            touchEndHandler(args: MouseEvent) {
+                console.log("Touch End", args);
+                this.touchStart = undefined;
+                this.cardStyles = {
+                    transition: "all .2s",
+                    // transform: `translateX(${0}px)`,
+                };
+            },
+            touchMoveHandler(args: MouseEvent) {
+                const startX = this.touchStart && this.touchStart.clientX;
+                if (!startX) {
+                    return;
+                }
+
+                const diffX = args.clientX - startX;
+                this.cardStyles = {
+                    transition: "all .2s",
+                    transform: `translateX(${diffX}px)`,
+                };
+
+                console.log("Move Handler", args);
+            },
             stopReflectionTimer() {
                 clearInterval(this.reflectionTimerInterval);
                 this.reflectionTimerInterval = undefined;
