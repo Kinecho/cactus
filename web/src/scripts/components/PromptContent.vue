@@ -679,18 +679,16 @@
         position: relative;
         transform-style: preserve-3d;
         transition: 0.6s;
-        //height: 100%;
-
-
         display: flex;
         flex-direction: column;
         height: 100vh;
-        max-height: 66rem;
-        max-width: 48rem;
         justify-content: space-between;
-        //padding: 2.4rem;
         width: 100%;
 
+        @include r(600) {
+            max-height: 66rem;
+            max-width: 48rem;
+        }
 
         &.flipped {
             transform: rotateY(180deg);
