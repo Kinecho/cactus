@@ -745,6 +745,7 @@
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
+        overflow: hidden;
         @include r(600) {
             max-height: 66rem;
             max-width: 48rem;
