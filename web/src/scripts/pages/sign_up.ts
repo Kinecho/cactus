@@ -15,24 +15,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const $welcomeMessage = document.getElementById("welcome-message");
     const $loginContainer = document.getElementById("third-party-logins");
     const $emailInput = document.getElementById("email-input") as HTMLInputElement;
-    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     configureLoginForm("email-signup");
 
-    console.log("Redirect url param is ", redirectUrlParam);
+
     let autoFillEmail: string | undefined | null;
     try {
         autoFillEmail = localStorage.getItem(LocalStorageKey.emailAutoFill);
     } catch (error) {
         console.error("failed to fetch value from localstorage", error);
     }
-
     if (autoFillEmail && $emailInput) {
+
         $emailInput.value = autoFillEmail;
         localStorage.removeItem(LocalStorageKey.emailAutoFill);
     }
 
-    let emailLinkRedirectUrl:string = PageRoute.SIGNUP_CONFIRMED;
-    if (redirectUrlParam){
+    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
+    console.log("Redirect url param is ", redirectUrlParam);
+    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
     }
 
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
         signInSuccess: (authResult, redirectUrl) => {
             console.log("Redirect URL is", redirectUrl);
-            console.log("Just returning true");
+            console.log("Letting fbui handle the redirect... just returning true");
             return true;
         }
     });
