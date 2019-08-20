@@ -415,7 +415,7 @@ import {LocalStorageKey} from '@web/util'
     .page-wrapper {
         display: flex;
         flex-flow: column nowrap;
-        height: 100vh;
+        flex-grow: 1;
         width: 100vw;
         justify-content: center;
         overflow: hidden;
@@ -485,7 +485,7 @@ import {LocalStorageKey} from '@web/util'
                     margin: 0 1%;
                     padding: 0;
                     position: absolute;
-                    top: 44vh;
+                    top: 38vh;
                     width: 4.8rem;
                     z-index: 10;
 
