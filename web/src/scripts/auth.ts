@@ -20,6 +20,20 @@ const firebase = initializeFirebase();
 
 let authUi: AuthUI;
 
+export interface LogoutOptions {
+    redirectOnSignOut: boolean,
+    redirectUrl?: string
+}
+
+export const DefaultLogoutOptions = {redirectOnSignOut: true, redirectUrl: "/"};
+
+export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
+    await getAuth().signOut();
+    StorageService.clear();
+    if (options.redirectUrl) {
+        window.location.href = options.redirectUrl || '/';
+    }
+}
 
 export interface EmailLinkSignupResult {
     success: boolean,

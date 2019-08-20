@@ -3,6 +3,26 @@ import {LocalStorageKey} from "@web/util";
 import {fromJSON} from "@shared/util/FirestoreUtil";
 
 export default class StorageService {
+
+    static clear() {
+        try {
+            localStorage.clear();
+        } catch (error) {
+            console.error("StorageService Failed to clear storage", error)
+        }
+    }
+
+    static removeItem(key: LocalStorageKey, id?: string) {
+        if (id) {
+            const map = this.getEncodedMap(key);
+            delete map[id];
+            console.log(`removed ${id} from `, map);
+            this.saveJSON(key, map);
+        } else {
+            localStorage.removeItem(key);
+        }
+    }
+
     static buildKey(prefix: LocalStorageKey, id: string): string {
         return `${prefix}_${id}`;
     }
@@ -16,13 +36,17 @@ export default class StorageService {
         }
     }
 
+    static saveJSON(key: LocalStorageKey, object: any) {
+        localStorage.setItem(key, JSON.stringify(object));
+    }
+
     static saveModel(key: LocalStorageKey, model: BaseModel, id?: string) {
         try {
             const encoded = this.getEncodedModelString(model);
             if (id) {
                 const map = this.getEncodedMap(key);
                 map[id] = encoded;
-                localStorage.setItem(key, JSON.stringify(map))
+                this.saveJSON(key, map);
             } else {
                 localStorage.setItem(key, encoded);
             }

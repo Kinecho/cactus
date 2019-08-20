@@ -1,3 +1,4 @@
+import {LocalStorageKey} from '@web/util'
 <template>
     <div class="celebrate-container">
         <h2>Whoop, whoop!<br/>You did it!</h2>
@@ -40,7 +41,7 @@
         </div>
         <div class="auth" v-if="authLoaded && !loggedIn">
             <h3>Sign Up</h3>
-            <magic-link/>
+            <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
         </div>
     </div>
 </template>
@@ -56,6 +57,8 @@
     import CactusMember from '@shared/models/CactusMember'
     import {PageRoute} from '@web/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
+    import StorageService from '@web/services/StorageService'
+    import {LocalStorageKey} from "@web/util"
 
     export default Vue.extend({
         components: {
@@ -136,6 +139,15 @@
             },
             restart() {
                 this.$emit("restart");
+            },
+            magicLinkSuccess(email: string | undefined) {
+                console.log("Celebrate Screen: Magic link sent successfully to ", email);
+                if (this.reflectionResponse && this.reflectionResponse.promptId) {
+                    StorageService.removeItem(LocalStorageKey.anonReflectionResponse, this.reflectionResponse.promptId);
+                }
+            },
+            magicLinkError(message: string | undefined) {
+                console.error("Celebrate component: Failed to send magic link", message);
             }
         }
     })

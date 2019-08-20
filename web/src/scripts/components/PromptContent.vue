@@ -1,3 +1,4 @@
+import {LocalStorageKey} from '@web/util'
 <template>
     <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
@@ -340,7 +341,7 @@
                 }
             },
 
-            async save() {
+            async save(): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
@@ -349,7 +350,11 @@
                         console.log("Member is not logged in, saving to localstorage");
                         StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
                     }
+                    return saved;
+                } else if (!this.isReflection) {
+                    console.log("Not saving. This is not a reflection screen");
                 }
+                return;
             },
             async next() {
                 if (this.isReflection && !this.reflectionComplete) {
@@ -357,19 +362,15 @@
                 }
 
                 this.transitionName = "slide";
-                console.log("going to next");
-                const saveTask = this.save();
+                const saveTask = this.isReflection ? this.save() : () => undefined;
                 const content = this.promptContent ? this.promptContent.content : [];
                 if (this.hasNext) {
-                    console.log("this.hasNext is true");
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                 }
-                console.log(`new active index is ${this.activeIndex}`);
                 await saveTask;
             },
             async previous() {
-                console.log("going to previous");
-                const saveTask = this.save();
+                const saveTask = this.isReflection ? this.save() : () => undefined;
                 this.transitionName = "slide-out";
 
                 if (this.completed) {
@@ -378,10 +379,8 @@
                 }
 
                 if (this.hasPrevious) {
-                    console.log("this.hasPrevious is true");
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
                 }
-                console.log(`new active index is ${this.activeIndex}`);
                 await saveTask;
             },
             async complete() {

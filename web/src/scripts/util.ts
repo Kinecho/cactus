@@ -67,7 +67,7 @@ export interface ConfirmEmailResponse {
 export function handleDatabaseError(error: { title?: string, message?: string, error: any }) {
     const timestamp = (new Date()).getTime();
     const id = `error-${timestamp}`;
-    addModal(id, {title: error.title, message: error.message || "Something unexpected occurred."})
+    addModal(id, {title: error.title, message: error.message || "Something unexpected occurred."});
     showModal(id);
 }
 

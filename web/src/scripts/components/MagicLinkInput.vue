@@ -76,6 +76,8 @@
                             // message = `Check your ${emailAddress} inbox to get your Magic Link to finish signing in.`;
                         }
 
+                        this.$emit("success", email);
+
                         addModal(modalId, {
                             title,
                             message,
@@ -88,26 +90,30 @@
                         });
                         showModal(modalId);
 
-
                         this.email = "";
 
                     } else if (signupResult.error) {
+                        const message = signupResult.error.friendlyMessage || "Sorry, it looks like we're having issues. Please try again later."
+                        this.$emit("error", {message});
                         gtag('event', 'email_signup_error', {
                             event_category: "email_signup",
                             event_label: `MagicLinkInput`
                         });
-                        this.error = signupResult.error.friendlyMessage || "Sorry, it looks like we're having issues. Please try again later."
+                        this.error = message;
                     } else {
-
+                        const message = "Sorry, it looks like we're having issues. Please try again later";
+                        this.$emit("error", {message});
                         gtag('event', 'email_signup_error', {
                             event_category: "email_signup",
                             event_label: `MagicLinkInput`
                         });
-                        this.error = "Sorry, it looks like we're having issues. Please try again later";
+                        this.error = message;
                     }
                 } catch (error) {
+                    const message = "Sorry, it looks like we're having issues.";
+                    this.$emit("sendError", {message});
                     console.error("failed to process form", error);
-                    this.error = "Sorry, it looks like we're having issues.";
+                    this.error = message;
                 } finally {
                     this.submitting = false;
                 }
