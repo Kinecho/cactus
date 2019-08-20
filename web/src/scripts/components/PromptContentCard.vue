@@ -342,6 +342,7 @@
         left: 0;
         position: absolute;
         right: 0;
+        overflow:hidden;
 
         @include r(600) {
             display: flex;
