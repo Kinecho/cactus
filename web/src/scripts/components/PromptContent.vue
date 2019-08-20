@@ -17,6 +17,12 @@
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
+                    <button class="share tertiary wiggle" @click="showSharing = false" v-show="showSharing">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                            <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                        <span class="buttonText">Back</span>
+                    </button>
                 </div>
                 <div class="progress-wrapper" v-if="!completed">
                     <div class="progress">
@@ -24,42 +30,48 @@
                     </div>
                 </div>
 
-                <div v-if="!completed">
-                    <transition :name="transitionName" mode="out-in">
-                        <content-card
-                                v-bind:key="activeIndex"
-                                v-bind:content="promptContent.content[activeIndex]"
-                                v-bind:response="reflectionResponse"
-                                v-bind:hasNext="hasNext && activeIndex > 0"
-                                v-bind:reflectionDuration="reflectionDuration"
-                                v-bind:saving="saving"
-                                v-bind:saved="saved"
-                                v-touch:swipe.left="next"
-                                v-touch:swipe.right="previous"
-                                v-on:next="next"
-                                v-on:previous="previous"
-                                v-on:complete="complete"
-                                v-on:save="save"/>
-                    </transition>
-                </div>
-                <div v-if="completed">
-                    <transition name="celebrate" appear mode="out-in">
-                        <celebrate v-on:back="completed = false"
-                                v-on:restart="restart" v-on:close="close"
-                                v-bind:reflectionResponse="reflectionResponse"
-                        />
-                    </transition>
+                <div :class="['flipper', {flipped: showSharing}]">
+                    <div class="front flip-card">
+                        <div v-if="!completed">
+                            <transition :name="transitionName" mode="out-in">
+                                <content-card
+                                        v-bind:key="activeIndex"
+                                        v-bind:content="promptContent.content[activeIndex]"
+                                        v-bind:response="reflectionResponse"
+                                        v-bind:hasNext="hasNext && activeIndex > 0"
+                                        v-bind:reflectionDuration="reflectionDuration"
+                                        v-bind:saving="saving"
+                                        v-bind:saved="saved"
+                                        v-touch:swipe.left="next"
+                                        v-touch:swipe.right="previous"
+                                        v-on:next="next"
+                                        v-on:previous="previous"
+                                        v-on:complete="complete"
+                                        v-on:save="save"/>
+                            </transition>
+                        </div>
+                        <div v-if="completed">
+                            <transition name="celebrate" appear mode="out-in">
+                                <celebrate v-on:back="completed = false"
+                                        v-on:restart="restart" v-on:close="close"
+                                        v-bind:reflectionResponse="reflectionResponse"
+                                />
+                            </transition>
+                        </div>
+                    </div>
+                    <div class="back flip-card">
+                        <prompt-content-sharing v-bind:promptContent="promptContent"/>
+                    </div>
                 </div>
 
-
-                <button class="previous arrow secondary" @click="previous" v-show="hasPrevious">
+                <button class="previous arrow secondary" @click="previous" v-show="hasPrevious && !showSharing">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
-                        v-show="hasNext && activeIndex > 0"
+                        v-show="hasNext && activeIndex > 0 && !showSharing"
                 >
                     <div class="progress-circle" v-if="isReflection">
                         <pie-spinner :percent="reflectionProgress"/>
@@ -71,15 +83,6 @@
                 </button>
             </section>
         </transition>
-
-
-        <modal :show="promptContent && showSharing" v-on:close="showSharing = false" :showCloseButton="true">
-            <div slot="body" class="centered share-modal-body">
-                <prompt-content-sharing v-bind:promptContent="promptContent"/>
-            </div>
-
-        </modal>
-
     </div>
 </template>
 
@@ -96,7 +99,6 @@
     import {getQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
-    import Modal from "@components/Modal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
     import PieSpinner from "@components/PieSpinner.vue"
@@ -117,7 +119,6 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            Modal,
             PieSpinner,
         },
         props: {
@@ -450,7 +451,7 @@
         }
 
         .content-container {
-
+            perspective: 1000px;
             @include r(600) {
                 margin-bottom: 12rem;
             }
@@ -667,4 +668,61 @@
         transform: translate(100%, 0);
         opacity: 0;
     }
+
+
+    //FLIPPER
+    .flipper {
+        position: relative;
+        transform-style: preserve-3d;
+        transition: 0.6s;
+        //height: 100%;
+
+
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        justify-content: space-between;
+        padding: 2.4rem;
+        width: 100%;
+
+
+        &.flipped {
+            transform: rotateY(180deg);
+        }
+    }
+
+    .flip-card {
+        border-radius: 12px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        overflow: hidden;
+        padding: 3.2rem;
+
+        @include r(600) {
+            border-radius: 12px;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            max-height: 66rem;
+            max-width: 48rem;
+        }
+
+        &.front {
+            z-index: 2;
+            transform: rotateY(0);
+            background-color: $lightBlue;
+        }
+
+        &.back {
+            background: url(assets/images/yellowNeedles.svg) $yellow;
+            background-size: 80%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transform: rotateY(180deg);
+        }
+    }
+
 </style>
