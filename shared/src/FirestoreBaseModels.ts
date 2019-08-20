@@ -40,7 +40,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
         return this;
     }
 
-    prepareFromFirestore(data:any){
+    prepareFromFirestore(data: any): any {
         return this;
     }
 

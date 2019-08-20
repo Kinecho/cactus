@@ -14,4 +14,5 @@ export enum QueryParam {
     CONTINUE_URL = "continueUrl",
     LANG = "lang",
     CONTENT_INDEX="slide",
+
 }

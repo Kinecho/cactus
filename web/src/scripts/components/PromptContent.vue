@@ -47,7 +47,10 @@
                 </div>
                 <div v-if="completed">
                     <transition name="celebrate" appear mode="out-in">
-                        <celebrate v-on:back="completed = false" v-on:restart="restart" v-on:close="close"/>
+                        <celebrate v-on:back="completed = false"
+                                v-on:restart="restart" v-on:close="close"
+                                v-bind:reflectionResponse="reflectionResponse"
+                        />
                     </transition>
                 </div>
 
@@ -88,12 +91,12 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
+    import PromptContent, {ContentType,} from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, updateQueryParam} from '@web/util'
+    import {getQueryParam, LocalStorageKey, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import Modal from "@components/Modal.vue";
@@ -101,6 +104,9 @@
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
     import PieSpinner from "@components/PieSpinner.vue"
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import CactusMember from '@shared/models/CactusMember'
+    import StorageService from '@web/services/StorageService'
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -126,6 +132,15 @@
             }
         },
         async created(): Promise<void> {
+
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.authLoaded = true;
+                    this.member = member;
+                }
+            });
+
+
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
                 promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
@@ -195,6 +210,9 @@
             saving: boolean,
             reflectionDuration: number,
             reflectionTimerInterval: any,
+            authLoaded: boolean,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
+            member: CactusMember | undefined,
         } {
             return {
                 promptContent: undefined,
@@ -210,6 +228,9 @@
                 saving: false,
                 reflectionDuration: 0,
                 reflectionTimerInterval: undefined,
+                authLoaded: false,
+                memberUnsubscriber: undefined,
+                member: undefined,
             };
         },
         computed: {
@@ -243,6 +264,11 @@
                     };
                     console.log("Style object", styles);
                     return styles;
+                }
+            },
+            storageKey(): string | undefined {
+                if (this.promptContent && this.promptContent.promptId) {
+                    return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
                 }
             }
         },
@@ -291,9 +317,11 @@
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-                    const createdResponse = ReflectionResponseService.sharedInstance.createReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
-                    this.reflectionResponse = createdResponse;
-                    this.reflectionDuration = 0;
+                    const localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
+                    console.log("local response ", localResponse);
+                    const createdResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
+                    this.reflectionResponse = localResponse || createdResponse;
+                    this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
                     console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
@@ -311,17 +339,22 @@
                     })
                 }
             },
+
             async save() {
                 if (this.reflectionResponse) {
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
-                    await ReflectionResponseService.sharedInstance.save(this.reflectionResponse);
+                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
+                    this.reflectionResponse = saved;
+                    if (!this.member && saved && saved.promptId) {
+                        console.log("Member is not logged in, saving to localstorage");
+                        StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
+                    }
                 }
             },
             async next() {
                 if (this.isReflection && !this.reflectionComplete) {
                     return;
                 }
-
 
                 this.transitionName = "slide";
                 console.log("going to next");
@@ -331,7 +364,7 @@
                     console.log("this.hasNext is true");
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                 }
-                console.log(`new active index is ${this.activeIndex}`)
+                console.log(`new active index is ${this.activeIndex}`);
                 await saveTask;
             },
             async previous() {

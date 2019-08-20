@@ -8,6 +8,7 @@ export enum LocalStorageKey {
     emailAutoFill = 'emailAutoFill',
     newUserSignIn = "newUserSignIn",
     referredByEmail = "referredByEmail",
+    anonReflectionResponse = "anonReflectionResponse"
 }
 
 
@@ -283,11 +284,10 @@ export function setupNavigation(options: NavigationOptions) {
         console.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
     }
-    console.log("Found a navigation header, initializing");
+    console.log("Found a navigation header element, initializing the nav bar");
 
-    // @ts-ignore
     window.NavBar = new NavBar({
-        el: $nav || $header,
+        el: ($nav || $header) as HTMLElement,
         propsData: {
             showSignup: options.showSignupButton,
             redirectOnSignOut: options.redirectOnSignOut || false,

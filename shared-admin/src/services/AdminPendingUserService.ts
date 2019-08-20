@@ -54,8 +54,8 @@ export default class AdminPendingUserService {
      * @param {referredByEmail} [args.referredByEmail] - the optional email of the person that referred this user
      * @return {Promise<PendingUser>}
      */
-    async addPendingSignup(args: { email: string, referredByEmail?: string }): Promise<PendingUser> {
-        const {email, referredByEmail} = args;
+    async addPendingSignup(args: { email: string, referredByEmail?: string, reflectionResponseIds?: string[] }): Promise<PendingUser> {
+        const {email, referredByEmail, reflectionResponseIds = []} = args;
         let recentReferrer: PendingUser | undefined = undefined;
         if (!referredByEmail) {
             recentReferrer = await this.findMostRecentReferrer(email);
@@ -63,35 +63,54 @@ export default class AdminPendingUserService {
 
         await this.cancelAllPending(email);
 
+
+        if (recentReferrer && recentReferrer.reflectionResponseIds) {
+            recentReferrer.reflectionResponseIds
+                .filter(id => !reflectionResponseIds.includes(id))
+                .forEach(id => reflectionResponseIds.push(id));
+        }
+
         const pendingUser = new PendingUser();
         pendingUser.email = email;
         pendingUser.referredByEmail = referredByEmail;
+        pendingUser.reflectionResponseIds = reflectionResponseIds;
 
         if (!referredByEmail && recentReferrer && recentReferrer.referredByEmail) {
             pendingUser.referredByEmail = recentReferrer.referredByEmail;
             pendingUser.previousReferrerPendingUserId = recentReferrer.id;
-            pendingUser.usedPreviousReffer = true;
+            pendingUser.usedPreviousReferrer = true;
         }
+
 
         pendingUser.status = PendingUserStatus.PENDING;
         pendingUser.magicLinkSentAt = new Date();
-        return await this.save(pendingUser);
+        const savedPending = await this.save(pendingUser);
+        console.log("Saved pending user", savedPending);
+        return savedPending;
 
     }
 
     async cancelAllPending(email: string): Promise<PendingUser[]> {
-        const query = this.getCollectionRef()
-            .where(PendingUser.Field.email, "==", email)
-            .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING);
+        console.log("attempting to cancel all pending useres");
+        try {
+            const query = this.getCollectionRef()
+                .where(PendingUser.Field.email, "==", email)
+                .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING);
 
-        const now = new Date();
-        const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
-        const tasks = results.results.map(pending => {
-            pending.signupCanceledAt = now;
-            pending.status = PendingUserStatus.CANCELED;
-            return this.save(pending)
-        });
-        return await Promise.all(tasks);
+            const now = new Date();
+            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
+            console.log("got pending results", results.size);
+            const tasks = results.results.map(pending => {
+                pending.signupCanceledAt = now;
+                pending.status = PendingUserStatus.CANCELED;
+                return this.save(pending)
+            });
+            console.log("awaiting all update tasks");
+            return await Promise.all(tasks);
+        } catch (error) {
+            console.error("Failed to cancel all existing pending users", error);
+            return []
+        }
     }
 
     async findMostRecentReferrer(email: string): Promise<PendingUser | undefined> {
@@ -102,7 +121,7 @@ export default class AdminPendingUserService {
                 .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
 
             const result = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
-
+            console.log("Fetched most recent referrers", result.size);
             return result.results.find(pending => !!pending.referredByEmail);
         } catch (e) {
             console.error("Failed to get most recent referrers", e);

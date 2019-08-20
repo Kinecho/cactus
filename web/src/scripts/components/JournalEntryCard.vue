@@ -207,7 +207,7 @@
                     return new Promise(async resolve => {
                         let response = edit.id ? responsesById[edit.id] : undefined;
                         if (!response && this.prompt && this.prompt.id) {
-                            response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
+                            response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
                         }
 
                         if (edit.text && edit.text.trim() && response) {

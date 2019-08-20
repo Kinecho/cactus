@@ -15,7 +15,45 @@ export default class ReflectionResponseService {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
     }
 
-    createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
+
+    static createPossiblyAnonymousReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
+        const response = new ReflectionResponse();
+        response.promptId = promptId;
+        response.promptQuestion = promptQuestion;
+        response.responseMedium = medium;
+        response.createdAt = new Date();
+        response.updatedAt = new Date();
+        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+
+        if (cactusMember) {
+            response.userId = cactusMember.userId;
+            response.cactusMemberId = cactusMember.id;
+            response.memberEmail = cactusMember.email;
+            response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
+            response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
+
+        } else {
+            response.anonymous = true;
+        }
+
+        return response;
+    }
+
+    static populateMemberFields(response: ReflectionResponse): ReflectionResponse {
+        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+
+        if (cactusMember) {
+            response.userId = cactusMember.userId;
+            response.cactusMemberId = cactusMember.id;
+            response.memberEmail = cactusMember.email;
+            response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
+            response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
+
+        }
+        return response;
+    }
+
+    static createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
         const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!cactusMember) {
             console.log("Unable to get cactus member");
@@ -36,8 +74,15 @@ export default class ReflectionResponseService {
         return response;
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse | undefined> {
-        return this.firestoreService.save(model);
+    async save(model: ReflectionResponse, options: { saveIfAnonymous: boolean } = {saveIfAnonymous: false}): Promise<ReflectionResponse | undefined> {
+        if (model.cactusMemberId || options.saveIfAnonymous) {
+            const saved = this.firestoreService.save(model);
+            //TODO: using cactusMemberId on this may be a weak way to go - we might want to check the current logged in status of the member instead. (shrug)
+            return saved;
+        } else {
+            console.warn("No member ID was found on the prompt, not saving");
+            return model;
+        }
     }
 
     async getForMailchimpMemberId(memberId: string): Promise<ReflectionResponse[]> {
