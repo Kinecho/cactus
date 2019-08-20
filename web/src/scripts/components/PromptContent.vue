@@ -32,6 +32,8 @@
                                 v-bind:response="reflectionResponse"
                                 v-bind:hasNext="hasNext && activeIndex > 0"
                                 v-bind:reflectionDuration="reflectionDuration"
+                                v-bind:saving="saving"
+                                v-bind:saved="saved"
                                 v-touch:swipe.left="next"
                                 v-touch:swipe.right="previous"
                                 v-on:next="next"
@@ -214,6 +216,7 @@
             reflectionResponses: ReflectionResponse[],
             reflectionResponse: ReflectionResponse | undefined,
             saving: boolean,
+            saved: boolean,
             reflectionDuration: number,
             reflectionTimerInterval: any,
             authLoaded: boolean,
@@ -232,6 +235,7 @@
                 reflectionResponses: [],
                 reflectionResponse: undefined,
                 saving: false,
+                saved: false,
                 reflectionDuration: 0,
                 reflectionTimerInterval: undefined,
                 authLoaded: false,
@@ -348,6 +352,8 @@
 
             async save(): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
+                    this.saving = true;
+                    this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
                     this.reflectionResponse = saved;
@@ -355,6 +361,8 @@
                         console.log("Member is not logged in, saving to localstorage");
                         StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
                     }
+                    this.saved = true;
+                    this.saving = false;
                     return saved;
                 } else if (!this.isReflection) {
                     console.log("Not saving. This is not a reflection screen");

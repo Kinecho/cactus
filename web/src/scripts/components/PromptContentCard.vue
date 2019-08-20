@@ -124,6 +124,7 @@
                 <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
+
                 <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
                             type="text"
@@ -133,6 +134,12 @@
                             v-on:input="autosave"
                     />
                 </resizable-textarea>
+                <transition name="fade-in" mode="out-in">
+                    <div class="saved-container" v-show="showSaved || saving">
+                        <span v-show="saving && !saved">Saving...</span>
+                        <span v-show="saved && !saving">Saved</span>
+                    </div>
+                </transition>
 
             </div>
             <!--    END Reflect-->
@@ -157,13 +164,13 @@
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import * as prettyMilliseconds from "pretty-ms";
     import {debounce} from "debounce";
     import {formatDurationAsTime} from '@shared/util/DateUtil'
     import PieSpinner from "@components/PieSpinner.vue"
 
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
+
+    const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
 
     export default Vue.extend({
         components: {
@@ -180,19 +187,37 @@
             hasPrevious: Boolean,
             response: Object as () => ReflectionResponse,
             reflectionDuration: Number,
+            saving: Boolean,
+            saved: Boolean,
         },
         data(): {
             youtubeVideoLoading: boolean,
             editingResponse: string,
-            saving: boolean,
+            showSaved: boolean,
+            showSavingTimeout: any,
         } {
             return {
                 youtubeVideoLoading: true,
                 editingResponse: "",
-                saving: false,
+                showSaved: false,
+                showSavingTimeout: undefined,
             }
         },
-        watch: {},
+        watch: {
+            saved(isSaved) {
+                console.log("saved changed", isSaved);
+                if (this.showSavingTimeout) {
+                    window.clearTimeout(this.showSavingTimeout);
+                    this.showSavingTimeout = undefined;
+                }
+                if (isSaved) {
+                    this.showSaved = true;
+                }
+                this.showSavingTimeout = setTimeout(() => {
+                    this.showSaved = false;
+                }, SAVED_INDICATOR_TIMEOUT_DURATION_MS);
+            }
+        },
         computed: {
             reflectionProgress(): number {
                 return Math.min(this.reflectionDuration / MINIMUM_REFLECT_DURATION_MS, 1);
@@ -266,15 +291,8 @@
                 }
 
             },
-            async saveReflectionResponse() {
-                this.saving = true;
-                if (this.response) {
-                    await ReflectionResponseService.sharedInstance.save(this.response);
-                }
-                this.saving = false;
-            },
             async next() {
-                if (this.isReflectScreen && this.reflectionProgress < 1){
+                if (this.isReflectScreen && this.reflectionProgress < 1) {
                     return;
                 }
 
@@ -296,6 +314,7 @@
     @import "mixins";
     @import "forms";
     @import "common";
+    @import "transitions";
 
     .content-card {
         background-color: $lightBlue;
@@ -527,20 +546,23 @@
             flex-grow: 0;
             position: relative;
             overflow: hidden;
+
             &.reflection {
                 position: relative;
+
                 &:hover:not(.complete) {
                     cursor: default;
                 }
 
-                &:not(.complete){
+                &:not(.complete) {
                     svg {
-                        opacity:0;
+                        opacity: 0;
                     }
                 }
 
                 &.complete {
                     cursor: pointer;
+
                     .progress-circle {
                         opacity: 0;
                     }
