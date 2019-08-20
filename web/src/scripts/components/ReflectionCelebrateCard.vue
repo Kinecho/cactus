@@ -67,8 +67,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import {PageRoute} from '@web/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
-    import StorageService from '@web/services/StorageService'
-    import {LocalStorageKey} from "@web/util"
+    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
 
     export default Vue.extend({
         components: {

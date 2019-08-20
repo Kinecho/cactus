@@ -1,9 +1,10 @@
 import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
-import {getQueryParam, LocalStorageKey, triggerWindowResize} from "@web/util";
+import {getQueryParam, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 initializeFirebase();
 

@@ -93,7 +93,7 @@
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, LocalStorageKey, updateQueryParam} from '@web/util'
+    import {getQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import Modal from "@components/Modal.vue";
@@ -103,7 +103,7 @@
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import StorageService from '@web/services/StorageService'
+    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);

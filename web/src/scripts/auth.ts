@@ -1,6 +1,6 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {addModal, getQueryParam, LocalStorageKey, showConfirmEmailModal} from "@web/util";
+import {addModal, getQueryParam, showConfirmEmailModal} from "@web/util";
 import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
@@ -12,7 +12,7 @@ import {
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
 import {QueryParam} from "@shared/util/queryParams";
-import StorageService from "@web/services/StorageService";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import AuthUI = firebaseui.auth.AuthUI;
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 

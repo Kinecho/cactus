@@ -13,9 +13,9 @@
     import {isValidEmail} from '@shared/util/StringUtil'
     import {sendEmailLinkSignIn} from "@web/auth"
     import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest"
-    import {addModal, getQueryParam, LocalStorageKey, showModal} from "@web/util"
+    import {addModal, getQueryParam, showModal} from "@web/util"
     import {QueryParam} from "@shared/util/queryParams"
-    import StorageService from "@web/services/StorageService"
+    import StorageService, {LocalStorageKey} from "@web/services/StorageService"
     import {gtag} from "@web/analytics"
 
     export default Vue.extend({

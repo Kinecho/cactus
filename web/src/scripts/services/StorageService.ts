@@ -1,6 +1,13 @@
 import {BaseModel} from "@shared/FirestoreBaseModels";
-import {LocalStorageKey} from "@web/util";
 import {fromJSON} from "@shared/util/FirestoreUtil";
+
+export enum LocalStorageKey {
+    emailForSignIn = 'emailForSignIn',
+    emailAutoFill = 'emailAutoFill',
+    newUserSignIn = "newUserSignIn",
+    referredByEmail = "referredByEmail",
+    anonReflectionResponse = "anonReflectionResponse"
+}
 
 export default class StorageService {
 

@@ -4,7 +4,13 @@ const jest = require("jest");
 import NavBar from "@components/NavBar.vue";
 import {mockFirebase, mockauth} from "@test/jestsetup";
 
-jest.mock("../firebase", () => {
+jest.mock("@web/auth", () => {
+    return {
+        logout: () => undefined,
+    }
+});
+
+jest.mock("@web/firebase", () => {
     return {
         getAuth: () => mockauth,
         initializeFirebase: () => mockFirebase

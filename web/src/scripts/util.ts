@@ -3,14 +3,6 @@ import {isValidEmail} from "@shared/util/StringUtil";
 import NavBar from "@components/NavBar.vue";
 import * as qs from "qs";
 
-export enum LocalStorageKey {
-    emailForSignIn = 'emailForSignIn',
-    emailAutoFill = 'emailAutoFill',
-    newUserSignIn = "newUserSignIn",
-    referredByEmail = "referredByEmail",
-    anonReflectionResponse = "anonReflectionResponse"
-}
-
 
 function createElementFromString(htmlString: string): ChildNode {
     const div = document.createElement('div');

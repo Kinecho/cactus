@@ -3,13 +3,14 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag} from "@web/analytics";
-import {addModal, getQueryParam, LocalStorageKey, showModal} from "@web/util";
+import {addModal, getQueryParam, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
 import {isValidEmail} from "@shared/util/StringUtil";
 import {NotificationStatus} from "@shared/models/CactusMember";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 /**
  *

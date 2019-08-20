@@ -31,6 +31,7 @@ module.exports = {
     moduleDirectories: [
         'src',
         'src/scripts',
+        'src/test',
         'node_modules',
     ],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'vue', 'node'],

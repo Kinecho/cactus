@@ -1,6 +1,5 @@
 import ReflectionResponse from "@shared/models/ReflectionResponse";
-import StorageService from "@web/services/StorageService";
-import {LocalStorageKey} from "@web/util";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 describe("storage service tests", () => {
     beforeEach(() => {

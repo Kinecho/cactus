@@ -1,12 +1,13 @@
 import {Config} from './config'
 import {QueryParam} from "@shared/util/queryParams";
-import {getQueryParam, LocalStorageKey} from "@web/util";
+import {getQueryParam} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 declare global {
     interface Window {
