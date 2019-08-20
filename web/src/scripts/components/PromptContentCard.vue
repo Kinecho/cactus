@@ -121,7 +121,7 @@
                         </svg>
                     </button>
                 </div>
-                <div>
+                <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
@@ -506,8 +506,12 @@
     .lowerActions {
         bottom: 3.2rem;
         left: 2.4rem;
-        position: absolute;
+        position: fixed;
         right: 2.4rem;
+
+        @include r(600) {
+            position: absolute;
+        }
     }
 
     .mobile-nav-buttons {
@@ -567,10 +571,6 @@
                 width: 1.8rem;
             }
         }
-
-
-
-
     }
 
     .reflect-container textarea {
@@ -592,5 +592,9 @@
         @include r(600) {
             width: 50%;
         }
+    }
+
+    .duration {
+        display: none;
     }
 </style>
