@@ -39,8 +39,8 @@ import {LocalStorageKey} from '@web/util'
             </section>
 
         </div>
+        <button class="primary authBtn" v-if="authLoaded && !loggedIn">Save My Stats</button>
         <div class="auth" v-if="authLoaded && !loggedIn">
-            <h3>Sign Up</h3>
             <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
         </div>
     </div>
@@ -213,6 +213,15 @@ import {LocalStorageKey} from '@web/util'
         font-size: 4.8rem;
         font-weight: bold;
         text-align: center;
+    }
+
+    .authBtn {
+        flex-grow: 0;
+        margin: 3.2rem auto 0;
+    }
+
+    .auth {
+        display: none;
     }
 
 
