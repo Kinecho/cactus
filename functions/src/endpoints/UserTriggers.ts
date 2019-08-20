@@ -18,6 +18,8 @@ import AdminSlackService, {
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import PendingUser from "@shared/models/PendingUser";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import SentPrompt from "@shared/models/SentPrompt";
 
 
 const userService = AdminUserService.getSharedInstance();
@@ -231,6 +233,30 @@ async function setupPendingUser(options: { pendingUser: PendingUser, member: Cac
                     reflectionResponse.mailchimpUniqueEmailId = member.mailchimpListMember && member.mailchimpListMember.unique_email_id;
                     reflectionResponse.userId = user.id;
                     await AdminReflectionResponseService.getSharedInstance().save(reflectionResponse);
+
+
+                    console.log(`Setting up the sent prompt for the ${member.email}`);
+                    if (member.id && reflectionResponse.promptId) {
+                        let sentPrompt: SentPrompt | undefined;
+                        sentPrompt = await AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({
+                            cactusMemberId: member.id,
+                            promptId: reflectionResponse.promptId
+                        });
+
+                        if (!sentPrompt) {
+                            sentPrompt = new SentPrompt();
+                            sentPrompt.promptId = reflectionResponse.promptId;
+                            sentPrompt.cactusMemberId = member.id;
+                            sentPrompt.memberEmail = member.email;
+                            sentPrompt.firstSentAt = reflectionResponse.createdAt || new Date();
+                            sentPrompt.lastSentAt = reflectionResponse.createdAt || new Date();
+                            sentPrompt.userId = user.id;
+                            await AdminSentPromptService.getSharedInstance().save(sentPrompt)
+                            console.log("Saved sent prompt successfully");
+                        } else {
+                            console.log("A sent prompt already existed for this member")
+                        }
+                    }
                 }
                 resolve();
                 return;

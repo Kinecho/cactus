@@ -119,7 +119,6 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         })
     }
 
-    resp.send(response);
 
     const fields = [{
         title: "Auth User",
@@ -173,8 +172,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             });
         }
 
-
-
+        resp.send(response);
     } catch (error) {
         Sentry.captureException(error);
         console.error(error);
@@ -186,6 +184,8 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             error: error,
         });
     }
+
+
 
     return;
 });

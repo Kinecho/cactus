@@ -16,6 +16,7 @@
                 <transition name="fade-down">
                     <nav class="moreMenu" v-show="menuOpen">
                         <a :href="prompt? prompt.contentPath : '#'" target="_blank" v-show="prompt && prompt.contentPath">Go&nbsp;Deeper</a>
+                        <a :href="promptContentPath" @click.prevent="showContent = true" v-if="prompt && prompt.promptContentEntryId">Go&nbsp;Deeper</a>
                         <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
                         <a href="#" v-on:click.prevent="startEditing" v-show="responses.length > 0">Edit Reflection</a>
                     </nav>
@@ -69,13 +70,13 @@
                     </svg>
                     Go Deeper
                 </a>
-                <modal v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="false">
-                    <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
-                </modal>
+
             </div>
 
         </nav>
-
+        <modal v-if="prompt && prompt.promptContentEntryId" v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="false">
+            <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
+        </modal>
     </article>
 </template>
 

@@ -39,9 +39,8 @@
 
         </div>
         <div class="auth" v-if="authLoaded && !loggedIn">
-            <h2>Sign In</h2>
-            <p>Sign in to save your work</p>
-            <a :href="loginUrl" class="button">Sign Up</a>
+            <h3>Sign Up</h3>
+            <magic-link/>
         </div>
     </div>
 </template>
@@ -56,10 +55,12 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
     import {PageRoute} from '@web/PageRoutes'
+    import MagicLink from "@components/MagicLinkInput.vue";
 
     export default Vue.extend({
         components: {
             Spinner,
+            MagicLink,
         },
         async created() {
 

@@ -7,6 +7,15 @@ export default class StorageService {
         return `${prefix}_${id}`;
     }
 
+    static getItem(key: LocalStorageKey): string | undefined {
+        try {
+            return localStorage.getItem(key) || undefined;
+        } catch (error) {
+            console.error(`Failed to get item ${key} from local storage`);
+            return;
+        }
+    }
+
     static saveModel(key: LocalStorageKey, model: BaseModel, id?: string) {
         try {
             const encoded = this.getEncodedModelString(model);
