@@ -38,19 +38,22 @@
                             Day Streak
                         </p>
                     </section>
-
                 </div>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save My Stats
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save for Next Time
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
-                    <h1>Sign in to save your work</h1>
-                    <button @click="showLogin = false" class="button secondary">&larr; Back</button>
+                    <h2 class="green">A Reflection a Day</h2>
+                    <p class="subtext">Save your reflection, duration, and streak for when you return. Just add your email.</p>
                     <div class="auth" v-if="authLoaded && !loggedIn">
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
                 </div>
+                <button @click="showLogin = false" class="backBtn tertiary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    Back to Celebrating
+                </button>
             </div>
         </div>
     </div>
@@ -172,7 +175,6 @@
     @import "transitions";
 
     .celebrate-container {
-
         display: flex;
         flex-direction: column;
         height: 100vh;
@@ -180,8 +182,6 @@
         width: 100%;
 
         @include r(600) {
-            //border-radius: 12px;
-            //box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             max-height: 66rem;
             max-width: 48rem;
             position: relative;
@@ -196,6 +196,15 @@
         @include r(600) {
             margin-bottom: 3.2rem;
         }
+
+        &.green {
+            color: $darkestGreen;
+        }
+    }
+
+    .subtext {
+        margin: -2.4rem 0 .8rem;
+        opacity: .8;
     }
 
     .illustration {
@@ -226,6 +235,10 @@
         text-align: center;
     }
 
+    .auth {
+        margin: 0 -3.2rem;
+    }
+
     .authBtn {
         flex-grow: 0;
         margin: 3.2rem auto 0;
@@ -233,12 +246,10 @@
 
     .auth-card {
         margin-top: 4rem;
-        /*padding: 2rem;*/
     }
 
     .flip-container {
         perspective: 1000px;
-
 
         .flipper {
             position: relative;
@@ -246,11 +257,9 @@
             transition: 0.6s;
             height: 100%;
 
-
             @include r(600) {
                 border-radius: 12px;
                 box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-
             }
         }
 
@@ -258,11 +267,11 @@
             .flipper {
                 transform: rotateY(180deg);
             }
-
         }
 
         .flip-card {
             background-color: lighten($lightPink, 3%);
+            border-radius: 12px;
             position: absolute;
             top: 0;
             left: 0;
@@ -270,16 +279,36 @@
             height: 100%;
             backface-visibility: hidden;
             overflow: hidden;
-            padding: 2.4rem;
+            padding: 3.2rem;
+
+            &.front {
+                z-index: 2;
+                transform: rotateY(0);
+            }
+
+            &.back {
+                background: url(assets/images/yellowNeedles.svg) $yellow;
+                background-size: 80%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                transform: rotateY(180deg);
+            }
         }
 
-        .front {
-            z-index: 2;
-            transform: rotateY(0);
-        }
+        .backBtn {
+            align-items: center;
+            display: flex;
+            flex-grow: 0;
+            margin: 0 auto;
 
-        .back {
-            transform: rotateY(180deg);
+            svg {
+                fill: $darkGreen;
+                height: 1.6rem;
+                margin-right: .8rem;
+                transform: scale(-1);
+                width: 1.6rem;
+            }
         }
     }
 
