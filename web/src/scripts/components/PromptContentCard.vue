@@ -506,8 +506,12 @@
     .lowerActions {
         bottom: 3.2rem;
         left: 2.4rem;
-        position: absolute;
+        position: fixed;
         right: 2.4rem;
+
+        @include r(600) {
+            position: absolute;
+        }
     }
 
     .mobile-nav-buttons {
