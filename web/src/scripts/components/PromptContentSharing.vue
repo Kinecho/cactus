@@ -139,19 +139,17 @@
             margin-bottom: 4.8rem;
 
             @include r(600) {
-                flex-flow: row wrap;
             }
 
             .btn {
                 align-items: center;
                 display: flex;
                 justify-content: center;
-                margin-bottom: .8rem;
+                margin: 0 auto .8rem;
                 width: 100%;
 
                 @include r(600) {
-                    margin: 0 .4rem;
-                    width: auto;
+
                 }
             }
 
@@ -187,7 +185,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
-    @import "social";
 
     .content-sharing {
         .info {
