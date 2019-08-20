@@ -11,6 +11,7 @@ const journalHome = PageRoute.JOURNAL_HOME;
 new Vue({
     el: "#app",
     template: `<div class="prompt-page">
+    <NavBar v-bind:isSticky="false"/>
     <Prompt v-on:close="redirectToJournal"/>
 </div>`,
     components: {
