@@ -716,9 +716,16 @@
         transition: 0.6s;
         display: flex;
         flex-direction: column;
-        height: 100vh;
         justify-content: space-between;
         width: 100%;
+
+        @include isTinyPhone {
+          height: calc(100vh - 8rem);
+        }
+
+        @include biggerThanTinyPhone {
+          height: calc(100vh - 10rem);
+        }
 
         @include r(600) {
             max-height: 66rem;

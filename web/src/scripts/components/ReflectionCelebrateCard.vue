@@ -254,7 +254,14 @@
             position: relative;
             transform-style: preserve-3d;
             transition: 0.6s;
-            height: 100%;
+
+            @include isTinyPhone {
+              height: calc(100vh - 8rem);
+            }
+
+            @include biggerThanTinyPhone {
+              height: calc(100vh - 10rem);
+            }
 
             @include r(600) {
                 border-radius: 12px;
