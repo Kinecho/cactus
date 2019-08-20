@@ -121,7 +121,7 @@
                         </svg>
                     </button>
                 </div>
-                <div>
+                <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
                 <resizable-textarea v-bind:maxLines="4">
@@ -567,10 +567,6 @@
                 width: 1.8rem;
             }
         }
-
-
-
-
     }
 
     .reflect-container textarea {
@@ -592,5 +588,9 @@
         @include r(600) {
             width: 50%;
         }
+    }
+
+    .duration {
+        display: none;
     }
 </style>
