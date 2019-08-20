@@ -109,7 +109,7 @@ export default class ReflectionResponseService {
                         queryUnsubscriber();
                     }
                 }
-
+                currentMember = member;
                 if (!member) {
                     return;
                 }

@@ -61,7 +61,7 @@ export default class StorageService {
     }
 
     private static getEncodedMap(key: LocalStorageKey): { [id: string]: string } {
-        let mapString: string | undefined | null = localStorage.getItem(key);
+        const mapString: string | undefined | null = localStorage.getItem(key);
         return mapString ? JSON.parse(mapString) : {};
     }
 
