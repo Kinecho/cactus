@@ -17,14 +17,16 @@
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
-                    <button class="share tertiary wiggle" @click="showSharing = false" v-show="showSharing">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                            <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                        </svg>
+                    <button class="share tertiary wiggle back" @click="showSharing = false" v-show="showSharing">
+                        <div class="arrow-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                            </svg>
+                        </div>
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
-                <div class="progress-wrapper" v-if="!completed">
+                <div class="progress-wrapper" v-if="!completed && !showSharing">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                     </div>
@@ -32,32 +34,28 @@
 
                 <div :class="['flipper', {flipped: showSharing}]">
                     <div class="front flip-card">
-                        <div v-if="!completed">
-                            <transition :name="transitionName" mode="out-in">
-                                <content-card
-                                        v-bind:key="activeIndex"
-                                        v-bind:content="promptContent.content[activeIndex]"
-                                        v-bind:response="reflectionResponse"
-                                        v-bind:hasNext="hasNext && activeIndex > 0"
-                                        v-bind:reflectionDuration="reflectionDuration"
-                                        v-bind:saving="saving"
-                                        v-bind:saved="saved"
-                                        v-touch:swipe.left="next"
-                                        v-touch:swipe.right="previous"
-                                        v-on:next="next"
-                                        v-on:previous="previous"
-                                        v-on:complete="complete"
-                                        v-on:save="save"/>
-                            </transition>
-                        </div>
-                        <div v-if="completed">
-                            <transition name="celebrate" appear mode="out-in">
-                                <celebrate v-on:back="completed = false"
-                                        v-on:restart="restart" v-on:close="close"
-                                        v-bind:reflectionResponse="reflectionResponse"
-                                />
-                            </transition>
-                        </div>
+                        <transition :name="transitionName" mode="out-in" v-if="!completed">
+                            <content-card
+                                    v-bind:key="activeIndex"
+                                    v-bind:content="promptContent.content[activeIndex]"
+                                    v-bind:response="reflectionResponse"
+                                    v-bind:hasNext="hasNext && activeIndex > 0"
+                                    v-bind:reflectionDuration="reflectionDuration"
+                                    v-bind:saving="saving"
+                                    v-bind:saved="saved"
+                                    v-touch:swipe.left="next"
+                                    v-touch:swipe.right="previous"
+                                    v-on:next="next"
+                                    v-on:previous="previous"
+                                    v-on:complete="complete"
+                                    v-on:save="save"/>
+                        </transition>
+                        <transition name="celebrate" appear mode="out-in" v-if="completed">
+                            <celebrate v-on:back="completed = false"
+                                    v-on:restart="restart" v-on:close="close"
+                                    v-bind:reflectionResponse="reflectionResponse"
+                            />
+                        </transition>
                     </div>
                     <div class="back flip-card">
                         <prompt-content-sharing v-bind:promptContent="promptContent"/>
@@ -437,9 +435,7 @@
         flex-grow: 1;
         width: 100vw;
         justify-content: center;
-        overflow: hidden;
         position: relative;
-
 
         button.secondary {
             transition: all .2s ease;
@@ -621,6 +617,14 @@
         }
     }
 
+    .arrow-wrapper {
+        transform: scale(-1);
+        margin-right: .8rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
     .wiggle:hover svg {
         animation: wiggle .5s forwards;
     }
@@ -682,7 +686,7 @@
         flex-direction: column;
         height: 100vh;
         justify-content: space-between;
-        padding: 2.4rem;
+        //padding: 2.4rem;
         width: 100%;
 
 
@@ -699,12 +703,7 @@
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
-        overflow: hidden;
-        padding: 3.2rem;
-
         @include r(600) {
-            border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             max-height: 66rem;
             max-width: 48rem;
         }
@@ -712,7 +711,6 @@
         &.front {
             z-index: 2;
             transform: rotateY(0);
-            background-color: $lightBlue;
         }
 
         &.back {
@@ -722,6 +720,11 @@
             flex-direction: column;
             justify-content: space-between;
             transform: rotateY(180deg);
+            padding: 3.2rem;
+            @include r(600) {
+                border-radius: 12px;
+                box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            }
         }
     }
 
