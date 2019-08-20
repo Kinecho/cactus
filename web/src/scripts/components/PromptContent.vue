@@ -500,7 +500,7 @@
                     margin: 0 1%;
                     padding: 0;
                     position: absolute;
-                    top: 38vh;
+                    top: 30vh;
                     width: 4.8rem;
                     z-index: 10;
 
