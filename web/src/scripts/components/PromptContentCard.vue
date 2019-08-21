@@ -132,6 +132,7 @@
                             rows="1"
                             v-model="response.content.text"
                             v-on:input="autosave"
+                            v-on:click.stop
                     />
                 </resizable-textarea>
                 <transition name="fade-in" mode="out-in">
