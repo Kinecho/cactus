@@ -432,7 +432,7 @@ module.exports = {
         "name": "referral_program"
     },
     "prompt": {
-        "title": "Prompts",
+        "title": "Cactus Mindful Moment",
         "path": "/prompts",
         "reflectionPrompt": false,
         "includeInDev": true,

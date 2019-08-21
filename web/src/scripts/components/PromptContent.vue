@@ -1,3 +1,5 @@
+import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
@@ -90,12 +92,12 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {ContentType,} from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, updateQueryParam} from '@web/util'
+    import {getQueryParam, pushQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
@@ -138,6 +140,24 @@
                 }
             });
 
+            this.popStateListener = window.addEventListener('popstate', (event: PopStateEvent) => {
+                console.log("Window popstate called", event);
+                const paramIndex = getQueryParam(QueryParam.CONTENT_INDEX);
+
+                if (paramIndex && !isNaN(Number(paramIndex))) {
+                    const index = Number(paramIndex);
+                    if (index !== this.activeIndex) {
+                        if (index < this.activeIndex) {
+                            this.transitionName = "slide-out";
+                        } else {
+                            this.transitionName = "slide";
+                        }
+
+                        this.activeIndex = index;
+                    }
+                }
+
+            }, false);
 
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
@@ -184,13 +204,7 @@
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     this.promptContent = promptContent;
                     this.loading = false;
-
-                    const [firstContent] = promptContent.content;
-                    if (firstContent && firstContent.text) {
-                        document.title = `${firstContent.text} | Cactus`;
-                    } else {
-                        document.title = 'Daily Prompt | Cactus'
-                    }
+                    this.updateDocumentTitle();
 
                 }
             });
@@ -204,6 +218,11 @@
             if (this.reflectionResponseUnsubscriber) {
                 this.reflectionResponseUnsubscriber();
             }
+
+            if (this.popStateListener) {
+                window.removeEventListener("popstate", this.popStateListener);
+            }
+
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -225,6 +244,7 @@
             member: CactusMember | undefined,
             touchStart: MouseEvent | undefined,
             cardStyles: any,
+            popStateListener: any | undefined,
         } {
             return {
                 promptContent: undefined,
@@ -245,7 +265,8 @@
                 memberUnsubscriber: undefined,
                 member: undefined,
                 touchStart: undefined,
-                cardStyles: {}
+                cardStyles: {},
+                popStateListener: undefined,
             };
         },
         computed: {
@@ -288,8 +309,15 @@
             }
         },
         watch: {
-            activeIndex(index: number) {
-                updateQueryParam(QueryParam.CONTENT_INDEX, index);
+            activeIndex(index: number, oldIndex: number) {
+                // if (!oldIndex || oldIndex < index) {
+                //     pushQueryParam(QueryParam.CONTENT_INDEX, index);
+                // } else {
+                //     updateQueryParam(QueryParam.CONTENT_INDEX, index);
+                // }
+
+
+                this.updateDocumentTitle();
 
                 if (this.promptContent && this.promptContent.content.length > index) {
                     const activeContent = this.promptContent.content[index];
@@ -310,6 +338,19 @@
             }
         },
         methods: {
+            updateDocumentTitle() {
+                const index = this.activeIndex || 0;
+                let title = this.promptContent && this.promptContent.subjectLine;
+                if (!title) {
+                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
+                    title = firstContent && firstContent.text;
+                }
+                if (title) {
+                    document.title = `Cactus Mindful Moment | ${title} | ${index + 1}`;
+                } else {
+                    document.title = 'Cactus Mindful Moment'
+                }
+            },
             async handleTap(event: MouseEvent) {
                 console.log("MouseEvent on Tap", event);
 
@@ -439,6 +480,7 @@
                 const content = this.promptContent ? this.promptContent.content : [];
                 if (this.hasNext) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
+                    pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 }
                 await saveTask;
             },
@@ -453,6 +495,7 @@
 
                 if (this.hasPrevious) {
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
+                    pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 }
                 await saveTask;
             },

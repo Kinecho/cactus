@@ -251,6 +251,19 @@ export function updateQueryParam(name: QueryParam, value: string | number) {
     }
 }
 
+
+export function pushQueryParam(name: QueryParam, value: string | number) {
+    try {
+        const params = qs.parse(window.location.search, {ignoreQueryPrefix: true}) || {};
+        params[name] = value;
+        const updatedQs = qs.stringify(params);
+        const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
+        window.history.pushState({path: newurl}, '', newurl);
+    } catch (error) {
+        console.error(`Failed to update query param value: ${name}=${value}`, error);
+    }
+}
+
 export function triggerWindowResize() {
     const resizeEvent = window.document.createEvent('UIEvents');
     resizeEvent.initUIEvent('resize', true, false, window, 0);
