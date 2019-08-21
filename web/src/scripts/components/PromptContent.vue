@@ -1,5 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
@@ -479,8 +477,11 @@ import {QueryParam} from '@shared/util/queryParams'
                         event_category: "prompt_content",
                         event_label: `Slide ${this.activeIndex}`
                     });
+                    await saveTask;
+                } else {
+                    await this.complete();
                 }
-                await saveTask;
+
             },
             async previous() {
                 const saveTask = this.isReflection ? this.save() : () => undefined;
@@ -504,7 +505,8 @@ import {QueryParam} from '@shared/util/queryParams'
             async complete() {
                 const saveTask = this.save();
                 this.transitionName = "slide";
-                this.activeIndex = 0;
+                // this.activeIndex = 0;
+                updateQueryParam(QueryParam.CONTENT_INDEX, "done");
                 this.completed = true;
                 gtag('event', 'complete', {
                     event_category: "prompt_content",
