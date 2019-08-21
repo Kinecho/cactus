@@ -15,7 +15,7 @@
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
                 <p class="quote">
-                    {{processedContent.quote.text}}
+                    "{{processedContent.quote.text}}"
                 </p>
                 <div class="author">
                     <p class="name">{{processedContent.quote.authorName}}</p>
@@ -342,7 +342,7 @@
         left: 0;
         position: absolute;
         right: 0;
-        overflow:hidden;
+        overflow: hidden;
 
         @include r(600) {
             display: flex;
@@ -399,10 +399,6 @@
         .quote {
             font-size: 2.4rem;
             margin-bottom: 2.4rem;
-
-            &:before, &:after {
-                content: "\"";
-            }
         }
 
         .name {
