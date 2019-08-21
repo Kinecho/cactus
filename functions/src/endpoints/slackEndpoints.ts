@@ -104,11 +104,11 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
 
     const slackCmdName = `${commandName} ${rest}`.trim();
     if (!immediate) {
-        console.log("Not immediate - sending to pubsub")
+        console.log("Not immediate - sending to pubsub");
         const pubsub = new PubSub();
         await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
 
-        resp.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\``});
+        resp.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\``});
         resp.end();
     } else {
         console.warn("Processing slack command immediately");
