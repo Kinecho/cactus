@@ -8,6 +8,7 @@ import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExp
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {onReflectionResponseCreated} from "@api/triggers/ReflectionResponseTriggers";
+import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
@@ -26,6 +27,7 @@ export const cloudFunctions = {
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
     unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
+    slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
     userCreatedTrigger: functions.auth.user().onCreate(onCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,

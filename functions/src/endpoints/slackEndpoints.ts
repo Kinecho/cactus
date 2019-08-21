@@ -100,10 +100,11 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
         slackResponseURL: payload.response_url,
     };
 
-    console.log("Sending job to pubsub topic", JSON.stringify(job, null, 2));
+    console.log("Job built:", JSON.stringify(job, null, 2));
 
     const slackCmdName = `${commandName} ${rest}`.trim();
     if (!immediate) {
+        console.log("Not immediate - sending to pubsub")
         const pubsub = new PubSub();
         await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
 
