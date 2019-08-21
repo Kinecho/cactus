@@ -5,7 +5,8 @@ import {
     getMailchimpDateString,
     getStreak,
     makeUTCDateIntoMailchimpDate,
-    numDaysAgoFromMidnights
+    numDaysAgoFromMidnights,
+    formatDateTime,
 } from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
@@ -81,6 +82,25 @@ describe("format duration", () => {
     });
 });
 
+describe ("format date time", () => {
+    test("No options", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date)).toEqual("2019-06-19 12:00 AM MDT")
+    });
+
+    test("new york timezone", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date, {timezone: "America/New_York"})).toEqual("2019-06-19 2:00 AM EDT")
+    });
+
+    test("paris timezone", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date, {timezone: "Europe/Paris"})).toEqual("2019-06-19 8:00 AM GMT+2")
+    });
+});
 
 describe("get difference in minutes", () => {
     test("-5 minutes", () => {
