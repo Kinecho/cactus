@@ -45,9 +45,7 @@
                                     v-bind:saved="saved"
                                     v-touch:swipe.left="next"
                                     v-touch:swipe.right="previous"
-                                    v-touch:moving="touchMoveHandler"
-                                    v-touch:end="touchEndHandler"
-                                    v-touch:start="touchStartHandler"
+                                    v-touch:tap="handleTap"
                                     v-on:next="next"
                                     v-on:previous="previous"
                                     v-on:complete="complete"
@@ -109,6 +107,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -313,6 +312,15 @@
             }
         },
         methods: {
+            async handleTap() {
+                const {height, width} = getDeviceDimensions();
+                console.log(`device dimensions w=${width} | h=${height}`);
+                if (width < MOBILE_BREAKPOINT_PX) {
+                    await this.next();
+                } else {
+                    console.log("screen is too larage to bother with tap gesture", width);
+                }
+            },
             touchStartHandler(args: MouseEvent) {
                 console.log("Touch Start", args);
                 this.touchStart = args;
@@ -720,11 +728,11 @@
         width: 100%;
 
         @include isTinyPhone {
-          height: calc(100vh - 8rem);
+            height: calc(100vh - 8rem);
         }
 
         @include biggerThanTinyPhone {
-          height: calc(100vh - 10rem);
+            height: calc(100vh - 10rem);
         }
 
         @include r(600) {

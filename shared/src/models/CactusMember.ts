@@ -36,6 +36,7 @@ export enum Field {
     fcmTokens = "fcmTokens",
     signupConfirmedAt = "signupConfirmedAt",
     lastJournalEntryAt = "lastJournalEntryAt",
+    unsubscribedAt = "unsubscribedAt",
 }
 
 export default class CactusMember extends BaseModel {
