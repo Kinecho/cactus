@@ -5,6 +5,7 @@ import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getConfig} from "@api/config/configService";
 import AdminSlackService, {
     AttachmentColor,
+    ChatMessage,
     SlackAttachmentField,
     SlackResponseType,
     SlashCommandResponse
@@ -30,7 +31,8 @@ export enum JobType {
 export interface JobRequest {
     type: JobType,
     payload?: any,
-    slackResponseURL: string,
+    slackResponseURL?: string,
+    channelName?:string,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
@@ -88,7 +90,12 @@ export async function processJob(job: JobRequest) {
             message.response_type = SlackResponseType.ephemeral;
         }
 
-        await AdminSlackService.getSharedInstance().sendToResponseUrl(job.slackResponseURL, message);
+        if (job.slackResponseURL){
+            await AdminSlackService.getSharedInstance().sendToResponseUrl(job.slackResponseURL, message);
+        } else if (job.channelName){
+            await AdminSlackService.getSharedInstance().sendArbitraryMessage(job.channelName, message as ChatMessage);
+        }
+
 
 
         console.log(`Finished processing SlackCommand ${job.type}`);
