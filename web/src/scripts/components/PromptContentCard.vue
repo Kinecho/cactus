@@ -319,7 +319,7 @@
     @import "transitions";
 
     .content-card {
-        background-color: $lightBlue;
+        background: $lightBlue no-repeat;
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -327,11 +327,81 @@
         padding: 2.4rem;
         width: 100%;
         overflow: hidden;
+
+        .slide-1 & {
+            background-image:
+                url(/assets/images/greenNeedleBlob.svg),
+                url(/assets/images/pinkBlob.svg);
+            background-position:
+                right -170px bottom 18vh,
+                right -140px bottom 28vh;
+            background-size: 250px, 180px;
+        }
+        .slide-2 &, .slide-3 & {
+            background-image:
+                url(/assets/images/greenNeedleBlob.svg),
+                url(/assets/images/pinkBlob.svg),
+                url(/assets/images/yellowNeedleBlob.svg),
+                url(/assets/images/yellowBlob.svg);
+            background-position:
+                left -200px bottom 18vh,
+                left -150px bottom 28vh,
+                right -440px bottom 48vh,
+                right -205px bottom 67vh;
+            background-size: 250px, 180px, 470px, 240px;
+        }
+        .slide-4 & {
+            background-image:
+                url(/assets/images/yellowNeedleBlob.svg),
+                url(/assets/images/yellowBlob.svg),
+                url(/assets/images/yellowNeedleBlob.svg),
+                url(/assets/images/pinkBlob.svg);
+            background-position:
+                left -375px bottom 48vh,
+                left -215px bottom 68vh,
+                right -415px bottom -22vh,
+                right -155px bottom 4vh;
+            background-size: 470px, 240px, 470px, 180px;
+        }
+        .slide-5 &, .slide-6 & {
+            background-image:
+                url(/assets/images/yellowNeedleBlob.svg),
+                url(/assets/images/pinkBlob.svg),
+                url(/assets/images/maroonTriangleBlob.svg),
+                url(/assets/images/lightGreenBlob.svg);
+            background-position:
+                left -280px bottom -22vh,
+                left -165px bottom 4vh,
+                right -335px bottom 32vh,
+                right -250px bottom 44vh;
+            background-size: 470px, 180px, 390px, 270px;
+        }
+        .slide-7 &, .slide-8 & {
+            background-image:
+                url(/assets/images/maroonTriangleBlob.svg),
+                url(/assets/images/lightGreenBlob.svg);
+            background-position:
+                left -335px bottom 32vh,
+                left -250px bottom 44vh;
+            background-size: 390px, 270px;
+        }
+
         @include r(600) {
             border-radius: 12px;
             box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             position: relative;
             overflow: hidden;
+
+            .slide-1 &,
+            .slide-2 &,
+            .slide-3 &,
+            .slide-4 &,
+            .slide-5 &,
+            .slide-6 &,
+            .slide-7 &,
+            .slide-8 & {
+                background-image: none;
+            }
         }
     }
 
