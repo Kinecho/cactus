@@ -176,7 +176,6 @@
     .celebrate-container {
         display: flex;
         flex-direction: column;
-        height: 100vh;
         justify-content: center;
         width: 100%;
 
@@ -184,7 +183,6 @@
             max-height: 66rem;
             max-width: 48rem;
             position: relative;
-            //overflow: hidden;
         }
     }
 
@@ -235,16 +233,9 @@
     }
 
     .auth {
-        margin: 0 -3.2rem;
-    }
-
-    .authBtn {
-        flex-grow: 0;
-        margin: 3.2rem auto 0;
-    }
-
-    .auth-card {
-        margin-top: 4rem;
+        @include r(600) {
+            margin: 0 -3.2rem;
+        }
     }
 
     .flip-container {
@@ -276,37 +267,60 @@
         }
 
         .flip-card {
-            background-color: lighten($lightPink, 3%);
-            border-radius: 12px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: center;
+            left: 0;
             overflow: hidden;
             padding: 3.2rem;
+            position: absolute;
+            top: 0;
+            width: 100%;
 
             &.front {
-                z-index: 2;
+                background-color: lighten($lightPink, 3%);
                 transform: rotateY(0);
+                z-index: 2;
             }
 
             &.back {
                 background: url(assets/images/yellowNeedles.svg) $yellow;
                 background-size: 80%;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
                 transform: rotateY(180deg);
+
+                @include r(600) {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                }
+            }
+        }
+
+        /* Lower Buttons */
+
+        .authBtn,
+        .backBtn {
+            bottom: 3.2rem;
+            flex-grow: 0;
+            left: 3.2rem;
+            margin: 3.2rem auto 0;
+            position: fixed;
+            right: 3.2rem;
+            width: calc(100% - 6.4rem);
+
+            @include r(600) {
+                position: static;
+                width: auto;
             }
         }
 
         .backBtn {
             align-items: center;
             display: flex;
-            flex-grow: 0;
-            margin: 0 auto;
+            justify-content: center;
 
             svg {
                 fill: $darkGreen;

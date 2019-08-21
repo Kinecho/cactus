@@ -540,10 +540,10 @@
                     z-index: 10;
 
                     &.previous {
-                        left: 0;
+                        left: -6.4rem;
                     }
                     &.next {
-                        right: 0;
+                        right: -6.4rem;
                     }
                 }
 
