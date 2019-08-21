@@ -44,6 +44,7 @@
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
+                    <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2 class="green">A Reflection a Day</h2>
                     <p class="subtext">Save your reflection, duration, and streak for when you return. Just add your email.</p>
                     <div class="auth" v-if="authLoaded && !loggedIn">
@@ -200,13 +201,22 @@
     }
 
     .subtext {
-        margin: -2.4rem 0 .8rem;
+        margin: -1.6rem 0 .8rem;
         opacity: .8;
+
+        @include r(600) {
+            margin-top: -2.4rem;
+        }
     }
 
-    .illustration {
+    .front .illustration {
         margin-bottom: 3.2rem;
         width: 100%;
+    }
+
+    .back .illustration {
+        margin-bottom: 1.6rem;
+        width: 70%;
     }
 
     .stats-container {
@@ -268,7 +278,6 @@
 
         .flip-card {
             backface-visibility: hidden;
-            border-radius: 12px;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -279,6 +288,10 @@
             position: absolute;
             top: 0;
             width: 100%;
+
+            @include r(600) {
+                border-radius: 12px;
+            }
 
             &.front {
                 background-color: lighten($lightPink, 3%);

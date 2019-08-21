@@ -738,14 +738,15 @@
     }
 
     .flip-card {
-        border-radius: 12px;
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
+
         @include r(600) {
+            border-radius: 12px;
             max-height: 66rem;
             max-width: 48rem;
         }
