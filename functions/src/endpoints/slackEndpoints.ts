@@ -4,16 +4,10 @@ import * as functions from "firebase-functions";
 import chalk from "chalk";
 import * as crypto from "crypto";
 import {getConfig} from "@api/config/configService";
-import AdminSlackService, {
-    SlackAttachmentField,
-    SlackResponseType,
-    SlashCommandResponse
-} from "@admin/services/AdminSlackService";
+import AdminSlackService, {SlackResponseType} from "@admin/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
-import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
-import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {getDateAtMidnightDenver, getISODate} from "@shared/util/DateUtil";
+import {JobRequest, JobType, processJob} from "@api/pubsub/subscribers/SlackCommandJob";
 
 
 const app = express();
@@ -39,8 +33,6 @@ export interface CommandPayload {
 }
 
 const versionNumber = "v0";
-
-type CommandResponse = SlashCommandResponse;
 
 const signatureHandler = (req: functions.https.Request | any, resp: functions.Response, next: Function) => {
     const headers = req.headers;
@@ -68,100 +60,68 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
 
 
     const commandText = payload.text;
-    const [commandName, ...rest] = commandText.split(" ");
+    const [commandName, ...rest] = commandText.split(" ").map(s => s.trim());
 
-    resp.status(200).send({text: `:hourglass_flowing_sand: Processing your request \`${commandName} ${rest}\``});
+    const immediate = rest.includes("immediate");
 
-    let commandResponse: SlashCommandResponse;
-    const responseType = SlackResponseType.in_channel;
+    let jobType: JobType | undefined = undefined;
+    let jobPayload: any = undefined;
     switch (commandName) {
         case "bigquery":
-            commandResponse = await _cmdBigQuery(payload, rest);
+            jobType = JobType.bigquery;
             break;
         case "activeUsers":
-            commandResponse = await _cmdActiveUserCount(payload, rest);
+            jobType = JobType.activeUsers;
+            jobPayload = rest;
             break;
         case "durumuru":
-            commandResponse = await _cmdDuruMuruToday(payload, rest);
+            jobPayload = rest;
+            jobType = JobType.durumuru;
             break;
         case "today":
-            commandResponse = await _cmdToday(payload, rest);
+            jobType = JobType.today;
             break;
         default:
-            commandResponse = {text: `Unknown command argument *${commandText}*`};
             break;
     }
-    console.log("got command response", commandResponse);
-    commandResponse.response_type = responseType;
-    await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, commandResponse);
+
+    if (!jobType) {
+        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+            text: `Unknown command name: \`${commandName}\``,
+            response_type: SlackResponseType.ephemeral
+        });
+        resp.sendStatus(200);
+        return;
+    }
+
+    const job: JobRequest = {
+        type: jobType,
+        payload: jobPayload,
+        slackResponseURL: payload.response_url,
+    };
+
+    console.log("Sending job to pubsub topic", JSON.stringify(job, null, 2));
+
+    const slackCmdName = `${commandName} ${rest}`.trim();
+    if (!immediate) {
+        const pubsub = new PubSub();
+        await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
+
+        resp.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\``});
+        resp.end();
+    } else {
+        console.warn("Processing slack command immediately");
+        try {
+            await processJob(job);
+        } catch (error) {
+            resp.status(200).send({text: `Error Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\`\n\`${error.message || error}\``});
+        }
+
+    }
 
 
     return;
 });
-
-
-async function _cmdBigQuery(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
-    const pubsub = new PubSub();
-    await pubsub.topic(PubSubTopic.firestore_export_bigquery).publishJSON({});
-
-
-    return {text: `BigQuery export job started for project ${config.web.domain}`};
-}
-
-async function _cmdActiveUserCount(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
-    let days = 1;
-    if (params.length > 0) {
-        const [dayArg] = params;
-        days = Number(dayArg);
-    }
-
-    console.log("getting active users for last ", days);
-    const activeUsers = await getActiveUserCountForTrailingDays(days);
-
-    return {text: `There have been *${activeUsers}* unique users with a reflection response over the last *${days}* days`}
-}
-
-async function _cmdToday(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
-    console.log("Getting today's stuff");
-    const todayDate = getDateAtMidnightDenver(new Date());
-
-
-    const fields: SlackAttachmentField[] = [];
-    const tasks = [
-        AdminCactusMemberService.getSharedInstance().getConfirmedSignupsSinceDate(todayDate),
-    ];
-    const [signups] = await Promise.all(tasks);
-
-    console.log(`Got ${signups.length} members singed up since ${getISODate(todayDate)}`);
-    fields.push({
-        title: "Confirmed Signups",
-        value: `${signups.length}`,
-        short: false,
-    });
-
-    const attachments = [{
-        // text: "",
-        fields,
-        footer: `These stats are pulled real-time from the database, not big query. \nYou can run this command yourself by typing \`/cactus today\``
-    }];
-    const response = {text: ":bar_chart: Here are today's stats so far.", attachments};
-
-    return response;
-}
-
-async function _cmdDuruMuruToday(payload: CommandPayload, params: string[]): Promise<CommandResponse> {
-    let days = 1;
-    if (params.length > 0) {
-        const [dayArg] = params;
-        days = Number(dayArg);
-    }
-
-    console.log("getting active users for last ", days);
-    const activeUsersToday = await getActiveUserCountForTrailingDays(1);
-    const activeUsersL30 = await getActiveUserCountForTrailingDays(30);
-
-    return {text: `*${(activeUsersToday / activeUsersL30).toFixed(3)} (${activeUsersToday}/${activeUsersL30})* is today's DURU/MURU\nThat is, ${activeUsersToday} unique users have reflected in the last 24 hours, and ${activeUsersL30} unique users have reflected in the last 30 days.`}
-}
 
 app.post("/actions", async (req: functions.https.Request | any, resp: functions.Response) => {
 

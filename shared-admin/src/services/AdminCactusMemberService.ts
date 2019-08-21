@@ -1,6 +1,6 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/models/CactusMember";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 
@@ -223,10 +223,10 @@ export default class AdminCactusMemberService {
         return member;
     }
 
-    async getConfirmedSignupsSinceDate(date: Date = new Date()): Promise<CactusMember[]> {
+    async getMembersCreatedSince(date: Date = new Date()): Promise<CactusMember[]> {
         const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
 
-        const query = this.getCollectionRef().where(CactusMember.Field.signupConfirmedAt, ">=", ts);
+        const query = this.getCollectionRef().where(BaseModelField.createdAt, ">=", ts);
 
         try {
             const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
@@ -236,6 +236,20 @@ export default class AdminCactusMemberService {
             console.error(error);
             return [];
         }
+    }
 
+    async getMembersUnsubscribedSince(date: Date = new Date()): Promise<CactusMember[]> {
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+
+        const query = this.getCollectionRef().where(CactusMember.Field.unsubscribedAt, ">=", ts);
+
+        try {
+            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
+
+            return results.results;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 }
