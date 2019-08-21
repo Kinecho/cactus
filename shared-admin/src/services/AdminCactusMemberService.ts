@@ -223,6 +223,13 @@ export default class AdminCactusMemberService {
         return member;
     }
 
+    async getAllMembers(): Promise<CactusMember[]> {
+        console.warn("Warning, fetching all members could be expensive");
+        const query = this.getCollectionRef();
+        const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
+        return results.results;
+    }
+
     async getMembersCreatedSince(date: Date = new Date()): Promise<CactusMember[]> {
         const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
 

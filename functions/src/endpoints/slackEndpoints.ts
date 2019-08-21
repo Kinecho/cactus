@@ -4,10 +4,10 @@ import * as functions from "firebase-functions";
 import chalk from "chalk";
 import * as crypto from "crypto";
 import {getConfig} from "@api/config/configService";
-import AdminSlackService, {SlackResponseType} from "@admin/services/AdminSlackService";
+import AdminSlackService, {SlackAttachment, SlackResponseType} from "@admin/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
-import {JobRequest, JobType, processJob} from "@api/pubsub/subscribers/SlackCommandJob";
+import {getSlackHelpText, JobRequest, JobType, processJob} from "@api/pubsub/subscribers/SlackCommandJob";
 
 
 const app = express();
@@ -86,8 +86,28 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
     }
 
     if (!jobType) {
+
+        let {intro, commands} = getSlackHelpText();
+
+        const attachments: SlackAttachment[] = [];
+
+        if (commandName.trim().length > 0) {
+            attachments.unshift({
+                text: `Unknown command name: \`${commandName}\``,
+                color: "danger"
+            })
+        }
+
+        attachments.push({
+            text: intro,
+            color: "good"
+        }, {
+            text: commands,
+            color: "good"
+        });
+
         await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
-            text: `Unknown command name: \`${commandName}\``,
+            attachments,
             response_type: SlackResponseType.ephemeral
         });
         resp.sendStatus(200);

@@ -1,9 +1,9 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
+import {getDateAtMidnightDenver, getDateFromISOString, getMailchimpDateString} from "@shared/util/DateUtil";
 import {
     MergeField,
     TagName,
@@ -12,6 +12,7 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
+import CactusMember from "@shared/models/CactusMember";
 
 
 export interface ResetUserResponse {
@@ -131,5 +132,20 @@ export default class AdminReflectionResponseService {
             mergeResponse,
             lastReplyString: lastReplyString
         };
+    }
+
+    async getResponseSinceDate(date:Date):Promise<ReflectionResponse[]>{
+        const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
+
+        const query = this.getCollectionRef().where(BaseModelField.createdAt, ">=", ts);
+
+        try {
+            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
+
+            return results.results;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
     }
 }

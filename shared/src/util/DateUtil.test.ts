@@ -1,4 +1,9 @@
-import {formatDuration, getMailchimpDateString, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
+import {
+    formatDateTime,
+    formatDuration,
+    getMailchimpDateString,
+    makeUTCDateIntoMailchimpDate
+} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
 describe("getMailchimpCurrentDateString test", () => {
@@ -70,5 +75,25 @@ describe("format duration", () => {
         const start = new Date(denverTime);
         const end = new Date(denverTime + (1000 * 60 * 3 + 30000));
         expect(formatDuration(start, end)).toEqual("3m 30s")
+    });
+});
+
+describe ("format date time", () => {
+    test("No options", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date)).toEqual("2019-06-19 12:00 AM MDT")
+    });
+
+    test("new york timezone", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date, {timezone: "America/New_York"})).toEqual("2019-06-19 2:00 AM EDT")
+    });
+
+    test("paris timezone", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDateTime(date, {timezone: "Europe/Paris"})).toEqual("2019-06-19 8:00 AM GMT+2")
     });
 });
