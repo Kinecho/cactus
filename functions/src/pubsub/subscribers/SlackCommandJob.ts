@@ -120,7 +120,6 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
         attachments,
         response_type: SlackResponseType.in_channel
     };
-
 }
 
 

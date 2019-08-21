@@ -87,7 +87,7 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
 
     if (!jobType) {
 
-        let {intro, commands} = getSlackHelpText();
+        const {intro, commands} = getSlackHelpText();
 
         const attachments: SlackAttachment[] = [];
 
