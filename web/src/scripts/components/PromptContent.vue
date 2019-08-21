@@ -1,4 +1,4 @@
-<template>
+<template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div :class="['page-wrapper', slideNumberClass] ">
         <transition appear name="fade-in" mode="out-in">
             <div class="centered" v-if="loading">
@@ -33,7 +33,7 @@
                 </div>
 
                 <div :class="['flipper', {flipped: showSharing}]">
-                    <div class="front flip-card">
+                    <div class="front flip-card" v-touch:tap="handleTap">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
@@ -43,9 +43,7 @@
                                     v-bind:reflectionDuration="reflectionDuration"
                                     v-bind:saving="saving"
                                     v-bind:saved="saved"
-                                    v-touch:swipe.left="next"
-                                    v-touch:swipe.right="previous"
-                                    v-touch:tap="handleTap"
+
                                     v-on:next="next"
                                     v-on:previous="previous"
                                     v-on:complete="complete"
@@ -312,13 +310,32 @@
             }
         },
         methods: {
-            async handleTap() {
+            async handleTap(event: MouseEvent) {
+                console.log("MouseEvent on Tap", event);
+
+                const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
+
+
                 const {height, width} = getDeviceDimensions();
                 console.log(`device dimensions w=${width} | h=${height}`);
                 if (width < MOBILE_BREAKPOINT_PX) {
-                    await this.next();
+                    const path = event.composedPath();
+                    const foundExcludedTarget = path.find((t) => {
+                        const el = t as HTMLElement;
+                        return !!excludedTags.includes((el.tagName || "").toUpperCase());
+
+                    });
+
+
+                    if (!foundExcludedTarget) {
+                        console.log("**USING TAP TO GO NEXT**");
+                        await this.next();
+                    } else {
+                        console.log("Tag Name is an excluded element");
+                    }
+
                 } else {
-                    console.log("screen is too larage to bother with tap gesture", width);
+                    console.log("screen is too large to bother with tap gesture", width);
                 }
             },
             touchStartHandler(args: MouseEvent) {
@@ -413,6 +430,7 @@
             },
             async next() {
                 if (this.isReflection && !this.reflectionComplete) {
+                    console.log("Next is disabled until the reflection is complete");
                     return;
                 }
 

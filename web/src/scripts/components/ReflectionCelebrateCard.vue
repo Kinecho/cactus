@@ -12,19 +12,19 @@
                                 <spinner v-if="reflectionCount === undefined" :delay="1000"/>
                             </transition>
                         </div>
-                        <p>
+                        <p v-show="reflectionCount !== undefined">
                             Reflections
                         </p>
                     </section>
                     <section class="metric">
                         <div class="label">
                             <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="totalMinutes !== undefined">{{totalMinutes}}</span>
-                                <spinner v-if="totalMinutes === undefined" :delay="1000"/>
+                                <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
+                                <spinner v-if="totalDuration === undefined" :delay="1000"/>
                             </transition>
                         </div>
-                        <p>
-                            Minutes
+                        <p v-show="totalDuration !== undefined">
+                            {{durationLabel}}
                         </p>
                     </section>
                     <section class="metric">
@@ -34,25 +34,29 @@
                                 <spinner v-if="streakDays === undefined" :delay="1000"/>
                             </transition>
                         </div>
-                        <p>
+                        <p v-show="streakDays !== undefined">
                             Day Streak
                         </p>
                     </section>
                 </div>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save for Next Time
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save for Next
+                    Time
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2 class="green">A Reflection a Day</h2>
-                    <p class="subtext">Save your reflection, duration, and streak for when you return. Just add your email.</p>
+                    <p class="subtext">Save your reflection, duration, and streak for when you return. Just add your
+                        email.</p>
                     <div class="auth" v-if="authLoaded && !loggedIn">
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
                 </div>
                 <button @click="showLogin = false" class="backBtn tertiary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
                     Back to Celebrating
                 </button>
             </div>
@@ -87,7 +91,7 @@
                     this.loggedIn = !!member;
 
                     const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
-
+                    console.log("all reflections", reflections);
                     if (reflections.length === 0 && this.reflectionResponse) {
                         reflections.push(this.reflectionResponse);
                     }
@@ -98,7 +102,17 @@
                         return duration + (Number(current) || 0);
                     }, 0);
 
-                    this.totalMinutes = millisecondsToMinutes(totalDuration);
+
+                    console.log("totalDuration", totalDuration);
+                    if (totalDuration < (60 * 1000)) {
+                        this.totalDuration = `${Math.round(totalDuration / 1000)}`;
+                        this.durationLabel = "Seconds"
+                    } else {
+                        this.durationLabel = "Minutes";
+                        this.totalDuration = millisecondsToMinutes(totalDuration);
+                    }
+
+
                     this.reflectionCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
                     this.loading = false;
@@ -112,7 +126,7 @@
         },
         data(): {
             reflectionCount: number | undefined,
-            totalMinutes: string | undefined,
+            totalDuration: string | undefined,
             streakDays: number | undefined,
             loading: boolean,
             authLoaded: boolean,
@@ -120,10 +134,11 @@
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
             showLogin: boolean,
+            durationLabel: string
         } {
             return {
                 reflectionCount: undefined,
-                totalMinutes: undefined,
+                totalDuration: undefined,
                 streakDays: undefined,
                 loading: true,
                 loggedIn: false,
@@ -131,6 +146,7 @@
                 authUnsubscriber: undefined,
                 member: undefined,
                 showLogin: false,
+                durationLabel: "",
             }
         },
         destroyed() {
@@ -257,11 +273,11 @@
             transition: 0.6s;
 
             @include isTinyPhone {
-              height: calc(100vh - 8rem);
+                height: calc(100vh - 8rem);
             }
 
             @include biggerThanTinyPhone {
-              height: calc(100vh - 10rem);
+                height: calc(100vh - 10rem);
             }
 
             @include r(600) {
