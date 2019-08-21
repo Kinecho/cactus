@@ -1,6 +1,7 @@
 <template>
 
     <article class="journalEntry" id="reflectParent" v-bind:class="{ new: !responseText }">
+
         <div class="dateContainer menuParent">
             <div class="dates">
                 <p class="date">{{promptDate}}</p>
@@ -15,6 +16,7 @@
                 <transition name="fade-down">
                     <nav class="moreMenu" v-show="menuOpen">
                         <a :href="prompt? prompt.contentPath : '#'" target="_blank" v-show="prompt && prompt.contentPath">Go&nbsp;Deeper</a>
+                        <a :href="promptContentPath" @click.prevent="showContent = true" v-if="prompt && prompt.promptContentEntryId">Go&nbsp;Deeper</a>
                         <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
                         <a href="#" v-on:click.prevent="startEditing" v-show="responses.length > 0">Edit Reflection</a>
                     </nav>
@@ -35,9 +37,7 @@
             </div>
             <nav class="buttonContainer">
                 <button class="primary small" v-on:click="doneEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                        <path d="M6.008 24.462a1.176 1.176 0 0 0-1.663 1.664l11.764 11.765c.46.46 1.205.46 1.664 0l25.882-25.883a1.176 1.176 0 1 0-1.663-1.663l-25.05 25.05L6.007 24.462z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
                     Done
                 </button>
                 <button class="secondary small" v-on:click="cancelEditing" type="button">
@@ -55,13 +55,26 @@
                 </svg>
                 Reflect
             </button>
-            <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="secondary small button wiggle">
+            <a v-if="prompt && prompt.contentPath && !prompt.hasPromptContent" :href="prompt.contentPath" class="secondary small button wiggle">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
                     <path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/>
                 </svg>
                 Go Deeper
             </a>
+            <div v-if="prompt && prompt.promptContentEntryId">
+                <a :href="promptContentPath" @click.prevent="showContent = true" class="secondary small button wiggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <path d="M35.579 26.105a1.053 1.053 0 1 1 2.105 0v12.632A5.263 5.263 0 0 1 32.421 44H9.263A5.263 5.263 0 0 1 4 38.737V15.579a5.263 5.263 0 0 1 5.263-5.263h12.632a1.053 1.053 0 1 1 0 2.105H9.263a3.158 3.158 0 0 0-3.158 3.158v23.158a3.158 3.158 0 0 0 3.158 3.158h23.158a3.158 3.158 0 0 0 3.158-3.158V26.105zm4.827-20h-10.09a1.053 1.053 0 1 1 0-2.105h12.631C43.53 4 44 4.471 44 5.053v12.631a1.053 1.053 0 1 1-2.105 0V7.594l-21.361 21.36a1.053 1.053 0 1 1-1.489-1.488l21.361-21.36z"/>
+                    </svg>
+                    Go Deeper
+                </a>
+
+            </div>
+
         </nav>
+        <modal v-if="prompt && prompt.promptContentEntryId" v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="false">
+            <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
+        </modal>
     </article>
 </template>
 
@@ -76,6 +89,10 @@
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import SentPromptService from "@web/services/SentPromptService"
     import {clickOutsideDirective} from '@web/vueDirectives'
+    import Modal from "@components/Modal.vue";
+    import PromptContent from "@components/PromptContent.vue"
+    import {PageRoute} from '@web/PageRoutes'
+    import {getResponseText} from '@shared/util/StringUtil'
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -89,9 +106,14 @@
         responsesLoaded: boolean,
         promptLoaded: boolean,
         editedResponses: { id: string | undefined, text: string }[],
+        showContent: boolean,
     }
 
     export default Vue.extend({
+        components: {
+            Modal,
+            PromptContent,
+        },
         directives: {
             'click-outside': clickOutsideDirective(),
         },
@@ -138,19 +160,23 @@
                 responsesLoaded: false,
                 responseUnsubscriber: undefined,
                 promptLoaded: false,
-                editedResponses: []
+                editedResponses: [],
+                showContent: false,
             }
         },
         watch: {},
         computed: {
+            promptContentPath(): string | undefined {
+                if (this.prompt && this.prompt.promptContentEntryId) {
+                    return `${PageRoute.PROMPTS_ROOT}/${this.prompt.promptContentEntryId}`
+                }
+                return;
+            },
             promptDate(): string | undefined {
                 return DateUtil.formatDate(this.sentPrompt.firstSentAt, "LLL d, yyyy")
             },
             responseText(): string | undefined {
-                if (this.responses.length === 0) {
-                    return;
-                }
-                return this.responses.map(r => (r.content.text || "").trim()).join("\n\n").trim();
+                return getResponseText(this.responses);
             },
             questionText(): string | undefined {
                 if (this.prompt) {
@@ -180,7 +206,7 @@
                     return new Promise(async resolve => {
                         let response = edit.id ? responsesById[edit.id] : undefined;
                         if (!response && this.prompt && this.prompt.id) {
-                            response = await ReflectionResponseService.sharedInstance.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
+                            response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
                         }
 
                         if (edit.text && edit.text.trim() && response) {
@@ -262,7 +288,7 @@
 
                 this.doReflect = true;
                 this.menuOpen = false;
-            }
+            },
         }
     })
 
@@ -292,8 +318,12 @@
             width: 1.6rem;
         }
 
-        &.icon svg {
-            margin-right: 0;
+        &.icon {
+            padding: .9rem;
+
+            svg {
+                margin-right: 0;
+            }
         }
 
         &.primary svg {

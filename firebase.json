@@ -49,6 +49,10 @@
         ],
         "rewrites": [
             {
+                "source": "/prompts/**",
+                "destination": "/prompt.html"
+            },
+            {
                 "source": "/account",
                 "destination": "/account_settings.html"
             },

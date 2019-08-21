@@ -1,5 +1,5 @@
 const {compilerOptions} = require('./tsconfig')
-const {pathsToModuleNameMapper} = require('ts-jest')
+const {pathsToModuleNameMapper} = require('ts-jest/utils')
 
 module.exports = {
     preset: 'ts-jest',
@@ -14,6 +14,7 @@ module.exports = {
     },
     setupFiles: [
         './src/test/jestsetup.ts',
+        "jest-localstorage-mock"
     ],
     // collectCoverage: true,
     collectCoverageFrom: [
@@ -30,6 +31,7 @@ module.exports = {
     moduleDirectories: [
         'src',
         'src/scripts',
+        'src/test',
         'node_modules',
     ],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'vue', 'node'],

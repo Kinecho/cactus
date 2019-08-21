@@ -104,18 +104,21 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         success: true,
         email,
     };
-    resp.send(response);
+    //TODO: send the response here
+    // resp.send(response);
 
 
     if (!existingMember) {
         const pendingUser = await AdminPendingUserService.getSharedInstance().addPendingSignup({
             email,
-            referredByEmail: referredBy
+            referredByEmail: referredBy,
+            reflectionResponseIds: payload.reflectionResponseIds
         });
         attachments.push({
             text: `Added PendingUser \`${pendingUser.id}\``,
         })
     }
+
 
     const fields = [{
         title: "Auth User",
@@ -169,8 +172,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             });
         }
 
-
-
+        resp.send(response);
     } catch (error) {
         Sentry.captureException(error);
         console.error(error);
@@ -182,6 +184,8 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             error: error,
         });
     }
+
+
 
     return;
 });

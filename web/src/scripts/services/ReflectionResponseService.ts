@@ -3,6 +3,8 @@ import ReflectionResponse, {ReflectionResponseField, ResponseMedium} from "@shar
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
+import CactusMember from "@shared/models/CactusMember";
+import {getStreak, numDaysAgoFromMidnights} from "@shared/util/DateUtil";
 
 
 export default class ReflectionResponseService {
@@ -13,7 +15,45 @@ export default class ReflectionResponseService {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
     }
 
-    async createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): Promise<ReflectionResponse | undefined> {
+
+    static createPossiblyAnonymousReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
+        const response = new ReflectionResponse();
+        response.promptId = promptId;
+        response.promptQuestion = promptQuestion;
+        response.responseMedium = medium;
+        response.createdAt = new Date();
+        response.updatedAt = new Date();
+        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+
+        if (cactusMember) {
+            response.userId = cactusMember.userId;
+            response.cactusMemberId = cactusMember.id;
+            response.memberEmail = cactusMember.email;
+            response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
+            response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
+
+        } else {
+            response.anonymous = true;
+        }
+
+        return response;
+    }
+
+    static populateMemberFields(response: ReflectionResponse): ReflectionResponse {
+        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+
+        if (cactusMember) {
+            response.userId = cactusMember.userId;
+            response.cactusMemberId = cactusMember.id;
+            response.memberEmail = cactusMember.email;
+            response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
+            response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
+
+        }
+        return response;
+    }
+
+    static createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
         const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!cactusMember) {
             console.log("Unable to get cactus member");
@@ -34,8 +74,15 @@ export default class ReflectionResponseService {
         return response;
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse | undefined> {
-        return this.firestoreService.save(model);
+    async save(model: ReflectionResponse, options: { saveIfAnonymous: boolean } = {saveIfAnonymous: false}): Promise<ReflectionResponse | undefined> {
+        if (model.cactusMemberId || options.saveIfAnonymous) {
+            const saved = this.firestoreService.save(model);
+            //TODO: using cactusMemberId on this may be a weak way to go - we might want to check the current logged in status of the member instead. (shrug)
+            return saved;
+        } else {
+            console.warn("No member ID was found on the prompt, not saving");
+            return model;
+        }
     }
 
     async getForMailchimpMemberId(memberId: string): Promise<ReflectionResponse[]> {
@@ -51,16 +98,40 @@ export default class ReflectionResponseService {
     }
 
     observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber | undefined {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
-        if (!member) {
-            return;
-        }
-        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
-            .where(ReflectionResponse.Field.promptId, "==", promptId)
-            .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        let queryUnsubscriber: ListenerUnsubscriber | undefined = undefined;
+        let currentMember: CactusMember | undefined = undefined;
+        const memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+            onData: ({member}) => {
+                const currentId = currentMember && currentMember.id;
+                const newId = member && member.id;
+                if (currentId !== newId) {
+                    if (queryUnsubscriber) {
+                        queryUnsubscriber();
+                    }
+                }
+                currentMember = member;
+                if (!member) {
+                    return;
+                }
 
-        options.queryName = "ReflectionResponseService:observeForPromptId";
-        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
+                const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id)
+                    .where(ReflectionResponse.Field.promptId, "==", promptId)
+                    .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+
+                options.queryName = "ReflectionResponseService:observeForPromptId";
+                queryUnsubscriber = this.firestoreService.observeQuery(query, ReflectionResponse, options);
+            }
+
+        });
+
+        return () => {
+            if (queryUnsubscriber) {
+                queryUnsubscriber();
+            }
+            if (memberUnsubscriber) {
+                memberUnsubscriber();
+            }
+        }
     }
 
     observeForMailchimpMemberId(memberId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
@@ -81,6 +152,35 @@ export default class ReflectionResponseService {
             return;
         }
         return this.firestoreService.delete(response.id, ReflectionResponse);
+    }
+
+    async getAllReflections(): Promise<ReflectionResponse[]> {
+        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        if (!member) {
+            console.warn("ReflectionResponseService.getTotalReflectionDurationMsL No current cactus member found");
+            return [];
+        }
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id).orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+        const responses = await this.firestoreService.executeQuery(query, ReflectionResponse);
+        return responses.results;
+    }
+
+    async getTotalReflectionDurationMs(): Promise<number> {
+        const reflections = await this.getAllReflections();
+        const totalDuration = reflections.reduce((duration, doc) => {
+            const current = doc.reflectionDurationMs || 0;
+            console.log("current response duration ", current);
+            return duration + (Number(current) || 0);
+        }, 0);
+        console.log("total duration is", totalDuration);
+        return totalDuration;
+    }
+
+    static getCurrentStreak(reflections: ReflectionResponse[]): number {
+        const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
+
+
+        return getStreak(dates);
     }
 
 }

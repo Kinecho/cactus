@@ -106,6 +106,7 @@ export default class FirestoreService {
         } catch (e) {
             console.error("failed to save firestore document", e);
             if (e.code === "permission-denied") {
+
                 handleDatabaseError({
                     title: "Whoops!",
                     message: "You do not have the proper permissions to perform this action.",
@@ -211,7 +212,8 @@ export default class FirestoreService {
         } catch (error) {
             console.error("Failed to execute query", error);
             if (error.message && error.message.indexOf("The query requires an index") !== -1) {
-                alert("You need to create an index\n" + error);
+                addModal("index-needed", {title: "An index needs to be created", message: error.message});
+                showModal("index-needed");
             }
             return {results: [], size: 0};
         }

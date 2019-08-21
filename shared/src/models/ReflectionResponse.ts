@@ -2,6 +2,9 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
+    PROMPT_WEB = "PROMPT_WEB",
+    PROMPT_IOS = "PROMPT_IOS",
+    PROMPT_ANDROID = "PROMPT_ANDROID",
     JOURNAL_WEB = "JOURNAL_WEB",
     JOURNAL_IOS = "JOURNAL_IOS",
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
@@ -28,7 +31,16 @@ export function getResponseMediumDisplayName(medium?: ResponseMedium|string): st
             break;
         case ResponseMedium.JOURNAL_ANDROID:
             displayName = "Journal Android";
-            break
+            break;
+        case ResponseMedium.PROMPT_WEB:
+            displayName = "Prompt Web";
+            break;
+        case ResponseMedium.PROMPT_IOS:
+            displayName = "Prompt iOS";
+            break;
+        case ResponseMedium.PROMPT_ANDROID:
+            displayName = "Prompt Android";
+            break;
         default:
             displayName = "Unknown";
             break;
@@ -47,12 +59,15 @@ export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
             displayName = ":email:";
             break;
         case ResponseMedium.JOURNAL_WEB:
+        case ResponseMedium.PROMPT_WEB:
             displayName = ":computer:";
             break;
         case ResponseMedium.JOURNAL_IOS:
+        case ResponseMedium.PROMPT_IOS:
             displayName = ":ios:";
             break;
         case ResponseMedium.JOURNAL_ANDROID:
+        case ResponseMedium.PROMPT_ANDROID:
             displayName = ":android:";
             break;
         default:
@@ -79,6 +94,7 @@ export enum ReflectionResponseField {
     content = "content",
     promptId = "promptId",
     promptQuestion = "promptQuestion",
+    reflectionDurationMs = "reflectionDurationMs",
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -86,6 +102,7 @@ export default class ReflectionResponse extends BaseModel {
     static Field = ReflectionResponseField;
     userId?: string;
     cactusMemberId?: string;
+    anonymous: boolean = false;
     responseDate?: Date;
     emailReplyId?: string;
     responseMedium?: ResponseMedium;
@@ -94,5 +111,6 @@ export default class ReflectionResponse extends BaseModel {
     memberEmail?: string;
     content: ReflectionContent = {};
     promptId?: string;
-    promptQuestion?: string
+    promptQuestion?: string;
+    reflectionDurationMs?: number = 0;
 }

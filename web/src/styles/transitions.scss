@@ -79,7 +79,6 @@ $slow: 1.5s;
   opacity: 0;
 }
 
-
 @include createTransition("fade-in-fast", $fast) {
   opacity: 0;
 }
@@ -96,11 +95,36 @@ $slow: 1.5s;
 
 }
 
-;
+.slide-leave-active,
+.slide-enter-active {
+  transition: .2s;
+}
+.slide-enter {
+  transform: translate(100%, 0);
+}
+.slide-leave-to {
+  transform: translate(-100%, 0);
+}
 
 
-@include createAnimation("bounce", bounce-in, $slow);
+
+.slide-out-leave-active,
+.slide-out-enter-active {
+  transition: .2s;
+}
+.slide-out-enter {
+  transform: translate(-100%, 0);
+}
+.slide-out-leave-to {
+  transform: translate(100%, 0);
+}
+
+
+
+@include createAnimation("bounce", bounce-in, $normal);
 @include createAnimation("fade-down", fade-down cubic-bezier(.42,.97,.52,1.49), .3s, $outDuration: $fast);
+
+@include createAnimation("celebrate", bounce-in, $normal, $reverseOut: false, $outAnimation: fade-out, $outDuration: $normal)
 
 
 @keyframes bounce-in {
@@ -108,7 +132,7 @@ $slow: 1.5s;
     transform: scale(0);
   }
   50% {
-    transform: scale(1.5);
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
@@ -120,12 +144,7 @@ $slow: 1.5s;
     opacity: 1;
   }
 
-  50% {
-    transform: scale(1.5);
-  }
   100% {
-    height: 0;
-    transform: scaleY(.2);
     opacity: 0;
   }
 

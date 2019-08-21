@@ -11,6 +11,7 @@ export enum Field {
     contentPath = "contentPath",
     baseFileName = "baseFileName",
     sendDate = "sendDate",
+    promptContentEntryId = "promptContentEntryId",
 }
 
 
@@ -26,6 +27,7 @@ export default class ReflectionPrompt extends BaseModel {
     baseFileName?: string;
     sendDate?: Date;
     topic?: string;
+    promptContentEntryId?: string;
 
     prepareForFirestore(): any {
         this.campaignIds = [];

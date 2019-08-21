@@ -20,6 +20,21 @@ export interface TimestampInterface {
     isEqual(other: TimestampInterface): boolean;
 }
 
+export function isTimestamp(value: any): boolean {
+    return isNotNull(value) && (value instanceof TimestampClass || (value.seconds && value.nanoseconds))
+}
+
+export function timestampToDate(timestamp: any): Date | undefined {
+    if (isTimestamp(timestamp)) {
+        if (timestamp.toDate) {
+            return timestamp.toDate();
+        } else if (timestamp.hasOwnProperty("seconds") && timestamp.hasOwnProperty("nanoseconds")) {
+            return new Date(timestamp.seconds * 1000 + (timestamp.nanoseconds / 1000000));
+        }
+    }
+    return;
+}
+
 export function setTimestamp(timestamp: any) {
     TimestampClass = timestamp;
 }
@@ -73,9 +88,13 @@ export function convertTimestampToDate(input: any): any {
     const copy = Object.assign({}, input);
 
     return transformObjectSync(copy, (value) => {
-        if (isNotNull(value) && value instanceof TimestampClass) {
-            return value.toDate();
+        // if (isNotNull(value) && value instanceof TimestampClass) {
+        //     return value.toDate();
+        // }
+        if (isTimestamp(value)) {
+            return timestampToDate(value);
         }
+
         return value;
     })
 }
@@ -129,7 +148,10 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
     const transformed = convertTimestampToDate(data);
     const model = new Type();
-    return Object.assign(model, transformed) as T;
+    const t = Object.assign(model, transformed) as T;
+    t.prepareFromFirestore(data);
+
+    return t;
 }
 
 export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T {

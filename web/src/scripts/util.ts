@@ -3,13 +3,6 @@ import {isValidEmail} from "@shared/util/StringUtil";
 import NavBar from "@components/NavBar.vue";
 import * as qs from "qs";
 
-export enum LocalStorageKey {
-    emailForSignIn = 'emailForSignIn',
-    emailAutoFill = 'emailAutoFill',
-    newUserSignIn = "newUserSignIn",
-    referredByEmail = "referredByEmail",
-}
-
 
 function createElementFromString(htmlString: string): ChildNode {
     const div = document.createElement('div');
@@ -66,7 +59,7 @@ export interface ConfirmEmailResponse {
 export function handleDatabaseError(error: { title?: string, message?: string, error: any }) {
     const timestamp = (new Date()).getTime();
     const id = `error-${timestamp}`;
-    addModal(id, {title: error.title, message: error.message || "Something unexpected occurred."})
+    addModal(id, {title: error.title, message: error.message || "Something unexpected occurred."});
     showModal(id);
 }
 
@@ -112,7 +105,7 @@ export function showConfirmEmailModal(options: {
         $form.appendChild($confirmButton);
         $content.appendChild($form);
 
-        function onFormSubmit(){
+        function onFormSubmit() {
             const email = $emailInput.value;
             const isValid = isValidEmail(email);
             if (!isValid) {
@@ -138,9 +131,8 @@ export function showConfirmEmailModal(options: {
         }
 
 
-
         $confirmButton.addEventListener("click", () => {
-           onFormSubmit();
+            onFormSubmit();
         });
 
 
@@ -166,9 +158,7 @@ export function addModal(modalId: string, options: {
         existingModal.remove()
     }
 
-    const $button = createElementFromString(`<button title="Close" class="modal-close tertiary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <path fill="#33CCAB" d="M13.8513053,12 L21.6125213,19.7612161 C22.1291596,20.2778543 22.1291596,21.0958831 21.6125213,21.6125213 C21.3643894,21.8606532 21.0334408,22 20.6868687,22 C20.3402966,22 20.009348,21.8606532 19.7612161,21.6125213 L12,13.8513053 L4.23878394,21.6125213 C3.99065203,21.8606532 3.65970345,22 3.31313131,22 C2.96655918,22 2.63561059,21.8606532 2.38747868,21.6125213 C1.87084044,21.0958831 1.87084044,20.2778543 2.38747868,19.7612161 L10.1486947,12 L2.38747868,4.23878394 C1.87084044,3.7221457 1.87084044,2.90411693 2.38747868,2.38747868 C2.90411693,1.87084044 3.7221457,1.87084044 4.23878394,2.38747868 L12,10.1486947 L19.7612161,2.38747868 C20.2778543,1.87084044 21.0958831,1.87084044 21.6125213,2.38747868 C22.1291596,2.90411693 22.1291596,3.7221457 21.6125213,4.23878394 L13.8513053,12 Z"/>
-    </svg>
+    const $button = createElementFromString(`<button title="Close" class="modal-close tertiary icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="18" height="18"><path fill="#33ccab" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
     </button>`);
 
 
@@ -235,19 +225,43 @@ export function removeQueryParam(name: QueryParam) {
     try {
         const params = qs.parse(window.location.search, {ignoreQueryPrefix: true});
         if (params) {
-            console.log("before removal query params;",  qs.stringify(params));
+            console.log("before removal query params;", qs.stringify(params));
             delete params[name];
             const updatedQs = qs.stringify(params);
-            console.log("updated params",  updatedQs);
+            console.log("updated params", updatedQs);
             const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
-
             window.history.pushState({path: newurl}, '', newurl);
 
         }
     } catch (e) {
-        console.error("browser does not support URLSearchParams", e);
+        console.error("Error removing query param", e);
     }
 
+}
+
+export function updateQueryParam(name: QueryParam, value: string | number) {
+    try {
+        const params = qs.parse(window.location.search, {ignoreQueryPrefix: true}) || {};
+        params[name] = value;
+        const updatedQs = qs.stringify(params);
+        const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
+        window.history.replaceState({path: newurl}, '', newurl);
+    } catch (error) {
+        console.error(`Failed to update query param value: ${name}=${value}`, error);
+    }
+}
+
+
+export function pushQueryParam(name: QueryParam, value: string | number) {
+    try {
+        const params = qs.parse(window.location.search, {ignoreQueryPrefix: true}) || {};
+        params[name] = value;
+        const updatedQs = qs.stringify(params);
+        const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
+        window.history.pushState({path: newurl}, '', newurl);
+    } catch (error) {
+        console.error(`Failed to update query param value: ${name}=${value}`, error);
+    }
 }
 
 export function triggerWindowResize() {
@@ -271,16 +285,14 @@ export function setupNavigation(options: NavigationOptions) {
     const $nav = document.getElementById("#top-nav");
 
 
-
     if (!$nav && !$header) {
         console.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
     }
-    console.log("Found a navigation header, initializing");
+    console.log("Found a navigation header element, initializing the nav bar");
 
-    // @ts-ignore
     window.NavBar = new NavBar({
-        el: $nav || $header,
+        el: ($nav || $header) as HTMLElement,
         propsData: {
             showSignup: options.showSignupButton,
             redirectOnSignOut: options.redirectOnSignOut || false,

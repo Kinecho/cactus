@@ -1,6 +1,6 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {addModal, getQueryParam, LocalStorageKey, showConfirmEmailModal} from "@web/util";
+import {addModal, getQueryParam, showConfirmEmailModal} from "@web/util";
 import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
@@ -11,14 +11,29 @@ import {
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
-import {ApiResponseError} from "@shared/api/ApiTypes";
-import AuthUI = firebaseui.auth.AuthUI;
 import {QueryParam} from "@shared/util/queryParams";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import AuthUI = firebaseui.auth.AuthUI;
+import ReflectionResponse from "@shared/models/ReflectionResponse";
 
 const firebase = initializeFirebase();
 
 let authUi: AuthUI;
 
+export interface LogoutOptions {
+    redirectOnSignOut: boolean,
+    redirectUrl?: string
+}
+
+export const DefaultLogoutOptions = {redirectOnSignOut: true, redirectUrl: "/"};
+
+export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
+    await getAuth().signOut();
+    StorageService.clear();
+    if (options.redirectUrl) {
+        window.location.href = options.redirectUrl || '/';
+    }
+}
 
 export interface EmailLinkSignupResult {
     success: boolean,
@@ -266,7 +281,6 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
 }
 
 
-
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -277,10 +291,14 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
+    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
+
+
     const statusResponse = await sendMagicLink({
         email: email,
         referredBy: subscription.referredByEmail,
-        continuePath: emailLinkRedirectUrl
+        continuePath: emailLinkRedirectUrl,
+        reflectionResponseIds: anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : []
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 

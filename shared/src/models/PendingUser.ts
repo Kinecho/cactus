@@ -27,11 +27,13 @@ export default class PendingUser extends BaseModel {
     magicLinkSentAt?: Date;
     signupCompletedAt?: Date;
     signupCompleted: boolean = false;
-    signupCanceledAt?:Date;
+    signupCanceledAt?: Date;
     signupCanceled = false;
-    usedPreviousReffer = false;
-    previousReferrerPendingUserId?:string;
+    usedPreviousReferrer = false;
+    previousReferrerPendingUserId?: string;
     status: PendingUserStatus = PendingUserStatus.PENDING;
-    userId?:string;
+    userId?: string;
     //TODO: Do we need to track the possibility of multiple referreredByEmails?
+    reflectionResponseIds: string[] = [];
+
 }

@@ -14,11 +14,14 @@ import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import GoogleSheetsService from "@admin/services/GoogleSheetsService";
 import * as Sentry from "@sentry/node";
 import chalk from "chalk";
+import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     console.log(chalk.green("initializing all services"));
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
+    //Firestore
     AdminFirestoreService.initialize(app);
     AdminSendgridService.initialize(config);
     AdminSlackService.initialize(config);
@@ -30,6 +33,10 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
+
+    //Flamelink
+    AdminFlamelinkService.initialize(config, app);
+    AdminPromptContentService.initialize();
 
 
     console.log("Initializing Sentry");

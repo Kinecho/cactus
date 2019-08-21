@@ -50,6 +50,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
+    import {logout} from '@web/auth'
 
     declare interface LinkData {
         title: string,
@@ -146,11 +147,7 @@
         methods: {
             async logout(): Promise<void> {
                 console.log('Logging out...');
-                await getAuth().signOut();
-                if (this.redirectOnSignOut) {
-                    window.location.href = this.signOutRedirectUrl || '/';
-                }
-
+                await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
                 window.location.href = PageRoute.SIGNUP;

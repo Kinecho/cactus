@@ -1,7 +1,8 @@
 import {init as initAnalytics, startFullstory} from '@web/analytics'
 import {initializeFirebase} from "@web/firebase";
-import {getQueryParam, LocalStorageKey, removeQueryParam} from "@web/util";
+import {getQueryParam, removeQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 initAnalytics();
 startFullstory();
@@ -31,6 +32,12 @@ if (referredByEmail){
 document.addEventListener('DOMContentLoaded', function () {
     //Nothing to do here
 
-
-
 });
+
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

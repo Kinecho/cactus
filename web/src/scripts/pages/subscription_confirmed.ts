@@ -1,9 +1,10 @@
 import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
-import {getQueryParam, LocalStorageKey, triggerWindowResize} from "@web/util";
+import {getQueryParam, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 initializeFirebase();
 
@@ -94,3 +95,11 @@ function handleResponse(response: EmailLinkSignupResult) {
 document.addEventListener('DOMContentLoaded', async function () {
     console.log("Subscription Confirmed Page Loaded");
 });
+
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

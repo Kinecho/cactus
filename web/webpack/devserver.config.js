@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const writeFile = util.promisify(fs.writeFile)
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HTMLWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
 
 module.exports = function (config) {
     const pages = pagesUtil.getPages(config, allPages)
@@ -42,6 +43,7 @@ module.exports = function (config) {
             open: false,
             contentBase: helpers.srcDir,
             stats: 'errors-warnings',
+            hot: true,
             historyApiFallback: {
                 disableDotRule: true,
                 rewrites: [
@@ -51,7 +53,10 @@ module.exports = function (config) {
                     }).map(filename => {
                         let page = pages[filename]
                         console.log('DevServer: adding page', page.path)
-                        let pattern = new RegExp('^' + page.path + '$')
+
+                        const suffix = page.indexPath ? '/(.+)' : '$'
+
+                        let pattern = new RegExp('^' + page.path + suffix)
                         return {from: pattern, to: `/${filename}.html`}
                     }),
                     {from: /./, to: '/404.html'},
@@ -65,6 +70,9 @@ module.exports = function (config) {
             template: indexPath,
             filename: `pages-index.html`,
             favicon: `${helpers.srcDir}/favicon.ico`,
+            alwaysWriteToDisk: true,
+        }), new HTMLWebpackHarddiskPlugin({
+            outputPath: helpers.publicDir
         })],
     }
 }

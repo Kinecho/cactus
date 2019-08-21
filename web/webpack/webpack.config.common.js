@@ -157,6 +157,7 @@ module.exports = (config) => {
                             template: `${helpers.htmlDir}/${filename}.html`,
                             filename: `${filename}.html`,
                             favicon: `${helpers.srcDir}/favicon.ico`,
+                            alwaysWriteToDisk: true,
                         })
                     }),
                     new webpack.DefinePlugin(parsedConfig),

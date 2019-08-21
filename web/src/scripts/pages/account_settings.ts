@@ -12,3 +12,9 @@ new Vue({
     }
 });
 
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

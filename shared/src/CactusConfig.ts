@@ -35,6 +35,7 @@ export interface CactusConfig {
             general: string,
             activity: string,
             data_log: string,
+            ci: string,
             [key: string] : string,
         }
         app: {
@@ -81,5 +82,10 @@ export interface CactusConfig {
         client_secret: string,
         prompt_content_sheet_id: string,
         service_account: ServiceAccountCredentials,
+    },
+    flamelink: {
+        service_account: ServiceAccountCredentials,
+        robot_user_id: string,
+        environment_id: string,
     }
 }

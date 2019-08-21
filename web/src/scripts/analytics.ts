@@ -1,12 +1,13 @@
 import {Config} from './config'
 import {QueryParam} from "@shared/util/queryParams";
-import {getQueryParam, LocalStorageKey} from "@web/util";
+import {getQueryParam} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
+import {LocalStorageKey} from "@web/services/StorageService";
 
 declare global {
     interface Window {
@@ -59,16 +60,18 @@ export function init() {
     const sentryIntegrations = [];
     if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
+        Sentry.init({
+            dsn: Config.sentry.dsn,
+            release: Config.version,
+            environment: Config.env,
+            integrations: sentryIntegrations,
+        });
     }
 
     console.log("version is ", Config.version);
 
-    Sentry.init({
-        dsn: Config.sentry.dsn,
-        release: Config.version,
-        environment: Config.env,
-        integrations: sentryIntegrations,
-    });
+    // if ()
+
 
     createGTag();
     gtag('js', new Date());

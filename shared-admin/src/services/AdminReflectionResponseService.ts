@@ -57,6 +57,13 @@ export default class AdminReflectionResponseService {
         return this.firestoreService.save(model);
     }
 
+    async getById(id?: string): Promise<ReflectionResponse | undefined> {
+        if (!id) {
+            return;
+        }
+
+        return this.firestoreService.getById(id, ReflectionResponse);
+    }
 
     async getResponseForCampaignId(memberId: string, campaignId: string): Promise<ReflectionResponse> {
         const collection = this.firestoreService.getCollectionRef(Collection.reflectionResponses);

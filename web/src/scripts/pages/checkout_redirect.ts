@@ -62,3 +62,10 @@ function showError( message:string) {
     }
 
 }
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}

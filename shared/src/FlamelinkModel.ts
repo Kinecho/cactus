@@ -1,0 +1,104 @@
+import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
+import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+
+export enum SchemaName {
+    promptContent = "promptContent",
+}
+
+export interface FlamelinkMeta {
+
+    createdBy: string,
+    createdDate: FlamelinkTimestamp,
+    docId: string,
+    env: string,
+    fl_id: string,
+    lastModifiedBy: string,
+    lastModifiedDate: FlamelinkTimestamp,
+    locale: string,
+    schema: SchemaName,
+    schemaRef: any,
+    schemaType: string,
+
+}
+
+export interface FlamelinkData {
+    _fl_meta_?: FlamelinkMeta
+    id?: string;
+    parentId?: string | number;
+    order?: number,
+
+    [key: string]: any
+}
+
+export interface FlamelinkIdentifiable extends FlamelinkData {
+    schema: SchemaName,
+    _fl_meta_?: FlamelinkMeta
+}
+
+
+export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
+    abstract readonly schema: SchemaName;
+    parentId?: string | number;
+    order?: number;
+    documentId?: string;
+    entryId?: string;
+    _fl_meta_?: FlamelinkMeta;
+
+    protected constructor(data?: FlamelinkData) {
+        if (data) {
+            this.updateFromData(data)
+        }
+    }
+
+    updateFromData(data: FlamelinkData) {
+        console.log("Updating model from data", data);
+        this._fl_meta_ = data._fl_meta_;
+        this.documentId = this._fl_meta_ ? this._fl_meta_.docId : data.id;
+        this.parentId = data.parentId;
+        this.order = data.order;
+        this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
+    }
+
+    prepareForFirestore(): any {
+        return this;
+    }
+
+    toFlamelinkData(removeKeys = ["schema", "entryId"]): any {
+        const prepared = this.prepareForFirestore();
+        if (!prepared) {
+            throw new Error("Unable to prepare for firestore");
+        }
+        const data = convertDateToTimestamp(prepared);
+        // console.log("data after converting to dates", data);
+
+        if (removeKeys && data) {
+            removeKeys.forEach(key => {
+                delete data[key];
+            });
+        }
+
+        Object.keys(data).forEach(key => {
+            if (data[key] === undefined) {
+                delete data[key];
+            }
+        });
+
+        return data;
+    }
+
+    toJSON(removeKeys = ["schema"]): any {
+        try {
+            const data = convertDateToJSON(this);
+
+            if (removeKeys && data) {
+                removeKeys.forEach(key => {
+                    delete data[key];
+                });
+            }
+            return data;
+        } catch (error) {
+            return {message: "Error processing this model toJSON", error};
+        }
+    }
+
+}

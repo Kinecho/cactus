@@ -1,0 +1,15 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+
+
+.prompt-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    width: 100%;
+}

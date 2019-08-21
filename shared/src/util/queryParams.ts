@@ -13,4 +13,6 @@ export enum QueryParam {
     API_KEY= "apiKey",
     CONTINUE_URL = "continueUrl",
     LANG = "lang",
+    CONTENT_INDEX="slide",
+
 }
