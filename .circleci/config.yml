@@ -286,6 +286,18 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: "A Stage Build is <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|ready for promotion>"
+  prod-deploy-started:
+    executor: cactus-web
+    steps:
+      - run: echo "Notify prod deploy started"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: "$CIRCLE_USERNAME has promoted a Stage Build. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
 
   firebase-deploy:
     description: "Deploy selected modules to the selected project"
@@ -496,6 +508,10 @@ workflows:
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
             - *deploy_stage_name
+      - prod-deploy-started:
+          name: "Notify Promotion"
+          requires:
+              - *prod_approval_name
       - firebase-deploy:
           name: "Prod: Deploy All"
           project: "prod"
