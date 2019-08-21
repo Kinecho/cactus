@@ -1,7 +1,8 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
         <div class="info">
-            <h2>Share this with a friend</h2>
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
+            <h2>Share With Friends</h2>
             <p>
                 {{meta.description}}
             </p>
@@ -23,17 +24,17 @@
                 inline-template>
             <div class="sharing">
                 <network network="email">
-                    <button class="emailBtn btn wiggle">
+                    <button class="emailBtn small btn wiggle">
                         <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
                     </button>
                 </network>
                 <network network="twitter">
-                    <button class="twBtn btn wiggle">
+                    <button class="twBtn small btn wiggle">
                         <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
                     </button>
                 </network>
                 <network network="facebook">
-                    <button class="fbBtn btn wiggle">
+                    <button class="fbBtn small btn wiggle">
                         <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
                     </button>
                 </network>
@@ -139,6 +140,7 @@
             margin-bottom: 4.8rem;
 
             @include r(600) {
+                flex-flow: row wrap;
             }
 
             .btn {
@@ -149,14 +151,15 @@
                 width: 100%;
 
                 @include r(600) {
-
+                    margin: 0 .4rem;
+                    width: auto;
                 }
             }
 
             .icon {
-                height: 2rem;
+                height: 1.6rem;
                 margin-right: .8rem;
-                width: 2rem;
+                width: 1.6rem;
             }
 
             .twBtn {
@@ -187,11 +190,22 @@
     @import "variables";
 
     .content-sharing {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: center;
+
+        .graphic {
+            margin-bottom: 3.2rem;
+            width: 70%;
+        }
+
         .info {
             margin: 2.4rem 0;
         }
 
         .referral-link {
+            margin-bottom: 3.2rem;
             position: relative;
 
             .link-input {
@@ -201,6 +215,7 @@
                 max-width: none;
                 width: 100%;
                 text-overflow: ellipsis;
+
                 @include r(600) {
                     margin-bottom: 1.6rem;
                     padding-right: 9rem;
@@ -208,10 +223,12 @@
             }
 
             button.copy {
+                background-color: $lightGreen;
                 width: 100%;
                 margin-bottom: 1.2rem;
 
                 @include r(600) {
+                    background-color: transparent;
                     border: none;
                     box-shadow: none;
                     padding: 1.2rem 2.4rem;
@@ -230,10 +247,7 @@
                     }
                 }
             }
-
         }
-
-
     }
 
 

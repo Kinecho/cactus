@@ -148,12 +148,9 @@ button, a.button {
   }
 
   &.small {
-    font: 1.6rem $font-stack;
-    padding: 1rem 1.6rem;
-
-    &.primary {
       box-shadow: none;
-    }
+      font: 1.6rem $font-stack;
+      padding: 1rem 1.6rem;
   }
 
   &.secondary {
