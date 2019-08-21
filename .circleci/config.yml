@@ -357,6 +357,7 @@ jobs:
   notify-workflow-started:
     description: "Notify slack that a workflow has started and provide a link"
     resource_class: small
+    parameters:
       workflow_name:
         type: string
         default: "DEFAULT"
