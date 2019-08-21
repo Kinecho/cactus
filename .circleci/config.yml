@@ -117,6 +117,7 @@ commands:
 jobs:
   get-changes:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - run: mkdir -p workspace
@@ -134,6 +135,7 @@ jobs:
             - modules_to_deploy.txt
   deploy-stage:
     executor: cactus-web
+    resource_class: large
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
@@ -158,6 +160,7 @@ jobs:
 
   install-all:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - install-module:
@@ -177,6 +180,7 @@ jobs:
           fail_only: true
   test-web:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - restore-module:
@@ -203,6 +207,7 @@ jobs:
           fail_only: true
   test-functions:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - restore-module:
@@ -232,6 +237,7 @@ jobs:
 
   test-shared:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - restore-module:
@@ -253,6 +259,7 @@ jobs:
           fail_only: true
   test-scripts:
     executor: cactus-web
+    resource_class: small
     steps:
       - checkout
       - restore-module:
@@ -276,6 +283,7 @@ jobs:
           fail_only: true
   ready-for-deploy:
     executor: cactus-web
+    resource_class: small
     steps:
       - run: echo "Ready for deployments"
       - slack/notify:
@@ -288,6 +296,7 @@ jobs:
           message: "A Stage Build is <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|ready for promotion>"
   prod-deploy-started:
     executor: cactus-web
+    resource_class: small
     steps:
       - run: echo "Notify prod deploy started"
       - slack/notify:
@@ -335,6 +344,7 @@ jobs:
         default: "DEFAULT"
         description: "The message to send to slack"
     executor: cactus-web
+    resource_class: small
     steps:
       - slack/notify:
           <<: *webhook-engineering-ci
@@ -346,7 +356,7 @@ jobs:
           message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
   notify-workflow-started:
     description: "Notify slack that a workflow has started and provide a link"
-    parameters:
+    resource_class: small
       workflow_name:
         type: string
         default: "DEFAULT"
@@ -363,6 +373,7 @@ jobs:
           message: "Starting workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\`"
   notify-branch-workflow-started:
     description: "Notify slack that a branch workflow has started and provide a link"
+    resource_class: small
     parameters:
       workflow_name:
         type: string
@@ -387,6 +398,7 @@ jobs:
         default: "DEFAULT"
         description: "The message to send to slack"
     executor: cactus-web
+    resource_class: small
     steps:
       - get-repo-link
       - slack/notify:
