@@ -124,7 +124,15 @@
                 <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
-
+                <transition name="fade-in" mode="out-in">
+                    <div class="saved-container" v-show="showSaved || saving">
+                        <span v-show="saving && !saved">Saving...</span>
+                        <span v-show="saved && !saving">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+                            Saved
+                        </span>
+                    </div>
+                </transition>
                 <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
                             type="text"
@@ -134,12 +142,6 @@
                             v-on:input="autosave"
                     />
                 </resizable-textarea>
-                <transition name="fade-in" mode="out-in">
-                    <div class="saved-container" v-show="showSaved || saving">
-                        <span v-show="saving && !saved">Saving...</span>
-                        <span v-show="saved && !saving">Saved</span>
-                    </div>
-                </transition>
 
             </div>
             <!--    END Reflect-->
@@ -591,6 +593,20 @@
                 height: 1.8rem;
                 width: 1.8rem;
             }
+        }
+    }
+
+    .saved-container {
+        font-size: 1.6rem;
+        margin-bottom: .8rem;
+        opacity: .8;
+        text-align: right;
+
+        svg {
+            fill: $darkGreen;
+            height: 1.2rem;
+            margin-right: .4rem;
+            width: 1.6rem;
         }
     }
 

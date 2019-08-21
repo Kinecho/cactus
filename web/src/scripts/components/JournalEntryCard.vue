@@ -37,9 +37,7 @@
             </div>
             <nav class="buttonContainer">
                 <button class="primary small" v-on:click="doneEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                        <path d="M6.008 24.462a1.176 1.176 0 0 0-1.663 1.664l11.764 11.765c.46.46 1.205.46 1.664 0l25.882-25.883a1.176 1.176 0 1 0-1.663-1.663l-25.05 25.05L6.007 24.462z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
                     Done
                 </button>
                 <button class="secondary small" v-on:click="cancelEditing" type="button">
