@@ -15,6 +15,8 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import * as prettyMilliseconds from "pretty-ms";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import CactusMember from "@shared/models/CactusMember";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
 
 const config = getConfig();
 
@@ -102,7 +104,8 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
 
     const [todayFields, allTimeFields] = await Promise.all([
         getTodayStatFields(todayDate),
-        getAllTimeStatFields()]);
+        getAllTimeStatFields(),
+    ]);
 
     const attachments = [{
         title: `Today's Stats`,
@@ -126,14 +129,20 @@ async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
 async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField[]> {
 
     const todayFields: SlackAttachmentField[] = [];
-    const tasks = [
+    const memberTasks = [
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getMembersUnsubscribedSince(todayDate),
     ];
-    console.log("signups tasks prepared...awaiting");
-    const [allMembers, unsubscriberes] = await Promise.all(tasks);
-    console.log("signups came back");
-    console.log(`Got ${allMembers.length} members created up since ${getISODate(todayDate)}`);
+
+    const responseTasks = [
+        AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
+    ];
+
+    const [allMembers, unsubscriberes] = await Promise.all(memberTasks);
+    const [allResponses] = await Promise.all(responseTasks);
+
+
+    console.log(`All tasks have completed for Today Stats for ${getISODate(todayDate)}`);
 
     const confirmedMemberCount = allMembers.reduce((count, member) => {
         if (!member.signupConfirmedAt) {
@@ -153,24 +162,43 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         return map;
     }, {});
 
+    interface ResponseByMedium {
+        [medium: string]: number
+    }
+
+    const reflectionResponsesByMedium: ResponseByMedium = allResponses.reduce((map: ResponseByMedium, response) => {
+        const medium = response.responseMedium || "Unknown";
+        map[medium] = (map[medium] || 0) + 1;
+        return map;
+    }, {});
+
+    const sortedResponseStats = Object.entries(reflectionResponsesByMedium).sort(([, v1], [, v2]) => {
+        return v2 - v1
+    }).map(([medium, count]) => {
+        return `\`${getResponseMediumDisplayName(medium)}\` - ${count}`
+    });
+
+    sortedResponseStats.unshift(`\`TOTAL\` - ${allResponses.length}`);
+
     todayFields.push({
-            title: `New Sign Ups`,
-            value: `${allMembers.length}`,
-            short: false,
-        }, {
-            title: `Confirmed Sign Ups`,
+            title: `Sign Ups`,
             value: `${confirmedMemberCount}`,
-            short: false,
+            short: true,
         }, {
             title: `Unsubscribers`,
             value: `${unsubscriberes.length}`,
-            short: false,
+            short: true,
+        },
+        {
+            title: "Reflection Responses",
+            value: `${sortedResponseStats.join("\n")}`,
+            short: true
         }, {
             title: "Referrers",
             value: `${Object.entries(topReferrers).sort(([, v1], [, v2]) => v2 - v1).map(([email, count]) => {
                 return `${email}: ${count}`
             }).join("\n") || "None"}`
-        }
+        },
     );
     return todayFields;
 }

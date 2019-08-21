@@ -8,11 +8,12 @@ import {
     MergeField,
     TagName,
     TagStatus,
-    UpdateMergeFieldRequest, UpdateMergeFieldResponse, UpdateTagResponse,
+    UpdateMergeFieldRequest,
+    UpdateMergeFieldResponse,
+    UpdateTagResponse,
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
-import CactusMember from "@shared/models/CactusMember";
 
 
 export interface ResetUserResponse {
@@ -134,13 +135,13 @@ export default class AdminReflectionResponseService {
         };
     }
 
-    async getResponseSinceDate(date:Date):Promise<ReflectionResponse[]>{
+    async getResponseSinceDate(date: Date): Promise<ReflectionResponse[]> {
         const ts = AdminFirestoreService.Timestamp.fromDate(getDateAtMidnightDenver(date));
 
         const query = this.getCollectionRef().where(BaseModelField.createdAt, ">=", ts);
 
         try {
-            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
+            const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, ReflectionResponse);
 
             return results.results;
         } catch (error) {

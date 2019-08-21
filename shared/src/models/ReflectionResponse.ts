@@ -11,7 +11,7 @@ export function isJournal(medium?: ResponseMedium): boolean {
     return medium && [ResponseMedium.JOURNAL_ANDROID, ResponseMedium.JOURNAL_IOS, ResponseMedium.JOURNAL_WEB].includes(medium) || false;
 }
 
-export function getResponseMediumDisplayName(medium?: ResponseMedium): string {
+export function getResponseMediumDisplayName(medium?: ResponseMedium|string): string {
     if (!medium) {
         return "Unknown";
     }
