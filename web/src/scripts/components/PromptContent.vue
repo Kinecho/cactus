@@ -108,6 +108,7 @@ import {QueryParam} from '@shared/util/queryParams'
     import CactusMember from '@shared/models/CactusMember'
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
+    import {gtag} from "@web/analytics"
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -310,13 +311,6 @@ import {QueryParam} from '@shared/util/queryParams'
         },
         watch: {
             activeIndex(index: number, oldIndex: number) {
-                // if (!oldIndex || oldIndex < index) {
-                //     pushQueryParam(QueryParam.CONTENT_INDEX, index);
-                // } else {
-                //     updateQueryParam(QueryParam.CONTENT_INDEX, index);
-                // }
-
-
                 this.updateDocumentTitle();
 
                 if (this.promptContent && this.promptContent.content.length > index) {
@@ -481,6 +475,10 @@ import {QueryParam} from '@shared/util/queryParams'
                 if (this.hasNext) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                    gtag('event', 'next', {
+                        event_category: "prompt_content",
+                        event_label: `Slide ${this.activeIndex}`
+                    });
                 }
                 await saveTask;
             },
@@ -496,6 +494,10 @@ import {QueryParam} from '@shared/util/queryParams'
                 if (this.hasPrevious) {
                     this.activeIndex = Math.max(this.activeIndex - 1, 0);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                    gtag('event', 'previous', {
+                        event_category: "prompt_content",
+                        event_label: `Slide ${this.activeIndex}`
+                    });
                 }
                 await saveTask;
             },
@@ -504,6 +506,10 @@ import {QueryParam} from '@shared/util/queryParams'
                 this.transitionName = "slide";
                 this.activeIndex = 0;
                 this.completed = true;
+                gtag('event', 'complete', {
+                    event_category: "prompt_content",
+                    event_label: `Slide ${this.activeIndex}`
+                });
                 await saveTask;
             },
             async restart() {
@@ -513,6 +519,10 @@ import {QueryParam} from '@shared/util/queryParams'
                 await saveTask;
             },
             close() {
+                gtag('event', 'close', {
+                    event_category: "prompt_content",
+                    event_label: `Slide ${this.activeIndex}`
+                });
                 this.onClose();
             }
         }
