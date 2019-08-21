@@ -32,7 +32,7 @@ export interface JobRequest {
     type: JobType,
     payload?: any,
     slackResponseURL?: string,
-    channelName?:string,
+    channelName?: string,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
@@ -90,12 +90,11 @@ export async function processJob(job: JobRequest) {
             message.response_type = SlackResponseType.ephemeral;
         }
 
-        if (job.slackResponseURL){
+        if (job.slackResponseURL) {
             await AdminSlackService.getSharedInstance().sendToResponseUrl(job.slackResponseURL, message);
-        } else if (job.channelName){
+        } else if (job.channelName) {
             await AdminSlackService.getSharedInstance().sendArbitraryMessage(job.channelName, message as ChatMessage);
         }
-
 
 
         console.log(`Finished processing SlackCommand ${job.type}`);
@@ -243,10 +242,11 @@ async function getAllTimeStatFields(): Promise<SlackAttachmentField[]> {
         stats.confirmed = isConfirmed(member) ? stats.confirmed + 1 : stats.confirmed;
         stats.unsubscribed = isUnsubscribed(member) ? stats.unsubscribed + 1 : stats.unsubscribed;
 
+        const referralEmail = member.referredByEmail || (member.mailchimpListMember && member.mailchimpListMember.merge_fields.REF_EMAIL as string);
 
-        if (member.referredByEmail) {
+        if (referralEmail) {
             stats.referrals = stats.referrals + 1;
-            stats.referrers[member.referredByEmail] = (stats.referrers[member.referredByEmail] || 0) + 1;
+            stats.referrers[referralEmail] = (stats.referrers[referralEmail] || 0) + 1;
         }
 
         return stats;
