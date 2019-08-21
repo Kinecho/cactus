@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="accountContainer">
         <NavBar/>
-        <div class="container">
+        <div class="centered content">
             <h1>Account</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
@@ -10,16 +10,15 @@
                 {{error}}
             </div>
 
-
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
-                    <div class="item">
+
+                    <div class="item" v-if="memberSince">
                         <label class="label">
                             Member Since
                         </label>
                         <span class="value">{{ memberSince }}</span>
                     </div>
-
 
                     <div class="item">
                         <label class="label">
@@ -27,12 +26,14 @@
                         </label>
                         <span class="value">{{member.email}}</span>
                     </div>
-                    <div class="item">
+
+                    <div class="item" v-if="displayName">
                         <label class="label">
                             Display Name
                         </label>
                         <span class="value">{{displayName}}</span>
                     </div>
+
                     <div class="item">
                         <label class="label">
                             Time Zone
@@ -145,7 +146,7 @@
                     if (!result.success) {
                         console.log("Unsetting notification status change since the update failed");
 
-                        let errorMessage = "Oops, we were unable to save your email notification settings right now. Please try again later";
+                        let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
 
                         if (result.error && result.error.title === "Member In Compliance State") {
                             errorMessage = "Cactus is unable to subscribe you to receive email notifications because you  previously unsubscribed. Please email help@cactus.app to resolve this issue."
@@ -170,50 +171,42 @@
     @import "common";
     @import "mixins";
     @import "variables";
+    @import "forms";
 
+    .accountContainer {
+        display: flex;
+        flex-flow: column nowrap;
+        height: 100vh;
+        justify-content: space-between;
 
-    .container {
-        padding: 1rem;
-        max-width: 90rem;
-        margin: 0 auto;
-
-        .loading {
-            padding: 0 4rem;
+        header, .centered {
+            width: 100%;
         }
 
-        .member-container {
-
+        footer {
+            flex-shrink: 0;
         }
+    }
 
-        .item {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 2rem;
-            max-width: 50rem;
+    .centered.content {
+        flex-grow: 1;
+        max-width: 70rem;
+        padding: 2.4rem;
+        text-align: left;
+    }
 
+    h1 {
+        margin-bottom: 3.2rem;
+    }
 
-            .label {
-                font-weight: bold;
-                font-size: 1.5rem;
-                color: $darkText;
-            }
+    .item {
+        margin-bottom: 2.4rem;
+    }
 
-            .value {
-                font-size: 1.8rem;
-                color: $darkText;
-
-
-            }
-
-            &.muted {
-                color: $lightText
-            }
-
-        }
-
-        hr {
-            margin: 2rem 0;
-        }
+    .label {
+        display: block;
+        font-size: 1.4rem;
+        margin-bottom: .8rem;
     }
 
 </style>
