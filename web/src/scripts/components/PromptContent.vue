@@ -338,7 +338,7 @@
                     title = firstContent && firstContent.text;
                 }
                 if (title) {
-                    document.title = `Cactus Mindful Moment | ${title} | ${index + 1}`;
+                    document.title = `Cactus | ${title} | ${index + 1}`;
                 } else {
                     document.title = 'Cactus Mindful Moment'
                 }
