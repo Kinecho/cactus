@@ -569,19 +569,20 @@
         margin-bottom: 2.4rem;
     }
 
-    .leaf3 {
+    .leaf7 {
         animation: growingLeaves 15s forwards;
-        transform: scale(0.3) translate(20px, 25px);
+        transform: scale(0.3) translate(5px, 30px);
         transform-origin: center;
     }
 
-    .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
+    .leaf3, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
         animation: growingLeaves2 15s forwards;
         opacity: 0;
-        transform: scale(0.7) translate(19px, 18px);
+        transform: scale(0.5) translate(5px, 3px);
+        transform-origin: center;
     }
 
-    .leaf7 {
+    .leaf3 {
         animation-delay: 6s;
     }
 
@@ -602,7 +603,7 @@
     }
 
     .leaf6 {
-        animation-delay: 44s;
+        animation-delay: 40s;
     }
 
     .grow5 {
