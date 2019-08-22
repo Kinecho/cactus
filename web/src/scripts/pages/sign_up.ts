@@ -16,8 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const $welcomeMessage = document.getElementById("welcome-message");
     const $loginContainer = document.getElementById("third-party-logins");
     const $emailInput = document.getElementById("email-input") as HTMLInputElement;
+
     configureLoginForm("email-signup");
 
+
+    const $message = document.getElementById("sign-up-message");
+    const queryMessage = getQueryParam(QueryParam.MESSAGE);
+
+    if ($message && queryMessage) {
+        $message.innerText = decodeURIComponent(queryMessage);
+    }
 
     let autoFillEmail: string | undefined | null;
     try {
