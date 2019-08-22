@@ -101,7 +101,7 @@
         </div>
 
         <section class="lowerActions">
-            <div class="mobile-nav-buttons" v-if="!isReflectScreen && hasNext">
+            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
                 <span class="tap">Tap Anywhere</span>
             </div>
 
@@ -121,7 +121,7 @@
                     </div>
                 </transition>
                 <div class="flexContainer">
-                <resizable-textarea v-bind:maxLines="4">
+                    <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
                             type="text"
                             placeholder="Add your reflection"
@@ -130,17 +130,17 @@
                             v-on:input="autosave"
                             v-on:click.stop
                     />
-                </resizable-textarea>
-                <div class="mobile-nav-buttons">
-                    <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
-                        <div class="progress-circle">
-                            <pie-spinner :percent="reflectionProgress"/>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                            <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                        </svg>
-                    </button>
-                </div>
+                    </resizable-textarea>
+                    <div class="mobile-nav-buttons">
+                        <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
+                            <div class="progress-circle">
+                                <pie-spinner :percent="reflectionProgress"/>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                                <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <!--    END Reflect-->
@@ -190,6 +190,7 @@
             reflectionDuration: Number,
             saving: Boolean,
             saved: Boolean,
+            tapAnywhereEnabled: Boolean,
         },
         data(): {
             youtubeVideoLoading: boolean,
@@ -338,60 +339,54 @@
         }
 
         .slide-1 & {
-            background-image:
-                url(/assets/images/greenNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg);
-            background-position:
-                right -170px bottom 18vh,
-                right -140px bottom 28vh;
+            background-image: url(/assets/images/greenNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg);
+            background-position: right -170px bottom 18vh,
+            right -140px bottom 28vh;
             background-size: 250px, 180px;
         }
+
         .slide-2 &, .slide-3 & {
-            background-image:
-                url(/assets/images/greenNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg),
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/yellowBlob.svg);
-            background-position:
-                left -200px bottom 18vh,
-                left -150px bottom 28vh,
-                right -440px bottom 48vh,
-                right -205px bottom 67vh;
+            background-image: url(/assets/images/greenNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg),
+            url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/yellowBlob.svg);
+            background-position: left -200px bottom 18vh,
+            left -150px bottom 28vh,
+            right -440px bottom 48vh,
+            right -205px bottom 67vh;
             background-size: 250px, 180px, 470px, 240px;
         }
+
         .slide-4 & {
-            background-image:
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/yellowBlob.svg),
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg);
-            background-position:
-                left -375px bottom 48vh,
-                left -215px bottom 68vh,
-                right -415px bottom -22vh,
-                right -155px bottom 4vh;
+            background-image: url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/yellowBlob.svg),
+            url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg);
+            background-position: left -375px bottom 48vh,
+            left -215px bottom 68vh,
+            right -415px bottom -22vh,
+            right -155px bottom 4vh;
             background-size: 470px, 240px, 470px, 180px;
         }
+
         .slide-5 &, .slide-6 & {
-            background-image:
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg),
-                url(/assets/images/maroonTriangleBlob.svg),
-                url(/assets/images/lightGreenBlob.svg);
-            background-position:
-                left -280px bottom -22vh,
-                left -165px bottom 4vh,
-                right -335px bottom 32vh,
-                right -250px bottom 44vh;
+            background-image: url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg),
+            url(/assets/images/maroonTriangleBlob.svg),
+            url(/assets/images/lightGreenBlob.svg);
+            background-position: left -280px bottom -22vh,
+            left -165px bottom 4vh,
+            right -335px bottom 32vh,
+            right -250px bottom 44vh;
             background-size: 470px, 180px, 390px, 270px;
         }
+
         .slide-7 &, .slide-8 & {
-            background-image:
-                url(/assets/images/maroonTriangleBlob.svg),
-                url(/assets/images/lightGreenBlob.svg);
-            background-position:
-                left -335px bottom 32vh,
-                left -250px bottom 44vh;
+            background-image: url(/assets/images/maroonTriangleBlob.svg),
+            url(/assets/images/lightGreenBlob.svg);
+            background-position: left -335px bottom 32vh,
+            left -250px bottom 44vh;
             background-size: 390px, 270px;
         }
 
