@@ -2,7 +2,7 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: showLogin}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <h2>Whoop, whoop!<br/>You did it!</h2>
+                <h2>{{celebrateText}}</h2>
                 <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
                 <div class="stats-container">
                     <section class="metric">
@@ -134,7 +134,8 @@
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
             showLogin: boolean,
-            durationLabel: string
+            durationLabel: string,
+            celebrations: Array<string>
         } {
             return {
                 reflectionCount: undefined,
@@ -147,6 +148,7 @@
                 member: undefined,
                 showLogin: false,
                 durationLabel: "",
+                celebrations: ["Well done!","Nice work!","Way to go!"]
             }
         },
         destroyed() {
@@ -160,6 +162,9 @@
                 // const params = {}
                 return base;
             },
+            celebrateText(): string {
+                return this.celebrations[Math.floor(Math.random() * this.celebrations.length)]
+            }
         },
         methods: {
             back() {
