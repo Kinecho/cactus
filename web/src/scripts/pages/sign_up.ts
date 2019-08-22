@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const queryMessage = getQueryParam(QueryParam.MESSAGE);
 
     if ($message && queryMessage) {
-        $message.innerText = decodeURIComponent(queryMessage);
+        $message.textContent = decodeURIComponent(queryMessage);
     }
 
     let autoFillEmail: string | undefined | null;
