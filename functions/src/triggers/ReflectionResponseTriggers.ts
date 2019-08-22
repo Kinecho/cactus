@@ -152,6 +152,7 @@ async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt
         sentPrompt.firstSentAt = new Date();
         sentPrompt.lastSentAt = new Date();
         sentPrompt.promptId = prompt.id;
+        sentPrompt.cactusMemberId = member.id;
         sentPrompt.promptContentEntryId = prompt.promptContentEntryId;
         if (reflectionResponse && reflectionResponse.responseMedium && [ResponseMedium.PROMPT_WEB, ResponseMedium.PROMPT_ANDROID, ResponseMedium.PROMPT_IOS].includes(reflectionResponse.responseMedium)) {
             sentPrompt.sendHistory.push({
