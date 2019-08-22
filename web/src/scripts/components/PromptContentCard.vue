@@ -101,11 +101,6 @@
         </section>
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
-                <button class="next inline-arrow primary" @click="next" v-if="hasNext">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                </button>
                 <span class="tap">Tap Anywhere</span>
             </div>
 

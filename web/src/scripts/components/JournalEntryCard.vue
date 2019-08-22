@@ -413,7 +413,9 @@
     textarea {
         border: 1px solid $green;
         border-radius: 6px;
+        font-family: $font-stack;
         font-size: 1.6rem;
+        line-height: 1.43;
         margin-top: .8rem;
         min-height: 11rem;
         padding: 1.6rem;
