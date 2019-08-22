@@ -293,10 +293,6 @@ describe("get streak", () => {
 });
 
 describe('Get Date at Midnight Denver', function () {
-    beforeEach(() => {
-
-    });
-
     test("8pm get date midnight denver from GMT at ", () => {
         const date = new Date(1566440539808); //approx 8:22pm denver on 8/21/2019
         console.log("starting date in local time", date);
@@ -305,8 +301,6 @@ describe('Get Date at Midnight Denver', function () {
         console.log("denver offset", denverOffset);
         const localTimezoneOffset = date.getTimezoneOffset() / 60;
         console.log("local timezone offset", localTimezoneOffset);
-        // if (hourOffset )
-
 
         const offsetDifference = localTimezoneOffset - denverOffset;
         console.log("Offset difference", offsetDifference);
@@ -324,7 +318,7 @@ describe('Get Date at Midnight Denver', function () {
         expect(midnightDate.getHours()).toEqual(expectedHour >= 24 ? expectedHour - 24 : expectedHour); //should be whatever the timezone offest is that is running the test
         expect(midnightDate.getMinutes()).toEqual(expectedMinute);
         expect(midnightDate.getSeconds()).toEqual(0);
-    })
+    });
 
     test("1 am get date midnight denver from GMT at 1am", () => {
         const date = new Date(1566371847820); //approx 01:17:38am denver on 8/21/2019
@@ -334,7 +328,6 @@ describe('Get Date at Midnight Denver', function () {
         console.log("denver offset", denverOffset);
         const localTimezoneOffset = date.getTimezoneOffset() / 60;
         console.log("local timezone offset", localTimezoneOffset);
-        // if (hourOffset )
 
 
         const offsetDifference = localTimezoneOffset - denverOffset;
