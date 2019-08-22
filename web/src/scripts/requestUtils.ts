@@ -18,8 +18,6 @@ export function initializeAxios(): AxiosInstance {
     const domain = Config.apiDomain;
     const baseURL = `${domain}`;
     axios.defaults.baseURL = baseURL;
-    console.log("set axios base url to ", baseURL);
-
 
     _request = axios.create({
         baseURL: Config.apiDomain

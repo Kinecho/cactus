@@ -51,7 +51,7 @@ export const onReflectionResponseCreated = functions.firestore
                 prompt = await AdminReflectionPromptService.getSharedInstance().get(reflectionResponse.promptId);
             }
             if (!prompt) {
-                await slackService.sendEngineeringMessage(`Unable to load prompt for promptId ${reflectionResponse.promptId}`);
+                await slackService.sendEngineeringMessage(`\`ReflectionPromptCreatedTrigger\`: No \`ReflectionPrompt\` found in the data base for  for promptId \`${reflectionResponse.promptId}\`. Member Email \`${memberEmail}\``);
             }
 
 
@@ -79,7 +79,7 @@ export const onReflectionResponseCreated = functions.firestore
             }
 
 
-            if (member && memberEmail &&  isJournal(reflectionResponse.responseMedium)) {
+            if (member && memberEmail && isJournal(reflectionResponse.responseMedium)) {
                 const setLastJournalDateResult = await AdminReflectionResponseService.setLastJournalDate(memberEmail);
                 if (setLastJournalDateResult.error) {
                     console.error("Failed to set the last journal date", setLastJournalDateResult.error);

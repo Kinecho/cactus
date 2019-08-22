@@ -102,6 +102,7 @@ export default class ReflectionResponseService {
         let currentMember: CactusMember | undefined = undefined;
         const memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
             onData: ({member}) => {
+                console.log("OBSERVE FOR PROMPT ID MEMBER RETURNED", member ? member.email : "NOT FOUND");
                 const currentId = currentMember && currentMember.id;
                 const newId = member && member.id;
                 if (currentId !== newId) {
@@ -111,6 +112,8 @@ export default class ReflectionResponseService {
                 }
                 currentMember = member;
                 if (!member) {
+                    console.log("ObserveForPromptId no member was found - returning empty list");
+                    options.onData([]);
                     return;
                 }
 

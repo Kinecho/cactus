@@ -344,13 +344,9 @@
                 }
             },
             async handleTap(event: MouseEvent) {
-                console.log("MouseEvent on Tap", event);
-
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
 
-
-                const {height, width} = getDeviceDimensions();
-                console.log(`device dimensions w=${width} | h=${height}`);
+                const {width} = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
@@ -361,22 +357,16 @@
 
 
                     if (!foundExcludedTarget) {
-                        console.log("**USING TAP TO GO NEXT**");
                         await this.next();
                     } else {
-                        console.log("Tag Name is an excluded element");
                     }
 
-                } else {
-                    console.log("screen is too large to bother with tap gesture", width);
                 }
             },
             touchStartHandler(args: MouseEvent) {
-                console.log("Touch Start", args);
                 this.touchStart = args;
             },
             touchEndHandler(args: MouseEvent) {
-                console.log("Touch End", args);
                 this.touchStart = undefined;
                 this.cardStyles = {
                     transition: "all .2s",
@@ -410,8 +400,8 @@
                 }
             },
             subscribeToResponse() {
-                console.log("subscribing to reflection responses ");
                 if (this.reflectionResponseUnsubscriber) {
+                    console.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
                 }
                 let promptId = this.promptContent && this.promptContent.promptId;
@@ -419,26 +409,42 @@
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-                    const localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
-                    console.log("local response ", localResponse);
-                    const createdResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
-                    this.reflectionResponse = localResponse || createdResponse;
+
+                    let localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
+                    console.log("local response found in storage", localResponse);
+
+                    this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
                     console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: (responses) => {
-                            console.log("Fetched reflection responses from subscriber", responses);
 
                             const [first] = responses;
+                            console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
+
+
+                            if (!first && !localResponse) {
+                                console.log("No local response and no db response, creating one now");
+                                console.log("Using the newly created response for this prompt.");
+                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
+                            } else if (first) {
+                                console.log("Using the response from the database", first.toJSON());
+                            }
+
+                            if (!first && localResponse) {
+                                console.log("No data found from database, using the locally created response");
+                            }
+
                             //TODO: combine if there are multiple?
-                            const response = first || createdResponse;
-                            console.log("Got response as", response.toJSON());
+                            const response = first || localResponse;
                             this.reflectionResponses = responses;
                             this.reflectionResponse = response;
                             this.reflectionDuration = response.reflectionDurationMs || 0;
                         }
                     })
+                } else {
+                    console.warn("NO prompt ID found for prompt content ", this.promptContent)
                 }
             },
 

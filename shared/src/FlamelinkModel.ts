@@ -51,7 +51,6 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
     }
 
     updateFromData(data: FlamelinkData) {
-        console.log("Updating model from data", data);
         this._fl_meta_ = data._fl_meta_;
         this.documentId = this._fl_meta_ ? this._fl_meta_.docId : data.id;
         this.parentId = data.parentId;

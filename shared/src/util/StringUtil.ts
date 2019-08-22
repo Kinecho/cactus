@@ -22,8 +22,6 @@ export function getFilenameFromInput(input: string, extension: string | undefine
 
 export function stripQueryParams(url: string): { url: string, query?: any } {
     const query = queryString.parseUrl(url);
-    console.log(query);
-
 
     return {url: query.url, query: query.query};
 

@@ -154,7 +154,6 @@ function createGTag() {
 export function startFullstory() {
 
     if (!Config.fullStoryTeamId) {
-        console.log("Full story is disabled. Not loading full story.");
         return;
     }
 

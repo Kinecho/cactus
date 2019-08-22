@@ -72,7 +72,6 @@
         },
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
-                console.log("auth state changed", user);
                 this.user = user;
                 this.authLoaded = true;
             })
@@ -128,13 +127,11 @@
             },
             displaySignupButton(): boolean {
                 const show = this.showSignup && this.authLoaded && !this.user;
-                console.log("show signup button", show);
                 return show;
             },
             displayLoginButton(): boolean {
                 const show = this.showLogin && this.authLoaded && !this.user;
                 //NOTE: login button is always disabled for now.
-                console.log("show login button", show);
                 return false;
             },
             initials(): string {
