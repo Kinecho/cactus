@@ -89,12 +89,14 @@ export function getDateFromISOString(input?: ISODate): Date | undefined {
 }
 
 export function getDateAtMidnightDenver(date: Date = new Date()): Date {
-    const dt = DateTime.fromJSDate(date).set({
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0
-    }).setZone(mailchimpTimeZone, {keepLocalTime: true});
+    const dt = DateTime.fromJSDate(date)
+        .setZone(mailchimpTimeZone, {keepLocalTime: false})
+        .set({
+            hour: 0,
+            minute: 0,
+            second: 0,
+            millisecond: 0
+        });
     return dt.toJSDate();
 }
 
