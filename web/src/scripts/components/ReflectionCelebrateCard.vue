@@ -39,16 +39,17 @@
                         </p>
                     </section>
                 </div>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">Save for Next
-                    Time
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
+                    Sign Up to Save Your Progress
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
-                    <h2 class="green">A Reflection a Day</h2>
-                    <p class="subtext">Save your reflection, duration, and streak for when you return. Just add your
-                        email.</p>
+                    <h2 class="green">Become a better version of yourself</h2>
+                    <p class="subtext">
+                        Questions to help you become more mindful and reflect on what makes you happy.
+                    </p>
                     <div class="auth" v-if="authLoaded && !loggedIn">
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
@@ -57,7 +58,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
-                    Back to Celebrating
+                    Back to celebration
                 </button>
             </div>
         </div>
