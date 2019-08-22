@@ -692,7 +692,6 @@
         @include textArea;
         background-color: transparent;
         border-radius: 3rem;
-        font-family: $font-stack;
         width: 100%;
 
         &:focus {
