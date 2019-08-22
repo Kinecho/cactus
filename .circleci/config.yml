@@ -332,7 +332,7 @@ jobs:
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-            npx firebase deploy --only << parameters.modules >> -P << parameters.project >>
+            npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
       - slack/status:
           <<: *webhook-engineering-ci
           fail_only: true
