@@ -143,8 +143,8 @@ export function toCamelCamse(input: string): string {
 }
 
 
-export function getResponseText(responses?: ReflectionResponse[]): string |undefined {
-    if (!responses){
+export function getResponseText(responses?: ReflectionResponse[]): string | undefined {
+    if (!responses) {
         return;
     }
 
@@ -152,4 +152,19 @@ export function getResponseText(responses?: ReflectionResponse[]): string |undef
         return;
     }
     return responses.map(r => (r.content.text || "").trim()).join("\n\n").trim();
+}
+
+export function getWordCount(text?: string): number {
+    if (!text || !text.trim()) {
+        return 0
+    }
+    const split = text.trim().split(/\s+/g);
+    return split.length;
+}
+
+export function getCharacterCount(text?: string): number {
+    if (!text) {
+        return 0;
+    }
+    return text.trim().length;
 }

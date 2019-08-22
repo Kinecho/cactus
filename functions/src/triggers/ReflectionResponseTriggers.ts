@@ -21,6 +21,8 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptContentURL} from "@api/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
+import {getCharacterCount, getWordCount} from "@shared/util/StringUtil";
+import * as prettyMilliseconds from "pretty-ms";
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
@@ -98,11 +100,18 @@ export const onReflectionResponseCreated = functions.firestore
                 })
             }
 
+            const reflectionText = reflectionResponse.content.text || "";
+            const wordCount = getWordCount(reflectionText);
+            const characterCount = getCharacterCount(reflectionText);
+            const duration = reflectionResponse.reflectionDurationMs && prettyMilliseconds(reflectionResponse.reflectionDurationMs || 0) || "Not Set";
             fields.push(
                 {
                     title: "Last Reply Updated",
                     value: resetReminderResult,
                     short: true,
+                }, {
+                    title: "Reflection Info",
+                    value: `Duration: ${duration}\nWords: ${wordCount}\nCharacters: ${characterCount}`
                 });
 
 

@@ -1,9 +1,9 @@
 import {
     appendDomain,
     appendQueryParams,
-    destructureDisplayName,
+    destructureDisplayName, getCharacterCount,
     getFilenameFromInput,
-    getUrlFromInput,
+    getUrlFromInput, getWordCount,
     stripQueryParams
 } from "@shared/util/StringUtil";
 
@@ -186,5 +186,59 @@ describe("Combine query strings", () => {
         const params = {};
 
         expect(appendQueryParams(url, params)).toEqual("/test?my=code&foo=bar")
+    });
+});
+
+describe("get word count", () => {
+    test("undefined", () => {
+        const input = undefined;
+        expect(getWordCount(input)).toEqual(0);
+    });
+
+    test("empty string", () => {
+        const input = "";
+        expect(getWordCount(input)).toEqual(0);
+    });
+
+    test("only whitespace string", () => {
+        const input = "   ";
+        expect(getWordCount(input)).toEqual(0);
+    });
+
+    test("one word", () => {
+        const input = "hello";
+        expect(getWordCount(input)).toEqual(1);
+    });
+
+    test("three words with extra space", () => {
+        const input = "hello    what's up";
+        expect(getWordCount(input)).toEqual(3);
+    });
+});
+
+describe("get character count", () => {
+    test("empty string", () => {
+        const input = "";
+        expect(getCharacterCount(input)).toEqual(0);
+    });
+
+    test("undefined", () => {
+        const input = undefined;
+        expect(getCharacterCount(input)).toEqual(0);
+    });
+
+    test("5 characters", () => {
+        const input = "12345";
+        expect(getCharacterCount(input)).toEqual(5);
+    });
+
+    test("with spaces", () => {
+        const input = "12 45";
+        expect(getCharacterCount(input)).toEqual(5);
+    });
+
+    test("padded string", () => {
+        const input = "    12345  ";
+        expect(getCharacterCount(input)).toEqual(5);
     });
 });
