@@ -1,5 +1,5 @@
 <template>
-    <div class="content-card">
+    <div :class="['content-card', {reflectScreen: isReflectScreen}]">
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
@@ -425,7 +425,8 @@
         right: 0;
         overflow: hidden;
 
-        @include h(960) {
+        &:empty {
+            display: none;
         }
 
         @include r(600) {
@@ -454,6 +455,10 @@
     .text {
         font-size: 2.4rem;
         padding: 7.2rem 0;
+
+        .reflectScreen & {
+            padding: 6.4rem 0 1.6rem;
+        }
     }
 
     .label {
@@ -560,7 +565,11 @@
     }
 
     .grow-container {
-        margin-top: 4.8rem;
+        align-items: center;
+        display: flex;
+        height: 156px;
+        justify-content: center;
+        margin-bottom: 2.4rem;
     }
 
     .leaf3 {
@@ -612,6 +621,20 @@
         @include r(600) {
             position: absolute;
         }
+
+        .reflectScreen & {
+            bottom: 0;
+            left: 0;
+            position: relative;
+            right: 0;
+
+            @include r(600) {
+                bottom: 3.2rem;
+                left: 2.4rem;
+                position: absolute;
+                right: 2.4rem;
+            }
+        }
     }
 
     .tap {
@@ -635,6 +658,7 @@
 
         .inline-arrow {
             flex-grow: 0;
+            float: right;
             position: relative;
             overflow: hidden;
 
@@ -704,6 +728,7 @@
         @include textArea;
         background-color: transparent;
         border-radius: 3rem;
+        max-height: 10rem;
         width: 100%;
 
         &:focus {
