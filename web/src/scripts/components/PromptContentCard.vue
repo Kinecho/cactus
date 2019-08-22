@@ -1,9 +1,5 @@
 <template>
     <div class="content-card">
-        <div :class="['background-image', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
-            <flamelink-image v-bind:image="processedContent.backgroundImage"/>
-        </div>
-
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
@@ -99,6 +95,11 @@
             </div>
             <!--    END Grow -->
         </section>
+
+        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
+            <flamelink-image v-bind:image="processedContent.backgroundImage"/>
+        </div>
+
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="!isReflectScreen">
                 <span class="tap">Tap Anywhere</span>
@@ -107,16 +108,6 @@
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen && response" class="reflect-container">
-                <div class="mobile-nav-buttons">
-                    <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
-                        <div class="progress-circle">
-                            <pie-spinner :percent="reflectionProgress"/>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                            <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                        </svg>
-                    </button>
-                </div>
                 <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
@@ -139,7 +130,16 @@
                             v-on:click.stop
                     />
                 </resizable-textarea>
-
+                <div class="mobile-nav-buttons">
+                    <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
+                        <div class="progress-circle">
+                            <pie-spinner :percent="reflectionProgress"/>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
             <!--    END Reflect-->
             <div class="actions" v-if="processedContent.actionButton">
@@ -319,11 +319,21 @@
         background: $lightBlue no-repeat;
         display: flex;
         flex-direction: column;
-        height: 100%;
         justify-content: space-between;
         padding: 2.4rem;
         width: 100%;
         overflow: hidden;
+
+        @include isTinyPhone {
+            min-height: calc(100vh - 8rem);
+        }
+        @include biggerThanTinyPhone {
+            min-height: calc(100vh - 10rem);
+        }
+        @include r(600) {
+            min-height: 0;
+            height: 100%;
+        }
 
         .slide-1 & {
             background-image:
@@ -406,17 +416,23 @@
         z-index: 2;
     }
 
-    .background-image {
+    .backgroundImage {
         bottom: 0;
         left: 0;
-        position: absolute;
+        margin: 0 -2.4rem -2.4rem;
+        max-height: 40vh;
+        position: relative;
         right: 0;
         overflow: hidden;
+
+        @include h(960) {
+        }
 
         @include r(600) {
             display: flex;
             justify-content: center;
             margin: 0 -2.4rem;
+            max-height: none;
             order: 1;
             position: static;
         }
@@ -437,6 +453,7 @@
 
     .text {
         font-size: 2.4rem;
+        padding: 7.2rem 0;
     }
 
     .label {

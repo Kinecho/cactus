@@ -17,7 +17,7 @@
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
-                    <button class="share tertiary wiggle back" @click="showSharing = false" v-show="showSharing">
+                    <button class="share tertiary back" @click="showSharing = false" v-show="showSharing">
                         <div class="arrow-wrapper">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                                 <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -825,22 +825,22 @@
     }
 
     .flip-card {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
         backface-visibility: hidden;
+        left: 0;
+        top: 0;
+        width: 100%;
 
         @include r(600) {
             border-radius: 12px;
+            height: 100%;
             max-height: 66rem;
             max-width: 48rem;
         }
 
         &.front {
-            z-index: 2;
+            position: absolute;
             transform: rotateY(0);
+            z-index: 2;
         }
 
         &.back {
@@ -849,8 +849,10 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transform: rotateY(180deg);
             padding: 3.2rem;
+            position: relative;
+            transform: rotateY(180deg);
+
             @include r(600) {
                 border-radius: 12px;
                 box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;

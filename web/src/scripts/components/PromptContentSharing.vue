@@ -137,7 +137,6 @@
             display: flex;
             flex-flow: column nowrap;
             justify-content: center;
-            margin-bottom: 4.8rem;
 
             @include r(600) {
                 flex-flow: row wrap;
@@ -192,8 +191,18 @@
     .content-sharing {
         display: flex;
         flex-direction: column;
-        height: 100%;
         justify-content: center;
+
+        @include isTinyPhone {
+            min-height: calc(100vh - 8rem - 6.4rem);
+        }
+        @include biggerThanTinyPhone {
+            min-height: calc(100vh - 10rem - 6.4rem);
+        }
+        @include r(600) {
+            min-height: 0;
+            height: 100%;
+        }
 
         .graphic {
             margin-bottom: 3.2rem;
