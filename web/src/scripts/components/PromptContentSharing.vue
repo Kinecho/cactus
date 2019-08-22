@@ -4,7 +4,7 @@
             <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
             <h2>Share With Friends</h2>
             <p>
-                {{meta.description}}
+                {{meta.title}}
             </p>
         </div>
         <div class="referral-link">
