@@ -101,7 +101,7 @@
         </div>
 
         <section class="lowerActions">
-            <div class="mobile-nav-buttons" v-if="!isReflectScreen">
+            <div class="mobile-nav-buttons" v-if="!isReflectScreen && hasNext">
                 <span class="tap">Tap Anywhere</span>
             </div>
 
