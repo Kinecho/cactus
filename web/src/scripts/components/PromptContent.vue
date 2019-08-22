@@ -506,7 +506,7 @@
                 const saveTask = this.save();
                 this.transitionName = "slide";
                 // this.activeIndex = 0;
-                updateQueryParam(QueryParam.CONTENT_INDEX, "done");
+                pushQueryParam(QueryParam.CONTENT_INDEX, "done");
                 this.completed = true;
                 gtag('event', 'complete', {
                     event_category: "prompt_content",
