@@ -3,6 +3,7 @@ import {CampaignMemberSendStatus} from "@shared/mailchimp/models/MailchimpTypes"
 
 export enum PromptSendMedium {
     EMAIL_MAILCHIMP = "EMAIL_MAILCHIMP",
+    PROMPT_CONTENT = "PROMPT_CONTENT"
 }
 
 export enum SentPromptField {
@@ -34,5 +35,6 @@ export default class SentPrompt extends BaseModel {
     firstSentAt?: Date;
     promptId?: string;
     memberEmail?:string;
-    sendHistory: SentPromptHistoryItem[] = []
+    sendHistory: SentPromptHistoryItem[] = [];
+    promptContentEntryId?:string;
 }

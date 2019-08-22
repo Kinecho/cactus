@@ -4,7 +4,8 @@ import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import ReflectionResponse, {
     getResponseMediumDisplayName,
     getResponseMediumSlackEmoji,
-    isJournal
+    isJournal,
+    ResponseMedium
 } from "@shared/models/ReflectionResponse";
 import AdminSlackService, {
     AttachmentColor,
@@ -18,6 +19,8 @@ import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptContentURL} from "@api/util/StringUtil";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
@@ -86,6 +89,14 @@ export const onReflectionResponseCreated = functions.firestore
                 }
             }
 
+            const sentPrompt = await createSentPromptIfNeeded({member, prompt, reflectionResponse});
+            if (sentPrompt) {
+                console.log("Created sent prompt", sentPrompt.toJSON());
+                fields.push({
+                    title: "SentPrompt created",
+                    value: `${sentPrompt.id}`
+                })
+            }
 
             fields.push(
                 {
@@ -125,3 +136,47 @@ export const onReflectionResponseCreated = functions.firestore
 
         }
     );
+
+
+async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<SentPrompt | undefined> {
+    const {member, prompt, reflectionResponse} = options;
+    let sentPrompt = await getSentPrompt({member, prompt, reflectionResponse});
+    if (sentPrompt) {
+        return sentPrompt;
+    }
+
+    if (member && member.id && prompt && prompt.id) {
+        sentPrompt = new SentPrompt();
+        sentPrompt.userId = member.userId;
+        sentPrompt.memberEmail = member.email;
+        sentPrompt.firstSentAt = new Date();
+        sentPrompt.lastSentAt = new Date();
+        sentPrompt.promptId = prompt.id;
+        sentPrompt.promptContentEntryId = prompt.promptContentEntryId;
+        if (reflectionResponse && reflectionResponse.responseMedium && [ResponseMedium.PROMPT_WEB, ResponseMedium.PROMPT_ANDROID, ResponseMedium.PROMPT_IOS].includes(reflectionResponse.responseMedium)) {
+            sentPrompt.sendHistory.push({
+                sendDate: new Date(),
+                medium: PromptSendMedium.PROMPT_CONTENT,
+            })
+        }
+
+        return await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+    }
+
+    return;
+}
+
+async function getSentPrompt(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<SentPrompt | undefined> {
+    const {member, prompt, reflectionResponse} = options;
+    if (member && member.id && prompt && prompt.id) {
+        return AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({
+            cactusMemberId: member.id,
+            promptId: prompt.id
+        })
+    } else if (reflectionResponse && !reflectionResponse.anonymous) {
+        const errorMessage = `Non-Anonymous reflection response Unable to search for sent prompt because no member and/or promptId was found\n Member: ${member && member.email} | Prompt ${prompt && prompt.id}`
+        console.warn(errorMessage);
+        await AdminSlackService.getSharedInstance().sendAlertMessage(errorMessage)
+    }
+    return;
+}

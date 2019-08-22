@@ -51,7 +51,8 @@ export enum ChannelName {
     activity = "activity",
     data_log = "data_log",
     email_sends = "email_sends",
-    ci = "ci"
+    ci = "ci",
+    alerts = "cactus-alerts"
 }
 
 export enum SlackResponseType {
@@ -213,11 +214,8 @@ export default class AdminSlackService {
 
     async sendMessage(channelName: ChannelName, message: string | ChatMessage) {
         try {
-
-
             let chatMessage: ChatMessage;
             const channel = this.getChannel(channelName);
-
             if (!channel) {
                 throw new Error("Unable to find the chanel for the ChannelName: " + channelName);
             }
@@ -234,7 +232,6 @@ export default class AdminSlackService {
                 ...chatMessage,
                 channel: channel
             };
-
 
             const response = await this.web.chat.postMessage(slackMessage);
             if (response.ok) {
@@ -269,6 +266,10 @@ export default class AdminSlackService {
 
     async sendCIMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.ci, message);
+    }
+
+    async sendAlertMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.alerts, message)
     }
 
 }
