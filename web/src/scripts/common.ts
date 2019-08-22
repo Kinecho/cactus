@@ -15,7 +15,6 @@ const referredByEmail = getQueryParam(QueryParam.REFERRED_BY_EMAIL);
 if (emailAutoFill) {
     try {
         window.localStorage.setItem(LocalStorageKey.emailAutoFill, emailAutoFill);
-        // removeQueryParam(QueryParam.EMAIL);
     } catch (e){
         console.error("Failed to set emailAutoFill item in local storage", e);
     }
