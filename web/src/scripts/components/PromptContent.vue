@@ -43,7 +43,7 @@
                                     v-bind:reflectionDuration="reflectionDuration"
                                     v-bind:saving="saving"
                                     v-bind:saved="saved"
-
+                                    v-bind:tapAnywhereEnabled="tapAnywhereEnabled"
                                     v-on:next="next"
                                     v-on:previous="previous"
                                     v-on:complete="complete"
@@ -305,7 +305,10 @@
                 if (this.promptContent && this.promptContent.promptId) {
                     return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
                 }
-            }
+            },
+            tapAnywhereEnabled(): boolean {
+                return !this.isReflection && this.hasNext && this.hasPrevious
+            },
         },
         watch: {
             activeIndex(index: number, oldIndex: number) {
@@ -327,7 +330,8 @@
                 if (!newContent || (!oldContent || newContent.promptId !== oldContent.promptId)) {
                     this.subscribeToResponse();
                 }
-            }
+            },
+
         },
         methods: {
             updateDocumentTitle() {
@@ -345,7 +349,10 @@
             },
             async handleTap(event: MouseEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
-
+                if (!this.tapAnywhereEnabled) {
+                    console.log("tap anywhere is disabled");
+                    return;
+                }
                 const {width} = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
@@ -355,8 +362,8 @@
 
                     });
 
-
                     if (!foundExcludedTarget) {
+
                         await this.next();
                     } else {
                     }
