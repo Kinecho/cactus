@@ -1,36 +1,68 @@
 <template>
     <div>
-        <div>
-            <h1>{{title}}</h1>
-            <p v-if="message">{{message}}</p>
+        <div class="centered">
+            <div>
+                <h1>{{title}}</h1>
+                <p v-if="message">{{message}}</p>
+            </div>
+            <div class="actions-container" v-if="!loading">
+                <magic-link/>
+                <div id="third-party-loading" class="loading hidden">
+                    <img src="/assets/images/loading.svg" alt=""/>Signing In...
+                </div>
+                <div class="divider hidden">
+                    <p class="message-container">Or choose from one of the following:</p>
+                </div>
+                <div id="third-party-logins">
+                    <div class="buttonContainer" id="signup-app"></div>
+                </div>
+            </div>
+            <div v-if="loading">
+                <spinner/>
+            </div>
         </div>
-        <form class="email-form hidden" id="email-signup">
-            <div class="alert error hidden">Sorry, looks like we have issues.</div>
-            <input type="email" name="email" placeholder="Enter your email address" id="email-input"/>
-            <button type="submit" name="submit" class="email-submit-button">Next</button>
-        </form>
-        <div id="third-party-loading" class="loading hidden">
-            <img src="/assets/images/loading.svg" alt=""/>Signing In...
-        </div>
-        <div class="divider hidden">
-            <p class="message-container">Or choose from one of the following:</p>
-        </div>
-        <div id="third-party-logins">
-            <div class="buttonContainer" id="signup-app"></div>
-        </div>
-
-
+        <img id="pinkBlob" src="assets/images/pinkBlob.svg" alt=""/>
+        <img id="yellowBlob1" src="assets/images/yellowNeedleBlob.svg" alt=""/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {User as UserRecord} from "firebase"
     import CactusMember from '@shared/models/CactusMember'
+    import {FirebaseUser} from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
+    import {getAuthUI, getAuthUIConfig} from "@web/auth";
+    import MagicLink from "@components/MagicLinkInput.vue"
+    import {PageRoute} from "@web/PageRoutes"
+    import {QueryParam} from "@shared/util/queryParams"
+    import Spinner from "@components/Spinner.vue";
+    import {getQueryParam} from "@web/util"
+
+    const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
+    console.log("Redirect url param is ", redirectUrlParam);
+    let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
+    if (redirectUrlParam) {
+        emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
+    }
+
+    const ui = getAuthUI();
+    const config = getAuthUIConfig({
+        signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+        emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
+        signInSuccess: (authResult, redirectUrl) => {
+            console.log("Redirect URL is", redirectUrl);
+            console.log("Letting fbui handle the redirect... just returning true");
+            return true;
+        }
+    });
+
 
     export default Vue.extend({
+        components: {
+            MagicLink,
+            Spinner,
+        },
         created() {
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: (({member, user}) => {
@@ -39,6 +71,30 @@
                     this.authLoaded = true;
                 })
             });
+            if (ui.isPendingRedirect()) {
+                console.log("Is pending redirect.... need to log the user in");
+                this.loading = true;
+                // if ($loading) $loading.classList.remove("hidden");
+                // if ($emailContainer) $emailContainer.classList.add("hidden");
+                // if ($divider) $divider.classList.add("hidden");
+                // if ($welcomeMessage) $welcomeMessage.classList.add("hidden");
+                // if ($loginContainer) {
+                //     $loginContainer.style.height = "0";
+                //     $loginContainer.style.opacity = "0";
+                // }
+
+                ui.start('#signup-app', config);
+            } else {
+                // if ($emailContainer) $emailContainer.classList.remove("hidden");
+                // if ($welcomeMessage) $welcomeMessage.classList.remove("hidden");
+                // if ($divider) $divider.classList.remove("hidden");
+                // The start method will wait until the DOM is loaded.
+                // ui.start('#signup-app', config);
+            }
+
+
+            ui.start('#signup-app', config);
+
         },
         destroyed() {
             if (this.memberListener) {
@@ -50,9 +106,10 @@
             title: string,
             message: string | undefined,
             memberListener: ListenerUnsubscriber | undefined,
-            user: UserRecord | undefined,
+            user: FirebaseUser | undefined,
             member: CactusMember | undefined,
             authLoaded: boolean,
+            loading: boolean,
 
         } {
             return {
@@ -62,6 +119,7 @@
                 member: undefined,
                 authLoaded: false,
                 memberListener: undefined,
+                loading: false,
             }
         }
     })
@@ -71,6 +129,7 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
 
 
     h1 {
