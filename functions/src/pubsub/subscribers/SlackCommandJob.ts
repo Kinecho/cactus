@@ -253,9 +253,9 @@ async function getAllTimeStatFields(): Promise<SlackAttachmentField[]> {
     }, {confirmed: 0, unsubscribed: 0, referrals: 0, referrers: {}});
 
     const uniqueReferrers = Object.keys(memberStats.referrers).length;
-    const topReferrersString = Object.entries(memberStats.referrers).sort(([, v1], [, v2]) => v2 - v1).slice(0, 20).map(([email, count]) => {
-        return `${email}: ${count}`
-    }).join("\n") || "None";
+    // const topReferrersString = Object.entries(memberStats.referrers).sort(([, v1], [, v2]) => v2 - v1).slice(0, 20).map(([email, count]) => {
+    //     return `${email}: ${count}`
+    // }).join("\n") || "None";
 
     return [
         {
@@ -285,11 +285,11 @@ async function getAllTimeStatFields(): Promise<SlackAttachmentField[]> {
             value: `${(durumuru.durumuru * 100).toFixed(2)}% (${durumuru.today}/${durumuru.l30})`,
             short: true,
         },
-        {
-            title: "Top 20 Referrers",
-            value: topReferrersString,
-            short: false,
-        }
+        // {
+        //     title: "Top 20 Referrers",
+        //     value: topReferrersString,
+        //     short: false,
+        // }
     ]
 }
 
