@@ -42,6 +42,7 @@
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
                     Sign Up to Save Your Progress
                 </button>
+                <button class="primary authBtn" v-if="authLoaded && loggedIn" @click="goToHome">Go Home</button>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
@@ -168,6 +169,9 @@
             }
         },
         methods: {
+            goToHome() {
+                window.location.href = PageRoute.JOURNAL_HOME;
+            },
             back() {
                 this.$emit("back");
             },
