@@ -415,25 +415,20 @@
         right: 0;
         overflow: hidden;
 
-        .defaultBg {
-        // &:empty {
+        .slide-0 & {
             $backgrounds:
                 url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
                 url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-                url(assets/images/pinkBlob.svg) left -56px bottom 0/180px,
-                url(assets/images/lightGreenBlob.svg) right -56px bottom 0/180px,
-                url(assets/images/yellowBlob.svg) left -56px bottom 0/180px;
+                url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
+                url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
+                url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
 
             $bgKey: random(length($backgrounds));
             $nth: nth($backgrounds, $bgKey);
 
             background: #{$nth} no-repeat;
-            bottom: 0;
             height: 200px;
-            left: 0;
             position: absolute;
-            transform: translateY(11px);
-            width: 111%;
         }
 
         @include r(600) {
