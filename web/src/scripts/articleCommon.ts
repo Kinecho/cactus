@@ -12,15 +12,14 @@ export function initializeArticlePage() {
     initAnalytics();
     startFullstory();
 
-    setupNavigation({showSignupButton: true});
+    setupNavigation({showSignupButton: true, showLoginButton: true});
     setupJumpToForm();
     configureMailchimpSignupForm("email-form-bottom");
 
     getAuth().onAuthStateChanged(user => {
         if (user) {
             hideEmailSignupFooter();
-        }
-        else {
+        } else {
             showEmailSignupFooter()
         }
     })

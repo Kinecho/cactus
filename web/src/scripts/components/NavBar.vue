@@ -4,7 +4,8 @@
         <div>
             <transition name="fade-in-slow" appear>
                 <a v-if="displayLoginButton"
-                        class="link"
+                        class="login"
+                        :href="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >Log In</a>
@@ -51,6 +52,7 @@
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {logout} from '@web/auth'
+    import {QueryParam} from '@shared/util/queryParams'
 
     declare interface LinkData {
         title: string,
@@ -88,7 +90,7 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
-            showLogin: {type: Boolean, default: false}, //NOTE: login is always disabled for now. See computed prop for displayLoginButton
+            showLogin: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {
@@ -130,15 +132,16 @@
                 return show;
             },
             displayLoginButton(): boolean {
-                const show = this.showLogin && this.authLoaded && !this.user;
-                //NOTE: login button is always disabled for now.
-                return false;
+                return this.showLogin && this.authLoaded && !this.user;
             },
             initials(): string {
                 if (this.user) {
                     return getInitials(this.user.displayName || this.user.email || "")
                 }
                 return "";
+            },
+            loginHref(): string {
+                return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
             }
         },
         methods: {
@@ -147,7 +150,7 @@
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
-                window.location.href = PageRoute.SIGNUP;
+                window.location.href = this.loginHref;
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -185,6 +188,14 @@
 
         a.link {
             @include fancyLink;
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+
+        a.login {
+            text-decoration: none;
 
             &:hover {
                 cursor: pointer;
