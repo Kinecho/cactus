@@ -351,6 +351,7 @@
             width: calc(100% - 6.4rem);
 
             @include r(600) {
+                max-width: none;
                 position: static;
                 width: auto;
             }
