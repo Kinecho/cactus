@@ -34,7 +34,21 @@
             opaque: Boolean,
             light: {type: Boolean, default: true},
             dark: Boolean,
-        //
+            //
+        },
+        created() {
+            this.escapeListener = document.addEventListener('keyup', (evt: KeyboardEvent) => {
+
+                if (evt.code === "27" || evt.keyCode === 27) {
+                    this.close()
+                }
+            });
+        },
+        destroyed() {
+            window.removeEventListener("keyup", this.escapeListener)
+        },
+        data(): { escapeListener: any } {
+            return {escapeListener: undefined}
         },
         methods: {
             close() {
@@ -69,6 +83,7 @@
 
         &.light {
             background-color: rgba(255, 255, 255, .9);
+
             &.opaque {
                 background-color: rgba(255, 255, 255, .1);
             }
@@ -76,11 +91,11 @@
 
         &.dark {
             background-color: rgba(0, 0, 0, .9);
+
             &.opaque {
                 background-color: rgba(0, 0, 0, 1);
             }
         }
-
 
 
         transition: opacity .3s ease;
