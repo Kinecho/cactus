@@ -96,10 +96,9 @@
             <!--    END Grow -->
         </section>
 
-        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage">
+        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
             <flamelink-image v-bind:image="processedContent.backgroundImage"/>
         </div>
-        <div class="defaultBg" v-else></div>
 
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
@@ -415,7 +414,7 @@
         right: 0;
         overflow: hidden;
 
-        .slide-0 & {
+        .slide-0 &:empty {
             $backgrounds:
                 url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
                 url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
