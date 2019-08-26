@@ -21,7 +21,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptContentURL} from "@api/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
-import {getCharacterCount, getWordCount} from "@shared/util/StringUtil";
+import {getWordCount} from "@shared/util/StringUtil";
 import * as prettyMilliseconds from "pretty-ms";
 
 /**
