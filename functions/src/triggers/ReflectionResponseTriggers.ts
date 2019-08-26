@@ -22,7 +22,6 @@ import {buildPromptContentURL} from "@api/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 import {getWordCount} from "@shared/util/StringUtil";
-import * as prettyMilliseconds from "pretty-ms";
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
