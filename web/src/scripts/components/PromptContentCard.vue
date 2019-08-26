@@ -127,9 +127,8 @@
                             placeholder="Add your reflection"
                             rows="1"
                             v-model="response.content.text"
-                            v-on:input="autosave"
                             v-on:click.stop
-                    />
+                        />
                     </resizable-textarea>
                     <div class="mobile-nav-buttons">
                         <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
@@ -267,13 +266,6 @@
             }
         },
         methods: {
-            autosave: debounce(function (this: any) {
-                this.save()
-            }, 1000),
-            save() {
-                console.log("debounced save");
-                this.$emit("save")
-            },
             async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
