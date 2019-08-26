@@ -9,7 +9,7 @@ module.exports = {
         "name": "index"
     },
     "sign_up": {
-        "title": "Sign Up",
+        "title": "Sign In",
         "path": "/signup",
         "reflectionPrompt": false,
         "name": "sign_up"
