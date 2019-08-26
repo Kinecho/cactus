@@ -96,9 +96,10 @@
             <!--    END Grow -->
         </section>
 
-        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
+        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage">
             <flamelink-image v-bind:image="processedContent.backgroundImage"/>
         </div>
+        <div class="defaultBg" v-else></div>
 
         <section class="lowerActions">
             <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
@@ -414,8 +415,25 @@
         right: 0;
         overflow: hidden;
 
-        &:empty {
-            display: none;
+        .defaultBg {
+        // &:empty {
+            $backgrounds:
+                url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
+                url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
+                url(assets/images/pinkBlob.svg) left -56px bottom 0/180px,
+                url(assets/images/lightGreenBlob.svg) right -56px bottom 0/180px,
+                url(assets/images/yellowBlob.svg) left -56px bottom 0/180px;
+
+            $bgKey: random(length($backgrounds));
+            $nth: nth($backgrounds, $bgKey);
+
+            background: #{$nth} no-repeat;
+            bottom: 0;
+            height: 200px;
+            left: 0;
+            position: absolute;
+            transform: translateY(11px);
+            width: 111%;
         }
 
         @include r(600) {
