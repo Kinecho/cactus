@@ -107,7 +107,7 @@ export const onReflectionResponseCreated = functions.firestore
 
             const reflectionText = reflectionResponse.content.text || "";
             const wordCount = getWordCount(reflectionText);
-            const characterCount = getCharacterCount(reflectionText);
+            const didJournal = (wordCount > 0 ? 'Yes' : 'No');
             const duration = reflectionResponse.reflectionDurationMs && prettyMilliseconds(reflectionResponse.reflectionDurationMs || 0) || "Not Set";
             fields.push(
                 {
@@ -116,7 +116,7 @@ export const onReflectionResponseCreated = functions.firestore
                     short: true,
                 }, {
                     title: "Reflection Info",
-                    value: `Duration: ${duration}\nWords: ${wordCount}\nCharacters: ${characterCount}`
+                    value: `Duration: ${duration}\nJournaled: ${didJournal}`
                 });
 
 
