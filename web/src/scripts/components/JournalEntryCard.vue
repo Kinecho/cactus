@@ -418,14 +418,42 @@
             border: 0;
         }
 
-        // url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
-        // url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-        // url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
-        // url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
-        // url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
+        &:nth-child(1), &:nth-child(16) {
+            background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/310px no-repeat;
+        }
+        &:nth-child(3) {
+            background: no-repeat;
+            background-image: url(assets/images/greenNeedleBlob.svg), url(assets/images/pinkBlob.svg);
+            background-position: right -130px bottom -52px;
+            background-size: 290px, 230px;
+        }
+        &:nth-child(4) {
+            background: url(assets/images/yellowNeedleBlob.svg) left 450px top 188px/540px no-repeat;
+        }
+        &:nth-child(7) {
+            background: no-repeat;
+            background-image: url(assets/images/greenVs.svg), url(assets/images/lightGreenBlob.svg);
+            background-position: right -130px bottom -52px;
+            background-size: 310px, 230px;
+        }
 
-        &:nth-child(1) {
-            background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/260px no-repeat;
+        &:nth-child(9) {
+            background: url(assets/images/greenVs.svg) right -130px bottom -70px/260px no-repeat;
+        }
+        &:nth-child(10) {
+            background: no-repeat;
+            background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
+            background-position: right -130px bottom -52px;
+            background-size: 310px, 230px;
+        }
+        &:nth-child(13) {
+            background: url(assets/images/yellowNeedleBlob.svg) left 450px top 138px/540px no-repeat;
+        }
+        &:nth-child(15) {
+            background: no-repeat;
+            background-image: url(assets/images/yellowNeedleBlob.svg), url(assets/images/yellowBlob.svg);
+            background-position: right -450px bottom -290px, right -220px bottom -90px;
+            background-size: 570px, 280px;
         }
     }
 
