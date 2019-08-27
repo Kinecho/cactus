@@ -53,11 +53,11 @@
             </nav>
         </form>
         <nav v-show="!doReflect && responsesLoaded" class="buttonContainer">
-            <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="secondary small button">
+            <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="button" v-bind:class="{ secondary: responseText }">
                 Reflect
             </a>
             <div class="promptBtn" v-if="prompt && prompt.promptContentEntryId">
-                <a :href="promptContentPath" @click.prevent="showContent = true" class="button">Reflect</a>
+                <a :href="promptContentPath" @click.prevent="showContent = true" class="button" v-bind:class="{ secondary: responseText }">Reflect</a>
             </div>
 
         </nav>
@@ -443,7 +443,7 @@
         &:nth-child(10) {
             background: no-repeat;
             background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
-            background-position: right -130px bottom -52px;
+            background-position: right -130px bottom -52px, right -130px bottom -112px;
             background-size: 310px, 230px;
         }
         &:nth-child(13) {
