@@ -194,10 +194,10 @@
         justify-content: center;
 
         @include isTinyPhone {
-            min-height: calc(100vh - 8rem - 6.4rem);
+            min-height: calc(100vh - 5.6rem - 6.4rem);
         }
         @include biggerThanTinyPhone {
-            min-height: calc(100vh - 10rem - 6.4rem);
+            min-height: calc(100vh - 9rem - 6.4rem);
         }
         @include r(600) {
             min-height: 0;

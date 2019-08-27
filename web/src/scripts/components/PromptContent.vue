@@ -814,11 +814,11 @@
         width: 100%;
 
         @include isTinyPhone {
-            height: calc(100vh - 8rem);
+            height: calc(100vh - 5.6rem);
         }
 
         @include biggerThanTinyPhone {
-            height: calc(100vh - 10rem);
+            height: calc(100vh - 9rem);
         }
 
         @include r(600) {

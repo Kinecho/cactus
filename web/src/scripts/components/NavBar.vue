@@ -195,7 +195,12 @@
         }
 
         a.login {
+            font-size: 1.6rem;
             text-decoration: none;
+
+            @include r(374) {
+              font-size: 1.8rem;
+            }
 
             &:hover {
                 cursor: pointer;
@@ -212,6 +217,7 @@
         }
 
         .nav-logo {
+            display: block;
             height: 5.8rem;
             width: 11.7rem;
 
