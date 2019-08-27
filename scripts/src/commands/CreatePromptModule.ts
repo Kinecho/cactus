@@ -124,11 +124,6 @@ export default class CreatePromptModule extends FirebaseCommand {
             content.topic = prompt.topic;
             console.log("attempting to save the prompt content to flamelink");
 
-            reflection: Content = {
-                contentType: ContentType.reflect,
-                text: prompt.question,
-            };
-
             content.content = [reflection];
 
             savedContent = await AdminPromptContentService.getSharedInstance().save(content);
