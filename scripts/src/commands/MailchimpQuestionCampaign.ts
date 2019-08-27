@@ -21,7 +21,7 @@ import {
     SendChecklistItemType,
     TemplateType
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
+import {getUrlFromInput, isValidEmail, appendDomain} from "@shared/util/StringUtil";
 import {CactusConfig} from "@shared/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
@@ -227,8 +227,8 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: this.questionType === QuestionType.PROMPT ? "text" : null,
                 name: "contentPath",
                 message: "Prompt module path",
-                initial: () => getUrlFromInput(`prompts/${this.promptContentId}`),
-                format: (value: string) => getUrlFromInput(`${value}`)
+                initial: () => `prompts/${this.promptContentId}`,
+                format: (value: string) => `${value}`
             },
             {
                 type: [QuestionType.DEFAULT,QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
@@ -418,7 +418,7 @@ export default class MailchimpQuestionCampaign implements Command {
         console.log(chalk.bold("creating template content..."));
         const sections: CampaignContentSectionMap = {
             [TemplateSection.question]: contentResponse.question,
-            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${getUrlFromInput(contentResponse.contentPath, domain)}?e=*|URL:EMAIL|*">${contentResponse.contentLinkText}</a>` : "",
+            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${appendDomain(contentResponse.contentPath, domain)}?e=*|URL:EMAIL|*">${contentResponse.contentLinkText}</a>` : "",
             [TemplateSection.inspiration]: contentResponse.inspirationText || "",
         };
 
