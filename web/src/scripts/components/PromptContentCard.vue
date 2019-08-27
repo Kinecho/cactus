@@ -166,7 +166,6 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import {debounce} from "debounce";
     import {formatDurationAsTime} from '@shared/util/DateUtil'
-    import PieSpinner from "@components/PieSpinner.vue"
 
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
 
@@ -177,7 +176,6 @@
             ResizableTextarea,
             Spinner,
             FlamelinkImage,
-            PieSpinner,
         },
         props: {
             content: {
@@ -749,7 +747,7 @@
     .reflect-container textarea {
         @include textArea;
         background-color: transparent;
-        border-radius: 3rem;
+        border-radius: 2.4rem;
         max-height: 10rem;
         width: 100%;
 
