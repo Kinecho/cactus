@@ -65,7 +65,7 @@ export default class CreatePromptModule extends FirebaseCommand {
         content.promptId = promptId;
         content.content = [reflection];
 
-        const savedContent = (await AdminPromptContentService.getSharedInstance().save(content)) as PromptContent;
+        const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
         if (savedContent) {
             console.log("Saved shell Content Prompt record to Flamelink", savedContent.entryId);
             prompt.promptContentEntryId = savedContent.entryId;
