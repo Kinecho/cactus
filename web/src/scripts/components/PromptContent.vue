@@ -70,7 +70,7 @@
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
-                        v-show="hasNext && activeIndex > 0 && !showSharing"
+                        v-show="hasNext && !showSharing"
                 >
                     <div class="progress-circle" v-if="isReflection">
                         <pie-spinner :percent="reflectionProgress"/>
@@ -307,7 +307,7 @@
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return !this.isReflection && this.hasNext && this.hasPrevious
+                return !this.isReflection
             },
         },
         watch: {
@@ -363,11 +363,8 @@
                     });
 
                     if (!foundExcludedTarget) {
-
                         await this.next();
-                    } else {
                     }
-
                 }
             },
             touchStartHandler(args: MouseEvent) {

@@ -143,9 +143,9 @@
                 </div>
             </div>
             <!--    END Reflect-->
-            <div class="actions" v-if="processedContent.actionButton">
-                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>
-            </div>
+<!--            <div class="actions" v-if="processedContent.actionButton">-->
+<!--                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>-->
+<!--            </div>-->
         </section>
     </div>
 </template>
@@ -289,7 +289,6 @@
                 if (this.isReflectScreen && this.reflectionProgress < 1) {
                     return;
                 }
-
 
                 this.$emit("next")
             },
