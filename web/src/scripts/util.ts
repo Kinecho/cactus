@@ -204,6 +204,16 @@ export function addModal(modalId: string, options: {
     return document.body.appendChild(modal);
 }
 
+export function getAllQueryParams(): { [name: string]: string } | undefined {
+    try {
+        return qs.parse(window.location.search, {
+            ignoreQueryPrefix: true
+        });
+    } catch (e) {
+        console.error("browser does not support url params", e);
+        return;
+    }
+}
 
 export function getQueryParam(name: QueryParam): string | null {
     try {

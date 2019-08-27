@@ -35,5 +35,6 @@ export default class PendingUser extends BaseModel {
     userId?: string;
     //TODO: Do we need to track the possibility of multiple referreredByEmails?
     reflectionResponseIds: string[] = [];
+    queryParams: { [name: string]: string } = {};
 
 }

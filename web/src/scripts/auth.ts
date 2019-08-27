@@ -13,8 +13,8 @@ import {
 } from "@shared/api/SignupEndpointTypes";
 import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import AuthUI = firebaseui.auth.AuthUI;
 import ReflectionResponse from "@shared/models/ReflectionResponse";
+import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
 
@@ -280,7 +280,6 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
-
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -288,6 +287,8 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
     }
+
+    const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
@@ -298,7 +299,8 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
         email: email,
         referredBy: subscription.referredByEmail,
         continuePath: emailLinkRedirectUrl,
-        reflectionResponseIds: anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : []
+        reflectionResponseIds: anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [],
+        queryParams: landingParams,
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 

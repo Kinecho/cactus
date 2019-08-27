@@ -104,15 +104,13 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         success: true,
         email,
     };
-    //TODO: send the response here
-    // resp.send(response);
-
 
     if (!existingMember) {
         const pendingUser = await AdminPendingUserService.getSharedInstance().addPendingSignup({
             email,
             referredByEmail: referredBy,
-            reflectionResponseIds: payload.reflectionResponseIds
+            reflectionResponseIds: payload.reflectionResponseIds,
+            queryParams: payload.queryParams,
         });
         attachments.push({
             text: `Added PendingUser \`${pendingUser.id}\``,
@@ -184,7 +182,6 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             error: error,
         });
     }
-
 
 
     return;
