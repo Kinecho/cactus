@@ -129,7 +129,7 @@
                 return !this.authLoaded;
             },
             referralLink(): string | undefined {
-                return this.member ? `${Config.domain}?ref=${this.member.email}` : undefined;
+                return (this.member && this.member.email) ? `${Config.domain}?ref=${encodeURIComponent(this.member.email)}` : undefined;
             }
         }
     })
@@ -148,9 +148,9 @@
         justify-content: space-between;
 
         @include r(600) {
-          @include h(960) {
-            height: 100vh;
-          }
+            @include h(960) {
+                height: 100vh;
+            }
         }
 
         header, .centered {
