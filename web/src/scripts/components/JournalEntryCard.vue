@@ -26,6 +26,7 @@
 
         <h3 class="topic" v-show="prompt && prompt.promptContentEntryId">Who lightens the burden</h3>
         <p class="subtext" v-show="prompt && prompt.promptContentEntryId">Today you’ll reflect on someone who helps you when you are worried about something.</p>
+        <!-- <img class="backgroundImage" src="/assets/images/nature.svg" alt="" /> -->
 
         <h3 class="question">{{questionText}}</h3>
         <p v-show="!prompt && promptLoaded" class="warning prompt">
@@ -377,6 +378,12 @@
         }
     }
 
+    .topoic,
+    .question,
+    .subtext {
+        max-width: 66%;
+    }
+
     .topic {
         margin-bottom: .8rem;
     }
@@ -392,24 +399,8 @@
         border-radius: 12px;
         margin: 0 .8rem 2.4rem;
         padding: 2.4rem 1.6rem;
-
-        .entry {
-            padding-left: 2rem;
-            position: relative;
-            white-space: pre-line;
-
-            &:before {
-                background-color: $yellow;
-                border-radius: .4rem;
-                content: '';
-                display: block;
-                height: 100%;
-                left: 0;
-                position: absolute;
-                top: 0;
-                width: .4rem;
-            }
-        }
+        overflow: hidden;
+        position: relative;
 
         @include r(768) {
             border-radius: 12px;
@@ -425,6 +416,42 @@
         &.new {
             @include shadowbox;
             border: 0;
+        }
+
+        // url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
+        // url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
+        // url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
+        // url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
+        // url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
+
+        &:nth-child(1) {
+            background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/260px no-repeat;
+        }
+    }
+
+    .backgroundImage {
+        bottom: -2.4rem;
+        height: auto;
+        left: 60%;
+        position: absolute;
+        width: 60%;
+    }
+
+    .entry {
+        padding-left: 2rem;
+        position: relative;
+        white-space: pre-line;
+
+        &:before {
+            background-color: $yellow;
+            border-radius: .4rem;
+            content: '';
+            display: block;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: .4rem;
         }
     }
 
