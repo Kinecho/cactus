@@ -31,7 +31,10 @@ export const DEFAULT_MORNING_TEMPLATE_ID = 53353;
 export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
 
 export const TOPIC_MORNING_TEMPLATE_ID = 59013;
-export const TOPIC_REMIDNER_TEMPLATE_ID = 59169;
+export const TOPIC_REMINDER_TEMPLATE_ID = 59169;
+
+export const PROMPT_MODULE_TEMPLATE_ID = 63697;
+export const PROMPT_MODULE_REMINDER_TEMPLATE_ID = 59169;
 
 const prompts = require('prompts');
 
@@ -85,6 +88,7 @@ interface ReminderConfiguration {
 export enum QuestionType {
     DEFAULT,
     TOPIC,
+    PROMPT,
 }
 
 export default class MailchimpQuestionCampaign implements Command {
@@ -846,6 +850,9 @@ export default class MailchimpQuestionCampaign implements Command {
             case QuestionType.TOPIC:
                 return TOPIC_MORNING_TEMPLATE_ID;
                 break;
+            case QuestionType.PROMPT:
+                return PROMPT_MODULE_TEMPLATE_ID;
+                break;
         }
     }
 
@@ -855,7 +862,10 @@ export default class MailchimpQuestionCampaign implements Command {
                 return DEFAULT_REMINDER_TEMPLATE_ID;
                 break;
             case QuestionType.TOPIC:
-                return TOPIC_REMIDNER_TEMPLATE_ID;
+                return TOPIC_REMINDER_TEMPLATE_ID;
+                break;
+            case QuestionType.PROMPT:
+                return PROMPT_MODULE_REMINDER_TEMPLATE_ID;
                 break;
         }
     }
