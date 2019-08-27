@@ -486,8 +486,8 @@ workflows:
           requires:
             - *install_all_name
       - notify-branch-workflow-finished:
-          name: &all_tests_finished "Notify Workflow Complete"
-          workflow_name: *workflow_name
+          name: &all_tests_finished "Notify Tests Passed"
+          workflow_name: "Feature Branch Tests"
           requires:
             - *install_all_name
             - *test_functions_name
