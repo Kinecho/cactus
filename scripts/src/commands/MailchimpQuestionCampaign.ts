@@ -226,9 +226,9 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: this.questionType === QuestionType.PROMPT ? "text" : null,
                 name: "contentPath",
-                message: "Reflect button link",
-                initial: () => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`,
-                format: (value: string) => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`
+                message: "Prompt module path",
+                initial: () => getUrlFromInput(`prompts/${this.promptContentId}`),
+                format: (value: string) => getUrlFromInput(`${value}`)
             },
             {
                 type: [QuestionType.DEFAULT,QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
@@ -407,13 +407,18 @@ export default class MailchimpQuestionCampaign implements Command {
             throw new Error("No mailchimp service was available - unable to save campaign");
         }
 
+        const config = this.currentConfig;
+        let domain = 'cactus.app';
+        if (config) {
+            domain = config.dynamic_links.domain;
+        }
 
         let campaignContent;
 
         console.log(chalk.bold("creating template content..."));
         const sections: CampaignContentSectionMap = {
             [TemplateSection.question]: contentResponse.question,
-            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${contentResponse.contentPath}">${contentResponse.contentLinkText}</a>` : "",
+            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${getUrlFromInput(contentResponse.contentPath, domain)}?e=*|URL:EMAIL|*">${contentResponse.contentLinkText}</a>` : "",
             [TemplateSection.inspiration]: contentResponse.inspirationText || "",
         };
 
