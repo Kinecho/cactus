@@ -26,7 +26,7 @@
 
         <h3 class="topic" v-show="prompt && prompt.promptContentEntryId">Who lightens the burden</h3>
         <p class="subtext" v-show="prompt && prompt.promptContentEntryId">Today you’ll reflect on someone who helps you when you are worried about something.</p>
-        <!-- <img class="backgroundImage" src="/assets/images/nature.svg" alt="" /> -->
+        <img class="backgroundImage" src="/assets/images/nature.svg" alt="" />
 
         <h3 class="question">{{questionText}}</h3>
         <p v-show="!prompt && promptLoaded" class="warning prompt">
@@ -418,43 +418,49 @@
             border: 0;
         }
 
-        &:nth-child(1), &:nth-child(16) {
-            background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/310px no-repeat;
-        }
-        &:nth-child(3) {
-            background: no-repeat;
-            background-image: url(assets/images/greenNeedleBlob.svg), url(assets/images/pinkBlob.svg);
-            background-position: right -130px bottom -52px;
-            background-size: 290px, 230px;
-        }
-        &:nth-child(4) {
-            background: url(assets/images/yellowNeedleBlob.svg) left 450px top 188px/540px no-repeat;
-        }
-        &:nth-child(7) {
-            background: no-repeat;
-            background-image: url(assets/images/greenVs.svg), url(assets/images/lightGreenBlob.svg);
-            background-position: right -130px bottom -52px;
-            background-size: 310px, 230px;
+        &:nth-child(3n), &:nth-child(2n) {
+            .backgroundImage {
+                display: none;
+            }
         }
 
-        &:nth-child(9) {
-            background: url(assets/images/greenVs.svg) right -130px bottom -70px/260px no-repeat;
-        }
-        &:nth-child(10) {
-            background: no-repeat;
-            background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
-            background-position: right -130px bottom -52px, right -130px bottom -112px;
-            background-size: 310px, 230px;
-        }
-        &:nth-child(13) {
-            background: url(assets/images/yellowNeedleBlob.svg) left 450px top 138px/540px no-repeat;
-        }
-        &:nth-child(15) {
-            background: no-repeat;
-            background-image: url(assets/images/yellowNeedleBlob.svg), url(assets/images/yellowBlob.svg);
-            background-position: right -450px bottom -290px, right -220px bottom -90px;
-            background-size: 570px, 280px;
-        }
+        // &:nth-child(1), &:nth-child(16) {
+        //     background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/310px no-repeat;
+        // }
+        // &:nth-child(3) {
+        //     background: no-repeat;
+        //     background-image: url(assets/images/greenNeedleBlob.svg), url(assets/images/pinkBlob.svg);
+        //     background-position: right -130px bottom -52px;
+        //     background-size: 290px, 230px;
+        // }
+        // &:nth-child(4) {
+        //     background: url(assets/images/yellowNeedleBlob.svg) left 450px top 188px/540px no-repeat;
+        // }
+        // &:nth-child(7) {
+        //     background: no-repeat;
+        //     background-image: url(assets/images/greenVs.svg), url(assets/images/lightGreenBlob.svg);
+        //     background-position: right -130px bottom -52px;
+        //     background-size: 310px, 230px;
+        // }
+        //
+        // &:nth-child(9) {
+        //     background: url(assets/images/greenVs.svg) right -130px bottom -70px/260px no-repeat;
+        // }
+        // &:nth-child(10) {
+        //     background: no-repeat;
+        //     background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/greenBlob.svg);
+        //     background-position: right -130px bottom -52px, right -130px bottom -112px;
+        //     background-size: 310px, 230px;
+        // }
+        // &:nth-child(13) {
+        //     background: url(assets/images/yellowNeedleBlob.svg) left 450px top 138px/540px no-repeat;
+        // }
+        // &:nth-child(15) {
+        //     background: no-repeat;
+        //     background-image: url(assets/images/yellowNeedleBlob.svg), url(assets/images/yellowBlob.svg);
+        //     background-position: right -450px bottom -290px, right -220px bottom -90px;
+        //     background-size: 570px, 280px;
+        // }
     }
 
     .backgroundImage {
