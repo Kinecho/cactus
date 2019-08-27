@@ -65,11 +65,14 @@ export default class CreatePromptModule extends FirebaseCommand {
         content.promptId = promptId;
         content.content = [reflection];
 
-        const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
+        const savedContent = (await AdminPromptContentService.getSharedInstance().save(content)) as PromptContent;
         if (savedContent) {
             console.log("Saved shell Content Prompt record to Flamelink", savedContent.entryId);
             prompt.promptContentEntryId = savedContent.entryId;
             content.entryId = savedContent.entryId;
+        } else { 
+            console.error("Could not save shell Flamelink, aborting!");
+            return;
         }
 
         const {createMailchimp} = await prompts([{
@@ -116,16 +119,16 @@ export default class CreatePromptModule extends FirebaseCommand {
             await AdminReflectionPromptService.getSharedInstance().save(prompt);
             console.log("saved the prompt successfully. Id", promptId);
 
-            content.promptId = promptId;
-            content.scheduledSendAt = this.mailchimpCommand ? this.mailchimpCommand.scheduleDateISO : undefined;
+            savedContent.promptId = promptId;
+            savedContent.scheduledSendAt = this.mailchimpCommand ? this.mailchimpCommand.scheduleDateISO : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
-            content.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
-            content.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
-            content.mailchimpCampaignWebId = prompt.campaign ? prompt.campaign.web_id : undefined;
-            content.topic = prompt.topic;
+            savedContent.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
+            savedContent.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
+            savedContent.mailchimpCampaignWebId = prompt.campaign ? prompt.campaign.web_id : undefined;
+            savedContent.topic = prompt.topic;
 
             console.log("attempting to update the prompt content in flamelink");
-            await AdminPromptContentService.getSharedInstance().save(content);
+            await AdminPromptContentService.getSharedInstance().save(savedContent);
 
             console.log(chalk.green(`Saved prompt ${promptId} successfully`));
         } else {
