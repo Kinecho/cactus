@@ -70,7 +70,7 @@
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
-                        v-show="hasNext && !showSharing"
+                        v-show="(hasNext || isLastCard) && !completed && !showSharing"
                 >
                     <div class="progress-circle" v-if="isReflection">
                         <pie-spinner :percent="reflectionProgress"/>
@@ -275,6 +275,9 @@
             hasNext(): boolean {
                 return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
             },
+            isLastCard(): boolean {
+                return this.promptContent && this.promptContent.content && this.activeIndex === this.promptContent.content.length - 1 || false
+            },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
             },
@@ -347,7 +350,7 @@
                     document.title = 'Cactus Mindful Moment'
                 }
             },
-            async handleTap(event: MouseEvent) {
+            async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
                 if (!this.tapAnywhereEnabled) {
                     console.log("tap anywhere is disabled");
@@ -363,7 +366,23 @@
                     });
 
                     if (!foundExcludedTarget) {
-                        await this.next();
+                        console.log("tap event", event);
+                        const touch = event.changedTouches && event.changedTouches.item(0);
+                        const leftThreshold = width * .20;
+                        console.log("left threshold", leftThreshold);
+                        let isPrevious = false;
+                        if (touch) {
+                            console.log("clientX tap", touch.clientX);
+                            isPrevious = touch.clientX < leftThreshold;
+                        }
+
+                        if (isPrevious) {
+                            await this.previous();
+                        } else {
+                            await this.next();
+                        }
+
+
                     }
                 }
             },
@@ -480,7 +499,7 @@
                 this.transitionName = "slide";
                 const saveTask = this.isReflection ? this.save() : () => undefined;
                 const content = this.promptContent ? this.promptContent.content : [];
-                if (this.hasNext) {
+                if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     gtag('event', 'next', {
@@ -488,7 +507,7 @@
                         event_label: `Slide ${this.activeIndex}`
                     });
                     await saveTask;
-                } else {
+                } else if (this.isLastCard) {
                     await this.complete();
                 }
 
