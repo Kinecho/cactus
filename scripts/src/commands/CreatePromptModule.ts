@@ -68,6 +68,8 @@ export default class CreatePromptModule extends FirebaseCommand {
         const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
         if (savedContent) {
             console.log("Saved shell Content Prompt record to Flamelink", savedContent.entryId);
+            prompt.promptContentEntryId = savedContent.entryId;
+            content.entryId = savedContent.entryId;
         }
 
         const {createMailchimp} = await prompts([{
@@ -111,7 +113,7 @@ export default class CreatePromptModule extends FirebaseCommand {
         }]);
 
         if (saveFirestore) {
-            const savedPrompt = await AdminReflectionPromptService.getSharedInstance().save(prompt);
+            await AdminReflectionPromptService.getSharedInstance().save(prompt);
             console.log("saved the prompt successfully. Id", promptId);
 
             content.promptId = promptId;
@@ -121,17 +123,9 @@ export default class CreatePromptModule extends FirebaseCommand {
             content.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
             content.mailchimpCampaignWebId = prompt.campaign ? prompt.campaign.web_id : undefined;
             content.topic = prompt.topic;
-            console.log("attempting to save the prompt content to flamelink");
 
-            content.content = [reflection];
-
-            const updatedContent = await AdminPromptContentService.getSharedInstance().save(content);
-            if (updatedContent) {
-                savedPrompt.promptContentEntryId = updatedContent.entryId;
-                await AdminReflectionPromptService.getSharedInstance().save(savedPrompt);
-                console.log("Updated the admin prompt to have the content id", updatedContent.entryId);
-            }
-
+            console.log("attempting to update the prompt content in flamelink");
+            await AdminPromptContentService.getSharedInstance().save(content);
 
             console.log(chalk.green(`Saved prompt ${promptId} successfully`));
         } else {
