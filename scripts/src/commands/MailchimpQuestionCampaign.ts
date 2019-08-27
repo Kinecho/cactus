@@ -219,14 +219,14 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: this.questionType === QuestionType.DEFAULT ? "text" : null,
                 name: "contentPath",
-                message: "Reflect button links to this url",
+                message: "Reflect page content path",
                 initial: () => getUrlFromInput(this.contentPath),
                 format: (value: string) => getUrlFromInput(value)
             },
             {
                 type: this.questionType === QuestionType.PROMPT ? "text" : null,
                 name: "contentPath",
-                message: "Reflect button links to this url",
+                message: "Reflect button link",
                 initial: () => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`,
                 format: (value: string) => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`
             },
