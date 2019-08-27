@@ -6,10 +6,19 @@ const fs = require('fs')
 const path = require('path')
 const writeFile = util.promisify(fs.writeFile)
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const HTMLWebpackHarddiskPlugin = require("html-webpack-harddisk-plugin");
+const HTMLWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 
 module.exports = function (config) {
     const pages = pagesUtil.getPages(config, allPages)
+
+    pages.login = {
+        'title': 'Log In',
+        'path': '/login',
+        'reflectionPrompt': false,
+        'name': 'sign_up',
+
+    }
+
     const indexPath = path.join(helpers.srcDir, 'pages-index.html')
 
     const reflectionPagesHtml = Object.values(pages)
@@ -57,7 +66,7 @@ module.exports = function (config) {
                         const suffix = page.indexPath ? '/(.+)' : '$'
 
                         let pattern = new RegExp('^' + page.path + suffix)
-                        return {from: pattern, to: `/${filename}.html`}
+                        return {from: pattern, to: `/${page.name}.html`}
                     }),
                     {from: /./, to: '/404.html'},
                 ],
@@ -72,7 +81,7 @@ module.exports = function (config) {
             favicon: `${helpers.srcDir}/favicon.ico`,
             alwaysWriteToDisk: true,
         }), new HTMLWebpackHarddiskPlugin({
-            outputPath: helpers.publicDir
+            outputPath: helpers.publicDir,
         })],
     }
 }

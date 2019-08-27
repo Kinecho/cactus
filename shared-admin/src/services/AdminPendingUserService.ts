@@ -5,6 +5,13 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 let firestoreService: AdminFirestoreService;
 
+export interface PendingUserRequest {
+    email: string,
+    referredByEmail?: string,
+    reflectionResponseIds?: string[],
+    queryParams?: { [name: string]: string },
+}
+
 export default class AdminPendingUserService {
     protected static sharedInstance: AdminPendingUserService;
 
@@ -54,8 +61,8 @@ export default class AdminPendingUserService {
      * @param {referredByEmail} [args.referredByEmail] - the optional email of the person that referred this user
      * @return {Promise<PendingUser>}
      */
-    async addPendingSignup(args: { email: string, referredByEmail?: string, reflectionResponseIds?: string[] }): Promise<PendingUser> {
-        const {email, referredByEmail, reflectionResponseIds = []} = args;
+    async addPendingSignup(args: PendingUserRequest): Promise<PendingUser> {
+        const {email, referredByEmail, reflectionResponseIds = [], queryParams = {}} = args;
         let recentReferrer: PendingUser | undefined = undefined;
         if (!referredByEmail) {
             recentReferrer = await this.findMostRecentReferrer(email);
@@ -74,6 +81,7 @@ export default class AdminPendingUserService {
         pendingUser.email = email;
         pendingUser.referredByEmail = referredByEmail;
         pendingUser.reflectionResponseIds = reflectionResponseIds;
+        pendingUser.queryParams = queryParams;
 
         if (!referredByEmail && recentReferrer && recentReferrer.referredByEmail) {
             pendingUser.referredByEmail = recentReferrer.referredByEmail;
@@ -81,6 +89,10 @@ export default class AdminPendingUserService {
             pendingUser.usedPreviousReferrer = true;
         }
 
+        if (recentReferrer && recentReferrer.queryParams) {
+            pendingUser.queryParams = {...recentReferrer.queryParams, ...queryParams};
+            console.log("merged query params into ", pendingUser.queryParams)
+        }
 
         pendingUser.status = PendingUserStatus.PENDING;
         pendingUser.magicLinkSentAt = new Date();
@@ -91,7 +103,7 @@ export default class AdminPendingUserService {
     }
 
     async cancelAllPending(email: string): Promise<PendingUser[]> {
-        console.log("attempting to cancel all pending useres");
+        console.log("attempting to cancel all pending users");
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
@@ -118,11 +130,13 @@ export default class AdminPendingUserService {
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
+                .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
                 .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
 
             const result = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
-            console.log("Fetched most recent referrers", result.size);
-            return result.results.find(pending => !!pending.referredByEmail);
+            const [mostRecent] = result.results;
+            console.log("Fetched most recent referrers", mostRecent);
+            return mostRecent;
         } catch (e) {
             console.error("Failed to get most recent referrers", e);
             return;
