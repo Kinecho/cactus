@@ -26,7 +26,6 @@
 
         <h3 class="topic" v-show="prompt && prompt.promptContentEntryId">Who lightens the burden</h3>
         <p class="subtext" v-show="prompt && prompt.promptContentEntryId">Today you’ll reflect on someone who helps you when you are worried about something.</p>
-        <img class="backgroundImage" src="/assets/images/nature.svg" alt="" />
 
         <h3 class="question">{{questionText}}</h3>
         <p v-show="!prompt && promptLoaded" class="warning prompt">
@@ -61,6 +60,7 @@
             </div>
 
         </nav>
+        <img class="backgroundImage" src="/assets/images/nature.svg" alt="" />
         <modal v-if="prompt && prompt.promptContentEntryId" v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="true">
             <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
         </modal>
@@ -378,10 +378,12 @@
         }
     }
 
-    .topoic,
+    .topic,
     .question,
     .subtext {
-        max-width: 66%;
+        @include r(600) {
+            max-width: 66%;
+        }
     }
 
     .topic {
@@ -402,8 +404,7 @@
         overflow: hidden;
         position: relative;
 
-        @include r(768) {
-            border-radius: 12px;
+        @include r(600) {
             padding: 3.2rem 2.4rem;
         }
 
@@ -464,11 +465,20 @@
     }
 
     .backgroundImage {
-        bottom: -2.4rem;
-        height: auto;
-        left: 60%;
-        position: absolute;
-        width: 60%;
+        bottom: -4rem;
+        left: -2.4rem;
+        margin: 0 auto;
+        position: relative;
+        right: 0;
+        width: 120%;
+
+        @include r(600) {
+            bottom: -2.4rem;
+            height: auto;
+            left: 60%;
+            position: absolute;
+            width: 60%;
+        }
     }
 
     .entry {
