@@ -573,7 +573,7 @@
     }
 
     .leaf7 {
-        animation: growingLeaves 15s forwards;
+        animation: growingLeaves 8s forwards;
         transform: scale(0.3) translate(5px, 30px);
         transform-origin: center;
     }
@@ -586,27 +586,28 @@
     }
 
     .leaf3 {
-        animation-delay: 6s;
+        animation-delay: 3s;
+        animation-duration: 8s;
     }
 
     .leaf5 {
-        animation-delay: 16s;
+        animation-delay: 6s;
     }
 
     .leaf1 {
-        animation-delay: 21s;
+        animation-delay: 11s;
     }
 
     .leaf4 {
-        animation-delay: 30s;
+        animation-delay: 17s;
     }
 
     .leaf2 {
-        animation-delay: 32s;
+        animation-delay: 21s;
     }
 
     .leaf6 {
-        animation-delay: 40s;
+        animation-delay: 28s;
     }
 
     .grow5 {
