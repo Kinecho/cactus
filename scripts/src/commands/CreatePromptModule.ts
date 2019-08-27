@@ -56,6 +56,20 @@ export default class CreatePromptModule extends FirebaseCommand {
         prompt.question = question;
         prompt.topic = topic;
 
+        const reflection: Content = {
+            contentType: ContentType.reflect,
+            text: prompt.question,
+        };
+
+        const content = new PromptContent();
+        content.promptId = promptId;
+        content.content = [reflection];
+
+        const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
+        if (savedContent) {
+            console.log("Saved shell Content Prompt record to Flamelink", savedContent.entryId);
+        }
+
         const {createMailchimp} = await prompts([{
             type: "toggle",
             message: "Create campaign in mailchimp?",
@@ -75,6 +89,9 @@ export default class CreatePromptModule extends FirebaseCommand {
             mailchimpCommand.question = question;
             mailchimpCommand.reflectionPromptId = promptId;
             mailchimpCommand.topic = topic;
+            if (savedContent) { 
+                mailchimpCommand.promptContentId = savedContent.entryId;
+            }
             this.mailchimpCommand = mailchimpCommand;
             await mailchimpCommand.start();
 

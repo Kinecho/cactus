@@ -49,6 +49,7 @@ interface ContentQuestionResponse {
     fromName: string;
     sendDateISO: string;
     campaignTitle: string;
+    promptContentId: string;
 }
 
 interface UseDefaultConfigurationResponse {
@@ -83,6 +84,7 @@ interface ReminderConfiguration {
     campaignTitle: string;
     suppressInactive: boolean;
     inactiveDaysThreshold?: number;
+    promptContentId: string;
 }
 
 export enum QuestionType {
@@ -98,6 +100,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
     question?: string;
     contentPath?: string;
+    promptContentId?: string;
     questionType: QuestionType = QuestionType.DEFAULT;
     campaign?: Campaign;
     reminderCampaign?: Campaign;
@@ -216,12 +219,19 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: this.questionType === QuestionType.DEFAULT ? "text" : null,
                 name: "contentPath",
-                message: "Go Deeper content path",
+                message: "Reflect button links to this url",
                 initial: () => getUrlFromInput(this.contentPath),
                 format: (value: string) => getUrlFromInput(value)
             },
             {
-                type: this.questionType === QuestionType.DEFAULT ? "text" : null,
+                type: this.questionType === QuestionType.PROMPT ? "text" : null,
+                name: "contentPath",
+                message: "Reflect button links to this url",
+                initial: () => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`,
+                format: (value: string) => `https://cactus.app/prompts/${this.promptContentId}?e=*|URL:EMAIL|*`
+            },
+            {
+                type: [QuestionType.DEFAULT,QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
                 name: "contentLinkText",
                 message: "Content link text",
                 initial: "Reflect"
@@ -403,7 +413,7 @@ export default class MailchimpQuestionCampaign implements Command {
         console.log(chalk.bold("creating template content..."));
         const sections: CampaignContentSectionMap = {
             [TemplateSection.question]: contentResponse.question,
-            [TemplateSection.content_link]: contentResponse.contentPath ? `<a href="${getUrlFromInput(contentResponse.contentPath, "cactus.app")}">${contentResponse.contentLinkText}</a>` : "",
+            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${contentResponse.contentPath}">${contentResponse.contentLinkText}</a>` : "",
             [TemplateSection.inspiration]: contentResponse.inspirationText || "",
         };
 
