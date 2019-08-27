@@ -114,7 +114,6 @@ export default class CreatePromptModule extends FirebaseCommand {
             const savedPrompt = await AdminReflectionPromptService.getSharedInstance().save(prompt);
             console.log("saved the prompt successfully. Id", promptId);
 
-            content = new PromptContent();
             content.promptId = promptId;
             content.scheduledSendAt = this.mailchimpCommand ? this.mailchimpCommand.scheduleDateISO : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
@@ -126,11 +125,11 @@ export default class CreatePromptModule extends FirebaseCommand {
 
             content.content = [reflection];
 
-            savedContent = await AdminPromptContentService.getSharedInstance().save(content);
-            if (savedContent) {
-                savedPrompt.promptContentEntryId = savedContent.entryId;
+            const updatedContent = await AdminPromptContentService.getSharedInstance().save(content);
+            if (updatedContent) {
+                savedPrompt.promptContentEntryId = updatedContent.entryId;
                 await AdminReflectionPromptService.getSharedInstance().save(savedPrompt);
-                console.log("Updated the admin prompt to have the content id", savedContent.entryId);
+                console.log("Updated the admin prompt to have the content id", updatedContent.entryId);
             }
 
 
