@@ -1,69 +1,22 @@
 <template>
     <article class="journalEntry" id="reflectParent" v-bind:class="{ new: !responseText }">
-
-        <div class="dateContainer menuParent">
-            <div class="dates">
-                <!-- <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div> -->
-                <p class="date">{{promptDate}}</p>
-            </div>
-
-            <dropdown-menu :items="linkItems"/>
-        </div>
-
         <div v-if="bodyComponent">
             <component v-bind:is="bodyComponent.name" v-bind="bodyComponent.props"></component>
         </div>
-
-        <div class="entry" v-if="!doReflect">{{responseText}}</div>
-
-        <form v-show="doReflect" v-on:submit.prevent>
-            <div v-for="editedResponse in editedResponses">
-                <textarea v-model="editedResponse.text"></textarea>
-            </div>
-            <nav class="buttonContainer">
-                <button class="primary small" v-on:click="doneEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
-                        <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
-                    </svg>
-                    Done
-                </button>
-                <button class="secondary small" v-on:click="cancelEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M13.851 12l7.762 7.761a1.3 1.3 0 0 1 0 1.852c-.249.248-.58.387-.926.387-.347 0-.678-.14-.926-.387L12 13.85l-7.761 7.762c-.248.248-.58.387-.926.387-.346 0-.677-.14-.926-.387a1.3 1.3 0 0 1 0-1.852L10.15 12 2.387 4.239a1.3 1.3 0 0 1 0-1.852 1.3 1.3 0 0 1 1.852 0L12 10.15l7.761-7.762a1.3 1.3 0 0 1 1.852 0 1.3 1.3 0 0 1 0 1.852L13.85 12z"/>
-                    </svg>
-                    Cancel
-                </button>
-            </nav>
-        </form>
-        <nav v-show="!doReflect && responsesLoaded" class="buttonContainer">
-            <a v-if="prompt && prompt.contentPath" :href="prompt.contentPath" class="secondary small button">
-                Reflect
-            </a>
-            <div class="promptBtn" v-if="prompt && prompt.promptContentEntryId">
-                <a :href="promptContentPath" @click.prevent="showContent = true" class="button">Reflect</a>
-            </div>
-        </nav>
-        <modal v-if="prompt && prompt.promptContentEntryId" v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="true">
-            <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
-        </modal>
-
     </article>
 </template>
 
 <script lang="ts">
     import Vue from 'vue'
-    import * as DateUtil from "@shared/util/DateUtil";
-    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
+    import ReflectionResponse from '@shared/models/ReflectionResponse'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import SentPrompt from "@shared/models/SentPrompt"
     import {ListenerUnsubscriber} from "@web/services/FirestoreService"
     import ReflectionPromptService from "@web/services/ReflectionPromptService"
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
-    import SentPromptService from "@web/services/SentPromptService"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import Modal from "@components/Modal.vue";
     import PromptContent from "@components/PromptContent.vue"
-    import {PageRoute} from '@web/PageRoutes'
     import {getResponseText} from '@shared/util/StringUtil'
     import PromptContentEntryCard from "@components/JournalEntryPromptContentCard.vue";
     import PromptQuestionEntryCard from "@components/JournalEntryQuestionCard.vue";
@@ -74,10 +27,10 @@
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
-        editedText: string,
         menuOpen: boolean,
         deleting: boolean,
         prompt?: ReflectionPrompt,
+        editedText: string,
         responses: ReflectionResponse[],
         promptUnsubscriber?: ListenerUnsubscriber,
         responseUnsubscriber?: ListenerUnsubscriber,
@@ -100,14 +53,18 @@
             'click-outside': clickOutsideDirective(),
         },
         props: {
-            sentPrompt: SentPrompt
+            sentPrompt: {
+                type: Object as () => SentPrompt,
+                required: true
+            }
         },
         created() {
             const sentPrompt = this.sentPrompt;
             const promptId = sentPrompt.promptId;
             if (promptId) {
                 this.promptUnsubscriber = ReflectionPromptService.sharedInstance.observeById(promptId, {
-                    includeDeleted: false, onData: prompt => {
+                    includeDeleted: false,
+                    onData: prompt => {
                         this.prompt = prompt;
                         this.promptLoaded = true;
                     }
@@ -119,6 +76,8 @@
                         this.responsesLoaded = true;
                     }
                 })
+            } else {
+                console.log("NO prompt id found on the sent prompt");
             }
         },
 
@@ -148,55 +107,36 @@
         },
         watch: {},
         computed: {
-            linkItems(): {
-                title: string,
-                href?: string,
-                onClick?: () => void,
-            }[] {
-                const linkItems = [{
-                    title: "Share Prompt",
-                    onClick: () => {
-                        alert("Clicked share")
-                    }
-                }];
-
-                if (this.responses.length > 0) {
-                    linkItems.push({
-                        title: "Edit Reflection",
-                        onClick: () => {
-                            this.startEditing()
-                        }
-                    })
-                } else {
-                    linkItems.push({
-                        title: "Add Reflection",
-                        onClick: () => {
-                            this.startEditing()
-                        }
-                    })
-                }
-
-                return linkItems
-            },
             bodyComponent(): { name: string, props?: any } | undefined {
                 if (!this.promptLoaded) {
                     return {name: "spinner"};
                 } else if (this.prompt && this.prompt.promptContentEntryId) {
-                    //@ts-ignore
-                    return {name: "prompt-content", props: {entryId: this.prompt.promptContentEntryId}};
+                    return {
+                        name: "prompt-content",
+                        props: {
+                            sentPrompt: this.sentPrompt,
+                            prompt: this.prompt,
+                            entryId: this.prompt.promptContentEntryId,
+                            responses: this.responses,
+                            responsesLoaded: this.responsesLoaded,
+                        }
+                    };
                 } else if (this.prompt) {
-                    return {name: "question-content", props: {prompt: this.prompt}};
+                    return {
+                        name: "question-content",
+                        props: {
+                            prompt: this.prompt,
+                            sentPrompt: this.sentPrompt,
+                            responses: this.responses,
+                            responsesLoaded: this.responsesLoaded,
+                        }
+                    };
                 }
             },
-            promptContentPath(): string | undefined {
-                if (this.prompt && this.prompt.promptContentEntryId) {
-                    return `${PageRoute.PROMPTS_ROOT}/${this.prompt.promptContentEntryId}`
-                }
-                return;
-            },
-            promptDate(): string | undefined {
-                return DateUtil.formatDate(this.sentPrompt.firstSentAt, "LLL d, yyyy")
-            },
+
+            // promptDate(): string | undefined {
+            //     return DateUtil.formatDate(this.sentPrompt.firstSentAt, "LLL d, yyyy")
+            // },
             responseText(): string | undefined {
                 return getResponseText(this.responses);
             },
@@ -212,105 +152,105 @@
             }
         },
         methods: {
-            async doneEditing() {
-                this.doReflect = false;
-
-
-                const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
-                    if (response.id) {
-                        map[response.id as string] = response;
-                    }
-                    return map;
-                }, {});
-
-                const tasks: Promise<any>[] = [];
-                this.editedResponses.forEach(edit => {
-                    return new Promise(async resolve => {
-                        let response = edit.id ? responsesById[edit.id] : undefined;
-                        if (!response && this.prompt && this.prompt.id) {
-                            response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
-                        }
-
-                        if (edit.text && edit.text.trim() && response) {
-                            response.content.text = edit.text;
-                            //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
-                            await ReflectionResponseService.sharedInstance.save(response);
-                        } else if (response && response.id) {
-                            //the text was deleted, delete the response;
-                            await ReflectionResponseService.sharedInstance.delete(response);
-                        } else {
-                            console.error("There was no response available to save... this shouldn't happen");
-                        }
-                        resolve();
-                    })
-                });
-                await Promise.all(tasks);
-
-            },
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            },
-            closeMenu() {
-                this.menuOpen = false;
-            },
-            cancelEditing() {
-                const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
-                    if (response.id) {
-                        map[response.id as string] = response;
-                    }
-                    return map;
-                }, {});
-
-                const foundChange = this.editedResponses.find(edit => {
-                    if (!edit.id && edit.text.trim()) {
-                        return true;
-                    } else if (edit.id && responsesById[edit.id]) {
-                        const response = responsesById[edit.id];
-                        const existingText = response.content.text || "";
-                        return existingText.trim() !== edit.text.trim();
-                    }
-                    return false;
-                });
-
-                if (foundChange) {
-                    const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
-                    if (c) {
-                        console.log("confirmed cancel");
-                        // this.editedText = this.responseText;
-                        this.doReflect = false;
-                    } else {
-                        console.log("don't cancel");
-                    }
-                } else {
-                    console.log("no changes, just closing");
-                    this.doReflect = false;
-                }
-            },
-            async deleteSentPrompt() {
-
-                const c = confirm("Are you sure you want to ignore this question? It will no longer be available in your journal");
-                if (!c) {
-                    return;
-                }
-
-                if (this.prompt && this.prompt.id) {
-                    await SentPromptService.sharedInstance.deleteForPromptId(this.prompt.id)
-                }
-            },
-            startEditing() {
-                this.editedText = this.responseText || "";
-                this.editedResponses = this.responses.map(response => {
-                    return {id: response.id || "", text: response.content.text || ""}
-                });
-
-                if (this.editedResponses.length === 0) {
-                    this.editedResponses = [{id: undefined, text: ""}];
-                }
-
-
-                this.doReflect = true;
-                this.menuOpen = false;
-            },
+            // async doneEditing() {
+            //     this.doReflect = false;
+            //
+            //
+            //     const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
+            //         if (response.id) {
+            //             map[response.id as string] = response;
+            //         }
+            //         return map;
+            //     }, {});
+            //
+            //     const tasks: Promise<any>[] = [];
+            //     this.editedResponses.forEach(edit => {
+            //         return new Promise(async resolve => {
+            //             let response = edit.id ? responsesById[edit.id] : undefined;
+            //             if (!response && this.prompt && this.prompt.id) {
+            //                 response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, ResponseMedium.JOURNAL_WEB, this.prompt.question)
+            //             }
+            //
+            //             if (edit.text && edit.text.trim() && response) {
+            //                 response.content.text = edit.text;
+            //                 //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
+            //                 await ReflectionResponseService.sharedInstance.save(response);
+            //             } else if (response && response.id) {
+            //                 //the text was deleted, delete the response;
+            //                 await ReflectionResponseService.sharedInstance.delete(response);
+            //             } else {
+            //                 console.error("There was no response available to save... this shouldn't happen");
+            //             }
+            //             resolve();
+            //         })
+            //     });
+            //     await Promise.all(tasks);
+            //
+            // },
+            // toggleMenu() {
+            //     this.menuOpen = !this.menuOpen;
+            // },
+            // closeMenu() {
+            //     this.menuOpen = false;
+            // },
+            // cancelEditing() {
+            //     const responsesById: { [id: string]: ReflectionResponse } = this.responses.reduce((map: { [id: string]: ReflectionResponse }, response) => {
+            //         if (response.id) {
+            //             map[response.id as string] = response;
+            //         }
+            //         return map;
+            //     }, {});
+            //
+            //     const foundChange = this.editedResponses.find(edit => {
+            //         if (!edit.id && edit.text.trim()) {
+            //             return true;
+            //         } else if (edit.id && responsesById[edit.id]) {
+            //             const response = responsesById[edit.id];
+            //             const existingText = response.content.text || "";
+            //             return existingText.trim() !== edit.text.trim();
+            //         }
+            //         return false;
+            //     });
+            //
+            //     if (foundChange) {
+            //         const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
+            //         if (c) {
+            //             console.log("confirmed cancel");
+            //             // this.editedText = this.responseText;
+            //             this.doReflect = false;
+            //         } else {
+            //             console.log("don't cancel");
+            //         }
+            //     } else {
+            //         console.log("no changes, just closing");
+            //         this.doReflect = false;
+            //     }
+            // },
+            // async deleteSentPrompt() {
+            //
+            //     const c = confirm("Are you sure you want to ignore this question? It will no longer be available in your journal");
+            //     if (!c) {
+            //         return;
+            //     }
+            //
+            //     if (this.prompt && this.prompt.id) {
+            //         await SentPromptService.sharedInstance.deleteForPromptId(this.prompt.id)
+            //     }
+            // },
+            // startEditing() {
+            //     this.editedText = this.responseText || "";
+            //     this.editedResponses = this.responses.map(response => {
+            //         return {id: response.id || "", text: response.content.text || ""}
+            //     });
+            //
+            //     if (this.editedResponses.length === 0) {
+            //         this.editedResponses = [{id: undefined, text: ""}];
+            //     }
+            //
+            //
+            //     this.doReflect = true;
+            //     this.menuOpen = false;
+            // },
         }
     })
 
@@ -366,25 +306,25 @@
         }
     }
 
-    .dateContainer {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 1.6rem;
-        position: relative;
-
-        .date {
-            font-size: 1.6rem;
-            flex-grow: 1;
-            opacity: .8;
-            display: flex;
-
-            &.edited {
-                color: $lightText;
-                font-size: 1rem;
-            }
-        }
-    }
+    //.dateContainer {
+    //    align-items: center;
+    //    display: flex;
+    //    justify-content: space-between;
+    //    margin-bottom: 1.6rem;
+    //    position: relative;
+    //
+    //    .date {
+    //        font-size: 1.6rem;
+    //        flex-grow: 1;
+    //        opacity: .8;
+    //        display: flex;
+    //
+    //        &.edited {
+    //            color: $lightText;
+    //            font-size: 1rem;
+    //        }
+    //    }
+    //}
 
     //.moreMenu {
     //    background-color: $lightPink;
