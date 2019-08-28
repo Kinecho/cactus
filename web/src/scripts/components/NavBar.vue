@@ -18,28 +18,14 @@
                 >Sign Up Free</a>
             </transition>
         </div>
-
-        <transition name="fade-in">
-            <div v-if="loggedIn" class="user-info">
-                <div v-click-outside="closeMenu">
-                    <div class="avatar-container" @click="toggleMenu" v-bind:class="{open: menuOpen}">
-                        <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
-                    </div>
-                    <transition name="fade-down">
-                        <nav class="moreMenu" v-show="menuOpen">
-                            <span class="static">{{user.email}}</span>
-                            <template v-for="(link) in links" v-bind:link="link">
-                                <a v-if="link.href" :href="link.href">{{link.title}}</a>
-                                <span v-if="link.onClick" @click.prevent="link.onClick">{{link.title}}</span>
-                            </template>
-                            <!--                        <a :href="PageRoute.JOURNAL_HOME">My Journal</a>-->
-                            <!--                        <a href="#" @click.prevent=logout>logout</a>-->
-                        </nav>
-                    </transition>
+        <dropdown-menu :items="links">
+            <div slot="custom-button">
+                <div class="navbar-avatar-container">
+                    <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
+                    <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                 </div>
             </div>
-        </transition>
+        </dropdown-menu>
     </header>
 </template>
 
@@ -51,12 +37,8 @@
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {logout} from '@web/auth'
-
-    declare interface LinkData {
-        title: string,
-        href?: string,
-        onClick?: () => Promise<void> | void
-    }
+    import DropdownMenu from "@components/DropdownMenu.vue"
+    import {DropdownMenuLink} from "@components/DropdownMenuTypes"
 
     declare interface NavBarData {
         authUnsubscribe?: () => void,
@@ -69,6 +51,9 @@
     export default Vue.extend({
         directives: {
             'click-outside': clickOutsideDirective(),
+        },
+        components: {
+            DropdownMenu,
         },
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
@@ -102,8 +87,8 @@
             loggedIn(): boolean {
                 return !!this.user;
             },
-            links(): LinkData[] {
-                return [{
+            links(): DropdownMenuLink[] {
+                const links: DropdownMenuLink[] = [{
                     title: "My Journal",
                     href: PageRoute.JOURNAL_HOME,
                 }, {
@@ -114,7 +99,16 @@
                     onClick: async () => {
                         await this.logout()
                     }
-                }]
+                }];
+
+                if (this.user && this.user.email) {
+                    links.unshift({
+                        static: true,
+                        title: this.user.email,
+                    })
+                }
+
+                return links;
             },
             displayName(): string | undefined | null {
                 return this.user ? this.user.displayName || this.user.email : null;
@@ -216,88 +210,45 @@
                 width: 7rem;
             }
         }
+    }
 
+    .dropdownMenuOpen {
+        .navbar-avatar-container {
+            transform: scale(.9);
+        }
+    }
 
-        .user-info {
+    .navbar-avatar-container {
+        cursor: pointer;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        overflow: hidden;
+        display: inline-block;
+        transition: transform .2s ease-in-out;
+
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            position: relative;
-
-            .moreMenu {
-                background-color: $lightPink;
-                border-radius: 6px;
-                right: 1rem;
-                padding: .8rem 0;
-                position: absolute;
-                top: 4rem;
-                z-index: 100;
-                @include popoverShadow;
-
-                a, span {
-                    background-color: transparent;
-                    color: $darkestPink;
-                    display: block;
-                    font-size: 1.6rem;
-                    opacity: .8;
-                    padding: .8rem 2.4rem;
-                    text-decoration: none;
-                    transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-                    white-space: nowrap;
-
-                    &.static {
-                        border-bottom: 1px solid darken($pink, 5%);
-                        color: $darkText;
-                        margin-bottom: .8rem;
-                        padding-bottom: 1.6rem;
-                    }
-
-                    &:hover:not(.static) {
-                        background-color: lighten($lightPink, 2%);
-                        opacity: 1;
-                        cursor: pointer;
-                    }
-                }
-            }
-
-            .avatar-container {
-                cursor: pointer;
-                width: 4rem;
-                height: 4rem;
-                border-radius: 50%;
-                overflow: hidden;
-                display: inline-block;
-                transition: transform .2s ease-in-out;
-
-                &.open {
-                    transform: scale(.9);
-                }
-
-                .initials {
-                    background: $darkGreen;
-                    color: white;
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                img {
-                    height: 100%;
-                    width: 100%;
-
-                }
-            }
-
-            @include isPhone {
-                font-size: 1.4rem;
-                .avatar-container {
-                    width: 3rem;
-                    height: 3rem;
-                }
-            }
         }
 
+        img {
+            height: 100%;
+            width: 100%;
 
+        }
+    }
+
+    @include isPhone {
+        font-size: 1.4rem;
+        .navbar-avatar-container {
+            width: 3rem;
+            height: 3rem;
+        }
     }
 </style>

@@ -1,5 +1,4 @@
 <template>
-
     <article class="journalEntry" id="reflectParent" v-bind:class="{ new: !responseText }">
 
         <div class="dateContainer menuParent">
@@ -8,30 +7,12 @@
                 <p class="date">{{promptDate}}</p>
             </div>
 
-            <div v-click-outside="closeMenu">
-                <button @click="toggleMenu()" class="secondary icon dots wiggle" v-bind:class="{ open: menuOpen }">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                        <path d="M24 27.059A3.53 3.53 0 1 1 24 20a3.53 3.53 0 0 1 0 7.059zm16.47 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059zm-32.94 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059z"/>
-                    </svg>
-                </button>
-                <transition name="fade-down">
-                    <nav class="moreMenu" v-show="menuOpen">
-                        <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
-                        <a href="#">Share Prompt</a>
-                        <a href="#" v-on:click.prevent="startEditing" v-show="responses.length > 0">Edit Reflection</a>
-                    </nav>
-                </transition>
-            </div>
+            <dropdown-menu :items="linkItems"/>
         </div>
 
-        <h3 class="topic" v-show="prompt && prompt.promptContentEntryId">Who lightens the burden</h3>
-        <p class="subtext" v-show="prompt && prompt.promptContentEntryId">Today you’ll reflect on someone who helps you when you are worried about something.</p>
-        <!-- <img class="backgroundImage" src="/assets/images/nature.svg" alt="" /> -->
-
-        <h3 class="question">{{questionText}}</h3>
-        <p v-show="!prompt && promptLoaded" class="warning prompt">
-            Oops! We were unable to load the question for this day.
-        </p>
+        <div v-if="bodyComponent">
+            <component v-bind:is="bodyComponent.name" v-bind="bodyComponent.props"></component>
+        </div>
 
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
 
@@ -41,7 +22,9 @@
             </div>
             <nav class="buttonContainer">
                 <button class="primary small" v-on:click="doneEditing" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                        <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                    </svg>
                     Done
                 </button>
                 <button class="secondary small" v-on:click="cancelEditing" type="button">
@@ -59,11 +42,11 @@
             <div class="promptBtn" v-if="prompt && prompt.promptContentEntryId">
                 <a :href="promptContentPath" @click.prevent="showContent = true" class="button">Reflect</a>
             </div>
-
         </nav>
         <modal v-if="prompt && prompt.promptContentEntryId" v-bind:show="showContent" v-on:close="showContent = false" :showCloseButton="true">
             <PromptContent slot="body" v-bind:promptContentEntryId="prompt.promptContentEntryId" v-on:close="showContent = false"/>
         </modal>
+
     </article>
 </template>
 
@@ -82,6 +65,12 @@
     import PromptContent from "@components/PromptContent.vue"
     import {PageRoute} from '@web/PageRoutes'
     import {getResponseText} from '@shared/util/StringUtil'
+    import PromptContentEntryCard from "@components/JournalEntryPromptContentCard.vue";
+    import PromptQuestionEntryCard from "@components/JournalEntryQuestionCard.vue";
+    import DropdownMenu from "@components/DropdownMenu.vue";
+
+
+    import Spinner from "@components/Spinner.vue";
 
     declare interface ReflectionResponseCardData {
         doReflect: boolean,
@@ -102,6 +91,10 @@
         components: {
             Modal,
             PromptContent,
+            Spinner,
+            "prompt-content": PromptContentEntryCard,
+            "question-content": PromptQuestionEntryCard,
+            DropdownMenu,
         },
         directives: {
             'click-outside': clickOutsideDirective(),
@@ -155,6 +148,46 @@
         },
         watch: {},
         computed: {
+            linkItems(): {
+                title: string,
+                href?: string,
+                onClick?: () => void,
+            }[] {
+                const linkItems = [{
+                    title: "Share Prompt",
+                    onClick: () => {
+                        alert("Clicked share")
+                    }
+                }];
+
+                if (this.responses.length > 0) {
+                    linkItems.push({
+                        title: "Edit Reflection",
+                        onClick: () => {
+                            this.startEditing()
+                        }
+                    })
+                } else {
+                    linkItems.push({
+                        title: "Add Reflection",
+                        onClick: () => {
+                            this.startEditing()
+                        }
+                    })
+                }
+
+                return linkItems
+            },
+            bodyComponent(): { name: string, props?: any } | undefined {
+                if (!this.promptLoaded) {
+                    return {name: "spinner"};
+                } else if (this.prompt && this.prompt.promptContentEntryId) {
+                    //@ts-ignore
+                    return {name: "prompt-content", props: {entryId: this.prompt.promptContentEntryId}};
+                } else if (this.prompt) {
+                    return {name: "question-content", props: {prompt: this.prompt}};
+                }
+            },
             promptContentPath(): string | undefined {
                 if (this.prompt && this.prompt.promptContentEntryId) {
                     return `${PageRoute.PROMPTS_ROOT}/${this.prompt.promptContentEntryId}`
@@ -353,32 +386,32 @@
         }
     }
 
-    .moreMenu {
-        background-color: $lightPink;
-        border-radius: 6px;
-        right: 0;
-        padding: .8rem 0;
-        position: absolute;
-        top: 4rem;
+    //.moreMenu {
+    //    background-color: $lightPink;
+    //    border-radius: 6px;
+    //    right: 0;
+    //    padding: .8rem 0;
+    //    position: absolute;
+    //    top: 4rem;
+    //
+    //    a {
+    //        background-color: transparent;
+    //        color: $darkestPink;
+    //        display: block;
+    //        font-size: 1.6rem;
+    //        opacity: .8;
+    //        padding: .8rem 2.4rem;
+    //        text-decoration: none;
+    //        transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
+    //
+    //        &:hover {
+    //            background-color: lighten($lightPink, 2%);
+    //            opacity: 1;
+    //        }
+    //    }
+    //}
 
-        a {
-            background-color: transparent;
-            color: $darkestPink;
-            display: block;
-            font-size: 1.6rem;
-            opacity: .8;
-            padding: .8rem 2.4rem;
-            text-decoration: none;
-            transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-
-            &:hover {
-                background-color: lighten($lightPink, 2%);
-                opacity: 1;
-            }
-        }
-    }
-
-    .topoic,
+    .topic,
     .question,
     .subtext {
         max-width: 66%;
