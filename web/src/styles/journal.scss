@@ -33,13 +33,14 @@
 
   .backgroundImage {
     bottom: -2.4rem;
-    height: auto;
+    //height: auto;
     left: 60%;
     position: absolute;
     width: 60%;
-
+    height: 100%;
     &.randomBackground {
       //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
+
 
       &.bg0 {
         background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px
