@@ -127,7 +127,7 @@
                             rows="1"
                             v-model="response.content.text"
                             v-on:click.stop
-                            @change="checkForInput"
+                            :class="{hasValue: !!response.content.text}"
                         />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
@@ -290,14 +290,6 @@
             complete() {
                 this.$emit("complete")
             },
-            checkForInput(): function(e){
-                let input = event.target
-                if (input.value != "") {
-                    input.classList.add("hasValue");
-                } else {
-                    input.classList.remove("hasValue");
-                }
-            }
         }
     })
 </script>
