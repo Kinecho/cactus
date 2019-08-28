@@ -14,7 +14,7 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <p class="label">
-                        Use this link to share Cactus with friends, family, and framily.
+                        Use this link to share Cactus with friends and family.
                     </p>
                     <div class="referral-link">
                         <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
