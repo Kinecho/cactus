@@ -305,7 +305,7 @@
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return !this.isReflection
+                return true
             },
         },
         watch: {
