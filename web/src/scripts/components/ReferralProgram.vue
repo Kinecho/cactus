@@ -17,7 +17,7 @@
                         Use this link to share Cactus with friends, family, and framily.
                     </p>
                     <div class="referral-link">
-                        <input type="text" class="link-input" name="referral-link" :value="referralLink">
+                        <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
                         <button class="copy secondary" v-clipboard:copy="referralLink"
                                 v-clipboard:success="handleCopySuccess"
                                 v-clipboard:error="handleCopyError">
