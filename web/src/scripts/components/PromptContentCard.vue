@@ -100,7 +100,7 @@
             <flamelink-image v-bind:image="processedContent.backgroundImage"/>
         </div>
 
-        <section class="lowerActions">
+        <section class="lowerActions" v-if="tapAnywhereEnabled || (isReflectScreen && response)">
             <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
                 <span class="tap">Tap Anywhere</span>
             </div>
@@ -124,22 +124,16 @@
                     <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
                             type="text"
-                            placeholder="Add your reflection"
                             rows="1"
                             v-model="response.content.text"
                             v-on:click.stop
+                            @change="checkForInput"
                         />
                     </resizable-textarea>
-                    <div class="mobile-nav-buttons">
-                        <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
-                            <div class="progress-circle">
-                                <pie-spinner :percent="reflectionProgress"/>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                                <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                            </svg>
-                        </button>
-                    </div>
+                    <span class="textareaPlaceholder">
+                        <svg class="pen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
+                        Write Optional Note
+                    </span>
                 </div>
             </div>
             <!--    END Reflect-->
@@ -295,6 +289,14 @@
             },
             complete() {
                 this.$emit("complete")
+            },
+            checkForInput(): function(e){
+                let input = event.target
+                if (input.value != "") {
+                    input.classList.add("hasValue");
+                } else {
+                    input.classList.remove("hasValue");
+                }
             }
         }
     })
@@ -452,7 +454,7 @@
 
     .text {
         font-size: 2.4rem;
-        padding: 7.2rem 0;
+        padding: 4rem 0;
 
         .reflectScreen & {
             padding: 6.4rem 0 1.6rem;
@@ -646,13 +648,15 @@
         opacity: .4;
         text-align: center;
         text-transform: uppercase;
-
-        .slide-0 & {
-            display: none;
-        }
     }
 
     .mobile-nav-buttons {
+
+        .slide-0 & {
+            background-color: $lightBlue;
+            margin: 0 -2.4rem -3.2rem;
+            padding: .8rem;
+        }
 
         @include r(600) {
             display: none;
@@ -727,34 +731,48 @@
     }
 
     .flexContainer {
-        @include r(374) {
-            display: flex;
-        }
-
-        .mobile-nav-buttons {
-            margin-top: .8rem;
-
-            button {
-                box-shadow: none;
-            }
-
-            @include r(374) {
-                margin: 0 0 0 .8rem;
-            }
-        }
+        position: relative;
     }
 
     .reflect-container textarea {
         @include textArea;
         background-color: transparent;
+        border: 0;
         border-radius: 2.4rem;
         max-height: 10rem;
+        position: relative;
+        transition: background-color .3s;
         width: 100%;
+        z-index: 1;
 
         &:focus {
             background-color: $white;
-            border-radius: 6px;
         }
+    }
+
+    .reflect-container textarea + .textareaPlaceholder {
+        align-items: center;
+        bottom: 0;
+        color: $darkGreen;
+        display: flex;
+        justify-content: center;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: opacity .3s;
+        z-index: 0;
+
+        .pen {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
+        }
+    }
+
+    .reflect-container textarea:focus + .textareaPlaceholder,
+    .reflect-container textarea.hasValue + .textareaPlaceholder {
+        opacity: 0;
     }
 
     .primaryBtn {

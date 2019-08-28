@@ -50,9 +50,7 @@
         </form>
         <nav v-show="!doReflect && responsesLoaded && (responses.length === 0 || !responseText)" class="buttonContainer">
             <button v-on:click="startEditing" class="primary small wiggle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
-                    <path d="M34.123 5.695a5.786 5.786 0 1 1 8.182 8.182l-27.59 27.591a1.104 1.104 0 0 1-.514.29l-8.829 2.208a1.104 1.104 0 0 1-1.338-1.338l2.207-8.83c.049-.194.15-.37.29-.512L34.124 5.695zM13.37 39.692l27.374-27.375a3.579 3.579 0 0 0-5.06-5.061L8.307 34.63 6.621 41.38l6.749-1.687z"/>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
                 Reflect
             </button>
             <a v-if="prompt && prompt.contentPath && !prompt.hasPromptContent" :href="prompt.contentPath" class="secondary small button wiggle">
