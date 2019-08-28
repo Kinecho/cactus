@@ -4,7 +4,7 @@
         <div class="dateContainer menuParent">
             <div class="dates">
                 <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
-                <h4 class="date">{{promptDate}}</h4>
+                <p class="date">{{promptDate}}</p>
             </div>
 
             <dropdown-menu :items="linkItems"/>

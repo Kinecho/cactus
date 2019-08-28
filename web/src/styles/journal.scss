@@ -5,7 +5,6 @@
   text-align: left;
 }
 
-
 .journalEntry {
   background-color: white;
   border: 1px solid $lightest;
@@ -15,8 +14,7 @@
   overflow: hidden;
   position: relative;
 
-  @include r(768) {
-    border-radius: 12px;
+  @include r(600) {
     padding: 3.2rem 2.4rem;
   }
 
@@ -32,40 +30,47 @@
   }
 
   .backgroundImage {
-    bottom: -2.4rem;
-    //height: auto;
-    left: 60%;
-    position: absolute;
-    width: 60%;
-    height: 100%;
-    &.randomBackground {
+    bottom: -4rem;
+    left: -2.4rem;
+    margin: 0 auto;
+    position: relative;
+    right: 0;
+    width: 120%;
+
+    @include r(600) {
+        bottom: -2.4rem;
+        height: auto;
+        left: 60%;
+        position: absolute;
+        width: 60%;
+    }
+
+    /* &.randomBackground {
       //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
 
 
       &.bg0 {
-        background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px
+        background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px no-repeat
       }
 
       &.bg1 {
-        background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px
+        background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px no-repeat
       }
 
       &.bg2 {
-        background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px
+        background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px no-repeat
       }
 
       &.bg3 {
-        background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px
+        background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px no-repeat
       }
 
       &.bg4 {
-        background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px
+        background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
       }
 
-    }
+    } */
   }
-
-
 }
 
 .buttonContainer {
@@ -75,7 +80,9 @@
 
 .topic,
 .subtext {
-  max-width: 66%;
+    @include r(768) {
+        max-width: 66%;
+    }
 }
 
 .topic {
@@ -83,11 +90,11 @@
 }
 
 .dateContainer {
-  align-items: center;
   display: flex;
   justify-content: space-between;
   margin-bottom: 1.6rem;
   position: relative;
+  z-index: 1;
 
   .date {
     font-size: 1.6rem;
