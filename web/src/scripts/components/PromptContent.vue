@@ -829,7 +829,7 @@
         }
 
         &.back {
-            background: url(assets/images/yellowNeedles.svg) $yellow;
+            background: url(/assets/images/yellowNeedles.svg) $yellow;
             background-size: 80%;
             display: flex;
             flex-direction: column;
