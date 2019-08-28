@@ -101,10 +101,6 @@
         </div>
 
         <section class="lowerActions" v-if="tapAnywhereEnabled || (isReflectScreen && response)">
-            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
-                <span class="tap">Tap Anywhere</span>
-            </div>
-
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen && response" class="reflect-container">
@@ -131,10 +127,14 @@
                         />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
-                        <svg class="pen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
+                        <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
                         Write Optional Note
                     </span>
                 </div>
+            </div>
+
+            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
+                <span class="tap">Tap Anywhere</span>
             </div>
             <!--    END Reflect-->
 <!--            <div class="actions" v-if="processedContent.actionButton">-->
@@ -449,7 +449,7 @@
         padding: 4rem 0;
 
         .reflectScreen & {
-            padding: 6.4rem 0 1.6rem;
+            padding: 5.6rem 0 1.6rem;
         }
     }
 
@@ -463,6 +463,12 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
+
+        @include isTinyPhone {
+            .reflectScreen & {
+                justify-content: flex-start;
+            }
+        }
     }
 
     .quote-container {
@@ -617,20 +623,6 @@
         @include r(600) {
             position: absolute;
         }
-
-        .reflectScreen & {
-            bottom: 0;
-            left: 0;
-            position: relative;
-            right: 0;
-
-            @include r(600) {
-                bottom: 3.2rem;
-                left: 2.4rem;
-                position: absolute;
-                right: 2.4rem;
-            }
-        }
     }
 
     .tap {
@@ -643,68 +635,12 @@
     }
 
     .mobile-nav-buttons {
-
-        .slide-0 & {
-            background-color: $lightBlue;
-            margin: 0 -2.4rem -3.2rem;
-            padding: .8rem;
-        }
+        background-color: $lightBlue;
+        margin: 0 -2.4rem -3.2rem;
+        padding: .8rem;
 
         @include r(600) {
             display: none;
-        }
-
-        .inline-arrow {
-            flex-grow: 0;
-            float: right;
-            position: relative;
-            overflow: hidden;
-
-            &.reflection {
-                position: relative;
-
-                &:hover:not(.complete) {
-                    cursor: default;
-                }
-
-                &:not(.complete) {
-                    svg {
-                        opacity: 0;
-                    }
-                }
-
-                &.complete {
-                    cursor: pointer;
-
-                    .progress-circle {
-                        opacity: 0;
-                    }
-                }
-
-                .progress-circle {
-                    transition: opacity .3s;
-                    z-index: 0;
-                    opacity: .6;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                }
-            }
-        }
-
-        .next {
-            display: flex;
-            height: 5.6rem;
-            justify-content: center;
-            padding: 0;
-            width: 5.6rem;
-
-            svg {
-                height: 1.8rem;
-                width: 1.8rem;
-            }
         }
     }
 
@@ -729,8 +665,9 @@
     .reflect-container textarea {
         @include textArea;
         background-color: transparent;
-        border: 0;
+        border-width: 0;
         border-radius: 2.4rem;
+        cursor: pointer;
         max-height: 10rem;
         position: relative;
         transition: background-color .3s;
@@ -739,6 +676,14 @@
 
         &:focus {
             background-color: $white;
+        }
+
+        &.hasValue {
+            border-width: 1px;
+        }
+
+        &:hover + .textareaPlaceholder .wiggle {
+            animation: wiggle .5s forwards;
         }
     }
 
