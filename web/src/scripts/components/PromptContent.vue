@@ -555,6 +555,7 @@
     })
 </script>
 
+
 <style lang="scss" scoped>
     @import "common";
     @import "variables";
@@ -809,11 +810,25 @@
         }
     }
 
+    @keyframes twist {
+        0% {
+            transform: rotateY(0);
+        }
+        50%{
+            transform: rotateY(10deg);
+        }
+        100% {
+            transform: rotateY(0);
+        }
+    }
+
     .flip-card {
         backface-visibility: hidden;
         left: 0;
         top: 0;
         width: 100%;
+
+        animation: twist .5s ;
 
         @include r(600) {
             border-radius: 12px;
