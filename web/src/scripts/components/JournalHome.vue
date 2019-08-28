@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="bgBlobs">
         <NavBar :show-signup="false" :isSticky="false"/>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
@@ -179,6 +179,13 @@
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";
+
+    .bgBlobs {
+        background-image: url(/assets/images/leftBlobBg.svg), url(/assets/images/rightBlobBg.svg);
+        background-repeat: repeat-y;
+        background-size: 525px 6130px;
+        background-position: 0 0, right top;
+    }
 
     .container {
         text-align: left;
