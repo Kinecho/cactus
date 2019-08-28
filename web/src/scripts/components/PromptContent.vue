@@ -597,7 +597,7 @@
                 position: relative;
                 transform: translateY(1.6rem);
                 width: 94%;
-                z-index: 5;
+                z-index: 20;
                 height: 0;
                 margin: 0 auto;
 
@@ -683,7 +683,7 @@
         left: 0;
         position: absolute;
         top: 2.4rem;
-        z-index: 5;
+        z-index: 20;
 
         @include r(600) {
             margin: 0 auto;
@@ -790,7 +790,9 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        position: relative;
         width: 100%;
+        z-index: 10;
 
         @include isTinyPhone {
             height: calc(100vh - 8rem);
