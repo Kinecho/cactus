@@ -2,7 +2,7 @@ import {
     appendDomain,
     appendQueryParams,
     destructureDisplayName, getCharacterCount,
-    getFilenameFromInput,
+    getFilenameFromInput, getIntegerFromStringBetween,
     getUrlFromInput, getWordCount,
     stripQueryParams
 } from "@shared/util/StringUtil";
@@ -240,5 +240,19 @@ describe("get character count", () => {
     test("padded string", () => {
         const input = "    12345  ";
         expect(getCharacterCount(input)).toEqual(5);
+    });
+});
+
+describe("get number from string", () => {
+    test("various strings", () => {
+        expect(getIntegerFromStringBetween("abc", 5)).toEqual(4);
+        expect(getIntegerFromStringBetween("abc124", 5)).toEqual(1);
+        expect(getIntegerFromStringBetween("aaaa", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("a", 5)).toEqual(2);
+        expect(getIntegerFromStringBetween("b", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("c", 5)).toEqual(4);
+        expect(getIntegerFromStringBetween("d", 5)).toEqual(0);
+        expect(getIntegerFromStringBetween("239aljadlkj291", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("", 5)).toEqual(0);
     });
 });

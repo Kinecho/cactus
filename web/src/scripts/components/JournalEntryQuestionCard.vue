@@ -3,8 +3,8 @@
 
         <div class="dateContainer menuParent">
             <div class="dates">
-                <!-- <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div> -->
-                <p class="date">{{promptDate}}</p>
+                <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+                <h4 class="date">{{promptDate}}</h4>
             </div>
 
             <dropdown-menu :items="linkItems"/>
@@ -84,7 +84,7 @@
         },
         computed: {
             promptDate(): string | undefined {
-                return formatDate(this.sentPrompt.firstSentAt, "LLL d, yyyy")
+                return formatDate(this.sentPrompt.firstSentAt, "LLLL d, yyyy")
             },
             linkItems(): {
                 title: string,
@@ -130,9 +130,7 @@
                 return;
             }
         },
-        methods: {
-
-        }
+        methods: {}
     })
 </script>
 
@@ -141,7 +139,6 @@
     @import "mixins";
     @import "variables";
     @import "journal";
-
 
 
 </style>

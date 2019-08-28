@@ -1,9 +1,7 @@
 <template>
-    <article class="journalEntry">
-        <div v-if="bodyComponent">
-            <component v-bind:is="bodyComponent.name" v-bind="bodyComponent.props"></component>
-        </div>
-    </article>
+    <div v-if="bodyComponent">
+        <component v-bind:is="bodyComponent.name" v-bind="bodyComponent.props"></component>
+    </div>
 </template>
 
 <script lang="ts">
@@ -16,8 +14,6 @@
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import PromptContentEntryCard from "@components/JournalEntryPromptContentCard.vue";
     import PromptQuestionEntryCard from "@components/JournalEntryQuestionCard.vue";
-
-
     import Spinner from "@components/Spinner.vue";
 
     declare interface ReflectionResponseCardData {
@@ -117,8 +113,7 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~@styles/mixins";
-    @import "~@styles/variables";
-
+    @import "mixins";
+    @import "variables";
 
 </style>

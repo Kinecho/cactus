@@ -1,9 +1,9 @@
 <template>
-    <div class="journalEntry" v-bind:class="{ new: !responseText }">
-        <div class="dateContainer menuParent" >
+    <div class="journalEntry" v-bind:class="{new: !this.responseText,}">
+        <div class="dateContainer menuParent">
             <div class="dates">
-                 <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
-                <p class="date">{{promptDate}}</p>
+                <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+                <h4 class="date">{{promptDate}}</h4>
             </div>
 
             <dropdown-menu :items="linkItems"/>
@@ -28,6 +28,7 @@
                 @close="doReflect = false"
         />
 
+        <div class="backgroundImage" :class="backgroundClasses"></div>
 
         <nav v-show="!doReflect" class="buttonContainer">
             <a :href="promptContentPath" @click.prevent="showContent = true" class="button">Reflect</a>
@@ -49,7 +50,7 @@
     import {formatDate} from "@shared/util/DateUtil"
     import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
-    import {getResponseText} from "@shared/util/StringUtil"
+    import {getIntegerFromStringBetween, getResponseText} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
@@ -119,6 +120,20 @@
             }
         },
         computed: {
+            backgroundClasses(): { [name: string]: string } {
+                const [first]: Content[] = (this.promptContent && this.promptContent.content) || []
+                const bgImage = first ? first.backgroundImage : undefined;
+                const id = this.prompt.id;
+
+                const showRandomBackground = !bgImage || true;
+
+                const classes: { [name: string]: any } = {
+                    randomBackground: showRandomBackground,
+                    [`bg${getIntegerFromStringBetween(id || "", 4)}`]: showRandomBackground
+                };
+
+                return classes;
+            },
             topicText(): string | undefined {
                 return this.promptContent && this.promptContent.subjectLine;
             },
@@ -134,7 +149,7 @@
                 return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
             },
             promptDate(): string | undefined {
-                return formatDate(this.sentPrompt.firstSentAt, "LLL d, yyyy")
+                return formatDate(this.sentPrompt.firstSentAt, "LLLL d, yyyy")
             },
             responseText(): string | undefined {
                 return getResponseText(this.responses);
@@ -170,9 +185,7 @@
                 return linkItems
             },
         },
-        methods: {
-
-        }
+        methods: {}
     })
 </script>
 
@@ -181,15 +194,6 @@
     @import "mixins";
     @import "variables";
     @import "journal";
-
-
-    .backgroundImage {
-        bottom: -2.4rem;
-        height: auto;
-        left: 60%;
-        position: absolute;
-        width: 60%;
-    }
 
 
 </style>

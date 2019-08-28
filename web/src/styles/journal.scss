@@ -1,11 +1,9 @@
 @import "variables";
 @import "mixins";
 
-
 .centered {
   text-align: left;
 }
-
 
 
 .journalEntry {
@@ -33,17 +31,41 @@
     border: 0;
   }
 
-  // url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
-  // url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-  // url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
-  // url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
-  // url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
+  .backgroundImage {
+    bottom: -2.4rem;
+    height: auto;
+    left: 60%;
+    position: absolute;
+    width: 60%;
 
-  &:nth-child(1) {
-    background: url(assets/images/maroonTriangleBlob.svg) right -130px bottom -52px/260px no-repeat;
+    &.randomBackground {
+      //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
+
+      &.bg0 {
+        background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px
+      }
+
+      &.bg1 {
+        background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px
+      }
+
+      &.bg2 {
+        background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px
+      }
+
+      &.bg3 {
+        background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px
+      }
+
+      &.bg4 {
+        background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px
+      }
+
+    }
   }
-}
 
+
+}
 
 .buttonContainer {
   display: flex;
@@ -83,6 +105,7 @@
   padding-left: 2rem;
   position: relative;
   white-space: pre-line;
+  margin: 1.6rem 0;
 
   &:before {
     background-color: $yellow;
