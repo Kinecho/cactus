@@ -13,10 +13,10 @@
             <transition name="fade-in-slow" appear>
                 <a v-if="displaySignupButton"
                         data-test="signup-button"
-                        class="jump-to-form button"
+                        class="jump-to-form button small"
                         @click.prevent="scrollToSignup"
                         type="button"
-                >Sign Up Free</a>
+                >Sign Up</a>
             </transition>
         </div>
 
@@ -178,38 +178,39 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
+    .login {
+        font-size: 1.6rem;
+        margin-left: .8rem;
+        text-decoration: none;
+        transition: background-color .2s ease-in-out;
+
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
+
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                padding: 1rem 1.6rem;
+
+                &:hover {
+                  background-color: $lightGreen;
+                }
+            }
+        }
+    }
+
+    a.button.jump-to-form {
+        flex-grow: 0;
+        margin-left: .8rem;
+
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
+        }
+    }
+
     header {
-        button, a.button {
-            flex-grow: 0;
-            font-size: 1.6rem;
-            margin: 0;
-            padding: 1.2rem 2rem 1.6rem;
-        }
-
-        a.link {
-            @include fancyLink;
-
-            &:hover {
-                cursor: pointer;
-            }
-        }
-
-        a.login {
-            font-size: 1.6rem;
-            text-decoration: none;
-
-            @include r(374) {
-              font-size: 1.8rem;
-            }
-
-            &:hover {
-                cursor: pointer;
-            }
-        }
-
-        &.out {
-            opacity: 0;
-        }
 
         &.loggedIn {
             display: flex;
@@ -219,6 +220,8 @@
         .nav-logo {
             display: block;
             height: 5.8rem;
+            position: static;
+            top: 0;
             width: 11.7rem;
 
             &.large-desktop {
@@ -229,16 +232,21 @@
             }
 
             @include isTinyPhone {
-                height: 4rem;
+                height: 3.5rem;
+                position: relative;
+                top: 2px;
                 width: 7rem;
             }
         }
-
 
         .user-info {
             display: flex;
             align-items: center;
             position: relative;
+
+            @include isPhone {
+                font-size: 1.4rem;
+            }
 
             .moreMenu {
                 background-color: $lightPink;
@@ -285,6 +293,11 @@
                 display: inline-block;
                 transition: transform .2s ease-in-out;
 
+                @include isPhone {
+                    width: 3rem;
+                    height: 3rem;
+                }
+
                 &.open {
                     transform: scale(.9);
                 }
@@ -302,19 +315,8 @@
                 img {
                     height: 100%;
                     width: 100%;
-
-                }
-            }
-
-            @include isPhone {
-                font-size: 1.4rem;
-                .avatar-container {
-                    width: 3rem;
-                    height: 3rem;
                 }
             }
         }
-
-
     }
 </style>
