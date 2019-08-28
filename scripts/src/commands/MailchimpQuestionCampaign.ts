@@ -21,7 +21,7 @@ import {
     SendChecklistItemType,
     TemplateType
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {getUrlFromInput, isValidEmail} from "@shared/util/StringUtil";
+import {getUrlFromInput, isValidEmail, appendDomain} from "@shared/util/StringUtil";
 import {CactusConfig} from "@shared/CactusConfig";
 import {mailchimpTimeZone, makeUTCDateIntoMailchimpDate} from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
@@ -31,7 +31,10 @@ export const DEFAULT_MORNING_TEMPLATE_ID = 53353;
 export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
 
 export const TOPIC_MORNING_TEMPLATE_ID = 59013;
-export const TOPIC_REMIDNER_TEMPLATE_ID = 59169;
+export const TOPIC_REMINDER_TEMPLATE_ID = 59169;
+
+export const PROMPT_MODULE_TEMPLATE_ID = 63697;
+export const PROMPT_MODULE_REMINDER_TEMPLATE_ID = 59169;
 
 const prompts = require('prompts');
 
@@ -46,6 +49,7 @@ interface ContentQuestionResponse {
     fromName: string;
     sendDateISO: string;
     campaignTitle: string;
+    promptContentId: string;
 }
 
 interface UseDefaultConfigurationResponse {
@@ -80,11 +84,13 @@ interface ReminderConfiguration {
     campaignTitle: string;
     suppressInactive: boolean;
     inactiveDaysThreshold?: number;
+    promptContentId: string;
 }
 
 export enum QuestionType {
     DEFAULT,
     TOPIC,
+    PROMPT,
 }
 
 export default class MailchimpQuestionCampaign implements Command {
@@ -94,6 +100,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
     question?: string;
     contentPath?: string;
+    promptContentId?: string;
     questionType: QuestionType = QuestionType.DEFAULT;
     campaign?: Campaign;
     reminderCampaign?: Campaign;
@@ -212,12 +219,19 @@ export default class MailchimpQuestionCampaign implements Command {
             {
                 type: this.questionType === QuestionType.DEFAULT ? "text" : null,
                 name: "contentPath",
-                message: "Go Deeper content path",
+                message: "Reflect page content path",
                 initial: () => getUrlFromInput(this.contentPath),
                 format: (value: string) => getUrlFromInput(value)
             },
             {
-                type: this.questionType === QuestionType.DEFAULT ? "text" : null,
+                type: this.questionType === QuestionType.PROMPT ? "text" : null,
+                name: "contentPath",
+                message: "Prompt module path",
+                initial: () => `prompts/${this.promptContentId}`,
+                format: (value: string) => `${value}`
+            },
+            {
+                type: [QuestionType.DEFAULT,QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
                 name: "contentLinkText",
                 message: "Content link text",
                 initial: "Reflect"
@@ -393,13 +407,18 @@ export default class MailchimpQuestionCampaign implements Command {
             throw new Error("No mailchimp service was available - unable to save campaign");
         }
 
+        const config = this.currentConfig;
+        let domain = 'cactus.app';
+        if (config) {
+            domain = config.dynamic_links.domain;
+        }
 
         let campaignContent;
 
         console.log(chalk.bold("creating template content..."));
         const sections: CampaignContentSectionMap = {
             [TemplateSection.question]: contentResponse.question,
-            [TemplateSection.content_link]: contentResponse.contentPath ? `<a href="${getUrlFromInput(contentResponse.contentPath, "cactus.app")}">${contentResponse.contentLinkText}</a>` : "",
+            [TemplateSection.content_link]: contentResponse.contentPath ? `<a class="button" href="${appendDomain(contentResponse.contentPath, domain)}?e=*|URL:EMAIL|*">${contentResponse.contentLinkText}</a>` : "",
             [TemplateSection.inspiration]: contentResponse.inspirationText || "",
         };
 
@@ -846,6 +865,9 @@ export default class MailchimpQuestionCampaign implements Command {
             case QuestionType.TOPIC:
                 return TOPIC_MORNING_TEMPLATE_ID;
                 break;
+            case QuestionType.PROMPT:
+                return PROMPT_MODULE_TEMPLATE_ID;
+                break;
         }
     }
 
@@ -855,7 +877,10 @@ export default class MailchimpQuestionCampaign implements Command {
                 return DEFAULT_REMINDER_TEMPLATE_ID;
                 break;
             case QuestionType.TOPIC:
-                return TOPIC_REMIDNER_TEMPLATE_ID;
+                return TOPIC_REMINDER_TEMPLATE_ID;
+                break;
+            case QuestionType.PROMPT:
+                return PROMPT_MODULE_REMINDER_TEMPLATE_ID;
                 break;
         }
     }
