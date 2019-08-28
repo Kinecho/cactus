@@ -8,7 +8,7 @@
             </p>
         </div>
         <div class="referral-link">
-            <input type="text" class="link-input" name="referral-link" :value="attributedLink">
+            <input type="text" class="link-input" name="referral-link" disabled="true" :value="attributedLink">
             <button class="copy secondary btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">

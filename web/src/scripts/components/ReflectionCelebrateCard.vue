@@ -357,6 +357,10 @@
             }
         }
 
+        .authBtn {
+            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
+        }
+
         .backBtn {
             align-items: center;
             display: flex;

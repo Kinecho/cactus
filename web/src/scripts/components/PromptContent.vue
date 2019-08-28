@@ -70,11 +70,8 @@
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
-                        v-show="hasNext && activeIndex > 0 && !showSharing"
+                        v-show="(hasNext || isLastCard) && !completed && !showSharing"
                 >
-                    <div class="progress-circle" v-if="isReflection">
-                        <pie-spinner :percent="reflectionProgress"/>
-                    </div>
 
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -100,7 +97,6 @@
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
-    import PieSpinner from "@components/PieSpinner.vue"
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
@@ -120,7 +116,6 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            PieSpinner,
         },
         props: {
             promptContentEntryId: String,
@@ -275,6 +270,9 @@
             hasNext(): boolean {
                 return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
             },
+            isLastCard(): boolean {
+                return this.promptContent && this.promptContent.content && this.activeIndex === this.promptContent.content.length - 1 || false
+            },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
             },
@@ -307,7 +305,7 @@
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return !this.isReflection && this.hasNext && this.hasPrevious
+                return true
             },
         },
         watch: {
@@ -347,7 +345,7 @@
                     document.title = 'Cactus Mindful Moment'
                 }
             },
-            async handleTap(event: MouseEvent) {
+            async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
                 if (!this.tapAnywhereEnabled) {
                     console.log("tap anywhere is disabled");
@@ -363,11 +361,24 @@
                     });
 
                     if (!foundExcludedTarget) {
+                        console.log("tap event", event);
+                        const touch = event.changedTouches && event.changedTouches.item(0);
+                        const leftThreshold = width * .20;
+                        console.log("left threshold", leftThreshold);
+                        let isPrevious = false;
+                        if (touch) {
+                            console.log("clientX tap", touch.clientX);
+                            isPrevious = touch.clientX < leftThreshold;
+                        }
 
-                        await this.next();
-                    } else {
+                        if (isPrevious) {
+                            await this.previous();
+                        } else {
+                            await this.next();
+                        }
+
+
                     }
-
                 }
             },
             touchStartHandler(args: MouseEvent) {
@@ -483,7 +494,7 @@
                 this.transitionName = "slide";
                 const saveTask = this.isReflection ? this.save() : () => undefined;
                 const content = this.promptContent ? this.promptContent.content : [];
-                if (this.hasNext) {
+                if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     gtag('event', 'next', {
@@ -491,7 +502,7 @@
                         event_label: `Slide ${this.activeIndex}`
                     });
                     await saveTask;
-                } else {
+                } else if (this.isLastCard) {
                     await this.complete();
                 }
 
@@ -543,6 +554,7 @@
         }
     })
 </script>
+
 
 <style lang="scss" scoped>
     @import "common";
@@ -662,39 +674,6 @@
 
                 &.previous svg {
                     transform: scale(-1);
-                }
-
-                &.reflection {
-                    border: 0;
-
-                    &:hover:not(.complete) {
-                        background-color: $white;
-                        cursor: default;
-                    }
-
-                    svg {
-                        fill: $white;
-                    }
-
-                    &.complete {
-                        cursor: pointer;
-                        background-color: $green;
-
-                        .progress-circle {
-                            opacity: 0;
-                        }
-                    }
-
-                    .progress-circle {
-                        transition: opacity .3s;
-                        z-index: -1;
-                        opacity: .6;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                    }
                 }
             }
         }
@@ -831,11 +810,25 @@
         }
     }
 
+    @keyframes twist {
+        0% {
+            transform: rotateY(0);
+        }
+        50%{
+            transform: rotateY(10deg);
+        }
+        100% {
+            transform: rotateY(0);
+        }
+    }
+
     .flip-card {
         backface-visibility: hidden;
         left: 0;
         top: 0;
         width: 100%;
+
+        animation: twist .5s ;
 
         @include r(600) {
             border-radius: 12px;
@@ -851,7 +844,7 @@
         }
 
         &.back {
-            background: url(assets/images/yellowNeedles.svg) $yellow;
+            background: url(/assets/images/yellowNeedles.svg) $yellow;
             background-size: 80%;
             display: flex;
             flex-direction: column;

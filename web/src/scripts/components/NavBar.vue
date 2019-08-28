@@ -1,6 +1,6 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
-        <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
+        <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <div>
             <transition name="fade-in-slow" appear>
                 <a v-if="displayLoginButton"
@@ -139,6 +139,9 @@
                     return getInitials(this.user.displayName || this.user.email || "")
                 }
                 return "";
+            },
+            logoHref(): string {
+                return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
             }
         },
         methods: {
