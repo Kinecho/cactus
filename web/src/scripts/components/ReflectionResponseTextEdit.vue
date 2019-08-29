@@ -1,7 +1,10 @@
 <template>
     <form v-show="show" v-on:submit.prevent>
         <div v-for="editedResponse in editedResponses">
-            <textarea v-model="editedResponse.text"></textarea>
+            <resizable-textarea :maxHeightPx="400">
+                <textarea v-model="editedResponse.text"></textarea>
+            </resizable-textarea>
+
         </div>
         <nav class="buttonContainer">
             <button class="primary small" v-on:click="doneEditing" type="button">
@@ -27,8 +30,11 @@
     import ReflectionResponseService from "@web/services/ReflectionResponseService"
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import {getResponseText} from "@shared/util/StringUtil"
-
+    import ResizableTextarea from "@components/ResizableTextarea.vue"
     export default Vue.extend({
+        components: {
+            ResizableTextarea,
+        },
         created() {
 
         },
@@ -214,7 +220,7 @@
         font-size: 1.6rem;
         line-height: 1.43;
         margin-top: .8rem;
-        min-height: 11rem;
+        min-height: 6rem;
         padding: 1.6rem;
         width: 100%;
     }
