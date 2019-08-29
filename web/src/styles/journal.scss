@@ -161,9 +161,22 @@
 
 .buttonContainer {
     display: flex;
+    flex-direction: column;
     margin-top: 1.6rem;
     position: relative;
     z-index: 1;
+
+    @include r(600) {
+        flex-direction: row;
+    }
+}
+
+.button + button {
+    margin-top: 1.6rem;
+
+    @include r(600) {
+        margin-top: 0;
+    }
 }
 
 button, a.button {
