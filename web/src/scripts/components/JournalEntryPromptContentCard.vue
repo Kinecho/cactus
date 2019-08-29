@@ -1,11 +1,8 @@
 <template>
-    <div class="journalEntry" v-bind:class="{new: !this.responseText,}">
-        <div class="dateContainer menuParent">
-            <div class="dates">
-                <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
-                <p class="date">{{promptDate}}</p>
-            </div>
-
+    <div class="journalEntry" v-bind:class="{new: !this.responseText, old: this.responseText}">
+        <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+        <p class="date">{{promptDate}}</p>
+        <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
         </div>
 
@@ -14,9 +11,8 @@
                 {{error}}
             </p>
         </div>
-        <div v-if="promptContent">
-
-            <h2 class="topic" v-show="topicText">{{topicText}}</h2>
+        <div class="textContainer" v-if="promptContent">
+            <h3 class="topic" v-show="topicText">{{topicText}}</h3>
             <p class="subtext" v-show="subText">{{subText}}</p>
         </div>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
@@ -28,17 +24,21 @@
                 @close="doReflect = false"
         />
 
-        <div class="backgroundImage">
+        <div class="backgroundImage" v-show="!doReflect">
             <flamelink-image v-if="backgroundImage" :image="backgroundImage"/>
             <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>
 
         <nav v-show="!doReflect" class="buttonContainer">
-            <a :href="promptContentPath" @click.prevent="showContent = true" class="button">
+            <a :href="promptContentPath" @click.prevent="showContent = true" class="wiggle button" v-show="responses.length === 0">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                     <path fill="#fff" d="M3 3h6a1 1 0 0 1 .117 1.993L9 5H3a1 1 0 0 0-.993.883L2 6v11a1 1 0 0 0 .883.993L3 18h11a1 1 0 0 0 .993-.883L15 17v-6a1 1 0 0 1 1.993-.117L17 11v6a3 3 0 0 1-2.824 2.995L14 20H3a3 3 0 0 1-2.995-2.824L0 17V6a3 3 0 0 1 2.824-2.995L3 3h6zm10-3h6.02c.023 0 .046.002.07.004L19 0a1.008 1.008 0 0 1 .595.196c.04.03.077.061.112.097l-.09-.08a1.006 1.006 0 0 1 .376.67l.003.03.003.055L20 1v6a1 1 0 0 1-1.993.117L18 7V3.414l-9.293 9.293a1 1 0 0 1-1.32.083l-.094-.083a1 1 0 0 1 0-1.414L16.584 2H13a1 1 0 0 1-.117-1.993L13 0h6z"/>
                 </svg>
                 Reflect</a>
+            <button @click.prevent="doReflect = true" class="wiggle secondary" v-show="responses.length === 0">
+                <img src="assets/images/pen.svg" alt="" />
+                Write a Note
+            </button>
         </nav>
         <modal :show="showContent"
                 v-on:close="showContent = false"
@@ -194,6 +194,11 @@
                 onClick?: () => void,
             }[] {
                 const linkItems = [{
+                    title: "Reflect",
+                    onClick: () => {
+                        this.showContent = true;
+                    }
+                },{
                     title: "Share Prompt",
                     onClick: () => {
                         this.showSharing = true;

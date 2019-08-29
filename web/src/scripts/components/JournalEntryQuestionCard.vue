@@ -1,12 +1,8 @@
 <template>
     <div class="journalEntry" v-bind:class="{ new: !responseText }">
-
-        <div class="dateContainer menuParent">
-            <div class="dates">
-                <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
-                <p class="date">{{promptDate}}</p>
-            </div>
-
+        <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+        <p class="date">{{promptDate}}</p>
+        <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
         </div>
 
