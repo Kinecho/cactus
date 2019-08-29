@@ -42,16 +42,9 @@
     import {DropdownMenuLink} from "@components/DropdownMenuTypes"
     import {QueryParam} from '@shared/util/queryParams'
 
-    declare interface LinkData {
-        title: string,
-        href?: string,
-        onClick?: () => Promise<void> | void
-    }
-
     declare interface NavBarData {
-        authUnsubscribe?: () => void,
-        user?: FirebaseUser | undefined | null,
-        menuOpen: boolean,
+        authUnsubscribe: (() => void) | undefined,
+        user: FirebaseUser | undefined | null,
         authLoaded: boolean,
     }
 
@@ -85,9 +78,8 @@
         },
         data(): NavBarData {
             return {
-                user: null,
+                user: undefined,
                 authUnsubscribe: undefined,
-                menuOpen: false,
                 authLoaded: false,
             }
         },
@@ -155,12 +147,7 @@
             goToLogin() {
                 window.location.href = this.loginHref;
             },
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            },
-            closeMenu() {
-                this.menuOpen = false;
-            },
+
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
                     return;
@@ -197,7 +184,7 @@
                 padding: 1rem 1.6rem;
 
                 &:hover {
-                  background-color: $lightGreen;
+                    background-color: $lightGreen;
                 }
             }
         }
@@ -243,49 +230,6 @@
         }
     }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            position: relative;
-
-            @include isPhone {
-                font-size: 1.4rem;
-            }
-
-            .moreMenu {
-                background-color: $lightPink;
-                border-radius: 6px;
-                right: 1rem;
-                padding: .8rem 0;
-                position: absolute;
-                top: 4rem;
-                z-index: 100;
-                @include popoverShadow;
-
-                a, span {
-                    background-color: transparent;
-                    color: $darkestPink;
-                    display: block;
-                    font-size: 1.6rem;
-                    opacity: .8;
-                    padding: .8rem 2.4rem;
-                    text-decoration: none;
-                    transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-                    white-space: nowrap;
-
-                    &.static {
-                        border-bottom: 1px solid darken($pink, 5%);
-                        color: $darkText;
-                        margin-bottom: .8rem;
-                        padding-bottom: 1.6rem;
-                    }
-
-    .dropdownMenuOpen {
-        .navbar-avatar-container {
-            transform: scale(.9);
-        }
-    }
-
     .navbar-avatar-container {
         cursor: pointer;
         width: 4rem;
@@ -304,24 +248,25 @@
             justify-content: center;
             align-items: center;
         }
-                @include isPhone {
-                    width: 3rem;
-                    height: 3rem;
-                }
 
-                &.open {
-                    transform: scale(.9);
-                }
+        @include isPhone {
+            width: 3rem;
+            height: 3rem;
+        }
 
-                .initials {
-                    background: $darkGreen;
-                    color: white;
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
+        &.open {
+            transform: scale(.9);
+        }
+
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
         img {
             height: 100%;
@@ -337,4 +282,6 @@
             height: 3rem;
         }
     }
+
+
 </style>
