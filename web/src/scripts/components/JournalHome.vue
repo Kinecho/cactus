@@ -19,8 +19,9 @@
                 <div class="section-container" v-if="loggedIn && loginReady && !sentPrompts.length && sentPromptsLoaded" key="empty">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in your choice to develop a healthier, happier mindset.</p>
-                        <img class="graphic" src="assets/images/music2.svg" alt="" />
+                        <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in
+                            your choice to develop a healthier, happier mindset.</p>
+                        <img class="graphic" src="assets/images/music2.svg" alt=""/>
                     </section>
                 </div>
 
@@ -48,6 +49,7 @@
             </div>
 
         </div>
+        <auto-prompt-content-modal :autoLoad="true"/>
     </div>
 </template>
 
@@ -62,6 +64,7 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import SentPrompt from "@shared/models/SentPrompt"
     import SentPromptService from '@web/services/SentPromptService'
+    import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -102,7 +105,11 @@
                 }
             });
         },
-        components: {NavBar, entry: JournalEntryCard},
+        components: {
+            NavBar,
+            entry: JournalEntryCard,
+            AutoPromptContentModal,
+        },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP}
         },
@@ -250,14 +257,14 @@
                 text-align: center;
 
                 p {
-                  margin: 1.6rem auto 3.2rem;
-                  max-width: 60rem;
-                  opacity: .8;
+                    margin: 1.6rem auto 3.2rem;
+                    max-width: 60rem;
+                    opacity: .8;
                 }
 
                 .graphic {
-                  max-width: 64rem;
-                  width: 90%;
+                    max-width: 64rem;
+                    width: 90%;
                 }
             }
 
