@@ -65,7 +65,7 @@
         height: 100%;
     }
 
-    .random-placeholder {
+    /* .random-placeholder {
       height:100%;
       width: 100%;
       min-height: 24rem;
@@ -92,7 +92,7 @@
         background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
       }
 
-    }
+    } */
 }
 
 .textContainer {
@@ -219,9 +219,9 @@ button, a.button {
 }
 
 .doneStatus {
-    background-color: $lightPink;
+    background-color: $lightGreen;
     border-radius: 2rem;
-    color: $darkestPink;
+    color: $darkGreen;
     display: inline-block;
     font-size: 1.4rem;
     font-weight: bold;

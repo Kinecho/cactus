@@ -24,7 +24,7 @@
                 @close="doReflect = false"
         />
 
-        <div class="backgroundImage" v-show="!doReflect">
+        <div class="backgroundImage" v-show="!doReflect && backgroundImage">
             <flamelink-image v-if="backgroundImage" :image="backgroundImage"/>
             <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>

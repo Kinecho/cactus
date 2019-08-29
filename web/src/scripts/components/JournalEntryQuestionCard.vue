@@ -1,6 +1,6 @@
 <template>
-    <div class="journalEntry" v-bind:class="{ new: !responseText }">
-        <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+    <div class="journalEntry" v-bind:class="{new: !this.responseText, old: this.responseText}">
+        <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)"><img src="assets/images/check.svg" />Done</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
