@@ -124,8 +124,8 @@
                             v-model="response.content.text"
                             v-on:click.stop
                             :class="{hasValue: !!response.content.text}"
-                            @focusin="disableTap"
-                            @focusout="enableTap"
+                            @focusin="disableNavigation"
+                            @focusout="enableNavigation"
                         />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
@@ -289,11 +289,11 @@
             complete() {
                 this.$emit("complete")
             },
-            enableTap(){
-                this.$emit("tapEnabled")
+            enableNavigation(){
+                this.$emit("navigationEnabled")
             },
-            disableTap(){
-                this.$emit("tapDisabled")
+            disableNavigation(){
+                this.$emit("navigationDisabled")
             }
         }
     })

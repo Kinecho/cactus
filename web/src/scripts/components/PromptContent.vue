@@ -48,8 +48,8 @@
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
-                                    @tapDisabled="tapDisabled = true"
-                                    @tapEnabled="tapDisabled = false"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :style="cardStyles"
                             />
                         </transition>
@@ -132,6 +132,11 @@
         async created(): Promise<void> {
 
             this.keyboardListener = (evt: KeyboardEvent) => {
+                console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
+                if (this.navigationDisabled) {
+                    console.log("navigation disabled");
+                    return;
+                }
                 if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
                     this.previous()
                 }
@@ -258,7 +263,7 @@
             cardStyles: any,
             popStateListener: any | undefined,
             keyboardListener: any | undefined,
-            tapDisabled: boolean,
+            navigationDisabled: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -282,7 +287,7 @@
                 cardStyles: {},
                 popStateListener: undefined,
                 keyboardListener: undefined,
-                tapDisabled: false,
+                navigationDisabled: false,
             };
         },
         computed: {
@@ -370,7 +375,7 @@
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
 
-                if (this.tapDisabled) {
+                if (this.navigationDisabled) {
                     console.log("tap is disabled");
                     return;
                 }
