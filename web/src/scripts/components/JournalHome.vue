@@ -181,10 +181,12 @@
     @import "~styles/transitions";
 
     .bgBlobs {
-        background-image: url(/assets/images/leftBlobBg.svg), url(/assets/images/rightBlobBg.svg);
-        background-repeat: repeat-y;
-        background-size: 525px 6130px;
-        background-position: -100px 0, right -80px top;
+        @include r(768) {
+            background-image: url(/assets/images/leftBlobBg.svg), url(/assets/images/rightBlobBg.svg);
+            background-repeat: repeat-y;
+            background-size: 525px 6130px;
+            background-position: -100px 0, right -80px top;
+        }
     }
 
     .container {

@@ -16,7 +16,7 @@
         </div>
         <div v-if="promptContent">
 
-            <h3 class="topic" v-show="topicText">{{topicText}}</h3>
+            <h2 class="topic" v-show="topicText">{{topicText}}</h2>
             <p class="subtext" v-show="subText">{{subText}}</p>
         </div>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
