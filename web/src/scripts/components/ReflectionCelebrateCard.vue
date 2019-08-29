@@ -42,7 +42,16 @@
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
                     Sign Up to Save Your Progress
                 </button>
-                <button class="primary authBtn" v-if="authLoaded && loggedIn" @click="goToHome">Go Home</button>
+                <button class="primary authBtn"
+                        v-if="authLoaded && loggedIn && !isModal"
+                        @click="goToHome">
+                    Go Home
+                </button>
+                <button class="primary authBtn"
+                        v-if="authLoaded && loggedIn && isModal"
+                        @click="close">
+                    Close
+                </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
                 <div class="auth-card">
@@ -124,7 +133,8 @@
         props: {
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
-            }
+            },
+            isModal: Boolean,
         },
         data(): {
             reflectionCount: number | undefined,
@@ -150,7 +160,7 @@
                 member: undefined,
                 showLogin: false,
                 durationLabel: "",
-                celebrations: ["Well done!","Nice work!","Way to go!"]
+                celebrations: ["Well done!", "Nice work!", "Way to go!"]
             }
         },
         destroyed() {

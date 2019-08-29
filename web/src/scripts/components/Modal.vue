@@ -3,7 +3,7 @@
         <div :class="['modal-mask', {show, opaque, light, dark}]">
             <div class="modal-wrapper">
                 <div class="modal-container">
-                    <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon">
+                    <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                             <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                         </svg>
@@ -34,6 +34,9 @@
             opaque: Boolean,
             light: {type: Boolean, default: true},
             dark: Boolean,
+            closeStyles: {
+                type: Object as () => { [name: string]: any }
+            }
             //
         },
         created() {

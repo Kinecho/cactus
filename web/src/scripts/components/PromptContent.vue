@@ -1,5 +1,5 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
-    <div :class="['page-wrapper', slideNumberClass] ">
+    <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
             <div class="centered" v-if="loading">
                 <spinner message="Loading..." :delay="1000"/>
@@ -55,6 +55,7 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:isModal="isModal"
                             />
                         </transition>
                     </div>
@@ -119,6 +120,7 @@
         },
         props: {
             promptContentEntryId: String,
+            isModal: {type: Boolean, default: false},
             onClose: {
                 type: Function, default: function () {
                     this.$emit("close")
@@ -578,6 +580,42 @@
         justify-content: center;
         position: relative;
 
+        @include maxW(600) {
+            &.isModal {
+                height: 100vh;
+
+                .content-container {
+                    height: 100%;
+
+                    .flipper {
+                        height: 100%;
+
+                        .flip-card {
+                            height: 100%;
+
+                            .content-card {
+                                height: 100%;
+                            }
+
+                            .flip-container {
+                                height: 100%;
+
+                                .flipper {
+                                    height: 100%;
+
+                                    .flip-card {
+                                        height: 100%;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         button.secondary {
             transition: all .2s ease;
             outline: transparent none;
@@ -773,12 +811,17 @@
 
     .slide-out-enter {
         transform: translate(-100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
+
     }
 
     .slide-out-leave-to {
         transform: translate(100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
     }
 
 
@@ -790,7 +833,6 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        position: relative;
         width: 100%;
         z-index: 10;
 
@@ -816,7 +858,7 @@
         0% {
             transform: rotateY(0);
         }
-        50%{
+        50% {
             transform: rotateY(10deg);
         }
         100% {
@@ -830,7 +872,7 @@
         top: 0;
         width: 100%;
 
-        animation: twist .5s ;
+        animation: twist .5s;
 
         @include r(600) {
             border-radius: 12px;

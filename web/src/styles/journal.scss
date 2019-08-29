@@ -1,11 +1,12 @@
 @import "variables";
 @import "mixins";
 
-.centered {
-  text-align: left;
-}
+//.centered {
+//  text-align: left;
+//}
 
 .journalEntry {
+  text-align: left;
   background-color: white;
   border: 1px solid $lightest;
   border-radius: 12px;
@@ -38,11 +39,11 @@
     width: 120%;
 
     @include r(600) {
-        bottom: -2.4rem;
-        height: auto;
-        left: 60%;
-        position: absolute;
-        width: 60%;
+      bottom: -2.4rem;
+      height: auto;
+      left: 60%;
+      position: absolute;
+      width: 60%;
     }
 
     /* &.randomBackground {
@@ -80,9 +81,9 @@
 
 .topic,
 .subtext {
-    @include r(768) {
-        max-width: 66%;
-    }
+  @include r(768) {
+    max-width: 66%;
+  }
 }
 
 .topic {
