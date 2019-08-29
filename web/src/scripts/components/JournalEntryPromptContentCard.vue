@@ -28,7 +28,9 @@
                 @close="doReflect = false"
         />
 
-        <div class="backgroundImage" :class="backgroundClasses"></div>
+        <div class="backgroundImage" :class="backgroundClasses">
+            <flamelink-image v-if="backgroundImage" :image="backgroundImage"/>
+        </div>
 
         <nav v-show="!doReflect" class="buttonContainer">
             <a :href="promptContentPath" @click.prevent="showContent = true" class="button">
@@ -59,7 +61,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import PromptContent, {Content} from "@shared/models/PromptContent"
+    import PromptContent, {Content, Image} from "@shared/models/PromptContent"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import PromptContentService from '@web/services/PromptContentService'
     import {PageRoute} from "@web/PageRoutes"
@@ -73,6 +75,7 @@
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import PromptSharing from "@components/PromptContentSharing.vue";
+    import FlamelinkImage from "@components/FlamelinkImage.vue";
 
     export default Vue.extend({
         components: {
@@ -81,6 +84,7 @@
             PromptContent: PromptContentVue,
             EditReflection,
             PromptSharing,
+            FlamelinkImage,
         },
         created() {
             this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
@@ -147,7 +151,7 @@
                 const bgImage = first ? first.backgroundImage : undefined;
                 const id = this.prompt.id;
 
-                const showRandomBackground = !bgImage || true;
+                const showRandomBackground = !bgImage;
 
                 const classes: { [name: string]: any } = {
                     randomBackground: showRandomBackground,
@@ -155,6 +159,13 @@
                 };
 
                 return classes;
+            },
+            backgroundImage(): Image | undefined {
+                const [first]: Content[] = (this.promptContent && this.promptContent.content) || []
+                if (first && first.backgroundImage) {
+                    return first.backgroundImage
+                }
+                return;
             },
             topicText(): string | undefined {
                 return this.promptContent && this.promptContent.subjectLine;
@@ -216,7 +227,6 @@
     @import "mixins";
     @import "variables";
     @import "journal";
-
 
     .sharing-card {
         @include shadowbox;

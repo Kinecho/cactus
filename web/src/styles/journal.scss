@@ -38,6 +38,16 @@
     right: 0;
     width: 120%;
 
+
+    overflow: hidden;
+    height: 100%;
+    max-width: 30vw;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+
     @include r(600) {
       bottom: -2.4rem;
       height: auto;
