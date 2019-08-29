@@ -14,10 +14,10 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <p class="label">
-                        Use this link to share Cactus with friends, family, and framily.
+                        Use this link to share Cactus with friends and family.
                     </p>
                     <div class="referral-link">
-                        <input type="text" class="link-input" name="referral-link" :value="referralLink">
+                        <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
                         <button class="copy secondary" v-clipboard:copy="referralLink"
                                 v-clipboard:success="handleCopySuccess"
                                 v-clipboard:error="handleCopyError">
@@ -129,7 +129,7 @@
                 return !this.authLoaded;
             },
             referralLink(): string | undefined {
-                return this.member ? `${Config.domain}?ref=${this.member.email}` : undefined;
+                return (this.member && this.member.email) ? `${Config.domain}?ref=${encodeURIComponent(this.member.email)}` : undefined;
             }
         }
     })
@@ -148,9 +148,9 @@
         justify-content: space-between;
 
         @include r(600) {
-          @include h(960) {
-            height: 100vh;
-          }
+            @include h(960) {
+                height: 100vh;
+            }
         }
 
         header, .centered {

@@ -156,16 +156,20 @@ export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
         cactusMember.userId = userId;
 
         let referredByEmail = cactusMember.referredByEmail || (cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.merge_fields.REF_EMAIL as string : undefined);
-        if (!referredByEmail && pendingUser && pendingUser.referredByEmail) {
-            referredByEmail = pendingUser.referredByEmail;
-            if (email) {
-                console.log("Updating mailchimp referred by email merge field to ", referredByEmail);
-                await MailchimpService.getSharedInstance().updateMergeFields({
-                    email: email,
-                    mergeFields: {REF_EMAIL: pendingUser.referredByEmail}
-                })
+        if (pendingUser) {
+            cactusMember.signupQueryParams = pendingUser.queryParams;
+            if (!referredByEmail && pendingUser.referredByEmail) {
+                referredByEmail = pendingUser.referredByEmail;
+                if (email) {
+                    console.log("Updating mailchimp referred by email merge field to ", referredByEmail);
+                    await MailchimpService.getSharedInstance().updateMergeFields({
+                        email: email,
+                        mergeFields: {REF_EMAIL: pendingUser.referredByEmail}
+                    })
+                }
             }
         }
+
         cactusMember.referredByEmail = referredByEmail;
 
         mailchimpMember = cactusMember.mailchimpListMember;

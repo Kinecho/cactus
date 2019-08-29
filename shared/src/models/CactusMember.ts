@@ -65,8 +65,9 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
-    timeZone?: string|null;
+    timeZone?: string | null;
     referredByEmail?: string;
+    signupQueryParams: { [name: string]: string } = {};
 
     prepareForFirestore(): any {
         super.prepareForFirestore();

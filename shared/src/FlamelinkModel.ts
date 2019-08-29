@@ -62,7 +62,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
         return this;
     }
 
-    toFlamelinkData(removeKeys = ["schema", "entryId"]): any {
+    toFlamelinkData(removeKeys = ["schema", "entryId", "_fl_meta_"]): any {
         const prepared = this.prepareForFirestore();
         if (!prepared) {
             throw new Error("Unable to prepare for firestore");

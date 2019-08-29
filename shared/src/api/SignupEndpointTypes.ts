@@ -8,20 +8,21 @@ export interface EmailStatusResponse extends ApiResponse {
     exists: boolean,
     email: string,
     error?: any,
-    message?:string,
+    message?: string,
 }
 
 export interface MagicLinkRequest {
     email: string,
     continuePath: string,
-    referredBy?: string|undefined,
-    reflectionResponseIds?: string[]
+    referredBy?: string | undefined,
+    reflectionResponseIds?: string[],
+    queryParams?: { [id: string]: string }
 }
 
-export interface MagicLinkResponse extends ApiResponse{
+export interface MagicLinkResponse extends ApiResponse {
     exists: boolean,
     success: boolean,
     email: string,
-    error?:any,
+    error?: any,
     message?: string,
 }

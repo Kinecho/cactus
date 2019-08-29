@@ -346,7 +346,7 @@
             flex-grow: 0;
             left: 3.2rem;
             margin: 3.2rem auto 0;
-            position: fixed;
+            /*position: fixed;*/
             right: 3.2rem;
             width: calc(100% - 6.4rem);
 
@@ -355,6 +355,10 @@
                 position: static;
                 width: auto;
             }
+        }
+
+        .authBtn {
+            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
         }
 
         .backBtn {
