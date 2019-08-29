@@ -48,6 +48,8 @@
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
+                                    @tapDisabled="tapDisabled = true"
+                                    @tapEnabled="tapDisabled = false"
                                     :style="cardStyles"
                             />
                         </transition>
@@ -133,7 +135,7 @@
                 if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
                     this.previous()
                 }
-                if (evt.code === "ArrowRight" || evt.keyCode === 39){
+                if (evt.code === "ArrowRight" || evt.keyCode === 39) {
                     this.next();
                 }
             };
@@ -256,6 +258,7 @@
             cardStyles: any,
             popStateListener: any | undefined,
             keyboardListener: any | undefined,
+            tapDisabled: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -279,6 +282,7 @@
                 cardStyles: {},
                 popStateListener: undefined,
                 keyboardListener: undefined,
+                tapDisabled: false,
             };
         },
         computed: {
@@ -365,6 +369,12 @@
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
+
+                if (this.tapDisabled) {
+                    console.log("tap is disabled");
+                    return;
+                }
+
                 if (!this.tapAnywhereEnabled) {
                     console.log("tap anywhere is disabled");
                     return;

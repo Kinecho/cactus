@@ -124,6 +124,8 @@
                             v-model="response.content.text"
                             v-on:click.stop
                             :class="{hasValue: !!response.content.text}"
+                            @focusin="disableTap"
+                            @focusout="enableTap"
                         />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
@@ -137,9 +139,6 @@
                 <span class="tap">Tap Anywhere</span>
             </div>
             <!--    END Reflect-->
-<!--            <div class="actions" v-if="processedContent.actionButton">-->
-<!--                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>-->
-<!--            </div>-->
         </section>
     </div>
 </template>
@@ -290,6 +289,12 @@
             complete() {
                 this.$emit("complete")
             },
+            enableTap(){
+                this.$emit("tapEnabled")
+            },
+            disableTap(){
+                this.$emit("tapDisabled")
+            }
         }
     })
 </script>
