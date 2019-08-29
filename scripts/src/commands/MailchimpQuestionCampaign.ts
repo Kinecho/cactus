@@ -263,7 +263,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "replyTo",
                 message: "reply-to email address",
-                initial: `hello${this.reflectionPromptId ? `+p_${this.reflectionPromptId}` : ""}@cactus.app`,
+                initial: `hello@cactus.app`,
                 validate: (value: string) => isValidEmail(value) && value.endsWith("cactus.app") ? true : 'Please enter a valid email that ends in \"cactus.app\"'
             },
             {

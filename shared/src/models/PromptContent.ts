@@ -154,13 +154,12 @@ export default class PromptContent extends FlamelinkModel {
     promptId?: string;
     content: Content[] = [];
     subjectLine?: string;
-    scheduledSendAt?: ISODate|Date|FlamelinkTimestamp;
+    scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
     contentStatus: ContentStatus = ContentStatus.in_progress;
     errorMessage?: string;
-    topic?:string;
-
+    topic?: string;
 
 
     constructor(data?: Partial<PromptContent>) {
@@ -172,6 +171,14 @@ export default class PromptContent extends FlamelinkModel {
             this.scheduledSendAt = data.scheduledSendAt
         }
 
+    }
+
+    getQuestion(): string | undefined {
+        if (this.content) {
+            const reflectCard = this.content.find(c => c.contentType === ContentType.reflect);
+            return reflectCard && reflectCard.text;
+        }
+        return;
     }
 
 }

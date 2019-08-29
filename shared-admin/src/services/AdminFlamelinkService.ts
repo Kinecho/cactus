@@ -103,5 +103,27 @@ export default class AdminFlamelinkService {
         return fromFlamelinkData(content, Type);
     }
 
+    async getAll<T extends FlamelinkModel>(Type: { new(): T }): Promise<{ results: T[], error?: any }> {
+        const type = new Type();
+        const schema = type.schema;
+        console.log(`Fetching all from ${schema}`);
+        try {
+            const entries = await this.flamelinkApp.content.get({schemaKey: schema});
+            if (!entries) {
+                return {results: []};
+            }
+
+            const results = Object.values(entries).map(entry => {
+                return fromFlamelinkData(entry, Type);
+            });
+
+            return {results};
+
+        } catch (error) {
+            console.error(`failed to get all ${schema} entries from flamelink`, error);
+            return {results: [], error}
+
+        }
+    }
 
 }

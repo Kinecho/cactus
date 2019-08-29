@@ -4,7 +4,8 @@
         <div>
             <transition name="fade-in-slow" appear>
                 <a v-if="displayLoginButton"
-                        class="link"
+                        class="login"
+                        :href="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >Log In</a>
@@ -12,10 +13,10 @@
             <transition name="fade-in-slow" appear>
                 <a v-if="displaySignupButton"
                         data-test="signup-button"
-                        class="jump-to-form button"
+                        class="jump-to-form button small"
                         @click.prevent="scrollToSignup"
                         type="button"
-                >Sign Up Free</a>
+                >Sign Up</a>
             </transition>
         </div>
         <dropdown-menu :items="links">
@@ -39,6 +40,13 @@
     import {logout} from '@web/auth'
     import DropdownMenu from "@components/DropdownMenu.vue"
     import {DropdownMenuLink} from "@components/DropdownMenuTypes"
+    import {QueryParam} from '@shared/util/queryParams'
+
+    declare interface LinkData {
+        title: string,
+        href?: string,
+        onClick?: () => Promise<void> | void
+    }
 
     declare interface NavBarData {
         authUnsubscribe?: () => void,
@@ -73,7 +81,7 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
-            showLogin: {type: Boolean, default: false}, //NOTE: login is always disabled for now. See computed prop for displayLoginButton
+            showLogin: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {
@@ -124,15 +132,16 @@
                 return show;
             },
             displayLoginButton(): boolean {
-                const show = this.showLogin && this.authLoaded && !this.user;
-                //NOTE: login button is always disabled for now.
-                return false;
+                return this.showLogin && this.authLoaded && !this.user;
             },
             initials(): string {
                 if (this.user) {
                     return getInitials(this.user.displayName || this.user.email || "")
                 }
                 return "";
+            },
+            loginHref(): string {
+                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
@@ -144,7 +153,7 @@
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
-                window.location.href = PageRoute.SIGNUP;
+                window.location.href = this.loginHref;
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -172,25 +181,39 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    header {
-        button, a.button {
-            flex-grow: 0;
-            font-size: 1.6rem;
-            margin: 0;
-            padding: 1.2rem 2rem 1.6rem;
-        }
+    .login {
+        font-size: 1.6rem;
+        margin-left: .8rem;
+        text-decoration: none;
+        transition: background-color .2s ease-in-out;
 
-        a.link {
-            @include fancyLink;
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
 
-            &:hover {
-                cursor: pointer;
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                padding: 1rem 1.6rem;
+
+                &:hover {
+                  background-color: $lightGreen;
+                }
             }
         }
+    }
 
-        &.out {
-            opacity: 0;
+    a.button.jump-to-form {
+        flex-grow: 0;
+        margin-left: .8rem;
+
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
         }
+    }
+
+    header {
 
         &.loggedIn {
             display: flex;
@@ -198,7 +221,10 @@
         }
 
         .nav-logo {
+            display: block;
             height: 5.8rem;
+            position: static;
+            top: 0;
             width: 11.7rem;
 
             &.large-desktop {
@@ -209,11 +235,50 @@
             }
 
             @include isTinyPhone {
-                height: 4rem;
+                height: 3.5rem;
+                position: relative;
+                top: 2px;
                 width: 7rem;
             }
         }
     }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            position: relative;
+
+            @include isPhone {
+                font-size: 1.4rem;
+            }
+
+            .moreMenu {
+                background-color: $lightPink;
+                border-radius: 6px;
+                right: 1rem;
+                padding: .8rem 0;
+                position: absolute;
+                top: 4rem;
+                z-index: 100;
+                @include popoverShadow;
+
+                a, span {
+                    background-color: transparent;
+                    color: $darkestPink;
+                    display: block;
+                    font-size: 1.6rem;
+                    opacity: .8;
+                    padding: .8rem 2.4rem;
+                    text-decoration: none;
+                    transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
+                    white-space: nowrap;
+
+                    &.static {
+                        border-bottom: 1px solid darken($pink, 5%);
+                        color: $darkText;
+                        margin-bottom: .8rem;
+                        padding-bottom: 1.6rem;
+                    }
 
     .dropdownMenuOpen {
         .navbar-avatar-container {
@@ -239,6 +304,24 @@
             justify-content: center;
             align-items: center;
         }
+                @include isPhone {
+                    width: 3rem;
+                    height: 3rem;
+                }
+
+                &.open {
+                    transform: scale(.9);
+                }
+
+                .initials {
+                    background: $darkGreen;
+                    color: white;
+                    height: 100%;
+                    width: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
 
         img {
             height: 100%;

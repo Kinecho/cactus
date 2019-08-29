@@ -8,6 +8,7 @@ export enum LocalStorageKey {
     referredByEmail = "referredByEmail",
     anonReflectionResponse = "anonReflectionResponse",
     landingQueryParams = "landingQueryParams",
+    flamelinkEnvironmentOverride = "flamelinkEnvironmentOverride",
 }
 
 export default class StorageService {

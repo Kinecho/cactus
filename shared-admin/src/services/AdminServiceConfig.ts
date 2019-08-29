@@ -16,6 +16,7 @@ import * as Sentry from "@sentry/node";
 import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     console.log(chalk.green("initializing all services"));
@@ -29,6 +30,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminCactusMemberService.initialize();
     AdminUserService.initialize(config);
     AdminReflectionPromptService.initialize();
+    AdminReflectionResponseService.initialize();
     AdminSentPromptService.initialize();
     AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
