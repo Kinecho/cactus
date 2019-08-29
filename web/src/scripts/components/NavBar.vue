@@ -141,7 +141,7 @@
                 return "";
             },
             loginHref(): string {
-                return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
+                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
