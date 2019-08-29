@@ -9,7 +9,7 @@ module.exports = {
     __PUBLIC_DOMAIN__: 'http://localhost:8080',
 
     //dev uses cactus-app-stage
-    __FLAMELINK_ENV_ID__: 'dev',
+    __FLAMELINK_ENV_ID__: 'production',
     __FLAMELINK_FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
         authDomain: 'cactus-app-stage.firebaseapp.com',

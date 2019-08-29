@@ -10,7 +10,7 @@ import "firebase/storage";
 import flamelink from "flamelink/app";
 import 'flamelink/content'
 import 'flamelink/storage'
-
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import FirebaseApp = firebase.app.App;
 
 let isInitialized = false;
@@ -36,12 +36,13 @@ export function initializeFirebase(): FirebaseObject {
         setTimestamp(firebase.firestore.Timestamp);
         firebaseApp = firebase.initializeApp(Config.firebase); //this is the default app, used in all the services
 
+        const envOverride = StorageService.getItem(LocalStorageKey.flamelinkEnvironmentOverride);
 
         const flamelinkFirebaseApp = firebase.initializeApp(Config.flamelinkFirebaseConfig, FirebaseAppName.flamelink); //this is the flamelink version
         flamelinkApp = flamelink({
             firebaseApp: flamelinkFirebaseApp, // required
             dbType: 'cf', // can be either 'rtdb' or 'cf' for Realtime DB or Cloud Firestore
-            env: Config.flamelinkEnvironmentId, // optional, default shown
+            env: envOverride || Config.flamelinkEnvironmentId, // optional, default shown
             locale: 'en-US', // optional, default shown
             precache: true // optional, default shown. Currently it only precaches "schemas" for better performance
         });
