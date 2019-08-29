@@ -3,7 +3,7 @@
         <div class="">
             <section class="hero">
                 <div class="nav-wrapper">
-                    <NavBar v-bind:isSticky="false"/>
+                    <NavBar v-bind:isSticky="false" :showLogin="false"/>
                 </div>
                 <div class="copy">
                     <h4>Cactus presents</h4>

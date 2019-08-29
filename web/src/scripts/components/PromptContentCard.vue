@@ -311,10 +311,10 @@
         overflow: hidden;
 
         @include isTinyPhone {
-            min-height: calc(100vh - 8rem);
+            min-height: calc(100vh - 5.6rem);
         }
         @include biggerThanTinyPhone {
-            min-height: calc(100vh - 10rem);
+            min-height: calc(100vh - 9rem);
         }
         @include r(600) {
             min-height: 0;

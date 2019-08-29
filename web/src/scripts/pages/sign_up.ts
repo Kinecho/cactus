@@ -6,7 +6,7 @@ import {getQueryParam, setupNavigation} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
 
-setupNavigation({showSignupButton: false, redirectOnSignOut: false});
+setupNavigation({showSignupButton: false, redirectOnSignOut: false, showLoginButton: false});
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("sign_up loaded");
