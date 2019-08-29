@@ -31,6 +31,7 @@
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import {getResponseText} from "@shared/util/StringUtil"
     import ResizableTextarea from "@components/ResizableTextarea.vue"
+
     export default Vue.extend({
         components: {
             ResizableTextarea,
@@ -101,14 +102,13 @@
                         if (!response && this.prompt && this.prompt.id) {
                             response = await ReflectionResponseService.createReflectionResponse(this.prompt.id, this.responseMedium, this.prompt.question)
                         }
-
-                        if (edit.text && edit.text.trim() && response) {
-                            response.content.text = edit.text;
+                        //We used to delete the response if the text was deleted, but we don't want to do that anymore.
+                        // This may cause non-ideal experiences if you have more than one response,
+                        // but that's an edge case that should not happen in practice
+                        if (response) {
+                            response.content.text = edit.text.trim();
                             //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
                             await ReflectionResponseService.sharedInstance.save(response);
-                        } else if (response && response.id) {
-                            //the text was deleted, delete the response;
-                            await ReflectionResponseService.sharedInstance.delete(response);
                         } else {
                             console.error("There was no response available to save... this shouldn't happen");
                         }

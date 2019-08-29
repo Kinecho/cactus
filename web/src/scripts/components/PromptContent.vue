@@ -1,3 +1,4 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -95,7 +96,7 @@
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, updateQueryParam} from '@web/util'
+    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
@@ -125,6 +126,7 @@
             isModal: {type: Boolean, default: false},
             onClose: {
                 type: Function, default: function () {
+                    removeQueryParam(QueryParam.CONTENT_INDEX);
                     this.$emit("close")
                 }
             }
@@ -467,24 +469,23 @@
                     this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
-                    console.log("subscribing to responses for promptId", promptId);
+                    // console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: (responses) => {
 
                             const [first] = responses;
-                            console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
+                            // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
 
                             if (!first && !localResponse) {
-                                console.log("No local response and no db response, creating one now");
-                                console.log("Using the newly created response for this prompt.");
+                                // console.log("No local response and no db response, creating one now");
+                                // console.log("Using the newly created response for this prompt.");
                                 localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                             } else if (first) {
-                                console.log("Using the response from the database", first.toJSON());
                             }
 
                             if (!first && localResponse) {
-                                console.log("No data found from database, using the locally created response");
+                                // console.log("No data found from database, using the locally created response");
                             }
 
                             //TODO: combine if there are multiple?

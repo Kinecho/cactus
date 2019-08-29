@@ -1,6 +1,9 @@
+import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
 <template>
-    <div class="journalEntry" v-bind:class="{new: !this.responseText, old: this.responseText}">
-        <div class="doneStatus" v-show="responsesLoaded && (responses.length !== 0 || responseText)">Done</div>
+    <div class="journalEntry" v-bind:class="{new: !completed, old: completed}">
+        <div class="doneStatus" v-show="responsesLoaded && completed">Done</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
@@ -11,9 +14,12 @@
                 {{error}}
             </p>
         </div>
-        <div class="textContainer" v-if="promptContent">
+        <div class="textContainer" v-if="promptContent && !completed">
             <h3 class="topic" v-show="topicText">{{topicText}}</h3>
             <p class="subtext" v-show="subText">{{subText}}</p>
+        </div>
+        <div class="textContainer" v-if="promptContent && completed">
+            <h3 class="question" v-show="topicText">{{questionText}}</h3>
         </div>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
         <edit-reflection
@@ -30,13 +36,13 @@
         </div>
 
         <nav v-show="!doReflect" class="buttonContainer">
-            <a :href="promptContentPath" @click.prevent="showContent = true" class="wiggle button" v-show="responses.length === 0">
+            <a :href="promptContentPath" @click.prevent="showContent = true" class="wiggle button" v-show="!completed">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                     <path fill="#fff" d="M3 3h6a1 1 0 0 1 .117 1.993L9 5H3a1 1 0 0 0-.993.883L2 6v11a1 1 0 0 0 .883.993L3 18h11a1 1 0 0 0 .993-.883L15 17v-6a1 1 0 0 1 1.993-.117L17 11v6a3 3 0 0 1-2.824 2.995L14 20H3a3 3 0 0 1-2.995-2.824L0 17V6a3 3 0 0 1 2.824-2.995L3 3h6zm10-3h6.02c.023 0 .046.002.07.004L19 0a1.008 1.008 0 0 1 .595.196c.04.03.077.061.112.097l-.09-.08a1.006 1.006 0 0 1 .376.67l.003.03.003.055L20 1v6a1 1 0 0 1-1.993.117L18 7V3.414l-9.293 9.293a1 1 0 0 1-1.32.083l-.094-.083a1 1 0 0 1 0-1.414L16.584 2H13a1 1 0 0 1-.117-1.993L13 0h6z"/>
                 </svg>
                 Reflect</a>
-            <button @click.prevent="doReflect = true" class="wiggle secondary" v-show="responses.length === 0">
-                <img src="assets/images/pen.svg" alt="" />
+            <button @click.prevent="doReflect = true" class="wiggle secondary" v-show="completed && !hasNote">
+                <img src="assets/images/pen.svg" alt=""/>
                 Write a Note
             </button>
         </nav>
@@ -71,12 +77,14 @@
     import {formatDate} from "@shared/util/DateUtil"
     import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
     import ReflectionPrompt from '@shared/models/ReflectionPrompt'
-    import {getIntegerFromStringBetween, getResponseText} from "@shared/util/StringUtil"
+    import {getIntegerFromStringBetween, getResponseText, isBlank} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import PromptSharing from "@components/PromptContentSharing.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
+    import {removeQueryParam, updateQueryParam} from '@web/util'
+    import {QueryParam} from "@shared/util/queryParams"
 
     export default Vue.extend({
         components: {
@@ -161,8 +169,11 @@
 
                 return classes;
             },
+            questionText(): string | undefined {
+                return this.promptContent && this.promptContent.getQuestion();
+            },
             backgroundImage(): Image | undefined {
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || []
+                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
                 if (first && first.backgroundImage) {
                     return first.backgroundImage
                 }
@@ -188,41 +199,51 @@
             responseText(): string | undefined {
                 return getResponseText(this.responses);
             },
+            completed(): boolean {
+                return this.responses.length > 0;
+            },
+            hasNote(): boolean {
+                return !isBlank(this.responseText);
+            },
             linkItems(): {
                 title: string,
                 href?: string,
                 onClick?: () => void,
             }[] {
-                const linkItems = [{
-                    title: "Reflect",
-                    onClick: () => {
-                        this.showContent = true;
-                    }
-                },{
-                    title: "Share Prompt",
-                    onClick: () => {
-                        this.showSharing = true;
-                    }
-                }];
+                const linkItems = [
+                    {
+                        title: "Reflect",
+                        onClick: () => {
+                            this.showContent = true;
+                        }
+                    }, {
+                        title: "Share Prompt",
+                        onClick: () => {
+                            this.showSharing = true;
+                        }
+                    },
+                    {
+                        title: this.hasNote ? "Edit Note" : "Write Note",
+                        onClick: () => {
+                            this.doReflect = true;
+                        }
+                    }];
 
-                if (this.responses.length > 0) {
-                    linkItems.push({
-                        title: "Edit Note",
-                        onClick: () => {
-                            this.doReflect = true;
-                        }
-                    })
-                } else {
-                    linkItems.push({
-                        title: "Write a Note",
-                        onClick: () => {
-                            this.doReflect = true;
-                        }
-                    })
-                }
 
                 return linkItems
             },
+        },
+        watch: {
+            showContent(show) {
+                if (show && this.promptContent && this.promptContent.entryId) {
+                    console.log("adding prompt content entry id query param");
+                    updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.promptContent.entryId);
+                } else {
+                    console.log("removing prompt content entry id");
+                    removeQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);
+                    removeQueryParam(QueryParam.CONTENT_INDEX);
+                }
+            }
         },
         methods: {}
     })

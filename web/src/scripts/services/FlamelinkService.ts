@@ -73,8 +73,6 @@ export default class FlamelinkService {
     observeByEntryId<T extends FlamelinkModel>(id: string, Type: { new(): T }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
         const type = new Type();
         const schema = type.schema;
-        console.log(`Fetching ${id} from ${schema}`);
-
 
         return this.content.subscribe({
             entryId: id,
@@ -92,7 +90,6 @@ export default class FlamelinkService {
                     return;
                 }
 
-                console.log(`raw ${schema} data`, data);
                 const model = fromFlamelinkData(data, Type);
                 options.onData(model);
             }

@@ -3,7 +3,7 @@ import {
     appendQueryParams,
     destructureDisplayName, getCharacterCount,
     getFilenameFromInput, getIntegerFromStringBetween,
-    getUrlFromInput, getWordCount,
+    getUrlFromInput, getWordCount, isBlank,
     stripQueryParams
 } from "@shared/util/StringUtil";
 
@@ -255,4 +255,13 @@ describe("get number from string", () => {
         expect(getIntegerFromStringBetween("239aljadlkj291", 5)).toEqual(3);
         expect(getIntegerFromStringBetween("", 5)).toEqual(0);
     });
+});
+
+test("isBlank", () => {
+    expect(isBlank("")).toBeTruthy();
+    expect(isBlank("    ")).toBeTruthy();
+    expect(isBlank(null)).toBeTruthy();
+    expect(isBlank(undefined)).toBeTruthy();
+    expect(isBlank("n")).toBeFalsy();
+    expect(isBlank("  akdljafs ")).toBeFalsy();
 });
