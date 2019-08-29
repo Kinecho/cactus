@@ -28,8 +28,9 @@
                 @close="doReflect = false"
         />
 
-        <div class="backgroundImage" :class="backgroundClasses">
+        <div class="backgroundImage">
             <flamelink-image v-if="backgroundImage" :image="backgroundImage"/>
+            <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>
 
         <nav v-show="!doReflect" class="buttonContainer">

@@ -37,11 +37,9 @@
     position: relative;
     right: 0;
     width: 120%;
-
-
     overflow: hidden;
     height: 100%;
-    max-width: 30vw;
+
 
     img {
       width: 100%;
@@ -56,7 +54,10 @@
       width: 60%;
     }
 
-    /* &.randomBackground {
+    .random-placeholder{
+      height:100%;
+      width: 100%;
+      min-height: 24rem;
       //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
 
 
@@ -80,7 +81,7 @@
         background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
       }
 
-    } */
+    }
   }
 }
 
