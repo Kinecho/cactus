@@ -129,6 +129,18 @@
         },
         async created(): Promise<void> {
 
+            this.keyboardListener = (evt: KeyboardEvent) => {
+                if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
+                    this.previous()
+                }
+                if (evt.code === "ArrowRight" || evt.keyCode === 39){
+                    this.next();
+                }
+            };
+
+            document.addEventListener('keyup', this.keyboardListener);
+
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.authLoaded = true;
@@ -219,6 +231,8 @@
                 window.removeEventListener("popstate", this.popStateListener);
             }
 
+            document.removeEventListener('keyup', this.keyboardListener);
+
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -241,6 +255,7 @@
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
+            keyboardListener: any | undefined,
         } {
             return {
                 promptContent: undefined,
@@ -263,6 +278,7 @@
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
+                keyboardListener: undefined,
             };
         },
         computed: {
