@@ -40,12 +40,14 @@
             //
         },
         created() {
-            this.escapeListener = document.addEventListener('keyup', (evt: KeyboardEvent) => {
-
-                if (evt.code === "27" || evt.keyCode === 27) {
+            this.escapeListener = (evt: KeyboardEvent) => {
+                if (evt.code === "Escape" || evt.keyCode === 27) {
                     this.close()
                 }
-            });
+            };
+
+            document.addEventListener('keyup', this.escapeListener);
+
         },
         destroyed() {
             window.removeEventListener("keyup", this.escapeListener)

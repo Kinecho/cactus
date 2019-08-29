@@ -48,6 +48,8 @@
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :style="cardStyles"
                             />
                         </transition>
@@ -128,6 +130,23 @@
             }
         },
         async created(): Promise<void> {
+
+            this.keyboardListener = (evt: KeyboardEvent) => {
+                console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
+                if (this.navigationDisabled) {
+                    console.log("navigation disabled");
+                    return;
+                }
+                if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
+                    this.previous()
+                }
+                if (evt.code === "ArrowRight" || evt.keyCode === 39) {
+                    this.next();
+                }
+            };
+
+            document.addEventListener('keyup', this.keyboardListener);
+
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
@@ -219,6 +238,8 @@
                 window.removeEventListener("popstate", this.popStateListener);
             }
 
+            document.removeEventListener('keyup', this.keyboardListener);
+
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -241,6 +262,8 @@
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
+            keyboardListener: any | undefined,
+            navigationDisabled: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -263,6 +286,8 @@
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
+                keyboardListener: undefined,
+                navigationDisabled: false,
             };
         },
         computed: {
@@ -349,6 +374,12 @@
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
+
+                if (this.navigationDisabled) {
+                    console.log("tap is disabled");
+                    return;
+                }
+
                 if (!this.tapAnywhereEnabled) {
                     console.log("tap anywhere is disabled");
                     return;
