@@ -72,6 +72,10 @@
             height: 50%;
             width: 100%;
         }
+
+        @include maxW(600){
+            display: none;
+        }
     }
 
 </style>
