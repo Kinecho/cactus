@@ -8,6 +8,13 @@ export interface PromptCopy {
     CLOSE: string,
     SAVED: string,
     SAVING: string,
+    CELEBRATIONS: string[],
+    REFLECTIONS: string,
+    SECONDS: string,
+    MINUTES: string,
+    DAY_STREAK: string,
+    GO_HOME: string,
+    SIGN_UP_MESSAGE: string,
 }
 
 export interface LocaleSettings {

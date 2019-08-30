@@ -13,7 +13,7 @@
                             </transition>
                         </div>
                         <p v-show="reflectionCount !== undefined">
-                            Reflections
+                            {{promptCopy.REFLECTIONS}}
                         </p>
                     </section>
                     <section class="metric">
@@ -35,22 +35,22 @@
                             </transition>
                         </div>
                         <p v-show="streakDays !== undefined">
-                            Day Streak
+                            {{promptCopy.DAY_STREAK}}
                         </p>
                     </section>
                 </div>
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
-                    Sign Up to Save Your Progress
+                    {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
                 <button class="primary authBtn"
                         v-if="authLoaded && loggedIn && !isModal"
                         @click="goToHome">
-                    Go Home
+                    {{promptCopy.GO_HOME}}
                 </button>
                 <button class="primary authBtn"
                         v-if="authLoaded && loggedIn && isModal"
                         @click="close">
-                    Close
+                    {{promptCopy.CLOSE}}
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
@@ -87,6 +87,10 @@
     import {PageRoute} from '@web/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import CopyService from '@shared/copy/CopyService'
+    import {PromptCopy} from '@shared/copy/CopyTypes'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -117,9 +121,9 @@
                     console.log("totalDuration", totalDuration);
                     if (totalDuration < (60 * 1000)) {
                         this.totalDuration = `${Math.round(totalDuration / 1000)}`;
-                        this.durationLabel = "Seconds"
+                        this.durationLabel = copy.prompts.SECONDS
                     } else {
-                        this.durationLabel = "Minutes";
+                        this.durationLabel = copy.prompts.MINUTES;
                         this.totalDuration = millisecondsToMinutes(totalDuration);
                     }
 
@@ -147,7 +151,7 @@
             member: CactusMember | undefined,
             showLogin: boolean,
             durationLabel: string,
-            celebrations: Array<string>
+            promptCopy: PromptCopy,
         } {
             return {
                 reflectionCount: undefined,
@@ -160,7 +164,7 @@
                 member: undefined,
                 showLogin: false,
                 durationLabel: "",
-                celebrations: ["Well done!", "Nice work!", "Way to go!"]
+                promptCopy: copy.prompts,
             }
         },
         destroyed() {
@@ -175,7 +179,8 @@
                 return base;
             },
             celebrateText(): string {
-                return this.celebrations[Math.floor(Math.random() * this.celebrations.length)]
+                const celebrations = copy.prompts.CELEBRATIONS;
+                return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
             }
         },
         methods: {
