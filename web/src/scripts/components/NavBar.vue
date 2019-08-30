@@ -19,7 +19,7 @@
                 >Sign Up</a>
             </transition>
         </div>
-        <dropdown-menu :items="links">
+        <dropdown-menu :items="links" v-if="loggedIn">
             <div slot="custom-button">
                 <div class="navbar-avatar-container">
                     <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
