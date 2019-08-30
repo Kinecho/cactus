@@ -28,8 +28,8 @@
                 @close="doReflect = false"
         />
 
-        <div class="backgroundImage" v-show="!doReflect && backgroundImage">
-            <flamelink-image v-if="backgroundImage" :image="backgroundImage"/>
+        <div class="backgroundImage" v-if="!doReflect && hasBackgroundImage">
+            <flamelink-image v-if="hasBackgroundImage" :image="backgroundImage"/>
             <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>
 
@@ -84,6 +84,7 @@
     import {removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
+    import {hasImage} from '@shared/util/FlamelinkUtils'
 
     export default Vue.extend({
         components: {
@@ -181,6 +182,9 @@
                     return first.backgroundImage
                 }
                 return;
+            },
+            hasBackgroundImage(): boolean {
+                return hasImage(this.backgroundImage);
             },
             topicText(): string | undefined {
                 return this.promptContent && this.promptContent.subjectLine;
