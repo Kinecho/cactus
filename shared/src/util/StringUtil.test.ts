@@ -2,8 +2,8 @@ import {
     appendDomain,
     appendQueryParams,
     destructureDisplayName, getCharacterCount,
-    getFilenameFromInput,
-    getUrlFromInput, getWordCount,
+    getFilenameFromInput, getIntegerFromStringBetween,
+    getUrlFromInput, getWordCount, isBlank,
     stripQueryParams
 } from "@shared/util/StringUtil";
 
@@ -241,4 +241,27 @@ describe("get character count", () => {
         const input = "    12345  ";
         expect(getCharacterCount(input)).toEqual(5);
     });
+});
+
+describe("get number from string", () => {
+    test("various strings", () => {
+        expect(getIntegerFromStringBetween("abc", 5)).toEqual(4);
+        expect(getIntegerFromStringBetween("abc124", 5)).toEqual(1);
+        expect(getIntegerFromStringBetween("aaaa", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("a", 5)).toEqual(2);
+        expect(getIntegerFromStringBetween("b", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("c", 5)).toEqual(4);
+        expect(getIntegerFromStringBetween("d", 5)).toEqual(0);
+        expect(getIntegerFromStringBetween("239aljadlkj291", 5)).toEqual(3);
+        expect(getIntegerFromStringBetween("", 5)).toEqual(0);
+    });
+});
+
+test("isBlank", () => {
+    expect(isBlank("")).toBeTruthy();
+    expect(isBlank("    ")).toBeTruthy();
+    expect(isBlank(null)).toBeTruthy();
+    expect(isBlank(undefined)).toBeTruthy();
+    expect(isBlank("n")).toBeFalsy();
+    expect(isBlank("  akdljafs ")).toBeFalsy();
 });

@@ -71,7 +71,7 @@ header {
 }
 
 a {
-    color: $darkGreen;
+  color: $darkGreen;
 }
 
 a.button {
@@ -142,13 +142,13 @@ button, a.button {
   }
 
   &.small {
-      box-shadow: none;
-      font: 1.6rem $font-stack;
-      padding: 1rem 1.6rem;
+    box-shadow: none;
+    font: 1.6rem $font-stack;
+    padding: 1rem 1.6rem;
   }
 
   &.secondary {
-    background-color: transparent;
+    background-color: $white;
     border: 1px solid $lightGreen;
     box-shadow: none;
     color: $darkGreen;

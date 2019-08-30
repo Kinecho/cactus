@@ -19,28 +19,14 @@
                 >Sign Up</a>
             </transition>
         </div>
-
-        <transition name="fade-in">
-            <div v-if="loggedIn" class="user-info">
-                <div v-click-outside="closeMenu">
-                    <div class="avatar-container" @click="toggleMenu" v-bind:class="{open: menuOpen}">
-                        <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
-                    </div>
-                    <transition name="fade-down">
-                        <nav class="moreMenu" v-show="menuOpen">
-                            <span class="static">{{user.email}}</span>
-                            <template v-for="(link) in links" v-bind:link="link">
-                                <a v-if="link.href" :href="link.href">{{link.title}}</a>
-                                <span v-if="link.onClick" @click.prevent="link.onClick">{{link.title}}</span>
-                            </template>
-                            <!--                        <a :href="PageRoute.JOURNAL_HOME">My Journal</a>-->
-                            <!--                        <a href="#" @click.prevent=logout>logout</a>-->
-                        </nav>
-                    </transition>
+        <dropdown-menu :items="links" v-if="loggedIn">
+            <div slot="custom-button">
+                <div class="navbar-avatar-container">
+                    <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
+                    <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                 </div>
             </div>
-        </transition>
+        </dropdown-menu>
     </header>
 </template>
 
@@ -52,18 +38,13 @@
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {logout} from '@web/auth'
+    import DropdownMenu from "@components/DropdownMenu.vue"
+    import {DropdownMenuLink} from "@components/DropdownMenuTypes"
     import {QueryParam} from '@shared/util/queryParams'
 
-    declare interface LinkData {
-        title: string,
-        href?: string,
-        onClick?: () => Promise<void> | void
-    }
-
     declare interface NavBarData {
-        authUnsubscribe?: () => void,
-        user?: FirebaseUser | undefined | null,
-        menuOpen: boolean,
+        authUnsubscribe: (() => void) | undefined,
+        user: FirebaseUser | undefined | null,
         authLoaded: boolean,
     }
 
@@ -71,6 +52,9 @@
     export default Vue.extend({
         directives: {
             'click-outside': clickOutsideDirective(),
+        },
+        components: {
+            DropdownMenu,
         },
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
@@ -94,9 +78,8 @@
         },
         data(): NavBarData {
             return {
-                user: null,
+                user: undefined,
                 authUnsubscribe: undefined,
-                menuOpen: false,
                 authLoaded: false,
             }
         },
@@ -104,8 +87,8 @@
             loggedIn(): boolean {
                 return !!this.user;
             },
-            links(): LinkData[] {
-                return [{
+            links(): DropdownMenuLink[] {
+                const links: DropdownMenuLink[] = [{
                     title: "My Journal",
                     href: PageRoute.JOURNAL_HOME,
                 }, {
@@ -116,7 +99,16 @@
                     onClick: async () => {
                         await this.logout()
                     }
-                }]
+                }];
+
+                if (this.user && this.user.email) {
+                    links.unshift({
+                        static: true,
+                        title: this.user.email,
+                    })
+                }
+
+                return links;
             },
             displayName(): string | undefined | null {
                 return this.user ? this.user.displayName || this.user.email : null;
@@ -155,12 +147,7 @@
             goToLogin() {
                 window.location.href = this.loginHref;
             },
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            },
-            closeMenu() {
-                this.menuOpen = false;
-            },
+
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
                     return;
@@ -197,7 +184,7 @@
                 padding: 1rem 1.6rem;
 
                 &:hover {
-                  background-color: $lightGreen;
+                    background-color: $lightGreen;
                 }
             }
         }
@@ -241,85 +228,60 @@
                 width: 7rem;
             }
         }
+    }
 
-        .user-info {
+    .navbar-avatar-container {
+        cursor: pointer;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        overflow: hidden;
+        display: inline-block;
+        transition: transform .2s ease-in-out;
+
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            position: relative;
+        }
 
-            @include isPhone {
-                font-size: 1.4rem;
-            }
+        @include isPhone {
+            width: 3rem;
+            height: 3rem;
+        }
 
-            .moreMenu {
-                background-color: $lightPink;
-                border-radius: 6px;
-                right: 1rem;
-                padding: .8rem 0;
-                position: absolute;
-                top: 4rem;
-                z-index: 100;
-                @include popoverShadow;
+        &.open {
+            transform: scale(.9);
+        }
 
-                a, span {
-                    background-color: transparent;
-                    color: $darkestPink;
-                    display: block;
-                    font-size: 1.6rem;
-                    opacity: .8;
-                    padding: .8rem 2.4rem;
-                    text-decoration: none;
-                    transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-                    white-space: nowrap;
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-                    &.static {
-                        border-bottom: 1px solid darken($pink, 5%);
-                        color: $darkText;
-                        margin-bottom: .8rem;
-                        padding-bottom: 1.6rem;
-                    }
+        img {
+            height: 100%;
+            width: 100%;
 
-                    &:hover:not(.static) {
-                        background-color: lighten($lightPink, 2%);
-                        opacity: 1;
-                        cursor: pointer;
-                    }
-                }
-            }
-
-            .avatar-container {
-                cursor: pointer;
-                width: 4rem;
-                height: 4rem;
-                border-radius: 50%;
-                overflow: hidden;
-                display: inline-block;
-                transition: transform .2s ease-in-out;
-
-                @include isPhone {
-                    width: 3rem;
-                    height: 3rem;
-                }
-
-                &.open {
-                    transform: scale(.9);
-                }
-
-                .initials {
-                    background: $darkGreen;
-                    color: white;
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                img {
-                    height: 100%;
-                    width: 100%;
-                }
-            }
         }
     }
+
+    @include isPhone {
+        font-size: 1.4rem;
+        .navbar-avatar-container {
+            width: 3rem;
+            height: 3rem;
+        }
+    }
+
+
 </style>

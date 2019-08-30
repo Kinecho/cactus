@@ -1,5 +1,6 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
-    <div :class="['page-wrapper', slideNumberClass] ">
+    <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
             <div class="centered" v-if="loading">
                 <spinner message="Loading..." :delay="1000"/>
@@ -48,6 +49,8 @@
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :style="cardStyles"
                             />
                         </transition>
@@ -55,6 +58,7 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:isModal="isModal"
                             />
                         </transition>
                     </div>
@@ -92,7 +96,7 @@
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, updateQueryParam} from '@web/util'
+    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
@@ -119,13 +123,32 @@
         },
         props: {
             promptContentEntryId: String,
+            isModal: {type: Boolean, default: false},
             onClose: {
                 type: Function, default: function () {
+                    removeQueryParam(QueryParam.CONTENT_INDEX);
                     this.$emit("close")
                 }
             }
         },
         async created(): Promise<void> {
+
+            this.keyboardListener = (evt: KeyboardEvent) => {
+                console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
+                if (this.navigationDisabled) {
+                    console.log("navigation disabled");
+                    return;
+                }
+                if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
+                    this.previous()
+                }
+                if (evt.code === "ArrowRight" || evt.keyCode === 39) {
+                    this.next();
+                }
+            };
+
+            document.addEventListener('keyup', this.keyboardListener);
+
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
@@ -217,6 +240,8 @@
                 window.removeEventListener("popstate", this.popStateListener);
             }
 
+            document.removeEventListener('keyup', this.keyboardListener);
+
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -239,6 +264,8 @@
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
+            keyboardListener: any | undefined,
+            navigationDisabled: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -261,6 +288,8 @@
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
+                keyboardListener: undefined,
+                navigationDisabled: false,
             };
         },
         computed: {
@@ -347,6 +376,12 @@
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
+
+                if (this.navigationDisabled) {
+                    console.log("tap is disabled");
+                    return;
+                }
+
                 if (!this.tapAnywhereEnabled) {
                     console.log("tap anywhere is disabled");
                     return;
@@ -434,24 +469,23 @@
                     this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
-                    console.log("subscribing to responses for promptId", promptId);
+                    // console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: (responses) => {
 
                             const [first] = responses;
-                            console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
+                            // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
 
                             if (!first && !localResponse) {
-                                console.log("No local response and no db response, creating one now");
-                                console.log("Using the newly created response for this prompt.");
+                                // console.log("No local response and no db response, creating one now");
+                                // console.log("Using the newly created response for this prompt.");
                                 localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                             } else if (first) {
-                                console.log("Using the response from the database", first.toJSON());
                             }
 
                             if (!first && localResponse) {
-                                console.log("No data found from database, using the locally created response");
+                                // console.log("No data found from database, using the locally created response");
                             }
 
                             //TODO: combine if there are multiple?
@@ -577,6 +611,42 @@
         width: 100vw;
         justify-content: center;
         position: relative;
+
+        @include maxW(600) {
+            &.isModal {
+                height: 100vh;
+
+                .content-container {
+                    height: 100%;
+
+                    .flipper {
+                        height: 100%;
+
+                        .flip-card {
+                            height: 100%;
+
+                            .content-card {
+                                height: 100%;
+                            }
+
+                            .flip-container {
+                                height: 100%;
+
+                                .flipper {
+                                    height: 100%;
+
+                                    .flip-card {
+                                        height: 100%;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         button.secondary {
             transition: all .2s ease;
@@ -773,12 +843,17 @@
 
     .slide-out-enter {
         transform: translate(-100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
+
     }
 
     .slide-out-leave-to {
         transform: translate(100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
     }
 
 
@@ -790,7 +865,6 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        position: relative;
         width: 100%;
         z-index: 10;
 
@@ -816,7 +890,7 @@
         0% {
             transform: rotateY(0);
         }
-        50%{
+        50% {
             transform: rotateY(10deg);
         }
         100% {
@@ -830,7 +904,7 @@
         top: 0;
         width: 100%;
 
-        animation: twist .5s ;
+        animation: twist .5s;
 
         @include r(600) {
             border-radius: 12px;

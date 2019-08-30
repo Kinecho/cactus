@@ -24,7 +24,8 @@ export function clickOutsideDirective():DirectiveOptions{
             el.__vueClickOutside__ = handler;
 
             // add Event Listeners
-            document.addEventListener('click', handler)
+            document.addEventListener('click', handler);
+            document.addEventListener("touchstart", handler);
         },
 
         unbind: function (el, binding) {

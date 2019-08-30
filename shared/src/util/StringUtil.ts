@@ -168,3 +168,22 @@ export function getCharacterCount(text?: string): number {
     }
     return text.trim().length;
 }
+
+export function getIntegerFromStringBetween(input: string, max: number): number {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+        hash = Math.abs(input.charCodeAt(i) + ((hash << 5) - hash));
+    }
+    return hash % max;
+
+
+}
+
+export function isBlank(input: string | null | undefined): boolean {
+    if (!input || !input.trim()) {
+        return true;
+    }
+
+    return false;
+
+}

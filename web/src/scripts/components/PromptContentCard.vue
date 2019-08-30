@@ -109,10 +109,10 @@
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div class="saved-container" v-show="showSaved || saving">
-                        <span v-show="saving && !saved">Saving...</span>
+                        <span v-show="saving && !saved">{{promptCopy.SAVING}}...</span>
                         <span v-show="saved && !saving">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-                            Saved
+                            {{promptCopy.SAVED}}
                         </span>
                     </div>
                 </transition>
@@ -124,22 +124,21 @@
                             v-model="response.content.text"
                             v-on:click.stop
                             :class="{hasValue: !!response.content.text}"
-                        />
+                            @focusin="disableNavigation"
+                            @focusout="enableNavigation"
+                    />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
                         <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
-                        Write Optional Note
+                        {{promptCopy.ADD_A_NOTE}}
                     </span>
                 </div>
             </div>
 
             <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
-                <span class="tap">Tap Anywhere</span>
+                <span class="tap">{{promptCopy.TAP_ANYWHERE}}</span>
             </div>
             <!--    END Reflect-->
-<!--            <div class="actions" v-if="processedContent.actionButton">-->
-<!--                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>-->
-<!--            </div>-->
         </section>
     </div>
 </template>
@@ -162,8 +161,12 @@
     import {formatDurationAsTime} from '@shared/util/DateUtil'
 
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
+    import CopyService from '@shared/copy/CopyService'
+    import {PromptCopy} from '@shared/copy/CopyTypes'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -188,12 +191,14 @@
             editingResponse: string,
             showSaved: boolean,
             showSavingTimeout: any,
+            promptCopy: PromptCopy,
         } {
             return {
                 youtubeVideoLoading: true,
                 editingResponse: "",
                 showSaved: false,
                 showSavingTimeout: undefined,
+                promptCopy: copy.prompts,
             }
         },
         watch: {
@@ -290,6 +295,12 @@
             complete() {
                 this.$emit("complete")
             },
+            enableNavigation() {
+                this.$emit("navigationEnabled")
+            },
+            disableNavigation() {
+                this.$emit("navigationDisabled")
+            }
         }
     })
 </script>
@@ -406,12 +417,11 @@
         overflow: hidden;
 
         .slide-0 &:empty {
-            $backgrounds:
-                url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
-                url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-                url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
-                url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
-                url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
+            $backgrounds: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
+            url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
+            url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
+            url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
+            url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
 
             $bgKey: random(length($backgrounds));
             $nth: nth($backgrounds, $bgKey);

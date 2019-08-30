@@ -1,0 +1,252 @@
+@import "variables";
+@import "mixins";
+
+//.centered {
+//  text-align: left;
+//}
+
+.journalEntry {
+    @include shadowbox;
+    margin: 0 1.6rem 3.2rem;
+    overflow: hidden;
+    padding: 1.6rem 1.6rem 2.4rem;
+    position: relative;
+    text-align: left;
+
+    @include r(600) {
+        padding: 3.2rem 2.4rem;
+    }
+
+    @include r(768) {
+        margin: 0 auto 4.8rem;
+        max-width: 64rem;
+        padding: 3.2rem;
+    }
+}
+
+.backgroundImage {
+    background: url(assets/images/pinkBlob4.svg) center top 1.6rem no-repeat;
+    background-size: 138%;
+    height: 100%;
+    margin: 0 -2.4rem -12rem;
+    min-height: 25rem;
+    overflow: hidden;
+    position: relative;
+    right: 0;
+    z-index: 0;
+
+    @include r(600) {
+        background-position: left 1.6rem center;
+        background-size: 154%;
+        bottom: auto;
+        height: 100%;
+        left: 63%;
+        margin: 0;
+        min-height: 25rem;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 28rem;
+    }
+
+    .hasNote & {
+        display: none;
+
+        @include r(600) {
+            background-position: center top;
+            background-size: 100%;
+            bottom: auto;
+            display: block;
+            height: 10rem;
+            left: 68%;
+            margin: 0;
+            min-height: 0;
+            position: absolute;
+            top: 7rem;
+            width: 14rem;
+        }
+    }
+
+    img {
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+
+  /* .random-placeholder {
+    height:100%;
+    width: 100%;
+    min-height: 24rem;
+    //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
+
+
+    &.bg0 {
+      background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px no-repeat
+    }
+
+    &.bg1 {
+      background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px no-repeat
+    }
+
+    &.bg2 {
+      background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px no-repeat
+    }
+
+    &.bg3 {
+      background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px no-repeat
+    }
+
+    &.bg4 {
+      background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
+    }
+
+  } */
+}
+
+.menuParent {
+    position: relative;
+    z-index: 2;
+}
+
+.textContainer {
+  position: relative;
+  z-index: 1;
+
+  @include r(600) {
+    max-width: 66%;
+  }
+}
+
+.question,
+.topic {
+  font-size: 2.1rem;
+
+  @include r(600) {
+    font-size: 2.4rem;
+  }
+}
+
+.date {
+  font-size: 1.6rem;
+  margin: .8rem 0 1.6rem;
+  opacity: .8;
+  display: flex;
+}
+
+.menuParent {
+  position: absolute;
+  right: .8rem;
+  top: 2.4rem;
+}
+
+.entry {
+    padding-left: 2rem;
+    position: relative;
+    white-space: pre-line;
+    margin: 1.6rem 0 1.6rem -2rem;
+
+    @include r(600) {
+        margin: 1.6rem 0;
+        max-width: 66%;
+    }
+
+    &:before {
+        background-color: $yellow;
+        border-radius: .4rem;
+        content: '';
+        display: block;
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: .8rem;
+
+        @include r(600) {
+            width: .4rem;
+        }
+    }
+
+    .hasNote & {
+        @include r(600) {
+            max-width: none;
+        }
+    }
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  margin-top: 2.4rem;
+  position: relative;
+  z-index: 1;
+
+  @include r(600) {
+    flex-direction: row;
+  }
+
+  button.secondary {
+    @include maxW(600) {
+      background-color: $white;
+    }
+  }
+}
+
+.button + button {
+  margin-top: 1.6rem;
+
+  @include r(600) {
+    margin-top: 0;
+  }
+}
+
+button, a.button {
+  align-items: center;
+  display: inline-flex;
+  flex-grow: 0;
+  justify-content: center;
+  margin: 0;
+  width: 100%;
+
+  @include r(600) {
+    margin-right: .8rem;
+    width: auto;
+  }
+
+  svg, img {
+    fill: $darkGreen;
+    height: 1.6rem;
+    margin-right: .8rem;
+    width: 1.6rem;
+  }
+
+  &.icon {
+    padding: .9rem;
+
+    svg {
+      margin-right: 0;
+    }
+  }
+
+  &.primary svg {
+    fill: white;
+  }
+}
+
+.wiggle:hover {
+  svg, img {
+    animation: wiggle .5s forwards;
+  }
+}
+
+.doneStatus {
+  background-color: $lightGreen;
+  border-radius: 2rem;
+  color: $darkestGreen;
+  display: inline-block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: .8rem 0;
+  padding: 0 .8rem;
+  text-transform: uppercase;
+}
