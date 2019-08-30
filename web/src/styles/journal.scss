@@ -9,7 +9,7 @@
     @include shadowbox;
     margin: 0 1.6rem 3.2rem;
     overflow: hidden;
-    padding: 1.6rem;
+    padding: 1.6rem 1.6rem 2.4rem;
     position: relative;
     text-align: left;
 
@@ -25,42 +25,53 @@
 }
 
 .backgroundImage {
-  height: 100%;
-  margin: 0 -2.4rem -12rem;
-  overflow: hidden;
-  position: relative;
-  right: 0;
-  z-index: 0;
-
-  @include r(600) {
-    height: auto;
-    left: 60%;
-    position: absolute;
-    top: 8rem;
-    width: 60%;
-  }
-  @include r(768) {
-    bottom: 6.4rem;
-    top: auto;
-  }
-
-  .old & {
-      display: none;
+    background: url(assets/images/pinkBlob4.svg) center top 1.6rem no-repeat;
+    background-size: 138%;
+    height: 100%;
+    margin: 0 -2.4rem -12rem;
+    min-height: 25rem;
+    overflow: hidden;
+    position: relative;
+    right: 0;
+    z-index: 0;
 
     @include r(600) {
-      bottom: auto;
-      display: block;
-      left: 72%;
-      top: 9rem;
-      width: 25%;
+        background-position: left 1.6rem center;
+        background-size: 154%;
+        bottom: auto;
+        height: 100%;
+        left: 63%;
+        margin: 0;
+        min-height: 25rem;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 28rem;
     }
-  }
 
-  img {
-      display: block;
-      height: 100%;
-      width: 100%;
-  }
+    .old & {
+        display: none;
+
+        @include r(600) {
+            background-position: center top;
+            background-size: 100%;
+            bottom: auto;
+            display: block;
+            height: 10rem;
+            left: 68%;
+            margin: 0;
+            min-height: 0;
+            position: absolute;
+            top: 7rem;
+            width: 14rem;
+        }
+    }
+
+    img {
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
 
   /* .random-placeholder {
     height:100%;
@@ -90,6 +101,11 @@
     }
 
   } */
+}
+
+.menuParent {
+    position: relative;
+    z-index: 2;
 }
 
 .textContainer {
@@ -164,7 +180,7 @@
 .buttonContainer {
   display: flex;
   flex-direction: column;
-  margin-top: 1.6rem;
+  margin-top: 2.4rem;
   position: relative;
   z-index: 1;
 
