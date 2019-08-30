@@ -28,6 +28,8 @@
             </transition>
 
             <div v-if="loggedIn && loginReady" class="section-container">
+                <skeleton-card/>
+
                 <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group
                             name="fade-out"
@@ -65,6 +67,7 @@
     import SentPrompt from "@shared/models/SentPrompt"
     import SentPromptService from '@web/services/SentPromptService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
+    import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -109,6 +112,7 @@
             NavBar,
             entry: JournalEntryCard,
             AutoPromptContentModal,
+            SkeletonCard,
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP}

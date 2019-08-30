@@ -2,7 +2,8 @@ import {QueryParam} from '@shared/util/queryParams'
 import {QueryParam} from '@shared/util/queryParams'
 import {QueryParam} from '@shared/util/queryParams'
 <template>
-    <div class="journalEntry" v-bind:class="{new: !completed, old: completed}">
+    <skeleton-card v-if="!allLoaded"/>
+    <div v-else class="journalEntry" v-bind:class="{new: !completed, old: completed}">
         <div class="doneStatus" v-show="responsesLoaded && completed">Done</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
@@ -85,6 +86,7 @@ import {QueryParam} from '@shared/util/queryParams'
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import {removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
+    import SkeletonCard from "@components/JournalEntrySkeleton.vue";
 
     export default Vue.extend({
         components: {
@@ -94,6 +96,7 @@ import {QueryParam} from '@shared/util/queryParams'
             EditReflection,
             PromptSharing,
             FlamelinkImage,
+            SkeletonCard
         },
         created() {
             this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
@@ -155,6 +158,9 @@ import {QueryParam} from '@shared/util/queryParams'
             }
         },
         computed: {
+            allLoaded(): boolean {
+                return !this.loading && this.responsesLoaded;
+            },
             backgroundClasses(): { [name: string]: string } {
                 const [first]: Content[] = (this.promptContent && this.promptContent.content) || []
                 const bgImage = first ? first.backgroundImage : undefined;

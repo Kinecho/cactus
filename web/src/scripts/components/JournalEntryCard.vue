@@ -15,6 +15,7 @@
     import PromptContentEntryCard from "@components/JournalEntryPromptContentCard.vue";
     import PromptQuestionEntryCard from "@components/JournalEntryQuestionCard.vue";
     import Spinner from "@components/Spinner.vue";
+    import SkeletonEntry from "@components/JournalEntrySkeleton.vue";
 
     declare interface ReflectionResponseCardData {
         prompt?: ReflectionPrompt,
@@ -30,6 +31,7 @@
             Spinner,
             "prompt-content": PromptContentEntryCard,
             "question-content": PromptQuestionEntryCard,
+            SkeletonEntry,
         },
         props: {
             sentPrompt: {
@@ -82,7 +84,7 @@
         computed: {
             bodyComponent(): { name: string, props?: any } | undefined {
                 if (!this.promptLoaded) {
-                    return {name: "spinner"};
+                    return {name: "skeleton-entry"};
                 } else if (this.prompt && this.prompt.promptContentEntryId) {
                     return {
                         name: "prompt-content",
