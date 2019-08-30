@@ -37,6 +37,7 @@
         .line {
             color: $lightGray;
             background-color: $lightGray;
+            border-radius: .4rem;
             height: 2rem;
             position: relative;
             overflow: hidden;
