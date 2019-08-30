@@ -41,7 +41,7 @@
                 Reflect</a>
             <button @click.prevent="doReflect = true" class="wiggle secondary" v-show="completed && !hasNote">
                 <img src="assets/images/pen.svg" alt=""/>
-                Write a Note
+                Add a Note
             </button>
         </nav>
         <modal :show="showContent"
@@ -230,7 +230,7 @@
                         }
                     },
                     {
-                        title: this.hasNote ? "Edit Note" : "Write Note",
+                        title: this.hasNote ? "Edit Note" : "Add a Note",
                         onClick: () => {
                             this.doReflect = true;
                         }

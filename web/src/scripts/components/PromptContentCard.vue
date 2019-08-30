@@ -130,7 +130,7 @@
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
                         <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
-                        Write Optional Note
+                        Add a Note
                     </span>
                 </div>
             </div>

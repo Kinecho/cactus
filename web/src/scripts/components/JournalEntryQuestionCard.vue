@@ -113,7 +113,7 @@
                     })
                 } else {
                     linkItems.push({
-                        title: "Write a Note",
+                        title: "Add a Note",
                         onClick: () => {
                             this.doReflect = true;
                         }
