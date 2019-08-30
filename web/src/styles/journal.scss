@@ -32,102 +32,102 @@
 }
 
 .backgroundImage {
-    height: 100%;
-    margin: 0 -2.4rem -12rem;
-    overflow: hidden;
-    position: relative;
-    right: 0;
-    z-index: 0;
+  height: 100%;
+  margin: 0 -2.4rem -12rem;
+  overflow: hidden;
+  position: relative;
+  right: 0;
+  z-index: 0;
 
+  @include r(600) {
+    height: auto;
+    left: 60%;
+    position: absolute;
+    top: 8rem;
+    width: 60%;
+  }
+  @include r(768) {
+    bottom: 6.4rem;
+    top: auto;
+  }
+
+  .old & {
     @include r(600) {
-        height: auto;
-        left: 60%;
-        position: absolute;
-        top: 8rem;
-        width: 60%;
+      bottom: auto;
+      left: 72%;
+      top: 9rem;
+      width: 25%;
     }
-    @include r(768) {
-        bottom: 6.4rem;
-        top: auto;
-    }
+  }
 
-    .old & {
-        @include r(600) {
-            bottom: auto;
-            left: 72%;
-            top: 9rem;
-            width: 25%;
-        }
-    }
+  img {
+    width: 100%;
+    height: 100%;
+  }
 
-    img {
-        width: 100%;
-        height: 100%;
+  /* .random-placeholder {
+    height:100%;
+    width: 100%;
+    min-height: 24rem;
+    //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
+
+
+    &.bg0 {
+      background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px no-repeat
     }
 
-    /* .random-placeholder {
-      height:100%;
-      width: 100%;
-      min-height: 24rem;
-      //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
+    &.bg1 {
+      background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px no-repeat
+    }
 
+    &.bg2 {
+      background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px no-repeat
+    }
 
-      &.bg0 {
-        background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px no-repeat
-      }
+    &.bg3 {
+      background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px no-repeat
+    }
 
-      &.bg1 {
-        background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px no-repeat
-      }
+    &.bg4 {
+      background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
+    }
 
-      &.bg2 {
-        background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px no-repeat
-      }
-
-      &.bg3 {
-        background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px no-repeat
-      }
-
-      &.bg4 {
-        background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
-      }
-
-    } */
+  } */
 }
 
 .textContainer {
-    position: relative;
-    z-index: 1;
+  position: relative;
+  z-index: 1;
 
-    @include r(600) {
-      max-width: 66%;
-    }
+  @include r(600) {
+    max-width: 66%;
+  }
 }
 
 .question,
 .topic {
-    font-size: 2.1rem;
+  font-size: 2.1rem;
 
-    @include r(600) {
-        font-size: 2.4rem;
-    }
+  @include r(600) {
+    font-size: 2.4rem;
+  }
 }
 
 .topic {
-    margin-bottom: .8rem;
+  margin-bottom: .8rem;
 }
 
 .date {
-    font-size: 1.6rem;
-    margin: .8rem 0;
-    opacity: .8;
-    display: flex;
+  font-size: 1.6rem;
+  margin: .8rem 0;
+  opacity: .8;
+  display: flex;
 }
 
 .menuParent {
-    position: absolute;
-    right: .8rem;
-    top: 2.4rem;
+  position: absolute;
+  right: .8rem;
+  top: 2.4rem;
 }
 
 .entry {
@@ -153,44 +153,50 @@
   }
 
   .old & {
-      @include r(600) {
-        max-width: none;
-      }
+    @include r(600) {
+      max-width: none;
+    }
   }
 }
 
 .buttonContainer {
-    display: flex;
-    flex-direction: column;
-    margin-top: 1.6rem;
-    position: relative;
-    z-index: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.6rem;
+  position: relative;
+  z-index: 1;
 
-    @include r(600) {
-        flex-direction: row;
+  @include r(600) {
+    flex-direction: row;
+  }
+
+  button.secondary {
+    @include maxW(600) {
+      background-color: $white;
     }
+  }
 }
 
 .button + button {
-    margin-top: 1.6rem;
+  margin-top: 1.6rem;
 
-    @include r(600) {
-        margin-top: 0;
-    }
+  @include r(600) {
+    margin-top: 0;
+  }
 }
 
 button, a.button {
-    align-items: center;
-    display: inline-flex;
-    flex-grow: 0;
-    justify-content: center;
-    margin: 0;
-    width: 100%;
+  align-items: center;
+  display: inline-flex;
+  flex-grow: 0;
+  justify-content: center;
+  margin: 0;
+  width: 100%;
 
-    @include r(600) {
-        margin-right: .8rem;
-        width: auto;
-    }
+  @include r(600) {
+    margin-right: .8rem;
+    width: auto;
+  }
 
   svg, img {
     fill: $darkGreen;
@@ -213,20 +219,20 @@ button, a.button {
 }
 
 .wiggle:hover {
-    svg, img {
-        animation: wiggle .5s forwards;
-    }
+  svg, img {
+    animation: wiggle .5s forwards;
+  }
 }
 
 .doneStatus {
-    background-color: $lightGreen;
-    border-radius: 2rem;
-    color: $darkGreen;
-    display: inline-block;
-    font-size: 1.4rem;
-    font-weight: bold;
-    letter-spacing: 1px;
-    margin: .8rem 0;
-    padding: 0 .8rem;
-    text-transform: uppercase;
+  background-color: $lightGreen;
+  border-radius: 2rem;
+  color: $darkGreen;
+  display: inline-block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: .8rem 0;
+  padding: 0 .8rem;
+  text-transform: uppercase;
 }
