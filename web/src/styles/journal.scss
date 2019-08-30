@@ -6,29 +6,22 @@
 //}
 
 .journalEntry {
-  text-align: left;
-  background-color: white;
-  border: 1px solid $lightest;
-  border-radius: 12px;
-  margin: 0 .8rem 2.4rem;
-  padding: 2.4rem 1.6rem;
-  overflow: hidden;
-  position: relative;
-
-  @include r(600) {
-    padding: 3.2rem 2.4rem;
-  }
-
-  @include r(768) {
-    margin: 0 auto 4.8rem;
-    max-width: 64rem;
-    padding: 3.2rem;
-  }
-
-  &.new {
     @include shadowbox;
-    border: 0;
-  }
+    margin: 0 1.6rem 3.2rem;
+    overflow: hidden;
+    padding: 1.6rem;
+    position: relative;
+    text-align: left;
+
+    @include r(600) {
+        padding: 3.2rem 2.4rem;
+    }
+
+    @include r(768) {
+        margin: 0 auto 4.8rem;
+        max-width: 64rem;
+        padding: 3.2rem;
+    }
 }
 
 .backgroundImage {
@@ -135,32 +128,37 @@
 }
 
 .entry {
-  padding-left: 2rem;
-  position: relative;
-  white-space: pre-line;
-  margin: 1.6rem 0;
+    padding-left: 2rem;
+    position: relative;
+    white-space: pre-line;
+    margin: 1.6rem 0 1.6rem -2rem;
 
-  &:before {
-    background-color: $yellow;
-    border-radius: .4rem;
-    content: '';
-    display: block;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: .4rem;
-  }
-
-  @include r(600) {
-    max-width: 66%;
-  }
-
-  .old & {
     @include r(600) {
-      max-width: none;
+        margin: 1.6rem 0;
+        max-width: 66%;
     }
-  }
+
+    &:before {
+        background-color: $yellow;
+        border-radius: .4rem;
+        content: '';
+        display: block;
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: .8rem;
+
+        @include r(600) {
+            width: .4rem;
+        }
+    }
+
+    .old & {
+        @include r(600) {
+            max-width: none;
+        }
+    }
 }
 
 .buttonContainer {
