@@ -1,8 +1,5 @@
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
 <template>
-    <skeleton-card v-if="!allLoaded"/>
+    <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, old: completed}">
         <div class="doneStatus" v-show="responsesLoaded && completed">Done</div>
         <p class="date">{{promptDate}}</p>
