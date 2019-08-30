@@ -160,7 +160,7 @@
                 return !this.loading && this.responsesLoaded;
             },
             backgroundClasses(): { [name: string]: string } {
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || []
+                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
                 const id = this.prompt.id;
 
