@@ -52,6 +52,8 @@
   }
 
   .old & {
+      display: none;
+
     @include r(600) {
       bottom: auto;
       left: 72%;
