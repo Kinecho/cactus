@@ -92,22 +92,6 @@
                 href?: string,
                 onClick?: () => void,
             }[] {
-                const linkItems = [{
-                    title: "Share Prompt",
-                    onClick: () => {
-                        alert("Clicked share")
-                    }
-                }];
-
-                if (this.responses.length > 0) {
-                    linkItems.push({
-                        title: "Reflect",
-                        onClick: () => {
-                            alert("Clicked reflect")
-                        }
-                    })
-                }
-
                 if (this.responses.length > 0) {
                     linkItems.push({
                         title: "Edit Note",
