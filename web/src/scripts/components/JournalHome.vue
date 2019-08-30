@@ -28,8 +28,6 @@
             </transition>
 
             <div v-if="loggedIn && loginReady" class="section-container">
-                <skeleton-card/>
-
                 <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
                     <transition-group
                             name="fade-out"
