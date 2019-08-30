@@ -272,4 +272,19 @@ export default class AdminSlackService {
         await this.sendMessage(ChannelName.alerts, message)
     }
 
+    static getProviderEmoji(provider: string): string | undefined {
+        switch (provider) {
+            case "password":
+                return ":link:";
+            case "twitter.com":
+                return ":twitter:";
+            case "facebook.com":
+                return ":facebook:";
+            case "google.com":
+                return ":google:";
+            default:
+                return undefined;
+        }
+    }
+
 }

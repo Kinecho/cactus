@@ -67,11 +67,40 @@ export default class CactusMember extends BaseModel {
     };
     timeZone?: string | null;
     referredByEmail?: string;
-    signupQueryParams: { [name: string]: string } = {};
+    signupQueryParams: {
+        utm_source?: string,
+        utm_medium?: string,
+        [name: string]: string | undefined
+    } = {};
 
     prepareForFirestore(): any {
         super.prepareForFirestore();
         this.email = this.email ? this.email.toLowerCase().trim() : this.email;
+        this.referredByEmail = this.getReferredBy();
         return this;
+    }
+
+    getSignupSource(): string | undefined {
+        if (this.signupQueryParams && this.signupQueryParams.utm_source) {
+            return this.signupQueryParams.utm_source;
+        }
+        return;
+    }
+
+    getSignupMedium(): string | undefined {
+        if (this.signupQueryParams && this.signupQueryParams.utm_medium) {
+            return this.signupQueryParams.utm_medium;
+        }
+        return;
+    }
+
+    getReferredBy(): string | undefined {
+        if (this.referredByEmail) {
+            return this.referredByEmail;
+        }
+        if (this.mailchimpListMember && this.mailchimpListMember.merge_fields.REF_EMAIL) {
+            return this.mailchimpListMember.merge_fields.REF_EMAIL as string | undefined;
+        }
+        return;
     }
 }
