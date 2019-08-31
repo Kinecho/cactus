@@ -12,11 +12,7 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div v-if="!loginReady" class="loading-container" key="loading">
-                    <span class="loading"><img alt="loading" src="/assets/images/loading.svg"/></span>
-                </div>
-
-                <div class="section-container" v-if="loggedIn && loginReady && !sentPrompts.length && sentPromptsLoaded" key="empty">
+                <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="empty">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
                         <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in
@@ -24,29 +20,26 @@
                         <img class="graphic" src="assets/images/music2.svg" alt=""/>
                     </section>
                 </div>
-
+                <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && sentPrompts.length > 0">
+                    <section class="journalList">
+                        <transition-group
+                                tag="div"
+                                appear
+                                v-bind:css="false"
+                                v-on:before-enter="beforeEnter"
+                                v-on:enter="enter">
+                            <entry
+                                    class="journalListItem"
+                                    v-for="(sentPrompt, index) in sentPrompts"
+                                    v-bind:sentPrompt="sentPrompt"
+                                    v-bind:index="index"
+                                    v-bind:key="sentPrompt.id"
+                                    v-bind:data-index="index"
+                            ></entry>
+                        </transition-group>
+                    </section>
+                </div>
             </transition>
-
-            <div v-if="loggedIn && loginReady" class="section-container">
-                <section v-if="sentPrompts.length > 0 && sentPromptsLoaded" class="journalList">
-                    <transition-group
-                            name="fade-out"
-                            tag="div"
-                            appear
-                            v-bind:css="false"
-                            v-on:before-enter="beforeEnter"
-                            v-on:enter="enter">
-                        <entry
-                                class="journalListItem"
-                                v-for="(sentPrompt, index) in sentPrompts"
-                                v-bind:sentPrompt="sentPrompt"
-                                v-bind:index="index"
-                                v-bind:key="sentPrompt.id"
-                                v-bind:data-index="index"
-                        ></entry>
-                    </transition-group>
-                </section>
-            </div>
 
         </div>
         <auto-prompt-content-modal :autoLoad="true"/>
@@ -202,6 +195,7 @@
         text-align: left;
         padding-top: 2rem;
         padding-bottom: 2rem;
+        min-height: 100vh;
     }
 
     .login-container {
@@ -222,19 +216,20 @@
     }
 
     .loading-container {
-        display: flex;
-        height: 0;
-        top: 4rem;
-        position: relative;
-        justify-content: center;
-        align-items: center;
+        /*display: flex;*/
+        /*height: 0;*/
+        /*top: 4rem;*/
+        /*position: relative;*/
+        /*justify-content: center;*/
+        /*align-items: center;*/
+        /*flex-direction: column;*/
 
-        .loading {
-            width: 2rem;
-            height: 2rem;
-            transform-origin: center;
-            animation: rotate 1s linear infinite;
-        }
+        /*.loading {*/
+        /*    width: 2rem;*/
+        /*    height: 2rem;*/
+        /*    transform-origin: center;*/
+        /*    animation: rotate 1s linear infinite;*/
+        /*}*/
     }
 
     .section-container {
@@ -242,6 +237,10 @@
         .journalList {
             display: flex;
             flex-direction: column;
+
+            .skeleton {
+                width: 100%;
+            }
 
             .journalListItem {
                 transition: all .3s;

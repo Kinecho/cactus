@@ -1,6 +1,10 @@
 <template>
     <div class="journalEntry skeleton">
         <p class="date" v-if="promptDate">{{promptDate}}</p>
+        <p class="date skeleton" v-else>
+            <skeleton-bar :lines="1" size="small"/>
+        </p>
+
         <div class="menuParent"></div>
 
         <div class="textContainer">
@@ -59,6 +63,11 @@
     @import "variables";
     @import "journal";
 
+
+    .date.skeleton {
+        width: 12rem;
+    }
+
     .skeleton-image {
         height: 100%;
         position: absolute;
@@ -68,12 +77,13 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        .image-wrapper{
+
+        .image-wrapper {
             height: 50%;
             width: 100%;
         }
 
-        @include maxW(600){
+        @include maxW(600) {
             display: none;
         }
     }
