@@ -17,6 +17,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import {getAuthUser} from "@api/util/RequestUtil";
 
 const Config = getConfig();
 
@@ -51,6 +52,20 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
     return;
 });
 
+
+app.post("/login", async (req: functions.https.Request | any, resp: functions.Response) => {
+    console.log("handling logged in ");
+
+
+    const user = await getAuthUser(req);
+
+    if (!user) {
+        resp.sendStatus(401);
+        return
+    }
+
+
+});
 
 app.post("/magic-link", async (req: functions.https.Request | any, resp: functions.Response) => {
 

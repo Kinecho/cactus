@@ -10,6 +10,7 @@ export enum Endpoint {
     checkout = "checkout",
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
+    loginEvent = "signup/login",
     sendMagicLink = "signup/magic-link",
     updateSubscriberStatus = "mailchimp/status"
 }
@@ -27,7 +28,7 @@ export function initializeAxios(): AxiosInstance {
 
 }
 
-export async function getAuthHeaders(): Promise<{Authorization: string}|undefined> {
+export async function getAuthHeaders(): Promise<{ Authorization: string } | undefined> {
     const user = getAuth().currentUser;
     if (user) {
         const token = await user.getIdToken();

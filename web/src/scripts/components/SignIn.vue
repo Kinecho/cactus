@@ -5,7 +5,7 @@
                 <h1 v-if="showTitle">{{_title}}</h1>
                 <p v-if="message">{{message}}</p>
             </div>
-            <div class="actions-container" >
+            <div class="actions-container">
                 <magic-link :initialEmail="email"/>
                 <div id="third-party-loading" v-show="isPendingRedirect">
                     <modal :show="isPendingRedirect" :containerPositionRelative="false" @close="isPendingRedirect = false">
@@ -49,18 +49,6 @@
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
     }
 
-    const ui = getAuthUI();
-    const config = getAuthUIConfig({
-        signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
-        emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
-        signInSuccess: (authResult, redirectUrl) => {
-            console.log("Redirect URL is", redirectUrl);
-            console.log("Letting fbui handle the redirect... just returning true");
-            return true;
-        }
-    });
-
-
     const locale = CopyService.getSharedInstance();
     const copy = locale.copy;
 
@@ -71,28 +59,23 @@
             Modal,
         },
         mounted() {
+            const ui = getAuthUI();
+            const config = getAuthUIConfig({
+                signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+                emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
+                signInSuccess: (authResult, redirectUrl) => {
+                    console.log("Redirect URL is", redirectUrl);
+                    console.log("Need to handle auth redirect");
+                    this.pendingRedirectUrl = redirectUrl;
+                    this.doRedirect = true;
+                    return false;
+                }
+            });
+
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
                 console.log("Is pending redirect.... need to log the user in");
-                // if ($loading) $loading.classList.remove("hidden");
-                // if ($emailContainer) $emailContainer.classList.add("hidden");
-                // if ($divider) $divider.classList.add("hidden");
-                // if ($welcomeMessage) $welcomeMessage.classList.add("hidden");
-                // if ($loginContainer) {
-                //     $loginContainer.style.height = "0";
-                //     $loginContainer.style.opacity = "0";
-                // }
-
-                // ui.start('#signup-app', config);
-            } else {
-                // if ($emailContainer) $emailContainer.classList.remove("hidden");
-                // if ($welcomeMessage) $welcomeMessage.classList.remove("hidden");
-                // if ($divider) $divider.classList.remove("hidden");
-                // The start method will wait until the DOM is loaded.
-                // ui.start('#signup-app', config);
             }
-
-
             ui.start('#signup-app', config);
         },
         created() {
@@ -128,6 +111,8 @@
             email: string,
             commonCopy: CommonCopy,
             isPendingRedirect: boolean,
+            pendingRedirectUrl: string | undefined,
+            doRedirect: boolean,
         } {
             return {
                 commonCopy: copy.common,
@@ -138,11 +123,22 @@
                 memberListener: undefined,
                 email: "",
                 isPendingRedirect: false,
+                pendingRedirectUrl: undefined,
+                doRedirect: false,
             }
         },
         computed: {
             _title(): string {
                 return this.title || copy.common.SIGN_UP
+            }
+        },
+        watch: {
+            async doRedirect(doRedirect){
+                if (!doRedirect){
+                    return;
+                }
+
+
             }
         }
     })
