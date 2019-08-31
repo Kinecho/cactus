@@ -20,9 +20,9 @@
 
     export default Vue.extend({
         created() {
-
+            this.email = this.initialEmail || "";
         },
-        props: {},
+        props: {initialEmail: String},
         data(): {
             email: string,
             submitting: boolean,

@@ -19,8 +19,9 @@ new Vue({
         Footer,
     },
     template: `<div class="page-wrapper">
-<NavBar v-bind:showSignup="false" v-bind:redirectOnSignOut="false"/>
+
 <div class="signin-wrapper">
+<NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true"/>
     <SignIn :message="message"/>
 </div>
 

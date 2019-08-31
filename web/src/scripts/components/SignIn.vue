@@ -1,3 +1,6 @@
+import {LocalStorageKey} from '@web/services/StorageService'
+import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div>
         <div class="centered">
@@ -6,7 +9,7 @@
                 <p v-if="message">{{message}}</p>
             </div>
             <div class="actions-container" v-if="!loading">
-                <magic-link/>
+                <magic-link :initialEmail="email"/>
                 <div id="third-party-loading" class="loading hidden">
                     <img src="/assets/images/loading.svg" alt=""/>Signing In...
                 </div>
@@ -38,6 +41,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import Spinner from "@components/Spinner.vue";
     import {getQueryParam} from "@web/util"
+    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
 
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     console.log("Redirect url param is ", redirectUrlParam);
@@ -64,6 +68,9 @@
             Spinner,
         },
         created() {
+            this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
+            this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
+
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: (({member, user}) => {
                     this.member = member;
@@ -110,7 +117,7 @@
             member: CactusMember | undefined,
             authLoaded: boolean,
             loading: boolean,
-
+            email: string,
         } {
             return {
                 title: "Sign Up",
@@ -120,6 +127,7 @@
                 authLoaded: false,
                 memberListener: undefined,
                 loading: false,
+                email: ""
             }
         }
     })
@@ -129,7 +137,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
 
 
     h1 {
@@ -156,6 +163,12 @@
             margin: -1.6rem auto 0;
             max-width: 30rem;
         }
+    }
+
+    .centered {
+        position: relative;
+        z-index: 2;
+        padding: 2.6rem;
     }
 
     #yellowBlob1 {

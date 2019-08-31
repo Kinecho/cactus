@@ -8,12 +8,25 @@ html, body {
 }
 
 .page-wrapper {
-  min-height: 100vh;
+  //min-height: 100vh;
   position: relative;
+
+  header {
+    position: relative;
+    z-index: 2;
+  }
 
   .signin-wrapper {
     flex-grow: 1;
     overflow: hidden;
     margin: 0 auto 4rem;
+    position: relative;
+    z-index: 2;
+
+    min-height: calc(100vh - 26rem);
+    @include r(600) {
+      min-height: calc(100vh - 15rem);
+    }
+
   }
 }

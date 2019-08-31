@@ -1,5 +1,5 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}">
         <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <div>
             <transition name="fade-in-slow" appear>
@@ -75,6 +75,7 @@
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
             showLogin: {type: Boolean, default: true},
+            forceTransparent: {type: Boolean, default: false},
         },
         data(): NavBarData {
             return {

@@ -38,6 +38,11 @@ body {
 header {
   align-items: center;
   background-color: white;
+
+  &.transparent {
+    background-color: transparent;
+  }
+
   display: flex;
   justify-content: space-between;
   padding: .8rem 2.4rem;
