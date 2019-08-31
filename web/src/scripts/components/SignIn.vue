@@ -1,6 +1,3 @@
-import {LocalStorageKey} from '@web/services/StorageService'
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div>
         <div class="centered">
@@ -11,7 +8,7 @@ import {QueryParam} from '@shared/util/queryParams'
             <div class="actions-container" v-if="!loading">
                 <magic-link :initialEmail="email"/>
                 <div id="third-party-loading" class="loading hidden">
-                    <img src="/assets/images/loading.svg" alt=""/>Signing In...
+                    <img src="/assets/images/loading.svg" alt=""/>{{commonCopy.SIGNING_IN}}...
                 </div>
                 <div class="divider hidden">
                     <p class="message-container">Or choose from one of the following:</p>
@@ -42,6 +39,8 @@ import {QueryParam} from '@shared/util/queryParams'
     import Spinner from "@components/Spinner.vue";
     import {getQueryParam} from "@web/util"
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import CopyService from '@shared/copy/CopyService'
+    import {CommonCopy} from '@shared/copy/CopyTypes'
 
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     console.log("Redirect url param is ", redirectUrlParam);
@@ -61,6 +60,9 @@ import {QueryParam} from '@shared/util/queryParams'
         }
     });
 
+
+    const locale = CopyService.getSharedInstance();
+    const copy = locale.copy;
 
     export default Vue.extend({
         components: {
@@ -118,9 +120,11 @@ import {QueryParam} from '@shared/util/queryParams'
             authLoaded: boolean,
             loading: boolean,
             email: string,
+            commonCopy: CommonCopy,
         } {
             return {
-                title: "Sign Up",
+                title: copy.common.SIGN_UP,
+                commonCopy: copy.common,
                 message: undefined,
                 user: undefined,
                 member: undefined,
@@ -167,7 +171,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
     .centered {
         position: relative;
-        z-index: 2;
+        z-index: 1;
         padding: 2.6rem;
     }
 

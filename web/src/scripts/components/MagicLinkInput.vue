@@ -1,9 +1,9 @@
 <template>
     <form class="email-form" id="email-signup" @submit.prevent="submit">
         <div class="alert error" v-if="error">{{error}}</div>
-        <input type="email" name="email" placeholder="Enter your email address" v-model="email"/>
+        <input type="email" name="email" :placeholder="commonCopy.ENTER_YOUR_EMAIL_ADDRESS" v-model="email"/>
         <button type="submit" name="submit" v-bind:disabled="submitting" :class="['email-submit-button', {loading: submitting, disabled: submitting}]">
-            Next
+            {{commonCopy.NEXT}}
         </button>
     </form>
 </template>
@@ -17,6 +17,10 @@
     import {QueryParam} from "@shared/util/queryParams"
     import StorageService, {LocalStorageKey} from "@web/services/StorageService"
     import {gtag} from "@web/analytics"
+    import CopyService from '@shared/copy/CopyService'
+    import {CommonCopy} from '@shared/copy/CopyTypes'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         created() {
@@ -27,11 +31,13 @@
             email: string,
             submitting: boolean,
             error: string | undefined,
+            commonCopy: CommonCopy,
         } {
             return {
                 email: "",
                 submitting: false,
-                error: undefined
+                error: undefined,
+                commonCopy: copy.common,
             }
         },
         methods: {
@@ -40,12 +46,12 @@
                 this.submitting = true;
                 let email = (this.email || "").toLowerCase().trim();
                 if (!email || email.trim().length === 0) {
-                    this.error = "Please enter an email address";
+                    this.error = copy.error.PLEASE_ENTER_AN_EMAIL_ADDRESS;
                     this.submitting = false;
                     return;
                 }
                 if (!isValidEmail(email)) {
-                    this.error = "Please enter a valid email address";
+                    this.error = copy.error.PLEASE_ENTER_A_VALID_EMAIL_ADDRESS;
                     this.submitting = false;
                     return;
                 }
@@ -67,12 +73,12 @@
                         const modalId = "signup-success-modal";
                         this.error = undefined;
 
-                        let title = "Welcome!";
-                        const message = `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`;
+                        let title = copy.exclamation(copy.common.WELCOME);
+                        const message = copy.auth.magicLinkSuccess(email);
                         const imageUrl = '/assets/images/success.svg';
 
                         if (signupResult.existingEmail) {
-                            title = "Welcome back!";
+                            title = copy.exclamation(copy.common.WELCOME_BACK);
                             // message = `Check your ${emailAddress} inbox to get your Magic Link to finish signing in.`;
                         }
 
@@ -93,7 +99,7 @@
                         this.email = "";
 
                     } else if (signupResult.error) {
-                        const message = signupResult.error.friendlyMessage || "Sorry, it looks like we're having issues. Please try again later."
+                        const message = signupResult.error.friendlyMessage || copy.error.SORRY_WE_ARE_HAVING_ISSUES_TRY_AGAIN;
                         this.$emit("error", {message});
                         gtag('event', 'email_signup_error', {
                             event_category: "email_signup",
@@ -101,7 +107,7 @@
                         });
                         this.error = message;
                     } else {
-                        const message = "Sorry, it looks like we're having issues. Please try again later";
+                        const message = copy.error.SORRY_WE_ARE_HAVING_ISSUES_TRY_AGAIN;
                         this.$emit("error", {message});
                         gtag('event', 'email_signup_error', {
                             event_category: "email_signup",
@@ -110,7 +116,7 @@
                         this.error = message;
                     }
                 } catch (error) {
-                    const message = "Sorry, it looks like we're having issues.";
+                    const message = copy.error.SORRY_WE_ARE_HAVING_ISSUES;
                     this.$emit("sendError", {message});
                     console.error("failed to process form", error);
                     this.error = message;
