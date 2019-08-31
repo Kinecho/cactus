@@ -13,7 +13,7 @@
                             </transition>
                         </div>
                         <p v-show="reflectionCount !== undefined">
-                            Reflections
+                            {{promptCopy.REFLECTIONS}}
                         </p>
                     </section>
                     <section class="metric">
@@ -35,12 +35,22 @@
                             </transition>
                         </div>
                         <p v-show="streakDays !== undefined">
-                            Day Streak
+                            {{promptCopy.DAY_STREAK}}
                         </p>
                     </section>
                 </div>
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
-                    Sign Up to Save Your Progress
+                    {{promptCopy.SIGN_UP_MESSAGE}}
+                </button>
+                <button class="primary authBtn"
+                        v-if="authLoaded && loggedIn && !isModal"
+                        @click="goToHome">
+                    {{promptCopy.GO_HOME}}
+                </button>
+                <button class="primary authBtn"
+                        v-if="authLoaded && loggedIn && isModal"
+                        @click="close">
+                    {{promptCopy.CLOSE}}
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
@@ -58,7 +68,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
-                    Back to celebration
+                    Go Back
                 </button>
             </div>
         </div>
@@ -77,6 +87,10 @@
     import {PageRoute} from '@web/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import CopyService from '@shared/copy/CopyService'
+    import {PromptCopy} from '@shared/copy/CopyTypes'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -107,9 +121,9 @@
                     console.log("totalDuration", totalDuration);
                     if (totalDuration < (60 * 1000)) {
                         this.totalDuration = `${Math.round(totalDuration / 1000)}`;
-                        this.durationLabel = "Seconds"
+                        this.durationLabel = copy.prompts.SECONDS
                     } else {
-                        this.durationLabel = "Minutes";
+                        this.durationLabel = copy.prompts.MINUTES;
                         this.totalDuration = millisecondsToMinutes(totalDuration);
                     }
 
@@ -123,7 +137,8 @@
         props: {
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
-            }
+            },
+            isModal: Boolean,
         },
         data(): {
             reflectionCount: number | undefined,
@@ -136,7 +151,7 @@
             member: CactusMember | undefined,
             showLogin: boolean,
             durationLabel: string,
-            celebrations: Array<string>
+            promptCopy: PromptCopy,
         } {
             return {
                 reflectionCount: undefined,
@@ -149,7 +164,7 @@
                 member: undefined,
                 showLogin: false,
                 durationLabel: "",
-                celebrations: ["Well done!","Nice work!","Way to go!"]
+                promptCopy: copy.prompts,
             }
         },
         destroyed() {
@@ -164,10 +179,14 @@
                 return base;
             },
             celebrateText(): string {
-                return this.celebrations[Math.floor(Math.random() * this.celebrations.length)]
+                const celebrations = copy.prompts.CELEBRATIONS;
+                return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
             }
         },
         methods: {
+            goToHome() {
+                window.location.href = PageRoute.JOURNAL_HOME;
+            },
             back() {
                 this.$emit("back");
             },
@@ -342,14 +361,19 @@
             flex-grow: 0;
             left: 3.2rem;
             margin: 3.2rem auto 0;
-            position: fixed;
+            /*position: fixed;*/
             right: 3.2rem;
             width: calc(100% - 6.4rem);
 
             @include r(600) {
+                max-width: none;
                 position: static;
                 width: auto;
             }
+        }
+
+        .authBtn {
+            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
         }
 
         .backBtn {

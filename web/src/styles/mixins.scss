@@ -141,6 +141,11 @@ $widthDesktop: $widthXL;
 }
 
 @mixin r( $point ) {
+    @if $point==374 {
+      @media (min-width: 374px) {
+        @content;
+      }
+    }
   @if $point==600 {
     @media (min-width: 600px) {
       @content;

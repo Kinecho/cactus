@@ -1,5 +1,6 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
-    <div :class="['page-wrapper', slideNumberClass] ">
+    <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
             <div class="centered" v-if="loading">
                 <spinner message="Loading..." :delay="1000"/>
@@ -43,11 +44,13 @@
                                     v-bind:reflectionDuration="reflectionDuration"
                                     v-bind:saving="saving"
                                     v-bind:saved="saved"
-
+                                    v-bind:tapAnywhereEnabled="tapAnywhereEnabled"
                                     v-on:next="next"
                                     v-on:previous="previous"
                                     v-on:complete="complete"
                                     v-on:save="save"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :style="cardStyles"
                             />
                         </transition>
@@ -55,6 +58,7 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:isModal="isModal"
                             />
                         </transition>
                     </div>
@@ -70,11 +74,8 @@
                 </button>
                 <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
-                        v-show="hasNext && activeIndex > 0 && !showSharing"
+                        v-show="(hasNext || isLastCard) && !completed && !showSharing"
                 >
-                    <div class="progress-circle" v-if="isReflection">
-                        <pie-spinner :percent="reflectionProgress"/>
-                    </div>
 
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -95,12 +96,11 @@
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, updateQueryParam} from '@web/util'
+    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
-    import PieSpinner from "@components/PieSpinner.vue"
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
@@ -120,17 +120,35 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            PieSpinner,
         },
         props: {
             promptContentEntryId: String,
+            isModal: {type: Boolean, default: false},
             onClose: {
                 type: Function, default: function () {
+                    removeQueryParam(QueryParam.CONTENT_INDEX);
                     this.$emit("close")
                 }
             }
         },
         async created(): Promise<void> {
+
+            this.keyboardListener = (evt: KeyboardEvent) => {
+                console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
+                if (this.navigationDisabled) {
+                    console.log("navigation disabled");
+                    return;
+                }
+                if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
+                    this.previous()
+                }
+                if (evt.code === "ArrowRight" || evt.keyCode === 39) {
+                    this.next();
+                }
+            };
+
+            document.addEventListener('keyup', this.keyboardListener);
+
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
@@ -222,6 +240,8 @@
                 window.removeEventListener("popstate", this.popStateListener);
             }
 
+            document.removeEventListener('keyup', this.keyboardListener);
+
         },
         data(): {
             promptContent: PromptContent | undefined,
@@ -244,6 +264,8 @@
             touchStart: MouseEvent | undefined,
             cardStyles: any,
             popStateListener: any | undefined,
+            keyboardListener: any | undefined,
+            navigationDisabled: boolean,
         } {
             return {
                 promptContent: undefined,
@@ -266,6 +288,8 @@
                 touchStart: undefined,
                 cardStyles: {},
                 popStateListener: undefined,
+                keyboardListener: undefined,
+                navigationDisabled: false,
             };
         },
         computed: {
@@ -274,6 +298,9 @@
             },
             hasNext(): boolean {
                 return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
+            },
+            isLastCard(): boolean {
+                return this.promptContent && this.promptContent.content && this.activeIndex === this.promptContent.content.length - 1 || false
             },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
@@ -305,7 +332,10 @@
                 if (this.promptContent && this.promptContent.promptId) {
                     return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
                 }
-            }
+            },
+            tapAnywhereEnabled(): boolean {
+                return true
+            },
         },
         watch: {
             activeIndex(index: number, oldIndex: number) {
@@ -327,7 +357,8 @@
                 if (!newContent || (!oldContent || newContent.promptId !== oldContent.promptId)) {
                     this.subscribeToResponse();
                 }
-            }
+            },
+
         },
         methods: {
             updateDocumentTitle() {
@@ -343,9 +374,18 @@
                     document.title = 'Cactus Mindful Moment'
                 }
             },
-            async handleTap(event: MouseEvent) {
+            async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
 
+                if (this.navigationDisabled) {
+                    console.log("tap is disabled");
+                    return;
+                }
+
+                if (!this.tapAnywhereEnabled) {
+                    console.log("tap anywhere is disabled");
+                    return;
+                }
                 const {width} = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
@@ -355,12 +395,25 @@
 
                     });
 
-
                     if (!foundExcludedTarget) {
-                        await this.next();
-                    } else {
-                    }
+                        console.log("tap event", event);
+                        const touch = event.changedTouches && event.changedTouches.item(0);
+                        const leftThreshold = width * .20;
+                        console.log("left threshold", leftThreshold);
+                        let isPrevious = false;
+                        if (touch) {
+                            console.log("clientX tap", touch.clientX);
+                            isPrevious = touch.clientX < leftThreshold;
+                        }
 
+                        if (isPrevious) {
+                            await this.previous();
+                        } else {
+                            await this.next();
+                        }
+
+
+                    }
                 }
             },
             touchStartHandler(args: MouseEvent) {
@@ -416,24 +469,23 @@
                     this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
-                    console.log("subscribing to responses for promptId", promptId);
+                    // console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: (responses) => {
 
                             const [first] = responses;
-                            console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
+                            // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
 
                             if (!first && !localResponse) {
-                                console.log("No local response and no db response, creating one now");
-                                console.log("Using the newly created response for this prompt.");
+                                // console.log("No local response and no db response, creating one now");
+                                // console.log("Using the newly created response for this prompt.");
                                 localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                             } else if (first) {
-                                console.log("Using the response from the database", first.toJSON());
                             }
 
                             if (!first && localResponse) {
-                                console.log("No data found from database, using the locally created response");
+                                // console.log("No data found from database, using the locally created response");
                             }
 
                             //TODO: combine if there are multiple?
@@ -476,7 +528,7 @@
                 this.transitionName = "slide";
                 const saveTask = this.isReflection ? this.save() : () => undefined;
                 const content = this.promptContent ? this.promptContent.content : [];
-                if (this.hasNext) {
+                if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     gtag('event', 'next', {
@@ -484,7 +536,7 @@
                         event_label: `Slide ${this.activeIndex}`
                     });
                     await saveTask;
-                } else {
+                } else if (this.isLastCard) {
                     await this.complete();
                 }
 
@@ -537,6 +589,7 @@
     })
 </script>
 
+
 <style lang="scss" scoped>
     @import "common";
     @import "variables";
@@ -559,6 +612,42 @@
         justify-content: center;
         position: relative;
 
+        @include maxW(600) {
+            &.isModal {
+                height: 100vh;
+
+                .content-container {
+                    height: 100%;
+
+                    .flipper {
+                        height: 100%;
+
+                        .flip-card {
+                            height: 100%;
+
+                            .content-card {
+                                height: 100%;
+                            }
+
+                            .flip-container {
+                                height: 100%;
+
+                                .flipper {
+                                    height: 100%;
+
+                                    .flip-card {
+                                        height: 100%;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         button.secondary {
             transition: all .2s ease;
             outline: transparent none;
@@ -578,7 +667,7 @@
                 position: relative;
                 transform: translateY(1.6rem);
                 width: 94%;
-                z-index: 5;
+                z-index: 20;
                 height: 0;
                 margin: 0 auto;
 
@@ -656,39 +745,6 @@
                 &.previous svg {
                     transform: scale(-1);
                 }
-
-                &.reflection {
-                    border: 0;
-
-                    &:hover:not(.complete) {
-                        background-color: $white;
-                        cursor: default;
-                    }
-
-                    svg {
-                        fill: $white;
-                    }
-
-                    &.complete {
-                        cursor: pointer;
-                        background-color: $green;
-
-                        .progress-circle {
-                            opacity: 0;
-                        }
-                    }
-
-                    .progress-circle {
-                        transition: opacity .3s;
-                        z-index: -1;
-                        opacity: .6;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                    }
-                }
             }
         }
     }
@@ -697,7 +753,7 @@
         left: 0;
         position: absolute;
         top: 2.4rem;
-        z-index: 5;
+        z-index: 20;
 
         @include r(600) {
             margin: 0 auto;
@@ -787,12 +843,17 @@
 
     .slide-out-enter {
         transform: translate(-100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
+
     }
 
     .slide-out-leave-to {
         transform: translate(100%, 0);
-        opacity: 0;
+        @include r(600) {
+            opacity: 0;
+        }
     }
 
 
@@ -805,13 +866,14 @@
         flex-direction: column;
         justify-content: space-between;
         width: 100%;
+        z-index: 10;
 
         @include isTinyPhone {
-            height: calc(100vh - 8rem);
+            height: calc(100vh - 5.6rem);
         }
 
         @include biggerThanTinyPhone {
-            height: calc(100vh - 10rem);
+            height: calc(100vh - 9rem);
         }
 
         @include r(600) {
@@ -824,11 +886,25 @@
         }
     }
 
+    @keyframes twist {
+        0% {
+            transform: rotateY(0);
+        }
+        50% {
+            transform: rotateY(10deg);
+        }
+        100% {
+            transform: rotateY(0);
+        }
+    }
+
     .flip-card {
         backface-visibility: hidden;
         left: 0;
         top: 0;
         width: 100%;
+
+        animation: twist .5s;
 
         @include r(600) {
             border-radius: 12px;
@@ -844,7 +920,7 @@
         }
 
         &.back {
-            background: url(assets/images/yellowNeedles.svg) $yellow;
+            background: url(/assets/images/yellowNeedles.svg) $yellow;
             background-size: 80%;
             display: flex;
             flex-direction: column;

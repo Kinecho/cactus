@@ -16,7 +16,7 @@ module.exports = {
         appId: '1:88457335033:web:e731bd6b336daeb6',
     },
     //Stage uses the prod app for flamelink
-    __FLAMELINK_ENV_ID__: "dev",
+    __FLAMELINK_ENV_ID__: "production",
     __FLAMELINK_FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
         authDomain: 'cactus-app-stage.firebaseapp.com',

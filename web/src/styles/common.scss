@@ -40,8 +40,19 @@ header {
   background-color: white;
   display: flex;
   justify-content: space-between;
-  padding: 1.6rem 2.4rem;
+  padding: .8rem 2.4rem;
   text-align: left;
+
+  @include r(374) {
+    padding: 1.6rem 2.4rem;
+  }
+  @include r(768) {
+    background-color: transparent;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 2.4rem;
+    position: relative;
+  }
 
   &.sticky {
     position: sticky;
@@ -52,23 +63,6 @@ header {
       position: static;
     }
   }
-
-  @include isTinyPhone {
-    min-height: 8rem;
-  }
-
-  @include biggerThanTinyPhone {
-    min-height: 10rem;
-  }
-
-  @include largePhoneOrBigger {
-    background-color: transparent;
-    margin: 0 auto;
-    min-height: 15rem;
-    max-width: 1200px;
-    padding: 2.4rem;
-    position: relative;
-  }
 }
 
 .logo {
@@ -77,7 +71,7 @@ header {
 }
 
 a {
-    color: $darkGreen;
+  color: $darkGreen;
 }
 
 a.button {
@@ -148,13 +142,13 @@ button, a.button {
   }
 
   &.small {
-      box-shadow: none;
-      font: 1.6rem $font-stack;
-      padding: 1rem 1.6rem;
+    box-shadow: none;
+    font: 1.6rem $font-stack;
+    padding: 1rem 1.6rem;
   }
 
   &.secondary {
-    background-color: transparent;
+    background-color: $white;
     border: 1px solid $lightGreen;
     box-shadow: none;
     color: $darkGreen;

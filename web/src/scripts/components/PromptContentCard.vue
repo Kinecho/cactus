@@ -58,38 +58,38 @@
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
-                <svg class="grow5" xmlns="http://www.w3.org/2000/svg" width="78" height="75">
-                    <path fill="#000" fill-opacity=".1" d="M62.481 70c0 2.762-10.406 5-23.24 5C26.406 75 16 72.762 16 70s10.406-5 23.241-5c12.834 0 23.24 2.238 23.24 5"/>
-                    <path fill="#F5DD48" d="M18.279 46.524c-1.428 2.786-2.021 5.419-2.238 8.542-.218 3.123.426 6.355 2.134 8.979 2.128 3.272 5.736 5.358 9.495 6.415 3.713 1.044 7.61 1.189 11.467 1.303 3.856-.114 7.753-.259 11.466-1.303 3.759-1.057 7.367-3.143 9.496-6.415 1.708-2.624 2.352-5.856 2.134-8.979-.218-3.123-1.48-6.515-2.906-9.302C56.304 39.864 48.042 37 39.616 37c-8.967.001-18.12 3.244-21.337 9.524"/>
-                    <path fill="#000" fill-rule="nonzero" d="M47 41c11.27 13.381 12.68 26-9.215 29.245-3.659.5-5.1.751-4.323.755h7.843C68 70.245 62.274 49.437 55 41h-8z" opacity=".05"/>
-                    <ellipse cx="39.5" cy="41.5" fill="#000" opacity=".407" rx="15.5" ry="2.5"/>
+                <svg class="grow5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 150">
+                    <path fill="#000" fill-opacity=".1" d="M124.962 140c0 5.524-20.812 10-46.48 10C52.812 150 32 145.524 32 140s20.812-10 46.482-10c25.668 0 46.48 4.476 46.48 10"/>
+                    <path fill="#F5DD48" d="M36.558 93.048c-2.856 5.572-4.042 10.838-4.476 17.084-.436 6.246.852 12.71 4.268 17.958 4.256 6.544 11.472 10.716 18.99 12.83 7.426 2.088 15.22 2.378 22.934 2.606 7.712-.228 15.506-.518 22.932-2.606 7.518-2.114 14.734-6.286 18.992-12.83 3.416-5.248 4.704-11.712 4.268-17.958-.436-6.246-2.96-13.03-5.812-18.604C112.608 79.728 96.084 74 79.232 74c-17.934.002-36.24 6.488-42.674 19.048"/>
+                    <path fill="#000" d="M94 82c22.54 26.762 25.36 52-18.43 58.49-7.318 1-10.2 1.502-8.646 1.51H82.61C136 140.49 124.548 98.874 110 82H94z" opacity=".05"/>
+                    <ellipse cx="79" cy="83" fill="#000" opacity=".407" rx="31" ry="5"/>
                     <g class="leaf1">
-                        <path fill="#2DB799" d="M59.621 10.788c-2.661.759-5.463 1.031-8.037 2.046-2.575 1.015-5.008 3.021-5.473 5.75l-.748 1.713 4.347 10.025h4.324l6.656-1.637c2.828-2.755 3.879-6.856 4.268-10.785.391-3.929.253-7.94 1.249-11.76-1.235 2.476-3.924 3.889-6.586 4.648"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M65.233 9.507c-7.32 16.531-16.325 23.71-27.005 21.449a.25.25 0 0 1 .104-.49C48.73 32.67 57.54 25.646 64.776 9.306a.25.25 0 0 1 .457.202z"/>
+                        <path fill="#2DB799" d="M119.242 21.576c-5.322 1.518-10.926 2.062-16.074 4.092-5.15 2.03-10.016 6.042-10.946 11.5l-1.496 3.426 8.694 20.05h8.648l13.312-3.274c5.656-5.51 7.758-13.712 8.536-21.57.782-7.858.506-15.88 2.498-23.52-2.47 4.952-7.848 7.778-13.172 9.296"/>
+                        <path fill="#29A389" d="M130.466 19.014c-14.64 33.062-32.65 47.42-54.01 42.898a.5.5 0 0 1 .208-.98c20.796 4.408 38.416-9.64 52.888-42.32a.5.5 0 0 1 .914.404v-.002z"/>
                     </g>
                     <g class="leaf2">
-                        <path fill="#2DB799" d="M11.872 17.9c.39 3.929 1.441 8.03 4.268 10.785l6.656 1.637h4.324l4.347-10.025-.747-1.713c-.466-2.729-2.899-4.735-5.474-5.75-2.574-1.015-5.376-1.287-8.037-2.046-2.661-.759-5.351-2.172-6.586-4.648.997 3.82.858 7.831 1.249 11.76"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M11.767 9.507c7.32 16.531 16.325 23.71 27.005 21.449a.25.25 0 0 0-.104-.49C28.27 32.67 19.46 25.646 12.224 9.306a.25.25 0 0 0-.457.202z"/>
+                        <path fill="#2DB799" d="M23.744 35.8c.78 7.858 2.882 16.06 8.536 21.57l13.312 3.274h8.648l8.694-20.05-1.494-3.426c-.932-5.458-5.798-9.47-10.948-11.5-5.148-2.03-10.752-2.574-16.074-4.092-5.322-1.518-10.702-4.344-13.172-9.296 1.994 7.64 1.716 15.662 2.498 23.52"/>
+                        <path fill="#29A389" d="M23.534 19.014c14.64 33.062 32.65 47.42 54.01 42.898a.5.5 0 0 0-.208-.98c-20.796 4.408-38.416-9.64-52.888-42.32a.5.5 0 0 0-.914.404v-.002z"/>
                     </g>
                     <g class="leaf3">
-                        <path fill="#30C1A2" d="M21.344 21.409c-.411 6.513 8.005 14.1 8.005 14.1 6.546-4.924 6.278-16.445 6.278-16.445.456-2.688-.335-3.552-1.633-5.698-1.298-2.144-2.985-3.885-4.413-5.903-1.426-2.018-2.627-4.459-2.658-7.178-2.595 6.825-5.111 13.723-5.579 21.124"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M26.65 2.132c-.036 18.08 5.27 28.3 15.947 30.578a.25.25 0 0 0 .104-.489c-10.395-2.217-15.587-12.218-15.55-30.087a.25.25 0 0 0-.5-.002z"/>
+                        <path fill="#30C1A2" d="M42.688 42.818c-.822 13.026 16.01 28.2 16.01 28.2 13.092-9.848 12.556-32.89 12.556-32.89.912-5.376-.67-7.104-3.266-11.396-2.596-4.288-5.97-7.77-8.826-11.806C56.31 10.89 53.908 6.008 53.846.57c-5.19 13.65-10.222 27.446-11.158 42.248"/>
+                        <path fill="#29A389" d="M53.3 4.264c-.072 36.16 10.54 56.6 31.894 61.156a.5.5 0 0 0 .208-.978c-20.79-4.434-31.174-24.436-31.1-60.174a.5.5 0 0 0-1-.004H53.3z"/>
                     </g>
                     <g class="leaf4">
-                        <path fill="#30C1A2" d="M7.702 36.712c2.713 4.081 7.092 6.867 11.792 7.959 4.7 1.094 9.869.378 14.409-1.279l-6.707-13.663c-2.492-1.395-5.404-1.273-8.296-1.152-.896.037-1.788.075-2.667.067C10.306 28.594 0 22.22 0 22.22s4.772 10.082 7.702 14.492"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M.814 23.387c12.07 13.46 22.853 17.505 32.31 12.054a.25.25 0 1 0-.249-.434c-9.209 5.308-19.759 1.35-31.689-11.954a.25.25 0 1 0-.372.334z"/>
+                        <path fill="#30C1A2" d="M15.404 73.424c5.426 8.162 14.184 13.734 23.584 15.918 9.4 2.188 19.738.756 28.818-2.558L54.392 59.458c-4.984-2.79-10.808-2.546-16.592-2.304-1.792.074-3.576.15-5.334.134C20.612 57.188 0 44.44 0 44.44s9.544 20.164 15.404 28.984"/>
+                        <path fill="#29A389" d="M1.628 46.774c24.14 26.92 45.706 35.01 64.62 24.108a.5.5 0 1 0-.498-.868c-18.418 10.616-39.518 2.7-63.378-23.908a.5.5 0 1 0-.744.668z"/>
                     </g>
                     <g class="leaf5">
-                        <path fill="#30C1A2" d="M61.524 28.644c-.879.008-1.772-.03-2.667-.067-2.892-.121-5.805-.243-8.295 1.152l-6.708 13.663c4.54 1.657 9.71 2.373 14.409 1.279 4.7-1.092 9.08-3.878 11.793-7.959 2.929-4.41 7.702-14.492 7.702-14.492s-10.306 6.374-16.234 6.424"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M77.186 23.387c-12.07 13.46-22.853 17.505-32.31 12.054a.25.25 0 1 1 .249-.434c9.209 5.308 19.759 1.35 31.689-11.954a.25.25 0 1 1 .372.334z"/>
+                        <path fill="#30C1A2" d="M123.048 57.288c-1.758.016-3.544-.06-5.334-.134-5.784-.242-11.61-.486-16.59 2.304L87.708 86.784c9.08 3.314 19.42 4.746 28.818 2.558 9.4-2.184 18.16-7.756 23.586-15.918 5.858-8.82 15.404-28.984 15.404-28.984s-20.612 12.748-32.468 12.848"/>
+                        <path fill="#29A389" d="M154.372 46.774c-24.14 26.92-45.706 35.01-64.62 24.108a.5.5 0 1 1 .498-.868c18.418 10.616 39.518 2.7 63.378-23.908a.5.5 0 1 1 .744.668z"/>
                     </g>
                     <g class="leaf6">
-                        <path fill="#30C1A2" d="M47.534 7.177c-1.427 2.019-3.115 3.76-4.412 5.905-1.298 2.145-2.09 3.009-1.634 5.697 0 0-.268 11.522 6.278 16.445 0 0 8.417-7.586 8.005-14.1C55.303 13.723 52.788 6.825 50.19 0c-.03 2.719-1.23 5.16-2.657 7.177"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M50.606 2.798c.317 17.83-4.742 27.832-15.206 29.913a.25.25 0 0 1-.098-.49c10.173-2.024 15.117-11.798 14.804-29.415a.25.25 0 0 1 .5-.008z"/>
+                        <path fill="#30C1A2" d="M95.068 14.354c-2.854 4.038-6.23 7.52-8.824 11.81-2.596 4.29-4.18 6.018-3.268 11.394 0 0-.536 23.044 12.556 32.89 0 0 16.834-15.172 16.01-28.2C110.606 27.446 105.576 13.65 100.38 0c-.06 5.438-2.46 10.32-5.314 14.354"/>
+                        <path fill="#29A389" d="M101.212 5.596c.634 35.66-9.484 55.664-30.412 59.826a.5.5 0 0 1-.196-.98c20.346-4.048 30.234-23.596 29.608-58.83a.5.5 0 0 1 1-.016z"/>
                     </g>
                     <g class="leaf7">
-                        <path fill="#33CCAB" d="M35.474 5.118c-.191 2.28-.528 4.108-1.406 6.198-1.413 3.365-3.861 6.203-5.397 9.514-2.404 5.181-2.366 11.435.1 16.586 1.097 2.293 2.685 4.399 4.807 5.796 2.123 1.399 6.504 1.446 6.647 1.434 2.563-.211 5.692-2.142 7.118-4.343 1.459-2.251 2.817-4.644 3.29-7.285.976-5.434-1.947-10.806-5.384-15.128-3.436-4.322-9.585-16.193-9.585-16.193s-.184 3.353-.19 3.421"/>
-                        <path fill="#29A389" fill-rule="nonzero" d="M35.9 4.198c5.101 18.755 6.004 31.707 2.732 38.83a.25.25 0 1 0 .454.209c3.336-7.262 2.427-20.31-2.704-39.17a.25.25 0 1 0-.483.131z"/>
+                        <path fill="#33CCAB" d="M70.948 10.236c-.382 4.56-1.056 8.216-2.812 12.396-2.826 6.73-7.722 12.406-10.794 19.028-4.808 10.362-4.732 22.87.2 33.172 2.194 4.586 5.37 8.798 9.614 11.592 4.246 2.798 13.008 2.892 13.294 2.868 5.126-.422 11.384-4.284 14.236-8.686 2.918-4.502 5.634-9.288 6.58-14.57 1.952-10.868-3.894-21.612-10.768-30.256-6.872-8.644-19.17-32.386-19.17-32.386s-.368 6.706-.38 6.842"/>
+                        <path fill="#29A389" d="M71.8 8.396c10.202 37.51 12.008 63.414 5.464 77.66a.5.5 0 1 0 .908.418c6.672-14.524 4.854-40.62-5.408-78.34a.5.5 0 1 0-.966.262h.002z"/>
                     </g>
                 </svg>
             </div>
@@ -100,11 +100,7 @@
             <flamelink-image v-bind:image="processedContent.backgroundImage"/>
         </div>
 
-        <section class="lowerActions">
-            <div class="mobile-nav-buttons" v-if="!isReflectScreen">
-                <span class="tap">Tap Anywhere</span>
-            </div>
-
+        <section class="lowerActions" v-if="tapAnywhereEnabled || (isReflectScreen && response)">
 
             <!--    START Reflect -->
             <div v-if="isReflectScreen && response" class="reflect-container">
@@ -113,38 +109,36 @@
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div class="saved-container" v-show="showSaved || saving">
-                        <span v-show="saving && !saved">Saving...</span>
+                        <span v-show="saving && !saved">{{promptCopy.SAVING}}...</span>
                         <span v-show="saved && !saving">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-                            Saved
+                            {{promptCopy.SAVED}}
                         </span>
                     </div>
                 </transition>
-                <resizable-textarea v-bind:maxLines="4">
+                <div class="flexContainer">
+                    <resizable-textarea v-bind:maxLines="4">
                     <textarea ref="reflectionInput"
                             type="text"
-                            placeholder="Add your reflection"
                             rows="1"
                             v-model="response.content.text"
-                            v-on:input="autosave"
                             v-on:click.stop
+                            :class="{hasValue: !!response.content.text}"
+                            @focusin="disableNavigation"
+                            @focusout="enableNavigation"
                     />
-                </resizable-textarea>
-                <div class="mobile-nav-buttons">
-                    <button :class="['next', 'inline-arrow', 'primary', 'reflection', {complete: reflectionProgress >= 1}]" @click="next" v-if="hasNext">
-                        <div class="progress-circle">
-                            <pie-spinner :percent="reflectionProgress"/>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                            <path fill="#fff" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                        </svg>
-                    </button>
+                    </resizable-textarea>
+                    <span class="textareaPlaceholder">
+                        <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
+                        {{promptCopy.ADD_A_NOTE}}
+                    </span>
                 </div>
             </div>
-            <!--    END Reflect-->
-            <div class="actions" v-if="processedContent.actionButton">
-                <button class="primaryBtn" @click="doButtonAction">{{processedContent.actionButton.label}}</button>
+
+            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
+                <span class="tap">{{promptCopy.TAP_ANYWHERE}}</span>
             </div>
+            <!--    END Reflect-->
         </section>
     </div>
 </template>
@@ -165,18 +159,20 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import {debounce} from "debounce";
     import {formatDurationAsTime} from '@shared/util/DateUtil'
-    import PieSpinner from "@components/PieSpinner.vue"
 
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
+    import CopyService from '@shared/copy/CopyService'
+    import {PromptCopy} from '@shared/copy/CopyTypes'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
             ResizableTextarea,
             Spinner,
             FlamelinkImage,
-            PieSpinner,
         },
         props: {
             content: {
@@ -188,18 +184,21 @@
             reflectionDuration: Number,
             saving: Boolean,
             saved: Boolean,
+            tapAnywhereEnabled: Boolean,
         },
         data(): {
             youtubeVideoLoading: boolean,
             editingResponse: string,
             showSaved: boolean,
             showSavingTimeout: any,
+            promptCopy: PromptCopy,
         } {
             return {
                 youtubeVideoLoading: true,
                 editingResponse: "",
                 showSaved: false,
                 showSavingTimeout: undefined,
+                promptCopy: copy.prompts,
             }
         },
         watch: {
@@ -264,13 +263,6 @@
             }
         },
         methods: {
-            autosave: debounce(function (this: any) {
-                this.save()
-            }, 1000),
-            save() {
-                console.log("debounced save");
-                this.$emit("save")
-            },
             async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
@@ -295,7 +287,6 @@
                     return;
                 }
 
-
                 this.$emit("next")
             },
             previous() {
@@ -303,6 +294,12 @@
             },
             complete() {
                 this.$emit("complete")
+            },
+            enableNavigation() {
+                this.$emit("navigationEnabled")
+            },
+            disableNavigation() {
+                this.$emit("navigationDisabled")
             }
         }
     })
@@ -325,10 +322,10 @@
         overflow: hidden;
 
         @include isTinyPhone {
-            min-height: calc(100vh - 8rem);
+            min-height: calc(100vh - 5.6rem);
         }
         @include biggerThanTinyPhone {
-            min-height: calc(100vh - 10rem);
+            min-height: calc(100vh - 9rem);
         }
         @include r(600) {
             min-height: 0;
@@ -336,60 +333,54 @@
         }
 
         .slide-1 & {
-            background-image:
-                url(/assets/images/greenNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg);
-            background-position:
-                right -170px bottom 18vh,
-                right -140px bottom 28vh;
+            background-image: url(/assets/images/greenNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg);
+            background-position: right -170px bottom 18vh,
+            right -140px bottom 28vh;
             background-size: 250px, 180px;
         }
+
         .slide-2 &, .slide-3 & {
-            background-image:
-                url(/assets/images/greenNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg),
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/yellowBlob.svg);
-            background-position:
-                left -200px bottom 18vh,
-                left -150px bottom 28vh,
-                right -440px bottom 48vh,
-                right -205px bottom 67vh;
+            background-image: url(/assets/images/greenNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg),
+            url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/yellowBlob.svg);
+            background-position: left -200px bottom 18vh,
+            left -150px bottom 28vh,
+            right -440px bottom 48vh,
+            right -205px bottom 67vh;
             background-size: 250px, 180px, 470px, 240px;
         }
+
         .slide-4 & {
-            background-image:
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/yellowBlob.svg),
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg);
-            background-position:
-                left -375px bottom 48vh,
-                left -215px bottom 68vh,
-                right -415px bottom -22vh,
-                right -155px bottom 4vh;
+            background-image: url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/yellowBlob.svg),
+            url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg);
+            background-position: left -375px bottom 48vh,
+            left -215px bottom 68vh,
+            right -415px bottom -22vh,
+            right -155px bottom 4vh;
             background-size: 470px, 240px, 470px, 180px;
         }
+
         .slide-5 &, .slide-6 & {
-            background-image:
-                url(/assets/images/yellowNeedleBlob.svg),
-                url(/assets/images/pinkBlob.svg),
-                url(/assets/images/maroonTriangleBlob.svg),
-                url(/assets/images/lightGreenBlob.svg);
-            background-position:
-                left -280px bottom -22vh,
-                left -165px bottom 4vh,
-                right -335px bottom 32vh,
-                right -250px bottom 44vh;
+            background-image: url(/assets/images/yellowNeedleBlob.svg),
+            url(/assets/images/pinkBlob.svg),
+            url(/assets/images/maroonTriangleBlob.svg),
+            url(/assets/images/lightGreenBlob.svg);
+            background-position: left -280px bottom -22vh,
+            left -165px bottom 4vh,
+            right -335px bottom 32vh,
+            right -250px bottom 44vh;
             background-size: 470px, 180px, 390px, 270px;
         }
+
         .slide-7 &, .slide-8 & {
-            background-image:
-                url(/assets/images/maroonTriangleBlob.svg),
-                url(/assets/images/lightGreenBlob.svg);
-            background-position:
-                left -335px bottom 32vh,
-                left -250px bottom 44vh;
+            background-image: url(/assets/images/maroonTriangleBlob.svg),
+            url(/assets/images/lightGreenBlob.svg);
+            background-position: left -335px bottom 32vh,
+            left -250px bottom 44vh;
             background-size: 390px, 270px;
         }
 
@@ -425,8 +416,19 @@
         right: 0;
         overflow: hidden;
 
-        &:empty {
-            display: none;
+        .slide-0 &:empty {
+            $backgrounds: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
+            url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
+            url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
+            url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
+            url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
+
+            $bgKey: random(length($backgrounds));
+            $nth: nth($backgrounds, $bgKey);
+
+            background: #{$nth} no-repeat;
+            height: 200px;
+            position: absolute;
         }
 
         @include r(600) {
@@ -454,10 +456,10 @@
 
     .text {
         font-size: 2.4rem;
-        padding: 7.2rem 0;
+        padding: 4rem 0;
 
         .reflectScreen & {
-            padding: 6.4rem 0 1.6rem;
+            padding: 5.6rem 0 1.6rem;
         }
     }
 
@@ -471,6 +473,12 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
+
+        @include isTinyPhone {
+            .reflectScreen & {
+                justify-content: flex-start;
+            }
+        }
     }
 
     .quote-container {
@@ -572,44 +580,48 @@
         margin-bottom: 2.4rem;
     }
 
-    .leaf3 {
-        animation: growingLeaves 15s forwards;
-        transform: scale(0.3) translate(20px, 25px);
+    .leaf7 {
+        animation: growingLeaves 8s forwards;
+        transform: scale(0.3) translate(5px, 30px);
         transform-origin: center;
     }
 
-    .leaf7, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
+    .leaf3, .leaf5, .leaf1, .leaf2, .leaf4, .leaf6 {
         animation: growingLeaves2 15s forwards;
         opacity: 0;
-        transform: scale(0.7) translate(19px, 18px);
+        transform: scale(0.5) translate(5px, 3px);
+        transform-origin: center;
     }
 
-    .leaf7 {
-        animation-delay: 6s;
+    .leaf3 {
+        animation-delay: 3s;
+        animation-duration: 8s;
     }
 
     .leaf5 {
-        animation-delay: 16s;
+        animation-delay: 6s;
     }
 
     .leaf1 {
-        animation-delay: 21s;
+        animation-delay: 11s;
     }
 
     .leaf4 {
-        animation-delay: 30s;
+        animation-delay: 17s;
     }
 
     .leaf2 {
-        animation-delay: 32s;
+        animation-delay: 21s;
     }
 
     .leaf6 {
-        animation-delay: 44s;
+        animation-delay: 28s;
     }
 
     .grow5 {
         animation: grow 60s forwards;
+        height: 75px;
+        width: 78px;
     }
 
     .lowerActions {
@@ -621,20 +633,6 @@
         @include r(600) {
             position: absolute;
         }
-
-        .reflectScreen & {
-            bottom: 0;
-            left: 0;
-            position: relative;
-            right: 0;
-
-            @include r(600) {
-                bottom: 3.2rem;
-                left: 2.4rem;
-                position: absolute;
-                right: 2.4rem;
-            }
-        }
     }
 
     .tap {
@@ -644,69 +642,15 @@
         opacity: .4;
         text-align: center;
         text-transform: uppercase;
-
-        .slide-0 & {
-            display: none;
-        }
     }
 
     .mobile-nav-buttons {
+        background-color: $lightBlue;
+        margin: 0 -2.4rem -3.2rem;
+        padding: .8rem;
 
         @include r(600) {
             display: none;
-        }
-
-        .inline-arrow {
-            flex-grow: 0;
-            float: right;
-            position: relative;
-            overflow: hidden;
-
-            &.reflection {
-                position: relative;
-
-                &:hover:not(.complete) {
-                    cursor: default;
-                }
-
-                &:not(.complete) {
-                    svg {
-                        opacity: 0;
-                    }
-                }
-
-                &.complete {
-                    cursor: pointer;
-
-                    .progress-circle {
-                        opacity: 0;
-                    }
-                }
-
-                .progress-circle {
-                    transition: opacity .3s;
-                    z-index: 0;
-                    opacity: .6;
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                }
-            }
-        }
-
-        .next {
-            display: flex;
-            height: 5.6rem;
-            justify-content: center;
-            padding: 0;
-            width: 5.6rem;
-
-            svg {
-                height: 1.8rem;
-                width: 1.8rem;
-            }
         }
     }
 
@@ -714,7 +658,7 @@
         font-size: 1.6rem;
         margin-bottom: .8rem;
         opacity: .8;
-        text-align: right;
+        text-align: left;
 
         svg {
             fill: $darkGreen;
@@ -724,17 +668,58 @@
         }
     }
 
+    .flexContainer {
+        position: relative;
+    }
+
     .reflect-container textarea {
         @include textArea;
         background-color: transparent;
-        border-radius: 3rem;
+        border-width: 0;
+        border-radius: 2.4rem;
+        cursor: pointer;
         max-height: 10rem;
+        position: relative;
+        transition: background-color .3s;
         width: 100%;
+        z-index: 1;
 
         &:focus {
             background-color: $white;
-            border-radius: 6px;
         }
+
+        &.hasValue {
+            border-width: 1px;
+        }
+
+        &:hover + .textareaPlaceholder .wiggle {
+            animation: wiggle .5s forwards;
+        }
+    }
+
+    .reflect-container textarea + .textareaPlaceholder {
+        align-items: center;
+        bottom: 0;
+        color: $darkGreen;
+        display: flex;
+        justify-content: center;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: opacity .3s;
+        z-index: 0;
+
+        .pen {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
+        }
+    }
+
+    .reflect-container textarea:focus + .textareaPlaceholder,
+    .reflect-container textarea.hasValue + .textareaPlaceholder {
+        opacity: 0;
     }
 
     .primaryBtn {

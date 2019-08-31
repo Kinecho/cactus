@@ -307,6 +307,34 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: "$CIRCLE_USERNAME has promoted a Stage Build. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+  branch-deploy-started:
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - run: echo "Notify Feature Branch deploy started"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: "$CIRCLE_USERNAME has started deploying \\`${CIRCLE_BRANCH}\\` to stage. <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
+
+  branch-deploy-finished:
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - run: echo "Notify Feature Branch deploy finished"
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: 'good'
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: "`$CIRCLE_BRANCH` has been deployed to stage.\n<https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow> | $(cat .slack_git_url.txt)"
+
 
   firebase-deploy:
     description: "Deploy selected modules to the selected project"
@@ -409,7 +437,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: ":white_check_mark: Finished Workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > \nBranch \\`${CIRCLE_BRANCH}\\` \n$(cat .slack_git_url.txt)"
+          message: ":white_check_mark: \\`${CIRCLE_BRANCH}\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > completed successfully.\n$(cat .slack_git_url.txt)"
 
 
 workflows:
@@ -458,8 +486,8 @@ workflows:
           requires:
             - *install_all_name
       - notify-branch-workflow-finished:
-          name: Notify Workflow Complete
-          workflow_name: *workflow_name
+          name: &all_tests_finished "Notify Tests Passed"
+          workflow_name: "Feature Branch Tests"
           requires:
             - *install_all_name
             - *test_functions_name
@@ -469,6 +497,27 @@ workflows:
           filters:
             branches:
               ignore: master
+      - branch_deploy_approval:
+          type: approval
+          name: &stage_approval_name "Deploy To Stage Approval"
+          requires:
+            - *all_tests_finished
+      - branch-deploy-started:
+          name: "Notify Branch Deploy Started"
+          requires:
+            - *stage_approval_name
+      - firebase-deploy:
+          name: &branch_deploy_name "Deploy Branch to Stage"
+          project: "stage"
+          modules: "functions,hosting"
+          requires:
+            - *stage_approval_name
+      - branch-deploy-finished:
+            name: "Notify Branch Deploy Finished"
+            requires:
+              - *branch_deploy_name
+              - *stage_approval_name
+
 
   cactus_release_pipeline:
     jobs:

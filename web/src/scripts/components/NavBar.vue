@@ -1,10 +1,11 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
-        <a href="/"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
+        <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <div>
             <transition name="fade-in-slow" appear>
                 <a v-if="displayLoginButton"
-                        class="link"
+                        class="login"
+                        :href="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >Log In</a>
@@ -12,34 +13,20 @@
             <transition name="fade-in-slow" appear>
                 <a v-if="displaySignupButton"
                         data-test="signup-button"
-                        class="jump-to-form button"
+                        class="jump-to-form button small"
                         @click.prevent="scrollToSignup"
                         type="button"
-                >Sign Up Free</a>
+                >Sign Up</a>
             </transition>
         </div>
-
-        <transition name="fade-in">
-            <div v-if="loggedIn" class="user-info">
-                <div v-click-outside="closeMenu">
-                    <div class="avatar-container" @click="toggleMenu" v-bind:class="{open: menuOpen}">
-                        <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
-                    </div>
-                    <transition name="fade-down">
-                        <nav class="moreMenu" v-show="menuOpen">
-                            <span class="static">{{user.email}}</span>
-                            <template v-for="(link) in links" v-bind:link="link">
-                                <a v-if="link.href" :href="link.href">{{link.title}}</a>
-                                <span v-if="link.onClick" @click.prevent="link.onClick">{{link.title}}</span>
-                            </template>
-                            <!--                        <a :href="PageRoute.JOURNAL_HOME">My Journal</a>-->
-                            <!--                        <a href="#" @click.prevent=logout>logout</a>-->
-                        </nav>
-                    </transition>
+        <dropdown-menu :items="links" v-if="loggedIn">
+            <div slot="custom-button">
+                <div class="navbar-avatar-container">
+                    <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
+                    <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                 </div>
             </div>
-        </transition>
+        </dropdown-menu>
     </header>
 </template>
 
@@ -51,17 +38,13 @@
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {logout} from '@web/auth'
-
-    declare interface LinkData {
-        title: string,
-        href?: string,
-        onClick?: () => Promise<void> | void
-    }
+    import DropdownMenu from "@components/DropdownMenu.vue"
+    import {DropdownMenuLink} from "@components/DropdownMenuTypes"
+    import {QueryParam} from '@shared/util/queryParams'
 
     declare interface NavBarData {
-        authUnsubscribe?: () => void,
-        user?: FirebaseUser | undefined | null,
-        menuOpen: boolean,
+        authUnsubscribe: (() => void) | undefined,
+        user: FirebaseUser | undefined | null,
         authLoaded: boolean,
     }
 
@@ -69,6 +52,9 @@
     export default Vue.extend({
         directives: {
             'click-outside': clickOutsideDirective(),
+        },
+        components: {
+            DropdownMenu,
         },
         created() {
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
@@ -88,13 +74,12 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
-            showLogin: {type: Boolean, default: false}, //NOTE: login is always disabled for now. See computed prop for displayLoginButton
+            showLogin: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {
-                user: null,
+                user: undefined,
                 authUnsubscribe: undefined,
-                menuOpen: false,
                 authLoaded: false,
             }
         },
@@ -102,8 +87,8 @@
             loggedIn(): boolean {
                 return !!this.user;
             },
-            links(): LinkData[] {
-                return [{
+            links(): DropdownMenuLink[] {
+                const links: DropdownMenuLink[] = [{
                     title: "My Journal",
                     href: PageRoute.JOURNAL_HOME,
                 }, {
@@ -114,7 +99,16 @@
                     onClick: async () => {
                         await this.logout()
                     }
-                }]
+                }];
+
+                if (this.user && this.user.email) {
+                    links.unshift({
+                        static: true,
+                        title: this.user.email,
+                    })
+                }
+
+                return links;
             },
             displayName(): string | undefined | null {
                 return this.user ? this.user.displayName || this.user.email : null;
@@ -130,15 +124,19 @@
                 return show;
             },
             displayLoginButton(): boolean {
-                const show = this.showLogin && this.authLoaded && !this.user;
-                //NOTE: login button is always disabled for now.
-                return false;
+                return this.showLogin && this.authLoaded && !this.user;
             },
             initials(): string {
                 if (this.user) {
                     return getInitials(this.user.displayName || this.user.email || "")
                 }
                 return "";
+            },
+            loginHref(): string {
+                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
+            },
+            logoHref(): string {
+                return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
             }
         },
         methods: {
@@ -147,14 +145,9 @@
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
-                window.location.href = PageRoute.SIGNUP;
+                window.location.href = this.loginHref;
             },
-            toggleMenu() {
-                this.menuOpen = !this.menuOpen;
-            },
-            closeMenu() {
-                this.menuOpen = false;
-            },
+
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
                     return;
@@ -175,25 +168,39 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    header {
-        button, a.button {
-            flex-grow: 0;
-            font-size: 1.6rem;
-            margin: 0;
-            padding: 1.2rem 2rem 1.6rem;
-        }
+    .login {
+        font-size: 1.6rem;
+        margin-left: .8rem;
+        text-decoration: none;
+        transition: background-color .2s ease-in-out;
 
-        a.link {
-            @include fancyLink;
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
 
-            &:hover {
-                cursor: pointer;
+            &:last-child {
+                border: 1px solid $lightGreen;
+                border-radius: 3rem;
+                padding: 1rem 1.6rem;
+
+                &:hover {
+                    background-color: $lightGreen;
+                }
             }
         }
+    }
 
-        &.out {
-            opacity: 0;
+    a.button.jump-to-form {
+        flex-grow: 0;
+        margin-left: .8rem;
+
+        @include r(600) {
+            font-size: 1.8rem;
+            margin-left: 1.6rem;
         }
+    }
+
+    header {
 
         &.loggedIn {
             display: flex;
@@ -201,7 +208,10 @@
         }
 
         .nav-logo {
+            display: block;
             height: 5.8rem;
+            position: static;
+            top: 0;
             width: 11.7rem;
 
             &.large-desktop {
@@ -212,92 +222,66 @@
             }
 
             @include isTinyPhone {
-                height: 4rem;
+                height: 3.5rem;
+                position: relative;
+                top: 2px;
                 width: 7rem;
             }
         }
+    }
 
+    .navbar-avatar-container {
+        cursor: pointer;
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        overflow: hidden;
+        display: inline-block;
+        transition: transform .2s ease-in-out;
 
-        .user-info {
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            position: relative;
-
-            .moreMenu {
-                background-color: $lightPink;
-                border-radius: 6px;
-                right: 1rem;
-                padding: .8rem 0;
-                position: absolute;
-                top: 4rem;
-                z-index: 100;
-                @include popoverShadow;
-
-                a, span {
-                    background-color: transparent;
-                    color: $darkestPink;
-                    display: block;
-                    font-size: 1.6rem;
-                    opacity: .8;
-                    padding: .8rem 2.4rem;
-                    text-decoration: none;
-                    transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-                    white-space: nowrap;
-
-                    &.static {
-                        border-bottom: 1px solid darken($pink, 5%);
-                        color: $darkText;
-                        margin-bottom: .8rem;
-                        padding-bottom: 1.6rem;
-                    }
-
-                    &:hover:not(.static) {
-                        background-color: lighten($lightPink, 2%);
-                        opacity: 1;
-                        cursor: pointer;
-                    }
-                }
-            }
-
-            .avatar-container {
-                cursor: pointer;
-                width: 4rem;
-                height: 4rem;
-                border-radius: 50%;
-                overflow: hidden;
-                display: inline-block;
-                transition: transform .2s ease-in-out;
-
-                &.open {
-                    transform: scale(.9);
-                }
-
-                .initials {
-                    background: $darkGreen;
-                    color: white;
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                img {
-                    height: 100%;
-                    width: 100%;
-
-                }
-            }
-
-            @include isPhone {
-                font-size: 1.4rem;
-                .avatar-container {
-                    width: 3rem;
-                    height: 3rem;
-                }
-            }
         }
 
+        @include isPhone {
+            width: 3rem;
+            height: 3rem;
+        }
 
+        &.open {
+            transform: scale(.9);
+        }
+
+        .initials {
+            background: $darkGreen;
+            color: white;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        img {
+            height: 100%;
+            width: 100%;
+
+        }
     }
+
+    @include isPhone {
+        font-size: 1.4rem;
+        .navbar-avatar-container {
+            width: 3rem;
+            height: 3rem;
+        }
+    }
+
+
 </style>

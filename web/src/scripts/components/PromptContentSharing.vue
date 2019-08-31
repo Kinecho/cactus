@@ -8,7 +8,7 @@
             </p>
         </div>
         <div class="referral-link">
-            <input type="text" class="link-input" name="referral-link" :value="attributedLink">
+            <input type="text" class="link-input" name="referral-link" disabled="true" :value="attributedLink">
             <button class="copy secondary btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
@@ -194,10 +194,10 @@
         justify-content: center;
 
         @include isTinyPhone {
-            min-height: calc(100vh - 8rem - 6.4rem);
+            min-height: calc(100vh - 5.6rem - 6.4rem);
         }
         @include biggerThanTinyPhone {
-            min-height: calc(100vh - 10rem - 6.4rem);
+            min-height: calc(100vh - 9rem - 6.4rem);
         }
         @include r(600) {
             min-height: 0;

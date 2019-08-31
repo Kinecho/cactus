@@ -21,6 +21,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptContentURL} from "@api/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
+import {getWordCount} from "@shared/util/StringUtil";
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
@@ -89,8 +90,13 @@ export const onReflectionResponseCreated = functions.firestore
                 }
             }
 
-            const sentPrompt = await createSentPromptIfNeeded({member, prompt, reflectionResponse});
-            if (sentPrompt) {
+
+            const {sentPrompt, created: sentPromptCreated} = await createSentPromptIfNeeded({
+                member,
+                prompt,
+                reflectionResponse
+            });
+            if (sentPrompt && sentPromptCreated) {
                 console.log("Created sent prompt", sentPrompt.toJSON());
                 fields.push({
                     title: "SentPrompt created",
@@ -98,11 +104,18 @@ export const onReflectionResponseCreated = functions.firestore
                 })
             }
 
+            const reflectionText = reflectionResponse.content.text || "";
+            const wordCount = getWordCount(reflectionText);
+            const didJournal = (wordCount > 0 ? 'Yes' : 'No');           
+            
             fields.push(
                 {
                     title: "Last Reply Updated",
                     value: resetReminderResult,
                     short: true,
+                }, {
+                    title: "Reflection Info",
+                    value: `Journaled: ${didJournal}`
                 });
 
 
@@ -138,11 +151,11 @@ export const onReflectionResponseCreated = functions.firestore
     );
 
 
-async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<SentPrompt | undefined> {
+async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<{ created: boolean, sentPrompt?: SentPrompt }> {
     const {member, prompt, reflectionResponse} = options;
     let sentPrompt = await getSentPrompt({member, prompt, reflectionResponse});
     if (sentPrompt) {
-        return sentPrompt;
+        return {created: false, sentPrompt};
     }
 
     if (member && member.id && prompt && prompt.id) {
@@ -161,10 +174,11 @@ async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt
             })
         }
 
-        return await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+        const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+        return {sentPrompt: saved, created: true};
     }
 
-    return;
+    return {created: false};
 }
 
 async function getSentPrompt(options: { member?: CactusMember, prompt?: ReflectionPrompt, reflectionResponse?: ReflectionResponse }): Promise<SentPrompt | undefined> {

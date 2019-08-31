@@ -15,5 +15,6 @@ export enum QueryParam {
     LANG = "lang",
     CONTENT_INDEX="slide",
     MESSAGE="message",
+    PROMPT_CONTENT_ENTRY_ID="pceid",
 
 }

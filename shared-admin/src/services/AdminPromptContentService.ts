@@ -35,4 +35,9 @@ export default class AdminPromptContentService {
         return await this.flamelinkService.getById(id, PromptContent);
     }
 
+    async getAll(): Promise<PromptContent[]> {
+        const results = await this.flamelinkService.getAll(PromptContent);
+        return results.results;
+    }
+
 }

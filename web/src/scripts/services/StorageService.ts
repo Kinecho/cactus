@@ -6,7 +6,9 @@ export enum LocalStorageKey {
     emailAutoFill = 'emailAutoFill',
     newUserSignIn = "newUserSignIn",
     referredByEmail = "referredByEmail",
-    anonReflectionResponse = "anonReflectionResponse"
+    anonReflectionResponse = "anonReflectionResponse",
+    landingQueryParams = "landingQueryParams",
+    flamelinkEnvironmentOverride = "flamelinkEnvironmentOverride",
 }
 
 export default class StorageService {
@@ -45,6 +47,10 @@ export default class StorageService {
 
     static saveJSON(key: LocalStorageKey, object: any) {
         localStorage.setItem(key, JSON.stringify(object));
+    }
+
+    static getJSON(key: LocalStorageKey): { [name: string]: string } {
+        return this.getEncodedMap(key);
     }
 
     static saveModel(key: LocalStorageKey, model: BaseModel, id?: string) {

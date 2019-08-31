@@ -15,7 +15,9 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import axios from "axios";
 import {transformObjectSync} from "@shared/util/ObjectUtil";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import md5 = require("md5");
+import PromptContent from "@shared/models/PromptContent";
 
 const prompts = require("prompts");
 
@@ -61,6 +63,23 @@ export default class TestDataFeedCommand extends FirebaseCommand {
         ]);
 
         console.log(`creating data for '${userResponse.email}'`);
+        console.log("Fetching prompt content entries...");
+        const promptContentEntries = await AdminPromptContentService.getSharedInstance().getAll();
+        console.log(`Fetched ${promptContentEntries.length} content entries from flamelink ${config.flamelink.service_account.project_id} - ${config.flamelink.environment_id}`);
+
+        let makeUpPrompts = false;
+        if (userResponse.numPrompts > promptContentEntries.length) {
+            const confirmResponse: { confirm: boolean } = await prompts({
+                message: `You requested ${userResponse.numPrompts}. There are only ${promptContentEntries.length} Prompt Content entries available - do you want to create prompts without the content module? Say no to only create ${promptContentEntries.length}.`,
+                type: "confirm",
+                name: "confirm"
+            });
+
+            if (confirmResponse.confirm) {
+                makeUpPrompts = true;
+            }
+        }
+
 
         let member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(userResponse.email);
         if (!member) {
@@ -87,16 +106,18 @@ export default class TestDataFeedCommand extends FirebaseCommand {
         }
 
         if (userResponse.deleteExisting) {
-            await this.deleteExisting(member);
+            await this.deleteExistingFeed(member);
         }
 
-        await this.generatePrompts(member, userResponse.numPrompts);
+        let numPrompts = makeUpPrompts ? userResponse.numPrompts : promptContentEntries.length;
+
+        await this.generatePrompts(member, numPrompts, promptContentEntries);
 
 
         return;
     }
 
-    async deleteExisting(member: CactusMember) {
+    async deleteExistingFeed(member: CactusMember) {
         const firestoreService = AdminFirestoreService.getSharedInstance();
         let batch = firestoreService.firestore.batch();
         if (member.id) {
@@ -123,21 +144,100 @@ export default class TestDataFeedCommand extends FirebaseCommand {
 
     }
 
-    async generatePrompts(member: CactusMember, numPrompts: number) {
-        console.log("creating prompts...");
-        const tasks = [];
-        const triviaQuestions = await this.fetchTriviaQuestions(numPrompts);
+    async upsertPromptForPromptContent(promptContent: PromptContent, daysBack: number): Promise<ReflectionPrompt | undefined> {
+        let promptId: string | undefined = promptContent.promptId;
+        let prompt: ReflectionPrompt | undefined = undefined;
+        if (promptId) {
+            prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
+        }
 
-        for (let i = 0; i < numPrompts; i++) {
-            tasks.push(new Promise(async resolve => {
+        if (!prompt) {
+            prompt = new ReflectionPrompt();
+            prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: daysBack}).toJSDate();
+            prompt.id = promptId;
+        }
+
+        if (!prompt) {
+            console.error(`Something went wrong and we don't have a prompt still. Not processing promptId for prompt content ${promptContent.promptId}`);
+            return;
+        }
+
+        prompt.topic = promptContent.topic;
+        prompt.question = promptContent.getQuestion();
+
+        if (!prompt.sendDate) {
+            prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: daysBack}).toJSDate();
+        }
+
+        console.log("question", prompt.question);
+        prompt.promptContentEntryId = promptContent.entryId;
+        console.log("set promptContentEntryId", promptContent.entryId);
+
+        console.log("Saving Content Prompt", prompt.toJSON());
+        return await AdminReflectionPromptService.getSharedInstance().save(prompt);
+    }
+
+    async createSentPrompt(options: { member: CactusMember, prompt: ReflectionPrompt }): Promise<SentPrompt | undefined> {
+        const {member, prompt} = options;
+        const promptId = prompt.id;
+        const sentPrompt = new SentPrompt();
+        sentPrompt.promptId = promptId;
+        sentPrompt.cactusMemberId = member.id;
+        sentPrompt.id = `${member.id}_${prompt.id}`;
+        sentPrompt.firstSentAt = prompt.sendDate;
+        sentPrompt.lastSentAt = prompt.sendDate;
+        sentPrompt.memberEmail = member.email;
+        sentPrompt.createdAt = new Date();
+        sentPrompt.sendHistory.push({
+            medium: PromptSendMedium.EMAIL_MAILCHIMP,
+            email: member.email,
+            sendDate: prompt.sendDate || new Date()
+        });
+
+        return await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+    }
+
+    async generatePrompts(member: CactusMember, numPrompts: number, promptContentEntries: PromptContent[]): Promise<void> {
+        console.log(`creating ${numPrompts} sent prompts...`);
+        const tasks: Promise<SentPrompt | undefined>[] = [];
+        const contentTasks: Promise<SentPrompt | undefined>[] = [];
+
+        promptContentEntries.slice(0, numPrompts).forEach((promptContent, i) => {
+            contentTasks.push(new Promise<SentPrompt | undefined>(async resolve => {
+                const prompt = await this.upsertPromptForPromptContent(promptContent, i);
+                if (prompt) {
+                    const sentPrompt = this.createSentPrompt({member, prompt});
+                    resolve(sentPrompt);
+                    return;
+                } else {
+                    resolve(undefined);
+                }
+            }))
+        });
+
+        const contentSentPromptResults = await Promise.all(contentTasks);
+        const contentSentPrompts = contentSentPromptResults.filter(Boolean) as SentPrompt[];
+        console.log(`Created ${contentSentPrompts.length} sent prompts from prompt content`);
+
+        if (contentSentPrompts.length === numPrompts) {
+            console.log("Created all the SentPrompts needed. Returning");
+            return;
+        }
+
+
+        const remainingPrompts = numPrompts - contentSentPrompts.length;
+        const triviaQuestions = await this.fetchTriviaQuestions(remainingPrompts);
+
+        for (let i = 0; i < remainingPrompts; i++) {
+            tasks.push(new Promise<SentPrompt | undefined>(async resolve => {
                 try {
                     const prompt = new ReflectionPrompt();
                     const trivia = triviaQuestions[i % triviaQuestions.length];
                     const promptId = `auto_test_${md5(trivia.question)}`;
                     prompt.id = promptId;
-                    prompt.question = `Question ${i + 1}: ${decodeURIComponent(trivia.question)}`;
-                    prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: numPrompts - i}).toJSDate();
-                    prompt.contentPath = `/test-${i + 1}`;
+                    prompt.question = `Question: ${decodeURIComponent(trivia.question)}\n${promptId}`;
+                    prompt.sendDate = DateTime.fromJSDate(new Date()).minus({days: contentSentPrompts.length + i}).toJSDate();
+                    // prompt.contentPath = `/test-${i + 1}`;
 
                     await AdminReflectionPromptService.getSharedInstance().save(prompt);
 
@@ -178,7 +278,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
             const batchSize = Math.min(50, count - questions.length);
             console.log("fetching", batchSize, "questions");
             const {data} = await axios.get(`https://opentdb.com/api.php?amount=${batchSize}&encode=base64`);
-            console.log("fetched questions batch", data.results);
+            console.log("fetched questions batch");
             const processed = data.results.map((question: TriviaQuestion) => {
 
                 const transform = (value: any) => {
@@ -194,7 +294,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
             questions.push(...processed);
         }
 
-        console.log(`fetched ${questions.length} questions. ${questions[0]}`);
+        console.log(`fetched ${questions.length} questions.`);
         return questions;
 
     }
