@@ -291,9 +291,5 @@
         }
     }
 
-    .journalEntry {
-        z-index: 2;
-    }
-
 
 </style>
