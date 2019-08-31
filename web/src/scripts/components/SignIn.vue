@@ -2,23 +2,22 @@
     <div>
         <div class="centered">
             <div>
-                <h1>{{title}}</h1>
+                <h1 v-if="showTitle">{{_title}}</h1>
                 <p v-if="message">{{message}}</p>
             </div>
-            <div class="actions-container" v-if="!loading">
+            <div class="actions-container" >
                 <magic-link :initialEmail="email"/>
-                <div id="third-party-loading" class="loading hidden">
-                    <img src="/assets/images/loading.svg" alt=""/>{{commonCopy.SIGNING_IN}}...
+                <div id="third-party-loading" v-show="isPendingRedirect">
+                    <modal :show="isPendingRedirect" :containerPositionRelative="false" @close="isPendingRedirect = false">
+                        <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body"/>
+                    </modal>
                 </div>
-                <div class="divider hidden">
-                    <p class="message-container">Or choose from one of the following:</p>
-                </div>
-                <div id="third-party-logins">
-                    <div class="buttonContainer" id="signup-app"></div>
+                <div class="divider">
+                    <p class="message-container">Or choose from one of the following</p>
                 </div>
             </div>
-            <div v-if="loading">
-                <spinner/>
+            <div id="third-party-logins">
+                <div class="buttonContainer" id="signup-app"></div>
             </div>
         </div>
         <img id="pinkBlob" src="assets/images/pinkBlob.svg" alt=""/>
@@ -41,6 +40,7 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
+    import Modal from "@components/Modal.vue"
 
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     console.log("Redirect url param is ", redirectUrlParam);
@@ -68,6 +68,32 @@
         components: {
             MagicLink,
             Spinner,
+            Modal,
+        },
+        mounted() {
+            if (ui.isPendingRedirect()) {
+                this.isPendingRedirect = true;
+                console.log("Is pending redirect.... need to log the user in");
+                // if ($loading) $loading.classList.remove("hidden");
+                // if ($emailContainer) $emailContainer.classList.add("hidden");
+                // if ($divider) $divider.classList.add("hidden");
+                // if ($welcomeMessage) $welcomeMessage.classList.add("hidden");
+                // if ($loginContainer) {
+                //     $loginContainer.style.height = "0";
+                //     $loginContainer.style.opacity = "0";
+                // }
+
+                // ui.start('#signup-app', config);
+            } else {
+                // if ($emailContainer) $emailContainer.classList.remove("hidden");
+                // if ($welcomeMessage) $welcomeMessage.classList.remove("hidden");
+                // if ($divider) $divider.classList.remove("hidden");
+                // The start method will wait until the DOM is loaded.
+                // ui.start('#signup-app', config);
+            }
+
+
+            ui.start('#signup-app', config);
         },
         created() {
             this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
@@ -80,61 +106,48 @@
                     this.authLoaded = true;
                 })
             });
-            if (ui.isPendingRedirect()) {
-                console.log("Is pending redirect.... need to log the user in");
-                this.loading = true;
-                // if ($loading) $loading.classList.remove("hidden");
-                // if ($emailContainer) $emailContainer.classList.add("hidden");
-                // if ($divider) $divider.classList.add("hidden");
-                // if ($welcomeMessage) $welcomeMessage.classList.add("hidden");
-                // if ($loginContainer) {
-                //     $loginContainer.style.height = "0";
-                //     $loginContainer.style.opacity = "0";
-                // }
-
-                ui.start('#signup-app', config);
-            } else {
-                // if ($emailContainer) $emailContainer.classList.remove("hidden");
-                // if ($welcomeMessage) $welcomeMessage.classList.remove("hidden");
-                // if ($divider) $divider.classList.remove("hidden");
-                // The start method will wait until the DOM is loaded.
-                // ui.start('#signup-app', config);
-            }
-
-
-            ui.start('#signup-app', config);
-
         },
         destroyed() {
             if (this.memberListener) {
                 this.memberListener();
             }
         },
-        props: {},
+        props: {
+            showTitle: {
+                type: Boolean,
+                default: true,
+            },
+            title: String,
+        },
         data(): {
-            title: string,
             message: string | undefined,
             memberListener: ListenerUnsubscriber | undefined,
             user: FirebaseUser | undefined,
             member: CactusMember | undefined,
             authLoaded: boolean,
-            loading: boolean,
             email: string,
             commonCopy: CommonCopy,
+            isPendingRedirect: boolean,
         } {
             return {
-                title: copy.common.SIGN_UP,
                 commonCopy: copy.common,
                 message: undefined,
                 user: undefined,
                 member: undefined,
                 authLoaded: false,
                 memberListener: undefined,
-                loading: false,
-                email: ""
+                email: "",
+                isPendingRedirect: false,
+            }
+        },
+        computed: {
+            _title(): string {
+                return this.title || copy.common.SIGN_UP
             }
         }
     })
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -161,10 +174,10 @@
     }
 
     .buttonContainer {
-        margin: -1.6rem -24px 0;
+        margin: 0 -24px 0;
 
         @include r(600) {
-            margin: -1.6rem auto 0;
+            margin: 0 auto 0;
             max-width: 30rem;
         }
     }
@@ -173,6 +186,13 @@
         position: relative;
         z-index: 1;
         padding: 2.6rem;
+    }
+
+    .divider {
+        margin: 2rem 0;
+        @include maxW(600) {
+            font-size: 1.6rem;
+        }
     }
 
     #yellowBlob1 {

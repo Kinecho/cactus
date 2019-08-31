@@ -12,7 +12,7 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="empty">
+                <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
                         <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in

@@ -1,4 +1,4 @@
-<template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
+\<template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="referralContainer">
         <NavBar/>
         <div class="centered content">

@@ -81,6 +81,7 @@
             isSticky: {type: Boolean, default: true},
             showLogin: {type: Boolean, default: true},
             forceTransparent: {type: Boolean, default: false},
+            loginRedirectUrl: String,
         },
         data(): NavBarData {
             return {
@@ -140,7 +141,7 @@
                 return "";
             },
             loginHref(): string {
-                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
+                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${this.loginRedirectUrl || window.location.href}`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;

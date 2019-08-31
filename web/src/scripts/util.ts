@@ -285,6 +285,7 @@ declare interface NavigationOptions {
     showLoginButton?: boolean,
     redirectOnSignOut?: boolean,
     signOutRedirectUrl?: string,
+    signUpRedirectUrl?: string,
     largeLogoOnDesktop?: boolean,
     stickyNav?: boolean,
 }
@@ -310,6 +311,7 @@ export function setupNavigation(options: NavigationOptions) {
             largeLogoOnDesktop: options.largeLogoOnDesktop || false,
             showLogin: options.showLoginButton || false,
             isSticky: options.stickyNav,
+            loginRedirectUrl: options.signUpRedirectUrl,
         },
         components: {NavBar: NavBar}
     });

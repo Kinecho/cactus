@@ -9,7 +9,9 @@ import Vue from "vue";
 import SignIn from "@components/SignIn.vue"
 import NavBar from "@components/NavBar.vue";
 import Footer from "@components/StardardFooter.vue";
+import CopyService from "@shared/copy/CopyService";
 
+const copy = CopyService.getSharedInstance().copy;
 
 new Vue({
     el: "#signup-app",
@@ -22,13 +24,14 @@ new Vue({
 
 <div class="signin-wrapper">
 <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true"/>
-    <SignIn :message="message"/>
+    <SignIn :message="message" :title="title"/>
 </div>
 
 <Footer/>
 </div>`,
     data: {
-        message: getQueryParam(QueryParam.MESSAGE)
+        message: getQueryParam(QueryParam.MESSAGE),
+        title: window.location.pathname.startsWith(PageRoute.LOGIN) ? copy.common.LOG_IN : copy.common.SIGN_UP,
     }
 });
 
