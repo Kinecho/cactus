@@ -1,7 +1,7 @@
 import axios, {AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
-
+import {FirebaseUser} from "@web/firebase"
 let _request: AxiosInstance;
 
 export enum Endpoint {
@@ -10,9 +10,9 @@ export enum Endpoint {
     checkout = "checkout",
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
-    loginEvent = "signup/login",
     sendMagicLink = "signup/magic-link",
-    updateSubscriberStatus = "mailchimp/status"
+    updateSubscriberStatus = "mailchimp/status",
+    loginEvent = "signup/login-event",
 }
 
 export function initializeAxios(): AxiosInstance {

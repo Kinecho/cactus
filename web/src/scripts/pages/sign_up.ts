@@ -1,5 +1,5 @@
 import "@styles/pages/sign_up.scss"
-import {getAuthUI, getAuthUIConfig} from "@web/auth";
+import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
 import {getQueryParam, setupNavigation} from "@web/util";
@@ -10,7 +10,7 @@ import SignIn from "@components/SignIn.vue"
 import NavBar from "@components/NavBar.vue";
 import Footer from "@components/StardardFooter.vue";
 import CopyService from "@shared/copy/CopyService";
-
+import {getAuth} from "@web/firebase";
 const copy = CopyService.getSharedInstance().copy;
 
 new Vue({
@@ -26,6 +26,7 @@ new Vue({
 <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true"/>
     <SignIn :message="message" :title="title"/>
 </div>
+
 
 <Footer/>
 </div>`,
@@ -75,16 +76,32 @@ function oldMethod() {
             emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
         }
 
-        const ui = getAuthUI();
-        const config = getAuthUIConfig({
-            signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
-            emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
-            signInSuccess: (authResult, redirectUrl) => {
-                console.log("Redirect URL is", redirectUrl);
-                console.log("Letting fbui handle the redirect... just returning true");
-                return true;
+    const ui = getAuthUI();
+    const config = getAuthUIConfig({
+        signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+        emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
+        signInSuccess: (authResult, redirectUrl) => {
+            console.log("Redirect URL is", redirectUrl);
+            console.log("Just returning true");
+
+
+            //TODO: This needs to be moved to the signin component
+            if (authResult.user && authResult.additionalUserInfo) {
+                try {
+                    sendLoginEvent({
+                        user: authResult.user,
+                        additionalUserInfo: authResult.additionalUserInfo
+                    }).then(() => console.log("successfully logged the login event"))
+                        .catch(error => console.error("Failed to send login event", error))
+                } catch (e) {
+                    console.error("failed to log login event");
+                }
+
             }
-        });
+
+            return true;
+        }
+    });
 
         if (ui.isPendingRedirect()) {
             console.log("Is pending redirect.... need to log the user in");

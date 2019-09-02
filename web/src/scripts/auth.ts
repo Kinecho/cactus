@@ -1,13 +1,14 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {addModal, getQueryParam, showConfirmEmailModal} from "@web/util";
-import {FirebaseUserCredential, getAuth, initializeFirebase} from "@web/firebase";
+import {AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase,} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
-import {Endpoint, request} from "@web/requestUtils";
+import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {
     EmailStatusRequest,
     EmailStatusResponse,
+    LoginEvent,
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
@@ -311,4 +312,27 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     }
 
 
+}
+
+export async function sendLoginEvent(args: {
+    user: FirebaseUser,
+    additionalUserInfo: AdditionalUserInfo,
+}): Promise<void> {
+    let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+    if (!referredByEmail) {
+        try {
+            referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
+        } catch (e) {
+            console.error("error trying to get referredByEmail from local storage", e)
+        }
+    }
+
+
+    const event: LoginEvent = {
+        providerId: args.additionalUserInfo.providerId,
+        userId: args.user.uid,
+        isNewUser: args.additionalUserInfo.isNewUser,
+        referredByEmail: referredByEmail
+    };
+    await request.post(Endpoint.loginEvent, event, {headers: {...getAuthHeaders()}})
 }

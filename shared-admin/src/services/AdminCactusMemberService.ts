@@ -183,6 +183,15 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
+    async getMemberByUserId(userId?: string): Promise<CactusMember | undefined> {
+        if (!userId) {
+            return;
+        }
+
+        const query = this.getCollectionRef().where(Field.userId, "==", userId);
+        return await firestoreService.getFirst(query, CactusMember);
+    }
+
     async getMemberByEmail(emailInput?: string): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;

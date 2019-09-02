@@ -26,3 +26,10 @@ export interface MagicLinkResponse extends ApiResponse {
     error?: any,
     message?: string,
 }
+
+export interface LoginEvent {
+    userId: string,
+    isNewUser: boolean,
+    providerId: string,
+    referredByEmail?: string | undefined | null
+}

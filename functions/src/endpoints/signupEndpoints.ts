@@ -5,6 +5,7 @@ import * as admin from "firebase-admin";
 import {
     EmailStatusRequest,
     EmailStatusResponse,
+    LoginEvent,
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
@@ -14,10 +15,12 @@ import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {appendDomain, getFullName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import AdminUserService from "@admin/services/AdminUserService";
+import MailchimpService from "@admin/services/MailchimpService";
+import {getAuthUser} from "@api/util/RequestUtil";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
-import AdminPendingUserService from "@admin/services/AdminPendingUserService";
-import {getAuthUser} from "@api/util/RequestUtil";
 
 const Config = getConfig();
 
@@ -200,6 +203,54 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
 
     return;
+});
+
+app.post("/login-event", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload: LoginEvent = req.body;
+    const {userId, isNewUser, providerId, referredByEmail} = payload;
+    console.log("Handling login event");
+    resp.sendStatus(204);
+
+
+    let message = "";
+
+    const user = await AdminUserService.getSharedInstance().getById(userId);
+    if (user) {
+        user.lastLoginAt = new Date();
+        if (!user.providerIds.includes(providerId)) {
+            user.providerIds.push(providerId);
+        }
+        message = `${user.email} logged in with ${providerId}`;
+    }
+
+    if (isNewUser && referredByEmail) {
+        console.log("Is new user login, and has a referral. Set it up! ");
+
+        await AdminUserService.getSharedInstance().setReferredByEmail({userId, referredByEmail});
+        console.log("Set referral email on the user");
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        console.log("Found member", member, "during login-event");
+        if (member && !member.referredByEmail) {
+            member.referredByEmail = referredByEmail;
+            await AdminCactusMemberService.getSharedInstance().save(member);
+            console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
+            if (member.email) {
+                console.log("Updating mailchimp ref email to ", referredByEmail);
+                await MailchimpService.getSharedInstance().updateMergeFields({
+                    email: member.email,
+                    mergeFields: {REF_EMAIL: referredByEmail}
+                })
+            }
+            message += `. Set their referredByEmail on their CactusMember to ${referredByEmail}.`;
+        } else {
+            message += `. Set referredByEmail on their User to ${referredByEmail}`
+        }
+    } else {
+        console.log("No referral or this was not a new user");
+    }
+
+    await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+
 });
 
 
