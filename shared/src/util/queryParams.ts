@@ -16,5 +16,6 @@ export enum QueryParam {
     CONTENT_INDEX="slide",
     MESSAGE="message",
     PROMPT_CONTENT_ENTRY_ID="pceid",
-
+    UTM_SOURCE = "utm_source",
+    UTM_MEDIUM = "utm_medium",
 }

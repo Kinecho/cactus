@@ -94,7 +94,11 @@
                 const url = this.promptContent ? `${Config.domain}${PageRoute.PROMPTS_ROOT}/${this.promptContent.entryId}` : undefined;
                 if (this.member && url) {
                     const email = this.member.email;
-                    return appendQueryParams(url, {[QueryParam.REFERRED_BY_EMAIL]: email})
+                    return appendQueryParams(url, {
+                        [QueryParam.REFERRED_BY_EMAIL]: email,
+                        [QueryParam.UTM_SOURCE]: "cactus.app",
+                        [QueryParam.UTM_MEDIUM]: "prompt-share"
+                    })
                 }
                 return url;
             },
@@ -223,7 +227,6 @@
                 margin-bottom: .8rem;
                 max-width: none;
                 width: 100%;
-                text-overflow: ellipsis;
 
                 @include r(600) {
                     margin-bottom: 1.6rem;

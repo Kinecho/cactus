@@ -72,6 +72,8 @@
     import {PageRoute} from '@web/PageRoutes';
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
+    import {QueryParam} from '@shared/util/queryParams'
+    import {appendQueryParams} from '@shared/util/StringUtil'
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -129,7 +131,16 @@
                 return !this.authLoaded;
             },
             referralLink(): string | undefined {
-                return (this.member && this.member.email) ? `${Config.domain}?ref=${encodeURIComponent(this.member.email)}` : undefined;
+                const url = `${Config.domain}`;
+                const params: { [key: string]: string } = {
+                    [QueryParam.UTM_SOURCE]: "cactus.app",
+                    [QueryParam.UTM_MEDIUM]: "invite-friends"
+                };
+                if (this.member && this.member.email) {
+                    params[QueryParam.REFERRED_BY_EMAIL] = this.member.email;
+                }
+
+                return appendQueryParams(url, params);
             }
         }
     })
@@ -202,6 +213,7 @@
 
         @include r(600) {
             margin-bottom: 1.6rem;
+            padding-right: 9rem;
         }
     }
 
@@ -216,6 +228,9 @@
             right: 0;
             top: 0;
             width: auto;
+            &.secondary {
+                background-color: transparent;
+            }
 
             &:hover {
                 background: transparent;
