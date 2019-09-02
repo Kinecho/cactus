@@ -315,8 +315,8 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 }
 
 export async function sendLoginEvent(args: {
-    user: FirebaseUser,
-    additionalUserInfo: AdditionalUserInfo,
+    user: FirebaseUser|null,
+    additionalUserInfo?: AdditionalUserInfo|null,
 }): Promise<void> {
     let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
     if (!referredByEmail) {
@@ -329,9 +329,9 @@ export async function sendLoginEvent(args: {
 
 
     const event: LoginEvent = {
-        providerId: args.additionalUserInfo.providerId,
-        userId: args.user.uid,
-        isNewUser: args.additionalUserInfo.isNewUser,
+        providerId: (args.additionalUserInfo && args.additionalUserInfo.providerId) || undefined,
+        userId: args.user && args.user.uid,
+        isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
         referredByEmail: referredByEmail
     };
     await request.post(Endpoint.loginEvent, event, {headers: {...getAuthHeaders()}})

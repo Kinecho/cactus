@@ -85,20 +85,6 @@ function oldMethod() {
             console.log("Just returning true");
 
 
-            //TODO: This needs to be moved to the signin component
-            if (authResult.user && authResult.additionalUserInfo) {
-                try {
-                    sendLoginEvent({
-                        user: authResult.user,
-                        additionalUserInfo: authResult.additionalUserInfo
-                    }).then(() => console.log("successfully logged the login event"))
-                        .catch(error => console.error("Failed to send login event", error))
-                } catch (e) {
-                    console.error("failed to log login event");
-                }
-
-            }
-
             return true;
         }
     });

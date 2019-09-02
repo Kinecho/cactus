@@ -212,10 +212,15 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
     resp.sendStatus(204);
 
 
+    if (!userId) {
+        console.error("No user ID was provided");
+        return;
+    }
+
     let message = "";
 
     const user = await AdminUserService.getSharedInstance().getById(userId);
-    if (user) {
+    if (user && providerId) {
         user.lastLoginAt = new Date();
         if (!user.providerIds.includes(providerId)) {
             user.providerIds.push(providerId);

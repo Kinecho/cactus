@@ -31,7 +31,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import {FirebaseUser} from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {getAuthUI, getAuthUIConfig} from "@web/auth";
+    import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import {PageRoute} from "@web/PageRoutes"
     import {QueryParam} from "@shared/util/queryParams"
@@ -67,6 +67,7 @@
                     console.log("Redirect URL is", redirectUrl);
                     console.log("Need to handle auth redirect");
                     this.pendingRedirectUrl = redirectUrl;
+                    this.authResult = authResult;
                     this.doRedirect = true;
                     return false;
                 }
@@ -113,6 +114,7 @@
             isPendingRedirect: boolean,
             pendingRedirectUrl: string | undefined,
             doRedirect: boolean,
+            authResult: firebase.auth.UserCredential | undefined,
         } {
             return {
                 commonCopy: copy.common,
@@ -125,6 +127,7 @@
                 isPendingRedirect: false,
                 pendingRedirectUrl: undefined,
                 doRedirect: false,
+                authResult: undefined,
             }
         },
         computed: {
@@ -133,9 +136,21 @@
             }
         },
         watch: {
-            async doRedirect(doRedirect){
-                if (!doRedirect){
+            async doRedirect(doRedirect) {
+                //TODO: probalby make this method more clear what it does by renaming/refactoring
+                if (!doRedirect) {
                     return;
+                }
+
+
+                //TODO: This needs to be moved to the signin component
+                if (this.authResult && this.authResult.user) {
+                    try {
+                        await sendLoginEvent(this.authResult)
+                    } catch (e) {
+                        console.error("failed to log login event", e);
+                    }
+
                 }
 
 

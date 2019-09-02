@@ -28,8 +28,8 @@ export interface MagicLinkResponse extends ApiResponse {
 }
 
 export interface LoginEvent {
-    userId: string,
+    userId?: string|null,
     isNewUser: boolean,
-    providerId: string,
+    providerId?: string,
     referredByEmail?: string | undefined | null
 }
