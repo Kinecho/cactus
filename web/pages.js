@@ -445,5 +445,12 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "terms_of_service"
+    },
+    "privacy_policy": {
+        "title": "Privacy Policy",
+        "path": "/privacy-policy",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "privacy_policy"
     }
 }
