@@ -49,6 +49,10 @@
         ],
         "rewrites": [
             {
+                "source": "/terms-of-service",
+                "destination": "/terms_of_service.html"
+            },
+            {
                 "source": "/prompts/**",
                 "destination": "/prompt.html"
             },
