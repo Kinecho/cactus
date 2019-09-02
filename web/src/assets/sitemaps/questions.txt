@@ -57,3 +57,5 @@ https://cactus.app/values
 https://cactus.app/auth-actions
 https://cactus.app/account
 https://cactus.app/prompts
+https://cactus.app/terms-of-service
+https://cactus.app/privacy-policy

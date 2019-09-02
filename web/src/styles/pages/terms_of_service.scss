@@ -1,0 +1,26 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+@import "~styles/modal";
+@import "~styles/article";
+
+.centered {
+  max-width: 900px;
+  .content {
+    text-align: left;
+    padding: 2.6rem;
+
+    h1 {
+      text-align: left;
+      margin-bottom: 2.4rem;
+    }
+    p {
+      margin-bottom: 1.6rem;
+    }
+
+    ul, ol, li {
+      margin: 0 0 1.6rem 1.6rem;
+      padding: 0;
+    }
+  }
+}

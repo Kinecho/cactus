@@ -437,6 +437,20 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "prompt",
-        "indexPath": true,
+        "indexPath": true
+    },
+    "terms_of_service": {
+        "title": "Terms of Service",
+        "path": "/terms-of-service",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "terms_of_service"
+    },
+    "privacy_policy": {
+        "title": "Privacy Policy",
+        "path": "/privacy-policy",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "privacy_policy"
     }
 }
