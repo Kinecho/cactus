@@ -9,7 +9,7 @@ import {
     MagicLinkRequest,
     MagicLinkResponse
 } from "@shared/api/SignupEndpointTypes";
-import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
+import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
@@ -21,6 +21,7 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 
 const Config = getConfig();
 
@@ -209,7 +210,6 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
     const payload: LoginEvent = req.body;
     const {userId, isNewUser, providerId, referredByEmail} = payload;
     console.log("Handling login event");
-    resp.sendStatus(204);
 
 
     if (!userId) {
@@ -217,7 +217,9 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         return;
     }
 
-    let message = "";
+    const attachments: SlackAttachment[] = [];
+    let message: ChatMessage = {text: "", attachments};
+
 
     const user = await AdminUserService.getSharedInstance().getById(userId);
     if (user && providerId) {
@@ -225,7 +227,29 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         if (!user.providerIds.includes(providerId)) {
             user.providerIds.push(providerId);
         }
-        message = `${user.email} logged in with ${providerId}`;
+        message.text = `${user.email} logged in with ${providerId} ${AdminSlackService.getProviderEmoji(providerId)}`;
+    }
+
+
+    if (isNewUser && user && user.email) {
+        console.log("completing signup");
+        const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({
+            userId,
+            email: user.email
+        });
+        let member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(user.id);
+        if (pendingUser && member) {
+            await AdminSentPromptService.getSharedInstance().initializeSentPromptsFromPendingUser({
+                pendingUser,
+                user: user,
+                member,
+            });
+
+            attachments.push({
+                title: `Completed signup for Pending User. Added ${pendingUser.reflectionResponseIds.length} reflection responses to their account.`,
+            })
+        }
+
     }
 
     if (isNewUser && referredByEmail) {
@@ -235,6 +259,8 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         console.log("Set referral email on the user");
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
         console.log("Found member", member, "during login-event");
+        const fields: SlackAttachmentField[] = [];
+        const accountAttachment: SlackAttachment = {fields};
         if (member && !member.referredByEmail) {
             member.referredByEmail = referredByEmail;
             await AdminCactusMemberService.getSharedInstance().save(member);
@@ -246,16 +272,22 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
                     mergeFields: {REF_EMAIL: referredByEmail}
                 })
             }
-            message += `. Set their referredByEmail on their CactusMember to ${referredByEmail}.`;
-        } else {
-            message += `. Set referredByEmail on their User to ${referredByEmail}`
+            fields.push({
+                title: "Referred By",
+                value: referredByEmail
+            })
         }
+        fields.push({
+            title: "Referred By",
+            value: referredByEmail
+        });
+        attachments.push(accountAttachment);
     } else {
         console.log("No referral or this was not a new user");
     }
 
     await AdminSlackService.getSharedInstance().sendActivityMessage(message);
-
+    resp.sendStatus(204);
 });
 
 

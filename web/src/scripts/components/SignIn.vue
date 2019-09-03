@@ -6,17 +6,18 @@
                 <p v-if="message">{{message}}</p>
             </div>
             <div class="actions-container">
-                <magic-link :initialEmail="email"/>
-                <div id="third-party-loading" v-show="isPendingRedirect">
-                    <modal :show="isPendingRedirect" :containerPositionRelative="false" @close="isPendingRedirect = false">
+                <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
+                <div id="third-party-loading" v-show="showSigningInModal">
+                    <modal :show="showSigningInModal" :containerPositionRelative="false" @close="showSigningInModal = false">
                         <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body"/>
                     </modal>
                 </div>
-                <div class="divider">
+                <div class="divider" v-if="!isPendingRedirect">
                     <p class="message-container">Or choose from one of the following</p>
                 </div>
             </div>
             <div id="third-party-logins">
+                <spinner v-if="firebaseUiLoading" :delay="1000"/>
                 <div class="buttonContainer" id="signup-app"></div>
             </div>
         </div>
@@ -59,17 +60,26 @@
             Modal,
         },
         mounted() {
+            this.firebaseUiLoading = true;
             const ui = getAuthUI();
             const config = getAuthUIConfig({
                 signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
                 emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
                 signInSuccess: (authResult, redirectUrl) => {
+                    this.showSigningInModal = true;
                     console.log("Redirect URL is", redirectUrl);
                     console.log("Need to handle auth redirect");
                     this.pendingRedirectUrl = redirectUrl;
                     this.authResult = authResult;
                     this.doRedirect = true;
                     return false;
+                },
+                signInFailure: async (error: firebaseui.auth.AuthUIError) => {
+                    alert("Sign In Failure");
+                    console.error("Sign in failure", error);
+                },
+                uiShown: () => {
+                    this.firebaseUiLoading = false;
                 }
             });
 
@@ -115,6 +125,8 @@
             pendingRedirectUrl: string | undefined,
             doRedirect: boolean,
             authResult: firebase.auth.UserCredential | undefined,
+            firebaseUiLoading: boolean,
+            showSigningInModal: boolean,
         } {
             return {
                 commonCopy: copy.common,
@@ -128,6 +140,8 @@
                 pendingRedirectUrl: undefined,
                 doRedirect: false,
                 authResult: undefined,
+                firebaseUiLoading: false,
+                showSigningInModal: false,
             }
         },
         computed: {
@@ -141,19 +155,15 @@
                 if (!doRedirect) {
                     return;
                 }
-
-
-                //TODO: This needs to be moved to the signin component
                 if (this.authResult && this.authResult.user) {
                     try {
                         await sendLoginEvent(this.authResult)
                     } catch (e) {
                         console.error("failed to log login event", e);
+                    } finally {
+                        window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
                     }
-
                 }
-
-
             }
         }
     })
@@ -189,7 +199,7 @@
 
         @include r(600) {
             margin: 0 auto 0;
-            max-width: 30rem;
+            max-width: 40rem;
         }
     }
 

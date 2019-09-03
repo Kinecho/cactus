@@ -7,6 +7,10 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import PendingUser from "@shared/models/PendingUser";
+import CactusMember from "@shared/models/CactusMember";
+import User from "@shared/models/User";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 
 
 export interface CampaignSentPromptProcessingResult {
@@ -198,5 +202,66 @@ export default class AdminSentPromptService {
         });
 
         return await Promise.all(tasks);
+    }
+
+
+    async initializeSentPromptsFromPendingUser(options: { pendingUser?: PendingUser, member: CactusMember, user: User }): Promise<void> {
+        const {member, user, pendingUser} = options;
+
+        if (!pendingUser) {
+            return;
+        }
+
+        console.log(`setting up pending user for email ${member.email}`);
+        let tasks: Promise<any>[] = [];
+        if (pendingUser.reflectionResponseIds) {
+            pendingUser.reflectionResponseIds.forEach(id => {
+                tasks.push(new Promise(async resolve => {
+                    const reflectionResponse = await AdminReflectionResponseService.getSharedInstance().getById(id);
+                    if (reflectionResponse) {
+                        console.log(`Updating anonymous reflection response to have member info ${id} - ${member.email}`);
+                        reflectionResponse.anonymous = false;
+                        reflectionResponse.cactusMemberId = member.id;
+                        reflectionResponse.memberEmail = member.email;
+                        reflectionResponse.mailchimpMemberId = member.mailchimpListMember && member.mailchimpListMember.id;
+                        reflectionResponse.mailchimpUniqueEmailId = member.mailchimpListMember && member.mailchimpListMember.unique_email_id;
+                        reflectionResponse.userId = user.id;
+                        await AdminReflectionResponseService.getSharedInstance().save(reflectionResponse);
+
+
+                        console.log(`Setting up the sent prompt for the ${member.email}`);
+                        if (member.id && reflectionResponse.promptId) {
+                            let sentPrompt: SentPrompt | undefined;
+                            sentPrompt = await this.getSentPromptForCactusMemberId({
+                                cactusMemberId: member.id,
+                                promptId: reflectionResponse.promptId
+                            });
+
+                            if (!sentPrompt) {
+                                sentPrompt = new SentPrompt();
+                                sentPrompt.promptId = reflectionResponse.promptId;
+                                sentPrompt.cactusMemberId = member.id;
+                                sentPrompt.memberEmail = member.email;
+                                sentPrompt.firstSentAt = reflectionResponse.createdAt || new Date();
+                                sentPrompt.lastSentAt = reflectionResponse.createdAt || new Date();
+                                sentPrompt.userId = user.id;
+                                await AdminSentPromptService.getSharedInstance().save(sentPrompt)
+                                console.log("Saved sent prompt successfully");
+                            } else {
+                                console.log("A sent prompt already existed for this member")
+                            }
+                        }
+                    }
+                    resolve();
+                    return;
+                }));
+
+            })
+        }
+
+        await Promise.all(tasks);
+
+
+        return;
     }
 }

@@ -18,7 +18,6 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
-
 let authUi: AuthUI;
 
 export interface LogoutOptions {
@@ -98,7 +97,8 @@ export interface AuthUIConfigOptions {
     signInSuccessPath: string,
     emailLinkSignInPath?: string,
     signInSuccess?: ((authResult: FirebaseUserCredential, redirectUrl: string) => boolean),
-    signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>)
+    signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>),
+    uiShown?: () => void;
 }
 
 
@@ -130,8 +130,13 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
                     console.error("No signin failure callback provided")
                 }
                 return
+            },
+
+            uiShown(): void {
+                opts.uiShown && opts.uiShown();
             }
         },
+
         signInSuccessUrl: opts.signInSuccessPath,
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
@@ -143,8 +148,8 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
             // emailProvider(opts)
 
         ],
-        // tosUrl: 'https://www.kinecho.com/terms-of-service',
-        // privacyPolicyUrl: 'https://kinecho.com/policies/privacy'
+        tosUrl: `${Config.domain}/terms-of-service`,
+        privacyPolicyUrl: `${Config.domain}/privacy-policy`
     }
 }
 
@@ -315,8 +320,8 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 }
 
 export async function sendLoginEvent(args: {
-    user: FirebaseUser|null,
-    additionalUserInfo?: AdditionalUserInfo|null,
+    user: FirebaseUser | null,
+    additionalUserInfo?: AdditionalUserInfo | null,
 }): Promise<void> {
     let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
     if (!referredByEmail) {
