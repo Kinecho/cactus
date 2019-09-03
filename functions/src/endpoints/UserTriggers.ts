@@ -3,7 +3,7 @@ import AdminUserService from "@admin/services/AdminUserService";
 import User from "@shared/models/User";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {destructureDisplayName} from "@shared/util/StringUtil";
+import {destructureDisplayName, getProviderDisplayName} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
@@ -212,20 +212,6 @@ function createSlackMessage(args: { member?: CactusMember, user: admin.auth.User
     return slackMessage;
 }
 
-function getProviderDisplayName(provider: string): string {
-    switch (provider) {
-        case "password":
-            return "Email";
-        case "twitter.com":
-            return "Twitter";
-        case "facebook.com":
-            return "Facebook";
-        case "google.com":
-            return "Google";
-        default:
-            return provider;
-    }
-}
 
 //
 // async function initializeSentPromptsFromPendingUser(options: { pendingUser?: PendingUser, member: CactusMember, user: User }): Promise<void> {

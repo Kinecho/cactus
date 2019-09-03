@@ -48,6 +48,18 @@
                         <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
                     </div>
+                    <div class="item">
+                        <label class="label">Connected Profiles</label>
+                        <ul v-if="showProviders" class="providers">
+                            <li v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)">
+                                <provider-icon :providerId="provider.providerId" class="icon"/>
+                                <div class="space-between">
+                                    <span class="provider-name">{{provider.displayName}}</span>
+                                    <span class="remove">remove</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </transition>
             <div>
@@ -73,6 +85,15 @@
     import {ZoneInfo} from '@web/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
     import {PageRoute} from '@web/PageRoutes'
+    import {FirebaseUser} from '@web/firebase'
+    import {getProviderDisplayName} from "@shared/util/StringUtil"
+    import ProviderIcon from "@components/ProviderIcon.vue";
+
+    export interface Provider {
+        iconName: string,
+        displayName: string,
+        providerId: string
+    }
 
     export default Vue.extend({
         components: {
@@ -81,11 +102,13 @@
             Spinner,
             CheckBox,
             TimezonePicker,
+            ProviderIcon,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({member, user}) => {
                     this.member = member;
+                    this.user = user;
                     this.authLoaded = true;
 
                     if (!member) {
@@ -102,8 +125,10 @@
         data(): {
             authLoaded: boolean,
             member: CactusMember | undefined | null,
+            user: FirebaseUser | undefined | null,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             error: string | undefined,
+            removedProviderIds: string[],
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -112,8 +137,10 @@
             return {
                 authLoaded: false,
                 member: undefined,
+                user: undefined,
                 memberUnsubscriber: undefined,
                 error: undefined,
+                removedProviderIds: [],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -130,8 +157,51 @@
             displayName(): string {
                 return this.member ? `${this.member.firstName || ""} ${this.member.lastName || ""}`.trim() : '';
             },
+
+            providers(): Provider[] {
+                let providerData = this.user && this.user.providerData;
+
+                if (!providerData || providerData.length === 0) {
+                    return [];
+                }
+
+
+                let info = providerData.filter(provider => provider &&
+                    provider.providerId !== "password" &&
+                    !this.removedProviderIds.includes(provider.providerId)).map(provider => {
+                    if (provider == null) {
+                        return null;
+                    }
+                    return {
+                        providerId: provider.providerId,
+                        displayName: getProviderDisplayName(provider.providerId),
+                    }
+                });
+
+                return info as Provider[];
+            },
+            showProviders(): boolean {
+                const user = this.user;
+                if (!user) {
+                    return false;
+                }
+
+                return user.providerData.length > 0;
+            }
         },
         methods: {
+            async removeProvider(providerId: string): Promise<void> {
+                if (!this.user) {
+                    return;
+                }
+                const c = confirm(`Are you sure you want to remove ${getProviderDisplayName(providerId)}?`);
+                if (c) {
+                    await this.user.unlink(providerId);
+                    this.removedProviderIds.push(providerId);
+                    this.user.reload();
+                }
+                return;
+            },
             async save() {
                 if (this.member) {
                     await CactusMemberService.sharedInstance.save(this.member);
@@ -176,7 +246,7 @@
     .accountContainer {
         display: flex;
         flex-flow: column nowrap;
-        height: 100vh;
+        min-height: 100vh;
         justify-content: space-between;
 
         header, .centered {
@@ -207,6 +277,51 @@
         display: block;
         font-size: 1.4rem;
         margin-bottom: .8rem;
+    }
+
+    .providers {
+        padding: 0;
+        margin: 0 -1rem;
+
+        li {
+            list-style: none;
+            padding: 1rem 1rem;
+        }
+
+        .provider-info {
+            display: flex;
+            /*justify-content: space-between;*/
+            /*align-items: center;*/
+
+
+            &:hover {
+                background-color: $lightBlue;
+                cursor: pointer;
+            }
+
+            .icon {
+                margin-right: 1rem;
+            }
+
+            .space-between{
+                display: flex;
+                flex-grow: 1;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .remove {
+                /*align-self: flex-end;*/
+                font-size: 1.2rem;
+                letter-spacing: 1px;
+                text-transform: uppercase;
+                color: $darkestPink;
+                /*height: 100%;*/
+                @include r(768) {
+                    font-size: 1.4rem;
+                }
+            }
+        }
     }
 
 </style>

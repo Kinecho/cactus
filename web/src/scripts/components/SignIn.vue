@@ -2,7 +2,7 @@
     <div>
         <div class="centered">
             <div>
-                <h1 v-if="showTitle">{{_title}}</h1>
+                <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
                 <p v-if="message">{{message}}</p>
             </div>
             <div class="actions-container">
@@ -90,6 +90,12 @@
             ui.start('#signup-app', config);
         },
         created() {
+            const ui = getAuthUI();
+            if (ui.isPendingRedirect()) {
+                this.isPendingRedirect = true;
+                console.log("Is pending redirect.... need to log the user in");
+            }
+
             this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
             this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
 

@@ -187,3 +187,18 @@ export function isBlank(input: string | null | undefined): boolean {
     return false;
 
 }
+
+export function getProviderDisplayName(provider: string): string {
+    switch (provider) {
+        case "password":
+            return "Email";
+        case "twitter.com":
+            return "Twitter";
+        case "facebook.com":
+            return "Facebook";
+        case "google.com":
+            return "Google";
+        default:
+            return provider;
+    }
+}
