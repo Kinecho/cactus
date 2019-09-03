@@ -1,6 +1,6 @@
 <template>
     <div class="accountContainer">
-        <NavBar/>
+        <NavBar :isSticky="false"/>
         <div class="centered content">
             <h1>Account</h1>
             <div class="loading" v-if="loading">
@@ -290,9 +290,6 @@
 
         .provider-info {
             display: flex;
-            /*justify-content: space-between;*/
-            /*align-items: center;*/
-
 
             &:hover {
                 background-color: $lightBlue;
@@ -311,12 +308,10 @@
             }
 
             .remove {
-                /*align-self: flex-end;*/
                 font-size: 1.2rem;
                 letter-spacing: 1px;
                 text-transform: uppercase;
                 color: $darkestPink;
-                /*height: 100%;*/
                 @include r(768) {
                     font-size: 1.4rem;
                 }

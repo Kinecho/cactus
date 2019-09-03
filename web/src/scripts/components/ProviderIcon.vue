@@ -43,8 +43,8 @@
 <style lang="scss" scoped>
 
     .provider-icon {
-        height: 4rem;
-        width: 4rem;
+        height: 3rem;
+        width: 3rem;
 
         svg {
             height: 100%;
