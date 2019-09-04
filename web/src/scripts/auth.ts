@@ -50,7 +50,7 @@ export interface EmailLinkSignupResult {
     }
 }
 
-export const emailProvider = (opts: any) => ({
+export const emailProvider = (opts: AuthUIConfigOptions) => ({
     provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
     signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
     forceSameDevice: false,
@@ -69,7 +69,7 @@ export const emailProvider = (opts: any) => ({
             // Additional state showPromo=1234 can be retrieved from URL on
             // sign-in completion in signInSuccess callback by checking
             // window.location.href.
-            url: `${Config.domain}${opts.emailLinkSignInPath}`,
+            url: `${opts.emailLinkSignInPath}`,
             continueUrl: `${Config.domain}${PageRoute.SIGNUP}`,
             // Custom FDL domain.
             dynamicLinkDomain: `${Config.firebaseDynamicLink.domain}`,
@@ -99,10 +99,23 @@ export interface AuthUIConfigOptions {
     signInSuccess?: ((authResult: FirebaseUserCredential, redirectUrl: string) => boolean),
     signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>),
     uiShown?: () => void;
+    includeEmailLink?: boolean,
 }
 
 
 export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
+    const signInOptions = [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+        // getPhoneProviderConfig(),
+        // emailProvider(opts)
+
+    ];
+    if (opts.includeEmailLink) {
+        signInOptions.push(emailProvider(opts));
+    }
+
     return {
         callbacks: {
             signInSuccessWithAuthResult: (authResult: FirebaseUserCredential, redirectUri: string): boolean => {
@@ -140,14 +153,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         signInSuccessUrl: opts.signInSuccessPath,
         signInFlow: 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
-        signInOptions: [
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            firebase.auth.TwitterAuthProvider.PROVIDER_ID,
-            // getPhoneProviderConfig(),
-            // emailProvider(opts)
-
-        ],
+        signInOptions,
         tosUrl: `${Config.domain}/terms-of-service`,
         privacyPolicyUrl: `${Config.domain}/privacy-policy`
     }

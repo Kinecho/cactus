@@ -25,6 +25,12 @@ export default class EnglishCopy extends LocalizedCopy {
         ENTER_YOUR_EMAIL_ADDRESS: "Enter your email address",
         WELCOME: "Welcome",
         WELCOME_BACK: "Welcome back",
+        ACCOUNT: "Account",
+        EMAIL: "Email",
+        NOTIFICATIONS: "Notifications",
+        REMOVE: "Remove",
+        TIME_ZONE: "Time Zone",
+        LOADING: "Loading",
     };
     navigation: NavigationCopy = {
         INVITE_FRIENDS: "Invite Friends",
@@ -47,6 +53,7 @@ export default class EnglishCopy extends LocalizedCopy {
         DAY_STREAK: "Day Streak",
         GO_HOME: "Go Home",
         SIGN_UP_MESSAGE: "Sign Up to Save Your Progress",
+
     };
     error: ErrorCopy = {
         PLEASE_ENTER_A_VALID_EMAIL_ADDRESS: "Please enter a valid email address",
@@ -56,6 +63,9 @@ export default class EnglishCopy extends LocalizedCopy {
     };
 
     auth: AuthenticationCopy = {
+        CONNECTED_ACCOUNTS: "Connected Accounts",
+        DISPLAY_NAME: "Display Name",
+        MEMBER_SINCE: "Member Since",
         magicLinkSuccess(email: string): string {
             return `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`
         }

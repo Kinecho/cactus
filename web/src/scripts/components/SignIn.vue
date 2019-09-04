@@ -62,9 +62,17 @@
         mounted() {
             this.firebaseUiLoading = true;
             const ui = getAuthUI();
+            let emailLinkSignInPath = redirectUrlParam || PageRoute.JOURNAL_HOME;
+            let includeEmailLink = false;
+            if (ui.isPendingRedirect()) {
+                includeEmailLink = true;
+                emailLinkSignInPath = PageRoute.LOGIN;
+            }
+
             const config = getAuthUIConfig({
+                includeEmailLink,
                 signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
-                emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
+                emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
                     this.showSigningInModal = true;
                     console.log("Redirect URL is", redirectUrl);
@@ -177,6 +185,57 @@
 
 </script>
 
+<style lang="scss">
+    @import "mixins";
+    @import "variables";
+
+
+    #signup-app {
+        margin: 0 -24px 0;
+
+        @include r(600) {
+            margin: 0 auto 0;
+            /*max-width: 40rem;*/
+        }
+
+        .firebaseui-container {
+            box-shadow: none;
+            width: 80rem;
+            max-width: 40rem;
+
+            .mdl-progress.firebaseui-busy-indicator {
+                top: 25px;
+            }
+
+            form {
+                .firebaseui-card-actions {
+                    .firebaseui-form-actions {
+
+                        .mdl-button, .firebaseui-button, .firebaseui-button.firebaseui-id-submit.mdl-button.mdl-button--colored.mdl-button--raised.mdl-js-button {
+                            height: unset;
+                            @include button;
+                            text-transform: none;
+                        }
+
+                        /*button.firebaseui-id-submit, button.mdl-button, .mdl-button--raised.mdl-button--colored {*/
+                        /*    */
+                        /*}*/
+                    }
+                }
+            }
+
+            .firebaseui-card-header {
+                .firebaseui-title {
+                    display: none;
+                }
+            }
+
+
+        }
+
+    }
+</style>
+
 <style lang="scss" scoped>
     @import "common";
     @import "mixins";
@@ -197,15 +256,6 @@
         @include r(600) {
             flex-direction: row;
             padding: 2.4rem;
-        }
-    }
-
-    .buttonContainer {
-        margin: 0 -24px 0;
-
-        @include r(600) {
-            margin: 0 auto 0;
-            max-width: 40rem;
         }
     }
 

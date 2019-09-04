@@ -27,12 +27,21 @@ export interface CommonCopy {
     ENTER_YOUR_EMAIL_ADDRESS: string,
     WELCOME: string,
     WELCOME_BACK: string,
+    ACCOUNT: string,
+    EMAIL: string,
+    TIME_ZONE: string,
+    NOTIFICATIONS: string,
+    REMOVE: string,
+    LOADING: string,
 }
 
 
 export interface AuthenticationCopy {
-
+    MEMBER_SINCE: string,
+    DISPLAY_NAME: string,
+    CONNECTED_ACCOUNTS: string,
     magicLinkSuccess(email: string): string;
+
 }
 
 export interface NavigationCopy {
