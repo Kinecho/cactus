@@ -1,7 +1,7 @@
 import axios, {AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
-import {FirebaseUser} from "@web/firebase"
+
 let _request: AxiosInstance;
 
 export enum Endpoint {
