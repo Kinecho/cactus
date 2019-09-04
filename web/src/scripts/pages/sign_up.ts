@@ -2,7 +2,7 @@ import "@styles/pages/sign_up.scss"
 import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
-import {getQueryParam, setupNavigation} from "@web/util";
+import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
 import Vue from "vue";
@@ -11,6 +11,7 @@ import NavBar from "@components/NavBar.vue";
 import Footer from "@components/StardardFooter.vue";
 import CopyService from "@shared/copy/CopyService";
 import {getAuth} from "@web/firebase";
+import {setupNavigation} from "@web/NavigationUtil";
 const copy = CopyService.getSharedInstance().copy;
 
 new Vue({

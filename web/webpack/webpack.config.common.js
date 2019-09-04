@@ -15,6 +15,17 @@ function getCommitHash() {
     return git.revparse(['HEAD'])
 }
 
+
+function recursiveIssuer(m) {
+    if (m.issuer) {
+        return recursiveIssuer(m.issuer)
+    } else if (m.name) {
+        return m.name
+    } else {
+        return false
+    }
+}
+
 module.exports = (config) => {
     return getCommitHash().then((gitcommit) => {
         return new Promise(resolve => {
@@ -42,7 +53,7 @@ module.exports = (config) => {
                 }
                 return entries
             }, {
-                common: `${helpers.scriptDir}/common.ts`,
+                // commonScripts: `${helpers.scriptDir}/common.ts`,
                 article: `${helpers.scriptDir}/articleCommon.ts`,
             })
 
@@ -52,6 +63,24 @@ module.exports = (config) => {
 
             // console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
+
+
+            const plugins = [new MiniCssExtractPlugin({
+                filename: isDev ? '[name].css' : '[id].[hash].css',
+                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+
+            })]
+
+
+            const cssCacheGroups = {};
+            Object.keys(pages).filter(filename => filename !== 'commonScripts' && filename !== 'article').map(filename => {
+                cssCacheGroups[`${filename}Styles`] = {
+                    name: filename,
+                    test: (m, c, entry = filename) => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                    chunks: 'all',
+                    enforce: true,
+                }
+            })
 
             return resolve({
                 entry: jsEntries,
@@ -92,6 +121,27 @@ module.exports = (config) => {
                     },
                     extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html', '.vue'],
                 },
+                optimization: {
+                    splitChunks: {
+                        cacheGroups: cssCacheGroups,
+                        // cacheGroups: {
+                        // fooStyles: {
+                        //     name: 'foo',
+                        //     test: (m, c, entry = 'foo') =>
+                        //         m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                        //     chunks: 'all',
+                        //     enforce: true,
+                        // },
+                        // barStyles: {
+                        //     name: 'bar',
+                        //     test: (m, c, entry = 'bar') =>
+                        //         m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                        //     chunks: 'all',
+                        //     enforce: true,
+                        // },
+                        // },
+                    },
+                },
                 module: {
                     rules: [
                         {
@@ -108,8 +158,13 @@ module.exports = (config) => {
                         {
                             test: /\.(css|scss)$/,
                             use: [
-                                'style-loader',
-                                MiniCssExtractPlugin.loader,
+                                // 'style-loader',
+                                {
+                                    loader: MiniCssExtractPlugin.loader,
+                                    options: {
+                                        hmr: isDev,
+                                    },
+                                },
                                 {
                                     loader: 'css-loader',
                                     options: {sourceMap: true, url: false},
@@ -124,7 +179,7 @@ module.exports = (config) => {
                                         sourceMapContents: false,
                                     },
                                 },
-                            ],
+                            ].filter(Boolean),
                         },
                         {
                             test: /\.(png|jpg|gif|svg)$/,
@@ -137,20 +192,23 @@ module.exports = (config) => {
                         },
                     ],
                 },
-                plugins: [
-                    new MiniCssExtractPlugin({
-                        filename: isDev ? '[name].css' : '[id].[hash].css',
-                        chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
-                    }),
-                    ...Object.keys(pages).map(filename => {
+                plugins: [...plugins,
+                    // new MiniCssExtractPlugin({
+                    //     filename: isDev ? '[name].css' : '[id].[hash].css',
+                    //     chunkFilename: isDev ? '[name].css' : '[id].[hash].css',
+                    //
+                    // }),
+                    ...Object.keys(pages).filter(filename => filename !== 'commonScripts' && filename !== 'article').map(filename => {
                         const page = pages[filename]
-                        console.log(chalk.green('Configuring HTML page ', filename))
-                        const chunks = ['common']
+
+                        const chunks = []
                         if (page.reflectionPrompt) {
                             chunks.push('article')
                         } else {
                             chunks.push(filename)
                         }
+
+                        console.log(chalk.green('Configuring HTML page ', filename, 'chunks: ', chunks.join(', ')))
                         return new HtmlWebpackPlugin({
                             chunks,
                             title: page.title,

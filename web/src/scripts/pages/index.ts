@@ -1,8 +1,8 @@
 import "@styles/pages/index.scss"
 import {configureLoginForm, setupJumpToForm} from '@web/mailchimp'
 import {initializeFirebase} from "@web/firebase";
-import {setupNavigation} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
+import {setupNavigation} from "@web/NavigationUtil";
 
 const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {

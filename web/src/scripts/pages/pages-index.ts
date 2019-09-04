@@ -1,5 +1,5 @@
 import "@styles/pages-index.scss"
-import {setupNavigation} from "@web/util";
+import {setupNavigation} from "@web/NavigationUtil";
 
 setupNavigation({showSignupButton: false});
 

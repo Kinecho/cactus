@@ -7,11 +7,7 @@
             </div>
             <div class="actions-container">
                 <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
-                <div id="third-party-loading" v-show="showSigningInModal">
-                    <modal :show="showSigningInModal" :containerPositionRelative="false" @close="showSigningInModal = false">
-                        <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body"/>
-                    </modal>
-                </div>
+                <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
                 <div class="divider" v-if="!isPendingRedirect">
                     <p class="message-container">Or choose from one of the following</p>
                 </div>
@@ -41,7 +37,6 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
-    import Modal from "@components/Modal.vue"
 
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     console.log("Redirect url param is ", redirectUrlParam);
@@ -57,7 +52,6 @@
         components: {
             MagicLink,
             Spinner,
-            Modal,
         },
         mounted() {
             this.firebaseUiLoading = true;
@@ -74,7 +68,7 @@
                 signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
                 emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
-                    this.showSigningInModal = true;
+                    this.isSigningIn = true;
                     console.log("Redirect URL is", redirectUrl);
                     console.log("Need to handle auth redirect");
                     this.pendingRedirectUrl = redirectUrl;
@@ -140,7 +134,7 @@
             doRedirect: boolean,
             authResult: firebase.auth.UserCredential | undefined,
             firebaseUiLoading: boolean,
-            showSigningInModal: boolean,
+            isSigningIn: boolean,
         } {
             return {
                 commonCopy: copy.common,
@@ -155,7 +149,7 @@
                 doRedirect: false,
                 authResult: undefined,
                 firebaseUiLoading: false,
-                showSigningInModal: false,
+                isSigningIn: false,
             }
         },
         computed: {

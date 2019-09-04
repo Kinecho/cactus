@@ -1,12 +1,14 @@
 import "@styles/pages/subscription_confirmed.scss"
-import {EmailLinkSignupResult, handleEmailLinkSignIn} from "@web/auth";
+import {EmailLinkSignupResult, handleEmailLinkSignIn, sendLoginEvent} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
 import {getQueryParam, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@web/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
+import {commonInit} from "@web/common";
 
 initializeFirebase();
+commonInit();
 
 let hasLoaded = false;
 getAuth().onAuthStateChanged(async user => {
@@ -15,11 +17,11 @@ getAuth().onAuthStateChanged(async user => {
         console.log("not logged in and this is the first time. handling email link...");
         hasLoaded = true;
         const response = await handleEmailLinkSignIn();
-        handleResponse(response);
+        await handleResponse(response);
     } else if (!hasLoaded && user) {
         console.log("user is signed in, and the page has not yet loaded auth");
         hasLoaded = true;
-        handleExistingUserLoginSuccess(user);
+        await handleExistingUserLoginSuccess(user);
     } else {
         console.log("auth changed, probably has loaded before. Has loaded =", hasLoaded);
     }
@@ -27,19 +29,20 @@ getAuth().onAuthStateChanged(async user => {
 
 });
 
-function handleExistingUserLoginSuccess(user: FirebaseUser) {
+async function handleExistingUserLoginSuccess(user: FirebaseUser) {
     console.log("redirecting...");
-    setTimeout(() => {
-        const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
-        window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
-    }, 500);
+
+    await sendLoginEvent({user});
+
+    const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+    window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
 }
 
 function showShareButtons() {
     triggerWindowResize();
 }
 
-function handleResponse(response: EmailLinkSignupResult) {
+async function handleResponse(response: EmailLinkSignupResult) {
     if (response.credential) {
 
         try {
@@ -51,6 +54,7 @@ function handleResponse(response: EmailLinkSignupResult) {
         } catch (e) {
             console.error("unable to persist new user status to localstorage");
         } finally {
+            await sendLoginEvent(response.credential);
             const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
             window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
         }
