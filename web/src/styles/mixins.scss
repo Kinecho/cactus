@@ -61,8 +61,8 @@ $widthDesktop: $widthXL;
   }
 }
 
-@mixin isTinyPhone(){
-  @include maxW($widthTinyPhone){
+@mixin isTinyPhone() {
+  @include maxW($widthTinyPhone) {
     @content;
   }
 }
@@ -113,7 +113,6 @@ $widthDesktop: $widthXL;
 }
 
 
-
 @mixin smallerThanLargePhone() {
   @include maxW($widthLargePhone) {
     @content;
@@ -127,13 +126,11 @@ $widthDesktop: $widthXL;
 }
 
 
-
 @mixin smallerThanTablet() {
   @include maxW($widthTablet) {
     @content;
   }
 }
-
 
 
 @mixin isDesktop() {
@@ -143,11 +140,11 @@ $widthDesktop: $widthXL;
 }
 
 @mixin r( $point ) {
-    @if $point==374 {
-      @media (min-width: 374px) {
-        @content;
-      }
+  @if $point==374 {
+    @media (min-width: 374px) {
+      @content;
     }
+  }
   @if $point==600 {
     @media (min-width: 600px) {
       @content;
@@ -238,27 +235,64 @@ $widthDesktop: $widthXL;
     transform: scale(2);
   }
 }
+
 @keyframes growingLeaves {
-    100% {
-        transform: scale(1) translate(0,0);
-    }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
 }
+
 @keyframes growingLeaves2 {
-    0% {
-        opacity: 0;
-    }
-    5% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translate(0,0);
-    }
+  0% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
 }
 
+@mixin secondaryButton() {
+  background-color: $white;
+  border: 1px solid $lightGreen;
+  box-shadow: none;
+  color: $darkGreen;
+  padding: 1.2rem 2.4rem;
 
+  &:hover {
+    background-color: $lightGreen;
+  }
+}
 
-@mixin button{
+@mixin tertiaryButton() {
+  background-color: transparent;
+  box-shadow: none;
+  color: $darkGreen;
+
+  &:hover {
+    background-color: $lightGreen;
+  }
+}
+
+@mixin smallButton() {
+  box-shadow: none;
+  font: 1.6rem $font-stack;
+  padding: 1rem 1.6rem;
+}
+
+@mixin iconButton() {
+  align-items: center;
+  display: flex;
+  flex-grow: 0;
+  justify-content: center;
+  margin: 0;
+  padding: 1.2rem;
+}
+
+@mixin button {
   background-color: $green;
   border: 0;
   border-radius: 3rem;
@@ -270,6 +304,8 @@ $widthDesktop: $widthXL;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
+
+  text-decoration: none;
 
   @include r(768) {
     max-width: 28rem;
@@ -307,39 +343,18 @@ $widthDesktop: $widthXL;
   }
 
   &.icon {
-    align-items: center;
-    display: flex;
-    flex-grow: 0;
-    justify-content: center;
-    margin: 0;
-    padding: 1.2rem;
+    @include iconButton;
   }
 
   &.small {
-    box-shadow: none;
-    font: 1.6rem $font-stack;
-    padding: 1rem 1.6rem;
+    @include smallButton;
   }
 
   &.secondary {
-    background-color: $white;
-    border: 1px solid $lightGreen;
-    box-shadow: none;
-    color: $darkGreen;
-    padding: 1.2rem 2.4rem;
-
-    &:hover {
-      background-color: $lightGreen;
-    }
+    @include secondaryButton;
   }
 
   &.tertiary {
-    background-color: transparent;
-    box-shadow: none;
-    color: $darkGreen;
-
-    &:hover {
-      background-color: $lightGreen;
-    }
+    @include tertiaryButton;
   }
 }

@@ -5,6 +5,9 @@ import {TweenMax, Power1} from "gsap";
 import 'animation.gsap';
 // @ts-ignore
 import {ScrollToPlugin} from 'gsap/all';
+import {commonInit} from "@web/common";
+
+commonInit();
 
 const controller = new ScrollMagic.Controller();
 

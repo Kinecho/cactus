@@ -13,7 +13,7 @@ import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} f
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import {appendDomain, getFullName} from "@shared/util/StringUtil";
+import {appendDomain, getFullName, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminUserService from "@admin/services/AdminUserService";
@@ -22,6 +22,7 @@ import {getAuthUser} from "@api/util/RequestUtil";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import {getISODateTime} from "@shared/util/DateUtil";
 
 const Config = getConfig();
 
@@ -207,87 +208,142 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 });
 
 app.post("/login-event", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: LoginEvent = req.body;
-    const {userId, isNewUser, providerId, referredByEmail} = payload;
-    console.log("Handling login event");
+    try {
+        console.log("Handling login event");
+        const requestUser = await getAuthUser(req);
+        if (!requestUser) {
+            console.log("No auth user was found on the request");
+            resp.sendStatus(401);
+            return
+        }
+
+        const payload: LoginEvent = req.body;
+
+        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = []} = payload;
+
+        if (!userId) {
+            console.warn("No user Id was provided in the body fo the request");
+            resp.status(400).send({message: "You muse provide as user ID in the body of the request"});
+            return;
+        }
 
 
-    if (!userId) {
-        console.error("No user ID was provided");
-        return;
-    }
+        if (requestUser.uid !== userId) {
+            console.warn(`The auth user on the request did not match the payload. Request User ID = ${requestUser.uid} | payloadUserId = ${userId}`);
+            resp.sendStatus(403);
+            return
+        }
 
-    const attachments: SlackAttachment[] = [];
-    let message: ChatMessage = {text: "", attachments};
+        const fields: SlackAttachmentField[] = [];
+
+        const attachments: SlackAttachment[] = [];
+        let message: ChatMessage = {text: "A user has logged in.", attachments};
 
 
-    const user = await AdminUserService.getSharedInstance().getById(userId);
-    if (user && providerId) {
+        const [user, member] = await Promise.all([
+            AdminUserService.getSharedInstance().getById(userId),
+            AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId)
+        ]);
+
+
+        if (!user) {
+            resp.status(400).send({message: `Unable to find a user for userId ${userId}`});
+            return;
+        }
+
+        const previousLoginDate = user.lastLoginAt;
         user.lastLoginAt = new Date();
-        if (!user.providerIds.includes(providerId)) {
+        await AdminUserService.getSharedInstance().save(user);
+        if (previousLoginDate) {
+            fields.push({title: "Last Logged In", value: getISODateTime(previousLoginDate)});
+        }
+
+        if (providerId && !user.providerIds.includes(providerId)) {
             user.providerIds.push(providerId);
         }
         message.text = `${user.email} logged in with ${providerId} ${AdminSlackService.getProviderEmoji(providerId)}`;
-    }
 
+        if (user.email) {
+            console.log("checking for pending user so we can grab the reflectionResponseIds from it");
 
-    if (isNewUser && user && user.email) {
-        console.log("completing signup");
-        const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({
-            userId,
-            email: user.email
-        });
-        let member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(user.id);
-        if (pendingUser && member) {
-            await AdminSentPromptService.getSharedInstance().initializeSentPromptsFromPendingUser({
-                pendingUser,
-                user: user,
-                member,
+            const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({
+                userId,
+                email: user.email
             });
 
-            attachments.push({
-                title: `Completed signup for Pending User. Added ${pendingUser.reflectionResponseIds.length} reflection responses to their account.`,
-            })
+            if (pendingUser) {
+                if (pendingUser.reflectionResponseIds.length > 0) {
+                    reflectionResponseIds.push(...pendingUser.reflectionResponseIds);
+                    fields.push({title: "Pending User's Reflections", value: `${reflectionResponseIds.length}`});
+                }
+            }
         }
 
-    }
 
-    if (isNewUser && referredByEmail) {
-        console.log("Is new user login, and has a referral. Set it up! ");
+        if (isNewUser && member) {
+            message.text = `${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
+            message.color = "good";
+            await AdminUserService.getSharedInstance().setReferredByEmail({
+                userId,
+                referredByEmail: referredByEmail || undefined
+            });
 
-        await AdminUserService.getSharedInstance().setReferredByEmail({userId, referredByEmail});
-        console.log("Set referral email on the user");
-        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-        console.log("Found member", member, "during login-event");
-        const fields: SlackAttachmentField[] = [];
-        const accountAttachment: SlackAttachment = {fields};
-        if (member && !member.referredByEmail) {
-            member.referredByEmail = referredByEmail;
+            const accountAttachment: SlackAttachment = {fields};
+            member.referredByEmail = referredByEmail || undefined;
+            member.signupQueryParams = Object.assign(member.signupQueryParams, payload.signupQueryParams);
             await AdminCactusMemberService.getSharedInstance().save(member);
             console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
-            if (member.email) {
+
+            if (member.email && referredByEmail) {
                 console.log("Updating mailchimp ref email to ", referredByEmail);
                 await MailchimpService.getSharedInstance().updateMergeFields({
                     email: member.email,
                     mergeFields: {REF_EMAIL: referredByEmail}
+                });
+
+                fields.push({
+                    title: "Referred By",
+                    value: referredByEmail
                 })
             }
+
             fields.push({
-                title: "Referred By",
-                value: referredByEmail
+                title: "Source / Medium",
+                value: `${member.getSignupSource() || "--"} / ${member.getSignupMedium() || "--"}`
+            });
+
+
+            attachments.push(accountAttachment);
+        } else if (!member) {
+            fields.push({
+                title: "No Member Found",
+                value: "User Trigger probably didn't finish processing.",
+            })
+        } else {
+            console.log("this was not a new user");
+        }
+
+
+        if (member && reflectionResponseIds.length > 0) {
+            await AdminSentPromptService.getSharedInstance().createSentPromptsFromReflectionResponseIds({
+                reflectionResponseIds,
+                member,
+                userId: userId,
+            });
+
+            fields.push({
+                title: `Pending Reflections Added`,
+                value: `${reflectionResponseIds.length} `
             })
         }
-        fields.push({
-            title: "Referred By",
-            value: referredByEmail
-        });
-        attachments.push(accountAttachment);
-    } else {
-        console.log("No referral or this was not a new user");
+
+        await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+        resp.sendStatus(204);
+    } catch (error) {
+        console.error("An unexpected error occurred while processing the login-event");
+        resp.sendStatus(500)
     }
 
-    await AdminSlackService.getSharedInstance().sendActivityMessage(message);
-    resp.sendStatus(204);
 });
 
 

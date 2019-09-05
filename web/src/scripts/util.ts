@@ -273,6 +273,8 @@ export function pushQueryParam(name: QueryParam, value: string | number) {
     }
 }
 
+
+
 export function triggerWindowResize() {
     const resizeEvent = window.document.createEvent('UIEvents');
     resizeEvent.initUIEvent('resize', true, false, window, 0);

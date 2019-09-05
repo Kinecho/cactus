@@ -1,7 +1,9 @@
 import "@styles/pages/values_home.scss"
 import Vue from "vue";
 import ValuesHome from "@components/ValuesHome.vue";
+import {commonInit} from "@web/common";
 
+commonInit();
 new Vue({
     el: "#app",
     template: `<ValuesHome/>`,

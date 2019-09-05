@@ -201,21 +201,58 @@
                 top: 25px;
             }
 
-            form {
-                .firebaseui-card-actions {
-                    .firebaseui-form-actions {
+            [data-provider-id="password"] {
+                display: none;
+            }
 
-                        .mdl-button, .firebaseui-button, .firebaseui-button.firebaseui-id-submit.mdl-button.mdl-button--colored.mdl-button--raised.mdl-js-button {
-                            height: unset;
+            &.firebaseui-id-page-email-link-sign-in-sent, &.firebaseui-id-page-email-not-received {
+                .firebaseui-id-secondary-link {
+                    display: none;
+                }
+            }
+
+            &.firebaseui-id-page-password-recovery-email-sent {
+                button.firebaseui-id-submit {
+                    display: none;
+                }
+            }
+
+            &.firebaseui-id-page-password-recovery {
+                .firebaseui-id-info-bar, firebaseui-info-bar {
+                    top: -3.2rem;
+                }
+
+                .firebaseui-id-secondary-link {
+                    display: none;
+                }
+            }
+
+            .firebaseui-card-actions {
+                .firebaseui-form-actions {
+
+                    .mdl-button, .firebaseui-button, .firebaseui-button.firebaseui-id-submit.mdl-button.mdl-button--colored.mdl-button--raised.mdl-js-button {
+                        height: unset;
+                        @include button;
+                        text-transform: none;
+
+
+                        &.firebaseui-id-secondary-link {
                             @include button;
-                            text-transform: none;
+                            @include secondaryButton;
                         }
 
-                        /*button.firebaseui-id-submit, button.mdl-button, .mdl-button--raised.mdl-button--colored {*/
-                        /*    */
-                        /*}*/
+                        &:not(:last-child) {
+                            margin-right: 1rem;
+                        }
+
                     }
+
+
+                    /*button.firebaseui-id-submit, button.mdl-button, .mdl-button--raised.mdl-button--colored {*/
+                    /*    */
+                    /*}*/
                 }
+
             }
 
             .firebaseui-card-header {

@@ -9,7 +9,10 @@ import {getAuth} from "@web/firebase";
 import {getQueryParam, removeQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 
-const journalHome = PageRoute.JOURNAL_HOME;
+import {commonInit} from "@web/common";
+
+commonInit();
+
 
 
 const emailParam = getQueryParam(QueryParam.EMAIL);

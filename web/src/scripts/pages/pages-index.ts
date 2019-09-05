@@ -1,6 +1,8 @@
 import "@styles/pages-index.scss"
 import {setupNavigation} from "@web/NavigationUtil";
+import {commonInit} from "@web/common";
 
+commonInit();
 setupNavigation({showSignupButton: false});
 
 //enables hot reload

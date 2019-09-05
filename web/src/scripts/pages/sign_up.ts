@@ -1,5 +1,5 @@
 import "@styles/pages/sign_up.scss"
-import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
+import {getAuthUI, getAuthUIConfig} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
 import {PageRoute} from "@web/PageRoutes";
 import {getQueryParam} from "@web/util";
@@ -10,9 +10,11 @@ import SignIn from "@components/SignIn.vue"
 import NavBar from "@components/NavBar.vue";
 import Footer from "@components/StardardFooter.vue";
 import CopyService from "@shared/copy/CopyService";
-import {getAuth} from "@web/firebase";
-import {setupNavigation} from "@web/NavigationUtil";
+import {commonInit} from "@web/common";
+
 const copy = CopyService.getSharedInstance().copy;
+
+commonInit();
 
 new Vue({
     el: "#signup-app",

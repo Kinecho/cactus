@@ -7,7 +7,6 @@ import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
 import {commonInit} from "@web/common";
 
-initializeFirebase();
 commonInit();
 
 let hasLoaded = false;

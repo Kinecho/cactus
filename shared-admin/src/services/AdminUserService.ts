@@ -109,13 +109,22 @@ export default class AdminUserService {
         return deletedUser;
     }
 
-    async setReferredByEmail(args: { userId: string, referredByEmail: string }) {
+    async setReferredByEmail(args: { userId: string, referredByEmail?: string | undefined }) {
         //todo: Should this set the referred by on a document without knowing if it exists? what if it does exist?
-        const {userId, referredByEmail} = args;
-        await this.getCollectionRef().doc(userId).set({[User.Field.referredByEmail]: referredByEmail}, {
-            merge: true,
-            mergeFields: [User.Field.referredByEmail]
-        });
+        try {
+            if (args.referredByEmail === undefined) {
+                return;
+            }
+
+            const {userId, referredByEmail} = args;
+            await this.getCollectionRef().doc(userId).set({[User.Field.referredByEmail]: referredByEmail}, {
+                merge: true,
+                mergeFields: [User.Field.referredByEmail]
+            });
+        } catch (e) {
+            console.error("Failed to update referred by email");
+        }
+
     }
 
 }

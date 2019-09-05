@@ -1,6 +1,6 @@
 import {Config} from "@web/config";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import {addModal, getQueryParam, showConfirmEmailModal} from "@web/util";
+import {addModal, getAllQueryParams, getQueryParam, showConfirmEmailModal} from "@web/util";
 import {AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase,} from "@web/firebase";
 import * as firebaseui from "firebaseui";
 import {PageRoute} from "@web/PageRoutes";
@@ -15,6 +15,7 @@ import {
 import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
+import CactusMemberService from "@web/services/CactusMemberService";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
@@ -292,6 +293,11 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
+export function getAnonymousReflectionResponseIds(): string[] {
+    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
+    return anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [];
+}
+
 export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -304,14 +310,11 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 
     console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
-    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
-
-
     const statusResponse = await sendMagicLink({
         email: email,
         referredBy: subscription.referredByEmail,
         continuePath: emailLinkRedirectUrl,
-        reflectionResponseIds: anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [],
+        reflectionResponseIds: getAnonymousReflectionResponseIds(),
         queryParams: landingParams,
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
@@ -321,29 +324,57 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
         existingEmail: statusResponse.exists,
         error: statusResponse.error
     }
-
-
 }
 
 export async function sendLoginEvent(args: {
     user: FirebaseUser | null,
     additionalUserInfo?: AdditionalUserInfo | null,
 }): Promise<void> {
-    let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-    if (!referredByEmail) {
-        try {
-            referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
-        } catch (e) {
-            console.error("error trying to get referredByEmail from local storage", e)
-        }
-    }
+    return new Promise(async resolve => {
+        let unsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+            onData: async ({member}) => {
+                if (member) {
+                    try {
+                        console.log("Got cactus member, can send login event", member);
+                        unsubscriber();
+                        let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
+                        if (!referredByEmail) {
+                            try {
+                                referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
+                            } catch (e) {
+                                console.error("error trying to get referredByEmail from local storage", e)
+                            }
+                        }
+                        const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
+
+                        const event: LoginEvent = {
+                            providerId: (args.additionalUserInfo && args.additionalUserInfo.providerId) || undefined,
+                            userId: args.user && args.user.uid,
+                            isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
+                            referredByEmail: referredByEmail,
+                            signupQueryParams: {...getAllQueryParams(), ...landingParams},
+                            reflectionResponseIds: getAnonymousReflectionResponseIds(),
+                        };
+                        console.log("login-event payload", JSON.stringify(event, null, 2));
+                        const headers = await getAuthHeaders();
+                        await request.post(Endpoint.loginEvent, event, {headers});
+                    } catch (error) {
+                        console.error("failed to send login event", error);
+                    } finally {
+                        resolve();
+                    }
+                } else {
+                    console.log("No member found while observing for member...still waiting");
+                }
+            }
+        });
 
 
-    const event: LoginEvent = {
-        providerId: (args.additionalUserInfo && args.additionalUserInfo.providerId) || undefined,
-        userId: args.user && args.user.uid,
-        isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
-        referredByEmail: referredByEmail
-    };
-    await request.post(Endpoint.loginEvent, event, {headers: {...getAuthHeaders()}})
+        window.setTimeout(() => {
+            unsubscriber && unsubscriber();
+            resolve();
+        }, 5000)
+
+
+    });
 }

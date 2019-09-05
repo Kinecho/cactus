@@ -4,6 +4,10 @@ import {initializeFirebase} from "@web/firebase";
 import {PageRoute} from "@web/PageRoutes";
 import {setupNavigation} from "@web/NavigationUtil";
 
+import {commonInit} from "@web/common";
+
+commonInit();
+
 const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {
     console.log("index.js loaded");

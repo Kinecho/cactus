@@ -78,11 +78,11 @@
 }
 
 
-input[type=email] {
+input[type=email]:not(.firebaseui-input) {
   @include textInput();
 }
 
 
-input[type=password] {
+input[type=password]:not(.firebaseui-input) {
   @include textInput();
 }

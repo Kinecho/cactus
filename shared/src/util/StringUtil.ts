@@ -188,7 +188,7 @@ export function isBlank(input: string | null | undefined): boolean {
 
 }
 
-export function getProviderDisplayName(provider: string): string {
+export function getProviderDisplayName(provider?: string): string {
     switch (provider) {
         case "password":
             return "Email";
@@ -199,6 +199,6 @@ export function getProviderDisplayName(provider: string): string {
         case "google.com":
             return "Google";
         default:
-            return provider;
+            return provider || "";
     }
 }

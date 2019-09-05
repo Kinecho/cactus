@@ -48,11 +48,3 @@ export function commonInit() {
 }
 
 commonInit();
-
-
-//enables hot reload
-if (module.hot) {
-    module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
-    })
-}

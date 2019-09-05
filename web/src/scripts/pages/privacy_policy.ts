@@ -2,7 +2,9 @@
 import "@styles/pages/privacy_policy.scss"
 import {initializeArticlePage} from "@web/articleCommon";
 import Footer from "@components/StardardFooter.vue";
+import {commonInit} from "@web/common";
 
+commonInit();
 
 new Footer({
     el: "#footer"

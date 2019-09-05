@@ -31,6 +31,7 @@ export enum EmailActionMode {
     resetPassword = "resetPassword",
     recoverEmail = "recoverEmail",
     verifyEmail = "verifyEmail",
+    signIn = "signIn",
 }
 
 export function initializeFirebase(): FirebaseObject {

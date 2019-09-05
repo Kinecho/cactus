@@ -192,6 +192,8 @@
                     return false;
                 }
 
+                // return true;
+
                 return user.providerData.filter(provider => provider &&
                     provider.providerId !== "password" &&
                     !this.removedProviderIds.includes(provider.providerId)).length > 0;
