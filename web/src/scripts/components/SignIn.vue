@@ -189,13 +189,11 @@
 
         @include r(600) {
             margin: 0 auto 0;
-            /*max-width: 40rem;*/
         }
 
         .firebaseui-container {
             box-shadow: none;
-            width: 80rem;
-            max-width: 40rem;
+            max-width: 50rem;
 
             .mdl-progress.firebaseui-busy-indicator {
                 top: 25px;
