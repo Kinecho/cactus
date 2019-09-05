@@ -282,13 +282,12 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         if (isNewUser && member) {
             message.text = `${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
-            message.color = "good";
             await AdminUserService.getSharedInstance().setReferredByEmail({
                 userId,
                 referredByEmail: referredByEmail || undefined
             });
 
-            const accountAttachment: SlackAttachment = {fields};
+            const accountAttachment: SlackAttachment = {fields, color: "good"};
             member.referredByEmail = referredByEmail || undefined;
             member.signupQueryParams = Object.assign(member.signupQueryParams, payload.signupQueryParams);
             await AdminCactusMemberService.getSharedInstance().save(member);
