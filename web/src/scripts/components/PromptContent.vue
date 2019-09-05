@@ -244,7 +244,7 @@
 
 
                     this.loading = false;
-                    this.updateDocumentTitle();
+                    this.updateDocumentMeta();
 
                 }
             });
@@ -412,7 +412,7 @@
                 // }
             },
             activeIndex(index: number, oldIndex: number) {
-                this.updateDocumentTitle();
+                this.updateDocumentMeta();
 
                 if (this.contentItems && this.contentItems.length > index) {
                     const activeContent = this.contentItems[index];
@@ -447,17 +447,31 @@
 
 
             },
-            updateDocumentTitle() {
+            updateDocumentMeta() {
                 const index = this.activeIndex || 0;
                 let title = this.promptContent && this.promptContent.subjectLine;
+                let shareImage = this.promptContent && this.promptContent.shareImage;
+                let ogTitle = document.querySelector("meta[property='og:title']");
+                let ogDescription = document.querySelector("meta[property='og:description']");
+                let ogImage = document.querySelector("meta[property='og:description']");
+
                 if (!title) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
                     title = firstContent && firstContent.text;
                 }
                 if (title) {
-                    document.title = `Cactus | ${title} | ${index + 1}`;
+                    document.title = `${title} | ${index + 1}`;
                 } else {
                     document.title = 'Cactus Mindful Moment'
+                }
+                if (ogTitle) {
+                    ogTitle.setAttribute("content", `${title}`);
+                }
+                if (ogDescription) {
+                    ogDescription.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
+                }
+                if (ogImage && shareImage) {
+                    ogImage.setAttribute("content", shareImage);
                 }
             },
             async handleTap(event: TouchEvent) {
