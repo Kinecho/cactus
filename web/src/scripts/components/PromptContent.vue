@@ -450,7 +450,6 @@
             updateDocumentMeta() {
                 const index = this.activeIndex || 0;
                 let title = this.promptContent && this.promptContent.subjectLine;
-                let shareImage = this.promptContent && this.promptContent.shareImage;
                 let ogTitle = document.querySelector("meta[property='og:title']");
                 let ogDescription = document.querySelector("meta[property='og:description']");
                 let ogImage = document.querySelector("meta[property='og:description']");
@@ -470,8 +469,8 @@
                 if (ogDescription) {
                     ogDescription.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
                 }
-                if (ogImage && shareImage) {
-                    ogImage.setAttribute("content", shareImage);
+                if (ogImage) {
+                    ogImage.setAttribute("content", 'some other image');
                 }
             },
             async handleTap(event: TouchEvent) {
