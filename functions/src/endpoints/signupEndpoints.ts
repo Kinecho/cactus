@@ -147,7 +147,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         value: `${member ? member.id : "none"}`,
         short: true,
     }];
-    if (referredBy) {
+    if (referredBy && !existingMember) {
         fields.push({
             title: "Referred By Email",
             value: `${referredBy || "--"}`,
@@ -261,7 +261,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         if (providerId && !user.providerIds.includes(providerId)) {
             user.providerIds.push(providerId);
         }
-        message.text = `${user.email} logged in with ${providerId} ${AdminSlackService.getProviderEmoji(providerId)}`;
+        message.text = `${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
 
         if (user.email) {
             console.log("checking for pending user so we can grab the reflectionResponseIds from it");
@@ -331,10 +331,10 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
                 userId: userId,
             });
 
-            fields.push({
-                title: `Pending Reflections Added`,
-                value: `${reflectionResponseIds.length} `
-            })
+            attachments.push({
+                title: `Added ${reflectionResponseIds.length} Anonymous Reflections to their account`,
+                color: "good"
+            });
         }
 
         await AdminSlackService.getSharedInstance().sendActivityMessage(message);
