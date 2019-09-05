@@ -3,6 +3,10 @@ import "@styles/pages/email_action.scss"
 import Vue from "vue";
 import EmailActionHandler from "@components/EmailActionHandler.vue";
 
+import {commonInit} from "@web/common";
+
+commonInit();
+
 new Vue({
     el: "#app",
     template: '<EmailAction/>',

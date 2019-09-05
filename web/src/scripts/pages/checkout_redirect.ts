@@ -4,6 +4,8 @@ import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {CreateSessionRequest} from "@shared/api/CheckoutTypes";
+import {commonInit} from "@web/common";
+commonInit();
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("checkout monthly loaded");

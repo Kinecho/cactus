@@ -1,8 +1,8 @@
 // tslint:disable-next-line:no-implicit-dependencies
 import "@styles/pages/$PAGE_NAME$.scss"
-import {initializeArticlePage} from "@web/articleCommon";
+import {commonInit} from "@web/common";
 
-initializeArticlePage();
+commonInit();
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("$PAGE_NAME$ loaded");

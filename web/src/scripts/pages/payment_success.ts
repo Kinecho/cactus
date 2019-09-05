@@ -2,7 +2,9 @@ import "@styles/pages/payment_success.scss"
 import {gtag} from "@web/analytics";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
+import {commonInit} from "@web/common";
 
+commonInit();
 document.addEventListener('DOMContentLoaded', function() {
     console.log("payment success loaded");
 

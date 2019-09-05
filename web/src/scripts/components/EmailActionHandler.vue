@@ -1,3 +1,6 @@
+import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
+import {EmailActionMode} from '@web/firebase'
 <template>
     <div class="root centered">
         <NavBar/>
@@ -50,6 +53,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import {EmailActionMode, getAuth} from '@web/firebase'
     import {PageRoute} from '@web/PageRoutes'
+    import {appendQueryParams} from '@shared/util/StringUtil'
 
     export default Vue.extend({
         components: {
@@ -60,7 +64,7 @@
             const actionCode = getQueryParam(QueryParam.OOB_CODE);
             const continueUrl = getQueryParam(QueryParam.CONTINUE_URL);
             const lang = getQueryParam(QueryParam.LANG);
-
+            const apiKey = getQueryParam(QueryParam.API_KEY);
             this.mode = mode;
             this.actionCode = actionCode;
             this.continueUrl = continueUrl || PageRoute.JOURNAL_HOME;
@@ -76,6 +80,17 @@
                     break;
                 case EmailActionMode.verifyEmail:
                     await this.handleVerifyEmail();
+                    break;
+                case EmailActionMode.signIn:
+                    const continueUrl = getQueryParam(QueryParam.CONTINUE_URL) || PageRoute.LOGIN;
+                    let url = appendQueryParams(continueUrl, {
+                        [QueryParam.MODE]: mode,
+                        [QueryParam.API_KEY]: apiKey,
+                        [QueryParam.CONTINUE_URL]: continueUrl,
+                        [QueryParam.OOB_CODE]: actionCode,
+                        [QueryParam.LANG]: lang,
+                    });
+                    window.location.assign(url);
                     break;
                 default:
                     break;
@@ -161,14 +176,14 @@
                         this.showPasswordResetButton = true;
 
                         this.error = undefined;
-                    } catch (revertError){
+                    } catch (revertError) {
                         console.error(revertError);
                         this.successMessage = undefined;
                         this.error = "Unable to recover your email address. Please try again later";
                         this.submitting = false;
                     }
 
-                } catch (invalidCodeError){
+                } catch (invalidCodeError) {
                     console.error(invalidCodeError);
                     this.successMessage = undefined;
                     this.error = "This link is either invalid or expired. Please try again.";

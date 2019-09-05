@@ -1,13 +1,18 @@
 import "@styles/article.scss"
-import {setupNavigation} from "@web/util";
 import {configureMailchimpSignupForm, setupJumpToForm} from "@web/mailchimp";
 import {init as initAnalytics, startFullstory} from "@web/analytics";
 import {getAuth, initializeFirebase} from "@web/firebase";
+import {setupNavigation} from "@web/NavigationUtil";
+
+import {commonInit} from "@web/common";
+
 
 /** start the page **/
 initializeArticlePage();
 
 export function initializeArticlePage() {
+    commonInit();
+
     initializeFirebase();
     initAnalytics();
     startFullstory();

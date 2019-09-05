@@ -49,6 +49,10 @@ export default class AdminUserService {
         AdminUserService.sharedInstance = new AdminUserService(config);
     }
 
+    getCollectionRef() {
+        return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.users);
+    }
+
     async save(model: User): Promise<User> {
         return firestoreService.save(model);
     }
@@ -87,7 +91,7 @@ export default class AdminUserService {
         return foundUser;
     }
 
-    async getById(id?: string|undefined): Promise<User | undefined> {
+    async getById(id?: string | undefined): Promise<User | undefined> {
         if (!id) {
             return undefined;
         }
@@ -103,6 +107,24 @@ export default class AdminUserService {
         const deletedUser = await firestoreService.delete(id, User);
 
         return deletedUser;
+    }
+
+    async setReferredByEmail(args: { userId: string, referredByEmail?: string | undefined }) {
+        //todo: Should this set the referred by on a document without knowing if it exists? what if it does exist?
+        try {
+            if (args.referredByEmail === undefined) {
+                return;
+            }
+
+            const {userId, referredByEmail} = args;
+            await this.getCollectionRef().doc(userId).set({[User.Field.referredByEmail]: referredByEmail}, {
+                merge: true,
+                mergeFields: [User.Field.referredByEmail]
+            });
+        } catch (e) {
+            console.error("Failed to update referred by email");
+        }
+
     }
 
 }

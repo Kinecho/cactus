@@ -38,6 +38,11 @@ body {
 header {
   align-items: center;
   background-color: white;
+
+  &.transparent {
+    background-color: transparent;
+  }
+
   display: flex;
   justify-content: space-between;
   padding: .8rem 2.4rem;
@@ -85,89 +90,7 @@ a.button {
 }
 
 button, a.button {
-  background-color: $green;
-  border: 0;
-  border-radius: 3rem;
-  box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.2);
-  color: white;
-  cursor: pointer;
-  flex-grow: 1;
-  font: 1.8rem $font-stack;
-  margin: 0;
-  padding: 1.2rem 2.4rem 1.6rem;
-  transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
-
-  @include r(768) {
-    max-width: 28rem;
-  }
-
-  &:hover {
-    cursor: pointer;
-    background-color: darken($green, 5%);
-  }
-
-  &:active {
-    box-shadow: none;
-  }
-
-  &:disabled, &.disabled {
-    background-color: #ccc;
-    box-shadow: none;
-    color: $darkText;
-    cursor: default;
-
-    &:not(.no-loading) {
-      &:before {
-        animation: rotate 1s linear infinite;
-        background: url(assets/images/loading.svg) no-repeat;
-        background-size: 2rem;
-        content: '';
-        display: block;
-        height: 2rem;
-        position: absolute;
-        transform-origin: center;
-        width: 2rem;
-        z-index: 1;
-      }
-    }
-  }
-
-  &.icon {
-    align-items: center;
-    display: flex;
-    flex-grow: 0;
-    justify-content: center;
-    margin: 0;
-    padding: 1.2rem;
-  }
-
-  &.small {
-    box-shadow: none;
-    font: 1.6rem $font-stack;
-    padding: 1rem 1.6rem;
-  }
-
-  &.secondary {
-    background-color: $white;
-    border: 1px solid $lightGreen;
-    box-shadow: none;
-    color: $darkGreen;
-    padding: 1.2rem 2.4rem;
-
-    &:hover {
-      background-color: $lightGreen;
-    }
-  }
-
-  &.tertiary {
-    background-color: transparent;
-    box-shadow: none;
-    color: $darkGreen;
-
-    &:hover {
-      background-color: $lightGreen;
-    }
-  }
+  @include button;
 }
 
 h1, h2, h3, h4, p {
@@ -236,7 +159,7 @@ footer {
   padding: 3.2rem 2.4rem 3.2rem;
   position: relative;
   z-index: 0;
-
+  overflow-x: hidden;
   &.lifted {
     margin-top: -4.8rem;
     padding: 8rem 2.4rem 3.2rem;
@@ -293,7 +216,6 @@ footer {
   align-items: center;
   display: flex;
   justify-content: center;
-
   @include r(600) {
     justify-content: flex-end;
   }

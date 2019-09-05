@@ -1,5 +1,5 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky}">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}">
         <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <div>
             <transition name="fade-in-slow" appear>
@@ -8,7 +8,7 @@
                         :href="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
-                >Log In</a>
+                >{{copy.common.LOG_IN}}</a>
             </transition>
             <transition name="fade-in-slow" appear>
                 <a v-if="displaySignupButton"
@@ -16,7 +16,7 @@
                         class="jump-to-form button small"
                         @click.prevent="scrollToSignup"
                         type="button"
-                >Sign Up</a>
+                >{{copy.common.SIGN_UP}}</a>
             </transition>
         </div>
         <dropdown-menu :items="links" v-if="loggedIn">
@@ -41,11 +41,16 @@
     import DropdownMenu from "@components/DropdownMenu.vue"
     import {DropdownMenuLink} from "@components/DropdownMenuTypes"
     import {QueryParam} from '@shared/util/queryParams'
+    import CopyService from '@shared/copy/CopyService'
+    import {LocalizedCopy} from '@shared/copy/CopyTypes'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
         authUnsubscribe: (() => void) | undefined,
         user: FirebaseUser | undefined | null,
         authLoaded: boolean,
+        copy: LocalizedCopy,
     }
 
 
@@ -75,9 +80,12 @@
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
             showLogin: {type: Boolean, default: true},
+            forceTransparent: {type: Boolean, default: false},
+            loginRedirectUrl: String,
         },
         data(): NavBarData {
             return {
+                copy: copy,
                 user: undefined,
                 authUnsubscribe: undefined,
                 authLoaded: false,
@@ -89,13 +97,13 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
-                    title: "My Journal",
+                    title: copy.navigation.MY_JOURNAL,
                     href: PageRoute.JOURNAL_HOME,
                 }, {
-                    title: "Invite Friends",
+                    title: copy.navigation.INVITE_FRIENDS,
                     href: PageRoute.REFERRAL_PROGRAM,
                 }, {
-                    title: "Log Out",
+                    title: copy.common.LOG_OUT,
                     onClick: async () => {
                         await this.logout()
                     }
@@ -133,7 +141,7 @@
                 return "";
             },
             loginHref(): string {
-                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${window.location.href}`;
+                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${this.loginRedirectUrl || window.location.href}`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;

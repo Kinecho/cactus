@@ -5,6 +5,10 @@ import VueClipboard from 'vue-clipboard2';
 import SocialSharing from 'vue-social-sharing';
 import ReferralProgram from "@components/ReferralProgram.vue";
 
+import {commonInit} from "@web/common";
+
+commonInit();
+
 Vue.use(VueClipboard);
 Vue.use(SocialSharing);
 

@@ -1,5 +1,7 @@
 import "@styles/pages/payment_cancel.scss"
+import {commonInit} from "@web/common";
 
+commonInit();
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("payment cancel loaded")

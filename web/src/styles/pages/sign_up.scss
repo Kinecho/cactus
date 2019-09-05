@@ -3,92 +3,30 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-html {
-  overflow-x: hidden;
+html, body {
+  //overflow: hidden;
 }
 
-body {
-  min-height: 100vh;
-  overflow-x: hidden;
+.page-wrapper {
+  //min-height: 100vh;
   position: relative;
 
-  @include h(768) {
-    //align-items: center;
-    //display: flex;
-
-    height: 100vh;
-    //justify-content: center;
+  header {
+    position: relative;
+    z-index: 2;
   }
-}
 
-.centered {
-  overflow-x: hidden;
-  position: relative;
-  width: 100%;
-  z-index: 1;
-}
+  .signin-wrapper {
+    flex-grow: 1;
+    overflow: hidden;
+    margin: 0 auto 4rem;
+    position: relative;
+    z-index: 2;
 
-.signup-container {
-  padding: 2.4rem;
-}
+    min-height: calc(100vh - 26rem);
+    @include r(600) {
+      min-height: calc(100vh - 15rem);
+    }
 
-.graphic {
-  margin-bottom: 3.2rem;
-  max-width: 100%;
-  width: 50rem;
-}
-
-h1 {
-  margin: 0;
-}
-
-form {
-  display: flex;
-  flex-flow: column wrap;
-  margin: 0 auto;
-  max-width: 70rem;
-  padding: 2.4rem 0;
-
-  @include r(600) {
-    flex-direction: row;
-    padding: 2.4rem;
   }
-}
-
-.buttonContainer {
-  margin: -1.6rem -24px 0;
-
-  @include r(600) {
-    margin: -1.6rem auto 0;
-    max-width: 30rem;
-  }
-}
-//
-//.loading {
-//  margin: 1.6rem;
-//
-//  img {
-//    animation: rotate 1s linear infinite;
-//    height: 2rem;
-//    margin: 0 .8rem .4rem 0;
-//    transform-origin: center;
-//    vertical-align: middle;
-//    width: 2rem;
-//  }
-//}
-
-#yellowBlob1 {
-  bottom: 3vh;
-  height: auto;
-  left: -180px;
-  position: absolute;
-  width: 360px;
-}
-#pinkBlob {
-  height: auto;
-  position: absolute;
-  right: -90px;
-  top: 24px;
-  transform: rotate(-165deg);
-  width: 180px;
 }

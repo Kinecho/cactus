@@ -20,6 +20,7 @@ let flamelinkApp: flamelink.app.App;
 export type FirebaseUser = firebase.User;
 export type FirebaseUserCredential = firebase.auth.UserCredential;
 export type Unsubscribe = firebase.Unsubscribe;
+export type AdditionalUserInfo = firebase.auth.AdditionalUserInfo;
 
 
 export enum FirebaseAppName {
@@ -30,6 +31,7 @@ export enum EmailActionMode {
     resetPassword = "resetPassword",
     recoverEmail = "recoverEmail",
     verifyEmail = "verifyEmail",
+    signIn = "signIn",
 }
 
 export function initializeFirebase(): FirebaseObject {

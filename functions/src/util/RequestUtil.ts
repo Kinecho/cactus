@@ -1,8 +1,6 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
 
-;
-
 export async function getAuthUser(request: express.Request): Promise<admin.auth.UserRecord | undefined> {
     const bearer = request.headers.authorization;
     if (!bearer) {
@@ -29,6 +27,4 @@ export async function getAuthUser(request: express.Request): Promise<admin.auth.
 
 
     return;
-
-
 }
