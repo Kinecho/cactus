@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="copy-link-container">
         <input type="text" class="link-input" name="referral-link" :disabled="!editable" :value="formattedText">
-        <button class="copy secondary btn"
+        <button class="copy primary"
                 v-clipboard:copy="formattedText"
                 v-clipboard:success="handleCopySuccess"
                 v-clipboard:error="handleCopyError">
@@ -67,47 +67,32 @@
     @import "mixins";
     @import "variables";
 
-    .copy-link-container {
-        margin-bottom: 3.2rem;
-        position: relative;
+    .link-input {
+        @include textInput;
+        color: $lightText;
+        margin-bottom: .8rem;
+        max-width: none;
+        width: 100%;
 
-        .link-input {
-            @include textInput;
-            color: $lightText;
-            margin-bottom: .8rem;
-            max-width: none;
-            width: 100%;
-
-            @include r(600) {
-                margin-bottom: 1.6rem;
-                padding-right: 9rem;
-            }
+        @include r(374) {
+            margin-bottom: 0;
         }
+    }
 
-        button.copy {
-            background-color: $lightGreen;
-            width: 100%;
-            margin-bottom: 1.2rem;
+    .copy-link-container {
+        position: relative;
+    }
 
-            @include r(600) {
-                background-color: transparent;
-                border: none;
-                box-shadow: none;
-                padding: 1.2rem 2.4rem;
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: auto;
+    .copy {
+        width: 100%;
 
-                &:hover {
-                    background: transparent;
-                }
-
-                &:active {
-                    background-color: $darkGreen;
-                    color: $white;
-                }
-            }
+        @include r(374) {
+            box-shadow: none;
+            padding: 1.2rem 2.4rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
         }
     }
 
