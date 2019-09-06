@@ -84,31 +84,8 @@
         position: relative;
     }
 
-        button.copy {
-            width: 100%;
-
-            @include r(600) {
-                border: none;
-                box-shadow: none;
-                padding: 1.2rem 2.4rem;
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: auto;
-
-                &:active {
-                    background-color: $darkGreen;
-                    color: $white;
-                }
-            }
-
-            &.primary {
-                @include buttonPrimary;
-            }
-
-            &.secondary {
-                @include buttonSecondary;
-            }
+    button.copy {
+        width: 100%;
 
         @include r(374) {
             box-shadow: none;
@@ -117,6 +94,19 @@
             right: 0;
             top: 0;
             width: auto;
+        }
+
+        &:active {
+            background-color: $darkGreen;
+            color: $white;
+        }
+
+        &.primary {
+            @include buttonPrimary;
+        }
+
+        &.secondary {
+            @include buttonSecondary;
         }
     }
 
