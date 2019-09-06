@@ -706,19 +706,29 @@ import {QueryParam} from '@shared/util/queryParams'
 
 
             .arrow {
-                display: none;
+                margin: auto;
+                padding: 0;
+                position: absolute;
+                top: 49%;
+                z-index: 10;
+
+                &.previous {
+                    left: 1.6rem;
+                }
+                &.next {
+                    right: 1.6rem;
+                }
 
                 @include r(600) {
+                    @include secondaryButton;
                     align-items: center;
                     display: flex;
                     height: 4.8rem;
                     justify-content: center;
                     margin: 0 1%;
                     padding: 0;
-                    position: absolute;
                     top: 30vh;
                     width: 4.8rem;
-                    z-index: 10;
 
                     &.previous {
                         left: -6.4rem;

@@ -134,10 +134,6 @@
                     </span>
                 </div>
             </div>
-
-            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
-                <span class="tap">{{promptCopy.TAP_ANYWHERE}}</span>
-            </div>
             <!--    END Reflect-->
         </section>
     </div>
