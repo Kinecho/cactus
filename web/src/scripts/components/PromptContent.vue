@@ -452,7 +452,7 @@
                 let title = this.promptContent && this.promptContent.subjectLine;
                 let ogTitle = document.querySelector("meta[property='og:title']");
                 let ogDescription = document.querySelector("meta[property='og:description']");
-                let ogImage = document.querySelector("meta[property='og:description']");
+                let ogImage = document.querySelector("meta[property='og:image']");
 
                 if (!title) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
