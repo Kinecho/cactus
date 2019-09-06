@@ -858,15 +858,8 @@
         display: none;
     }
 
-    .share-note-container {
-        background-color: $white;
-        border-radius: 2rem;
-        padding: 2rem;
-        margin: 1rem 0;
-
-        .share-note-link-container {
-            position: relative;
-        }
+    .share-note-link-container {
+        position: relative;
     }
 
 </style>
