@@ -19,6 +19,15 @@
                     <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
                 </p>
             </div>
+
+            <!--  START SHARE_NOTE -->
+            <div class="share-note-container" v-if="isShareNoteScreen">
+                <h3>{{response.promptQuestion}}</h3>
+                <p class="note-text">{{response.content.text}}</p>
+            </div>
+
+            <!--  END SHARE_NOTE -->
+
             <!--    START QUOTE    -->
             <div class="quote-container" v-if="processedContent.quote">
                 <div class="avatar-container" v-if="quoteAvatar">
@@ -253,6 +262,9 @@
             },
             isReflectScreen(): boolean {
                 return this.content.contentType === ContentType.reflect
+            },
+            isShareNoteScreen(): boolean {
+                return this.content.contentType === ContentType.share_reflection;
             },
             linkClasses(): string | undefined {
                 if (!this.processedContent || !this.processedContent.link) {
@@ -818,5 +830,11 @@
 
     .duration {
         display: none;
+    }
+
+    .share-note-container {
+        background-color: $white;
+        border-radius: 2rem;
+        padding: 2rem;
     }
 </style>
