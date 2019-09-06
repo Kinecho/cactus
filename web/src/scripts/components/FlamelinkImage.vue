@@ -8,7 +8,9 @@
     import {Image as ContentImage} from "@shared/models/PromptContent";
     import {Config} from '@web/config'
     import {stripQueryParams} from '@shared/util/StringUtil'
-    import {getImageBreakpointWidth, ImageWidth} from '@shared/util/ImageUtil'
+    import {getImageBreakpointWidth, 
+            ImageWidth, 
+            getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
 
     export default Vue.extend({
         props: {
@@ -36,21 +38,6 @@
             }
         },
         methods: {
-
-            getCloudinaryUrlFromStorageUrl(storageUrl: string): string {
-
-                const isSVG = stripQueryParams(storageUrl).url.endsWith(".svg");
-                let transformations = [];
-                if (!isSVG) {
-                    transformations.push(`w_${getImageBreakpointWidth(this.width)}`);
-                }
-                let manipulationSlug = "";
-                if (transformations.length > 0) {
-                    manipulationSlug = `${transformations.join(",")}/`
-                }
-
-                return `https://res.cloudinary.com/cactus-app/image/fetch/${manipulationSlug}${encodeURIComponent(storageUrl)}`;
-            },
             async fetchImageUrl(): Promise<void> {
                 if (!this.image) {
                     this.imageUrl = undefined;
@@ -60,12 +47,12 @@
                 if (this.image.flamelinkFileName) {
                     const storagePath = `flamelink/media/${this.image.flamelinkFileName}`;
                     const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${Config.firebase.storageBucket}/o/${encodeURIComponent(storagePath)}?alt=media`;
-                    this.imageUrl = this.getCloudinaryUrlFromStorageUrl(storageUrl);
+                    this.imageUrl = getCloudinaryUrlFromStorageUrl(storageUrl, this.width);
                     return;
                 }
 
                 if (this.image.storageUrl) {
-                    this.imageUrl = this.getCloudinaryUrlFromStorageUrl(this.image.storageUrl);
+                    this.imageUrl = getCloudinaryUrlFromStorageUrl(this.image.storageUrl, this.width);
                     return;
                 }
 
