@@ -113,4 +113,7 @@ export default class ReflectionResponse extends BaseModel {
     promptId?: string;
     promptQuestion?: string;
     reflectionDurationMs?: number = 0;
+    shared: boolean = false;
+    sharedAt?: Date;
+    unsharedAt?: Date;
 }

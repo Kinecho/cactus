@@ -1,6 +1,12 @@
 <template>
     <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
+
+            <div class="share-warning" v-if="isReflectScreen && response && response.shared">
+                This reflection has been shared
+            </div>
+
+
             <button class="skip tertiary" @click="next" v-show="showSkip">
                 Skip
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -24,7 +30,7 @@
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
-                        <snackbar-content :autoHide="false">
+                        <snackbar-content :autoHide="false" v-if="linkCreated">
                             <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                                 <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                             </svg>
@@ -32,10 +38,21 @@
                         </snackbar-content>
                         <p>Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
+
+                        <button class="button secondary removeLink"
+                                :disabled="creatingLink"
+                                :class="{loading: creatingLink}"
+                                @click="unshareReflection">
+                            Unshare
+                        </button>
                     </div>
-                    <button v-else class="button primary getLink" :disabled="creatingLink" :class="{loading: creatingLink}" @click="createSharableLink">
+                    <button v-else class="button primary getLink"
+                            :disabled="creatingLink"
+                            :class="{loading: creatingLink}"
+                            @click="createSharableLink">
                         {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
                     </button>
+
 
                 </transition>
             </div>
@@ -90,7 +107,6 @@
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
             </div>
             <!--      END Link      -->
-
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
@@ -201,6 +217,7 @@
     import CopyTextInput from "@components/CopyTextInput.vue";
     import {QueryParam} from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -235,6 +252,7 @@
             promptCopy: PromptCopy,
             creatingLink: boolean,
             shareableLinkUrl: string | undefined,
+            linkCreated: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -244,7 +262,11 @@
                 promptCopy: copy.prompts,
                 creatingLink: false,
                 shareableLinkUrl: undefined,
+                linkCreated: false,
             }
+        },
+        beforeMount() {
+            this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
         },
         watch: {
             saved(isSaved) {
@@ -326,10 +348,16 @@
         methods: {
             async createSharableLink() {
                 this.creatingLink = true;
-                setTimeout(() => {
-                    this.shareableLinkUrl = "https://google.com";
-                    this.creatingLink = false
-                }, 1500)
+                let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
+                this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(saved);
+                this.linkCreated = true;
+                this.creatingLink = false;
+            },
+            async unshareReflection() {
+                this.creatingLink = true;
+                await ReflectionResponseService.sharedInstance.unShareResponse(this.response);
+                this.shareableLinkUrl = undefined;
+                this.creatingLink = false
             },
             async doButtonAction() {
                 if (!this.content.actionButton) {
@@ -583,8 +611,12 @@
         margin-bottom: .8rem;
     }
 
-    .getLink {
+    .getLink, .removeLink {
         width: 100%;
+    }
+
+    .removeLink {
+        margin-top: 1rem;
     }
 
     .label {
@@ -869,4 +901,10 @@
         }
     }
 
+
+    .share-warning {
+        background: orangered;
+        color: white;
+        padding: 2rem;
+    }
 </style>
