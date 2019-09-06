@@ -79,7 +79,7 @@
                 image: any | Image,
             } {
                 const image: Image = {
-                    url: getRandomAvatar(),
+                    url: getRandomAvatar(this.response.memberEmail),
                 };
 
                 return {
