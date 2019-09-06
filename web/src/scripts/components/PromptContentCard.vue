@@ -24,7 +24,7 @@
             </div>
 
             <!--  START SHARE_NOTE -->
-            <div class="share-note-container" v-if="isShareNoteScreen">
+            <div v-if="isShareNoteScreen">
                 <shared-reflection-card :response="response"/>
 
                 <transition name="fade-in" mode="out-in">
@@ -37,13 +37,6 @@
                         </snackbar-content>
                         <p>Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
-
-                        <button class="button secondary removeLink"
-                                :disabled="creatingLink"
-                                :class="{loading: creatingLink}"
-                                @click="unshareReflection">
-                            Unshare
-                        </button>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
@@ -614,12 +607,8 @@
         margin-bottom: .8rem;
     }
 
-    .getLink, .removeLink {
+    .getLink {
         width: 100%;
-    }
-
-    .removeLink {
-        margin-top: 1rem;
     }
 
     .label {
