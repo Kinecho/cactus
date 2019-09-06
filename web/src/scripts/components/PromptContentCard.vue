@@ -21,10 +21,24 @@
             </div>
 
             <!--  START SHARE_NOTE -->
-            <div class="share-note-container" v-if="isShareNoteScreen">
-                <h3>{{response.promptQuestion}}</h3>
-                <p class="note-text">{{response.content.text}}</p>
+            <div v-if="isShareNoteScreen">
+                <div class="share-note-container">
+                    <h3>{{response.promptQuestion}}</h3>
+                    <p class="note-text">{{response.content.text}}</p>
+
+                </div>
+                <transition name="fade-in" mode="out-in">
+                    <div v-if="shareableLinkUrl">
+                        <p>Here's your direct link to share:</p>
+                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false"/>
+                    </div>
+                    <button v-else class="button primary" :disabled="creatingLink" :class="{loading: creatingLink}" @click="createSharableLink">
+                        {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
+                    </button>
+                </transition>
+
             </div>
+
 
             <!--  END SHARE_NOTE -->
 
@@ -185,7 +199,8 @@
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
     import VueSimpleMarkdown from 'vue-simple-markdown'
-
+    import CopyTextInput from "@components/CopyTextInput.vue";
+    import {QueryParam} from "@shared/util/queryParams"
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -197,6 +212,7 @@
             ResizableTextarea,
             Spinner,
             FlamelinkImage,
+            CopyTextInput,
         },
         props: {
             content: {
@@ -216,6 +232,8 @@
             showSaved: boolean,
             showSavingTimeout: any,
             promptCopy: PromptCopy,
+            creatingLink: boolean,
+            shareableLinkUrl: string | undefined,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -223,6 +241,8 @@
                 showSaved: false,
                 showSavingTimeout: undefined,
                 promptCopy: copy.prompts,
+                creatingLink: false,
+                shareableLinkUrl: undefined,
             }
         },
         watch: {
@@ -241,6 +261,16 @@
             }
         },
         computed: {
+            shareableLinkParams(): {} | undefined {
+                if (this.shareableLinkUrl) {
+                    return {
+                        [QueryParam.UTM_MEDIUM]: "prompt-share-note",
+                        [QueryParam.UTM_SOURCE]: "cactus.app",
+                    }
+                }
+                return;
+
+            },
             showSkip(): boolean {
                 return this.processedContent && this.processedContent.contentType === ContentType.share_reflection;
             },
@@ -293,6 +323,13 @@
             }
         },
         methods: {
+            async createSharableLink() {
+                this.creatingLink = true;
+                setTimeout(() => {
+                    this.shareableLinkUrl = "https://google.com";
+                    this.creatingLink = false
+                }, 1500)
+            },
             async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
@@ -836,5 +873,6 @@
         background-color: $white;
         border-radius: 2rem;
         padding: 2rem;
+        margin: 1rem 0;
     }
 </style>
