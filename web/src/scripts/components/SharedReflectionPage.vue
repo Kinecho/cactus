@@ -1,12 +1,13 @@
 <template>
     <div class="shared-reflection-page">
-        <NavBar :isSticky="false" :forceTransparent="true"/>
+        <NavBar :isSticky="false" :forceTransparent="true" :showSignup="true"/>
         <div class="content">
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
                 <card :response="reflectionResponse"/>
 
             </div>
+            <sign-up-footer/>
         </div>
         <Footer/>
     </div>
@@ -21,12 +22,14 @@
     import ReflectionResponse from "@shared/models/ReflectionResponse"
     import Card from "@components/SharedReflectionCard.vue";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import SignUpFooter from "@components/SignUpFooter.vue";
 
     export default Vue.extend({
         components: {
             NavBar,
             Footer,
             Card,
+            SignUpFooter,
         },
         created() {
 
@@ -88,9 +91,18 @@
     .shared-reflection-page {
         background: url("/assets/images/greenNeedleBlob.svg") repeat, $lightGreen;
 
+        @include r(600) {
+            background: unset;
+        }
+
+        min-height: 40rem;
+
         .content {
-            min-height: 40rem;
-            padding: 4rem 1rem;
+            padding: 2rem 0 0;
+            @include r(600) {
+                padding: 4rem 1rem 0;
+            }
+
 
             .error {
                 padding: 3rem;
