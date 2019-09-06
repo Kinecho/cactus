@@ -28,13 +28,20 @@
 
                 </div>
                 <transition name="fade-in" mode="out-in">
-                    <div v-if="shareableLinkUrl">
+                    <div v-if="shareableLinkUrl" class="share-note-link-container">
+                        <snackbar-content :autoHide="false">
+                            <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                                <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                            </svg>
+                            <span slot="text">Shareable Link Created</span>
+                        </snackbar-content>
                         <p>Here's your direct link to share:</p>
-                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false"/>
+                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                     </div>
                     <button v-else class="button primary" :disabled="creatingLink" :class="{loading: creatingLink}" @click="createSharableLink">
                         {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
                     </button>
+
                 </transition>
 
             </div>
@@ -201,6 +208,7 @@
     import VueSimpleMarkdown from 'vue-simple-markdown'
     import CopyTextInput from "@components/CopyTextInput.vue";
     import {QueryParam} from "@shared/util/queryParams"
+    import SnackbarContent from "@components/SnackbarContent.vue"
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -213,6 +221,7 @@
             Spinner,
             FlamelinkImage,
             CopyTextInput,
+            SnackbarContent,
         },
         props: {
             content: {
@@ -874,5 +883,10 @@
         border-radius: 2rem;
         padding: 2rem;
         margin: 1rem 0;
+
+        .share-note-link-container {
+            position: relative;
+        }
     }
+
 </style>

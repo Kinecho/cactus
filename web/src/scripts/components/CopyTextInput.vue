@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="copy-link-container">
         <input type="text" class="link-input" name="referral-link" :disabled="!editable" :value="formattedText">
-        <button class="copy secondary btn"
+        <button class="copy btn" :class="[buttonStyle]"
                 v-clipboard:copy="formattedText"
                 v-clipboard:success="handleCopySuccess"
                 v-clipboard:error="handleCopyError">
@@ -25,7 +25,8 @@
         props: {
             text: String,
             editable: {type: Boolean, default: false},
-            queryParams: {type: Object as () => { [key: string]: string }}
+            queryParams: {type: Object as () => { [key: string]: string }},
+            buttonStyle: {validator: (value: string) => ["primary", "secondary"].includes(value), default: "secondary"},
         },
         data(): {
             copySucceeded: boolean,
@@ -85,12 +86,10 @@
         }
 
         button.copy {
-            background-color: $lightGreen;
             width: 100%;
             margin-bottom: 1.2rem;
 
             @include r(600) {
-                background-color: transparent;
                 border: none;
                 box-shadow: none;
                 padding: 1.2rem 2.4rem;
@@ -99,15 +98,20 @@
                 top: 0;
                 width: auto;
 
-                &:hover {
-                    background: transparent;
-                }
-
                 &:active {
                     background-color: $darkGreen;
                     color: $white;
                 }
             }
+
+            &.primary {
+                @include buttonPrimary;
+            }
+
+            &.secondary {
+                @include buttonSecondary;
+            }
+
         }
     }
 
