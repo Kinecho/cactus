@@ -67,12 +67,12 @@ import {QueryParam} from '@shared/util/queryParams'
                     </div>
                 </div>
 
-                <button class="previous arrow secondary" @click="previous" v-show="hasPrevious && !showSharing">
+                <button class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
-                <button :class="['next', 'arrow', 'secondary', {reflection: isReflection, complete: reflectionComplete}]"
+                <button :class="['next', 'arrow', 'tertiary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
                         v-show="(hasNext || isLastCard) && !completed && !showSharing"
                 >
@@ -670,11 +670,15 @@ import {QueryParam} from '@shared/util/queryParams'
 
             .progress-wrapper {
                 position: relative;
-                transform: translateY(1.6rem);
+                transform: translateY(.8rem);
                 width: 94%;
                 z-index: 20;
                 height: 0;
                 margin: 0 auto;
+
+                @include r(600) {
+                    transform: translateY(1.6rem);
+                }
 
                 .progress {
                     display: flex;
@@ -767,7 +771,7 @@ import {QueryParam} from '@shared/util/queryParams'
     .shareContainer {
         left: 0;
         position: absolute;
-        top: 2.4rem;
+        top: 1.6rem;
         z-index: 20;
 
         @include r(600) {
@@ -798,6 +802,7 @@ import {QueryParam} from '@shared/util/queryParams'
     button.share {
         align-items: center;
         display: flex;
+        padding: 1.2rem 1.6rem;
 
         &:hover {
             background-color: transparent;
@@ -906,12 +911,11 @@ import {QueryParam} from '@shared/util/queryParams'
     }
 
     .flip-card {
+        animation: twist .5s;
         backface-visibility: hidden;
         left: 0;
         top: 0;
         width: 100%;
-
-        animation: twist .5s;
 
         @include r(600) {
             border-radius: 12px;
@@ -932,7 +936,7 @@ import {QueryParam} from '@shared/util/queryParams'
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 3.2rem;
+            padding: 2.4rem;
             position: relative;
             transform: rotateY(180deg);
 

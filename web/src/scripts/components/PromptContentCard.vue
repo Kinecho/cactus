@@ -425,7 +425,6 @@
         @include r(600) {
             display: flex;
             justify-content: center;
-            margin: 0 -2.4rem;
             max-height: none;
             order: 1;
             position: static;
@@ -446,8 +445,12 @@
     }
 
     .text {
-        font-size: 2.4rem;
-        padding: 4rem 0;
+        font-size: 2rem;
+        padding: 4rem 1.6rem;
+
+        @include r(374) {
+            font-size: 2.4rem;
+        }
 
         .reflectScreen & {
             padding: 5.6rem 0 1.6rem;

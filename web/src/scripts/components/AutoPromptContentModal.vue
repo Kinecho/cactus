@@ -3,7 +3,7 @@ import {QueryParam} from '@shared/util/queryParams'
     <modal :show="showContent"
             v-on:close="showContent = false"
             :showCloseButton="true"
-            :closeStyles="{top: '2.4rem'}"
+            :closeStyles="{top: '1.6rem'}"
     >
         <PromptContent slot="body"
                 v-bind:promptContentEntryId="entryId"
