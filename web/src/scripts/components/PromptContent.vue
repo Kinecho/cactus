@@ -101,6 +101,7 @@
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
+    import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
@@ -450,9 +451,10 @@
             updateDocumentMeta() {
                 const index = this.activeIndex || 0;
                 let title = this.promptContent && this.promptContent.subjectLine;
-                let ogTitle = document.querySelector("meta[property='og:title']");
-                let ogDescription = document.querySelector("meta[property='og:description']");
-                let ogImage = document.querySelector("meta[property='og:image']");
+                let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
+                let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+                let ogImageTag = document.querySelector("meta[property='og:image']");
 
                 if (!title) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
@@ -463,14 +465,20 @@
                 } else {
                     document.title = 'Cactus Mindful Moment'
                 }
-                if (ogTitle) {
-                    ogTitle.setAttribute("content", `${title}`);
+                if (ogTitleTag) {
+                    ogTitleTag.setAttribute("content", `${title}`);
                 }
-                if (ogDescription) {
-                    ogDescription.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
+                if (ogDescriptionTag) {
+                    ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
                 }
-                if (ogImage) {
-                    ogImage.setAttribute("content", 'some other image');
+
+                if (!openGraphImage) {
+                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
+                    openGraphImage = firstContent && firstContent.backgroundImage;
+                }
+                if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
+                    let pngUrl = getCloudinaryUrlFromStorageUrl(openGraphImage.storageUrl, 1200, ["w_1200","h_630","f_png","c_fill"]);
+                    ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
             },
             async handleTap(event: TouchEvent) {
