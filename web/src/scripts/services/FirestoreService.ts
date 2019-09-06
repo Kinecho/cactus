@@ -165,7 +165,7 @@ export default class FirestoreService {
             }
             options.onData(fromDocumentSnapshot(snapshot, Type));
         }, error => {
-            console.error("there was an error fetching the document snapshot", options.queryName, error);
+            console.error(`there was an error fetching the document snapshot "${options.queryName || "unknown"}"`, error);
             options.onData(undefined, error)
         });
     }

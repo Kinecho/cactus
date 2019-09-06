@@ -8,6 +8,7 @@
             <div class="avatar">NP</div>
             <div class="info">
                 <span class="email">{{memberEmail}}</span>
+                <span class="name">{{memberName}}</span>
                 <span class="date">{{shareDate}}</span>
             </div>
         </div>
@@ -19,6 +20,7 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import {formatDate, getISODate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
+    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -30,16 +32,40 @@
         props: {
             response: ReflectionResponse
         },
-        data(): {} {
-            return {}
+        data(): {
+            resizeListener: any | undefined,
+            deviceWidth: number,
+        } {
+            return {
+                resizeListener: undefined,
+                deviceWidth: 0,
+            }
+        },
+        destroyed() {
+            if (this.resizeListener) {
+                window.removeEventListener("resize", this.resizeListener);
+            }
+        },
+        mounted() {
+            this.deviceWidth = getDeviceDimensions().width;
+            this.resizeListener = window.addEventListener("resize", () => {
+                this.deviceWidth = getDeviceDimensions().width;
+            })
         },
         computed: {
+            memberName(): string | undefined {
+                if (this.response && this.response.anonymous) {
+                    return copy.auth.AN_ANONYMOUS_USER;
+                } else if (this.response) {
+                    return "some User but we don't have their profile";
+                }
+            },
             memberEmail(): string | undefined {
                 return this.response.memberEmail;
             },
             shareDate(): string | undefined {
-
-                return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, copy.settings.dates.longFormat)}` || undefined;
+                const format = this.deviceWidth > MOBILE_BREAKPOINT_PX ? copy.settings.dates.longFormat : copy.settings.dates.shortFormat;
+                return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
             }
         }
     })
@@ -82,7 +108,9 @@
             align-items: center;
 
             .avatar {
-                $avatarDiameter: 5rem;
+                flex-shrink: 0;
+                $avatarDiameter: 4rem;
+                font-size: 1.5rem;
                 background-color: $lightGreen;
                 border-radius: 50%;
                 width: $avatarDiameter;
@@ -92,15 +120,23 @@
                 align-items: center;
                 color: $white;
                 margin-right: 1rem;
+
+                @include r(600) {
+                    $avatarDiameter: 5rem;
+                    width: $avatarDiameter;
+                    height: $avatarDiameter;
+                    font-size: 2.4rem;
+                }
             }
 
             .info {
                 display: flex;
                 flex-direction: column;
 
-                .email {
+                .email, .name {
                     font-weight: bold;
                 }
+
             }
         }
 

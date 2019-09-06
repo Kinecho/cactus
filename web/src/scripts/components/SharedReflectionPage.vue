@@ -1,6 +1,6 @@
 <template>
     <div class="shared-reflection-page">
-        <NavBar :isSticky="false"/>
+        <NavBar :isSticky="false" :forceTransparent="true"/>
         <div class="content">
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
@@ -20,6 +20,7 @@
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse from "@shared/models/ReflectionResponse"
     import Card from "@components/SharedReflectionCard.vue";
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     export default Vue.extend({
         components: {
@@ -46,7 +47,7 @@
 
             this.reflectionResponseId = responseId;
 
-            ReflectionResponseService.sharedInstance.observeSharedReflection(responseId, {
+            this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeSharedReflection(responseId, {
                 onData: (reflectionResponse, error) => {
                     if (error || !reflectionResponse) {
                         this.error = "This reflection does not exist or you do not have permission to view it";
@@ -58,14 +59,21 @@
                 }
             })
         },
+        beforeDestroy() {
+            if (this.responseUnsubscriber) {
+                this.responseUnsubscriber();
+            }
+        },
         data(): {
             reflectionResponseId: string | undefined,
             error: string | undefined,
+            responseUnsubscriber: ListenerUnsubscriber | undefined,
             reflectionResponse: ReflectionResponse | undefined,
         } {
             return {
                 reflectionResponseId: undefined,
                 error: undefined,
+                responseUnsubscriber: undefined,
                 reflectionResponse: undefined,
             }
         }
@@ -78,8 +86,11 @@
     @import "variables";
 
     .shared-reflection-page {
+        background: url("/assets/images/greenNeedleBlob.svg") repeat, $lightGreen;
+
         .content {
             min-height: 40rem;
+            padding: 4rem 1rem;
 
             .error {
                 padding: 3rem;
