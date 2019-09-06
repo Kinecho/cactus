@@ -305,14 +305,18 @@ import {QueryParam} from '@shared/util/queryParams'
 
                 console.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
 
-                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
-                const sharingCard: Content = {
-                    contentType: ContentType.share_reflection,
-                    text_md: shareReflectionCopy,
-                    title: copy.prompts.SHARE_YOUR_NOTE,
-                };
+                if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
+                    let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                    const sharingCard: Content = {
+                        contentType: ContentType.share_reflection,
+                        text_md: shareReflectionCopy,
+                        title: copy.prompts.SHARE_YOUR_NOTE,
+                    };
 
-                items.push(sharingCard);
+                    items.push(sharingCard);
+                }
+
+
                 return items;
 
             },
