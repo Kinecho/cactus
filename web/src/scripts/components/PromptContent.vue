@@ -605,12 +605,17 @@ import {QueryParam} from '@shared/util/queryParams'
     }
 
     .page-wrapper {
+        background-color: $lightBlue;
         display: flex;
         flex-flow: column nowrap;
         flex-grow: 1;
         width: 100vw;
         justify-content: center;
         position: relative;
+
+        @include r(600) {
+            background-color: transparent;
+        }
 
         @include maxW(600) {
             &.isModal {
