@@ -9,9 +9,9 @@
                 <flamelink-image :image="avatarData.image" alt="User Avatar"/>
             </div>
             <div class="info">
-                <span class="name">{{memberName}}</span>
-                <span class="email">{{memberEmail}}</span>
-                <span class="date">{{shareDate}}</span>
+                <p class="name">{{memberName}}</p>
+                <p class="email">{{memberEmail}}</p>
+                <p class="date">{{shareDate}}</p>
             </div>
         </div>
     </div>
@@ -97,10 +97,8 @@
 
     .shared-reflection-card {
         @include shadowbox;
-        margin: 0 1.6rem 3.2rem;
-        overflow: hidden;
-        padding: 1.6rem 1.6rem 2.4rem;
-        position: relative;
+        margin: -2.4rem 0 2.4rem;
+        padding: 1.6rem 2.4rem;
         text-align: left;
 
         @include r(600) {
@@ -113,13 +111,13 @@
             padding: 3.2rem;
         }
 
+        .noteQuestion {
+            margin-bottom: .8rem;
+        }
 
-        .note {
-            margin-bottom: 1rem;
-
-            .note-text {
-                white-space: pre-line;
-            }
+        .note-text {
+            margin-bottom: 2.4rem;
+            white-space: pre-line;
         }
 
         .profile {
@@ -127,23 +125,16 @@
             align-items: center;
 
             .avatar {
-                flex-shrink: 0;
-                $avatarDiameter: 4rem;
-                font-size: 1.5rem;
+                $avatarDiameter: 4.4rem;
                 border-radius: 50%;
-                width: $avatarDiameter;
                 height: $avatarDiameter;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                color: $white;
-                margin-right: 1rem;
+                margin-right: .8rem;
+                width: $avatarDiameter;
 
                 @include r(600) {
-                    $avatarDiameter: 5rem;
-                    width: $avatarDiameter;
+                    $avatarDiameter: 6.4rem;
                     height: $avatarDiameter;
-                    font-size: 2.4rem;
+                    width: $avatarDiameter;
                 }
 
                 img {
@@ -153,16 +144,13 @@
             }
 
             .info {
-                display: flex;
-                flex-direction: column;
+                font-size: 1.6rem;
+            }
 
-                .email, .name {
-                    font-weight: bold;
-                }
-
+            .name {
+                font-weight: bold;
             }
         }
-
     }
 
 </style>

@@ -35,7 +35,7 @@
                             </svg>
                             <span slot="text">Shareable Link Created</span>
                         </snackbar-content>
-                        <p>Here's your direct link to share:</p>
+                        <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                     </div>
                     <button v-else class="button primary getLink"
@@ -882,10 +882,6 @@
         display: none;
     }
 
-    .share-note-link-container {
-        position: relative;
-    }
-
     .share-warning {
         background-color: $lightGreen;
         border-radius: 6px;
@@ -898,5 +894,9 @@
             margin: .4rem .8rem 0 0;
             width: 2rem;
         }
+    }
+
+    .directLink {
+        margin-bottom: 1.6rem;
     }
 </style>

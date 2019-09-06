@@ -1,11 +1,11 @@
 <template>
     <transition name="snack" appear>
         <div class="snackbar snackbar-content" v-if="!hidden" :class="[{closeable}]">
-            <span class="icon" v-if="$slots.icon">
+            <span class="check" v-if="$slots.icon">
                 <slot name="icon"></slot>
             </span>
             <slot name="text">{{text}}</slot>
-            <button title="Close" class="close tertiary icon" @click="dismiss" v-if="closeable">
+            <button title="Close" class="close tertiary" @click="dismiss" v-if="closeable">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                     <path fill="#e6f9f7" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                 </svg>
@@ -75,43 +75,36 @@
     @import "transitions";
 
     .snackbar-content {
-        $topPadding: 2rem;
-        padding: $topPadding 2rem;
-        background-color: $darkestGreen;
-        color: $lightBlue;
-        border-radius: 12px;
-        position: relative;
-        display: flex;
         align-items: center;
-        min-height: 2rem;
+        background-color: $darkestGreen;
+        border-radius: 6px;
+        color: $lightBlue;
+        display: flex;
+        padding: .8rem 1.6rem;
+        position: relative;
 
-        .icon {
-            display: flex;
-            align-items: center;
-            margin-right: 1rem;
+        &.closeable {
+            padding-right: 4rem;
+        }
 
-            svg {
-                height: 2rem;
-                width: 2rem;
+        .check svg {
+            height: 1.1rem;
+            margin-right: .8rem;
+            width: 1.6rem;
 
-                path {
-                    fill: $lightBlue;
-                }
-
+            path {
+                fill: $lightBlue;
             }
         }
 
-        &.closeable {
-            padding-right: 5rem;
-        }
-
         .close {
-            $closeHeight: 1.5rem;
+            padding: 1rem 1.6rem;
             position: absolute;
             right: 0;
-            top: $topPadding - $closeHeight/2;
+            top: 0;
 
             svg {
+                $closeHeight: 1.5rem;
                 height: $closeHeight;
                 width: $closeHeight;
 
