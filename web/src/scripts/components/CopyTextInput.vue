@@ -68,26 +68,24 @@
     @import "mixins";
     @import "variables";
 
-    .copy-link-container {
-        margin-bottom: 3.2rem;
-        position: relative;
+    .link-input {
+        @include textInput;
+        color: $lightText;
+        margin-bottom: .8rem;
+        max-width: none;
+        width: 100%;
 
-        .link-input {
-            @include textInput;
-            color: $lightText;
-            margin-bottom: .8rem;
-            max-width: none;
-            width: 100%;
-
-            @include r(600) {
-                margin-bottom: 1.6rem;
-                padding-right: 9rem;
-            }
+        @include r(374) {
+            margin-bottom: 0;
         }
+    }
+
+    .copy-link-container {
+        position: relative;
+    }
 
         button.copy {
             width: 100%;
-            margin-bottom: 1.2rem;
 
             @include r(600) {
                 border: none;
@@ -112,6 +110,13 @@
                 @include buttonSecondary;
             }
 
+        @include r(374) {
+            box-shadow: none;
+            padding: 1.2rem 2.4rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
         }
     }
 

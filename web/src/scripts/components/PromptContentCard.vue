@@ -1,31 +1,26 @@
 <template>
     <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
-            <div class="skip-container" v-show="showSkip">
-                <button class="skip tertiary wiggle" @click="next">
-                    <span class="buttonText">Skip</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-
-                </button>
-            </div>
-
+            <button class="skip tertiary" @click="next" v-show="showSkip">
+                Skip
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                    <path fill="#07454C" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                </svg>
+            </button>
 
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
-                <p>
+                <p :class="{tight: isShareNoteScreen}">
                     <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
                 </p>
             </div>
 
             <!--  START SHARE_NOTE -->
-            <div v-if="isShareNoteScreen">
-                <div class="share-note-container">
-                    <h3>{{response.promptQuestion}}</h3>
+            <div class="share-note-container" v-if="isShareNoteScreen">
+                <div class="note">
+                    <h3 class="noteQuestion">{{response.promptQuestion}}</h3>
                     <p class="note-text">{{response.content.text}}</p>
-
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
@@ -38,15 +33,12 @@
                         <p>Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                     </div>
-                    <button v-else class="button primary" :disabled="creatingLink" :class="{loading: creatingLink}" @click="createSharableLink">
+                    <button v-else class="button primary getLink" :disabled="creatingLink" :class="{loading: creatingLink}" @click="createSharableLink">
                         {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
                     </button>
 
                 </transition>
-
             </div>
-
-
             <!--  END SHARE_NOTE -->
 
             <!--    START QUOTE    -->
@@ -404,65 +396,12 @@
             min-height: calc(100vh - 9rem);
         }
         @include r(600) {
-            min-height: 0;
+            border-radius: 12px;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             height: 100%;
-        }
-
-
-        &.type {
-            &-share_reflection {
-                .skip {
-                }
-            }
-        }
-
-
-        .skip-container {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-
-            .skip {
-                align-items: center;
-                display: flex;
-
-                &:hover {
-                    background-color: transparent;
-                }
-
-                @include r(600) {
-                    margin: 0 auto;
-                    position: static;
-                    width: 48rem;
-                }
-
-                svg {
-                    height: 2.4rem;
-                    width: 2rem;
-                    margin-left: 1rem;
-                    @include r(600) {
-                        height: 2.2rem;
-                        width: 1.8rem;
-                    }
-                }
-
-                &:hover {
-                    svg {
-                        animation: wiggle .5s forwards;
-                    }
-
-
-                }
-
-                .buttonText {
-                    display: none;
-
-                    @include r(600) {
-                        display: block;
-                    }
-                }
-            }
-
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
         }
 
         .slide-1 & {
@@ -518,11 +457,6 @@
         }
 
         @include r(600) {
-            border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            position: relative;
-            overflow: hidden;
-
             .slide-1 &,
             .slide-2 &,
             .slide-3 &,
@@ -532,6 +466,16 @@
             .slide-7 &,
             .slide-8 & {
                 background-image: none;
+            }
+        }
+
+        &.type-share_reflection {
+            display: block;
+            padding: 1.6rem;
+
+            @include r(374) {
+                display: flex;
+                padding: 2.4rem;
             }
         }
     }
@@ -597,14 +541,50 @@
 
         p {
             white-space: pre-line;
+
+            &.tight {
+                font-size: 1.6rem;
+
+                @include r(374) {
+                    font-size: 1.8rem;
+                }
+            }
+        }
+    }
+
+    .skip.tertiary {
+        align-items: center;
+        color: $darkestGreen;
+        display: flex;
+        flex-grow: 0;
+        justify-content: center;
+        width: auto;
+
+        svg {
+            height: 1.2rem;
+            margin-left: .4rem;
+            width: 1.2rem;
         }
 
-
-        .title {
-            margin-bottom: 2rem;
-            font-size: 4rem;
+        @include r(600) {
+            display: none;
         }
+    }
 
+    .note {
+        @include shadowbox;
+        margin-bottom: 2.4rem;
+        padding: 1.6rem 2.4rem;
+        text-align: left;
+    }
+
+    .noteQuestion,
+    .copyText {
+        margin-bottom: .8rem;
+    }
+
+    .getLink {
+        width: 100%;
     }
 
     .label {
