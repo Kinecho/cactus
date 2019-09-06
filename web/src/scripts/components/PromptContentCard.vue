@@ -498,6 +498,8 @@
         }
 
         &.type-share_reflection {
+
+            overflow-y: auto;
             display: block;
             padding: 1.6rem;
 
