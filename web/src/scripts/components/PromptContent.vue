@@ -38,7 +38,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
-                                    v-bind:content="promptContent.content[activeIndex]"
+                                    v-bind:content="contentItems[activeIndex]"
                                     v-bind:response="reflectionResponse"
                                     v-bind:hasNext="hasNext && activeIndex > 0"
                                     v-bind:reflectionDuration="reflectionDuration"
@@ -107,13 +107,15 @@ import {QueryParam} from '@shared/util/queryParams'
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
+    import {isBlank} from "@shared/util/StringUtil"
+    import CopyService from "@shared/copy/CopyService";
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
     const MIN_REFLECTION_MS = MINIMUM_REFLECT_DURATION_MS;
     const REFLECT_UPDATE_INTERVAL_MS = 100;
-
+    const copy = CopyService.getSharedInstance().copy;
     export default Vue.extend({
         components: {
             ContentCard,
@@ -219,6 +221,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         this.completed = true;
                     }
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+
                     this.promptContent = promptContent;
                     this.loading = false;
                     this.updateDocumentTitle();
@@ -293,14 +296,34 @@ import {QueryParam} from '@shared/util/queryParams'
             };
         },
         computed: {
+            contentItems(): Content[] | undefined {
+                if (!this.promptContent) {
+                    return;
+                }
+
+                const items = [...this.promptContent.content];
+
+                console.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
+
+                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                const sharingCard: Content = {
+                    contentType: ContentType.share_reflection,
+                    text_md: shareReflectionCopy,
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                };
+
+                items.push(sharingCard);
+                return items;
+
+            },
             slideNumberClass(): string {
                 return `slide-${this.activeIndex}`
             },
             hasNext(): boolean {
-                return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
+                return this.contentItems && this.contentItems && this.activeIndex < this.contentItems.length - 1 || false
             },
             isLastCard(): boolean {
-                return this.promptContent && this.promptContent.content && this.activeIndex === this.promptContent.content.length - 1 || false
+                return this.contentItems && this.contentItems && this.activeIndex === this.contentItems.length - 1 || false
             },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
@@ -312,8 +335,8 @@ import {QueryParam} from '@shared/util/queryParams'
                 return this.reflectionDuration >= MIN_REFLECTION_MS
             },
             isReflection(): boolean {
-                if (this.promptContent && this.promptContent.content.length > this.activeIndex) {
-                    const activeContent = this.promptContent.content[this.activeIndex];
+                if (this.contentItems && this.contentItems.length > this.activeIndex) {
+                    const activeContent = this.contentItems[this.activeIndex];
                     const isReflect = activeContent.contentType === ContentType.reflect || false;
                     return isReflect
                 }
@@ -341,8 +364,8 @@ import {QueryParam} from '@shared/util/queryParams'
             activeIndex(index: number, oldIndex: number) {
                 this.updateDocumentTitle();
 
-                if (this.promptContent && this.promptContent.content.length > index) {
-                    const activeContent = this.promptContent.content[index];
+                if (this.contentItems && this.contentItems.length > index) {
+                    const activeContent = this.contentItems[index];
                     let isReflect = activeContent.contentType === ContentType.reflect || false;
 
                     if (isReflect) {
@@ -527,7 +550,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
                 this.transitionName = "slide";
                 const saveTask = this.isReflection ? this.save() : () => undefined;
-                const content = this.promptContent ? this.promptContent.content : [];
+                const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);

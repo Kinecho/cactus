@@ -1,9 +1,23 @@
 <template>
-    <div :class="['content-card', {reflectScreen: isReflectScreen}]">
+    <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
+            <div class="skip-container" v-show="showSkip">
+                <button class="skip tertiary wiggle" @click="next">
+                    <span class="buttonText">Skip</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
+
+                </button>
+            </div>
+
+
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
-                <p>{{processedContent.text}}</p>
+                <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
+                <p>
+                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                </p>
             </div>
             <!--    START QUOTE    -->
             <div class="quote-container" v-if="processedContent.quote">
@@ -157,16 +171,17 @@
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import {debounce} from "debounce";
     import {formatDurationAsTime} from '@shared/util/DateUtil'
-
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
+    import VueSimpleMarkdown from 'vue-simple-markdown'
+
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
-
     const copy = CopyService.getSharedInstance().copy;
+
+    Vue.use(VueSimpleMarkdown);
 
     export default Vue.extend({
         components: {
@@ -217,6 +232,9 @@
             }
         },
         computed: {
+            showSkip(): boolean {
+                return this.processedContent && this.processedContent.contentType === ContentType.share_reflection;
+            },
             reflectionProgress(): number {
                 return Math.min(this.reflectionDuration / MINIMUM_REFLECT_DURATION_MS, 1);
             },
@@ -330,6 +348,63 @@
         @include r(600) {
             min-height: 0;
             height: 100%;
+        }
+
+
+        &.type {
+            &-share_reflection {
+                .skip {
+                }
+            }
+        }
+
+
+        .skip-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+
+            .skip {
+                align-items: center;
+                display: flex;
+
+                &:hover {
+                    background-color: transparent;
+                }
+
+                @include r(600) {
+                    margin: 0 auto;
+                    position: static;
+                    width: 48rem;
+                }
+
+                svg {
+                    height: 2.4rem;
+                    width: 2rem;
+                    margin-left: 1rem;
+                    @include r(600) {
+                        height: 2.2rem;
+                        width: 1.8rem;
+                    }
+                }
+
+                &:hover {
+                    svg {
+                        animation: wiggle .5s forwards;
+                    }
+
+
+                }
+
+                .buttonText {
+                    display: none;
+
+                    @include r(600) {
+                        display: block;
+                    }
+                }
+            }
+
         }
 
         .slide-1 & {
@@ -461,6 +536,17 @@
         .reflectScreen & {
             padding: 5.6rem 0 1.6rem;
         }
+
+        p {
+            white-space: pre-line;
+        }
+
+
+        .title {
+            margin-bottom: 2rem;
+            font-size: 4rem;
+        }
+
     }
 
     .label {

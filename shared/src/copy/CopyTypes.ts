@@ -15,6 +15,8 @@ export interface PromptCopy {
     DAY_STREAK: string,
     GO_HOME: string,
     SIGN_UP_MESSAGE: string,
+    SHARE_YOUR_NOTE: string,
+    SHARE_PROMPT_COPY_MD: string,
 }
 
 export interface CommonCopy {
@@ -40,6 +42,7 @@ export interface AuthenticationCopy {
     MEMBER_SINCE: string,
     DISPLAY_NAME: string,
     CONNECTED_ACCOUNTS: string,
+
     magicLinkSuccess(email: string): string;
 
 }
