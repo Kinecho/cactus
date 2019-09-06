@@ -74,7 +74,7 @@
 <script lang="ts">
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StardardFooter.vue";
+    import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";

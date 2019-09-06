@@ -136,6 +136,21 @@ export default class ReflectionResponseService {
         }
     }
 
+    observeSharedReflection(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?:any) => void }): ListenerUnsubscriber | undefined {
+        return this.firestoreService.observeById(reflectionId, ReflectionResponse, {
+            queryName: "observeSharedReflection",
+            onData: (model:ReflectionResponse|undefined, error) => {
+                if (model && model.shared){
+                    options.onData(model, error);
+                }
+                else {
+                    options.onData(undefined, error);
+                }
+
+            }
+        });
+    }
+
     observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber | undefined {
         let queryUnsubscriber: ListenerUnsubscriber | undefined = undefined;
         let currentMember: CactusMember | undefined = undefined;

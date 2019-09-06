@@ -38,7 +38,8 @@ declare interface GetOptions {
 }
 
 declare interface DocObserverOptions<IModel extends BaseModel> extends GetOptions {
-    onData: (model?: IModel) => void | Promise<void>
+    queryName?:string,
+    onData: (model?: IModel, error?: any) => void | Promise<void>
 }
 
 declare interface IQueryOptions<IQueryCursor> extends GetOptions {

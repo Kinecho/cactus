@@ -159,11 +159,14 @@ export default class FirestoreService {
 
         return collection.doc(id).onSnapshot(snapshot => {
             if (!options.includeDeleted && snapshot.get("deleted") === true) {
-                console.warn("Document is deleted, and the request options did not include deleted objects");
+                console.warn("Document is deleted, and the request options did not include deleted objects", options.queryName);
                 options.onData(undefined);
                 return;
             }
             options.onData(fromDocumentSnapshot(snapshot, Type));
+        }, error => {
+            console.error("there was an error fetching the document snapshot", options.queryName, error);
+            options.onData(undefined, error)
         });
     }
 

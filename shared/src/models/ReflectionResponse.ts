@@ -14,7 +14,7 @@ export function isJournal(medium?: ResponseMedium): boolean {
     return medium && [ResponseMedium.JOURNAL_ANDROID, ResponseMedium.JOURNAL_IOS, ResponseMedium.JOURNAL_WEB].includes(medium) || false;
 }
 
-export function getResponseMediumDisplayName(medium?: ResponseMedium|string): string {
+export function getResponseMediumDisplayName(medium?: ResponseMedium | string): string {
     if (!medium) {
         return "Unknown";
     }
@@ -95,6 +95,7 @@ export enum ReflectionResponseField {
     promptId = "promptId",
     promptQuestion = "promptQuestion",
     reflectionDurationMs = "reflectionDurationMs",
+    shared = "shared",
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -116,4 +117,11 @@ export default class ReflectionResponse extends BaseModel {
     shared: boolean = false;
     sharedAt?: Date;
     unsharedAt?: Date;
+
+    decodeJSON(json: any) {
+        super.decodeJSON(json);
+
+        this.sharedAt = json.sharedAt ? new Date(json.sharedAt) : undefined;
+        this.unsharedAt = json.unsharedAt ? new Date(json.unsharedAt) : undefined;
+    }
 }

@@ -8,7 +8,7 @@ import {LocalStorageKey} from "@web/services/StorageService";
 import Vue from "vue";
 import SignIn from "@components/SignIn.vue"
 import NavBar from "@components/NavBar.vue";
-import Footer from "@components/StardardFooter.vue";
+import Footer from "@components/StandardFooter.vue";
 import CopyService from "@shared/copy/CopyService";
 import {commonInit} from "@web/common";
 

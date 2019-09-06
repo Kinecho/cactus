@@ -24,10 +24,8 @@
 
             <!--  START SHARE_NOTE -->
             <div class="share-note-container" v-if="isShareNoteScreen">
-                <div class="note">
-                    <h3 class="noteQuestion">{{response.promptQuestion}}</h3>
-                    <p class="note-text">{{response.content.text}}</p>
-                </div>
+                <shared-reflection-card :response="response"/>
+
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
                         <snackbar-content :autoHide="false" v-if="linkCreated">
@@ -218,6 +216,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import SharedReflectionCard from "@components/SharedReflectionCard.vue";
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -231,6 +230,7 @@
             FlamelinkImage,
             CopyTextInput,
             SnackbarContent,
+            SharedReflectionCard,
         },
         props: {
             content: {
