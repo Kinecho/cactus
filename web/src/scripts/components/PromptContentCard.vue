@@ -3,6 +3,7 @@
         <section class="content">
 
             <div class="share-warning" v-if="isReflectScreen && response && response.shared">
+                <img src="/assets/images/users.svg" />
                 This reflection has been shared
             </div>
 
@@ -896,10 +897,17 @@
         position: relative;
     }
 
-
     .share-warning {
-        background: orangered;
-        color: white;
-        padding: 2rem;
+        background-color: $lightGreen;
+        border-radius: 6px;
+        display: flex;
+        padding: .8rem 1.6rem;
+        text-align: left;
+
+        img {
+            height: 2rem;
+            margin: .4rem .8rem 0 0;
+            width: 2rem;
+        }
     }
 </style>
