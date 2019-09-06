@@ -5,10 +5,12 @@
             <p class="note-text">{{response.content.text}}</p>
         </div>
         <div class="profile">
-            <div class="avatar">NP</div>
+            <div class="avatar">
+                <flamelink-image :image="avatarData.image" alt="User Avatar"/>
+            </div>
             <div class="info">
-                <span class="email">{{memberEmail}}</span>
                 <span class="name">{{memberName}}</span>
+                <span class="email">{{memberEmail}}</span>
                 <span class="date">{{shareDate}}</span>
             </div>
         </div>
@@ -18,14 +20,20 @@
 <script lang="ts">
     import Vue from "vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import {formatDate, getISODate} from '@shared/util/DateUtil'
+    import {formatDate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
+    import FlamelinkImage from '@components/FlamelinkImage.vue'
+    import {Image} from '@shared/models/PromptContent'
+    import {getRandomAvatar} from '@web/AvatarUtil'
 
     const copy = CopyService.getSharedInstance().copy;
 
 
     export default Vue.extend({
+        components: {
+            FlamelinkImage,
+        },
         created() {
 
         },
@@ -57,7 +65,7 @@
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
                 } else if (this.response) {
-                    return "some User but we don't have their profile";
+                    // return "some User but we don't have their profile";
                 }
             },
             memberEmail(): string | undefined {
@@ -66,6 +74,17 @@
             shareDate(): string | undefined {
                 const format = this.deviceWidth > MOBILE_BREAKPOINT_PX ? copy.settings.dates.longFormat : copy.settings.dates.shortFormat;
                 return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
+            },
+            avatarData(): {
+                image: any | Image,
+            } {
+                const image: Image = {
+                    url: getRandomAvatar(),
+                };
+
+                return {
+                    image,
+                }
             }
         }
     })
@@ -111,7 +130,6 @@
                 flex-shrink: 0;
                 $avatarDiameter: 4rem;
                 font-size: 1.5rem;
-                background-color: $lightGreen;
                 border-radius: 50%;
                 width: $avatarDiameter;
                 height: $avatarDiameter;
@@ -126,6 +144,11 @@
                     width: $avatarDiameter;
                     height: $avatarDiameter;
                     font-size: 2.4rem;
+                }
+
+                img {
+                    width: 100%;
+                    height: 100%;
                 }
             }
 

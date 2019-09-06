@@ -124,7 +124,10 @@ export function getFullName(member?: CactusMember): string {
     return `${member.firstName || ""} ${member.lastName || ""}`.trim();
 }
 
-export function getInitials(input: string): string {
+export function getInitials(input?: string): string {
+    if (!input) {
+        return "";
+    }
     const {firstName, lastName} = destructureDisplayName(input);
     let initials = "";
     if (firstName) {
