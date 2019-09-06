@@ -477,7 +477,7 @@
                     openGraphImage = firstContent && firstContent.backgroundImage;
                 }
                 if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    let pngUrl = getCloudinaryUrlFromStorageUrl(openGraphImage.storageUrl, 1200, ["w_1200","h_630","f_png","c_fill"]);
+                    let pngUrl = getCloudinaryUrlFromStorageUrl(openGraphImage.storageUrl, 1200, ["w_1200","h_630","f_png","c_lpad"]);
                     ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
             },
