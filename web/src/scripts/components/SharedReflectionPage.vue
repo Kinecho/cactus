@@ -89,10 +89,11 @@
     @import "variables";
 
     .shared-reflection-page {
-        background: url("/assets/images/greenNeedleBlob.svg") repeat, $lightGreen;
-
+        background: url("/assets/images/greenNeedleBlob.svg"), $lightGreen;
+        background-size: 40%;
         @include r(600) {
             background: unset;
+            background-size: 60%
         }
 
         min-height: 40rem;

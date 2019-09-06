@@ -45,11 +45,13 @@
     @import "variables";
 
     .signup-footer {
-        background: url("/assets/images/yellowNeedles.svg") repeat, $yellow;
+        background: url("/assets/images/yellowNeedles.svg"), $yellow;
+        background-size: 80%;
         padding: 1.6rem;
         margin: 0 auto;
         position: relative;
-        @include r(600){
+        @include r(600) {
+            background-size: 30%;
             max-width: 80rem;
             border-radius: .5rem;
             top: 3rem;
