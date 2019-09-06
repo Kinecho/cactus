@@ -312,17 +312,12 @@
         background: $lightBlue no-repeat;
         display: flex;
         flex-direction: column;
+        height: 100vh;
         justify-content: space-between;
         padding: 2.4rem;
         width: 100%;
         overflow: hidden;
 
-        @include isTinyPhone {
-            min-height: calc(100vh - 5.6rem);
-        }
-        @include biggerThanTinyPhone {
-            min-height: calc(100vh - 9rem);
-        }
         @include r(600) {
             min-height: 0;
             height: 100%;

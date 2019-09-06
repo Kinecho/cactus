@@ -297,14 +297,6 @@
             transform-style: preserve-3d;
             transition: 0.6s;
 
-            @include isTinyPhone {
-                height: calc(100vh - 8rem);
-            }
-
-            @include biggerThanTinyPhone {
-                height: calc(100vh - 10rem);
-            }
-
             @include r(600) {
                 border-radius: 12px;
                 box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
@@ -336,8 +328,13 @@
 
             &.front {
                 background-color: lighten($lightPink, 3%);
+                height: 100vh;
                 transform: rotateY(0);
                 z-index: 2;
+
+                @include r(600) {
+                    height: auto;
+                }
             }
 
             &.back {

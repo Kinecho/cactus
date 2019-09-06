@@ -256,25 +256,29 @@ $widthDesktop: $widthXL;
 }
 
 @mixin secondaryButton() {
-  background-color: $white;
-  border: 1px solid $lightGreen;
-  box-shadow: none;
-  color: $darkGreen;
-  padding: 1.2rem 2.4rem;
+    background-color: $white;
+    border: 1px solid $lightGreen;
+    box-shadow: none;
+    color: $darkGreen;
+    padding: 1.2rem 2.4rem;
 
-  &:hover {
-    background-color: $lightGreen;
-  }
+    @include r(600) {
+        &:hover {
+            background-color: $lightGreen;
+        }
+    }
 }
 
 @mixin tertiaryButton() {
-  background-color: transparent;
-  box-shadow: none;
-  color: $darkGreen;
+    background-color: transparent;
+    box-shadow: none;
+    color: $darkGreen;
 
-  &:hover {
-    background-color: $lightGreen;
-  }
+    @include r(600) {
+        &:hover {
+            background-color: $lightGreen;
+        }
+    }
 }
 
 @mixin smallButton() {

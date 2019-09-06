@@ -617,37 +617,37 @@ import {QueryParam} from '@shared/util/queryParams'
             background-color: transparent;
         }
 
+        &:not(.isModal) {
+            .content-card,
+            .flip-card {
+                height: calc(100vh - 5.2rem);
+
+                @include r(374) {
+                    height: calc(100vh - 9rem);
+                }
+                @include r(600) {
+                    height: 100%;
+                }
+            }
+        }
+
+        &.isModal {
+            .content-card,
+            .flip-card {
+                height: 100vh;
+
+                @include r(600) {
+                    height: 100%;
+                }
+            }
+        }
+
         @include maxW(600) {
             &.isModal {
                 height: 100vh;
 
                 .content-container {
                     height: 100%;
-
-                    .flipper {
-                        height: 100%;
-
-                        .flip-card {
-                            height: 100%;
-
-                            .content-card {
-                                height: 100%;
-                            }
-
-                            .flip-container {
-                                height: 100%;
-
-                                .flipper {
-                                    height: 100%;
-
-                                    .flip-card {
-                                        height: 100%;
-                                    }
-                                }
-
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -882,14 +882,6 @@ import {QueryParam} from '@shared/util/queryParams'
         justify-content: space-between;
         width: 100%;
         z-index: 10;
-
-        @include isTinyPhone {
-            height: calc(100vh - 5.6rem);
-        }
-
-        @include biggerThanTinyPhone {
-            height: calc(100vh - 9rem);
-        }
 
         @include r(600) {
             max-height: 66rem;
