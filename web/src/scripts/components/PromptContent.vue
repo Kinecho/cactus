@@ -27,7 +27,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
-                <div class="progress-wrapper" v-if="!completed && !showSharing">
+                <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                     </div>
@@ -315,6 +315,13 @@ import {QueryParam} from '@shared/util/queryParams'
                 items.push(sharingCard);
                 return items;
 
+            },
+            isShareNote(): boolean {
+                if (this.contentItems && this.contentItems.length > this.activeIndex) {
+                    const activeContent = this.contentItems[this.activeIndex];
+                    return activeContent.contentType === ContentType.share_reflection || false;
+                }
+                return false;
             },
             slideNumberClass(): string {
                 return `slide-${this.activeIndex}`
