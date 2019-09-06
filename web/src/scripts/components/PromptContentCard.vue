@@ -448,12 +448,12 @@
         font-size: 2rem;
         padding: 4rem 1.6rem;
 
-        @include r(374) {
-            font-size: 2.4rem;
+        .reflectScreen & {
+            margin-top: -5.6rem;
         }
 
-        .reflectScreen & {
-            padding: 5.6rem 0 1.6rem;
+        @include r(374) {
+            font-size: 2.4rem;
         }
     }
 
@@ -467,12 +467,6 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
-
-        @include isTinyPhone {
-            .reflectScreen & {
-                justify-content: flex-start;
-            }
-        }
     }
 
     .quote-container {
@@ -571,7 +565,7 @@
         display: flex;
         height: 156px;
         justify-content: center;
-        margin-bottom: 2.4rem;
+        margin: -2.4rem 0 2.4rem;
     }
 
     .leaf7 {
