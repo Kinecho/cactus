@@ -326,7 +326,7 @@
         .slide-1 & {
             background-image: url(/assets/images/greenNeedleBlob.svg),
             url(/assets/images/pinkBlob.svg);
-            background-position: right -170px bottom 18vh,
+            background-position: right -170px bottom 8vh,
             right -140px bottom 28vh;
             background-size: 250px, 180px;
         }
@@ -336,7 +336,7 @@
             url(/assets/images/pinkBlob.svg),
             url(/assets/images/yellowNeedleBlob.svg),
             url(/assets/images/yellowBlob.svg);
-            background-position: left -200px bottom 18vh,
+            background-position: left -200px bottom 8vh,
             left -150px bottom 28vh,
             right -440px bottom 48vh,
             right -205px bottom 67vh;
@@ -484,8 +484,13 @@
         }
 
         .quote {
-            font-size: 2.4rem;
+            font-size: 2rem;
             margin-bottom: 2.4rem;
+            padding: 0 1.6rem;
+
+            @include r(374) {
+                font-size: 2.4rem;
+            }
         }
 
         .name {
