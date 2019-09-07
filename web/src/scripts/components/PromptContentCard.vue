@@ -33,7 +33,7 @@
                             <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                                 <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                             </svg>
-                            <span slot="text">Shareable Link Created</span>
+                            <span slot="text">Shareable link created</span>
                         </snackbar-content>
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
@@ -500,6 +500,10 @@
             @include r(374) {
                 display: flex;
                 padding: 2.4rem;
+            }
+
+            .text {
+                padding: 0 0 3.2rem;
             }
         }
     }

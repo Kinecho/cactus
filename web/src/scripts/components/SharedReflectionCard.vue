@@ -97,7 +97,7 @@
 
     .shared-reflection-card {
         @include shadowbox;
-        margin: -2.4rem 0 2.4rem;
+        margin-bottom: 2.4rem;
         padding: 1.6rem 2.4rem;
         text-align: left;
 

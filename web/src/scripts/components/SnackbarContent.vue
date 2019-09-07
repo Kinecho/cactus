@@ -78,13 +78,14 @@
         align-items: center;
         background-color: $darkestGreen;
         border-radius: 6px;
-        color: $lightBlue;
-        display: flex;
+        color: $lightGreen;
+        display: inline-flex;
+        margin-bottom: 1.6rem;
         padding: .8rem 1.6rem;
         position: relative;
 
         &.closeable {
-            padding-right: 4rem;
+            padding-right: 4.8rem;
         }
 
         .check svg {
@@ -93,7 +94,7 @@
             width: 1.6rem;
 
             path {
-                fill: $lightBlue;
+                fill: $lightGreen;
             }
         }
 
@@ -114,7 +115,6 @@
             }
         }
     }
-
 
     .snack {
         &-enter-active {
