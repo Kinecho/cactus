@@ -46,6 +46,7 @@
                         </label>
                         <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
+
                     </div>
                     <div class="item" v-if="showProviders">
                         <label class="label">{{copy.auth.CONNECTED_ACCOUNTS}}</label>
@@ -58,12 +59,19 @@
                                 </div>
                             </li>
                         </ul>
-
                     </div>
                 </div>
             </transition>
-            <div>
-
+            <div class="snackbar-container">
+                <snackbar-content
+                        v-for="(snackbar, index) of snackbars"
+                        :text="snackbar.message"
+                        :closeable="snackbar.closeable"
+                        :key="snackbar.id"
+                        @close="removeSnackbar(snackbar.id)"
+                        :autoHide="snackbar.autoHide"
+                        :durationMs="snackbar.timeoutMs"
+                />
             </div>
         </div>
         <Footer/>
@@ -90,6 +98,8 @@
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
+    import SnackbarContent from "@components/SnackbarContent.vue";
+    import * as uuid from "uuid/v4";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -107,6 +117,7 @@
             CheckBox,
             TimezonePicker,
             ProviderIcon,
+            SnackbarContent,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -134,6 +145,7 @@
             error: string | undefined,
             removedProviderIds: string[],
             copy: LocalizedCopy,
+            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }[],
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -147,6 +159,7 @@
                 error: undefined,
                 removedProviderIds: [],
                 copy,
+                snackbars: [],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -208,9 +221,39 @@
                 if (c) {
                     this.removedProviderIds.push(providerId);
                     await this.user.unlink(providerId);
+                    this.addSnackbar(`${getProviderDisplayName(providerId)} Removed`);
                     this.user.reload();
                 }
                 return;
+            },
+            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }): string {
+
+                const id = uuid();
+                if (typeof message === "string") {
+                    this.snackbars.push({id, message: message, autoHide: true});
+                } else {
+                    this.snackbars.push({id, autoHide: true, closeable: true, ...message});
+                }
+
+                return id;
+            },
+            removeSnackbar(id: string) {
+                console.log("removing snackbar", id);
+                this.snackbars = this.snackbars.filter(snack => snack.id !== id);
+            },
+            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }) {
+                const snackbar = this.snackbars.find(snack => snack.id === id);
+
+                if (!snackbar) {
+                    console.log("no snackbar found with id");
+                    return;
+                }
+                console.log("Found snackbar ", id);
+                if (typeof message === "string") {
+                    snackbar.message = message;
+                } else {
+                    Object.assign(snackbar, message);
+                }
             },
             async save() {
                 if (this.member) {
@@ -219,11 +262,17 @@
                 }
             },
             async saveEmailStatus(status: NotificationStatus) {
+                const snackId = this.addSnackbar({
+                    message: "Saving notification settings...",
+                    closeable: false,
+                    autoHide: false
+                });
                 console.log("Saving status...", status);
                 this.error = undefined;
                 if (this.member && this.member.email) {
                     const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
+                        this.addSnackbar("Oops! Unable to save email settings.");
                         console.log("Unsetting notification status change since the update failed");
 
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
@@ -234,6 +283,12 @@
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
                         this.error = errorMessage;
+                    } else {
+                        this.updateSnackbar(snackId, {
+                            message: "Email Settings Updated",
+                            autoHide: true,
+                            closeable: true
+                        });
                     }
                 }
             },
@@ -241,6 +296,7 @@
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     await this.save();
+                    this.addSnackbar("Timezone Updated");
                 }
             }
         }
@@ -253,7 +309,24 @@
     @import "variables";
     @import "forms";
 
+    .snackbar-container {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 5000;
+        display: flex;
+        flex-direction: column;
+
+        @include r(600) {
+            bottom: unset;
+            top: 9rem;
+            left: 50%;
+        }
+
+    }
+
     .accountContainer {
+
         display: flex;
         flex-flow: column nowrap;
         min-height: 100vh;
@@ -269,6 +342,7 @@
     }
 
     .centered.content {
+        position: relative;
         flex-grow: 1;
         max-width: 70rem;
         padding: 2.4rem;

@@ -45,6 +45,7 @@
             if (this.autoHide) {
                 this.hideTimer = setTimeout(() => {
                     this.timedOut = true;
+                    this.remove();
                 }, this.durationMs || DEFAULT_DURATION_MS)
             }
         },
@@ -58,10 +59,26 @@
                 return this.timedOut || this.dismissed;
             }
         },
-
+        watch: {
+            autoHide(autoHide: boolean) {
+                if (this.hideTimer) {
+                    clearInterval(this.hideTimer);
+                }
+                if (autoHide) {
+                    this.hideTimer = setTimeout(() => {
+                        this.timedOut = true;
+                        this.remove();
+                    }, this.durationMs || DEFAULT_DURATION_MS)
+                }
+            }
+        },
         methods: {
+            remove() {
+                this.$emit("close")
+            },
             dismiss() {
                 this.dismissed = true;
+                this.remove();
             }
         },
 
@@ -132,7 +149,7 @@
 
         &-leave-to {
             opacity: 0;
-            transform: translateX(-50px);
+            transform: translateX(-150px);
         }
     }
 
