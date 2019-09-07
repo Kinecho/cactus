@@ -63,15 +63,19 @@
                 </div>
             </transition>
             <div class="snackbar-container">
-                <snackbar-content
-                        v-for="(snackbar, index) of snackbars"
-                        :text="snackbar.message"
-                        :closeable="snackbar.closeable"
-                        :key="snackbar.id"
-                        @close="removeSnackbar(snackbar.id)"
-                        :autoHide="snackbar.autoHide"
-                        :durationMs="snackbar.timeoutMs"
-                />
+
+                <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
+                    <snackbar-content
+                            class="snackbar-item"
+                            v-for="(snackbar, index) of snackbars"
+                            :text="snackbar.message"
+                            :closeable="snackbar.closeable"
+                            :key="snackbar.id"
+                            @close="removeSnackbar(snackbar.id)"
+                            :autoHide="snackbar.autoHide"
+                            :durationMs="snackbar.timeoutMs"
+                    />
+                </transition-group>
             </div>
         </div>
         <Footer/>
@@ -159,7 +163,13 @@
                 error: undefined,
                 removedProviderIds: [],
                 copy,
-                snackbars: [],
+                snackbars: [
+                    {message: "one aksjhf  alkdjf alkfj kladj lfkaj lfk sj", closeable: true, autoHide: false, id: "1"},
+                    {message: "two", closeable: true, autoHide: false, id: "2"},
+                    {message: "three alskjfa sdflkaj dlfk lakjf sl", closeable: true, autoHide: false, id: "3"},
+                    {message: "four", closeable: true, autoHide: false, id: "4"},
+                    {message: "five", closeable: true, autoHide: false, id: "5"},
+                ],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -225,6 +235,14 @@
                     this.user.reload();
                 }
                 return;
+            },
+            beforeLeave(el: any) {
+                const {marginLeft, marginTop, width, height} = window.getComputedStyle(el);
+                el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
+                // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
+                el.style.top = `${el.offsetTop}px`;
+                el.style.width = width
+                el.style.height = height
             },
             addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }): string {
 
@@ -309,22 +327,6 @@
     @import "variables";
     @import "forms";
 
-    .snackbar-container {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 5000;
-        display: flex;
-        flex-direction: column;
-
-        @include r(600) {
-            bottom: unset;
-            top: 9rem;
-            left: 50%;
-        }
-
-    }
-
     .accountContainer {
 
         display: flex;
@@ -402,5 +404,50 @@
             }
         }
     }
+
+
+    .snackbar-container {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        z-index: 5000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        @include r(600) {
+            bottom: unset;
+            top: 9rem;
+        }
+
+        > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+    }
+
+    .snackbar-item {
+        transition: all .3s;
+        width: 30rem;
+        min-width: 20rem;
+        max-width: 90vw;
+    }
+
+    .snackbar-enter {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .snackbar-leave-to {
+        opacity: 0;
+        transform: translateX(-200px);
+
+    }
+
+    .snackbar-leave-active {
+        position: absolute;
+    }
+
 
 </style>

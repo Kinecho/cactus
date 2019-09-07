@@ -1,17 +1,17 @@
 <template>
-    <transition name="snack" appear>
-        <div class="snackbar snackbar-content" v-if="!hidden" :class="[{closeable}]">
+    <!--    <transition name="snack" appear>-->
+    <div class="snackbar snackbar-content" v-if="!hidden" :class="[{closeable}]">
             <span class="check" v-if="$slots.icon">
                 <slot name="icon"></slot>
             </span>
-            <slot name="text">{{text}}</slot>
-            <button title="Close" class="close tertiary" @click="dismiss" v-if="closeable">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                    <path fill="#e6f9f7" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                </svg>
-            </button>
-        </div>
-    </transition>
+        <slot name="text">{{text}}</slot>
+        <button title="Close" class="close tertiary" @click="dismiss" v-if="closeable">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#e6f9f7" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
+    </div>
+    <!--    </transition>-->
 
 
 </template>
