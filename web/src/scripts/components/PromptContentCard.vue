@@ -3,6 +3,7 @@
         <section class="content">
 
             <div class="share-warning" v-if="isReflectScreen && response && response.shared">
+                <img src="/assets/images/users.svg" />
                 This reflection has been shared
             </div>
 
@@ -23,7 +24,7 @@
             </div>
 
             <!--  START SHARE_NOTE -->
-            <div class="share-note-container" v-if="isShareNoteScreen">
+            <div v-if="isShareNoteScreen">
                 <shared-reflection-card :response="response"/>
 
                 <transition name="fade-in" mode="out-in">
@@ -32,17 +33,10 @@
                             <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                                 <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                             </svg>
-                            <span slot="text">Shareable Link Created</span>
+                            <span slot="text">Shareable link created</span>
                         </snackbar-content>
-                        <p>Here's your direct link to share:</p>
+                        <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
-
-                        <button class="button secondary removeLink"
-                                :disabled="creatingLink"
-                                :class="{loading: creatingLink}"
-                                @click="unshareReflection">
-                            Unshare
-                        </button>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
@@ -507,6 +501,10 @@
                 display: flex;
                 padding: 2.4rem;
             }
+
+            .text {
+                padding: 0 0 3.2rem;
+            }
         }
     }
 
@@ -613,12 +611,8 @@
         margin-bottom: .8rem;
     }
 
-    .getLink, .removeLink {
+    .getLink {
         width: 100%;
-    }
-
-    .removeLink {
-        margin-top: 1rem;
     }
 
     .label {
@@ -892,14 +886,21 @@
         display: none;
     }
 
-    .share-note-link-container {
-        position: relative;
+    .share-warning {
+        background-color: $lightGreen;
+        border-radius: 6px;
+        display: flex;
+        padding: .8rem 1.6rem;
+        text-align: left;
+
+        img {
+            height: 2rem;
+            margin: .4rem .8rem 0 0;
+            width: 2rem;
+        }
     }
 
-
-    .share-warning {
-        background: orangered;
-        color: white;
-        padding: 2rem;
+    .directLink {
+        margin-bottom: 1.6rem;
     }
 </style>
