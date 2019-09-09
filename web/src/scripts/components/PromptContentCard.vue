@@ -490,21 +490,22 @@
                 background-image: none;
             }
         }
+    }
 
-        &.type-share_reflection {
+    /*this nesting is temporary*/
+    .page-wrapper.isModal .content-container .flipper .flip-card .content-card.type-share_reflection {
+        background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+        height: auto;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        padding: 1.6rem 1.6rem 2.4rem;
 
-            overflow-y: auto;
-            display: block;
-            padding: 1.6rem;
+        @include r(374) {
+            padding: 2.4rem;
+        }
 
-            @include r(374) {
-                display: flex;
-                padding: 2.4rem;
-            }
-
-            .text {
-                padding: 0 0 3.2rem;
-            }
+        .text {
+            padding: 4rem 0 3.2rem;
         }
     }
 
@@ -586,7 +587,10 @@
         display: flex;
         flex-grow: 0;
         justify-content: center;
-        width: auto;
+        position: absolute;
+        right: 0;
+        top: .8rem;
+        width: min-content;
 
         svg {
             height: 1.2rem;

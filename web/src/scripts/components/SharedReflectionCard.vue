@@ -117,7 +117,21 @@
 
         .note-text {
             margin-bottom: 2.4rem;
+            max-height: 12.4rem;
+            overflow: hidden;
+            position: relative;
             white-space: pre-line;
+
+            &:after {
+                background: linear-gradient(rgba(255,255,255,0), $white);
+                content: '';
+                display: block;
+                height: 4.8rem;
+                left: 0;
+                position: absolute;
+                top: 7.2rem;
+                width: 100%;
+            }
         }
 
         .profile {
