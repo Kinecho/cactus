@@ -1,4 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -17,6 +16,11 @@ import {QueryParam} from '@shared/util/queryParams'
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
+                    </button>
+                    <button v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon" >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                            <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                        </svg>
                     </button>
                     <button class="share tertiary back" @click="showSharing = false" v-show="showSharing">
                         <div class="arrow-wrapper">
@@ -293,6 +297,9 @@ import {QueryParam} from '@shared/util/queryParams'
             };
         },
         computed: {
+            showCloseButton():boolean {
+                return this.isModal && !this.showSharing
+            },
             slideNumberClass(): string {
                 return `slide-${this.activeIndex}`
             },
