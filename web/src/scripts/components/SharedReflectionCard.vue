@@ -134,6 +134,14 @@
             }
         }
 
+        &.full .note-text {
+            max-height: none;
+
+            &:after {
+                display: none;
+            }
+        }
+
         .profile {
             display: flex;
             align-items: center;
