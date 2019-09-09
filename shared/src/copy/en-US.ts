@@ -54,6 +54,7 @@ export default class EnglishCopy extends LocalizedCopy {
         GO_HOME: "Go Home",
         SIGN_UP_MESSAGE: "Sign Up to Save Your Progress",
         SHARE_YOUR_NOTE: "Share Your Note",
+        SHARE_NOTE: "Share Note",
         SHARE_PROMPT_COPY_MD: "Researchers have found that sharing your thoughts makes you more courageous and **builds trust and connection** with others.",
     };
     error: ErrorCopy = {

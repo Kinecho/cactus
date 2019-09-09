@@ -16,6 +16,7 @@ export interface PromptCopy {
     GO_HOME: string,
     SIGN_UP_MESSAGE: string,
     SHARE_YOUR_NOTE: string,
+    SHARE_NOTE: string,
     SHARE_PROMPT_COPY_MD: string,
 }
 

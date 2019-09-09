@@ -1,4 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -124,6 +123,7 @@ import {QueryParam} from '@shared/util/queryParams'
             PromptContentSharing,
         },
         props: {
+            initialIndex: Number,
             promptContentEntryId: String,
             isModal: {type: Boolean, default: false},
             onClose: {
@@ -133,8 +133,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 }
             }
         },
-        async created(): Promise<void> {
-
+        async beforeMount(): Promise<void> {
             this.keyboardListener = (evt: KeyboardEvent) => {
                 console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
                 if (this.navigationDisabled) {
@@ -161,6 +160,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
             this.popStateListener = window.addEventListener('popstate', (event: PopStateEvent) => {
                 console.log("Window popstate called", event);
+
                 const paramIndex = getQueryParam(QueryParam.CONTENT_INDEX);
 
                 if (paramIndex && !isNaN(Number(paramIndex))) {
@@ -215,8 +215,12 @@ import {QueryParam} from '@shared/util/queryParams'
                     console.log("raw promptContent data", data);
 
                     const promptContent = new PromptContent(data);
+                    if (this.initialIndex) {
+                        this.activeIndex = this.initialIndex;
+                    } else {
+                        this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
+                    }
 
-                    this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
                     if (isDone) {
                         this.completed = true;
                     }
