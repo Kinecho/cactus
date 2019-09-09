@@ -17,11 +17,6 @@
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
-                    <button v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon" >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                            <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                        </svg>
-                    </button>
                     <button class="share tertiary back" @click="showSharing = false" v-show="showSharing">
                         <div class="arrow-wrapper">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -31,6 +26,11 @@
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
+                <button v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon" >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                        <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                    </svg>
+                </button>
                 <div class="progress-wrapper" v-if="!completed && !showSharing">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
@@ -837,15 +837,16 @@
         animation: wiggle .5s forwards;
     }
 
+    .close {
+        position: absolute;
+        right: 0;
+        top: 1.8rem;
+        z-index: 20;
 
-    .share-modal-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-        margin-top: 2rem;
-        @include shadowbox;
+        svg {
+            height: 1.8rem;
+            width: 1.8rem;
+        }
     }
 
     .slide-leave-active,
