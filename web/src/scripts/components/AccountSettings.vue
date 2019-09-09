@@ -440,8 +440,9 @@
     }
 
     .snackbar-leave-to {
-        opacity: 0;
-        transform: translateX(-200px);
+        //opacity: 0;
+        //transform: translateX(-200px);
+        animation: snackbar-out .3s;
 
     }
 
@@ -449,5 +450,14 @@
         position: absolute;
     }
 
+    @keyframes snackbar-out {
+        50% {
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(-200px);
+            opacity: 0;
+        }
+    }
 
 </style>
