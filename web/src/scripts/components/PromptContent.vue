@@ -372,7 +372,7 @@
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return true
+                return !this.isShareNote;
             },
         },
         watch: {
