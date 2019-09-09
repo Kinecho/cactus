@@ -1,13 +1,6 @@
 <template>
     <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
-
-            <div class="share-warning" v-if="isReflectScreen && response && response.shared">
-                <img src="/assets/images/users.svg"/>
-                This reflection has been shared
-            </div>
-
-
             <button class="skip tertiary" @click="next" v-show="showSkip">
                 Skip
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -152,6 +145,10 @@
             <div v-if="isReflectScreen && response" class="reflect-container">
                 <div class="duration">
                     <h5>{{formattedDuration}}</h5>
+                </div>
+                <div class="share-warning" v-if="isReflectScreen && response && response.shared">
+                    <img src="/assets/images/users.svg"/>
+                    <span class="shareText">This note is shared</span>
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div class="saved-container" v-show="showSaved || saving">
@@ -894,8 +891,6 @@
     }
 
     .share-warning {
-        background-color: $lightGreen;
-        border-radius: 6px;
         display: flex;
         padding: .8rem 1.6rem;
         text-align: left;
@@ -905,6 +900,10 @@
             margin: .4rem .8rem 0 0;
             width: 2rem;
         }
+    }
+
+    .shareText {
+        opacity: .7;
     }
 
     .directLink {
