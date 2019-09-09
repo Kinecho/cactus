@@ -204,7 +204,7 @@
             min-height: calc(100vh - 9rem - 6.4rem);
         }
         @include r(600) {
-            min-height: 0;
+            min-height: 66rem;
             height: 100%;
         }
 

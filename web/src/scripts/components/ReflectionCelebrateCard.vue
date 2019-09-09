@@ -222,7 +222,7 @@
         width: 100%;
 
         @include r(600) {
-            max-height: 66rem;
+            min-height: 66rem;
             max-width: 48rem;
             position: relative;
         }

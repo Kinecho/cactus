@@ -620,13 +620,14 @@ import {QueryParam} from '@shared/util/queryParams'
         &:not(.isModal) {
             .content-card,
             .flip-card {
-                height: calc(100vh - 5.2rem);
+                min-height: calc(100vh - 5.2rem);
 
                 @include r(374) {
-                    height: calc(100vh - 9rem);
+                    min-height: calc(100vh - 9rem);
                 }
                 @include r(600) {
                     height: 100%;
+                    min-height: 0;
                 }
             }
         }
@@ -634,20 +635,22 @@ import {QueryParam} from '@shared/util/queryParams'
         &.isModal {
             .content-card,
             .flip-card {
-                height: 100vh;
+                min-height: 100vh;
 
                 @include r(600) {
                     height: 100%;
+                    min-height: 0;
                 }
             }
         }
 
         @include maxW(600) {
             &.isModal {
-                height: 100vh;
+                min-height: 100vh;
 
                 .content-container {
                     height: 100%;
+                    min-height: 0;
                 }
             }
         }
@@ -889,7 +892,7 @@ import {QueryParam} from '@shared/util/queryParams'
         z-index: 10;
 
         @include r(600) {
-            max-height: 66rem;
+            min-height: 66rem;
             max-width: 48rem;
         }
 
@@ -920,7 +923,7 @@ import {QueryParam} from '@shared/util/queryParams'
         @include r(600) {
             border-radius: 12px;
             height: 100%;
-            max-height: 66rem;
+            min-height: 66rem;
             max-width: 48rem;
         }
 
