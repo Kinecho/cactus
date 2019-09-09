@@ -230,6 +230,7 @@
                     {
                         title: copy.prompts.REFLECT,
                         onClick: () => {
+                            this.initialIndex = 0;
                             this.showContent = true;
                         }
                     },
