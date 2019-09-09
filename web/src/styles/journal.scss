@@ -22,6 +22,10 @@
         max-width: 64rem;
         padding: 3.2rem;
     }
+
+    &.hasNote {
+        overflow: visible;
+    }
 }
 
 .backgroundImage {

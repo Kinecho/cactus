@@ -497,7 +497,6 @@
         background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
         height: auto;
         min-height: 100vh;
-        min-height: -webkit-fill-available;
         padding: 1.6rem 1.6rem 2.4rem;
 
         @include r(374) {
@@ -891,13 +890,14 @@
     }
 
     .share-warning {
+        align-items: center;
         display: flex;
+        justify-content: center;
         padding: .8rem 1.6rem;
-        text-align: left;
 
         img {
             height: 2rem;
-            margin: .4rem .8rem 0 0;
+            margin-right: .8rem;
             width: 2rem;
         }
     }
