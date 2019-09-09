@@ -891,13 +891,14 @@
     }
 
     .share-warning {
+        align-items: center;
         display: flex;
+        justify-content: center;
         padding: .8rem 1.6rem;
-        text-align: left;
 
         img {
             height: 2rem;
-            margin: .4rem .8rem 0 0;
+            margin-right: .8rem;
             width: 2rem;
         }
     }
