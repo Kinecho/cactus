@@ -1,5 +1,5 @@
 <template>
-    <div class="signup-footer">
+    <div class="signup-footer" v-if="showFooter">
         <div id="signupAnchor"></div>
         <div class="centered">
             <section class="email">
@@ -18,6 +18,9 @@
     import Vue from "vue";
     import MagicLink from "@components/MagicLinkInput.vue";
     import CopyService from "@shared/copy/CopyService";
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import CactusMember from "@shared/models/CactusMember"
 
     const copy = CopyService.getSharedInstance().copy;
     export default Vue.extend({
@@ -33,8 +36,29 @@
                 default: copy.auth.SIGN_UP_FREE,
             }
         },
-        data(): {} {
-            return {}
+        beforeMount() {
+            this.authUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.member = member;
+                    this.authLoaded = true;
+                }
+            })
+        },
+        data(): {
+            authUnsubscriber: ListenerUnsubscriber | undefined,
+            member: CactusMember | undefined,
+            authLoaded: boolean,
+        } {
+            return {
+                member: undefined,
+                authUnsubscriber: undefined,
+                authLoaded: false,
+            }
+        },
+        computed: {
+            showFooter(): boolean {
+                return this.authLoaded && !this.member
+            }
         }
     })
 </script>
@@ -51,7 +75,7 @@
         z-index: 1;
 
         @include r(768) {
-          padding: 5.6rem 0;
+            padding: 5.6rem 0;
         }
 
         input[type=email] {
