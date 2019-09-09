@@ -45,18 +45,36 @@
     @import "variables";
 
     .signup-footer {
-        background: url("/assets/images/yellowNeedles.svg"), $yellow;
-        background-size: 80%;
-        padding: 1.6rem;
-        margin: 0 auto;
+        background: $yellow url(assets/images/yellowNeedles.svg) 0 0/320px;
+        padding: 3.2rem 2.4rem 1.6rem;
         position: relative;
-        @include r(600) {
-            background-size: 30%;
-            max-width: 80rem;
-            border-radius: .5rem;
-            top: 3rem;
-            z-index: 3;
+        z-index: 1;
+
+        @include r(768) {
+          padding: 5.6rem 0;
         }
+
+        input[type=email] {
+            border-color: $darkYellow;
+
+            &:hover {
+                border-color: $darkestYellow;
+            }
+        }
+    }
+
+    .emailHeader {
+        font-size: 2.4rem;
+        margin: 0 0 .8rem;
+        padding: 0 2.4rem;
+
+        @include r(768) {
+            font-size: 3.2rem;
+        }
+    }
+
+    .subtext {
+        padding: 0 2.4rem;
     }
 
 </style>

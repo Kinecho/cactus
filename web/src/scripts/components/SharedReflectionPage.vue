@@ -89,27 +89,37 @@
     @import "variables";
 
     .shared-reflection-page {
-        background: url("/assets/images/greenNeedleBlob.svg"), $lightGreen;
-        background-size: 40%;
-        @include r(600) {
-            background: unset;
-            background-size: 60%
-        }
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100vh;
+    }
 
-        min-height: 40rem;
+    header {
+        width: 100%;
+    }
 
-        .content {
-            padding: 2rem 0 0;
-            @include r(600) {
-                padding: 4rem 1rem 0;
-            }
+    .content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
 
+    .reflection-container {
+        flex-grow: 1;
+        padding: 2.4rem;
+    }
 
-            .error {
-                padding: 3rem;
-                background-color: $lightPink;
-                color: $darkestPink;
-            }
+    .error {
+        background-color: $lightPink;
+        color: $darkestPink;
+        margin: 2.4rem auto;
+        max-width: 64rem;
+        padding: 2.4rem;
+        width: 100%;
+
+        @include r(768) {
+          border-radius: 6px;
         }
     }
 
