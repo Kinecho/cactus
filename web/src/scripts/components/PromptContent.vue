@@ -11,7 +11,7 @@
 
             <section class="content-container centered" v-if="!loading && promptContent">
                 <div class="shareContainer">
-                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing">
+                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
                         </svg>
@@ -374,6 +374,9 @@
             tapAnywhereEnabled(): boolean {
                 return !this.isShareNote;
             },
+            sharePromptEnabled(): boolean {
+                return !this.isShareNote;
+            }
         },
         watch: {
             activeIndex(index: number, oldIndex: number) {
