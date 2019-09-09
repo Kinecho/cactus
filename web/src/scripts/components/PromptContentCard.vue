@@ -497,7 +497,6 @@
         background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
         height: auto;
         min-height: 100vh;
-        min-height: -webkit-fill-available;
         padding: 1.6rem 1.6rem 2.4rem;
 
         @include r(374) {
