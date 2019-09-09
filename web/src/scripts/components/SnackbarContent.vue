@@ -1,6 +1,5 @@
 <template>
-    <!--    <transition name="snack" appear>-->
-    <div class="snackbar snackbar-content" v-if="!hidden" :class="[{closeable}]">
+    <div class="snackbar snackbar-content" v-if="!hidden" :class="[color, {closeable}]">
             <span class="check" v-if="$slots.icon">
                 <slot name="icon"></slot>
             </span>
@@ -11,9 +10,6 @@
             </svg>
         </button>
     </div>
-    <!--    </transition>-->
-
-
 </template>
 
 <script lang="ts">
@@ -29,6 +25,14 @@
             autoHide: {type: Boolean, default: false},
             durationMs: {type: Number, default: DEFAULT_DURATION_MS},
             closeable: {type: Boolean, default: true},
+            color: {
+                default: "default",
+                required: false,
+                validator: function (value: string) {
+                    // The value must match one of these strings
+                    return ['success', 'warning', 'danger', "info", "default"].indexOf(value) !== -1
+                }
+            }
         },
         data(): {
             hideTimer: any | undefined,
@@ -94,12 +98,38 @@
     .snackbar-content {
         align-items: center;
         background-color: $darkestGreen;
-        border-radius: 6px;
         color: $lightGreen;
+        border-radius: 6px;
         display: inline-flex;
         margin-bottom: 1.6rem;
         padding: .8rem 1.6rem;
         position: relative;
+        transition: all .3s;
+
+        &.default {
+            background-color: $darkestGreen;
+            color: $lightBlue;
+        }
+
+        &.success {
+            background-color: $darkGreen;
+            color: $white;
+        }
+
+        &.danger {
+            background-color: $darkestPink;
+            color: $white;
+        }
+
+        &.info {
+            background-color: $darkestGreen;
+            color: $lightBlue;
+        }
+
+        &.warning {
+            background-color: $darkestYellow;
+            color: $darkText;
+        }
 
         &.closeable {
             padding-right: 4.8rem;

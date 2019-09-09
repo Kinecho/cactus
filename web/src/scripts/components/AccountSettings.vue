@@ -74,6 +74,7 @@
                             @close="removeSnackbar(snackbar.id)"
                             :autoHide="snackbar.autoHide"
                             :durationMs="snackbar.timeoutMs"
+                            :color="snackbar.color"
                     />
                 </transition-group>
             </div>
@@ -149,7 +150,7 @@
             error: string | undefined,
             removedProviderIds: string[],
             copy: LocalizedCopy,
-            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }[],
+            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }[],
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -163,13 +164,7 @@
                 error: undefined,
                 removedProviderIds: [],
                 copy,
-                snackbars: [
-                    {message: "one aksjhf  alkdjf alkfj kladj lfkaj lfk sj", closeable: true, autoHide: false, id: "1"},
-                    {message: "two", closeable: true, autoHide: false, id: "2"},
-                    {message: "three alskjfa sdflkaj dlfk lakjf sl", closeable: true, autoHide: false, id: "3"},
-                    {message: "four", closeable: true, autoHide: false, id: "4"},
-                    {message: "five", closeable: true, autoHide: false, id: "5"},
-                ],
+                snackbars: [],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -244,7 +239,7 @@
                 el.style.width = width
                 el.style.height = height
             },
-            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }): string {
+            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
 
                 const id = uuid();
                 if (typeof message === "string") {
@@ -259,7 +254,7 @@
                 console.log("removing snackbar", id);
                 this.snackbars = this.snackbars.filter(snack => snack.id !== id);
             },
-            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean }) {
+            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
                 const snackbar = this.snackbars.find(snack => snack.id === id);
 
                 if (!snackbar) {
@@ -283,7 +278,8 @@
                 const snackId = this.addSnackbar({
                     message: "Saving notification settings...",
                     closeable: false,
-                    autoHide: false
+                    autoHide: false,
+                    color: "info",
                 });
                 console.log("Saving status...", status);
                 this.error = undefined;
@@ -305,7 +301,8 @@
                         this.updateSnackbar(snackId, {
                             message: "Email Settings Updated",
                             autoHide: true,
-                            closeable: true
+                            closeable: true,
+                            color: "success",
                         });
                     }
                 }
@@ -314,7 +311,7 @@
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     await this.save();
-                    this.addSnackbar("Timezone Updated");
+                    this.addSnackbar({message: "Timezone Updated", color: "success"});
                 }
             }
         }

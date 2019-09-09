@@ -3,7 +3,7 @@
         <section class="content">
 
             <div class="share-warning" v-if="isReflectScreen && response && response.shared">
-                <img src="/assets/images/users.svg" />
+                <img src="/assets/images/users.svg"/>
                 This reflection has been shared
             </div>
 
@@ -29,12 +29,14 @@
 
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
-                        <snackbar-content :autoHide="false" v-if="linkCreated">
-                            <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
-                                <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
-                            </svg>
-                            <span slot="text">Shareable link created</span>
-                        </snackbar-content>
+                        <transition name="snack" appear>
+                            <snackbar-content :autoHide="false" v-if="linkCreated">
+                                <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                                    <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                                </svg>
+                                <span slot="text">Shareable link created</span>
+                            </snackbar-content>
+                        </transition>
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                     </div>
@@ -908,4 +910,26 @@
     .directLink {
         margin-bottom: 1.6rem;
     }
+
+
+    .snack {
+        &-enter-active {
+            transition: all .2s cubic-bezier(.42, .97, .52, 1.49)
+        }
+
+        &-leave-active {
+            transition: all .2s ease;
+        }
+
+        &-enter {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        &-leave-to {
+            opacity: 0;
+            transform: translateX(-150px);
+        }
+    }
+
 </style>
