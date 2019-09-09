@@ -8,7 +8,7 @@
         <div class="menuParent"></div>
 
         <div class="textContainer">
-            <h3 class="topic">
+            <h3 class="skeleton topic">
                 <skeleton-bar :lines="1" size="large"/>
             </h3>
             <p class="subtext">
@@ -66,6 +66,10 @@
 
     .date.skeleton {
         width: 12rem;
+    }
+
+    .skeleton.topic {
+        margin-bottom: 1.2rem;
     }
 
     .skeleton-image {
