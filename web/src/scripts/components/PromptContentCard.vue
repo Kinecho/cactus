@@ -493,6 +493,7 @@
     }
 
     /*this nesting is temporary*/
+    .page-wrapper .content-container .flipper .flip-card .content-card.type-share_reflection,
     .page-wrapper.isModal .content-container .flipper .flip-card .content-card.type-share_reflection {
         background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
         height: auto;
