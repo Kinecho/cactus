@@ -46,8 +46,7 @@
             </nav>
             <modal :show="showContent"
                     v-on:close="showContent = false"
-                    :showCloseButton="true"
-                    :closeStyles="{top: '2.4rem'}"
+                    :showCloseButton="false"
             >
                 <PromptContent slot="body"
                         v-bind:promptContentEntryId="entryId"
