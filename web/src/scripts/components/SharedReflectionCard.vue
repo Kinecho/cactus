@@ -129,7 +129,7 @@
                 height: 4.8rem;
                 left: 0;
                 position: absolute;
-                top: 7.2rem;
+                top: 7.6rem;
                 width: 100%;
             }
         }
