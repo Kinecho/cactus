@@ -666,45 +666,6 @@
             background-color: transparent;
         }
 
-        &:not(.isModal) {
-            .content-card,
-            .flip-card {
-                min-height: calc(100vh - 5.2rem);
-
-                @include r(374) {
-                    min-height: calc(100vh - 9rem);
-                }
-                @include r(600) {
-                    height: 100%;
-                    min-height: 0;
-                }
-            }
-        }
-
-        &.isModal {
-            .content-card,
-            .flip-card {
-                min-height: 100vh;
-
-                @include r(600) {
-                    height: 100%;
-                    min-height: 0;
-                }
-            }
-        }
-
-        @include maxW(600) {
-            &.isModal {
-                min-height: 100vh;
-
-                .content-container {
-                    height: 100%;
-                    min-height: 0;
-                }
-            }
-        }
-
-
         button.secondary {
             transition: all .2s ease;
             outline: transparent none;
@@ -721,15 +682,17 @@
             }
 
             .progress-wrapper {
-                position: relative;
-                transform: translateY(.8rem);
-                width: 94%;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 1.6rem;
+                width: 100%;
                 z-index: 20;
-                height: 0;
-                margin: 0 auto;
 
                 @include r(600) {
-                    transform: translateY(1.6rem);
+                    margin: auto;
+                    top: 5.6rem;
+                    width: 94%;
                 }
 
                 .progress {
@@ -765,7 +728,7 @@
                 margin: auto;
                 padding: 0;
                 position: absolute;
-                top: 49%;
+                top: 58%;
                 z-index: 10;
 
                 &.previous {
@@ -823,7 +786,7 @@
     .shareContainer {
         left: 0;
         position: absolute;
-        top: 1.6rem;
+        top: 2.4rem;
         z-index: 20;
 
         @include r(600) {
@@ -982,6 +945,7 @@
         }
 
         &.front {
+            height: 100%;
             position: absolute;
             transform: rotateY(0);
             z-index: 2;
