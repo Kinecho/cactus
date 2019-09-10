@@ -856,11 +856,15 @@
         animation: wiggle .5s forwards;
     }
 
-    .close {
+    button.close {
         position: absolute;
-        right: 0;
-        top: 1.8rem;
+        right: .8rem;
+        top: 2.8rem;
         z-index: 20;
+
+        @include r(600) {
+            display: none;
+        }
 
         svg {
             height: 1.8rem;
