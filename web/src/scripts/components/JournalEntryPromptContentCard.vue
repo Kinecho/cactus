@@ -46,7 +46,8 @@
             </nav>
             <modal :show="showContent"
                     v-on:close="showContent = false"
-                    :showCloseButton="false"
+                    :showCloseButton="true"
+                    :hideCloseButtonOnMobile="true"
             >
                 <PromptContent slot="body"
                         v-bind:promptContentEntryId="entryId"
