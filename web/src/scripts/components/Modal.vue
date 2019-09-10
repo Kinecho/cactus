@@ -3,16 +3,17 @@
         <div :class="['modal-mask', {show, opaque, light, dark}]">
             <div class="modal-wrapper">
                 <div class="modal-container" :class="{relative: containerPositionRelative}">
-                    <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                            <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                        </svg>
-                    </button>
+
 
                     <div class="modal-header">
                         <slot name="header"></slot>
                     </div>
                     <div class="modal-body">
+                        <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                                <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                            </svg>
+                        </button>
                         <slot name="body">
                             default body
                         </slot>
@@ -126,8 +127,8 @@
 
                 .modal-close {
                     &.mobileHidden {
-                        @include maxW(600){
-                            display:  none;
+                        @include maxW(600) {
+                            display: none;
                         }
                     }
 
@@ -154,6 +155,7 @@
 
                 .modal-body {
                     margin: 0 0;
+                    position: relative;
                 }
 
 
