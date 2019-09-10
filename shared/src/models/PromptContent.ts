@@ -80,6 +80,7 @@ export enum ContentType {
     photo = "photo",
     audio = "audio",
     reflect = "reflect",
+    share_reflection = "share_reflection",
 }
 
 
@@ -107,26 +108,33 @@ export function processContent(content: Content): Content {
 
     switch (content.contentType) {
         case ContentType.text:
-            processed.text = content.text;
+            processed.text = content.text_md || content.text;
+            processed.title = content.title;
             break;
         case ContentType.quote:
             processed.quote = content.quote;
             break;
         case ContentType.video:
-            processed.text = content.text;
+            processed.text = content.text_md || content.text;
             processed.video = content.video;
             break;
         case ContentType.photo:
-            processed.text = content.text;
+            processed.text = content.text_md || content.text;
             processed.photo = content.photo;
             break;
         case ContentType.audio:
-            processed.text = content.text;
+            processed.text = content.text_md || content.text;
             processed.audio = content.audio;
             break;
         case ContentType.reflect:
-            processed.text = content.text;
+            processed.text = content.text_md || content.text;
             break;
+        case ContentType.share_reflection:
+            processed.text = content.text_md || content.text;
+            processed.title = content.title;
+            break;
+        default:
+            console.warn("UNHANDLED CONTENT TYPE", content.contentType);
 
     }
 
@@ -139,8 +147,10 @@ export interface Content {
     contentType: ContentType;
     quote?: Quote;
     text?: string;
+    text_md?: string;
     backgroundImage?: ContentBackgroundImage;
     label?: string;
+    title?: string;
     video?: Video;
     photo?: Image;
     audio?: Audio;
@@ -160,11 +170,13 @@ export default class PromptContent extends FlamelinkModel {
     contentStatus: ContentStatus = ContentStatus.in_progress;
     errorMessage?: string;
     topic?: string;
+    shareReflectionCopy_md?: string;
 
 
     constructor(data?: Partial<PromptContent>) {
         super(data);
         if (data) {
+            Object.assign(this, data);
             this.promptId = data.promptId;
             this.content = data.content || [];
             this.subjectLine = data.subjectLine;

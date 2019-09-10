@@ -1,10 +1,50 @@
 <template>
-    <div :class="['content-card', {reflectScreen: isReflectScreen}]">
+    <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
+            <button class="skip tertiary" @click="next" v-show="showSkip">
+                Skip
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                    <path fill="#07454C" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                </svg>
+            </button>
+
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
-                <p>{{processedContent.text}}</p>
+                <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
+                <p :class="{tight: isShareNoteScreen}">
+                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                </p>
             </div>
+
+            <!--  START SHARE_NOTE -->
+            <div v-if="isShareNoteScreen">
+                <shared-reflection-card :response="response"/>
+
+                <transition name="fade-in" mode="out-in">
+                    <div v-if="shareableLinkUrl" class="share-note-link-container">
+                        <transition name="snack" appear>
+                            <snackbar-content :autoHide="false" v-if="linkCreated">
+                                <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                                    <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                                </svg>
+                                <span slot="text">Shareable link created</span>
+                            </snackbar-content>
+                        </transition>
+                        <p class="directLink">Here's your direct link to share:</p>
+                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
+                    </div>
+                    <button v-else class="button primary getLink"
+                            :disabled="creatingLink"
+                            :class="{loading: creatingLink}"
+                            @click="createSharableLink">
+                        {{creatingLink ? 'Creating' : 'Get Shareable Link'}}
+                    </button>
+
+
+                </transition>
+            </div>
+            <!--  END SHARE_NOTE -->
+
             <!--    START QUOTE    -->
             <div class="quote-container" v-if="processedContent.quote">
                 <div class="avatar-container" v-if="quoteAvatar">
@@ -54,7 +94,6 @@
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
             </div>
             <!--      END Link      -->
-
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
@@ -107,6 +146,10 @@
                 <div class="duration">
                     <h5>{{formattedDuration}}</h5>
                 </div>
+                <div class="share-warning" v-if="isReflectScreen && response && response.shared">
+                    <img src="/assets/images/users.svg"/>
+                    <span class="shareText">This note is shared</span>
+                </div>
                 <transition name="fade-in" mode="out-in">
                     <div class="saved-container" v-show="showSaved || saving">
                         <span v-show="saving && !saved">{{promptCopy.SAVING}}...</span>
@@ -153,22 +196,30 @@
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import {debounce} from "debounce";
     import {formatDurationAsTime} from '@shared/util/DateUtil'
-
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
+    import VueSimpleMarkdown from 'vue-simple-markdown'
+    import CopyTextInput from "@components/CopyTextInput.vue";
+    import {QueryParam} from "@shared/util/queryParams"
+    import SnackbarContent from "@components/SnackbarContent.vue"
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import SharedReflectionCard from "@components/SharedReflectionCard.vue";
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
-
     const copy = CopyService.getSharedInstance().copy;
+
+    Vue.use(VueSimpleMarkdown);
 
     export default Vue.extend({
         components: {
             ResizableTextarea,
             Spinner,
             FlamelinkImage,
+            CopyTextInput,
+            SnackbarContent,
+            SharedReflectionCard,
         },
         props: {
             content: {
@@ -188,6 +239,9 @@
             showSaved: boolean,
             showSavingTimeout: any,
             promptCopy: PromptCopy,
+            creatingLink: boolean,
+            shareableLinkUrl: string | undefined,
+            linkCreated: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -195,7 +249,13 @@
                 showSaved: false,
                 showSavingTimeout: undefined,
                 promptCopy: copy.prompts,
+                creatingLink: false,
+                shareableLinkUrl: undefined,
+                linkCreated: false,
             }
+        },
+        beforeMount() {
+            this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
         },
         watch: {
             saved(isSaved) {
@@ -213,6 +273,19 @@
             }
         },
         computed: {
+            shareableLinkParams(): {} | undefined {
+                if (this.shareableLinkUrl) {
+                    return {
+                        [QueryParam.UTM_MEDIUM]: "prompt-share-note",
+                        [QueryParam.UTM_SOURCE]: "cactus.app",
+                    }
+                }
+                return;
+
+            },
+            showSkip(): boolean {
+                return this.processedContent && this.processedContent.contentType === ContentType.share_reflection;
+            },
             reflectionProgress(): number {
                 return Math.min(this.reflectionDuration / MINIMUM_REFLECT_DURATION_MS, 1);
             },
@@ -231,6 +304,9 @@
             },
             isReflectScreen(): boolean {
                 return this.content.contentType === ContentType.reflect
+            },
+            isShareNoteScreen(): boolean {
+                return this.content.contentType === ContentType.share_reflection;
             },
             linkClasses(): string | undefined {
                 if (!this.processedContent || !this.processedContent.link) {
@@ -259,6 +335,19 @@
             }
         },
         methods: {
+            async createSharableLink() {
+                this.creatingLink = true;
+                let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
+                this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(saved);
+                this.linkCreated = true;
+                this.creatingLink = false;
+            },
+            async unshareReflection() {
+                this.creatingLink = true;
+                await ReflectionResponseService.sharedInstance.unShareResponse(this.response);
+                this.shareableLinkUrl = undefined;
+                this.creatingLink = false
+            },
             async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
@@ -319,8 +408,12 @@
         overflow: hidden;
 
         @include r(600) {
-            min-height: 0;
+            border-radius: 12px;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             height: 100%;
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
         }
 
         .slide-1 & {
@@ -376,11 +469,6 @@
         }
 
         @include r(600) {
-            border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            position: relative;
-            overflow: hidden;
-
             .slide-1 &,
             .slide-2 &,
             .slide-3 &,
@@ -391,6 +479,26 @@
             .slide-8 & {
                 background-image: none;
             }
+        }
+    }
+
+    /*this nesting is temporary*/
+    .page-wrapper .content-container .flipper .flip-card .content-card.type-share_reflection,
+    .page-wrapper.isModal .content-container .flipper .flip-card .content-card.type-share_reflection {
+        background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+        height: auto;
+        min-height: 100vh;
+        padding: 1.6rem 1.6rem 2.4rem;
+
+        @include r(374) {
+            padding: 2.4rem;
+        }
+        @include r(600) {
+            min-height: 66rem;
+        }
+
+        .text {
+            padding: 4rem 0 3.2rem;
         }
     }
 
@@ -455,6 +563,56 @@
         @include r(374) {
             font-size: 2.4rem;
         }
+
+        p {
+            white-space: pre-line;
+
+            &.tight {
+                font-size: 1.6rem;
+
+                @include r(374) {
+                    font-size: 1.8rem;
+                }
+            }
+        }
+    }
+
+    .skip.tertiary {
+        align-items: center;
+        color: $darkestGreen;
+        display: flex;
+        flex-grow: 0;
+        justify-content: center;
+        position: absolute;
+        right: 0;
+        top: .8rem;
+        width: min-content;
+
+        svg {
+            height: 1.2rem;
+            margin-left: .4rem;
+            width: 1.2rem;
+        }
+
+        @include r(600) {
+            display: none;
+        }
+    }
+
+    .note {
+        @include shadowbox;
+        margin-bottom: 2.4rem;
+        padding: 1.6rem 2.4rem;
+        text-align: left;
+    }
+
+    .noteQuestion,
+    .copyText {
+        margin-bottom: .8rem;
+    }
+
+    .getLink {
+        width: 100%;
     }
 
     .label {
@@ -726,4 +884,47 @@
     .duration {
         display: none;
     }
+
+    .share-warning {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        padding: .8rem 1.6rem;
+
+        img {
+            height: 2rem;
+            margin-right: .8rem;
+            width: 2rem;
+        }
+    }
+
+    .shareText {
+        opacity: .7;
+    }
+
+    .directLink {
+        margin-bottom: 1.6rem;
+    }
+
+
+    .snack {
+        &-enter-active {
+            transition: all .2s cubic-bezier(.42, .97, .52, 1.49)
+        }
+
+        &-leave-active {
+            transition: all .2s ease;
+        }
+
+        &-enter {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        &-leave-to {
+            opacity: 0;
+            transform: translateX(-150px);
+        }
+    }
+
 </style>

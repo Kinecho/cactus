@@ -3,7 +3,7 @@ import "@styles/pages/prompt.scss"
 import Vue from "vue";
 import PromptPage from "@components/PromptContent.vue";
 import NavBar from "@components/NavBar.vue";
-import Footer from "@components/StardardFooter.vue";
+import Footer from "@components/StandardFooter.vue";
 import {PageRoute} from "@web/PageRoutes";
 import {getAuth} from "@web/firebase";
 import {getQueryParam, removeQueryParam} from "@web/util";

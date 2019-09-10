@@ -15,6 +15,12 @@ declare module 'vue-social-sharing' {
   export default SocialSharing;
 }
 
+declare module 'vue-simple-markdown'{
+    import {PluginObject} from "vue";
+    const VueSimpleMarkdown: PluginObject<any>;
+    export default VueSimpleMarkdown;
+}
+
 interface Window {
     [key:string]: any; // Add index signature
 }

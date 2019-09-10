@@ -43,6 +43,7 @@
     import {QueryParam} from '@shared/util/queryParams'
     import CopyService from '@shared/copy/CopyService'
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
+    import {getRandomAvatar} from '@web/AvatarUtil'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -125,7 +126,7 @@
                 return this.user ? this.user.email : null;
             },
             profileImageUrl(): string | undefined | null {
-                return this.user ? this.user.photoURL : undefined;
+                return (this.user && this.user.photoURL) ? this.user.photoURL : getRandomAvatar(this.user && this.user.uid || undefined);
             },
             displaySignupButton(): boolean {
                 const show = this.showSignup && this.authLoaded && !this.user;

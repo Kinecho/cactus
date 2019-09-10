@@ -452,5 +452,13 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "privacy_policy"
+    },
+    "shared_reflection": {
+        "title": "Reflection",
+        "path": "/reflection",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "shared_reflection",
+        "indexPath": true
     }
 }

@@ -49,6 +49,10 @@
         ],
         "rewrites": [
             {
+                "source": "/reflection/**",
+                "destination": "/shared_reflection.html"
+            },
+            {
                 "source": "/privacy-policy",
                 "destination": "/privacy_policy.html"
             },

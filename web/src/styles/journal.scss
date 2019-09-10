@@ -6,72 +6,76 @@
 //}
 
 .journalEntry {
-    @include shadowbox;
-    margin: 0 1.6rem 3.2rem;
-    overflow: hidden;
-    padding: 1.6rem 1.6rem 2.4rem;
-    position: relative;
-    text-align: left;
+  @include shadowbox;
+  margin: 0 1.6rem 3.2rem;
+  overflow: hidden;
+  padding: 1.6rem 1.6rem 2.4rem;
+  position: relative;
+  text-align: left;
 
-    @include r(600) {
-        padding: 3.2rem 2.4rem;
-    }
+  @include r(600) {
+    padding: 3.2rem 2.4rem;
+  }
 
-    @include r(768) {
-        margin: 0 auto 4.8rem;
-        max-width: 64rem;
-        padding: 3.2rem;
-    }
+  @include r(768) {
+    margin: 0 auto 4.8rem;
+    max-width: 64rem;
+    padding: 3.2rem;
+  }
+
+  &.hasNote {
+    overflow: visible;
+  }
 }
 
 .backgroundImage {
-    background: url(assets/images/pinkBlob4.svg) center top 1.6rem no-repeat;
-    background-size: 138%;
+  background: url(assets/images/pinkBlob4.svg) center top 1.6rem no-repeat;
+  background-size: 138%;
+  height: 100%;
+  margin: 0 -2.4rem -12rem;
+  min-height: 25rem;
+  overflow: hidden;
+  position: relative;
+  right: 0;
+  z-index: 0;
+
+  @include r(600) {
+    background-position: left 1.6rem center;
+    background-size: 154%;
+    bottom: auto;
     height: 100%;
-    margin: 0 -2.4rem -12rem;
+    left: 63%;
+    margin: 0;
     min-height: 25rem;
-    overflow: hidden;
-    position: relative;
+    position: absolute;
     right: 0;
-    z-index: 0;
+    top: 0;
+    width: 28rem;
+  }
+
+  .hasNote & {
+    display: none;
 
     @include r(600) {
-        background-position: left 1.6rem center;
-        background-size: 154%;
-        bottom: auto;
-        height: 100%;
-        left: 63%;
-        margin: 0;
-        min-height: 25rem;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 28rem;
+      background-position: center top;
+      background-size: 100%;
+      bottom: auto;
+      display: block;
+      height: 10rem;
+      left: 68%;
+      margin: 0;
+      min-height: 0;
+      position: absolute;
+      top: 7rem;
+      width: 14rem;
     }
+  }
 
-    .hasNote & {
-        display: none;
-
-        @include r(600) {
-            background-position: center top;
-            background-size: 100%;
-            bottom: auto;
-            display: block;
-            height: 10rem;
-            left: 68%;
-            margin: 0;
-            min-height: 0;
-            position: absolute;
-            top: 7rem;
-            width: 14rem;
-        }
-    }
-
-    img {
-        display: block;
-        height: 100%;
-        width: 100%;
-    }
+  img {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
 
   /* .random-placeholder {
     height:100%;
@@ -104,8 +108,8 @@
 }
 
 .menuParent {
-    position: relative;
-    z-index: 2;
+  position: relative;
+  z-index: 2;
 }
 
 .textContainer {
@@ -119,6 +123,7 @@
 
 .question,
 .topic {
+  word-break: break-word;
   font-size: 2.1rem;
 
   @include r(600) {
@@ -144,6 +149,7 @@
     position: relative;
     white-space: pre-line;
     margin: 1.6rem 0 1.6rem -2rem;
+    word-break: break-word;
 
     @include r(600) {
         margin: 1.6rem 0;
@@ -152,17 +158,18 @@
 
     &:before {
         background-color: $yellow;
-        border-radius: .4rem;
+        border-radius: 0 .4rem .4rem 0;
         content: '';
         display: block;
         height: 100%;
-        left: 0;
+        left: .4rem;
         position: absolute;
         top: 0;
-        width: .8rem;
+        width: .4rem;
 
         @include r(600) {
-            width: .4rem;
+            border-radius: .4rem;
+            left: 0;
         }
     }
 

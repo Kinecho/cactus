@@ -1,9 +1,7 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template>
     <modal :show="showContent"
             v-on:close="showContent = false"
-            :showCloseButton="true"
-            :closeStyles="{top: '1.6rem'}"
+            :showCloseButton="false"
     >
         <PromptContent slot="body"
                 v-bind:promptContentEntryId="entryId"
