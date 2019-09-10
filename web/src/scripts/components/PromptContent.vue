@@ -858,9 +858,14 @@
 
     .close {
         position: absolute;
-        right: 0;
-        top: 1.8rem;
+        right: .8rem;
+        top: 2.8rem;
         z-index: 20;
+
+        @include r(600) {
+            right: 0;
+            top: 0;
+        }
 
         svg {
             height: 1.8rem;
