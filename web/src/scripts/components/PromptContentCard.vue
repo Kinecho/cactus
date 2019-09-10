@@ -502,6 +502,9 @@
         @include r(374) {
             padding: 2.4rem;
         }
+        @include r(600) {
+            min-height: 66rem;
+        }
 
         .text {
             padding: 4rem 0 3.2rem;
