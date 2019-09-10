@@ -4,8 +4,10 @@ import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import {getStreak, numDaysAgoFromMidnights} from "@shared/util/DateUtil";
-
+import {getStreak} from "@shared/util/DateUtil";
+import {Config} from "@web/config";
+import {PageRoute} from "@web/PageRoutes";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 export default class ReflectionResponseService {
     public static sharedInstance = new ReflectionResponseService();
@@ -15,6 +17,40 @@ export default class ReflectionResponseService {
         return this.firestoreService.getCollectionRef(Collection.reflectionResponses)
     }
 
+    static getShareableUrl(response?: ReflectionResponse): string | undefined {
+        if (!response || !response.shared || !response.id) {
+            return;
+        }
+
+        return `${Config.domain}${PageRoute.SHARED_REFLECTION}/${response.id}`;
+
+    }
+
+    async shareResponse(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
+        if (!response) {
+            return;
+        }
+        if (response.shared) {
+            return;
+        }
+
+        response.shared = true;
+        response.sharedAt = new Date();
+        return await this.save(response, {saveIfAnonymous: true});
+    }
+
+    async unShareResponse(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
+        if (!response) {
+            return;
+        }
+        if (!response.shared) {
+            return;
+        }
+
+        response.shared = false;
+        response.unsharedAt = new Date();
+        return await this.save(response, {saveIfAnonymous: true});
+    }
 
     static createPossiblyAnonymousReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
         const response = new ReflectionResponse();
@@ -79,8 +115,11 @@ export default class ReflectionResponseService {
             const saved = this.firestoreService.save(model);
             //TODO: using cactusMemberId on this may be a weak way to go - we might want to check the current logged in status of the member instead. (shrug)
             return saved;
-        } else {
-            console.warn("No member ID was found on the prompt, not saving");
+        }
+        if (!model.cactusMemberId) {
+            console.warn("No cactusMemberId found on ReflectionResponse, Saving to local storage");
+            StorageService.saveModel(LocalStorageKey.anonReflectionResponse, model, model.promptId);
+
             return model;
         }
     }
@@ -95,6 +134,21 @@ export default class ReflectionResponseService {
             console.error("Failed to fetch reflection responses", error);
             return [];
         }
+    }
+
+    observeSharedReflection(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?:any) => void }): ListenerUnsubscriber | undefined {
+        return this.firestoreService.observeById(reflectionId, ReflectionResponse, {
+            queryName: "observeSharedReflection",
+            onData: (model:ReflectionResponse|undefined, error) => {
+                if (model && model.shared){
+                    options.onData(model, error);
+                }
+                else {
+                    options.onData(undefined, error);
+                }
+
+            }
+        });
     }
 
     observeForPromptId(promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber | undefined {

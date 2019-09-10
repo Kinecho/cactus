@@ -91,7 +91,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import Footer from "@components/StardardFooter.vue"
+    import Footer from "@components/StandardFooter.vue"
     import NavBar from "@components/NavBar.vue"
     import AuthButton from "@components/AuthButton.vue"
     import {getQueryParam} from '@web/util'

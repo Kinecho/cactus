@@ -1,37 +1,37 @@
 <template>
-        <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
-        <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: responseText}">
-            <div class="doneStatus" v-show="responsesLoaded && completed">{{promptCopy.DONE}}</div>
-            <p class="date">{{promptDate}}</p>
-            <div class="menuParent">
-                <dropdown-menu :items="linkItems"/>
-            </div>
+    <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
+    <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: responseText}">
+        <div class="doneStatus" v-show="responsesLoaded && completed">{{promptCopy.DONE}}</div>
+        <p class="date">{{promptDate}}</p>
+        <div class="menuParent">
+            <dropdown-menu :items="linkItems"/>
+        </div>
 
-            <div v-if="error">
-                <p v-show="error" class="warning prompt">
-                    {{error}}
-                </p>
-            </div>
-            <div class="textContainer" v-if="promptContent && !completed">
-                <h3 class="topic" v-show="topicText">{{topicText}}</h3>
-                <p class="subtext" v-show="subText">{{subText}}</p>
-            </div>
-            <div class="textContainer" v-if="promptContent && completed">
-                <h3 class="question" v-show="topicText">{{questionText}}</h3>
-            </div>
-            <div class="entry" v-if="!doReflect">{{responseText}}</div>
-            <edit-reflection
-                    :show="doReflect"
-                    :responses="responses"
-                    :prompt="prompt"
-                    :responseMedium="responseMedium"
-                    @close="doReflect = false"
-            />
+        <div v-if="error">
+            <p v-show="error" class="warning prompt">
+                {{error}}
+            </p>
+        </div>
+        <div class="textContainer" v-if="promptContent && !completed">
+            <h3 class="topic" v-show="topicText">{{topicText}}</h3>
+            <p class="subtext" v-show="subText">{{subText}}</p>
+        </div>
+        <div class="textContainer" v-if="promptContent && completed">
+            <h3 class="question" v-show="topicText">{{questionText}}</h3>
+        </div>
+        <div class="entry" v-if="!doReflect">{{responseText}}</div>
+        <edit-reflection
+                :show="doReflect"
+                :responses="responses"
+                :prompt="prompt"
+                :responseMedium="responseMedium"
+                @close="doReflect = false"
+        />
 
-            <div class="backgroundImage" v-if="!doReflect && hasBackgroundImage">
-                <flamelink-image v-if="hasBackgroundImage" :image="backgroundImage"/>
-                <div v-else class="random-placeholder" :class="backgroundClasses"></div>
-            </div>
+        <div class="backgroundImage" v-if="!doReflect && hasBackgroundImage">
+            <flamelink-image v-if="hasBackgroundImage" :image="backgroundImage"/>
+            <div v-else class="random-placeholder" :class="backgroundClasses"></div>
+        </div>
 
             <nav v-show="!doReflect" class="buttonContainer">
                 <a :href="promptContentPath" @click.prevent="showContent = true" class="wiggle button" v-show="!completed">
@@ -47,12 +47,13 @@
             <modal :show="showContent"
                     v-on:close="showContent = false"
                     :showCloseButton="true"
-                    :closeStyles="{top: '2.4rem'}"
+                    :hideCloseButtonOnMobile="true"
             >
                 <PromptContent slot="body"
                         v-bind:promptContentEntryId="entryId"
                         v-bind:isModal="true"
                         v-on:close="showContent = false"
+                        :initialIndex="initialIndex"
                 />
             </modal>
             <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
@@ -60,8 +61,8 @@
                     <PromptSharing :promptContent="promptContent"/>
                 </div>
 
-            </modal>
-        </div>
+        </modal>
+    </div>
 </template>
 
 <script lang="ts">
@@ -81,7 +82,7 @@
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import PromptSharing from "@components/PromptContentSharing.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
-    import {removeQueryParam, updateQueryParam} from '@web/util'
+    import {pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
     import {hasImage} from '@shared/util/FlamelinkUtils'
@@ -146,6 +147,7 @@
             responseMedium: ResponseMedium,
             showSharing: boolean,
             promptCopy: PromptCopy,
+            initialIndex: number | undefined,
         } {
             return {
                 doReflect: false,
@@ -159,6 +161,7 @@
                 responseMedium: ResponseMedium.JOURNAL_WEB,
                 showSharing: false,
                 promptCopy: copy.prompts,
+                initialIndex: undefined,
             }
         },
         computed: {
@@ -227,12 +230,8 @@
                     {
                         title: copy.prompts.REFLECT,
                         onClick: () => {
+                            this.initialIndex = 0;
                             this.showContent = true;
-                        }
-                    }, {
-                        title: copy.prompts.SHARE_PROMPT,
-                        onClick: () => {
-                            this.showSharing = true;
                         }
                     },
                     {
@@ -240,8 +239,27 @@
                         onClick: () => {
                             this.doReflect = true;
                         }
-                    }];
+                    },
+                    {
+                        title: copy.prompts.SHARE_PROMPT,
+                        onClick: () => {
+                            this.showSharing = true;
+                        }
+                    },
+                ];
 
+
+                if (this.hasNote && this.promptContent && this.promptContent.content) {
+                    const shareIndex = this.promptContent.content.length;
+                    linkItems.push({
+                        title: copy.prompts.SHARE_NOTE,
+                        onClick: () => {
+                            // pushQueryParam(QueryParam.CONTENT_INDEX, shareIndex);
+                            this.initialIndex = shareIndex;
+                            this.showContent = true;
+                        }
+                    })
+                }
 
                 return linkItems
             },

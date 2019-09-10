@@ -1,4 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -12,7 +11,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
             <section class="content-container centered" v-if="!loading && promptContent">
                 <div class="shareContainer">
-                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing">
+                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
                         </svg>
@@ -27,7 +26,12 @@ import {QueryParam} from '@shared/util/queryParams'
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
-                <div class="progress-wrapper" v-if="!completed && !showSharing">
+                <button v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                        <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                    </svg>
+                </button>
+                <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
                     </div>
@@ -38,7 +42,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
-                                    v-bind:content="promptContent.content[activeIndex]"
+                                    v-bind:content="contentItems[activeIndex]"
                                     v-bind:response="reflectionResponse"
                                     v-bind:hasNext="hasNext && activeIndex > 0"
                                     v-bind:reflectionDuration="reflectionDuration"
@@ -107,13 +111,15 @@ import {QueryParam} from '@shared/util/queryParams'
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
+    import {isBlank} from "@shared/util/StringUtil"
+    import CopyService from "@shared/copy/CopyService";
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
     const MIN_REFLECTION_MS = MINIMUM_REFLECT_DURATION_MS;
     const REFLECT_UPDATE_INTERVAL_MS = 100;
-
+    const copy = CopyService.getSharedInstance().copy;
     export default Vue.extend({
         components: {
             ContentCard,
@@ -122,6 +128,7 @@ import {QueryParam} from '@shared/util/queryParams'
             PromptContentSharing,
         },
         props: {
+            initialIndex: Number,
             promptContentEntryId: String,
             isModal: {type: Boolean, default: false},
             onClose: {
@@ -131,8 +138,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 }
             }
         },
-        async created(): Promise<void> {
-
+        async beforeMount(): Promise<void> {
             this.keyboardListener = (evt: KeyboardEvent) => {
                 console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
                 if (this.navigationDisabled) {
@@ -159,6 +165,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
             this.popStateListener = window.addEventListener('popstate', (event: PopStateEvent) => {
                 console.log("Window popstate called", event);
+
                 const paramIndex = getQueryParam(QueryParam.CONTENT_INDEX);
 
                 if (paramIndex && !isNaN(Number(paramIndex))) {
@@ -213,12 +220,17 @@ import {QueryParam} from '@shared/util/queryParams'
                     console.log("raw promptContent data", data);
 
                     const promptContent = new PromptContent(data);
+                    if (this.initialIndex) {
+                        this.activeIndex = this.initialIndex;
+                    } else {
+                        this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
+                    }
 
-                    this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
                     if (isDone) {
                         this.completed = true;
                     }
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+
                     this.promptContent = promptContent;
                     this.loading = false;
                     this.updateDocumentTitle();
@@ -293,14 +305,48 @@ import {QueryParam} from '@shared/util/queryParams'
             };
         },
         computed: {
+            contentItems(): Content[] | undefined {
+                if (!this.promptContent) {
+                    return;
+                }
+
+                const items = [...this.promptContent.content];
+
+                console.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
+
+                if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
+                    let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                    const sharingCard: Content = {
+                        contentType: ContentType.share_reflection,
+                        text_md: shareReflectionCopy,
+                        title: copy.prompts.SHARE_YOUR_NOTE,
+                    };
+
+                    items.push(sharingCard);
+                }
+
+
+                return items;
+
+            },
+            isShareNote(): boolean {
+                if (this.contentItems && this.contentItems.length > this.activeIndex) {
+                    const activeContent = this.contentItems[this.activeIndex];
+                    return activeContent.contentType === ContentType.share_reflection || false;
+                }
+                return false;
+            },
+            showCloseButton(): boolean {
+                return this.isModal && !this.showSharing && !this.isShareNote;
+            },
             slideNumberClass(): string {
                 return `slide-${this.activeIndex}`
             },
             hasNext(): boolean {
-                return this.promptContent && this.promptContent.content && this.activeIndex < this.promptContent.content.length - 1 || false
+                return this.contentItems && this.contentItems && this.activeIndex < this.contentItems.length - 1 || false
             },
             isLastCard(): boolean {
-                return this.promptContent && this.promptContent.content && this.activeIndex === this.promptContent.content.length - 1 || false
+                return this.contentItems && this.contentItems && this.activeIndex === this.contentItems.length - 1 || false
             },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
@@ -312,8 +358,8 @@ import {QueryParam} from '@shared/util/queryParams'
                 return this.reflectionDuration >= MIN_REFLECTION_MS
             },
             isReflection(): boolean {
-                if (this.promptContent && this.promptContent.content.length > this.activeIndex) {
-                    const activeContent = this.promptContent.content[this.activeIndex];
+                if (this.contentItems && this.contentItems.length > this.activeIndex) {
+                    const activeContent = this.contentItems[this.activeIndex];
                     const isReflect = activeContent.contentType === ContentType.reflect || false;
                     return isReflect
                 }
@@ -334,15 +380,18 @@ import {QueryParam} from '@shared/util/queryParams'
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return true
+                return !this.isShareNote;
             },
+            sharePromptEnabled(): boolean {
+                return !this.isShareNote;
+            }
         },
         watch: {
             activeIndex(index: number, oldIndex: number) {
                 this.updateDocumentTitle();
 
-                if (this.promptContent && this.promptContent.content.length > index) {
-                    const activeContent = this.promptContent.content[index];
+                if (this.contentItems && this.contentItems.length > index) {
+                    const activeContent = this.contentItems[index];
                     let isReflect = activeContent.contentType === ContentType.reflect || false;
 
                     if (isReflect) {
@@ -527,7 +576,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
                 this.transitionName = "slide";
                 const saveTask = this.isReflection ? this.save() : () => undefined;
-                const content = this.promptContent ? this.promptContent.content : [];
+                const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
@@ -812,15 +861,20 @@ import {QueryParam} from '@shared/util/queryParams'
         animation: wiggle .5s forwards;
     }
 
+    button.close {
+        position: absolute;
+        right: .8rem;
+        top: 2.8rem;
+        z-index: 20;
 
-    .share-modal-body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 2rem;
-        margin-top: 2rem;
-        @include shadowbox;
+        @include r(600) {
+            display: none;
+        }
+
+        svg {
+            height: 1.8rem;
+            width: 1.8rem;
+        }
     }
 
     .slide-leave-active,

@@ -46,6 +46,7 @@
                         </label>
                         <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
+
                     </div>
                     <div class="item" v-if="showProviders">
                         <label class="label">{{copy.auth.CONNECTED_ACCOUNTS}}</label>
@@ -58,12 +59,24 @@
                                 </div>
                             </li>
                         </ul>
-
                     </div>
                 </div>
             </transition>
-            <div>
+            <div class="snackbar-container">
 
+                <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
+                    <snackbar-content
+                            class="snackbar-item"
+                            v-for="(snackbar, index) of snackbars"
+                            :text="snackbar.message"
+                            :closeable="snackbar.closeable"
+                            :key="snackbar.id"
+                            @close="removeSnackbar(snackbar.id)"
+                            :autoHide="snackbar.autoHide"
+                            :durationMs="snackbar.timeoutMs"
+                            :color="snackbar.color"
+                    />
+                </transition-group>
             </div>
         </div>
         <Footer/>
@@ -74,7 +87,7 @@
 <script lang="ts">
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StardardFooter.vue";
+    import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
@@ -90,6 +103,8 @@
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
+    import SnackbarContent from "@components/SnackbarContent.vue";
+    import * as uuid from "uuid/v4";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -107,6 +122,7 @@
             CheckBox,
             TimezonePicker,
             ProviderIcon,
+            SnackbarContent,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -134,6 +150,7 @@
             error: string | undefined,
             removedProviderIds: string[],
             copy: LocalizedCopy,
+            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }[],
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -147,6 +164,7 @@
                 error: undefined,
                 removedProviderIds: [],
                 copy,
+                snackbars: [],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
@@ -208,9 +226,47 @@
                 if (c) {
                     this.removedProviderIds.push(providerId);
                     await this.user.unlink(providerId);
+                    this.addSnackbar(`${getProviderDisplayName(providerId)} Removed`);
                     this.user.reload();
                 }
                 return;
+            },
+            beforeLeave(el: any) {
+                const {marginLeft, marginTop, width, height} = window.getComputedStyle(el);
+                el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
+                // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
+                el.style.top = `${el.offsetTop}px`;
+                el.style.width = width
+                el.style.height = height
+            },
+            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
+
+                const id = uuid();
+                if (typeof message === "string") {
+                    this.snackbars.push({id, message: message, autoHide: true});
+                } else {
+                    this.snackbars.push({id, autoHide: true, closeable: true, ...message});
+                }
+
+                return id;
+            },
+            removeSnackbar(id: string) {
+                console.log("removing snackbar", id);
+                this.snackbars = this.snackbars.filter(snack => snack.id !== id);
+            },
+            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
+                const snackbar = this.snackbars.find(snack => snack.id === id);
+
+                if (!snackbar) {
+                    console.log("no snackbar found with id");
+                    return;
+                }
+                console.log("Found snackbar ", id);
+                if (typeof message === "string") {
+                    snackbar.message = message;
+                } else {
+                    Object.assign(snackbar, message);
+                }
             },
             async save() {
                 if (this.member) {
@@ -219,11 +275,18 @@
                 }
             },
             async saveEmailStatus(status: NotificationStatus) {
+                const snackId = this.addSnackbar({
+                    message: "Saving notification settings...",
+                    closeable: false,
+                    autoHide: false,
+                    color: "info",
+                });
                 console.log("Saving status...", status);
                 this.error = undefined;
                 if (this.member && this.member.email) {
                     const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
+                        this.addSnackbar("Oops! Unable to save email settings.");
                         console.log("Unsetting notification status change since the update failed");
 
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
@@ -234,6 +297,13 @@
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
                         this.error = errorMessage;
+                    } else {
+                        this.updateSnackbar(snackId, {
+                            message: "Email Settings Updated",
+                            autoHide: true,
+                            closeable: true,
+                            color: "success",
+                        });
                     }
                 }
             },
@@ -241,6 +311,7 @@
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     await this.save();
+                    this.addSnackbar({message: "Timezone Updated", color: "success"});
                 }
             }
         }
@@ -254,6 +325,7 @@
     @import "forms";
 
     .accountContainer {
+
         display: flex;
         flex-flow: column nowrap;
         min-height: 100vh;
@@ -269,6 +341,7 @@
     }
 
     .centered.content {
+        position: relative;
         flex-grow: 1;
         max-width: 70rem;
         padding: 2.4rem;
@@ -326,6 +399,61 @@
                     font-size: 1.4rem;
                 }
             }
+        }
+    }
+
+
+    .snackbar-container {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        z-index: 5000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        @include r(600) {
+            bottom: unset;
+            top: 9rem;
+        }
+
+        > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+    }
+
+    .snackbar-item {
+        transition: all .3s;
+        width: 30rem;
+        min-width: 20rem;
+        max-width: 90vw;
+    }
+
+    .snackbar-enter {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .snackbar-leave-to {
+        //opacity: 0;
+        //transform: translateX(-200px);
+        animation: snackbar-out .3s;
+
+    }
+
+    .snackbar-leave-active {
+        position: absolute;
+    }
+
+    @keyframes snackbar-out {
+        50% {
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(-200px);
+            opacity: 0;
         }
     }
 

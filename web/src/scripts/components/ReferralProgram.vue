@@ -63,7 +63,7 @@
 <script lang="ts">
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StardardFooter.vue";
+    import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';

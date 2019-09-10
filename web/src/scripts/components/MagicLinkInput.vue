@@ -3,7 +3,7 @@
         <div class="alert error" v-if="error">{{error}}</div>
         <input type="email" name="email" :placeholder="commonCopy.ENTER_YOUR_EMAIL_ADDRESS" v-model="email" :disabled="submitting" :class="{disabled: submitting}"/>
         <button type="submit" name="submit" v-bind:disabled="submitting" :class="['email-submit-button', {loading: submitting, disabled: submitting}]">
-            {{commonCopy.NEXT}}
+            {{nextCopy}}
         </button>
     </form>
 </template>
@@ -26,7 +26,10 @@
         created() {
             this.email = this.initialEmail || "";
         },
-        props: {initialEmail: String},
+        props: {
+            initialEmail: String,
+            buttonText: String,
+        },
         data(): {
             email: string,
             submitting: boolean,
@@ -38,6 +41,11 @@
                 submitting: false,
                 error: undefined,
                 commonCopy: copy.common,
+            }
+        },
+        computed: {
+            nextCopy(): string {
+                return this.buttonText || this.commonCopy.NEXT;
             }
         },
         methods: {
