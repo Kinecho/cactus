@@ -387,7 +387,7 @@
                 }
             },
             tapAnywhereEnabled(): boolean {
-                return !this.isShareNote;
+                return true;
             },
             sharePromptEnabled(): boolean {
                 return !this.isShareNote;
