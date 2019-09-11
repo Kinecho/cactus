@@ -1,7 +1,7 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
-            <div class="centered" v-if="loading && !responsesLoaded">
+            <div class="centered" v-if="loading || !responsesLoaded">
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
@@ -9,7 +9,7 @@
                 No prompt found for id
             </div>
 
-            <section class="content-container centered" v-if="!loading && promptContent">
+            <section class="content-container centered" v-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer">
                     <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
@@ -140,9 +140,7 @@
         },
         async beforeMount(): Promise<void> {
             this.keyboardListener = (evt: KeyboardEvent) => {
-                console.log("keyboard event listener, navigation disabled: ", this.navigationDisabled)
                 if (this.navigationDisabled) {
-                    console.log("navigation disabled");
                     return;
                 }
                 if (evt.code === "ArrowLeft" || evt.keyCode === 37) {
@@ -164,20 +162,28 @@
             });
 
             this.popStateListener = window.addEventListener('popstate', (event: PopStateEvent) => {
-                console.log("Window popstate called", event);
-
                 const paramIndex = getQueryParam(QueryParam.CONTENT_INDEX);
+                if (paramIndex === "done") {
+                    this.completed = true;
+                    return;
+                }
+                this.completed = false;
+                let nextIndex: number | undefined = undefined;
+                if (paramIndex === "share" && this.contentItems) {
+                    nextIndex = Math.max(this.contentItems.length - 1, 0);
+                } else if (paramIndex && !isNaN(Number(paramIndex))) {
+                    nextIndex = Number(paramIndex)
+                }
 
-                if (paramIndex && !isNaN(Number(paramIndex))) {
-                    const index = Number(paramIndex);
-                    if (index !== this.activeIndex) {
-                        if (index < this.activeIndex) {
+                if (nextIndex !== undefined) {
+                    if (nextIndex !== this.activeIndex) {
+                        if (nextIndex < this.activeIndex) {
                             this.transitionName = "slide-out";
                         } else {
                             this.transitionName = "slide";
                         }
 
-                        this.activeIndex = index;
+                        this.activeIndex = nextIndex;
                     }
                 }
 
@@ -193,15 +199,14 @@
 
             let slideParam = getQueryParam(QueryParam.CONTENT_INDEX);
             let slideNumber = 0;
-            let isDone = false;
-            if (slideParam === "done") {
-                isDone = true;
-            } else {
+            let isDone = slideParam === "done";
+            let isShare = slideParam === "share";
+
+            try {
                 slideNumber = Number(getQueryParam(QueryParam.CONTENT_INDEX) || 0);
+            } catch {
+                slideNumber = 0;
             }
-
-
-            // flamelink.content.subscribe()
 
             //TODO: use a promptContentService
             this.promptsUnsubscriber = await flamelink.content.subscribe({
@@ -221,18 +226,21 @@
 
                     const promptContent = new PromptContent(data);
                     this.promptContent = promptContent;
-                    if (this.initialIndex) {
+                    console.log("on load - promptContentLength", promptContent.content && promptContent.content.length);
+                    if (isShare) {
+                        console.log("setting pendingActiveIndex to promptContent.content.length");
+                        this.pendingActiveIndex = promptContent.content.length
+                    } else if (isDone) {
+                        this.completed = true;
+                    } else if (this.initialIndex) {
                         this.activeIndex = this.initialIndex;
-                    } else if (slideNumber > promptContent.content.length - 1) {
+                    } else if (slideNumber < promptContent.content.length - 1) {
                         this.activeIndex = slideNumber;
-                    } else if (slideNumber === promptContent.content.length){
-                        this.pendingActiveIndex = slideNumber
                     }
 
-                    if (isDone) {
-                        this.completed = true;
+                    if (!this.pendingActiveIndex && !isDone) {
+                        updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                     }
-                    updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
 
 
                     this.loading = false;
@@ -328,7 +336,7 @@
                         text_md: shareReflectionCopy,
                         title: copy.prompts.SHARE_YOUR_NOTE,
                     };
-
+                    console.log("adding share card to content items");
                     items.push(sharingCard);
                 }
 
@@ -395,9 +403,13 @@
         },
         watch: {
             responsesLoaded(loaded) {
-                if (loaded && this.pendingActiveIndex !== undefined) {
-                    this.activeIndex = this.pendingActiveIndex;
-                }
+                // console.log("responses loaded. Pending Active Index is", this.pendingActiveIndex, "contentItems.length", this.contentItems && this.contentItems.length)
+                // if (loaded && this.pendingActiveIndex !== undefined) {
+                //     if (this.contentItems && this.contentItems.length > 0) {
+                //         this.activeIndex = Math.min(Math.max(0, this.contentItems.length - 1), this.pendingActiveIndex)
+                //         // updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                //     }
+                // }
             },
             activeIndex(index: number, oldIndex: number) {
                 this.updateDocumentTitle();
@@ -422,6 +434,19 @@
 
         },
         methods: {
+            async updatePendingActiveIndex(reflection?: ReflectionResponse) {
+                console.log("Update pending active index");
+                if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
+                    if (this.promptContent && this.promptContent.content.length > 0) {
+                        console.log("Setting active index in pending active index method");
+                        this.activeIndex = Math.min(this.promptContent.content.length, this.pendingActiveIndex);
+                    }
+                } else if (!this.completed) {
+                    updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                }
+
+
+            },
             updateDocumentTitle() {
                 const index = this.activeIndex || 0;
                 let title = this.promptContent && this.promptContent.subjectLine;
@@ -532,8 +557,8 @@
 
                     // console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
-                        onData: (responses) => {
-                            this.responsesLoaded = true;
+                        onData: async (responses) => {
+
                             const [first] = responses;
                             // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
@@ -551,9 +576,15 @@
 
                             //TODO: combine if there are multiple?
                             const response = first || localResponse;
+
+                            await this.updatePendingActiveIndex(response);
+                            this.responsesLoaded = true;
                             this.reflectionResponses = responses;
                             this.reflectionResponse = response;
+
+
                             this.reflectionDuration = response.reflectionDurationMs || 0;
+
                         }
                     })
                 } else {
@@ -575,8 +606,6 @@
                     this.saved = true;
                     this.saving = false;
                     return saved;
-                } else if (!this.isReflection) {
-                    console.log("Not saving. This is not a reflection screen");
                 }
                 return;
             },
@@ -591,7 +620,15 @@
                 const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
-                    pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+
+                    let nextItem = content[this.activeIndex];
+                    if (nextItem && nextItem.contentType === ContentType.share_reflection) {
+                        pushQueryParam(QueryParam.CONTENT_INDEX, "share");
+                    } else {
+                        pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                    }
+
+
                     gtag('event', 'next', {
                         event_category: "prompt_content",
                         event_label: `Slide ${this.activeIndex}`
@@ -605,20 +642,29 @@
             async previous() {
                 const saveTask = this.isReflection ? this.save() : () => undefined;
                 this.transitionName = "slide-out";
-
+                const content = this.contentItems || [];
                 if (this.completed) {
+                    this.activeIndex = Math.max(0, content.length - 1);
                     this.completed = false;
-                    return;
+                    // return;
+                } else if (this.hasPrevious) {
+                    this.activeIndex = Math.max(this.activeIndex - 1, 0);
                 }
 
-                if (this.hasPrevious) {
-                    this.activeIndex = Math.max(this.activeIndex - 1, 0);
+                let previousItem = content[this.activeIndex];
+                if (previousItem && previousItem.contentType === ContentType.share_reflection) {
+                    pushQueryParam(QueryParam.CONTENT_INDEX, "share");
+                } else {
                     pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
-                    gtag('event', 'previous', {
-                        event_category: "prompt_content",
-                        event_label: `Slide ${this.activeIndex}`
-                    });
                 }
+
+
+                // pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
+                gtag('event', 'previous', {
+                    event_category: "prompt_content",
+                    event_label: `Slide ${this.activeIndex}`
+                });
+
                 await saveTask;
             },
             async complete() {

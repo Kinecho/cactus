@@ -251,15 +251,9 @@
 
 
                 if (this.hasNote && this.promptContent && this.promptContent.content) {
-                    const shareIndex = this.promptContent.content.length;
                     linkItems.push({
                         title: copy.prompts.SHARE_NOTE,
-                        href: `${this.promptContentPath}?slide=${shareIndex}`,
-                        // onClick: () => {
-                        //     // pushQueryParam(QueryParam.CONTENT_INDEX, shareIndex);
-                        //     this.initialIndex = shareIndex;
-                        //     this.showContent = true;
-                        // }
+                        href: `${this.promptContentPath}?${QueryParam.CONTENT_INDEX}=share`,
                     })
                 }
 

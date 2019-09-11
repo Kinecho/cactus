@@ -1,5 +1,5 @@
 <template>
-    <div :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
+    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
             <button class="skip tertiary" @click="next" v-show="showSkip">
                 Skip
