@@ -1,7 +1,7 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
-            <div class="centered" v-if="loading">
+            <div class="centered" v-if="loading && !responsesLoaded">
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
@@ -220,10 +220,13 @@
                     console.log("raw promptContent data", data);
 
                     const promptContent = new PromptContent(data);
+                    this.promptContent = promptContent;
                     if (this.initialIndex) {
                         this.activeIndex = this.initialIndex;
-                    } else {
-                        this.activeIndex = (slideNumber > promptContent.content.length - 1) ? 0 : slideNumber;
+                    } else if (slideNumber > promptContent.content.length - 1) {
+                        this.activeIndex = slideNumber;
+                    } else if (slideNumber === promptContent.content.length){
+                        this.pendingActiveIndex = slideNumber
                     }
 
                     if (isDone) {
@@ -231,7 +234,7 @@
                     }
                     updateQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
 
-                    this.promptContent = promptContent;
+
                     this.loading = false;
                     this.updateDocumentTitle();
 
@@ -278,6 +281,8 @@
             popStateListener: any | undefined,
             keyboardListener: any | undefined,
             navigationDisabled: boolean,
+            responsesLoaded: boolean,
+            pendingActiveIndex: number | undefined,
         } {
             return {
                 promptContent: undefined,
@@ -290,6 +295,7 @@
                 reflectionResponseUnsubscriber: undefined,
                 reflectionResponses: [],
                 reflectionResponse: undefined,
+                responsesLoaded: false,
                 saving: false,
                 saved: false,
                 reflectionDuration: 0,
@@ -302,6 +308,7 @@
                 popStateListener: undefined,
                 keyboardListener: undefined,
                 navigationDisabled: false,
+                pendingActiveIndex: undefined,
             };
         },
         computed: {
@@ -387,6 +394,11 @@
             }
         },
         watch: {
+            responsesLoaded(loaded) {
+                if (loaded && this.pendingActiveIndex !== undefined) {
+                    this.activeIndex = this.pendingActiveIndex;
+                }
+            },
             activeIndex(index: number, oldIndex: number) {
                 this.updateDocumentTitle();
 
@@ -521,7 +533,7 @@
                     // console.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: (responses) => {
-
+                            this.responsesLoaded = true;
                             const [first] = responses;
                             // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
