@@ -512,7 +512,9 @@
 
             background: #{$nth} no-repeat;
             height: 200px;
+            margin: 0;
             position: absolute;
+            width: 100%;
         }
 
         @include r(600) {
