@@ -689,6 +689,7 @@
 
         .content-container {
             perspective: 1000px;
+
             @include r(600) {
                 margin-bottom: 12rem;
             }
@@ -735,19 +736,18 @@
                 }
             }
 
-
             .arrow {
                 margin: auto;
                 padding: 0;
                 position: absolute;
-                top: 58%;
+                top: 50%;
                 z-index: 10;
 
                 &.previous {
-                    left: 1.6rem;
+                    left: .8rem;
                 }
                 &.next {
-                    right: 1.6rem;
+                    right: .8rem;
                 }
 
                 @include r(600) {
