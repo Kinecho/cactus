@@ -177,10 +177,6 @@
                     </span>
                 </div>
             </div>
-
-            <div class="mobile-nav-buttons" v-if="tapAnywhereEnabled">
-                <span class="tap">{{promptCopy.TAP_ANYWHERE}}</span>
-            </div>
             <!--    END Reflect-->
         </section>
     </div>
@@ -405,22 +401,14 @@
         background: $lightBlue no-repeat;
         display: flex;
         flex-direction: column;
+        height: 100%;
         justify-content: space-between;
         padding: 2.4rem;
         width: 100%;
-        overflow: hidden;
 
-        @include isTinyPhone {
-            min-height: calc(100vh - 5.6rem);
-        }
-        @include biggerThanTinyPhone {
-            min-height: calc(100vh - 9rem);
-        }
         @include r(600) {
             border-radius: 12px;
             box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            height: 100%;
-            min-height: 0;
             overflow: hidden;
             position: relative;
         }
@@ -428,7 +416,7 @@
         .slide-1 & {
             background-image: url(/assets/images/greenNeedleBlob.svg),
             url(/assets/images/pinkBlob.svg);
-            background-position: right -170px bottom 18vh,
+            background-position: right -210px bottom 38vh,
             right -140px bottom 28vh;
             background-size: 250px, 180px;
         }
@@ -438,7 +426,7 @@
             url(/assets/images/pinkBlob.svg),
             url(/assets/images/yellowNeedleBlob.svg),
             url(/assets/images/yellowBlob.svg);
-            background-position: left -200px bottom 18vh,
+            background-position: left -210px bottom 38vh,
             left -150px bottom 28vh,
             right -440px bottom 48vh,
             right -205px bottom 67vh;
@@ -489,25 +477,13 @@
                 background-image: none;
             }
         }
-    }
 
-    /*this nesting is temporary*/
-    .page-wrapper .content-container .flipper .flip-card .content-card.type-share_reflection,
-    .page-wrapper.isModal .content-container .flipper .flip-card .content-card.type-share_reflection {
-        background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
-        height: auto;
-        min-height: 100vh;
-        padding: 1.6rem 1.6rem 2.4rem;
+        &.type-share_reflection {
+            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
 
-        @include r(374) {
-            padding: 2.4rem;
-        }
-        @include r(600) {
-            min-height: 66rem;
-        }
-
-        .text {
-            padding: 4rem 0 3.2rem;
+            .text {
+                padding: 0 0 2.4rem;
+            }
         }
     }
 
@@ -536,13 +512,14 @@
 
             background: #{$nth} no-repeat;
             height: 200px;
+            margin: 0;
             position: absolute;
+            width: 100%;
         }
 
         @include r(600) {
             display: flex;
             justify-content: center;
-            margin: 0 -2.4rem;
             max-height: none;
             order: 1;
             position: static;
@@ -563,22 +540,22 @@
     }
 
     .text {
-        font-size: 2.4rem;
-        padding: 4rem 0;
+        font-size: 2rem;
+        padding: 4rem 1.6rem;
 
         .reflectScreen & {
-            padding: 5.6rem 0 1.6rem;
+            margin-top: -5.6rem;
+        }
+
+        @include r(374) {
+            font-size: 2.4rem;
         }
 
         p {
             white-space: pre-line;
 
             &.tight {
-                font-size: 1.6rem;
-
-                @include r(374) {
-                    font-size: 1.8rem;
-                }
+                font-size: 1.8rem;
             }
         }
     }
@@ -586,12 +563,12 @@
     .skip.tertiary {
         align-items: center;
         color: $darkestGreen;
-        display: flex;
+        display: none;
         flex-grow: 0;
         justify-content: center;
         position: absolute;
         right: 0;
-        top: .8rem;
+        top: 1.6rem;
         width: min-content;
 
         svg {
@@ -631,12 +608,6 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
-
-        @include isTinyPhone {
-            .reflectScreen & {
-                justify-content: flex-start;
-            }
-        }
     }
 
     .quote-container {
@@ -654,8 +625,13 @@
         }
 
         .quote {
-            font-size: 2.4rem;
+            font-size: 2rem;
             margin-bottom: 2.4rem;
+            padding: 0 1.6rem;
+
+            @include r(374) {
+                font-size: 2.4rem;
+            }
         }
 
         .name {
@@ -735,7 +711,7 @@
         display: flex;
         height: 156px;
         justify-content: center;
-        margin-bottom: 2.4rem;
+        margin: -2.4rem 0 2.4rem;
     }
 
     .leaf7 {

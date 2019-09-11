@@ -204,13 +204,18 @@
             min-height: calc(100vh - 9rem - 6.4rem);
         }
         @include r(600) {
-            min-height: 0;
+            min-height: 66rem;
             height: 100%;
         }
 
         .graphic {
-            margin-bottom: 3.2rem;
-            width: 70%;
+            margin-bottom: 1.6rem;
+            width: 50%;
+
+            @include r(374) {
+                margin-bottom: 3.2rem;
+                width: 70%;
+            }
         }
 
         .info {
@@ -218,8 +223,12 @@
         }
 
         .referral-link {
-            margin-bottom: 3.2rem;
+            margin-bottom: 1.6rem;
             position: relative;
+
+            @include r(374) {
+                margin-bottom: 3.2rem;
+            }
 
             .link-input {
                 @include textInput;

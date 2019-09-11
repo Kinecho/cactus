@@ -89,6 +89,7 @@
 
         @include r(374) {
             box-shadow: none;
+            height: 4.7rem;
             padding: 1.2rem 2.4rem;
             position: absolute;
             right: 0;

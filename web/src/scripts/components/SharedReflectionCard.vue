@@ -96,16 +96,18 @@
     @import "variables";
 
     .shared-reflection-card {
-        @include shadowbox;
-        margin-bottom: 2.4rem;
+        background-color: $white;
+        border-radius: 12px;
+        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+        margin-bottom: 3.2rem;
         padding: 1.6rem 2.4rem;
         text-align: left;
 
-        @include r(600) {
-            padding: 3.2rem 2.4rem;
+        @include r(374) {
+            margin: 0 .8rem 3.2rem;
         }
 
-        @include r(768) {
+        @include r(600) {
             margin: 0 auto 4.8rem;
             max-width: 64rem;
             padding: 3.2rem;
@@ -129,7 +131,7 @@
                 height: 4.8rem;
                 left: 0;
                 position: absolute;
-                top: 7.2rem;
+                top: 7.6rem;
                 width: 100%;
             }
         }

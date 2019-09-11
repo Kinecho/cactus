@@ -218,14 +218,9 @@
     .celebrate-container {
         display: flex;
         flex-direction: column;
+        height: 100%;
         justify-content: center;
         width: 100%;
-
-        @include r(600) {
-            max-height: 66rem;
-            max-width: 48rem;
-            position: relative;
-        }
     }
 
     h2 {
@@ -293,17 +288,10 @@
         perspective: 1000px;
 
         .flipper {
+            height: 100%;
             position: relative;
             transform-style: preserve-3d;
             transition: 0.6s;
-
-            @include isTinyPhone {
-                height: calc(100vh - 8rem);
-            }
-
-            @include biggerThanTinyPhone {
-                height: calc(100vh - 10rem);
-            }
 
             @include r(600) {
                 border-radius: 12px;
@@ -336,8 +324,13 @@
 
             &.front {
                 background-color: lighten($lightPink, 3%);
+                height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
+
+                @include r(600) {
+                    min-height: 66rem;
+                }
             }
 
             &.back {
