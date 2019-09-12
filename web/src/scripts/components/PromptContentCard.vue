@@ -650,6 +650,7 @@
             border-radius: 4px;
             display: block;
             max-width: 100%;
+            margin: 0 auto; /* center smaller image in card */
         }
     }
 
