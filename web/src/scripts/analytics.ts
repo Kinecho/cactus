@@ -99,7 +99,7 @@ export function clearTrackingData() {
 
 export function setUserId(userId?: string) {
     gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
-    gtag('config', 'GA_MEASUREMENT_ID', {
+    gtag('config', Config.googleAnalyticsID, {
         'user_id': userId,
         'custom_map': {'dimension1': userId}
     });
