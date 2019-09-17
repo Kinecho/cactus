@@ -101,6 +101,7 @@
     import {getFlamelink} from '@web/firebase'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
+    import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
@@ -244,7 +245,7 @@
 
 
                     this.loading = false;
-                    this.updateDocumentTitle();
+                    this.updateDocumentMeta();
 
                 }
             });
@@ -412,7 +413,7 @@
                 // }
             },
             activeIndex(index: number, oldIndex: number) {
-                this.updateDocumentTitle();
+                this.updateDocumentMeta();
 
                 if (this.contentItems && this.contentItems.length > index) {
                     const activeContent = this.contentItems[index];
@@ -447,17 +448,42 @@
 
 
             },
-            updateDocumentTitle() {
+            updateDocumentMeta() {
                 const index = this.activeIndex || 0;
                 let title = this.promptContent && this.promptContent.subjectLine;
+                let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
+                let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+                let ogImageTag = document.querySelector("meta[property='og:image']");
+
                 if (!title) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
                     title = firstContent && firstContent.text;
                 }
                 if (title) {
-                    document.title = `Cactus | ${title} | ${index + 1}`;
+                    document.title = `${title} | ${index + 1}`;
                 } else {
                     document.title = 'Cactus Mindful Moment'
+                }
+                if (ogTitleTag) {
+                    ogTitleTag.setAttribute("content", `${title}`);
+                }
+                if (ogDescriptionTag) {
+                    ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
+                }
+
+                if (!openGraphImage || !openGraphImage.storageUrl) {
+                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
+                    openGraphImage = firstContent && firstContent.backgroundImage;
+                }
+
+                if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
+                    console.log(openGraphImage.storageUrl);
+                    let pngUrl = getCloudinaryUrlFromStorageUrl({
+                        storageUrl: openGraphImage.storageUrl, 
+                        width: 1200, 
+                        transforms: ["w_1200","h_630","f_png","c_lpad"]});
+                    ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
             },
             async handleTap(event: TouchEvent) {

@@ -20,9 +20,13 @@
     import Footer from "@components/StandardFooter.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse from "@shared/models/ReflectionResponse"
+    import CopyService from "@shared/copy/CopyService"
     import Card from "@components/SharedReflectionCard.vue";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import SignUpFooter from "@components/SignUpFooter.vue";
+    import {formatDate} from '@shared/util/DateUtil'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -59,12 +63,37 @@
                     }
                     this.error = undefined;
                     this.reflectionResponse = reflectionResponse;
+                    this.updateDocumentMeta();
                 }
             })
         },
         beforeDestroy() {
             if (this.responseUnsubscriber) {
                 this.responseUnsubscriber();
+            }
+        },
+        methods: {
+            updateDocumentMeta() {
+                let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+
+                
+                if (this.reflectionResponse) {
+                    let identifier = this.reflectionResponse.memberEmail;
+                    let question = this.reflectionResponse.promptQuestion;
+                    let shareDate = formatDate(this.reflectionResponse.sharedAt, copy.settings.dates.longFormat);
+
+                    if (question) { question = question.trim(); }
+                    
+                    let title = `Read ${identifier}'s private note on '${question}'`;
+                    let description = `This reflection note was shared on ${shareDate}.`;
+
+                    if (ogTitleTag && ogDescriptionTag) {
+                        document.title = title
+                        ogTitleTag.setAttribute("content", `${title}`);
+                        ogDescriptionTag.setAttribute("content", `${description}`);
+                    }
+                }
             }
         },
         data(): {

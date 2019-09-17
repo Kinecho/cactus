@@ -164,6 +164,7 @@ export default class PromptContent extends FlamelinkModel {
     promptId?: string;
     content: Content[] = [];
     subjectLine?: string;
+    openGraphImage?: Image;
     scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
