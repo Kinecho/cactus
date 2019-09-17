@@ -78,8 +78,10 @@
                     let identifier = this.reflectionResponse.memberEmail;
                     let question = this.reflectionResponse.promptQuestion;
                     let note = this.reflectionResponse.content.text;
+
+                    if (question) { question = question.trim(); }
                     
-                    let title = `Read ${identifier}'s private note on '${question.trim()}'`;
+                    let title = `Read ${identifier}'s private note on '${question}'`;
                     let description = `${note}`;
 
                     if (ogTitleTag && ogDescriptionTag) {
