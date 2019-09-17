@@ -206,6 +206,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
+    import CactusMemberService from '@web/services/CactusMemberService'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -275,7 +276,10 @@
         computed: {
             shareableLinkParams(): {} | undefined {
                 if (this.shareableLinkUrl) {
+                    const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+                    const email = member && member.email;
                     return {
+                        [QueryParam.REFERRED_BY_EMAIL]: email,
                         [QueryParam.UTM_MEDIUM]: "prompt-share-note",
                         [QueryParam.UTM_SOURCE]: "cactus.app",
                     }
