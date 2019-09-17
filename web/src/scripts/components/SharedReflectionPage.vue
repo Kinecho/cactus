@@ -79,7 +79,7 @@
                     let question = this.reflectionResponse.promptQuestion;
                     let note = this.reflectionResponse.content.text;
                     
-                    let title = `${identifier}'s private note: ${question}`;
+                    let title = `Read ${identifier}'s private note on '${question.trim()}'`;
                     let description = `${note}`;
 
                     if (ogTitleTag && ogDescriptionTag) {
