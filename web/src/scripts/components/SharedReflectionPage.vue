@@ -59,12 +59,35 @@
                     }
                     this.error = undefined;
                     this.reflectionResponse = reflectionResponse;
+                    this.updateDocumentMeta();
                 }
             })
         },
         beforeDestroy() {
             if (this.responseUnsubscriber) {
                 this.responseUnsubscriber();
+            }
+        },
+        methods: {
+            updateDocumentMeta() {
+                let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+
+                
+                if (this.reflectionResponse) {
+                    let identifier = this.reflectionResponse.memberEmail;
+                    let question = this.reflectionResponse.promptQuestion;
+                    let note = this.reflectionResponse.content.text;
+                    
+                    let title = `${identifier}'s private note: ${question}`;
+                    let description = `${note}`;
+
+                    if (ogTitleTag && ogDescriptionTag) {
+                        document.title = title
+                        ogTitleTag.setAttribute("content", `${title}`);
+                        ogDescriptionTag.setAttribute("content", `${description}`);
+                    }
+                }
             }
         },
         data(): {
