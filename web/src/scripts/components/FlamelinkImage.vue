@@ -47,12 +47,18 @@
                 if (this.image.flamelinkFileName) {
                     const storagePath = `flamelink/media/${this.image.flamelinkFileName}`;
                     const storageUrl = `https://firebasestorage.googleapis.com/v0/b/${Config.firebase.storageBucket}/o/${encodeURIComponent(storagePath)}?alt=media`;
-                    this.imageUrl = getCloudinaryUrlFromStorageUrl(storageUrl, this.width);
+                    this.imageUrl = getCloudinaryUrlFromStorageUrl({
+                            storageUrl: storageUrl, 
+                            width: this.width
+                        });
                     return;
                 }
 
                 if (this.image.storageUrl) {
-                    this.imageUrl = getCloudinaryUrlFromStorageUrl(this.image.storageUrl, this.width);
+                    this.imageUrl = getCloudinaryUrlFromStorageUrl({
+                            storageUrl: this.image.storageUrl, 
+                            width: this.width
+                        });
                     return;
                 }
 

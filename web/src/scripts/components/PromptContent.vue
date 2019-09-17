@@ -472,12 +472,17 @@
                     ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
                 }
 
-                if (!openGraphImage) {
+                if (!openGraphImage || !openGraphImage.storageUrl) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
                     openGraphImage = firstContent && firstContent.backgroundImage;
                 }
+
                 if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    let pngUrl = getCloudinaryUrlFromStorageUrl(openGraphImage.storageUrl, 1200, ["w_1200","h_630","f_png","c_lpad"]);
+                    console.log(openGraphImage.storageUrl);
+                    let pngUrl = getCloudinaryUrlFromStorageUrl({
+                        storageUrl: openGraphImage.storageUrl, 
+                        width: 1200, 
+                        transforms: ["w_1200","h_630","f_png","c_lpad"]});
                     ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
             },

@@ -31,20 +31,24 @@ export function getImageBreakpointWidth(input: string | number | ImageWidth): nu
 
 }
 
-export function getCloudinaryUrlFromStorageUrl(storageUrl: string, width: string | number, transforms?: Array<string>): string {
+export function getCloudinaryUrlFromStorageUrl(options: {
+        storageUrl: string, 
+        width: string | number, 
+        transforms?: Array<string>
+    }): string {
 
-    const isSVG = stripQueryParams(storageUrl).url.endsWith(".svg");
+    const isSVG = stripQueryParams(options.storageUrl).url.endsWith(".svg");
     let transformations = [];
     if (isSVG) {
-        transformations.push(`w_${getImageBreakpointWidth(width)}`);
+        transformations.push(`w_${getImageBreakpointWidth(options.width)}`);
     }
-    if (transforms) {
-        transformations = transformations.concat(transforms);
+    if (options.transforms) {
+        transformations = transformations.concat(options.transforms);
     }
     let manipulationSlug = "";
     if (transformations.length > 0) {
         manipulationSlug = `${transformations.join(",")}/`
     }
 
-    return `https://res.cloudinary.com/cactus-app/image/fetch/${manipulationSlug}${encodeURIComponent(storageUrl)}`;
+    return `https://res.cloudinary.com/cactus-app/image/fetch/${manipulationSlug}${encodeURIComponent(options.storageUrl)}`;
 }
