@@ -766,7 +766,7 @@
     .lowerActions {
         bottom: 3.2rem;
         left: 2.4rem;
-        position: fixed;
+        position: sticky;
         right: 2.4rem;
 
         @include r(600) {
