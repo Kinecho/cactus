@@ -480,8 +480,8 @@
                 if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
                     console.log(openGraphImage.storageUrl);
                     let pngUrl = getCloudinaryUrlFromStorageUrl({
-                        storageUrl: openGraphImage.storageUrl, 
-                        width: 1200, 
+                        storageUrl: openGraphImage.storageUrl,
+                        width: 1200,
                         transforms: ["w_1200","h_630","f_png","c_lpad"]});
                     ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
@@ -740,11 +740,10 @@
     .page-wrapper {
         background-color: $lightBlue;
         display: flex;
-        flex-flow: column nowrap;
+        flex-direction: column;
         flex-grow: 1;
-        width: 100vw;
-        justify-content: center;
         position: relative;
+        width: 100vw;
 
         @include r(600) {
             background-color: transparent;
