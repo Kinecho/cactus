@@ -540,6 +540,10 @@
         img {
             transform: translateY(11px);
             width: 111%;
+
+            @include r(600) {
+                max-height: 30rem;
+            }
         }
     }
 
