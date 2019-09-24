@@ -1,5 +1,5 @@
 <template>
-    <div :class="['flip-container', 'celebrate-container', {flipped: showLogin}]">
+    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <h2>{{celebrateText}}</h2>
@@ -51,12 +51,12 @@
                             <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
                         </button>
                     </div>
-                    <div class="door shareDoor">
+                    <div class="door shareDoor" @click="tradeNote()">
                         <h3>Share Your Note</h3>
                         <p>Boost someone’s day with a quick dose of gratitude</p>
                     </div>
                 </section>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                     {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
                 <button class="primary authBtn"
@@ -71,7 +71,11 @@
                 </button>
             </div>
             <div :class="[ 'flip-card', 'back']">
-                <div class="auth-card">
+                <prompt-content-card
+                        v-if="showTradeNote"
+                        :content="sharingContentCard"
+                        :response="reflectionResponse"/>
+                <div class="auth-card" v-else>
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2 class="green">Become a better version of yourself</h2>
                     <p class="subtext">
@@ -81,7 +85,7 @@
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
                 </div>
-                <button @click="showLogin = false" class="backBtn tertiary">
+                <button @click="flipped = false" class="backBtn tertiary">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
@@ -106,6 +110,9 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
+    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
+    import {isBlank} from "@shared/util/StringUtil"
+    import PromptContentCard from '@components/PromptContentCard.vue'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -113,9 +120,9 @@
         components: {
             Spinner,
             MagicLink,
+            PromptContentCard,
         },
         async created() {
-
             CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member}) => {
                     this.member = member;
@@ -155,6 +162,7 @@
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
             },
+            promptContent: {type: Object as () => PromptContent},
             isModal: Boolean,
         },
         data(): {
@@ -166,10 +174,11 @@
             loggedIn: boolean,
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
-            showLogin: boolean,
+            flipped: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
             doorOpen: boolean,
+            showTradeNote: boolean,
         } {
             return {
                 reflectionCount: undefined,
@@ -180,10 +189,11 @@
                 authLoaded: false,
                 authUnsubscriber: undefined,
                 member: undefined,
-                showLogin: false,
+                flipped: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
                 doorOpen: false,
+                showTradeNote: false,
             }
         },
         destroyed() {
@@ -200,7 +210,17 @@
             celebrateText(): string {
                 const celebrations = copy.prompts.CELEBRATIONS;
                 return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
-            }
+            },
+            sharingContentCard():Content|undefined {
+                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                const sharingCard: Content = {
+                    contentType: ContentType.share_reflection,
+                    text_md: shareReflectionCopy,
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                };
+
+                return sharingCard
+            },
         },
         methods: {
             goToHome() {
@@ -229,6 +249,15 @@
             },
             magicLinkError(message: string | undefined) {
                 console.error("Celebrate component: Failed to send magic link", message);
+            },
+            showLogin() {
+                this.showTradeNote = false;
+                this.flipped = true;
+            },
+            tradeNote(){
+                this.showTradeNote = true;
+                this.flipped = true;
+
             }
         }
     })

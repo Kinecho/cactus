@@ -63,6 +63,7 @@
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:isModal="isModal"
+                                    :promptContent="promptContent"
                             />
                         </transition>
                     </div>
