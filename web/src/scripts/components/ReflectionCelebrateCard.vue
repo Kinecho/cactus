@@ -40,11 +40,17 @@
                     </section>
                 </div>
                 <section class="doorTest">
-                    <div class="door">
+                    <div class="door tradeDoor" @click="openDoor()" v-show="!doorOpen">
                         <h3>Trade Notes</h3>
-                        <p>Reflect with someone to build a connection and trust</p>
+                        <p>Choose someone to trade notes with. Once you've both reflected, your notes will be shared.</p>
                     </div>
-                    <div class="door">
+                    <div class="door psychDoor" v-show="doorOpen">
+                        <h3>Coming Soon!</h3>
+                        <p>We'll let you know when trading notes is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">free phone wallpapers</a>.</p>
+                        <button @click="closeDoor()" class="icon tertiary">
+                            <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
+                        </button>
+                    </div>
                         <h3>Share Your Note</h3>
                         <p>Boost someone’s day with a quick dose of gratitude</p>
                     </div>
@@ -162,6 +168,7 @@
             showLogin: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
+            doorOpen: boolean,
         } {
             return {
                 reflectionCount: undefined,
@@ -175,6 +182,7 @@
                 showLogin: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
+                doorOpen: false,
             }
         },
         destroyed() {
@@ -206,6 +214,12 @@
             restart() {
                 this.$emit("restart");
             },
+            openDoor() {
+                this.doorOpen = true;
+            },
+            closeDoor() {
+                this.doorOpen = false;
+            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -232,8 +246,10 @@
         justify-content: center;
         width: 100%;
 
-        &.flip-container .flip-card.front {
-            height: auto;
+        @include r(600) {
+            &.flip-container .flip-card.front {
+                height: auto;
+            }
         }
     }
 
@@ -404,19 +420,8 @@
         cursor: pointer;
         margin-bottom: 1.6rem;
         padding: 1.6rem 9.6rem 1.6rem 2.4rem;
+        position: relative;
         text-align: left;
-
-        &:nth-child(1) {
-            background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
-            background-size: 36rem, 25rem;
-            background-position: right -24rem top -5rem, right -10rem top -11rem;
-        }
-
-        &:nth-child(2) {
-            background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
-            background-size: 32rem, 29rem;
-            background-position: right -23rem top 1rem, right -13rem top 5rem;
-        }
 
         @include r(600) {
             transition: transform .3s;
@@ -424,6 +429,50 @@
             &:hover {
                 transform: scale(1.03);
             }
+        }
+
+        &.tradeDoor {
+            background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
+            // background-size: 36rem, 25rem;
+            // background-position: right -24rem top -5rem, right -10rem top -11rem;
+            background-size: 32rem, 25rem;
+            background-position: right -21rem top 0, right -11rem top -12rem;
+        }
+
+        &.shareDoor {
+            background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
+            background-size: 32rem, 29rem;
+            background-position: right -23rem top 1rem, right -13rem top 5rem;
+        }
+
+        h3 {
+            margin-bottom: .4rem;
+        }
+    }
+
+    .psychDoor {
+        background-color: $darkestGreen;
+        color: $white;
+        padding-right: 2.4rem;
+
+        p {
+            opacity: .9;
+        }
+
+        a {
+            @include fancyLinkLight;
+            opacity: 1;
+        }
+
+        .icon.tertiary {
+            position: absolute;
+            right: .8rem;
+            top: .8rem;
+        }
+
+        .closeButton {
+            height: 1.4rem;
+            width: 1.4rem;
         }
     }
 

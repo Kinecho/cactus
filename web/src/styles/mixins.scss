@@ -17,6 +17,23 @@
   }
 }
 
+@mixin fancyLinkLight {
+    background-image: linear-gradient($darkGreen, $darkGreen);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% .8rem;
+    color: $white;
+    padding: .2rem;
+    text-decoration: none;
+    transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
+
+    &:hover {
+        background-image: linear-gradient($darkGreen, $darkGreen);
+        background-size: 100% 100%;
+        text-decoration: none;
+    }
+}
+
 @mixin popoverShadow {
   box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
 }
