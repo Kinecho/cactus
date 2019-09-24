@@ -39,6 +39,16 @@
                         </p>
                     </section>
                 </div>
+                <section class="doorTest">
+                    <div class="door">
+                        <h3>Trade Notes</h3>
+                        <p>Reflect with someone to build a connection and trust</p>
+                    </div>
+                    <div class="door">
+                        <h3>Share Your Note</h3>
+                        <p>Boost someone’s day with a quick dose of gratitude</p>
+                    </div>
+                </section>
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
                     {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
@@ -221,6 +231,10 @@
         height: 100%;
         justify-content: center;
         width: 100%;
+
+        &.flip-container .flip-card.front {
+            height: auto;
+        }
     }
 
     h2 {
@@ -258,6 +272,7 @@
     .stats-container {
         display: flex;
         justify-content: center;
+        margin-bottom: 3.2rem;
     }
 
     .metric {
@@ -354,7 +369,6 @@
             flex-grow: 0;
             left: 3.2rem;
             margin: 3.2rem auto 0;
-            /*position: fixed;*/
             right: 3.2rem;
             width: calc(100% - 6.4rem);
 
@@ -380,6 +394,35 @@
                 margin-right: .8rem;
                 transform: scale(-1);
                 width: 1.6rem;
+            }
+        }
+    }
+
+    .door {
+        @include shadowbox;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        margin-bottom: 1.6rem;
+        padding: 1.6rem 9.6rem 1.6rem 2.4rem;
+        text-align: left;
+
+        &:nth-child(1) {
+            background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
+            background-size: 36rem, 25rem;
+            background-position: right -24rem top -5rem, right -10rem top -11rem;
+        }
+
+        &:nth-child(2) {
+            background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
+            background-size: 32rem, 29rem;
+            background-position: right -23rem top 1rem, right -13rem top 5rem;
+        }
+
+        @include r(600) {
+            transition: transform .3s;
+
+            &:hover {
+                transform: scale(1.03);
             }
         }
     }
