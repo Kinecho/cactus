@@ -85,12 +85,15 @@
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
                 </div>
-                <button @click="flipped = false" class="backBtn tertiary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                    Go Back
-                </button>
+                <div class="flexContainer">
+                    <button @click="flipped = false" class="backBtn tertiary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                </div>
             </div>
         </div>
     </div>
@@ -306,8 +309,8 @@
     }
 
     .front .illustration {
-        margin-bottom: 3.2rem;
-        width: 100%;
+        margin: 0 auto 2.4rem;
+        width: 70%;
     }
 
     .back .illustration {
@@ -413,8 +416,7 @@
 
         /* Lower Buttons */
 
-        .authBtn,
-        .backBtn {
+        .authBtn {
             bottom: 3.2rem;
             flex-grow: 0;
             left: 3.2rem;
@@ -432,6 +434,16 @@
         .authBtn {
             bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
         }
+    }
+
+    .flexContainer {
+        display: flex;
+        padding: 2.4rem 1.6rem;
+
+        button {
+            flex-grow: 1;
+            margin: 0 .8rem;
+        }
 
         .backBtn {
             align-items: center;
@@ -440,10 +452,10 @@
 
             svg {
                 fill: $darkGreen;
-                height: 1.6rem;
+                height: 1.4rem;
                 margin-right: .8rem;
                 transform: scale(-1);
-                width: 1.6rem;
+                width: 1.4rem;
             }
         }
     }

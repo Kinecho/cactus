@@ -483,7 +483,9 @@
         }
 
         &.type-share_reflection {
-            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            background: transparent;
+            box-shadow: none;
 
             .text {
                 padding: 0 0 2.4rem;
