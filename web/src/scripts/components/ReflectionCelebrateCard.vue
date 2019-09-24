@@ -70,7 +70,7 @@
                     {{promptCopy.CLOSE}}
                 </button>
             </div>
-            <div :class="[ 'flip-card', 'back']">
+            <div :class="[ 'flip-card', 'back', {tradeNote: showTradeNote}]">
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
@@ -378,6 +378,10 @@
             position: absolute;
             top: 0;
             width: 100%;
+
+            &.tradeNote {
+                padding: 0;
+            }
 
             @include r(600) {
                 border-radius: 12px;
