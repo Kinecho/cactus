@@ -208,7 +208,7 @@ export default class AdminSentPromptService {
         const tasks: Promise<any>[] = [];
         const {reflectionResponseIds, member, userId} = options;
 
-        let idSet = new Set(reflectionResponseIds);
+        const idSet = new Set(reflectionResponseIds);
 
         idSet.forEach(id => {
             tasks.push(new Promise(async resolve => {
@@ -273,7 +273,7 @@ export default class AdminSentPromptService {
         }
 
         console.log(`setting up pending user for email ${member.email}`);
-        let tasks: Promise<any>[] = [];
+        const tasks: Promise<any>[] = [];
         if (pendingUser.reflectionResponseIds) {
             await this.createSentPromptsFromReflectionResponseIds({
                 reflectionResponseIds: pendingUser.reflectionResponseIds,
