@@ -551,12 +551,12 @@
         padding-right: 2.4rem;
 
         p {
-            opacity: .9;
+            color: rgba(255,255,255,.9);
         }
 
         a {
             @include fancyLinkLight;
-            opacity: 1;
+            color: rgba(255,255,255,1);
         }
 
         .icon.tertiary {
