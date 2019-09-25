@@ -39,7 +39,7 @@
                         </p>
                     </section>
                 </div>
-                <section class="doorTest">
+                <section class="doorTest" v-if="this.reflectionResponse.content.text">
                     <div class="door tradeDoor" @click="openDoor()" v-show="!doorOpen">
                         <h3>Trade Notes</h3>
                         <p>Choose someone to trade notes with. Once you've both reflected, your notes will be shared.</p>
@@ -70,7 +70,7 @@
                     {{promptCopy.CLOSE}}
                 </button>
             </div>
-            <div :class="[ 'flip-card', 'back', {tradeNote: showTradeNote}]">
+            <div :class="[ 'flip-card', 'back', {backDoor: showTradeNote}]">
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
@@ -279,9 +279,17 @@
         justify-content: center;
         width: 100%;
 
-        @include r(600) {
-            &.flip-container .flip-card.front {
-                height: auto;
+        &.flip-container .flip-card.front {
+            height: auto;
+        }
+
+        &.flip-container .flipper {
+            background: url(/assets/images/yellowNeedles.svg) $yellow;
+            background-size: 80%;
+
+            @include r(600) {
+                background: transparent;
+                box-shadow: none;
             }
         }
     }
@@ -382,8 +390,14 @@
             top: 0;
             width: 100%;
 
-            &.tradeNote {
+            &.backDoor {
+                height: auto;
+                justify-content: flex-start;
                 padding: 0;
+
+                .content-card {
+                    height: auto;
+                }
             }
 
             @include r(600) {
@@ -438,7 +452,12 @@
 
     .flexContainer {
         display: flex;
+        flex-direction: column-reverse;
         padding: 2.4rem 1.6rem;
+
+        @include r(374) {
+            flex-direction: row;
+        }
 
         button {
             flex-grow: 1;
@@ -464,12 +483,14 @@
         @include shadowbox;
         background-repeat: no-repeat;
         cursor: pointer;
-        margin-bottom: 1.6rem;
-        padding: 1.6rem 9.6rem 1.6rem 2.4rem;
+        margin: 0 -1.6rem 1.6rem;
+        padding: 1.6rem 2.4rem;
         position: relative;
         text-align: left;
 
         @include r(600) {
+            margin: 0 0 1.6rem;
+            padding-right: 9.6rem;
             transition: transform .3s;
 
             &:hover {
@@ -478,21 +499,41 @@
         }
 
         &.tradeDoor {
-            background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
-            // background-size: 36rem, 25rem;
-            // background-position: right -24rem top -5rem, right -10rem top -11rem;
-            background-size: 32rem, 25rem;
-            background-position: right -21rem top 0, right -11rem top -12rem;
+            background-image: url(/assets/images/pinkBlob4.svg);
+            background-size: 25rem;
+            background-position: right -11rem top -12rem;
+
+            @include r(600) {
+                background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
+                // background-size: 36rem, 25rem;
+                // background-position: right -24rem top -5rem, right -10rem top -11rem;
+                background-size: 32rem, 25rem;
+                background-position: right -21rem top 0, right -11rem top -12rem;
+            }
         }
 
         &.shareDoor {
-            background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
-            background-size: 32rem, 29rem;
-            background-position: right -23rem top 1rem, right -13rem top 5rem;
+            background-image: url(/assets/images/lightGreenBlob.svg);
+            background-size: 29rem;
+            background-position: right -13rem top 5rem;
+
+            @include r(600) {
+                background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
+                background-size: 32rem, 29rem;
+                background-position: right -23rem top 1rem, right -13rem top 5rem;
+            }
         }
 
         h3 {
             margin-bottom: .4rem;
+        }
+
+        p {
+            font-size: 1.6rem;
+
+            @include r(374) {
+                font-size: 1.8rem;
+            }
         }
     }
 
