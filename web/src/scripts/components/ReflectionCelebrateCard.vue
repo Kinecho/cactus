@@ -40,20 +40,20 @@
                     </section>
                 </div>
                 <section class="doorTest" v-if="this.reflectionResponse.content.text">
-                    <div class="door tradeDoor" @click="openDoor()" v-show="!doorOpen">
+                    <div class="door tradeDoor" @click="openDoor(); recordTradeNoteClick();" v-show="!doorOpen">
                         <h3>Trade Notes</h3>
-                        <p>Choose someone to trade notes with. Once you've both reflected, your notes will be shared.</p>
+                        <p>Share with a friend and Cactus will keep your note private until they reflect and share back with you.</p>
                     </div>
                     <div class="door psychDoor" v-show="doorOpen">
                         <h3>Coming Soon!</h3>
-                        <p>We'll let you know when trading notes is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">Cactus wallpapers</a>.</p>
+                        <p>We'll let you know when the Trade Notes feature is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">Cactus phone wallpapers</a>.</p>
                         <button @click="closeDoor()" class="icon tertiary">
                             <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
                         </button>
                     </div>
                     <div class="door shareDoor" @click="tradeNote()">
                         <h3>Share Your Note</h3>
-                        <p>Boost someone’s day with a quick dose of gratitude</p>
+                        <p>Boost someone’s day with a quick dose of gratitude.</p>
                     </div>
                 </section>
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
@@ -116,6 +116,7 @@
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
+    import {gtag} from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -244,6 +245,12 @@
             closeDoor() {
                 this.doorOpen = false;
             },
+            recordTradeNoteClick() {
+                gtag('event', 'trade_notes_clicked', {
+                    event_category: "prompt_content",
+                    event_label: `coming_soon`
+                });
+            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -260,7 +267,6 @@
             tradeNote(){
                 this.showTradeNote = true;
                 this.flipped = true;
-
             }
         }
     })

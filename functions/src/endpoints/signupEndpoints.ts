@@ -237,7 +237,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         const fields: SlackAttachmentField[] = [];
 
         const attachments: SlackAttachment[] = [];
-        let message: ChatMessage = {text: "A user has logged in.", attachments};
+        const message: ChatMessage = {text: "A user has logged in.", attachments};
 
 
         const [user, member] = await Promise.all([

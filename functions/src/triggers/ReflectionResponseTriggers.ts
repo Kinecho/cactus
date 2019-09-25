@@ -73,7 +73,6 @@ export const onReflectionResponseCreated = functions.firestore
                         color: "danger"
                     });
                     await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${member.mailchimpListMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
-                } else {
                 }
             } else {
                 console.log("not resetting user reminder for email " + memberEmail)
