@@ -494,7 +494,8 @@
             padding-right: 9.6rem;
             transition: transform .3s;
 
-            &:hover {
+            &.tradeDoor:hover,
+            &.shareDoor:hover {
                 transform: scale(1.03);
             }
         }
