@@ -284,8 +284,7 @@
         }
 
         &.flip-container .flipper {
-            background: url(/assets/images/yellowNeedles.svg) $yellow;
-            background-size: 80%;
+            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
 
             @include r(600) {
                 background: transparent;
@@ -390,13 +389,15 @@
             top: 0;
             width: 100%;
 
-            &.backDoor {
+            &.backDoor.back {
+                background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
                 height: auto;
                 justify-content: flex-start;
                 padding: 0;
 
                 .content-card {
                     height: auto;
+                    padding: 5.6rem 2.4rem;
                 }
             }
 
