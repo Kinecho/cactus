@@ -63,20 +63,17 @@ export const onReflectionResponseCreated = functions.firestore
             let messageText = `${getResponseMediumSlackEmoji(reflectionResponse.responseMedium)} ${memberEmail || "An anonymous user"} recorded a Reflection Response via *${getResponseMediumDisplayName(reflectionResponse.responseMedium)}*`;
             const fields: SlackAttachmentField[] = [];
 
-            let resetReminderResult = "Not attempted";
             if (member && member.mailchimpListMember) {
                 console.log(`Resetting the reminder for ${member.mailchimpListMember.email_address}`);
                 const resetUserResponse = await AdminReflectionResponseService.resetUserReminder(member.mailchimpListMember.email_address);
                 if (!resetUserResponse.success) {
                     console.log("reset user reminder failed", resetUserResponse);
-                    resetReminderResult = `Failed - see details`;
                     attachments.push({
-                        text: `Failed to reset reminder\n\`\`\`${JSON.stringify(resetReminderResult)}`,
+                        text: `Failed to reset reminder\n\`\`\`${JSON.stringify(resetUserResponse)}`,
                         color: "danger"
                     });
                     await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${member.mailchimpListMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
                 } else {
-                    resetReminderResult = `${resetUserResponse.lastReplyString || "unknown"}`
                 }
             } else {
                 console.log("not resetting user reminder for email " + memberEmail)
@@ -108,12 +105,7 @@ export const onReflectionResponseCreated = functions.firestore
             const wordCount = getWordCount(reflectionText);
             const didJournal = (wordCount > 0 ? 'Yes' : 'No');           
             
-            fields.push(
-                {
-                    title: "Last Reply Updated",
-                    value: resetReminderResult,
-                    short: true,
-                }, {
+            fields.push({
                     title: "Reflection Info",
                     value: `Journaled: ${didJournal}`
                 });
