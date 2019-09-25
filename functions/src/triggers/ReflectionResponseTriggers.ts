@@ -108,12 +108,7 @@ export const onReflectionResponseCreated = functions.firestore
             const wordCount = getWordCount(reflectionText);
             const didJournal = (wordCount > 0 ? 'Yes' : 'No');           
             
-            fields.push(
-                {
-                    title: "Last Reply Updated",
-                    value: resetReminderResult,
-                    short: true,
-                }, {
+            fields.push({
                     title: "Reflection Info",
                     value: `Journaled: ${didJournal}`
                 });
