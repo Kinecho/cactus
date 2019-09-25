@@ -10,7 +10,7 @@
             </div>
 
             <section class="content-container centered" v-if="!loading && promptContent && responsesLoaded">
-                <div class="shareContainer">
+                <div class="shareContainer" v-if="!completed">
                     <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
@@ -63,6 +63,7 @@
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:isModal="isModal"
+                                    :promptContent="promptContent"
                             />
                         </transition>
                     </div>
@@ -71,7 +72,7 @@
                     </div>
                 </div>
 
-                <button class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing">
+                <button class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing && !completed">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
@@ -330,16 +331,16 @@
 
                 console.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
 
-                if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
-                    let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
-                    const sharingCard: Content = {
-                        contentType: ContentType.share_reflection,
-                        text_md: shareReflectionCopy,
-                        title: copy.prompts.SHARE_YOUR_NOTE,
-                    };
-                    console.log("adding share card to content items");
-                    items.push(sharingCard);
-                }
+                // if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
+                //     let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                //     const sharingCard: Content = {
+                //         contentType: ContentType.share_reflection,
+                //         text_md: shareReflectionCopy,
+                //         title: copy.prompts.SHARE_YOUR_NOTE,
+                //     };
+                //     console.log("adding share card to content items");
+                //     items.push(sharingCard);
+                // }
 
 
                 return items;
@@ -480,8 +481,8 @@
                 if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
                     console.log(openGraphImage.storageUrl);
                     let pngUrl = getCloudinaryUrlFromStorageUrl({
-                        storageUrl: openGraphImage.storageUrl, 
-                        width: 1200, 
+                        storageUrl: openGraphImage.storageUrl,
+                        width: 1200,
                         transforms: ["w_1200","h_630","f_png","c_lpad"]});
                     ogImageTag.setAttribute("content", `${pngUrl}`);
                 }
@@ -740,11 +741,10 @@
     .page-wrapper {
         background-color: $lightBlue;
         display: flex;
-        flex-flow: column nowrap;
+        flex-direction: column;
         flex-grow: 1;
-        width: 100vw;
-        justify-content: center;
         position: relative;
+        width: 100vw;
 
         @include r(600) {
             background-color: transparent;

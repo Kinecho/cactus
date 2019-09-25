@@ -1,9 +1,5 @@
 <template>
     <div class="shared-reflection-card">
-        <div class="note">
-            <h3 class="noteQuestion">{{response.promptQuestion}}</h3>
-            <p class="note-text">{{response.content.text}}</p>
-        </div>
         <div class="profile">
             <div class="avatar">
                 <flamelink-image :image="avatarData.image" alt="User Avatar"/>
@@ -13,6 +9,10 @@
                 <p class="email">{{memberEmail}}</p>
                 <p class="date">{{shareDate}}</p>
             </div>
+        </div>
+        <div class="note">
+            <h3 class="noteQuestion">{{response.promptQuestion}}</h3>
+            <p class="note-text">{{response.content.text}}</p>
         </div>
     </div>
 </template>
@@ -110,7 +110,7 @@
         @include r(600) {
             margin: 0 auto 4.8rem;
             max-width: 64rem;
-            padding: 3.2rem;
+            padding: 2.4rem;
         }
 
         .noteQuestion {
@@ -118,7 +118,6 @@
         }
 
         .note-text {
-            margin-bottom: 2.4rem;
             max-height: 12.4rem;
             overflow: hidden;
             position: relative;
@@ -145,8 +144,9 @@
         }
 
         .profile {
-            display: flex;
             align-items: center;
+            display: flex;
+            margin-bottom: 1.6rem;
 
             .avatar {
                 $avatarDiameter: 4.4rem;
@@ -155,12 +155,6 @@
                 margin-right: .8rem;
                 width: $avatarDiameter;
 
-                @include r(600) {
-                    $avatarDiameter: 6.4rem;
-                    height: $avatarDiameter;
-                    width: $avatarDiameter;
-                }
-
                 img {
                     width: 100%;
                     height: 100%;
@@ -168,7 +162,7 @@
             }
 
             .info {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
             }
 
             .name {

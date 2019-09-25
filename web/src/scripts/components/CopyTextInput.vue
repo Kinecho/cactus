@@ -85,6 +85,7 @@
     }
 
     button.copy {
+        min-width: 11rem;
         width: 100%;
 
         @include r(374) {
@@ -108,6 +109,8 @@
 
         &.secondary {
             @include buttonSecondary;
+            background-color: $lightGreen;
+            color: $darkGreen;
         }
     }
 

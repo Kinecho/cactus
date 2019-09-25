@@ -1,5 +1,5 @@
 <template>
-    <div :class="['flip-container', 'celebrate-container', {flipped: showLogin}]">
+    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <h2>{{celebrateText}}</h2>
@@ -39,7 +39,24 @@
                         </p>
                     </section>
                 </div>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin = true">
+                <section class="doorTest" v-if="this.reflectionResponse.content.text">
+                    <div class="door tradeDoor" @click="openDoor(); recordTradeNoteClick();" v-show="!doorOpen">
+                        <h3>Trade Notes</h3>
+                        <p>Share with a friend and Cactus will keep your note private until they reflect and share back with you.</p>
+                    </div>
+                    <div class="door psychDoor" v-show="doorOpen">
+                        <h3>Coming Soon!</h3>
+                        <p>We'll let you know when the Trade Notes feature is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">Cactus phone wallpapers</a>.</p>
+                        <button @click="closeDoor()" class="icon tertiary">
+                            <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
+                        </button>
+                    </div>
+                    <div class="door shareDoor" @click="tradeNote()">
+                        <h3>Share Your Note</h3>
+                        <p>Boost someone’s day with a quick dose of gratitude.</p>
+                    </div>
+                </section>
+                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                     {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
                 <button class="primary authBtn"
@@ -53,8 +70,12 @@
                     {{promptCopy.CLOSE}}
                 </button>
             </div>
-            <div :class="[ 'flip-card', 'back']">
-                <div class="auth-card">
+            <div :class="[ 'flip-card', 'back', {backDoor: showTradeNote}]">
+                <prompt-content-card
+                        v-if="showTradeNote"
+                        :content="sharingContentCard"
+                        :response="reflectionResponse"/>
+                <div class="auth-card" v-else>
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2 class="green">Become a better version of yourself</h2>
                     <p class="subtext">
@@ -64,12 +85,15 @@
                         <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
                     </div>
                 </div>
-                <button @click="showLogin = false" class="backBtn tertiary">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                    Go Back
-                </button>
+                <div class="flexContainer">
+                    <button @click="flipped = false" class="backBtn tertiary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                </div>
             </div>
         </div>
     </div>
@@ -89,6 +113,10 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
+    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
+    import {isBlank} from "@shared/util/StringUtil"
+    import PromptContentCard from '@components/PromptContentCard.vue'
+    import {gtag} from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -96,9 +124,9 @@
         components: {
             Spinner,
             MagicLink,
+            PromptContentCard,
         },
         async created() {
-
             CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member}) => {
                     this.member = member;
@@ -138,6 +166,7 @@
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
             },
+            promptContent: {type: Object as () => PromptContent},
             isModal: Boolean,
         },
         data(): {
@@ -149,9 +178,11 @@
             loggedIn: boolean,
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
-            showLogin: boolean,
+            flipped: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
+            doorOpen: boolean,
+            showTradeNote: boolean,
         } {
             return {
                 reflectionCount: undefined,
@@ -162,9 +193,11 @@
                 authLoaded: false,
                 authUnsubscriber: undefined,
                 member: undefined,
-                showLogin: false,
+                flipped: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
+                doorOpen: false,
+                showTradeNote: false,
             }
         },
         destroyed() {
@@ -181,7 +214,17 @@
             celebrateText(): string {
                 const celebrations = copy.prompts.CELEBRATIONS;
                 return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
-            }
+            },
+            sharingContentCard():Content|undefined {
+                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                const sharingCard: Content = {
+                    contentType: ContentType.share_reflection,
+                    text_md: shareReflectionCopy,
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                };
+
+                return sharingCard
+            },
         },
         methods: {
             goToHome() {
@@ -196,6 +239,18 @@
             restart() {
                 this.$emit("restart");
             },
+            openDoor() {
+                this.doorOpen = true;
+            },
+            closeDoor() {
+                this.doorOpen = false;
+            },
+            recordTradeNoteClick() {
+                gtag('event', 'trade_notes_clicked', {
+                    event_category: "prompt_content",
+                    event_label: `coming_soon`
+                });
+            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -204,6 +259,14 @@
             },
             magicLinkError(message: string | undefined) {
                 console.error("Celebrate component: Failed to send magic link", message);
+            },
+            showLogin() {
+                this.showTradeNote = false;
+                this.flipped = true;
+            },
+            tradeNote(){
+                this.showTradeNote = true;
+                this.flipped = true;
             }
         }
     })
@@ -221,6 +284,19 @@
         height: 100%;
         justify-content: center;
         width: 100%;
+
+        &.flip-container .flip-card.front {
+            height: auto;
+        }
+
+        &.flip-container .flipper {
+            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
+
+            @include r(600) {
+                background: transparent;
+                box-shadow: none;
+            }
+        }
     }
 
     h2 {
@@ -246,8 +322,8 @@
     }
 
     .front .illustration {
-        margin-bottom: 3.2rem;
-        width: 100%;
+        margin: 0 auto 2.4rem;
+        width: 70%;
     }
 
     .back .illustration {
@@ -258,6 +334,7 @@
     .stats-container {
         display: flex;
         justify-content: center;
+        margin-bottom: 3.2rem;
     }
 
     .metric {
@@ -318,6 +395,18 @@
             top: 0;
             width: 100%;
 
+            &.backDoor.back {
+                background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
+                height: auto;
+                justify-content: flex-start;
+                padding: 0;
+
+                .content-card {
+                    height: auto;
+                    padding: 5.6rem 2.4rem;
+                }
+            }
+
             @include r(600) {
                 border-radius: 12px;
             }
@@ -348,13 +437,11 @@
 
         /* Lower Buttons */
 
-        .authBtn,
-        .backBtn {
+        .authBtn {
             bottom: 3.2rem;
             flex-grow: 0;
             left: 3.2rem;
             margin: 3.2rem auto 0;
-            /*position: fixed;*/
             right: 3.2rem;
             width: calc(100% - 6.4rem);
 
@@ -368,6 +455,21 @@
         .authBtn {
             bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
         }
+    }
+
+    .flexContainer {
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 2.4rem 1.6rem;
+
+        @include r(374) {
+            flex-direction: row;
+        }
+
+        button {
+            flex-grow: 1;
+            margin: 0 .8rem;
+        }
 
         .backBtn {
             align-items: center;
@@ -376,11 +478,96 @@
 
             svg {
                 fill: $darkGreen;
-                height: 1.6rem;
+                height: 1.4rem;
                 margin-right: .8rem;
                 transform: scale(-1);
-                width: 1.6rem;
+                width: 1.4rem;
             }
+        }
+    }
+
+    .door {
+        @include shadowbox;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        margin: 0 -1.6rem 1.6rem;
+        padding: 1.6rem 2.4rem;
+        position: relative;
+        text-align: left;
+
+        @include r(600) {
+            margin: 0 0 1.6rem;
+            padding-right: 9.6rem;
+            transition: transform .3s;
+
+            &.tradeDoor:hover,
+            &.shareDoor:hover {
+                transform: scale(1.03);
+            }
+        }
+
+        &.tradeDoor {
+            background-image: url(/assets/images/pinkBlob4.svg);
+            background-size: 25rem;
+            background-position: right -11rem top -12rem;
+
+            @include r(600) {
+                background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
+                // background-size: 36rem, 25rem;
+                // background-position: right -24rem top -5rem, right -10rem top -11rem;
+                background-size: 32rem, 25rem;
+                background-position: right -21rem top 0, right -11rem top -12rem;
+            }
+        }
+
+        &.shareDoor {
+            background-image: url(/assets/images/lightGreenBlob.svg);
+            background-size: 29rem;
+            background-position: right -13rem top 5rem;
+
+            @include r(600) {
+                background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
+                background-size: 32rem, 29rem;
+                background-position: right -23rem top 1rem, right -13rem top 5rem;
+            }
+        }
+
+        h3 {
+            margin-bottom: .4rem;
+        }
+
+        p {
+            font-size: 1.6rem;
+
+            @include r(374) {
+                font-size: 1.8rem;
+            }
+        }
+    }
+
+    .psychDoor {
+        background-color: $darkestGreen;
+        color: $white;
+        padding-right: 2.4rem;
+
+        p {
+            color: rgba(255,255,255,.9);
+        }
+
+        a {
+            @include fancyLinkLight;
+            color: rgba(255,255,255,1);
+        }
+
+        .icon.tertiary {
+            position: absolute;
+            right: .8rem;
+            top: .8rem;
+        }
+
+        .closeButton {
+            height: 1.4rem;
+            width: 1.4rem;
         }
     }
 

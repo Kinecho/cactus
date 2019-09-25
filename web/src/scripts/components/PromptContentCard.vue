@@ -31,7 +31,7 @@
                             </snackbar-content>
                         </transition>
                         <p class="directLink">Here's your direct link to share:</p>
-                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
+                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="secondary"/>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
@@ -483,7 +483,9 @@
         }
 
         &.type-share_reflection {
-            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            background: transparent;
+            box-shadow: none;
 
             .text {
                 padding: 0 0 2.4rem;
