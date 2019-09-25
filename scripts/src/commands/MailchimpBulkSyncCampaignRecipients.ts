@@ -35,7 +35,7 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
             return;
         }
 
-        console.log("attempting to initalize mailchimp service");
+        console.log("attempting to initialize mailchimp service");
         const mailchimpService = MailchimpService.getSharedInstance();
 
         const campaignResponse: { fetchCampaigns: boolean } = await prompts({

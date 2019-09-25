@@ -60,14 +60,20 @@
                 <div class="sharing-card" slot="body">
                     <PromptSharing :promptContent="promptContent"/>
                 </div>
-
-        </modal>
+            </modal>
+            <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
+                <div class="sharing-card" slot="body">
+                    <prompt-content-card
+                            :content="shareNote.content"
+                            :response="shareNote.response"/>
+                </div>
+            </modal>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import PromptContent, {Content, Image} from "@shared/models/PromptContent"
+    import PromptContent, {Content, ContentType, Image} from "@shared/models/PromptContent"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import PromptContentService from '@web/services/PromptContentService'
     import {PageRoute} from "@web/PageRoutes"
@@ -88,7 +94,7 @@
     import {hasImage} from '@shared/util/FlamelinkUtils'
     import CopyService from "@shared/copy/CopyService";
     import {PromptCopy} from "@shared/copy/CopyTypes"
-
+    import PromptContentCard from "@components/PromptContentCard.vue"
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -96,6 +102,7 @@
             Modal,
             DropdownMenu,
             PromptContent: PromptContentVue,
+            PromptContentCard,
             EditReflection,
             PromptSharing,
             FlamelinkImage,
@@ -148,6 +155,7 @@
             showSharing: boolean,
             promptCopy: PromptCopy,
             initialIndex: number | undefined,
+            showShareNote: boolean,
         } {
             return {
                 doReflect: false,
@@ -162,9 +170,29 @@
                 showSharing: false,
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
+                showShareNote: false,
             }
         },
         computed: {
+            shareNote():{content: Content, response: ReflectionResponse}|undefined {
+                if (!this.promptContent || !this.responses || this.responses.length === 0){
+                    return;
+                }
+                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                const sharingCard: Content = {
+                    contentType: ContentType.share_reflection,
+                    text_md: shareReflectionCopy,
+                    title: copy.prompts.SHARE_YOUR_NOTE,
+                };
+
+                const [response] = this.responses;
+                if (response){
+                    return {content: sharingCard, response: response}
+                } else {
+                    return
+                }
+
+            },
             allLoaded(): boolean {
                 return !this.loading && this.responsesLoaded;
             },
@@ -253,7 +281,10 @@
                 if (this.hasNote && this.promptContent && this.promptContent.content) {
                     linkItems.push({
                         title: copy.prompts.SHARE_NOTE,
-                        href: `${this.promptContentPath}?${QueryParam.CONTENT_INDEX}=share`,
+                        // href: `${this.promptContentPath}?${QueryParam.CONTENT_INDEX}=share`,
+                        onClick: () => {
+                            this.showShareNote = true
+                        }
                     })
                 }
 
