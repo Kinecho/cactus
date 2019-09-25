@@ -40,7 +40,7 @@
                     </section>
                 </div>
                 <section class="doorTest" v-if="this.reflectionResponse.content.text">
-                    <div class="door tradeDoor" @click="openDoor()" v-show="!doorOpen">
+                    <div class="door tradeDoor" @click="openDoor(); recordTradeNoteClick();" v-show="!doorOpen">
                         <h3>Trade Notes</h3>
                         <p>Choose someone to trade notes with. Once you've both reflected, your notes will be shared.</p>
                     </div>
@@ -116,6 +116,7 @@
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
+    import {gtag} from "@web/analytics";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -244,6 +245,12 @@
             closeDoor() {
                 this.doorOpen = false;
             },
+            recordTradeNoteClick() {
+                gtag('event', 'trade_notes_clicked', {
+                    event_category: "prompt_content",
+                    event_label: `coming_soon`
+                });
+            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -260,7 +267,6 @@
             tradeNote(){
                 this.showTradeNote = true;
                 this.flipped = true;
-
             }
         }
     })
