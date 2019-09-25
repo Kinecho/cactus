@@ -62,7 +62,7 @@
                 </div>
             </modal>
             <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
-                <div class="sharing-card" slot="body">
+                <div class="sharing-card note" slot="body">
                     <prompt-content-card
                             :content="shareNote.content"
                             :response="shareNote.response"/>
@@ -333,6 +333,12 @@
             box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             min-height: 66rem;
             max-width: 48rem;
+        }
+
+        &.note {
+            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            padding: 2.4rem 0;
+            text-align: center;
         }
     }
 
