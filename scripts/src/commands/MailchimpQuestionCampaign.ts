@@ -454,7 +454,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "toggle",
                 name: "scheduleReminder",
                 message: "Do you want to create the reminder email now?",
-                initial: true,
+                initial: false,
                 active: 'yes',
                 inactive: 'no',
             },
