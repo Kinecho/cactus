@@ -198,9 +198,9 @@ export default class AdminFirestoreService {
         if (!model.id) {
             return
         }
-        let collection = this.getCollectionRefFromModel(model);
+        const collection = this.getCollectionRefFromModel(model);
 
-        let doc = collection.doc(model.id);
+        const doc = collection.doc(model.id);
         await doc.delete();
         console.log(`Deleted ${model.collection}.${model.id} from the database`);
         return model
@@ -209,19 +209,19 @@ export default class AdminFirestoreService {
 
     async deletePermanentlyForQuery<T extends BaseModel>(query: FirebaseFirestore.Query): Promise<number> {
         const snapshot = await query.get();
-        let tasks = snapshot.docs.map(doc => {
+        const tasks = snapshot.docs.map(doc => {
             return doc.ref.delete()
         });
 
-        let results = await Promise.all(tasks);
+        const results = await Promise.all(tasks);
         console.log(`Permanently Deleted ${results.length} documents`);
         return results.length
 
     }
 
     async deleteForQuery<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }): Promise<(T | undefined)[]> {
-        let results = await this.executeQuery(query, Type);
-        let deletedModels = await Promise.all(results.results.map(this.deleteModel));
+        const results = await this.executeQuery(query, Type);
+        const deletedModels = await Promise.all(results.results.map(this.deleteModel));
         console.log(`deleted ${deletedModels.length} models`);
         return deletedModels;
     }

@@ -149,7 +149,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async archiveeMember(email: string): Promise<any> {
+    async archiveMember(email: string): Promise<any> {
         const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}`;
         try {
             const response = await this.request.delete(url, {
@@ -161,7 +161,7 @@ export default class MailchimpService {
             return response.data;
         } catch (e){
             if (e.isAxiosError){
-                let err = e as AxiosError;
+                const err = e as AxiosError;
                 return err.response && err.response.data
             }
             return "Unable to delete member from mailchimp"
@@ -178,10 +178,10 @@ export default class MailchimpService {
                 }
             });
 
-            return response.data;
+            return response.data || "success";
         } catch (e){
             if (e.isAxiosError){
-                let err = e as AxiosError;
+                const err = e as AxiosError;
                 return err.response && err.response.data
             }
             return "Unable to delete member from mailchimp"

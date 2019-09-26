@@ -290,7 +290,7 @@ export default class AdminSentPromptService {
     }
 
     async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
-        let tasks: Promise<number>[] = [];
+        const tasks: Promise<number>[] = [];
         if (member.email) {
             const query = this.getCollectionRef().where(SentPrompt.Fields.memberEmail, "==", member.email);
             tasks.push(AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query))

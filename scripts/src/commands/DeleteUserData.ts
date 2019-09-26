@@ -30,7 +30,7 @@ export default class DeleteUserData extends FirebaseCommand {
                 type: "text",
                 validate: (value: string) => isValidEmail(value) ? true : "Please enter a valid email",
                 name: "email",
-                format: (email: string) => email.trim().toLowerCase(),
+                format: (e: string) => e.trim().toLowerCase(),
             },
             {
                 message: "Are you sure you want to delete all of their data from the database? This action is non-reversable",
@@ -51,15 +51,15 @@ export default class DeleteUserData extends FirebaseCommand {
             await AdminUserService.getSharedInstance().getByEmail(answers.email),
             await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
                 try {
-                    const user = await (admin.auth().getUserByEmail(answers.email));
-                    resolve(user);
+                    const u = await (admin.auth().getUserByEmail(answers.email));
+                    resolve(u);
                 } catch (e) {
                     resolve(undefined);
                 }
             })
         ]);
 
-        let deleteTasks: Promise<any>[] = [];
+        const deleteTasks: Promise<any>[] = [];
 
         if (member) {
             console.log("Cactus Member ID", member.id);
@@ -72,7 +72,7 @@ export default class DeleteUserData extends FirebaseCommand {
         deleteTasks.push(AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email}));
         deleteTasks.push(AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email));
 
-        let deletePendingUserTask = AdminPendingUserService.getSharedInstance().deleteForEmail(email);
+        const deletePendingUserTask = AdminPendingUserService.getSharedInstance().deleteForEmail(email);
 
         if (user) {
             console.log("Cactus User found");
@@ -89,7 +89,7 @@ export default class DeleteUserData extends FirebaseCommand {
             console.log("No auth user found");
         }
 
-        let deleteResults = await Promise.all([deletePendingUserTask, ...deleteTasks]);
+        const deleteResults = await Promise.all([deletePendingUserTask, ...deleteTasks]);
         console.log(`Finished deleted ${deleteResults.length} tasks`);
 
         const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
