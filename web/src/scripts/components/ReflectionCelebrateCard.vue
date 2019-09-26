@@ -290,7 +290,8 @@
         }
 
         &.flip-container .flipper {
-            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
+            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
+            // causing issues on safari
 
             @include r(600) {
                 background: transparent;
