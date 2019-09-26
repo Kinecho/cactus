@@ -288,4 +288,25 @@ export default class AdminSentPromptService {
 
         return;
     }
+
+    async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
+        let tasks: Promise<number>[] = [];
+        if (member.email) {
+            const query = this.getCollectionRef().where(SentPrompt.Fields.memberEmail, "==", member.email);
+            tasks.push(AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query))
+        }
+
+        if (member.id) {
+            const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id);
+            tasks.push(AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query))
+        }
+
+        const results: number[] = await Promise.all(tasks);
+        const totalDeleted = results.reduce((total, num) => {
+            return total + num
+        }, 0);
+
+        console.log(`Permanently deleted ${totalDeleted} sent prompts for member ${member.email || member.id}`)
+        return totalDeleted
+    }
 }

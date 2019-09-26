@@ -33,7 +33,10 @@ export default class AdminCactusMemberService {
         return await firestoreService.getById(id, CactusMember);
     }
 
-    async delete(id: string): Promise<CactusMember | undefined> {
+    async delete(id?: string): Promise<CactusMember | undefined> {
+        if (!id){
+            return undefined
+        }
         return firestoreService.delete(id, CactusMember);
     }
 

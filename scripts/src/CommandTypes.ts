@@ -70,6 +70,7 @@ export abstract class FirebaseCommand implements Command {
 
         await this.run(app, firestoreService, config);
         console.groupEnd();
+        process.exit(0);
     }
 
     protected constructor(opts: FirebaseCommandConstructorArgs = {useAdmin: false, name: "Command"}) {
