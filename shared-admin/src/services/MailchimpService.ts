@@ -149,7 +149,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async archiveeMember(email: string): Promise<any> {
+    async archiveMember(email: string): Promise<any> {
         const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}`;
         try {
             const response = await this.request.delete(url, {
