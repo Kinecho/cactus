@@ -24,7 +24,7 @@ export default class AdminEmailReplyService {
 
     async deletePermanentlyByEmail(email: string): Promise<number> {
         const query = this.getCollectionRef().where("from.email", "==", email);
-        let result = await firestoreService.deletePermanentlyForQuery(query);
+        const result = await firestoreService.deletePermanentlyForQuery(query);
         console.log(`deleted ${result} emailReply entries`);
         return result;
     }

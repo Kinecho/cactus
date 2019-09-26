@@ -109,7 +109,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
             await this.deleteExistingFeed(member);
         }
 
-        let numPrompts = makeUpPrompts ? userResponse.numPrompts : promptContentEntries.length;
+        const numPrompts = makeUpPrompts ? userResponse.numPrompts : promptContentEntries.length;
 
         await this.generatePrompts(member, numPrompts, promptContentEntries);
 
@@ -145,7 +145,7 @@ export default class TestDataFeedCommand extends FirebaseCommand {
     }
 
     async upsertPromptForPromptContent(promptContent: PromptContent, daysBack: number): Promise<ReflectionPrompt | undefined> {
-        let promptId: string | undefined = promptContent.promptId;
+        const promptId: string | undefined = promptContent.promptId;
         let prompt: ReflectionPrompt | undefined = undefined;
         if (promptId) {
             prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);

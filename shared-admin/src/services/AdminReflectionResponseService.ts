@@ -159,7 +159,7 @@ export default class AdminReflectionResponseService {
     }
 
     async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
-        let tasks: Promise<number>[] = [];
+        const tasks: Promise<number>[] = [];
         if (member.email) {
             const query = this.getCollectionRef().where(ReflectionResponseField.memberEmail, "==", member.email);
             tasks.push(this.firestoreService.deletePermanentlyForQuery(query))

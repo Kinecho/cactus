@@ -161,7 +161,7 @@ export default class MailchimpService {
             return response.data;
         } catch (e){
             if (e.isAxiosError){
-                let err = e as AxiosError;
+                const err = e as AxiosError;
                 return err.response && err.response.data
             }
             return "Unable to delete member from mailchimp"
@@ -178,10 +178,10 @@ export default class MailchimpService {
                 }
             });
 
-            return response.data;
+            return response.data || "success";
         } catch (e){
             if (e.isAxiosError){
-                let err = e as AxiosError;
+                const err = e as AxiosError;
                 return err.response && err.response.data
             }
             return "Unable to delete member from mailchimp"
