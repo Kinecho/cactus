@@ -158,4 +158,29 @@ export default class AdminPendingUserService {
         return;
     }
 
+
+    async deleteForEmail(email: string): Promise<number> {
+        const query = this.getCollectionRef()
+            .where(PendingUser.Field.email, "==", email);
+
+        // let deleteTasks: Promise<PendingUser | undefined>[] = [];
+        return await firestoreService.deletePermanentlyForQuery(query)
+
+
+        // try {
+        //     const result =
+        //     // const result = await firestoreService.executeQuery(query, PendingUser);
+        //     // result.results.forEach(pendingUser => {
+        //     //     if (pendingUser.id) {
+        //     //         console.log(`deleting pending user ${pendingUser.id}`);
+        //     //         deleteTasks.push(firestoreService.deletePermanently(pendingUser));
+        //     //     }
+        //     // })
+        //
+        // } catch (e) {
+        //     console.error("Failed to find pending users");
+        // }
+
+        // return (await Promise.all(deleteTasks)).filter(Boolean) as PendingUser[];
+    }
 }

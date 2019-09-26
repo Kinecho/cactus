@@ -149,6 +149,47 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async archiveeMember(email: string): Promise<any> {
+        const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}`;
+        try {
+            const response = await this.request.delete(url, {
+                params: {
+                    exclude_fields: "members._links,_links"
+                }
+            });
+
+            return response.data;
+        } catch (e){
+            if (e.isAxiosError){
+                let err = e as AxiosError;
+                return err.response && err.response.data
+            }
+            return "Unable to delete member from mailchimp"
+        }
+
+    }
+
+    async deleteMemberPermanently(email: string): Promise<any> {
+        const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/actions/delete-permanent`;
+        try {
+            const response = await this.request.post(url, {
+                params: {
+                    exclude_fields: "members._links,_links"
+                }
+            });
+
+            return response.data;
+        } catch (e){
+            if (e.isAxiosError){
+                let err = e as AxiosError;
+                return err.response && err.response.data
+            }
+            return "Unable to delete member from mailchimp"
+        }
+
+    }
+
+
     async getAllMembers(options?: GetListMembersOptions, pageSize = defaultPageSize, pageDelay = 0, onPageValues?: (members: ListMember[]) => Promise<void>): Promise<ListMember[]> {
         return this.getAllPaginatedResults(pagination => this.getMembers(options, pagination), response => response.members, pageSize, pageDelay, onPageValues)
     }

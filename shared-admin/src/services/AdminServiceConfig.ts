@@ -17,6 +17,7 @@ import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     console.log(chalk.green("initializing all services"));
@@ -35,6 +36,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
+    AdminEmailReplyService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

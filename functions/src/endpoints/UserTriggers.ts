@@ -279,12 +279,10 @@ export async function onDelete(user: admin.auth.UserRecord) {
                 short: false,
             })
         }
-
-        attachment.fields = fields;
     } else {
         attachment.text = `:ghost: No user found in DB. Deleted them from Auth.`;
     }
-
+    attachment.fields = fields;
 
     const message: SlackMessage = {attachments: [attachment]};
     await slackService.sendActivityNotification(message);
