@@ -164,6 +164,7 @@
                     <textarea ref="reflectionInput"
                             type="text"
                             rows="1"
+                            data-gramm="false"
                             v-model="response.content.text"
                             v-on:click.stop
                             :class="{hasValue: !!response.content.text}"
