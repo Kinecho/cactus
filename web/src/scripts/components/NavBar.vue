@@ -1,5 +1,5 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}" v-if="!hidden">
         <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
         <div>
             <transition name="fade-in-slow" appear>
@@ -44,6 +44,7 @@
     import CopyService from '@shared/copy/CopyService'
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import {getRandomAvatar} from '@web/AvatarUtil'
+    import {getQueryParam} from '@web/util'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -52,6 +53,7 @@
         user: FirebaseUser | undefined | null,
         authLoaded: boolean,
         copy: LocalizedCopy,
+        hidden: boolean,
     }
 
 
@@ -67,6 +69,12 @@
                 this.user = user;
                 this.authLoaded = true;
             })
+        },
+        beforeMount() {
+            let NO_NAV = getQueryParam(QueryParam.NO_NAV);
+            if (NO_NAV !== undefined) {
+                this.hidden = true;
+            }
         },
         destroyed() {
             if (this.authUnsubscribe) {
@@ -90,6 +98,7 @@
                 user: undefined,
                 authUnsubscribe: undefined,
                 authLoaded: false,
+                hidden: false,
             }
         },
         computed: {

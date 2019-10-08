@@ -18,5 +18,5 @@ export enum QueryParam {
     PROMPT_CONTENT_ENTRY_ID="pceid",
     UTM_SOURCE = "utm_source",
     UTM_MEDIUM = "utm_medium",
-
+    NO_NAV = "no_nav",
 }
