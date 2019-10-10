@@ -11,6 +11,9 @@ import {NotificationStatus} from "@shared/models/CactusMember";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {LocalStorageKey} from "@web/services/StorageService";
+import {getAuth} from "@web/firebase";
+import * as firebase from "firebase";
+import AuthCredential = firebase.auth.AuthCredential;
 
 /**
  *
@@ -370,7 +373,6 @@ export async function updateSubscriptionStatus(status: NotificationStatus, email
     const headers = await getAuthHeaders();
     try {
         const response = await request.put(Endpoint.updateSubscriberStatus, updateRequest, {headers: {...headers}});
-
         return response.data;
     } catch (error) {
         console.error("Unable to update the user's status");
