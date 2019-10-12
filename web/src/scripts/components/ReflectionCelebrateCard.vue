@@ -39,23 +39,6 @@
                         </p>
                     </section>
                 </div>
-                <section class="doorTest" v-if="this.reflectionResponse.content.text">
-                    <div class="door tradeDoor" @click="openDoor(); recordTradeNoteClick();" v-show="!doorOpen">
-                        <h3>Trade Notes</h3>
-                        <p>Share with a friend and Cactus will keep your note private until they reflect and share back with you.</p>
-                    </div>
-                    <div class="door psychDoor" v-show="doorOpen">
-                        <h3>Coming Soon!</h3>
-                        <p>We'll let you know when the Trade Notes feature is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">Cactus phone wallpapers</a>.</p>
-                        <button @click="closeDoor()" class="icon tertiary">
-                            <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
-                        </button>
-                    </div>
-                    <div class="door shareDoor" @click="tradeNote()">
-                        <h3>Share Your Note</h3>
-                        <p>Boost someone’s day with a quick dose of gratitude.</p>
-                    </div>
-                </section>
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                     {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
@@ -181,7 +164,6 @@
             flipped: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
-            doorOpen: boolean,
             showTradeNote: boolean,
         } {
             return {
@@ -196,7 +178,6 @@
                 flipped: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
-                doorOpen: false,
                 showTradeNote: false,
             }
         },
@@ -238,12 +219,6 @@
             },
             restart() {
                 this.$emit("restart");
-            },
-            openDoor() {
-                this.doorOpen = true;
-            },
-            closeDoor() {
-                this.doorOpen = false;
             },
             recordTradeNoteClick() {
                 gtag('event', 'trade_notes_clicked', {
@@ -396,18 +371,6 @@
             top: 0;
             width: 100%;
 
-            &.backDoor.back {
-                background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
-                height: auto;
-                justify-content: flex-start;
-                padding: 0;
-
-                .content-card {
-                    height: auto;
-                    padding: 5.6rem 2.4rem;
-                }
-            }
-
             @include r(600) {
                 border-radius: 12px;
             }
@@ -486,91 +449,5 @@
             }
         }
     }
-
-    .door {
-        @include shadowbox;
-        background-repeat: no-repeat;
-        cursor: pointer;
-        margin: 0 -1.6rem 1.6rem;
-        padding: 1.6rem 2.4rem;
-        position: relative;
-        text-align: left;
-
-        @include r(600) {
-            margin: 0 0 1.6rem;
-            padding-right: 9.6rem;
-            transition: transform .3s;
-
-            &.tradeDoor:hover,
-            &.shareDoor:hover {
-                transform: scale(1.03);
-            }
-        }
-
-        &.tradeDoor {
-            background-image: url(/assets/images/pinkBlob4.svg);
-            background-size: 25rem;
-            background-position: right -11rem top -12rem;
-
-            @include r(600) {
-                background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
-                // background-size: 36rem, 25rem;
-                // background-position: right -24rem top -5rem, right -10rem top -11rem;
-                background-size: 32rem, 25rem;
-                background-position: right -21rem top 0, right -11rem top -12rem;
-            }
-        }
-
-        &.shareDoor {
-            background-image: url(/assets/images/lightGreenBlob.svg);
-            background-size: 29rem;
-            background-position: right -13rem top 5rem;
-
-            @include r(600) {
-                background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
-                background-size: 32rem, 29rem;
-                background-position: right -23rem top 1rem, right -13rem top 5rem;
-            }
-        }
-
-        h3 {
-            margin-bottom: .4rem;
-        }
-
-        p {
-            font-size: 1.6rem;
-
-            @include r(374) {
-                font-size: 1.8rem;
-            }
-        }
-    }
-
-    .psychDoor {
-        background-color: $darkestGreen;
-        color: $white;
-        padding-right: 2.4rem;
-
-        p {
-            color: rgba(255,255,255,.9);
-        }
-
-        a {
-            @include fancyLinkLight;
-            color: rgba(255,255,255,1);
-        }
-
-        .icon.tertiary {
-            position: absolute;
-            right: .8rem;
-            top: .8rem;
-        }
-
-        .closeButton {
-            height: 1.4rem;
-            width: 1.4rem;
-        }
-    }
-
 
 </style>
