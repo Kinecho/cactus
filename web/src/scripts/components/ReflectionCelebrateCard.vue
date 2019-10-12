@@ -2,8 +2,10 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
+                <a class="aboutLink" href="#" onclick="goBack()">About the cactuses</a>
                 <h2>{{celebrateText}}</h2>
-                <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
+                <p class="subtext">You just grew your <a href="#" onclick="goBack()">{{elementLabel}}</a> Cactus.</p>
+                <div class="lowerContainer">
                 <div class="stats-container">
                     <section class="metric">
                         <div class="label">
@@ -39,6 +41,7 @@
                         </p>
                     </section>
                 </div>
+
                 <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                     {{promptCopy.SIGN_UP_MESSAGE}}
                 </button>
@@ -52,6 +55,7 @@
                         @click="close">
                     {{promptCopy.CLOSE}}
                 </button>
+                </div>
             </div>
             <div :class="[ 'flip-card', 'back', {backDoor: showTradeNote}]">
                 <prompt-content-card
@@ -153,6 +157,7 @@
             isModal: Boolean,
         },
         data(): {
+            elementLabel: string,
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
@@ -167,6 +172,7 @@
             showTradeNote: boolean,
         } {
             return {
+                elementLabel: "Meaning",
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
@@ -307,6 +313,10 @@
         width: 70%;
     }
 
+    .lowerContainer {
+        background: $darkerGreen url(images/assets/lightGreenNeedles.svg);
+    }
+
     .stats-container {
         display: flex;
         justify-content: center;
@@ -314,6 +324,7 @@
     }
 
     .metric {
+        color: $lightGreen;
         width: 10rem;
 
         @include r(600) {
@@ -366,7 +377,6 @@
             justify-content: center;
             left: 0;
             overflow: hidden;
-            padding: 3.2rem;
             position: absolute;
             top: 0;
             width: 100%;
