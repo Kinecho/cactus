@@ -268,6 +268,7 @@
 
         &.flip-container .flip-card.front {
             height: auto;
+            justify-content: flex-start;
         }
 
         &.flip-container .flipper {
@@ -279,6 +280,14 @@
                 box-shadow: none;
             }
         }
+    }
+
+    .aboutLink {
+        align-self: flex-end;
+        font-size: 1.4rem;
+        font-weight: bold;
+        padding: 2.4rem;
+        text-decoration: none;
     }
 
     h2 {
@@ -303,18 +312,13 @@
         }
     }
 
-    .front .illustration {
-        margin: 0 auto 2.4rem;
-        width: 70%;
-    }
-
     .back .illustration {
         margin-bottom: 1.6rem;
         width: 70%;
     }
 
     .lowerContainer {
-        background: $darkerGreen url(images/assets/lightGreenNeedles.svg);
+        background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
     }
 
     .stats-container {
