@@ -21,7 +21,7 @@
                     </div>
                 </modal>
                 <h2>{{celebrateText}}</h2>
-                <p class="subtext">You just grew your <a href="#" @click="showCactusModal = true">{{elementLabel}}</a> Cactus.</p>
+                <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
                 <div class="lowerContainer">
                 <div class="stats-container">
                     <section class="metric">
