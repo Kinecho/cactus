@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <div v-if="processedContent.text" class="text">
+            <div v-if="processedContent.text || processedContent.elements" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">

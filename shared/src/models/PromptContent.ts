@@ -145,6 +145,8 @@ export function processContent(content: Content): Content {
             break;
         case ContentType.elements:
             processed.elements = true;
+            processed.text = content.text_md || content.text;
+            processed.title = content.title;
             break;
         default:
             console.warn("UNHANDLED CONTENT TYPE", content.contentType);
