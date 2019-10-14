@@ -9,14 +9,8 @@
             </button>
 
             <div v-if="processedContent.showElementIcon" class="element-container">
-                <!-- 
-                    KATIE TO-DO: 
-                    Replace this with logic to show the correct cactus for the element.
-
-                    Which element can be access through `processedContent.cactusElement` 
-                -->
                 <div class="element-icon">
-                    <img src="/assets/images/grow5.svg"/>
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
                     <h4 class="label">#{{cactusElement}}</h4>
                 </div>
             </div>
