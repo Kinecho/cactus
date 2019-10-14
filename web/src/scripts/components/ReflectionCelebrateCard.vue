@@ -370,10 +370,16 @@
         background-color: $darkestGreen;
         border-radius: 1.2rem;
         color: $lightGreen;
+        display: flex;
+        flex-direction: column;
+        min-height: 34rem;
         padding: 2.4rem;
         width: 30rem;
 
         .description {
+            align-items: center;
+            display: flex;
+            flex-grow: 1;
             padding: 3.2rem 0;
         }
 
@@ -384,6 +390,7 @@
         }
 
         .left {
+            margin: -2px 1.6rem 0 0;
             transform: scale(-1);
         }
 
