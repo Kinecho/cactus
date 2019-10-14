@@ -108,6 +108,10 @@
             </div>
             <!--      END Link      -->
 
+            <!--    START Elements  -->
+            <prompt-content-card-elements v-if="processedContent.elements" />
+            <!--    END Elements    -->
+
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
                 <svg class="grow5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 150">
@@ -219,6 +223,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import PromptContentCardElements from "@components/PromptContentCardElements.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
 
@@ -235,6 +240,7 @@
             CopyTextInput,
             SnackbarContent,
             SharedReflectionCard,
+            PromptContentCardElements
         },
         props: {
             content: {
