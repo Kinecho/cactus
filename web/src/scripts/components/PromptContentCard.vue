@@ -11,8 +11,8 @@
             <div v-if="processedContent.showElementIcon" class="element-container">
                 <div class="element-icon">
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
-                    <h4 class="label">#{{cactusElement}}</h4>
                 </div>
+                <h4 class="label">#{{cactusElement}}</h4>
             </div>
 
             <div v-if="processedContent.text || processedContent.elements" class="text">
@@ -635,18 +635,21 @@
         justify-content: center;
     }
 
-    .element-container {
-        display: flex;
-        flex-direction: column;
+    .element-icon {
+        align-items: center;
+        background-color: $lightPink;
+        border-radius: 50%;
+        display: inline-flex;
+        height: 6.4rem;
+        justify-content: center;
+        margin-bottom: 1.6rem;
+        padding: .8rem;
+        width: 6.4rem;
 
-        .element-icon {
-            margin-bottom: 2.4rem;
-
-            img {
-                $avatarSize: 5.6rem;
-                height: $avatarSize;
-                width: $avatarSize;
-            }
+        img {
+            $avatarSize: 4rem;
+            height: $avatarSize;
+            width: $avatarSize;
         }
     }
 
