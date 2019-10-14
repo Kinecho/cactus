@@ -2,8 +2,8 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <button class="small tertiary aboutLink" @click="showCactusModal = true">About the cactuses</button>
-                <modal :show="showCactusModal" v-on:close="showCactusModal = false" :showCloseButton="true">
+                <button class="small tertiary aboutLink" @click="showCactusModal">About the cactuses</button>
+                <modal :show="cactusModalVisible" v-on:close="hideCactusModal" :showCloseButton="true">
                     <div class="modalContainer" slot="body">
                         <p class="description">Your happiest life depends on a balance of five elements.</p>
                         <div class="btnContainer">
@@ -189,7 +189,7 @@
             durationLabel: string,
             promptCopy: PromptCopy,
             showTradeNote: boolean,
-            showCactusModal: boolean,
+            cactusModalVisible: boolean,
         } {
             return {
                 elementLabel: "Meaning",
@@ -205,7 +205,7 @@
                 durationLabel: "",
                 promptCopy: copy.prompts,
                 showTradeNote: false,
-                showCactusModal: false,
+                cactusModalVisible: false,
             }
         },
         destroyed() {
@@ -260,8 +260,12 @@
                 this.flipped = true;
             },
             showCactusModal() {
-                this.showCactusModal = true;
+                this.cactusModalVisible = true;
+            },
+            hideCactusModal() {
+                this.cactusModalVisible = false;
             }
+
         }
     })
 </script>
