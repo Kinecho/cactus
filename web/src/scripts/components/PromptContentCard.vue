@@ -8,6 +8,19 @@
                 </svg>
             </button>
 
+            <div v-if="processedContent.showElementIcon" class="element-container">
+                <!-- 
+                    KATIE TO-DO: 
+                    Replace this with logic to show the correct cactus for the element.
+
+                    Which element can be access through `processedContent.cactusElement` 
+                -->
+                <div class="element-icon">
+                    <img src="/assets/images/grow5.svg"/>
+                    <h4 class="label">#{{cactusElement}}</h4>
+                </div>
+            </div>
+
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
@@ -94,6 +107,10 @@
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
             </div>
             <!--      END Link      -->
+
+            <!--    START Elements  -->
+            <prompt-content-card-elements v-if="processedContent.elements" />
+            <!--    END Elements    -->
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
@@ -206,6 +223,7 @@
     import {QueryParam} from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
+    import PromptContentCardElements from "@components/PromptContentCardElements.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
 
@@ -222,11 +240,13 @@
             CopyTextInput,
             SnackbarContent,
             SharedReflectionCard,
+            PromptContentCardElements
         },
         props: {
             content: {
                 type: Object as () => Content
             },
+            cactusElement: String,
             hasNext: Boolean,
             hasPrevious: Boolean,
             response: Object as () => ReflectionResponse,
@@ -619,6 +639,21 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
+    }
+
+    .element-container {
+        display: flex;
+        flex-direction: column;
+
+        .element-icon {
+            margin-bottom: 2.4rem;
+
+            img {
+                $avatarSize: 5.6rem;
+                height: $avatarSize;
+                width: $avatarSize;
+            }
+        }
     }
 
     .quote-container {
