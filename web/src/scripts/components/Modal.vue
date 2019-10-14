@@ -133,8 +133,8 @@
                     }
 
                     position: absolute;
-                    top: 0;
-                    right: 0;
+                    top: .8rem;
+                    right: .8rem;
 
                     z-index: 100;
                     height: 4.8rem;
