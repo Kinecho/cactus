@@ -130,6 +130,10 @@ h4 {
   @include r(768) {
     font-size: 1.6rem;
   }
+
+    &.maroon {
+      color: $darkestPink;
+    }
 }
 
 .alert {

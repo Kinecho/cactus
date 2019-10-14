@@ -2,7 +2,7 @@
     <div class="elements-container">
         <div class="element-icon" v-for="element in elements">
             <img :src="'/assets/images/cacti/'+ element + '-3.svg'"/>
-            <h4 class="label">#{{element}}</h4>
+            <h4 class="maroon label">#{{element}}</h4>
         </div>
     </div>
 </template>
@@ -26,7 +26,7 @@
 
         },
         props: {
-    
+
         },
         data(): {
             resizeListener: any | undefined,
@@ -65,14 +65,29 @@
     @import "transitions";
 
     .elements-container {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
 
         .element-icon {
-            margin-bottom: 2.4rem;
+            &:nth-child(1) {
+                align-self: end;
+                grid-column: 1 / 3;
+            }
+            &:nth-child(2), &:nth-child(3) {
+                margin: 2.4rem 0 3.2rem;
+            }
+            &:nth-child(4) {
+                justify-self: end;
+                margin-right: 1.6rem;
+            }
+            &:nth-child(5) {
+                justify-self: start;
+                margin-left: 1.6rem;
+            }
 
             img {
-                $avatarSize: 5.6rem;
+                $avatarSize: 6.4rem;
                 height: $avatarSize;
                 width: $avatarSize;
             }
