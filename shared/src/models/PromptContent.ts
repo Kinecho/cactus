@@ -92,6 +92,14 @@ export enum ContentStatus {
     published = "published",
 }
 
+export enum CactusElement {
+    meaning = "meaning",
+    experience = "experience",
+    energy = "energy",
+    emotions = "emotions",
+    relationships = "relationships",
+}
+
 /**
  * Removes unneeded fields from the content for easier display
  * @param {Content} content
@@ -101,6 +109,7 @@ export function processContent(content: Content): Content {
     const processed: Content = {
         contentType: content.contentType,
         label: content.label,
+        showElementIcon: content.showElementIcon,
         actionButton: (content.actionButton && content.actionButton.label && content.actionButton.action) ? content.actionButton : undefined,
         link: (content.link && content.link.destinationHref && content.link.linkLabel) ? content.link : undefined,
         backgroundImage: content.backgroundImage,
@@ -139,7 +148,6 @@ export function processContent(content: Content): Content {
     }
 
     return processed;
-
 }
 
 
@@ -156,6 +164,7 @@ export interface Content {
     audio?: Audio;
     link?: ContentLink;
     actionButton?: ActionButton;
+    showElementIcon?: boolean;
 }
 
 
@@ -166,6 +175,7 @@ export default class PromptContent extends FlamelinkModel {
     subjectLine?: string;
     openGraphImage?: Image;
     scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
+    cactusElement?: CactusElement; 
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
     contentStatus: ContentStatus = ContentStatus.in_progress;
@@ -181,6 +191,7 @@ export default class PromptContent extends FlamelinkModel {
             this.promptId = data.promptId;
             this.content = data.content || [];
             this.subjectLine = data.subjectLine;
+            this.cactusElement = data.cactusElement;
             this.scheduledSendAt = data.scheduledSendAt
         }
 

@@ -42,6 +42,7 @@
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:content="contentItems[activeIndex]"
                                     v-bind:response="reflectionResponse"
                                     v-bind:hasNext="hasNext && activeIndex > 0"
@@ -96,7 +97,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType, CactusElement} from '@shared/models/PromptContent'
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
@@ -401,7 +402,12 @@
             },
             sharePromptEnabled(): boolean {
                 return !this.isShareNote;
-            }
+            },
+            cactusElement(): CactusElement | undefined {
+                if (this.promptContent) {
+                    return this.promptContent.cactusElement;
+                }
+            },
         },
         watch: {
             responsesLoaded(loaded) {
