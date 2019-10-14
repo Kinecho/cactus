@@ -1,7 +1,7 @@
 <template>
     <div class="elements-container">
         <div class="element-icon" v-for="element in elements">
-            <img src="/assets/images/grow5.svg"/>
+            <img :src="'/assets/images/cacti/'+ element + '-3.svg'"/>
             <h4 class="label">#{{element}}</h4>
         </div>
     </div>
