@@ -2,9 +2,26 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <a class="aboutLink" href="#" onclick="goBack()">About the cactuses</a>
+                <button class="small tertiary aboutLink" @click="showCactusModal = true">About the cactuses</button>
+                <modal :show="showCactusModal" v-on:close="showCactusModal = false" :showCloseButton="true">
+                    <div class="modalContainer" slot="body">
+                        <p class="description">Your happiest life depends on a balance of five elements.</p>
+                        <div class="btnContainer">
+                            <button class="tertiary icon left">
+                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                                </svg>
+                            </button>
+                            <button class="tertiary icon right">
+                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </modal>
                 <h2>{{celebrateText}}</h2>
-                <p class="subtext">You just grew your <a href="#" onclick="goBack()">{{elementLabel}}</a> Cactus.</p>
+                <p class="subtext">You just grew your <a href="#" @click="showCactusModal = true">{{elementLabel}}</a> Cactus.</p>
                 <div class="lowerContainer">
                 <div class="stats-container">
                     <section class="metric">
@@ -57,7 +74,7 @@
                 </button>
                 </div>
             </div>
-            <div :class="[ 'flip-card', 'back', {backDoor: showTradeNote}]">
+            <div :class="[ 'flip-card', 'back']">
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
@@ -104,11 +121,13 @@
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
     import {gtag} from "@web/analytics";
+    import Modal from "@components/Modal.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
+            Modal,
             Spinner,
             MagicLink,
             PromptContentCard,
@@ -170,6 +189,7 @@
             durationLabel: string,
             promptCopy: PromptCopy,
             showTradeNote: boolean,
+            showCactusModal: boolean,
         } {
             return {
                 elementLabel: "Meaning",
@@ -185,6 +205,7 @@
                 durationLabel: "",
                 promptCopy: copy.prompts,
                 showTradeNote: false,
+                showCactusModal: false,
             }
         },
         destroyed() {
@@ -226,12 +247,6 @@
             restart() {
                 this.$emit("restart");
             },
-            recordTradeNoteClick() {
-                gtag('event', 'trade_notes_clicked', {
-                    event_category: "prompt_content",
-                    event_label: `coming_soon`
-                });
-            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -242,12 +257,10 @@
                 console.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
-                this.showTradeNote = false;
                 this.flipped = true;
             },
-            tradeNote(){
-                this.showTradeNote = true;
-                this.flipped = true;
+            showCactusModal() {
+                this.showCactusModal = true;
             }
         }
     })
@@ -284,9 +297,10 @@
 
     .aboutLink {
         align-self: flex-end;
+        flex-grow: 0;
         font-size: 1.4rem;
         font-weight: bold;
-        padding: 2.4rem;
+        margin: 1.6rem;
         text-decoration: none;
     }
 
@@ -319,12 +333,12 @@
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+        padding: 3.2rem;
     }
 
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 3.2rem;
     }
 
     .metric {
@@ -349,6 +363,33 @@
     .auth {
         @include r(600) {
             margin: 0 -3.2rem;
+        }
+    }
+
+    .modalContainer {
+        background-color: $darkestGreen;
+        border-radius: 1.2rem;
+        color: $lightGreen;
+        padding: 2.4rem;
+        width: 30rem;
+
+        .description {
+            padding: 3.2rem 0;
+        }
+
+        .btnContainer {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+
+        .left {
+            transform: scale(-1);
+        }
+
+        .arrow {
+            height: 1.8rem;
+            width: 1.8rem;
         }
     }
 
