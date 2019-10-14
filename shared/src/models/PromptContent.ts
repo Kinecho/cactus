@@ -80,6 +80,7 @@ export enum ContentType {
     photo = "photo",
     audio = "audio",
     reflect = "reflect",
+    elements = "elements",
     share_reflection = "share_reflection",
 }
 
@@ -142,6 +143,9 @@ export function processContent(content: Content): Content {
             processed.text = content.text_md || content.text;
             processed.title = content.title;
             break;
+        case ContentType.elements:
+            processed.elements = true;
+            break;
         default:
             console.warn("UNHANDLED CONTENT TYPE", content.contentType);
 
@@ -163,6 +167,7 @@ export interface Content {
     photo?: Image;
     audio?: Audio;
     link?: ContentLink;
+    elements?: boolean;
     actionButton?: ActionButton;
     showElementIcon?: boolean;
 }
