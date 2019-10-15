@@ -22,7 +22,7 @@
                 </modal>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
+                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementDescription}}.</p>
                 </div>
                 <div class="lowerContainer">
                     <img class="elementIllustration" :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
@@ -183,7 +183,7 @@
             cactusElement: String,
         },
         data(): {
-            elementLabel: string,
+            elementDescription: string,
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
@@ -199,7 +199,7 @@
             cactusModalVisible: boolean,
         } {
             return {
-                elementLabel: "Meaning",
+                elementDescription: "living with a sense of purpose while you enjoy the present",
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
@@ -317,7 +317,7 @@
 
     .successText {
         flex-grow: 1;
-        padding: 4rem 0;
+        padding: 4rem 4rem 6.4rem;
     }
 
     h2 {
