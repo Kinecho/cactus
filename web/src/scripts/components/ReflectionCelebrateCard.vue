@@ -23,55 +23,55 @@
                 <h2>{{celebrateText}}</h2>
                 <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
                 <div class="lowerContainer">
-                <div class="stats-container">
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                                <spinner v-if="reflectionCount === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="reflectionCount !== undefined">
-                            {{promptCopy.REFLECTIONS}}
-                        </p>
-                    </section>
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
-                                <spinner v-if="totalDuration === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="totalDuration !== undefined">
-                            {{durationLabel}}
-                        </p>
-                    </section>
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                                <spinner v-if="streakDays === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="streakDays !== undefined">
-                            {{promptCopy.DAY_STREAK}}
-                        </p>
-                    </section>
-                </div>
+                    <div class="stats-container">
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                                    <spinner v-if="reflectionCount === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="reflectionCount !== undefined">
+                                {{promptCopy.REFLECTIONS}}
+                            </p>
+                        </section>
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
+                                    <spinner v-if="totalDuration === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="totalDuration !== undefined">
+                                {{durationLabel}}
+                            </p>
+                        </section>
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                                    <spinner v-if="streakDays === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakDays !== undefined">
+                                {{promptCopy.DAY_STREAK}}
+                            </p>
+                        </section>
+                    </div>
 
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                    {{promptCopy.SIGN_UP_MESSAGE}}
-                </button>
-                <button class="primary authBtn"
-                        v-if="authLoaded && loggedIn && !isModal"
-                        @click="goToHome">
-                    {{promptCopy.GO_HOME}}
-                </button>
-                <button class="primary authBtn"
-                        v-if="authLoaded && loggedIn && isModal"
-                        @click="close">
-                    {{promptCopy.CLOSE}}
-                </button>
+                    <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        {{promptCopy.SIGN_UP_MESSAGE}}
+                    </button>
+                    <button class="primary authBtn"
+                            v-if="authLoaded && loggedIn && !isModal"
+                            @click="goToHome">
+                        {{promptCopy.GO_HOME}}
+                    </button>
+                    <button class="primary authBtn"
+                            v-if="authLoaded && loggedIn && isModal"
+                            @click="close">
+                        {{promptCopy.CLOSE}}
+                    </button>
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
