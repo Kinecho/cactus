@@ -5,7 +5,8 @@ import {
     LocaleSettings,
     LocalizedCopy,
     NavigationCopy,
-    PromptCopy
+    PromptCopy,
+    ElementCopy
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
@@ -56,6 +57,13 @@ export default class EnglishCopy extends LocalizedCopy {
         SHARE_YOUR_NOTE: "Share Your Note",
         SHARE_NOTE: "Share Note",
         SHARE_PROMPT_COPY_MD: "Become more courageous and **build trust and connection** with others.",
+    };
+    elements: ElementCopy = {
+        MEANING_DESCRIPTION: "Living with a sense of purpose while you enjoy the present",
+        EXPERIENCE_DESCRIPTION: "Exploring your intellectual curiosities and openly observing life’s lessons",
+        ENERGY_DESCRIPTION: "Caring for your physical health and managing the mind-body connection",
+        EMOTIONS_DESCRIPTION: "Embracing the spectrum of emotions as you strive for optimism",
+        RELATIONSHIPS_DESCRIPTION: "Developing rewarding and fulfilling relationships with yourself and others",
     };
     error: ErrorCopy = {
         PLEASE_ENTER_A_VALID_EMAIL_ADDRESS: "Please enter a valid email address",
