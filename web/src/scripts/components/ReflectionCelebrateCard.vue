@@ -128,7 +128,7 @@
     import PromptContentCard from '@components/PromptContentCard.vue'
     import {gtag} from "@web/analytics";
     import Modal from "@components/Modal.vue";
-    import {CactusElement} from "@shared/models/PromptContent"
+    import {CactusElement} from "@shared/models/CactusElement";
 
     const copy = CopyService.getSharedInstance().copy;
 
