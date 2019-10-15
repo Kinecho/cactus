@@ -1,13 +1,6 @@
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
-            <button class="skip tertiary" @click="next" v-show="showSkip">
-                Skip
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
-                    <path fill="#07454C" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                </svg>
-            </button>
-
             <div v-if="processedContent.showElementIcon" class="element-container">
                 <div class="element-icon">
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
@@ -633,6 +626,10 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
+    }
+
+    .element-container {
+        margin-bottom: -1.6rem;
     }
 
     .element-icon {
