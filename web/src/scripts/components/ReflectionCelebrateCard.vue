@@ -23,6 +23,7 @@
                 <h2>{{celebrateText}}</h2>
                 <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
                 <div class="lowerContainer">
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
                     <div class="stats-container">
                         <section class="metric">
                             <div class="label">
@@ -122,6 +123,9 @@
     import PromptContentCard from '@components/PromptContentCard.vue'
     import {gtag} from "@web/analytics";
     import Modal from "@components/Modal.vue";
+    import {
+        CactusElement
+    } from "@shared/models/PromptContent"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -174,6 +178,7 @@
             },
             promptContent: {type: Object as () => PromptContent},
             isModal: Boolean,
+            cactusElement: String,
         },
         data(): {
             elementLabel: string,

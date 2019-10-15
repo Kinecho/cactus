@@ -63,6 +63,7 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
                                     :promptContent="promptContent"
                             />
