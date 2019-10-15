@@ -1,6 +1,7 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
+import {CactusElement} from "@shared/models/CactusElement";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -91,14 +92,6 @@ export enum ContentStatus {
     processing = "processing",
     needs_changes = "needs_changes",
     published = "published",
-}
-
-export enum CactusElement {
-    energy = "energy",
-    experience = "experience",
-    relationships = "relationships",
-    emotions = "emotions",
-    meaning = "meaning",
 }
 
 /**

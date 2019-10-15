@@ -1,6 +1,10 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import CactusElement from "@shared/models/PromptContent";
+import {CactusElement} from "@shared/models/CactusElement";
 
-export default interface ElementAccumulation {
-  [key: CactusElement]: number
+export interface ElementAccumulation {
+  energy: number,
+  experience: number,
+  relationships: number,
+  emotions: number,
+  meaning: number
 };
