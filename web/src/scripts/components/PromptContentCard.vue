@@ -5,7 +5,7 @@
                 <div class="element-icon">
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
                 </div>
-                <h4 class="label">#{{cactusElement}}</h4>
+                <h4 class="label">{{cactusElement}}</h4>
             </div>
 
             <div v-if="processedContent.text || processedContent.elements" class="text">
