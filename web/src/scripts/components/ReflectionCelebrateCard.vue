@@ -25,7 +25,9 @@
                     <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy.MEANING_DESCRIPTION}}.</p>
                 </div>
                 <div class="lowerContainer">
-                    <img class="elementIllustration" :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
+                    <span class="element-icon" v-for="(count, element) in elementAccumulations">
+                        <img v-if="count > 0" class="elementIllustration" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"/>
+                    </span>
                     <div class="stats-container">
                         <section class="metric">
                             <div class="label">
@@ -111,6 +113,7 @@
     import Spinner from "@components/Spinner.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
+    import {ElementAccumulation} from '@shared/models/ElementAccumulation'
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -168,7 +171,8 @@
 
                     this.reflectionCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
-                    this.loading = false;
+                    this.elementAccumulations = ReflectionResponseService.getElementAccumulationCounts(reflections);
+                    this.loading = false; 
                 }
             });
         },
@@ -184,6 +188,7 @@
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
+            elementAccumulations: ElementAccumulation | undefined,
             loading: boolean,
             authLoaded: boolean,
             loggedIn: boolean,
@@ -200,6 +205,7 @@
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
+                elementAccumulations: undefined,
                 loading: true,
                 loggedIn: false,
                 authLoaded: false,
