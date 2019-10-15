@@ -94,11 +94,11 @@ export enum ContentStatus {
 }
 
 export enum CactusElement {
-    meaning = "meaning",
-    experience = "experience",
     energy = "energy",
-    emotions = "emotions",
+    experience = "experience",
     relationships = "relationships",
+    emotions = "emotions",
+    meaning = "meaning",
 }
 
 /**
