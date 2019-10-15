@@ -22,7 +22,7 @@
                 </modal>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementDescription}}.</p>
+                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy.MEANING_DESCRIPTION}}.</p>
                 </div>
                 <div class="lowerContainer">
                     <img class="elementIllustration" :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
@@ -119,15 +119,13 @@
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {PromptCopy} from '@shared/copy/CopyTypes'
+    import {PromptCopy, ElementCopy} from '@shared/copy/CopyTypes'
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
     import {gtag} from "@web/analytics";
     import Modal from "@components/Modal.vue";
-    import {
-        CactusElement
-    } from "@shared/models/PromptContent"
+    import {CactusElement} from "@shared/models/PromptContent"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -183,7 +181,6 @@
             cactusElement: String,
         },
         data(): {
-            elementDescription: string,
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
@@ -195,11 +192,11 @@
             flipped: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
+            elementCopy: ElementCopy,
             showTradeNote: boolean,
             cactusModalVisible: boolean,
         } {
             return {
-                elementDescription: "living with a sense of purpose while you enjoy the present",
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
@@ -211,6 +208,7 @@
                 flipped: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
+                elementCopy: copy.elements,
                 showTradeNote: false,
                 cactusModalVisible: false,
             }

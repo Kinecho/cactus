@@ -38,6 +38,13 @@ export interface CommonCopy {
     LOADING: string,
 }
 
+export interface ElementCopy {
+    MEANING_DESCRIPTION: string,
+    EXPERIENCE_DESCRIPTION: string,
+    ENERGY_DESCRIPTION: string,
+    EMOTIONS_DESCRIPTION: string,
+    RELATIONSHIPS_DESCRIPTION: string,
+}
 
 export interface AuthenticationCopy {
     MEMBER_SINCE: string,
@@ -71,6 +78,7 @@ export interface ErrorCopy {
 
 export abstract class LocalizedCopy {
     abstract prompts: PromptCopy;
+    abstract elements: ElementCopy;
     abstract settings: LocaleSettings;
     abstract common: CommonCopy;
     abstract navigation: NavigationCopy;

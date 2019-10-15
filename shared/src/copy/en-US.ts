@@ -5,7 +5,8 @@ import {
     LocaleSettings,
     LocalizedCopy,
     NavigationCopy,
-    PromptCopy
+    PromptCopy,
+    ElementCopy
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
