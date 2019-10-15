@@ -25,8 +25,8 @@
                     <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy.MEANING_DESCRIPTION}}.</p>
                 </div>
                 <div class="lowerContainer">
-                    <span class="element-icon" v-for="(count, element) in elementAccumulations">
-                        <img v-if="count > 0" class="elementIllustration" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"/>
+                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0">
+                        <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
                     </span>
                     <div class="stats-container">
                         <section class="metric">
@@ -172,7 +172,7 @@
                     this.reflectionCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
                     this.elementAccumulations = ReflectionResponseService.getElementAccumulationCounts(reflections);
-                    this.loading = false; 
+                    this.loading = false;
                 }
             });
         },
@@ -346,18 +346,26 @@
         }
     }
 
-    .elementIllustration {
-        margin: -5.6rem auto 2.4rem;
-    }
-
-    .back .illustration {
-        margin-bottom: 1.6rem;
-        width: 70%;
-    }
-
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
         padding: 1.6rem 0 3.2rem;
+    }
+
+    .cactusContainer {
+        display: inline-block;
+        margin: 0 .4rem;
+    }
+
+    .cactusIllustration {
+        margin: -5.6rem auto 2.4rem;
+        height: 8rem;
+
+        &.count-2 {
+            height: 9rem;
+        }
+        &.count-3 {
+            height: 10rem;
+        }
     }
 
     .stats-container {
@@ -423,6 +431,11 @@
             height: 1.8rem;
             width: 1.8rem;
         }
+    }
+
+    .back .illustration {
+        margin-bottom: 1.6rem;
+        width: 70%;
     }
 
     .flip-container {
