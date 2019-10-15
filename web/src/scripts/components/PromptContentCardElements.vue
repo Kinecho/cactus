@@ -9,9 +9,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {
-        CactusElement
-    } from "@shared/models/PromptContent"
+    import {CactusElement} from "@shared/models/CactusElement"
     import {formatDate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"

@@ -98,7 +98,8 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType, CactusElement} from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
+    import {CactusElement} from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
