@@ -22,7 +22,7 @@
                 </modal>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy.MEANING_DESCRIPTION}}.</p>
+                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
                 </div>
                 <div class="lowerContainer">
                     <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0">
