@@ -20,10 +20,12 @@
                         </div>
                     </div>
                 </modal>
-                <h2>{{celebrateText}}</h2>
-                <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
+                <div class="successText">
+                    <h2>{{celebrateText}}</h2>
+                    <p class="subtext">You just grew your <a href="#" @click="showCactusModal">{{elementLabel}}</a> Cactus.</p>
+                </div>
                 <div class="lowerContainer">
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
+                    <img class="elementIllustration" :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
                     <div class="stats-container">
                         <section class="metric">
                             <div class="label">
@@ -313,6 +315,11 @@
         text-decoration: none;
     }
 
+    .successText {
+        flex-grow: 1;
+        padding: 4rem 0;
+    }
+
     h2 {
         color: $darkestPink;
         margin-bottom: 2.4rem;
@@ -335,6 +342,10 @@
         }
     }
 
+    .elementIllustration {
+        margin: -5.6rem auto 2.4rem;
+    }
+
     .back .illustration {
         margin-bottom: 1.6rem;
         width: 70%;
@@ -342,12 +353,13 @@
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-        padding: 3.2rem;
+        padding: 1.6rem 0 3.2rem;
     }
 
     .stats-container {
         display: flex;
         justify-content: center;
+        margin-bottom: 1.6rem;
     }
 
     .metric {
