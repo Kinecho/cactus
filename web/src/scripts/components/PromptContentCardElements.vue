@@ -2,7 +2,7 @@
     <div class="elements-container">
         <div class="element-icon" v-for="element in elements">
             <img :src="'/assets/images/cacti/'+ element + '-3.svg'"/>
-            <h4 class="maroon label">#{{element}}</h4>
+            <h4 class="maroon label">{{element}}</h4>
         </div>
     </div>
 </template>
