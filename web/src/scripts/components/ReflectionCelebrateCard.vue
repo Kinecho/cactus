@@ -88,7 +88,10 @@
                 </div>
             </div>
         </div>
-        <element-description-modal :autoLoad="cactusModalVisible" @close="cactusModalVisible = false" />
+        <element-description-modal 
+            :cactusElement = "cactusModalElement"
+            :autoLoad="cactusModalVisible" 
+            @close="cactusModalVisible = false" />
     </div>
 </template>
 
@@ -186,6 +189,7 @@
             elementCopy: ElementCopy,
             showTradeNote: boolean,
             cactusModalVisible: boolean,
+            cactusModalElement: string | undefined
         } {
             return {
                 reflectionCount: undefined,
@@ -203,6 +207,7 @@
                 elementCopy: copy.elements,
                 showTradeNote: false,
                 cactusModalVisible: false,
+                cactusModalElement: undefined
             }
         },
         destroyed() {
@@ -258,6 +263,7 @@
             },
             showCactusModal(element: string) {
                 this.cactusModalVisible = true;
+                this.cactusModalElement = element;
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;
