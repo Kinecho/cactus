@@ -353,18 +353,17 @@
 
     .cactusContainer {
         display: inline-block;
-        margin: 0 .4rem;
     }
 
     .cactusIllustration {
         margin: -5.6rem auto 2.4rem;
-        height: 8rem;
+        height: 10rem;
 
         &.count-2 {
-            height: 9rem;
+            height: 12rem;
         }
         &.count-3 {
-            height: 10rem;
+            height: 14rem;
         }
     }
 

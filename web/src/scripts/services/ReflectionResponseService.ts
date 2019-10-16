@@ -243,9 +243,9 @@ export default class ReflectionResponseService {
         return {
             meaning: 3,
             experience: 0,
-            energy: 2,
-            emotions: 1,
-            relationships: 3
+            energy: 1,
+            emotions: 2,
+            relationships: 0
         };
     }
 
