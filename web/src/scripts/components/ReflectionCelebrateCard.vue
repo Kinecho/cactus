@@ -2,23 +2,6 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <modal :show="cactusModalVisible" v-on:close="hideCactusModal" :showCloseButton="true">
-                    <div class="modalContainer" slot="body">
-                        <p class="description">Your happiest life depends on a balance of five elements.</p>
-                        <div class="btnContainer">
-                            <button class="tertiary icon left">
-                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                                </svg>
-                            </button>
-                            <button class="tertiary icon right">
-                                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </modal>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
@@ -104,6 +87,7 @@
                 </div>
             </div>
         </div>
+        <element-description-modal :autoLoad="false" :show="showCactusModal" />
     </div>
 </template>
 
@@ -128,6 +112,7 @@
     import {gtag} from "@web/analytics";
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
+    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -137,6 +122,7 @@
             Spinner,
             MagicLink,
             PromptContentCard,
+            ElementDescriptionModal,
         },
         async created() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -386,40 +372,6 @@
     .auth {
         @include r(600) {
             margin: 0 -3.2rem;
-        }
-    }
-
-    .modalContainer {
-        background-color: $darkestGreen;
-        border-radius: 1.2rem;
-        color: $lightGreen;
-        display: flex;
-        flex-direction: column;
-        min-height: 34rem;
-        padding: 2.4rem;
-        width: 30rem;
-
-        .description {
-            align-items: center;
-            display: flex;
-            flex-grow: 1;
-            padding: 3.2rem 0;
-        }
-
-        .btnContainer {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-        }
-
-        .left {
-            margin: -2px 1.6rem 0 0;
-            transform: scale(-1);
-        }
-
-        .arrow {
-            height: 1.8rem;
-            width: 1.8rem;
         }
     }
 
