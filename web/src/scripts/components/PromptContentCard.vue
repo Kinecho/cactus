@@ -640,11 +640,11 @@
         height: 6.4rem;
         justify-content: center;
         margin-bottom: 1.6rem;
-        padding: .8rem;
+        padding: .4rem;
         width: 6.4rem;
 
         img {
-            $avatarSize: 4rem;
+            $avatarSize: 5.6rem;
             height: $avatarSize;
             width: $avatarSize;
         }

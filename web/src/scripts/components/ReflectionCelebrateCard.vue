@@ -2,7 +2,6 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <button class="small tertiary aboutLink" @click="showCactusModal">About the cactuses</button>
                 <modal :show="cactusModalVisible" v-on:close="hideCactusModal" :showCloseButton="true">
                     <div class="modalContainer" slot="body">
                         <p class="description">Your happiest life depends on a balance of five elements.</p>
@@ -25,7 +24,7 @@
                     <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
                 </div>
                 <div class="lowerContainer">
-                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0">
+                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0" @click="showCactusModal">
                         <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
                     </span>
                     <div class="stats-container">
@@ -310,18 +309,9 @@
         }
     }
 
-    .aboutLink {
-        align-self: flex-end;
-        flex-grow: 0;
-        font-size: 1.4rem;
-        font-weight: bold;
-        margin: 1.6rem;
-        text-decoration: none;
-    }
-
     .successText {
         flex-grow: 1;
-        padding: 4rem 4rem 6.4rem;
+        padding: 6.4rem 4rem;
     }
 
     h2 {
@@ -348,10 +338,11 @@
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-        padding: 1.6rem 0 3.2rem;
+        padding-bottom: 3.2rem;
     }
 
     .cactusContainer {
+        cursor: pointer;
         display: inline-block;
     }
 

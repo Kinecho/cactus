@@ -73,7 +73,7 @@
                 grid-column: 1 / 3;
             }
             &:nth-child(2), &:nth-child(3) {
-                margin: 1.6rem 0 3.2rem;
+                margin-bottom: 3.2rem;
             }
             &:nth-child(4) {
                 justify-self: end;
@@ -85,7 +85,7 @@
             }
 
             img {
-                $avatarSize: 6.4rem;
+                $avatarSize: 9.6rem;
                 height: $avatarSize;
                 width: $avatarSize;
             }
