@@ -4,10 +4,11 @@
             <div :class="['front', 'flip-card']">
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
+                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
+                    {{cactusModalVisible}}
                 </div>
                 <div class="lowerContainer">
-                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0" @click="showCactusModal">
+                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0" @click="showCactusModal(element)">
                         <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
                     </span>
                     <div class="stats-container">
@@ -87,7 +88,7 @@
                 </div>
             </div>
         </div>
-        <element-description-modal :autoLoad="false" :show="showCactusModal" />
+        <element-description-modal :autoLoad="cactusModalVisible" @close="cactusModalVisible = false" />
     </div>
 </template>
 
@@ -255,7 +256,7 @@
             showLogin() {
                 this.flipped = true;
             },
-            showCactusModal() {
+            showCactusModal(element: string) {
                 this.cactusModalVisible = true;
             },
             hideCactusModal() {

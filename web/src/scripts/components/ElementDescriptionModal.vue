@@ -1,6 +1,6 @@
 <template>
     <modal :show="showContent"
-            v-on:close="showContent = false"
+            v-on:close="showContent = false; $emit('close')"
             :showCloseButton="true"
     >
         <div class="modalContainer" slot="body">
@@ -45,7 +45,7 @@
             Modal,
         },
         props: {
-            cactusElement: String,
+            cactusElement: {type: String, default: 'meaning'},
             autoLoad: {type: Boolean, default: true}
         },
         data(): {
@@ -53,8 +53,13 @@
             elementCopy: ElementCopy,
         } {
             return {
-                showContent: false,
+                showContent: this.autoLoad,
                 elementCopy: copy.elements,
+            }
+        },
+        watch: {
+            autoLoad: function () {
+              this.showContent = this.autoLoad
             }
         },
         // methods: {
