@@ -5,7 +5,6 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
-                    {{cactusModalVisible}}
                 </div>
                 <div class="lowerContainer">
                     <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0" @click="showCactusModal(element)">
@@ -88,9 +87,9 @@
                 </div>
             </div>
         </div>
-        <element-description-modal 
+        <element-description-modal
             :cactusElement = "cactusModalElement"
-            :autoLoad="cactusModalVisible" 
+            :autoLoad="cactusModalVisible"
             @close="cactusModalVisible = false" />
     </div>
 </template>
@@ -323,6 +322,7 @@
     .subtext {
         margin: -1.6rem 0 .8rem;
         opacity: .8;
+        text-transform: lowercase;
 
         @include r(600) {
             margin-top: -2.4rem;

@@ -10,6 +10,9 @@
 
             <!-- element cards -->
             <div>
+                <div class="elementIcon">
+                    <img :src="'/assets/images/cacti/'+ cactusElement + '-3.svg'"/>
+                </div>
                 <h3>{{cactusElement}}</h3>
                 <p class="description">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</p>
             </div>
@@ -78,6 +81,24 @@
     @import "mixins";
     @import "variables";
 
+    .elementIcon {
+        align-items: center;
+        background-color: $lightPink;
+        border-radius: 50%;
+        display: inline-flex;
+        height: 6.4rem;
+        justify-content: center;
+        margin-bottom: 1.6rem;
+        padding: .4rem;
+        width: 6.4rem;
+
+        img {
+            $avatarSize: 5.6rem;
+            height: $avatarSize;
+            width: $avatarSize;
+        }
+    }
+
     .modalContainer {
         background-color: $darkestGreen;
         border-radius: 1.2rem;
@@ -87,28 +108,38 @@
         min-height: 34rem;
         padding: 2.4rem;
         width: 30rem;
+    }
 
-        .description {
-            align-items: center;
-            display: flex;
-            flex-grow: 1;
-            padding: 3.2rem 0;
-        }
+    h3 {
+        color: $white;
+        text-transform: capitalize;
 
-        .btnContainer {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-        }
-
-        .left {
-            margin: -2px 1.6rem 0 0;
-            transform: scale(-1);
-        }
-
-        .arrow {
-            height: 1.8rem;
-            width: 1.8rem;
+        + .description {
+            padding-top: 0;
         }
     }
+
+    .description {
+        align-items: center;
+        display: flex;
+        flex-grow: 1;
+        padding: 3.2rem 0;
+    }
+
+    .btnContainer {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    button.left {
+        margin: -2px 1.6rem 0 0;
+        transform: scale(-1);
+    }
+
+    .arrow {
+        height: 1.8rem;
+        width: 1.8rem;
+    }
+
 </style>
