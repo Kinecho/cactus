@@ -340,7 +340,7 @@
     }
 
     .cactusIllustration {
-        margin: -5.6rem auto 2.4rem;
+        margin: -6.8rem auto 2.4rem;
         height: 10rem;
 
         &.count-2 {
