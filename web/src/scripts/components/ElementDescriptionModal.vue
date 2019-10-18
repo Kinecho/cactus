@@ -6,11 +6,11 @@
 
         <transition-group class="modalContainer" tag="div" slot="body">
             <div v-for="slide in slides" class="slide" :key="slide.id">
-                <div class="elementIcon">
+                <div v-show="slide.element" class="elementIcon">
                     <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
                 </div>
-                <h3>{{slide.element}}</h3>
-                <p class="description">{{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}</p>
+                <h3 v-show="slide.element">{{slide.element}}</h3>
+                <p class="description">{{slide.element ? elementCopy[slide.element.toUpperCase() + '_DESCRIPTION'] : slide.intro}}</p>
                 <div class="btnContainer">
                     <button class="tertiary icon left" @click="previous">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -55,6 +55,9 @@
                 elementCopy: copy.elements,
                 slides: [
                     {
+                        id: 0,
+                        intro: "Your happiest life depends on a balance of five elements."
+                    }, {
                         id: 1,
                         element: "energy"
                     }, {
