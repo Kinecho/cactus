@@ -6,11 +6,13 @@
 
         <transition-group class="modalContainer" tag="div" slot="body">
             <div v-for="slide in slides" class="slide" :key="slide.id">
-                <div v-show="slide.element" class="elementIcon">
-                    <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
+                <div class="slideContent">
+                    <div v-show="slide.element" class="elementIcon">
+                        <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
+                    </div>
+                    <h3 v-show="slide.element">{{slide.element}}</h3>
+                    <p class="description">{{slide.element ? elementCopy[slide.element.toUpperCase() + '_DESCRIPTION'] : slide.intro}}</p>
                 </div>
-                <h3 v-show="slide.element">{{slide.element}}</h3>
-                <p class="description">{{slide.element ? elementCopy[slide.element.toUpperCase() + '_DESCRIPTION'] : slide.intro}}</p>
                 <div class="btnContainer">
                     <button class="tertiary icon left" @click="previous">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -137,25 +139,26 @@
         width: 30rem;
     }
 
+    .slideContent {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        justify-content: center;
+    }
+
     h3 {
         color: $white;
         text-transform: capitalize;
-
-        + .description {
-            padding-top: 0;
-        }
     }
 
     .description {
         align-items: center;
         display: flex;
-        padding: 3.2rem 0;
     }
 
     .btnContainer {
-        align-items: flex-end;
         display: flex;
-        flex-grow: 1;
     }
 
     button.left {
