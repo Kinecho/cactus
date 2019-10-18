@@ -4,27 +4,27 @@
             :showCloseButton="true"
     >
 
-            <transition-group class="modalContainer" tag="div" slot="body">
-                <div v-for="slide in slides" class="slide" :key="slide.id">
-                    <div class="elementIcon">
-                        <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
-                    </div>
-                    <h3>{{slide.element}}</h3>
-                    <p class="description">{{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}</p>
-                    <div class="btnContainer">
-                        <button class="tertiary icon left" @click="previous">
-                            <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                            </svg>
-                        </button>
-                        <button class="tertiary icon right" @click="next">
-                            <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                            </svg>
-                        </button>
-                    </div>
+        <transition-group class="modalContainer" tag="div" slot="body">
+            <div v-for="slide in slides" class="slide" :key="slide.id">
+                <div class="elementIcon">
+                    <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
                 </div>
-            </transition-group>
+                <h3>{{slide.element}}</h3>
+                <p class="description">{{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}</p>
+                <div class="btnContainer">
+                    <button class="tertiary icon left" @click="previous">
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                            <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                    </button>
+                    <button class="tertiary icon right" @click="next">
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                            <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </transition-group>
     </modal>
 </template>
 
