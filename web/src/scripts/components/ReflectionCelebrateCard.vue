@@ -4,10 +4,11 @@
             <div :class="['front', 'flip-card']">
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <p class="subtext">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
+                    <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
+                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
                 </div>
                 <div class="lowerContainer">
-                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0" @click="showCactusModal(element)">
+                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click="showCactusModal(element)">
                         <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
                     </span>
                     <div class="stats-container">
@@ -329,9 +330,14 @@
         }
     }
 
+    .front .illustration {
+        margin: 0 auto;
+        width: 90%;
+    }
+
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-        padding-bottom: 3.2rem;
+        padding: 6.4rem 4rem;
     }
 
     .cactusContainer {
@@ -340,7 +346,7 @@
     }
 
     .cactusIllustration {
-        margin: -6.8rem auto 2.4rem;
+        margin: -13.6rem auto 2.4rem;
         height: 10rem;
 
         &.count-2 {
