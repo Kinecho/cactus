@@ -3,34 +3,28 @@
             v-on:close="showContent = false; $emit('close')"
             :showCloseButton="true"
     >
-        <div class="modalContainer" slot="body">
-            <!-- intro card -->
-            <p class="description">Your happiest life depends on a balance of five elements.</p>
-            <!-- end intro card -->
 
-            <!-- element cards -->
-            <div>
-                <div class="elementIcon">
-                    <img :src="'/assets/images/cacti/'+ cactusElement + '-3.svg'"/>
+            <transition-group class="modalContainer" tag="div" slot="body">
+                <div v-for="slide in slides" class="slide" :key="slide.id">
+                    <div class="elementIcon">
+                        <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
+                    </div>
+                    <h3>{{slide.element}}</h3>
+                    <p class="description">{{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}</p>
+                    <div class="btnContainer">
+                        <button class="tertiary icon left" @click="previous">
+                            <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                            </svg>
+                        </button>
+                        <button class="tertiary icon right" @click="next">
+                            <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <h3>{{cactusElement}}</h3>
-                <p class="description">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</p>
-            </div>
-            <!-- end element cards -->
-
-            <div class="btnContainer">
-                <button class="tertiary icon left">
-                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                </button>
-                <button class="tertiary icon right">
-                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                        <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
+            </transition-group>
     </modal>
 </template>
 
@@ -48,16 +42,35 @@
             Modal,
         },
         props: {
-            cactusElement: {type: String, default: 'meaning'},
-            autoLoad: {type: Boolean, default: true}
+            cactusElement: String,
+            autoLoad: Boolean,
         },
         data(): {
             showContent: boolean,
             elementCopy: ElementCopy,
+            slides: Array<any>,
         } {
             return {
                 showContent: this.autoLoad,
                 elementCopy: copy.elements,
+                slides: [
+                    {
+                        id: 1,
+                        element: "energy"
+                    }, {
+                        id: 2,
+                        element: "meaning"
+                    }, {
+                        id: 3,
+                        element: "relationships"
+                    }, {
+                        id: 4,
+                        element: "experience"
+                    }, {
+                        id: 5,
+                        element: "emotions"
+                    }
+                ]
             }
         },
         watch: {
@@ -65,14 +78,16 @@
               this.showContent = this.autoLoad
             }
         },
-        // methods: {
-        //     back() {
-        //         this.$emit("back");
-        //     },
-        //     close() {
-        //         this.$emit("close");
-        //     },
-        // },
+        methods: {
+            next () {
+                const first = this.slides.shift()
+                this.slides = this.slides.concat(first)
+            },
+            previous () {
+                const last = this.slides.pop()
+                this.slides = [last].concat(this.slides)
+            }
+        }
     })
 </script>
 
@@ -104,9 +119,18 @@
         border-radius: 1.2rem;
         color: $lightGreen;
         display: flex;
-        flex-direction: column;
         min-height: 34rem;
-        padding: 2.4rem;
+        overflow: hidden;
+        width: 30rem;
+    }
+
+    .slide {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        justify-content: space-between;
+        padding: 4rem 2.4rem 2.4rem;
         width: 30rem;
     }
 
@@ -122,14 +146,13 @@
     .description {
         align-items: center;
         display: flex;
-        flex-grow: 1;
         padding: 3.2rem 0;
     }
 
     .btnContainer {
-        align-items: center;
+        align-items: flex-end;
         display: flex;
-        justify-content: center;
+        flex-grow: 1;
     }
 
     button.left {
