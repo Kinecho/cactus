@@ -1,9 +1,13 @@
 <template>
     <div class="elements-container">
-        <div class="element-icon" v-for="element in elements">
+        <a href="#" class="element-icon" v-for="element in elements" @click="showCactusModal(cactusElement)">
             <img :src="'/assets/images/cacti/'+ element + '-3.svg'"/>
             <h4 class="maroon label">{{element}}</h4>
-        </div>
+        </a>
+        <element-description-modal
+            :cactusElement = "cactusModalElement"
+            :autoLoad="cactusModalVisible"
+            @close="cactusModalVisible = false" />
     </div>
 </template>
 
@@ -14,11 +18,13 @@
     import CopyService from "@shared/copy/CopyService"
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
     import {Image} from '@shared/models/PromptContent'
+    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue"
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
+            ElementDescriptionModal,
         },
         created() {
 
@@ -29,10 +35,14 @@
         data(): {
             resizeListener: any | undefined,
             deviceWidth: number,
+            cactusModalVisible: boolean,
+            cactusModalElement: string | undefined
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
+                cactusModalVisible: false,
+                cactusModalElement: undefined
             }
         },
         destroyed() {
@@ -49,6 +59,15 @@
         computed: {
             elements(): Array<string> {
                 return Object.values(CactusElement);
+            }
+        },
+        methods: {
+            showCactusModal(element: string) {
+                this.cactusModalVisible = true;
+                this.cactusModalElement = element;
+            },
+            hideCactusModal() {
+                this.cactusModalVisible = false;
             }
         }
     })
@@ -68,6 +87,8 @@
         grid-template-rows: 1fr 1fr 1fr;
 
         .element-icon {
+            text-decoration: none;
+
             &:nth-child(1) {
                 align-self: end;
                 grid-column: 1 / 3;
