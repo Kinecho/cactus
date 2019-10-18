@@ -36,13 +36,15 @@
             resizeListener: any | undefined,
             deviceWidth: number,
             cactusModalVisible: boolean,
-            cactusModalElement: string | undefined
+            cactusModalElement: string | undefined,
+            cactusElement: string | undefined
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
                 cactusModalVisible: false,
-                cactusModalElement: undefined
+                cactusModalElement: undefined,
+                cactusElement: ''
             }
         },
         destroyed() {
