@@ -454,8 +454,11 @@
                 let title = this.promptContent && this.promptContent.subjectLine;
                 let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
                 let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
                 let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
                 let ogImageTag = document.querySelector("meta[property='og:image']");
+                let twitterImageTag = document.querySelector("meta[name='twitter:image']");
 
                 if (!title) {
                     const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
@@ -468,9 +471,15 @@
                 }
                 if (ogTitleTag) {
                     ogTitleTag.setAttribute("content", `${title}`);
+                    if (twitterTitleTag) {
+                        twitterTitleTag.setAttribute("content", `${title}`);
+                    }
                 }
                 if (ogDescriptionTag) {
                     ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
+                    if (twitterDescriptionTag) {
+                        twitterDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
+                    }
                 }
 
                 if (!openGraphImage || !openGraphImage.storageUrl) {
@@ -485,6 +494,10 @@
                         width: 1200,
                         transforms: ["w_1200","h_630","f_png","c_lpad"]});
                     ogImageTag.setAttribute("content", `${pngUrl}`);
+                    
+                    if (twitterImageTag) {
+                        twitterImageTag.setAttribute("content", `${pngUrl}`);
+                    }
                 }
             },
             async handleTap(event: TouchEvent) {
