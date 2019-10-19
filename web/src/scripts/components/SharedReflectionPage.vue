@@ -75,9 +75,10 @@
         methods: {
             updateDocumentMeta() {
                 let ogTitleTag = document.querySelector("meta[property='og:title']");
+                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
                 let ogDescriptionTag = document.querySelector("meta[property='og:description']");
+                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
 
-                
                 if (this.reflectionResponse) {
                     let identifier = this.reflectionResponse.memberEmail;
                     let question = this.reflectionResponse.promptQuestion;
@@ -92,6 +93,11 @@
                         document.title = title
                         ogTitleTag.setAttribute("content", `${title}`);
                         ogDescriptionTag.setAttribute("content", `${description}`);
+
+                        if (twitterTitleTag && twitterDescriptionTag) {
+                            twitterTitleTag.setAttribute("content", `${title}`);
+                            twitterDescriptionTag.setAttribute("content", `${description}`); 
+                        }
                     }
                 }
             }

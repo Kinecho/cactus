@@ -15,8 +15,8 @@
                 <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>Your first Cactus prompt will be emailed to you soon. For now, sit back and be confident in
-                            your choice to develop a healthier, happier mindset.</p>
+                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the day.</p>
+                        <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                         <img class="graphic" src="assets/images/music2.svg" alt=""/>
                     </section>
                 </div>
@@ -48,6 +48,7 @@
 
 <script lang="ts">
     import Vue from 'vue'
+    import {Config} from "@web/config";
     import {FirebaseUser} from '@web/firebase';
     import JournalEntryCard from "@components/JournalEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
@@ -106,7 +107,8 @@
             SkeletonCard,
         },
         props: {
-            loginPath: {type: String, default: PageRoute.SIGNUP}
+            loginPath: {type: String, default: PageRoute.SIGNUP},
+            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
         },
         data(): JournalHomeData {
             return {
@@ -264,6 +266,7 @@
                 }
 
                 .graphic {
+                    margin-top: 10rem;
                     max-width: 64rem;
                     width: 90%;
                 }
