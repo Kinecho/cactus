@@ -101,7 +101,6 @@
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
-                {{whichCactus}}
                 <!-- <svg class="grow5 energy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 150">
                     <path fill="#000" fill-opacity=".1" d="M124.962 140c0 5.524-20.812 10-46.48 10C52.812 150 32 145.524 32 140s20.812-10 46.482-10c25.668 0 46.48 4.476 46.48 10"/>
                     <path fill="#F5DD48" d="M36.558 93.048c-2.856 5.572-4.042 10.838-4.476 17.084-.436 6.246.852 12.71 4.268 17.958 4.256 6.544 11.472 10.716 18.99 12.83 7.426 2.088 15.22 2.378 22.934 2.606 7.712-.228 15.506-.518 22.932-2.606 7.518-2.114 14.734-6.286 18.992-12.83 3.416-5.248 4.704-11.712 4.268-17.958-.436-6.246-2.96-13.03-5.812-18.604C112.608 79.728 96.084 74 79.232 74c-17.934.002-36.24 6.488-42.674 19.048"/>
@@ -896,13 +895,6 @@
     .leaf6 {
         animation-delay: 28s;
     }
-
-//   animation-name: example;
-//   animation-duration: 5s;
-//   animation-timing-function: linear;
-//   animation-delay: 2s;
-//   animation-iteration-count: infinite;
-//   animation-direction: alternate;
 
     .stem1 {
         animation: growingLeaves 20s ease-out -3s forwards;
