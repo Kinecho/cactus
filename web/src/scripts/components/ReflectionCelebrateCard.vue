@@ -5,7 +5,7 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about {{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}.</p>
+                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
                 <div class="lowerContainer">
                     <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click="showCactusModal(element)">
@@ -323,7 +323,10 @@
     .subtext {
         margin: -1.6rem 0 .8rem;
         opacity: .8;
-        text-transform: lowercase;
+
+        .meaning {
+            text-transform: lowercase;
+        }
 
         @include r(600) {
             margin-top: -2.4rem;
