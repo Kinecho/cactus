@@ -83,8 +83,10 @@
               this.showContent = this.autoLoad
             },
             cactusElement: function() {
-              while(this.slides[0].element != this.cactusElement) {
-                this.next();
+              if (this.cactusElementExists()) {
+                  while(this.slides[0].element != this.cactusElement) {
+                    this.next();
+                  }
               }
             }
         },
@@ -96,6 +98,16 @@
             previous () {
                 const last = this.slides.pop()
                 this.slides = [last].concat(this.slides)
+            },
+            cactusElementExists() {
+                let exists = false;
+                let element = this.cactusElement;
+                this.slides.forEach(function (slide, index) {
+                    if (slide.element && slide.element == element) {
+                        exists = true;
+                    }                    
+                });
+                return exists;
             }
         }
     })
