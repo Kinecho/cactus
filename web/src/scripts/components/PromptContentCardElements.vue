@@ -6,7 +6,7 @@
         </a>
         <element-description-modal
             :cactusElement = "cactusModalElement"
-            :autoLoad="cactusModalVisible"
+            :showModal="cactusModalVisible"
             @close="cactusModalVisible = false" />
     </div>
 </template>
