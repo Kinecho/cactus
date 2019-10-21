@@ -41,7 +41,7 @@
                 </div>
 
                 <div :class="['flipper', {flipped: showSharing}]">
-                    <div class="front flip-card" v-touch:tap="handleTap">
+                    <div class="front flip-card" v-touch:tap="handleTap" :aria-hidden="showSharing">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
@@ -70,7 +70,7 @@
                             />
                         </transition>
                     </div>
-                    <div class="back flip-card">
+                    <div class="back flip-card" :aria-hidden="!showSharing">
                         <prompt-content-sharing v-bind:promptContent="promptContent"/>
                     </div>
                 </div>
