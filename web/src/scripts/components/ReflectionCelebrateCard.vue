@@ -261,9 +261,9 @@
             showLogin() {
                 this.flipped = true;
             },
-            showCactusModal(element: string) {
+            showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
-                this.cactusModalElement = element;
+                this.cactusModalElement = CactusElement[element];
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;
