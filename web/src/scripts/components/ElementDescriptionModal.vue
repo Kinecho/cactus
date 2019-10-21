@@ -81,6 +81,11 @@
         watch: {
             autoLoad: function () {
               this.showContent = this.autoLoad
+            },
+            cactusElement: function() {
+              while(this.slides[0].element != this.cactusElement) {
+                this.next();
+              }
             }
         },
         methods: {
