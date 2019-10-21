@@ -1,6 +1,6 @@
 <template>
-    <modal :show="showContent"
-            v-on:close="showContent = false; $emit('close')"
+    <modal :show="showModal"
+            v-on:close="$emit('close')"
             :showCloseButton="true"
     >
 
@@ -45,15 +45,13 @@
         },
         props: {
             cactusElement: String,
-            autoLoad: Boolean,
+            showModal: Boolean,
         },
         data(): {
-            showContent: boolean,
             elementCopy: ElementCopy,
             slides: Array<any>,
         } {
             return {
-                showContent: this.autoLoad,
                 elementCopy: copy.elements,
                 slides: [
                     {
@@ -79,9 +77,6 @@
             }
         },
         watch: {
-            autoLoad: function () {
-              this.showContent = this.autoLoad
-            },
             cactusElement: function() {
               if (this.cactusElementExists()) {
                   while(this.slides[0].element != this.cactusElement) {
