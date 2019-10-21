@@ -4,9 +4,10 @@
             <slot name="custom-button"></slot>
         </div>
         <div class="dropdown-menu">
-            <button v-if="!hasCustomButton" @click="toggleMenu()" class="dropdown-menu secondary icon dots wiggle" v-bind:class="{ open: menuOpen }">
+            <button aria-label="Options" v-if="!hasCustomButton" @click="toggleMenu()" class="dropdown-menu secondary icon dots wiggle" v-bind:class="{ open: menuOpen }">
                 <slot name="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+                        <title>Options</title>
                         <path d="M24 27.059A3.53 3.53 0 1 1 24 20a3.53 3.53 0 0 1 0 7.059zm16.47 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059zm-32.94 0a3.53 3.53 0 1 1 0-7.059 3.53 3.53 0 0 1 0 7.059z"/>
                     </svg>
                 </slot>

@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
         <div class="info">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Two friends running, one with a green hat"/>
             <h2>Share With Friends</h2>
             <p>
                 {{meta.title}}
@@ -9,7 +9,7 @@
         </div>
         <div class="referral-link">
             <input type="text" class="link-input" name="referral-link" disabled="true" :value="attributedLink">
-            <button class="copy secondary btn" v-clipboard:copy="attributedLink"
+            <button aria-label="Copy link" class="copy secondary btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
                 <span v-if="copySucceeded === true">Copied</span>
@@ -24,17 +24,17 @@
                 inline-template>
             <div class="sharing">
                 <network network="email">
-                    <button class="emailBtn small btn wiggle">
+                    <button aria-label="Use email to share" class="emailBtn small btn wiggle">
                         <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
                     </button>
                 </network>
                 <network network="twitter">
-                    <button class="twBtn small btn wiggle">
+                    <button aria-label="Use Twitter to share" class="twBtn small btn wiggle">
                         <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
                     </button>
                 </network>
                 <network network="facebook">
-                    <button class="fbBtn small btn wiggle">
+                    <button aria-label="Use Facebook to share" class="fbBtn small btn wiggle">
                         <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
                     </button>
                 </network>

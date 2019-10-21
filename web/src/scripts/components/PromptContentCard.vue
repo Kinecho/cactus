@@ -3,7 +3,8 @@
         <section class="content">
             <button class="skip tertiary" @click="next" v-show="showSkip">
                 Skip
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true">
+                    <title>Skip</title>
                     <path fill="#07454C" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                 </svg>
             </button>
@@ -25,6 +26,7 @@
                         <transition name="snack" appear>
                             <snackbar-content :autoHide="false" v-if="linkCreated">
                                 <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                                    <title>Close</title>
                                     <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                                 </svg>
                                 <span slot="text">Shareable link created</span>
@@ -33,7 +35,7 @@
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="secondary"/>
                     </div>
-                    <button v-else class="button primary getLink"
+                    <button aria-label="Get Link" v-else class="button primary getLink"
                             :disabled="creatingLink"
                             :class="{loading: creatingLink}"
                             @click="createSharableLink">
@@ -147,14 +149,14 @@
                     <h5>{{formattedDuration}}</h5>
                 </div>
                 <div class="share-warning" v-if="isReflectScreen && response && response.shared">
-                    <img src="/assets/images/users.svg"/>
+                    <img alt="" src="/assets/images/users.svg"/>
                     <span class="shareText">This note is shared</span>
                 </div>
                 <transition name="fade-in" mode="out-in">
                     <div class="saved-container" v-show="showSaved || saving">
                         <span v-show="saving && !saved">{{promptCopy.SAVING}}...</span>
                         <span v-show="saved && !saving">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13" aria-hidden="true"><title>Saved</title><path d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
                             {{promptCopy.SAVED}}
                         </span>
                     </div>
@@ -173,7 +175,7 @@
                     />
                     </resizable-textarea>
                     <span class="textareaPlaceholder">
-                        <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
+                        <svg class="pen wiggle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" aria-hidden="true"><title>Add a note</title><path fill="#29A389" d="M18.99.302a3.828 3.828 0 0 1 1.717 6.405l-13.5 13.5a1 1 0 0 1-.444.258l-5.5 1.5a1 1 0 0 1-1.228-1.228l1.5-5.5a1 1 0 0 1 .258-.444l13.5-13.5A3.828 3.828 0 0 1 18.99.302zM5.98 18.605L19.294 5.293a1.828 1.828 0 1 0-2.586-2.586L3.395 16.02l-.97 3.556 3.556-.97z"/></svg>
                         {{promptCopy.ADD_A_NOTE}}
                     </span>
                 </div>
