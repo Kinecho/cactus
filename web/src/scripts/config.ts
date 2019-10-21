@@ -29,6 +29,7 @@ declare var __GOOGLE_OPTIMIZE_ID__: string;
 declare var __FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_ENV_ID__: string;
+declare var __FIRST_PROMPT_ID__: string;
 
 declare var __API_DOMAIN__: string;
 declare var __FULL_STORY_TEAM_ID__: string;
@@ -45,6 +46,7 @@ export const Config = {
     firebase: __FIREBASE_CONFIG__,
     flamelinkFirebaseConfig: __FLAMELINK_FIREBASE_CONFIG__,
     flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
+    firstPromptId: __FIRST_PROMPT_ID__,
     apiDomain: __API_DOMAIN__,
     fullStoryTeamId: __FULL_STORY_TEAM_ID__,
     stripe: __STRIPE_CONFIG__,
