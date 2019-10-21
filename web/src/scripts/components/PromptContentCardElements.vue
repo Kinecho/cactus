@@ -37,14 +37,14 @@
             deviceWidth: number,
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined,
-            cactusElement: string | undefined
+            cactusElement: CactusElement | undefined
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
-                cactusElement: ''
+                cactusElement: undefined
             }
         },
         destroyed() {
@@ -64,8 +64,8 @@
             }
         },
         methods: {
-            showCactusModal(element: string) {
-                this.cactusModalElement = element;
+            showCactusModal(element: keyof typeof CactusElement) {
+                this.cactusModalElement = CactusElement[element];
                 this.cactusModalVisible = true;
             },
             hideCactusModal() {
