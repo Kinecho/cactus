@@ -49,10 +49,9 @@ export default class FlamelinkService {
         }
 
         if (saved) {
-            console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
+            // console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
             model.updateFromData(saved);
         }
-
 
         return model;
     }

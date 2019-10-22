@@ -6,6 +6,7 @@ import 'flamelink/content'
 import 'flamelink/storage'
 import FlamelinkModel from "@shared/FlamelinkModel";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
+import {convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 
 export default class AdminFlamelinkService {
     protected static sharedInstance: AdminFlamelinkService;
@@ -82,7 +83,7 @@ export default class AdminFlamelinkService {
         }
 
         if (saved) {
-            console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
+            // console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
             model.updateFromData(saved);
         }
 
@@ -90,7 +91,7 @@ export default class AdminFlamelinkService {
         return model;
     }
 
-    async getById<T extends FlamelinkModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
+    async getByEntryId<T extends FlamelinkModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
         const schema = type.schema;
         console.log(`Fetching ${id} from ${schema}`);
@@ -101,6 +102,52 @@ export default class AdminFlamelinkService {
         }
 
         return fromFlamelinkData(content, Type);
+    }
+
+    async getByField<T extends FlamelinkModel>(opts: { name: string, value: any }, Type: { new(): T }): Promise<T | undefined> {
+
+        const type = new Type();
+        const schema = type.schema;
+        console.log(`Fetching from ${schema} where ${opts.name} = ${opts.value}`);
+
+
+        const results = await this.flamelinkApp.content.getByField({
+            field: opts.name,
+            value: opts.value,
+            schemaKey: schema
+        });
+        if (!results) {
+            return undefined
+        }
+
+        let content = results;
+
+        let values = Object.values(results);
+        if (Array.isArray(values)) {
+            [content] = values;
+        }
+
+        if (!content) {
+            return undefined
+        }
+
+        return fromFlamelinkData(content, Type);
+    }
+
+    //used to do a partial update
+    async update<T extends FlamelinkModel>(model: T, data: Partial<T>): Promise<void> {
+        // const type = new Type();
+        const schema = model.schema;
+        const entryId = model.entryId;
+        if (!entryId) {
+            console.warn("No entry id found on model", model);
+            return
+        }
+        await this.flamelinkApp.content.update({
+            schemaKey: schema,
+            entryId: entryId,
+            data: convertDateToTimestamp(data),
+        })
     }
 
     async getAll<T extends FlamelinkModel>(Type: { new(): T }): Promise<{ results: T[], error?: any }> {

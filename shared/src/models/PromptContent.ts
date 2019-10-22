@@ -167,8 +167,13 @@ export interface Content {
     showElementIcon?: boolean;
 }
 
+export enum PromptContentFields {
+    promptId = "promptId",
+    cactusElement = "cactusElement"
+}
 
 export default class PromptContent extends FlamelinkModel {
+    static Fields = PromptContentFields;
     schema = SchemaName.promptContent;
     promptId?: string;
     content: Content[] = [];
