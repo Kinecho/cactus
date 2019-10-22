@@ -1,5 +1,4 @@
 import {CactusConfig} from "@shared/CactusConfig";
-
 import * as admin from "firebase-admin";
 import * as flamelink from "flamelink/app";
 import 'flamelink/content'
@@ -83,7 +82,7 @@ export default class AdminFlamelinkService {
         }
 
         if (saved) {
-            // console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
+            // console.log(chalk.magenta(`AdminFlamelinkService.ts: setting fl_meta on saved model ${JSON.stringify(saved, null, 2)}`));
             model.updateFromData(saved);
         }
 
@@ -131,6 +130,7 @@ export default class AdminFlamelinkService {
             return undefined
         }
 
+        console.log("content found in flamelink", JSON.stringify(content, null, 2))
         return fromFlamelinkData(content, Type);
     }
 
