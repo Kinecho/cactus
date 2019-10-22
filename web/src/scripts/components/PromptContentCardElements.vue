@@ -90,21 +90,51 @@
 
         .element-icon {
             text-decoration: none;
+            transition: transform .3s;
 
             &:nth-child(1) {
                 align-self: end;
                 grid-column: 1 / 3;
+
+                img {
+                    animation: wiggle .2s 1s 2;
+                }
             }
-            &:nth-child(2), &:nth-child(3) {
+            &:nth-child(2) {
                 margin-bottom: 3.2rem;
+
+                img {
+                    animation: wiggle .2s 8s 2;
+                }
+            }
+            &:nth-child(3) {
+                margin-bottom: 3.2rem;
+
+                img {
+                    animation: wiggle .2s 5s 2;
+                }
             }
             &:nth-child(4) {
                 justify-self: end;
                 margin-right: 1.6rem;
+
+                img {
+                    animation: wiggle .2s 11s 2;
+                }
             }
             &:nth-child(5) {
                 justify-self: start;
                 margin-left: 1.6rem;
+
+                img {
+                    animation: wiggle .2s 15s 2;
+                }
+            }
+
+            @include r(600) {
+                &:hover {
+                    transform: scale(1.03);
+                }
             }
 
             img {
