@@ -8,9 +8,11 @@
                     <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
                 <div class="lowerContainer">
-                    <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click="showCactusModal(element)">
-                        <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
-                    </span>
+                    <div class="cactusGarden">
+                        <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click="showCactusModal(element)">
+                            <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
+                        </span>
+                    </div>
                     <div class="stats-container">
                         <section class="metric">
                             <div class="label">
@@ -350,13 +352,23 @@
         padding: 6.4rem 4rem;
     }
 
+    .cactusGarden {
+        margin: -13.6rem -2.4rem 2.4rem;
+    }
+
     .cactusContainer {
         cursor: pointer;
         display: inline-block;
+        transition: transform .3s;
+
+        @include r(600) {
+            &:hover {
+                transform: scale(1.03);
+            }
+        }
     }
 
     .cactusIllustration {
-        margin: -13.6rem auto 2.4rem;
         height: 10rem;
 
         &.count-2 {
