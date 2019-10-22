@@ -15,6 +15,14 @@ export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
 }
 
+export interface SaveOptions {
+    setUpdatedAt: boolean
+}
+
+export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
+    setUpdatedAt: true,
+};
+
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
@@ -82,7 +90,7 @@ export default class AdminFirestoreService {
         return model;
     }
 
-    async save<T extends BaseModel>(model: T): Promise<T> {
+    async save<T extends BaseModel>(model: T, options: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
         try {
             const collectionRef = this.getCollectionRef(model.collection);
             let doc = collectionRef.doc();
@@ -93,7 +101,9 @@ export default class AdminFirestoreService {
                 model.createdAt = new Date();
             }
 
-            model.updatedAt = new Date();
+            if (options.setUpdatedAt){
+                model.updatedAt = new Date();
+            }
 
             // const doc = this.getDocumentRefFromModel(model);
 

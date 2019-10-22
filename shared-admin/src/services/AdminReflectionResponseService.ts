@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {SaveOptions} from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -54,8 +54,8 @@ export default class AdminReflectionResponseService {
 
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse> {
-        return this.firestoreService.save(model);
+    async save(model: ReflectionResponse, options?: SaveOptions): Promise<ReflectionResponse> {
+        return this.firestoreService.save(model, options);
     }
 
     async getById(id?: string): Promise<ReflectionResponse | undefined> {

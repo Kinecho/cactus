@@ -36,6 +36,7 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
     showInList = true;
 
     dataFileName = "questions_elements_2019-10-21.csv";
+    // dataFileName = "questions_elements_test.csv";
     inputData: DataRow[] = [];
     promptContentService!: AdminPromptContentService;
     setupResponse!: SetupResponse;
@@ -135,7 +136,7 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
         responses.filter(response => response.cactusElement != promptContent.cactusElement)
             .map(response => {
                 response.cactusElement = promptContent.cactusElement || null;
-                tasks.push(AdminReflectionResponseService.getSharedInstance().save(response))
+                tasks.push(AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false}))
             });
 
         return await Promise.all(tasks);
