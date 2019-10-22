@@ -5,11 +5,11 @@
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
-            <div v-if="!loading && !promptContent">
+            <div v-else-if="!loading && !promptContent">
                 No prompt found for id
             </div>
 
-            <section class="content-container centered" v-if="!loading && promptContent && responsesLoaded">
+            <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
                     <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
@@ -42,6 +42,7 @@
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:content="contentItems[activeIndex]"
                                     v-bind:response="reflectionResponse"
                                     v-bind:hasNext="hasNext && activeIndex > 0"
@@ -62,7 +63,10 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :promptContent="promptContent"
                             />
                         </transition>
@@ -96,7 +100,8 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
+    import {CactusElement} from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
@@ -401,7 +406,12 @@
             },
             sharePromptEnabled(): boolean {
                 return !this.isShareNote;
-            }
+            },
+            cactusElement(): CactusElement | undefined {
+                if (this.promptContent) {
+                    return this.promptContent.cactusElement;
+                }
+            },
         },
         watch: {
             responsesLoaded(loaded) {
@@ -637,6 +647,7 @@
                     this.saving = true;
                     this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
+                    this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {

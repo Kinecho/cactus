@@ -1,6 +1,7 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
+import {CactusElement} from "@shared/models/CactusElement";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -80,6 +81,7 @@ export enum ContentType {
     photo = "photo",
     audio = "audio",
     reflect = "reflect",
+    elements = "elements",
     share_reflection = "share_reflection",
 }
 
@@ -101,6 +103,7 @@ export function processContent(content: Content): Content {
     const processed: Content = {
         contentType: content.contentType,
         label: content.label,
+        showElementIcon: content.showElementIcon,
         actionButton: (content.actionButton && content.actionButton.label && content.actionButton.action) ? content.actionButton : undefined,
         link: (content.link && content.link.destinationHref && content.link.linkLabel) ? content.link : undefined,
         backgroundImage: content.backgroundImage,
@@ -133,13 +136,17 @@ export function processContent(content: Content): Content {
             processed.text = content.text_md || content.text;
             processed.title = content.title;
             break;
+        case ContentType.elements:
+            processed.elements = true;
+            processed.text = content.text_md || content.text;
+            processed.title = content.title;
+            break;
         default:
             console.warn("UNHANDLED CONTENT TYPE", content.contentType);
 
     }
 
     return processed;
-
 }
 
 
@@ -155,17 +162,25 @@ export interface Content {
     photo?: Image;
     audio?: Audio;
     link?: ContentLink;
+    elements?: boolean;
     actionButton?: ActionButton;
+    showElementIcon?: boolean;
 }
 
+export enum PromptContentFields {
+    promptId = "promptId",
+    cactusElement = "cactusElement"
+}
 
 export default class PromptContent extends FlamelinkModel {
+    static Fields = PromptContentFields;
     schema = SchemaName.promptContent;
     promptId?: string;
     content: Content[] = [];
     subjectLine?: string;
     openGraphImage?: Image;
     scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
+    cactusElement?: CactusElement; 
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
     contentStatus: ContentStatus = ContentStatus.in_progress;
@@ -181,6 +196,7 @@ export default class PromptContent extends FlamelinkModel {
             this.promptId = data.promptId;
             this.content = data.content || [];
             this.subjectLine = data.subjectLine;
+            this.cactusElement = data.cactusElement;
             this.scheduledSendAt = data.scheduledSendAt
         }
 

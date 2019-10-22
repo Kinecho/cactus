@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {SaveOptions} from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -54,8 +54,8 @@ export default class AdminReflectionResponseService {
 
     }
 
-    async save(model: ReflectionResponse): Promise<ReflectionResponse> {
-        return this.firestoreService.save(model);
+    async save(model: ReflectionResponse, options?: SaveOptions): Promise<ReflectionResponse> {
+        return this.firestoreService.save(model, options);
     }
 
     async getById(id?: string): Promise<ReflectionResponse | undefined> {
@@ -72,6 +72,13 @@ export default class AdminReflectionResponseService {
         console.log("getting response from collection", collection);
 
         throw new Error("Not implemented");
+    }
+
+    async getResponsesForPromptId(promptId: string): Promise<ReflectionResponse[]> {
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId);
+        let results = await this.firestoreService.executeQuery(query, ReflectionResponse);
+
+        return results.results
     }
 
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {

@@ -55,7 +55,12 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
         this.documentId = this._fl_meta_ ? this._fl_meta_.docId : data.id;
         this.parentId = data.parentId;
         this.order = data.order;
+
         this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
+        //this seems to happen when updating after saving the object via Flamelink SDK
+        if (data["_fl_meta_.fl_id"] && !this.entryId){
+            this.entryId = data["_fl_meta_.fl_id"]
+        }
     }
 
     prepareForFirestore(): any {

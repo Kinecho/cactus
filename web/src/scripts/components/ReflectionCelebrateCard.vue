@@ -2,75 +2,74 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <h2>{{celebrateText}}</h2>
-                <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!"/>
-                <div class="stats-container">
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
-                                <spinner v-if="reflectionCount === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="reflectionCount !== undefined">
-                            {{promptCopy.REFLECTIONS}}
-                        </p>
-                    </section>
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
-                                <spinner v-if="totalDuration === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="totalDuration !== undefined">
-                            {{durationLabel}}
-                        </p>
-                    </section>
-                    <section class="metric">
-                        <div class="label">
-                            <transition name="fade-in" mode="out-in" appear>
-                                <span v-if="streakDays !== undefined">{{streakDays}}</span>
-                                <spinner v-if="streakDays === undefined" :delay="1000"/>
-                            </transition>
-                        </div>
-                        <p v-show="streakDays !== undefined">
-                            {{promptCopy.DAY_STREAK}}
-                        </p>
-                    </section>
+                <div class="successText">
+                    <h2>{{celebrateText}}</h2>
+                    <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
+                    <p class="subtext" v-if="cactusElement">Today’s question focused on <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
-                <section class="doorTest" v-if="this.reflectionResponse.content.text">
-                    <div class="door tradeDoor" @click="openDoor(); recordTradeNoteClick();" v-show="!doorOpen">
-                        <h3>Trade Notes</h3>
-                        <p>Share with a friend and Cactus will keep your note private until they reflect and share back with you.</p>
+                <div class="lowerContainer">
+                    <div class="cactusGarden">
+                        <a class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click.prevent="showCactusModal(element)">
+                            <img
+                                :class="['cactusIllustration', `count-${count}`]"
+                                :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
+                                :alt="element + ' cactus'"
+                                :title="elementCopy[element.toUpperCase()]"
+                            />
+                        </a>
                     </div>
-                    <div class="door psychDoor" v-show="doorOpen">
-                        <h3>Coming Soon!</h3>
-                        <p>We'll let you know when the Trade Notes feature is available. In the meantime, enjoy these <a href="https://drive.google.com/drive/folders/18uUI3pSWEZG2-GvAyX_w88zKO1lk3DAm?usp=sharing" target="_blank">Cactus phone wallpapers</a>.</p>
-                        <button @click="closeDoor()" class="icon tertiary">
-                            <svg class="closeButton" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/></svg>
-                        </button>
+                    <div class="stats-container">
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="reflectionCount !== undefined">{{reflectionCount}}</span>
+                                    <spinner v-if="reflectionCount === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="reflectionCount !== undefined">
+                                {{promptCopy.REFLECTIONS}}
+                            </p>
+                        </section>
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="totalDuration !== undefined">{{totalDuration}}</span>
+                                    <spinner v-if="totalDuration === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="totalDuration !== undefined">
+                                {{durationLabel}}
+                            </p>
+                        </section>
+                        <section class="metric">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakDays !== undefined">{{streakDays}}</span>
+                                    <spinner v-if="streakDays === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakDays !== undefined">
+                                {{promptCopy.DAY_STREAK}}
+                            </p>
+                        </section>
                     </div>
-                    <div class="door shareDoor" @click="tradeNote()">
-                        <h3>Share Your Note</h3>
-                        <p>Boost someone’s day with a quick dose of gratitude.</p>
-                    </div>
-                </section>
-                <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                    {{promptCopy.SIGN_UP_MESSAGE}}
-                </button>
-                <button class="primary authBtn"
-                        v-if="authLoaded && loggedIn && !isModal"
-                        @click="goToHome">
-                    {{promptCopy.GO_HOME}}
-                </button>
-                <button class="primary authBtn"
-                        v-if="authLoaded && loggedIn && isModal"
-                        @click="close">
-                    {{promptCopy.CLOSE}}
-                </button>
+
+                    <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        {{promptCopy.SIGN_UP_MESSAGE}}
+                    </button>
+                    <button class="primary authBtn"
+                            v-if="authLoaded && loggedIn && !isModal"
+                            @click="goToHome">
+                        {{promptCopy.GO_HOME}}
+                    </button>
+                    <button class="primary authBtn"
+                            v-if="authLoaded && loggedIn && isModal"
+                            @click="close">
+                        {{promptCopy.CLOSE}}
+                    </button>
+                </div>
             </div>
-            <div :class="[ 'flip-card', 'back', {backDoor: showTradeNote}]">
+            <div :class="[ 'flip-card', 'back']">
                 <prompt-content-card
                         v-if="showTradeNote"
                         :content="sharingContentCard"
@@ -96,6 +95,12 @@
                 </div>
             </div>
         </div>
+        <element-description-modal
+            :cactusElement = "cactusModalElement"
+            :showModal="cactusModalVisible"
+            :navigationEnabled="true"
+            :showIntroCard="false"
+            @close="hideCactusModal" />
     </div>
 </template>
 
@@ -104,6 +109,7 @@
     import Spinner from "@components/Spinner.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
+    import {createElementAccumulation, ElementAccumulation} from '@shared/models/ElementAccumulation'
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -112,21 +118,25 @@
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {PromptCopy} from '@shared/copy/CopyTypes'
+    import {PromptCopy, ElementCopy} from '@shared/copy/CopyTypes'
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
-    import {gtag} from "@web/analytics";
+    import Modal from "@components/Modal.vue";
+    import {CactusElement} from "@shared/models/CactusElement";
+    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
+            Modal,
             Spinner,
             MagicLink,
             PromptContentCard,
+            ElementDescriptionModal,
         },
-        async created() {
+        async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member}) => {
                     this.member = member;
@@ -158,6 +168,14 @@
 
                     this.reflectionCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
+                    if (member) {
+                        this.elementAccumulations = await ReflectionResponseService.sharedInstance.getElementAccumulationCounts(reflections);
+                    } else if (this.reflectionResponse.cactusElement) {
+                        const anonymousAccumulations = createElementAccumulation();
+                        anonymousAccumulations[this.reflectionResponse.cactusElement] += 1;
+                        this.elementAccumulations = anonymousAccumulations;
+                    }
+
                     this.loading = false;
                 }
             });
@@ -168,11 +186,13 @@
             },
             promptContent: {type: Object as () => PromptContent},
             isModal: Boolean,
+            cactusElement: String as () => CactusElement,
         },
         data(): {
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
+            elementAccumulations: ElementAccumulation | undefined,
             loading: boolean,
             authLoaded: boolean,
             loggedIn: boolean,
@@ -181,13 +201,16 @@
             flipped: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
-            doorOpen: boolean,
+            elementCopy: ElementCopy,
             showTradeNote: boolean,
+            cactusModalVisible: boolean,
+            cactusModalElement: string | undefined
         } {
             return {
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
+                elementAccumulations: undefined,
                 loading: true,
                 loggedIn: false,
                 authLoaded: false,
@@ -196,8 +219,10 @@
                 flipped: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
-                doorOpen: false,
+                elementCopy: copy.elements,
                 showTradeNote: false,
+                cactusModalVisible: false,
+                cactusModalElement: undefined
             }
         },
         destroyed() {
@@ -212,8 +237,8 @@
                 return base;
             },
             celebrateText(): string {
-                const celebrations = copy.prompts.CELEBRATIONS;
-                return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
+                const celebrations = copy.prompts.CELEBRATIONS || ["Nice Work!"];
+                return celebrations[Math.floor(Math.random() * celebrations.length - 1)] || celebrations[0]
             },
             sharingContentCard():Content|undefined {
                 let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
@@ -225,6 +250,22 @@
 
                 return sharingCard
             },
+            elementName():string|undefined {
+                switch (this.cactusElement) {
+                    case CactusElement.emotions:
+                        return this.elementCopy.EMOTIONS;
+                    case CactusElement.experience:
+                        return this.elementCopy.EXPERIENCE;
+                    case CactusElement.relationships:
+                        return this.elementCopy.RELATIONSHIPS;
+                    case CactusElement.meaning:
+                        return this.elementCopy.MEANING;
+                    case CactusElement.energy:
+                        return this.elementCopy.ENERGY;
+                    default:
+                        return this.cactusElement
+                }
+            }
         },
         methods: {
             goToHome() {
@@ -239,17 +280,11 @@
             restart() {
                 this.$emit("restart");
             },
-            openDoor() {
-                this.doorOpen = true;
+            enableNavigation() {
+                this.$emit("navigationEnabled")
             },
-            closeDoor() {
-                this.doorOpen = false;
-            },
-            recordTradeNoteClick() {
-                gtag('event', 'trade_notes_clicked', {
-                    event_category: "prompt_content",
-                    event_label: `coming_soon`
-                });
+            disableNavigation() {
+                this.$emit("navigationDisabled")
             },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
@@ -261,12 +296,16 @@
                 console.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
-                this.showTradeNote = false;
                 this.flipped = true;
             },
-            tradeNote(){
-                this.showTradeNote = true;
-                this.flipped = true;
+            showCactusModal(element: keyof typeof CactusElement) {
+                this.cactusModalVisible = true;
+                this.cactusModalElement = CactusElement[element];
+                this.disableNavigation()
+            },
+            hideCactusModal() {
+                this.cactusModalVisible = false;
+                this.enableNavigation()
             }
         }
     })
@@ -287,6 +326,7 @@
 
         &.flip-container .flip-card.front {
             height: auto;
+            justify-content: flex-start;
         }
 
         &.flip-container .flipper {
@@ -298,6 +338,11 @@
                 box-shadow: none;
             }
         }
+    }
+
+    .successText {
+        flex-grow: 1;
+        padding: 6.4rem 4rem;
     }
 
     h2 {
@@ -317,28 +362,64 @@
         margin: -1.6rem 0 .8rem;
         opacity: .8;
 
+        .meaning, .element-name {
+            text-transform: lowercase;
+        }
+
         @include r(600) {
             margin-top: -2.4rem;
         }
     }
 
     .front .illustration {
-        margin: 0 auto 2.4rem;
-        width: 70%;
+        margin: 0 auto;
+        width: 90%;
     }
 
-    .back .illustration {
-        margin-bottom: 1.6rem;
-        width: 70%;
+    .lowerContainer {
+        background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+        padding: 6.4rem 4rem;
+    }
+
+    .cactusGarden {
+        align-items: flex-end;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        margin: -13.6rem 0 2.4rem;
+        min-height: 10rem;
+    }
+
+    .cactusContainer {
+        cursor: pointer;
+        transition: transform .3s;
+
+        @include r(600) {
+            &:hover {
+                transform: scale(1.03);
+            }
+        }
+    }
+
+    .cactusIllustration {
+        height: 10rem;
+
+        &.count-2 {
+            height: 12rem;
+        }
+        &.count-3 {
+            height: 14rem;
+        }
     }
 
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 3.2rem;
+        margin-bottom: 1.6rem;
     }
 
     .metric {
+        color: $lightGreen;
         width: 10rem;
 
         @include r(600) {
@@ -360,6 +441,11 @@
         @include r(600) {
             margin: 0 -3.2rem;
         }
+    }
+
+    .back .illustration {
+        margin-bottom: 1.6rem;
+        width: 70%;
     }
 
     .flip-container {
@@ -391,22 +477,9 @@
             justify-content: center;
             left: 0;
             overflow: hidden;
-            padding: 3.2rem;
             position: absolute;
             top: 0;
             width: 100%;
-
-            &.backDoor.back {
-                background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
-                height: auto;
-                justify-content: flex-start;
-                padding: 0;
-
-                .content-card {
-                    height: auto;
-                    padding: 5.6rem 2.4rem;
-                }
-            }
 
             @include r(600) {
                 border-radius: 12px;
@@ -486,91 +559,5 @@
             }
         }
     }
-
-    .door {
-        @include shadowbox;
-        background-repeat: no-repeat;
-        cursor: pointer;
-        margin: 0 -1.6rem 1.6rem;
-        padding: 1.6rem 2.4rem;
-        position: relative;
-        text-align: left;
-
-        @include r(600) {
-            margin: 0 0 1.6rem;
-            padding-right: 9.6rem;
-            transition: transform .3s;
-
-            &.tradeDoor:hover,
-            &.shareDoor:hover {
-                transform: scale(1.03);
-            }
-        }
-
-        &.tradeDoor {
-            background-image: url(/assets/images/pinkBlob4.svg);
-            background-size: 25rem;
-            background-position: right -11rem top -12rem;
-
-            @include r(600) {
-                background-image: url(/assets/images/maroonTriangleBlob.svg), url(/assets/images/pinkBlob4.svg);
-                // background-size: 36rem, 25rem;
-                // background-position: right -24rem top -5rem, right -10rem top -11rem;
-                background-size: 32rem, 25rem;
-                background-position: right -21rem top 0, right -11rem top -12rem;
-            }
-        }
-
-        &.shareDoor {
-            background-image: url(/assets/images/lightGreenBlob.svg);
-            background-size: 29rem;
-            background-position: right -13rem top 5rem;
-
-            @include r(600) {
-                background-image: url(/assets/images/greenNeedleBlob.svg), url(/assets/images/lightGreenBlob.svg);
-                background-size: 32rem, 29rem;
-                background-position: right -23rem top 1rem, right -13rem top 5rem;
-            }
-        }
-
-        h3 {
-            margin-bottom: .4rem;
-        }
-
-        p {
-            font-size: 1.6rem;
-
-            @include r(374) {
-                font-size: 1.8rem;
-            }
-        }
-    }
-
-    .psychDoor {
-        background-color: $darkestGreen;
-        color: $white;
-        padding-right: 2.4rem;
-
-        p {
-            color: rgba(255,255,255,.9);
-        }
-
-        a {
-            @include fancyLinkLight;
-            color: rgba(255,255,255,1);
-        }
-
-        .icon.tertiary {
-            position: absolute;
-            right: .8rem;
-            top: .8rem;
-        }
-
-        .closeButton {
-            height: 1.4rem;
-            width: 1.4rem;
-        }
-    }
-
 
 </style>

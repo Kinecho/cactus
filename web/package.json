@@ -50,6 +50,7 @@
         "flamelink": "^1.0.0-alpha.22",
         "gsap": "^2.1.3",
         "luxon": "^1.16.0",
+        "portal-vue": "^2.1.6",
         "pretty-ms": "^5.0.0",
         "prompts": "^2.1.0",
         "qs": "^6.7.0",

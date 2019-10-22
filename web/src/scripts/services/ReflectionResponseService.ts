@@ -4,6 +4,7 @@ import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
+import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {getStreak} from "@shared/util/DateUtil";
 import {Config} from "@web/config";
 import {PageRoute} from "@web/PageRoutes";
@@ -236,6 +237,22 @@ export default class ReflectionResponseService {
 
 
         return getStreak(dates);
+    }
+
+    async getElementAccumulationCounts(refelections: ReflectionResponse[]): Promise<ElementAccumulation|undefined> {
+        const initial:ElementAccumulation = createElementAccumulation();
+
+        const reflections = await this.getAllReflections();
+        return reflections.reduce((current, reflection) => {
+            if (reflection.cactusElement) {
+                current[reflection.cactusElement] += 1
+            }
+
+            return current
+        }, initial)
+
+
+
     }
 
 }

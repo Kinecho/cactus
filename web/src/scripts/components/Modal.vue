@@ -1,34 +1,38 @@
 <template>
-    <transition name="modal" v-if="show">
-        <div :class="['modal-mask', {show, opaque, light, dark}]">
-            <div class="modal-wrapper">
-                <div class="modal-container" :class="{relative: containerPositionRelative}">
-
-
-                    <div class="modal-header">
-                        <slot name="header"></slot>
-                    </div>
-                    <div class="modal-body">
-                        <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                                <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                            </svg>
-                        </button>
-                        <slot name="body">
-                            default body
-                        </slot>
+    <MountingPortal :mountTo="target">
+        <transition name="modal" v-if="show" appear>
+            <div :class="['modal-mask', {show, opaque, light, dark}]">
+                <div class="modal-wrapper">
+                    <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
+                        <div class="modal-header">
+                            <slot name="header"></slot>
+                        </div>
+                        <div class="modal-body">
+                            <button v-if="showCloseButton" @click="close" title="Close" class="modal-close tertiary icon" :style="closeStyles" :class='{mobileHidden: hideCloseButtonOnMobile}'>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                                    <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                                </svg>
+                            </button>
+                            <slot name="body">
+                                default body
+                            </slot>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </transition>
-
+        </transition>
+    </MountingPortal>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
+    import * as uuid from "uuid/v4"
+    import {MountingPortal} from "portal-vue"
 
     export default Vue.extend({
+        components: {
+            MountingPortal,
+        },
         props: {
             show: Boolean,
             showCloseButton: {type: Boolean, default: true},
@@ -55,11 +59,39 @@
             document.addEventListener('keyup', this.escapeListener);
 
         },
-        destroyed() {
-            window.removeEventListener("keyup", this.escapeListener)
+        beforeMount() {
+            if (!this.id) {
+                this.id = uuid()
+            }
+            if (this.key){
+                let modal = document.getElementById(this.key);
+                if (!modal) {
+                    const wrapper = document.createElement("div");
+                    const portal = document.createElement("div");
+                    portal.classList.add("portal-target");
+                    wrapper.setAttribute("id", this.key);
+                    wrapper.appendChild(portal)
+                    document.body.appendChild(wrapper)
+                }
+            }
         },
-        data(): { escapeListener: any } {
-            return {escapeListener: undefined}
+        destroyed() {
+            window.removeEventListener("keyup", this.escapeListener);
+            if (this.key) {
+                let wrapper = document.getElementById(this.key);
+                if (wrapper) {
+                    wrapper.remove()
+                }
+            }
+
+        },
+        data(): {
+            escapeListener: any,
+            id?: string,
+        } {
+            return {
+                escapeListener: undefined,
+            }
         },
         methods: {
             close() {
@@ -74,6 +106,14 @@
                 } else {
                     document.body.classList.remove("no-scroll");
                 }
+            }
+        },
+        computed: {
+            key():string|undefined{
+                return this.id ? `modal_${this.id}` : undefined
+            },
+            target(): string|undefined {
+                return this.key ? `#${this.key} > .portal-target` : undefined
             }
         }
     })
@@ -133,8 +173,8 @@
                     }
 
                     position: absolute;
-                    top: 0;
-                    right: 0;
+                    top: .8rem;
+                    right: .8rem;
 
                     z-index: 100;
                     height: 4.8rem;
