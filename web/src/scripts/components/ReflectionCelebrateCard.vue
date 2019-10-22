@@ -382,13 +382,16 @@
     }
 
     .cactusGarden {
-        margin: -13.6rem -2.4rem 2.4rem;
+        align-items: flex-end;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        margin: -13.6rem 0 2.4rem;
         min-height: 10rem;
     }
 
     .cactusContainer {
         cursor: pointer;
-        display: inline-block;
         transition: transform .3s;
 
         @include r(600) {
