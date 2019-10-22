@@ -100,7 +100,7 @@
     import Spinner from "@components/Spinner.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
-    import {ElementAccumulation} from '@shared/models/ElementAccumulation'
+    import {createElementAccumulation, ElementAccumulation} from '@shared/models/ElementAccumulation'
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -128,7 +128,7 @@
             PromptContentCard,
             ElementDescriptionModal,
         },
-        async created() {
+        async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member}) => {
                     this.member = member;
@@ -160,7 +160,14 @@
 
                     this.reflectionCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
-                    this.elementAccumulations = ReflectionResponseService.getElementAccumulationCounts(reflections);
+                    if (member) {
+                        this.elementAccumulations = await ReflectionResponseService.sharedInstance.getElementAccumulationCounts(reflections);
+                    } else if (this.reflectionResponse.cactusElement) {
+                        const anonymousAccumulations = createElementAccumulation();
+                        anonymousAccumulations[this.reflectionResponse.cactusElement] += 1;
+                        this.elementAccumulations = anonymousAccumulations;
+                    }
+
                     this.loading = false;
                 }
             });
