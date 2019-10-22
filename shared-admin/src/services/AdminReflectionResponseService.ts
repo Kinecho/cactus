@@ -74,6 +74,13 @@ export default class AdminReflectionResponseService {
         throw new Error("Not implemented");
     }
 
+    async getResponsesForPromptId(promptId: string): Promise<ReflectionResponse[]> {
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId);
+        let results = await this.firestoreService.executeQuery(query, ReflectionResponse);
+
+        return results.results
+    }
+
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
         const mailchimpService = MailchimpService.getSharedInstance();
 

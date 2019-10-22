@@ -10,6 +10,9 @@ import helpers from "@scripts/helpers";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContent from "@shared/models/PromptContent";
 import chalk from "chalk";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import * as prompts from "prompts"
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 
 interface DataRow {
     element: CactusElement,
@@ -22,6 +25,10 @@ interface RowResult {
     promptContent?: PromptContent | undefined
 }
 
+interface SetupResponse {
+    backfillResponses: boolean,
+}
+
 export default class PromptContentSetElementCommand extends FirebaseCommand {
     name = "Prompt Content - Set Elements";
     description = "Set the Prompt Content Element on all Prompt Content and Reflection Responses";
@@ -30,22 +37,31 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
     dataFileName = "questions_elements_2019-10-21.csv";
     inputData: DataRow[] = [];
     promptContentService!: AdminPromptContentService;
+    setupResponse!: SetupResponse;
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
+
+        this.setupResponse = await prompts([{
+            message: "Do you want to also back-fill ReflectionResponses?",
+            type: "confirm",
+            name: "backfillResponses"
+        }]);
+
+
         this.promptContentService = AdminPromptContentService.getSharedInstance();
 
         this.inputData = await this.loadCsv();
 
-        let tasks: Promise<RowResult>[] = this.inputData.map(row => this.processRow(row));
+        let tasks: Promise<RowResult>[] = this.inputData.map(row => this.updatePromptContent(row));
         await Promise.all(tasks);
         console.log("All rows processed");
 
         return;
     }
 
-    async processRow(row: DataRow): Promise<RowResult> {
+    async updatePromptContent(row: DataRow): Promise<RowResult> {
         try {
             console.log("processing row", row);
             let promptContent = await this.promptContentService.getByPromptId(row.promptId);
@@ -67,12 +83,37 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
 
             await this.promptContentService.save(promptContent);
             console.log("updated content for promptId", row.promptId);
+
+
+            if (this.setupResponse.backfillResponses) {
+                const responses = await this.backfillReflectionResponses(promptContent);
+                console.log(chalk.green(`backfilled ${responses.length} reflection responses for element ${promptContent.cactusElement} | entryId = ${promptContent.entryId}`));
+            }
+
             return {promptContent: promptContent}
         } catch (error) {
-            console.error(chalk.red("failed to update prompt", error))
+            console.error(chalk.red("failed to update prompt", error));
             return {error}
         }
+    }
 
+    async backfillReflectionResponses(promptContent: PromptContent): Promise<ReflectionResponse[]> {
+        if (!promptContent.promptId) {
+            console.warn(chalk.yellow(`No promptId found on promptContent entryId ${promptContent.entryId}`));
+            return []
+        }
+        console.log(chalk.yellow(`backfilling reflection responses for prompt content element for promptId = ${promptContent.promptId}`));
+
+        const responses = await AdminReflectionResponseService.getSharedInstance().getResponsesForPromptId(promptContent.promptId);
+
+        const tasks: Promise<ReflectionResponse>[] = [];
+        responses.filter(response => response.cactusElement != promptContent.cactusElement)
+            .map(response => {
+                response.cactusElement = promptContent.cactusElement || null;
+                tasks.push(AdminReflectionResponseService.getSharedInstance().save(response))
+            });
+
+        return await Promise.all(tasks);
     }
 
     async loadCsv(): Promise<DataRow[]> {
