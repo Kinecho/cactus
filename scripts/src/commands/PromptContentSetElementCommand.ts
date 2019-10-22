@@ -22,7 +22,8 @@ interface DataRow {
 
 interface RowResult {
     error?: any,
-    promptContent?: PromptContent | undefined
+    promptContent?: PromptContent | undefined,
+    totalBackfilled?: number
 }
 
 interface SetupResponse {
@@ -55,23 +56,43 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
         this.inputData = await this.loadCsv();
 
         let tasks: Promise<RowResult>[] = this.inputData.map(row => this.updatePromptContent(row));
-        await Promise.all(tasks);
-        console.log("All rows processed");
+        let results = await Promise.all(tasks);
+
+        interface ResultAgg {
+            responses: number,
+            errors: number,
+            successes: number
+        }
+        let agg = results.reduce((total: ResultAgg, r) => {
+            total.responses += (r.totalBackfilled || 0);
+            total.errors += r.error ? 1 : 0;
+            total.successes += r.error ? 0 : 1;
+            return total
+        }, {responses: 0, errors: 0, successes: 0});
+        console.log();
+        console.log("=====");
+        console.log();
+        console.log(chalk.green(`${this.inputData.length} rows processed `));
+        console.log(chalk.green(`Backfilled ${agg.responses} responses`));
+        console.log(chalk.green(`Successes ${agg.successes} responses`));
+        console.info(chalk.red(`Errors: ${agg.errors}`));
 
         return;
     }
 
     async updatePromptContent(row: DataRow): Promise<RowResult> {
         try {
-            console.log("processing row", row);
+            console.log("processing row for promptId", row.promptId);
             let promptContent = await this.promptContentService.getByPromptId(row.promptId);
             if (!promptContent) {
-                console.log("no content found on row");
+                console.log(chalk.red(`no content found for row with promptId ${row.promptId}`));
                 return {error: `No content was found for promptId ${row.promptId}`}
+            } else {
+                console.log(chalk.blue(`Found prompt content with entryId ${promptContent.entryId}`));
             }
             console.log("found prompt content for promptId", row.promptId);
             if (!row.element) {
-                console.log("No element found on row");
+                console.log(chalk.blue("No element found on row"));
                 return {error: `No element was found on row for promptId ${row.promptId}`}
             }
 
@@ -84,13 +105,17 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
             await this.promptContentService.save(promptContent);
             console.log("updated content for promptId", row.promptId);
 
+            let totalBackfilled = 0;
 
             if (this.setupResponse.backfillResponses) {
+                const entryId = promptContent.entryId;
+                console.log(chalk.magenta(`starting backfill for entryId ${entryId}`));
                 const responses = await this.backfillReflectionResponses(promptContent);
-                console.log(chalk.green(`backfilled ${responses.length} reflection responses for element ${promptContent.cactusElement} | entryId = ${promptContent.entryId}`));
+                console.log(chalk.green(`backfilled ${responses.length} reflection responses for element ${promptContent.cactusElement} | entryId = ${entryId}`));
+                totalBackfilled += responses.length
             }
 
-            return {promptContent: promptContent}
+            return {promptContent: promptContent, totalBackfilled}
         } catch (error) {
             console.error(chalk.red("failed to update prompt", error));
             return {error}
