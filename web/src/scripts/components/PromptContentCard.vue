@@ -257,7 +257,7 @@
             :showModal="cactusModalVisible"
             :navigationEnabled="true"
             :showIntroCard="false"
-            @close="cactusModalVisible = false" />
+            @close="hideCactusModal"/>
     </div>
 </template>
 
@@ -482,9 +482,11 @@
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
                 this.cactusModalElement = CactusElement[element];
+                this.disableNavigation()
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;
+                this.enableNavigation()
             }
         }
     })

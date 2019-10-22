@@ -95,7 +95,7 @@
             :showModal="cactusModalVisible"
             :navigationEnabled="true"
             :showIntroCard="false"
-            @close="cactusModalVisible = false" />
+            @close="hideCactusModal" />
     </div>
 </template>
 
@@ -117,7 +117,6 @@
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
-    import {gtag} from "@web/analytics";
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
@@ -279,7 +278,6 @@
             hideCactusModal() {
                 this.cactusModalVisible = false;
             }
-
         }
     })
 </script>
