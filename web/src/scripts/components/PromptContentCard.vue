@@ -2,7 +2,7 @@
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
             <div v-if="processedContent.showElementIcon" class="element-container">
-                <div class="element-icon">
+                <div class="element-icon" @click="showCactusModal(cactusElement)">
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
                 </div>
                 <h4 class="label">{{cactusElement}}</h4>
@@ -251,6 +251,11 @@
             </div>
             <!--    END Reflect-->
         </section>
+
+        <element-description-modal
+            :cactusElement = "cactusModalElement"
+            :showModal="cactusModalVisible"
+            @close="cactusModalVisible = false" />
     </div>
 </template>
 
@@ -280,7 +285,8 @@
     import PromptContentCardElements from "@components/PromptContentCardElements.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {CactusElement} from "@shared/models/CactusElement"
+    import {CactusElement} from "@shared/models/CactusElement";
+    import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -295,7 +301,8 @@
             CopyTextInput,
             SnackbarContent,
             SharedReflectionCard,
-            PromptContentCardElements
+            PromptContentCardElements,
+            ElementDescriptionModal
         },
         props: {
             content: {
@@ -319,6 +326,8 @@
             creatingLink: boolean,
             shareableLinkUrl: string | undefined,
             linkCreated: boolean,
+            cactusModalVisible: boolean,
+            cactusModalElement: string | undefined
         } {
             return {
                 youtubeVideoLoading: true,
@@ -329,6 +338,8 @@
                 creatingLink: false,
                 shareableLinkUrl: undefined,
                 linkCreated: false,
+                cactusModalVisible: false,
+                cactusModalElement: undefined
             }
         },
         beforeMount() {
@@ -465,6 +476,13 @@
             },
             disableNavigation() {
                 this.$emit("navigationDisabled")
+            },
+            showCactusModal(element: keyof typeof CactusElement) {
+                this.cactusModalVisible = true;
+                this.cactusModalElement = CactusElement[element];
+            },
+            hideCactusModal() {
+                this.cactusModalVisible = false;
             }
         }
     })
