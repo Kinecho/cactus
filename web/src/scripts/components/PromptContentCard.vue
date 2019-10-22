@@ -716,6 +716,7 @@
 
     .element-container {
         margin-bottom: -1.6rem;
+        cursor: pointer;
     }
 
     .element-icon {
