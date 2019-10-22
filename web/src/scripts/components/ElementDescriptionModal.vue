@@ -9,7 +9,7 @@
                     <div v-show="slide.element" class="elementIcon">
                         <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
                     </div>
-                    <h3 v-show="slide.element">{{slide.element}}</h3>
+                    <h3 v-show="slide.element">{{elementCopy[slide.element.toUpperCase()]}}</h3>
                     <p class="description" v-if="slide.element">
                         {{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}
                     </p>
@@ -193,6 +193,7 @@
     .description {
         align-items: center;
         display: flex;
+        text-align: center;
     }
 
     .btnContainer {

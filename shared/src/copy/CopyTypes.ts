@@ -39,10 +39,15 @@ export interface CommonCopy {
 }
 
 export interface ElementCopy {
+    MEANING: string,
     MEANING_DESCRIPTION: string,
+    EXPERIENCE: string,
     EXPERIENCE_DESCRIPTION: string,
+    ENERGY: string,
     ENERGY_DESCRIPTION: string,
+    EMOTIONS: string,
     EMOTIONS_DESCRIPTION: string,
+    RELATIONSHIPS: string,
     RELATIONSHIPS_DESCRIPTION: string,
 }
 

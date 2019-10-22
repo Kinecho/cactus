@@ -5,13 +5,18 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="" @click.prevent="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
+                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="" @click.prevent="showCactusModal(cactusElement)">{{elementCopy[cactusElement.toUpperCase()].toLowerCase()}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
-                        <span class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click="showCactusModal(element)">
-                            <img :class="['cactusIllustration', `count-${count}`]" :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'" />
-                        </span>
+                        <a class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click.prevent="showCactusModal(element)">
+                            <img
+                                :class="['cactusIllustration', `count-${count}`]"
+                                :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
+                                :alt="element + ' cactus'"
+                                :title="elementCopy[element.toUpperCase()]"
+                            />
+                        </a>
                     </div>
                     <div class="stats-container">
                         <section class="metric">
@@ -259,6 +264,12 @@
             restart() {
                 this.$emit("restart");
             },
+            enableNavigation() {
+                this.$emit("navigationEnabled")
+            },
+            disableNavigation() {
+                this.$emit("navigationDisabled")
+            },
             magicLinkSuccess(email: string | undefined) {
                 console.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
@@ -274,9 +285,11 @@
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
                 this.cactusModalElement = CactusElement[element];
+                this.disableNavigation()
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;
+                this.enableNavigation()
             }
         }
     })
@@ -354,6 +367,7 @@
 
     .cactusGarden {
         margin: -13.6rem -2.4rem 2.4rem;
+        min-height: 10rem;
     }
 
     .cactusContainer {

@@ -65,6 +65,8 @@
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :promptContent="promptContent"
                             />
                         </transition>

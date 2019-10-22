@@ -1,12 +1,12 @@
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
-            <div v-if="processedContent.showElementIcon" class="element-container">
-                <div class="element-icon" @click="showCactusModal(cactusElement)">
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'"/>
+            <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
+                <div class="element-icon" >
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
                 </div>
                 <h4 class="label">{{cactusElement}}</h4>
-            </div>
+            </a>
 
             <div v-if="processedContent.text" class="text">
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
