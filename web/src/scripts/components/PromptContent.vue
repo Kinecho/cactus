@@ -5,11 +5,11 @@
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
-            <div v-if="!loading && !promptContent">
+            <div v-else-if="!loading && !promptContent">
                 No prompt found for id
             </div>
 
-            <section class="content-container centered" v-if="!loading && promptContent && responsesLoaded">
+            <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
                     <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
