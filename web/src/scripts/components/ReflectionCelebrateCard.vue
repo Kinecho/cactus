@@ -5,7 +5,7 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="" @click.prevent="showCactusModal(cactusElement)">{{elementCopy[cactusElement.toUpperCase()].toLowerCase()}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
+                    <p class="subtext" v-if="cactusElement">Today’s question focused on <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -186,7 +186,7 @@
             },
             promptContent: {type: Object as () => PromptContent},
             isModal: Boolean,
-            cactusElement: String,
+            cactusElement: String as () => CactusElement,
         },
         data(): {
             reflectionCount: number | undefined,
@@ -237,8 +237,8 @@
                 return base;
             },
             celebrateText(): string {
-                const celebrations = copy.prompts.CELEBRATIONS;
-                return celebrations[Math.floor(Math.random() * celebrations.length - 1)]
+                const celebrations = copy.prompts.CELEBRATIONS || ["Nice Work!"];
+                return celebrations[Math.floor(Math.random() * celebrations.length - 1)] || celebrations[0]
             },
             sharingContentCard():Content|undefined {
                 let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
@@ -250,6 +250,22 @@
 
                 return sharingCard
             },
+            elementName():string|undefined {
+                switch (this.cactusElement) {
+                    case CactusElement.emotions:
+                        return this.elementCopy.EMOTIONS;
+                    case CactusElement.experience:
+                        return this.elementCopy.EXPERIENCE;
+                    case CactusElement.relationships:
+                        return this.elementCopy.RELATIONSHIPS;
+                    case CactusElement.meaning:
+                        return this.elementCopy.MEANING;
+                    case CactusElement.energy:
+                        return this.elementCopy.ENERGY;
+                    default:
+                        return this.cactusElement
+                }
+            }
         },
         methods: {
             goToHome() {
@@ -346,7 +362,7 @@
         margin: -1.6rem 0 .8rem;
         opacity: .8;
 
-        .meaning {
+        .meaning, .element-name {
             text-transform: lowercase;
         }
 
