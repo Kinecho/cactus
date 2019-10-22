@@ -255,6 +255,8 @@
         <element-description-modal
             :cactusElement = "cactusModalElement"
             :showModal="cactusModalVisible"
+            :navigationEnabled="true"
+            :showIntroCard="false"
             @close="cactusModalVisible = false" />
     </div>
 </template>

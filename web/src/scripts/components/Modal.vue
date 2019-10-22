@@ -2,9 +2,7 @@
     <transition name="modal" v-if="show">
         <div :class="['modal-mask', {show, opaque, light, dark}]">
             <div class="modal-wrapper">
-                <div class="modal-container" :class="{relative: containerPositionRelative}">
-
-
+                <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
                     <div class="modal-header">
                         <slot name="header"></slot>
                     </div>
@@ -91,7 +89,6 @@
         left: 0;
         width: 100%;
         height: 100%;
-
         &.light {
             background-color: rgba(255, 255, 255, .9);
 

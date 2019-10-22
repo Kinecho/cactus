@@ -3,30 +3,34 @@
             v-on:close="$emit('close')"
             :showCloseButton="true"
     >
-
-        <transition-group class="modalContainer" tag="div" slot="body">
-            <div v-for="slide in slides" class="slide" :key="slide.id">
+        <div slot="body" class="modalContainer">
+            <div class="slide">
                 <div class="slideContent">
                     <div v-show="slide.element" class="elementIcon">
                         <img :src="'/assets/images/cacti/'+ slide.element + '-3.svg'"/>
                     </div>
                     <h3 v-show="slide.element">{{slide.element}}</h3>
-                    <p class="description">{{slide.element ? elementCopy[slide.element.toUpperCase() + '_DESCRIPTION'] : slide.intro}}</p>
+                    <p class="description" v-if="slide.element">
+                        {{elementCopy[slide.element.toUpperCase() + '_DESCRIPTION']}}
+                    </p>
+                    <p class="description" v-else-if="slide.intro">
+                        {{slide.intro}}
+                    </p>
                 </div>
-                <div class="btnContainer">
-                    <button class="tertiary icon left" @click="previous">
+                <div class="btnContainer" v-if="navigationEnabled">
+                    <button class="tertiary icon left no-loading" :class="{disabled: !hasPrevious}" @click="previous" :disabled="!hasPrevious">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                             <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
                     </button>
-                    <button class="tertiary icon right" @click="next">
+                    <button class="tertiary icon right no-loading" :class="{disabled: !hasNext}" @click="next" :disabled="!hasNext">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                             <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
                     </button>
                 </div>
             </div>
-        </transition-group>
+        </div>
     </modal>
 </template>
 
@@ -39,60 +43,82 @@
 
     const copy = CopyService.getSharedInstance().copy;
 
+    interface ElementSlide {
+        element?: CactusElement,
+        intro?: string
+    }
+
     export default Vue.extend({
         components: {
             Modal,
         },
         props: {
-            cactusElement: String,
-            showModal: Boolean,
+            cactusElement: {type: String as () => CactusElement},
+            showModal: {type: Boolean, default: false},
+            navigationEnabled: {type: Boolean, default: true},
+            showIntroCard: {type: Boolean, default: true},
+        },
+        beforeMount() {
+            this.slides = this.slides.filter(s => !s.intro || this.showIntroCard);
+            this.activeIndex = Math.max(this.slides.findIndex(slide => slide.element === this.cactusElement), 0)
         },
         data(): {
             elementCopy: ElementCopy,
-            slides: Array<any>,
+            slides: ElementSlide[],
+            activeIndex: number,
         } {
             return {
                 elementCopy: copy.elements,
+                activeIndex: 0,
                 slides: [
                     {
-                        id: 0,
+                        // id: 0,
                         intro: "Your happiest life depends on a balance of five elements."
                     }, {
-                        id: 1,
-                        element: "energy"
+                        // id: 1,
+                        element: CactusElement.energy
                     }, {
-                        id: 2,
-                        element: "meaning"
+                        // id: 2,
+                        element: CactusElement.meaning
                     }, {
-                        id: 3,
-                        element: "relationships"
+                        // id: 3,
+                        element: CactusElement.relationships
                     }, {
-                        id: 4,
-                        element: "experience"
+                        // id: 4,
+                        element: CactusElement.experience
                     }, {
-                        id: 5,
-                        element: "emotions"
+                        // id: 5,
+                        element: CactusElement.emotions
                     }
                 ]
             }
         },
+        computed: {
+            slide(): ElementSlide {
+                return this.slides[this.activeIndex]
+            },
+            hasNext(): boolean {
+                return this.activeIndex < this.slides.length - 1
+            },
+            hasPrevious(): boolean {
+                return this.activeIndex > 0
+            }
+
+        },
         watch: {
             cactusElement: function() {
-              if (this.cactusElementExists()) {
-                  while(this.slides[0].element != this.cactusElement) {
-                    this.next();
-                  }
-              }
+                const foundIndex = this.slides.findIndex(slide => slide.element === this.cactusElement);
+                if (foundIndex > -1){
+                    this.activeIndex = Math.max(foundIndex, 0)
+                }
             }
         },
         methods: {
-            next () {
-                const first = this.slides.shift()
-                this.slides = this.slides.concat(first)
+            next() {
+                this.activeIndex = Math.min(this.slides.length - 1, this.activeIndex + 1)
             },
-            previous () {
-                const last = this.slides.pop()
-                this.slides = [last].concat(this.slides)
+            previous() {
+                this.activeIndex = Math.max(0, this.activeIndex - 1)
             },
             cactusElementExists() {
                 let exists = false;
@@ -100,7 +126,7 @@
                 this.slides.forEach(function (slide, index) {
                     if (slide.element && slide.element == element) {
                         exists = true;
-                    }                    
+                    }
                 });
                 return exists;
             }
@@ -171,6 +197,11 @@
 
     .btnContainer {
         display: flex;
+        opacity: 1;
+        button.disabled {
+            opacity: 0;
+            transition: opacity .1s;
+        }
     }
 
     button.left {

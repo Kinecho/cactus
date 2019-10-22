@@ -5,7 +5,7 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="#" @click="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
+                    <p class="subtext" v-if="cactusElement !== undefined">Today’s question focused on <a href="" @click.prevent="showCactusModal(cactusElement)">{{cactusElement}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -93,6 +93,8 @@
         <element-description-modal
             :cactusElement = "cactusModalElement"
             :showModal="cactusModalVisible"
+            :navigationEnabled="true"
+            :showIntroCard="false"
             @close="cactusModalVisible = false" />
     </div>
 </template>
