@@ -53,7 +53,7 @@
                             </p>
                         </section>
                     </div>
-
+                    <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">Share My Note</button>
                     <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                         {{promptCopy.SIGN_UP_MESSAGE}}
                     </button>
@@ -303,6 +303,10 @@
                 this.cactusModalElement = CactusElement[element];
                 this.disableNavigation()
             },
+            tradeNote(){
+                this.showTradeNote = true;
+                this.flipped = true;
+            },
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
@@ -512,6 +516,7 @@
         /* Lower Buttons */
 
         .authBtn {
+            box-shadow: none;
             bottom: 3.2rem;
             flex-grow: 0;
             left: 3.2rem;
@@ -528,6 +533,17 @@
 
         .authBtn {
             bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
+        }
+
+        .secondary,
+        .primary {
+            height: 4.8rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .secondary {
+            margin-right: .8rem;
         }
     }
 
