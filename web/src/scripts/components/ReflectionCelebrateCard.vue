@@ -382,20 +382,20 @@
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-        padding: 6.4rem 4rem;
+        padding: 6.4rem 4rem 4rem;
     }
 
     .cactusGarden {
         align-items: flex-end;
-        display: flex;
-        flex-flow: row nowrap;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(6rem, 9rem));
         justify-content: center;
         margin: -13.6rem 0 2.4rem;
-        min-height: 10rem;
     }
 
     .cactusContainer {
         cursor: pointer;
+        justify-self: center;
         transition: transform .3s;
 
         @include r(600) {
@@ -406,13 +406,13 @@
     }
 
     .cactusIllustration {
-        height: 10rem;
+        height: 14rem;
 
         &.count-2 {
             height: 12rem;
         }
-        &.count-3 {
-            height: 14rem;
+        &.count-1 {
+            height: 10rem;
         }
     }
 
@@ -424,14 +424,14 @@
 
     .metric {
         color: $lightGreen;
-        width: 10rem;
+        padding: 0 .8rem;
 
         @include r(600) {
-            width: 11rem;
         }
 
         p {
             font-size: 1.6rem;
+            white-space: nowrap;
         }
     }
 
