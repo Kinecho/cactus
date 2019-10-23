@@ -53,20 +53,22 @@
                             </p>
                         </section>
                     </div>
-                    <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">Share My Note</button>
-                    <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                        {{promptCopy.SIGN_UP_MESSAGE}}
-                    </button>
-                    <button class="primary authBtn"
-                            v-if="authLoaded && loggedIn && !isModal"
-                            @click="goToHome">
-                        {{promptCopy.GO_HOME}}
-                    </button>
-                    <button class="primary authBtn"
-                            v-if="authLoaded && loggedIn && isModal"
-                            @click="close">
-                        {{promptCopy.CLOSE}}
-                    </button>
+                    <div class="btnContainer">
+                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">Share Note</button>
+                        <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                            {{promptCopy.SIGN_UP_MESSAGE}}
+                        </button>
+                        <button class="primary authBtn"
+                                v-if="authLoaded && loggedIn && !isModal"
+                                @click="goToHome">
+                            {{promptCopy.GO_HOME}}
+                        </button>
+                        <button class="primary authBtn"
+                                v-if="authLoaded && loggedIn && isModal"
+                                @click="close">
+                            {{promptCopy.CLOSE}}
+                        </button>
+                    </div>
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
@@ -328,6 +330,7 @@
         justify-content: center;
         width: 100%;
 
+        &.flip-container .flip-card.back,
         &.flip-container .flip-card.front {
             height: auto;
             justify-content: flex-start;
@@ -544,6 +547,31 @@
 
         .secondary {
             margin-right: .8rem;
+        }
+    }
+
+    .btnContainer {
+        display: flex;
+        flex-direction: column;
+
+        .authBtn {
+            width: 100%;
+
+            + .authBtn {
+                margin-top: 1.6rem;
+            }
+        }
+
+        @include r(374) {
+            flex-direction: row;
+
+            .authBtn {
+                width: auto;
+
+                + .authBtn {
+                    margin-top: 3.2rem;
+                }
+            }
         }
     }
 
