@@ -91,7 +91,7 @@
                         </svg>
                         Back
                     </button>
-                    <button @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                    <button class="secondary" @click="goToHome">{{promptCopy.GO_HOME}}</button>
                 </div>
             </div>
         </div>
