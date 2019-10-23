@@ -26,6 +26,10 @@ body {
   }
 }
 
+.modal-mask-in {
+  filter: blur(5px);
+}
+
 .centered {
   margin: 0 auto;
   text-align: center;

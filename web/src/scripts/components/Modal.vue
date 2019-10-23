@@ -74,6 +74,7 @@
                     document.body.appendChild(wrapper)
                 }
             }
+
         },
         destroyed() {
             window.removeEventListener("keyup", this.escapeListener);
@@ -101,10 +102,11 @@
         watch: {
             show(newValue) {
                 if (newValue) {
-
                     document.body.classList.add("no-scroll");
+                    this.$root.$el.classList.add("modal-mask-in")
                 } else {
                     document.body.classList.remove("no-scroll");
+                    this.$root.$el.classList.remove("modal-mask-in")
                 }
             }
         },
@@ -133,7 +135,7 @@
         height: 100%;
 
         &.light {
-            background-color: rgba(255, 255, 255, .9);
+            background-color: rgba(255, 255, 255, .6);
 
             &.opaque {
                 background-color: rgba(255, 255, 255, .1);
@@ -141,7 +143,7 @@
         }
 
         &.dark {
-            background-color: rgba(0, 0, 0, .9);
+            background-color: rgba(0, 0, 0, .6);
 
             &.opaque {
                 background-color: rgba(0, 0, 0, 1);
