@@ -11,7 +11,8 @@ export interface Image extends FlamelinkFile {
     url?: string,
     flamelinkFileName?: string,
     storageUrl?: string,
-    fileIds?: string[]
+    fileIds?: string[],
+    altText?: string
 }
 
 export interface Video extends FlamelinkFile {
