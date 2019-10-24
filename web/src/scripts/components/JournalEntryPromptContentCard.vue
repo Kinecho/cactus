@@ -17,7 +17,7 @@
             <p class="subtext" v-show="subText">{{subText}}</p>
         </div>
         <div class="textContainer" v-if="promptContent && completed">
-            <h3 class="question" v-show="topicText">{{questionText}}</h3>
+            <h3 class="question" v-show="questionText">{{questionText}}</h3>
         </div>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
         <edit-reflection

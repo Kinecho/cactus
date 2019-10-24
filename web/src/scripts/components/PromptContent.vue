@@ -5,11 +5,11 @@
                 <spinner message="Loading..." :delay="1000"/>
             </div>
 
-            <div v-if="!loading && !promptContent">
+            <div v-else-if="!loading && !promptContent">
                 No prompt found for id
             </div>
 
-            <section class="content-container centered" v-if="!loading && promptContent && responsesLoaded">
+            <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
                     <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" aria-hidden="true">
@@ -45,6 +45,7 @@
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:content="contentItems[activeIndex]"
                                     v-bind:response="reflectionResponse"
                                     v-bind:hasNext="hasNext && activeIndex > 0"
@@ -65,7 +66,10 @@
                             <celebrate v-on:back="completed = false"
                                     v-on:restart="restart" v-on:close="close"
                                     v-bind:reflectionResponse="reflectionResponse"
+                                    v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
+                                    @navigationDisabled="navigationDisabled = true"
+                                    @navigationEnabled="navigationDisabled = false"
                                     :promptContent="promptContent"
                             />
                         </transition>
@@ -75,7 +79,7 @@
                     </div>
                 </div>
 
-                <button aria-label="Previous slide" class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing && !completed">
+                <button aria-label="Previous slide" class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing && !completed && !showTradeNote">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <title>Previous</title>
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -100,7 +104,8 @@
     import {PageRoute} from '@web/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType,} from '@shared/models/PromptContent'
+    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
+    import {CactusElement} from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
     import {getFlamelink} from '@web/firebase'
@@ -405,7 +410,12 @@
             },
             sharePromptEnabled(): boolean {
                 return !this.isShareNote;
-            }
+            },
+            cactusElement(): CactusElement | undefined {
+                if (this.promptContent) {
+                    return this.promptContent.cactusElement;
+                }
+            },
         },
         watch: {
             responsesLoaded(loaded) {
@@ -641,6 +651,7 @@
                     this.saving = true;
                     this.saved = false;
                     this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
+                    this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {

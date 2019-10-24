@@ -1,4 +1,5 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import {CactusElement} from "@shared/models/CactusElement";
 
 export enum ResponseMedium {
     EMAIL = "EMAIL",
@@ -96,6 +97,7 @@ export enum ReflectionResponseField {
     promptQuestion = "promptQuestion",
     reflectionDurationMs = "reflectionDurationMs",
     shared = "shared",
+    cactusElement = "cactusElement"
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -117,6 +119,7 @@ export default class ReflectionResponse extends BaseModel {
     shared: boolean = false;
     sharedAt?: Date;
     unsharedAt?: Date;
+    cactusElement?: CactusElement|null;
 
     decodeJSON(json: any) {
         super.decodeJSON(json);

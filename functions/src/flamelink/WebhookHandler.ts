@@ -63,7 +63,7 @@ async function handlePromptContentEvent(event: FlamelinkWebhookEvent, action: Ev
         }
 
 
-        const promptFromDb = await AdminPromptContentService.getSharedInstance().getById(promptContent.entryId);
+        const promptFromDb = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContent.entryId);
         console.log(chalk.green("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2)));
 
         return {success: true, message: "Not yet implemented"}

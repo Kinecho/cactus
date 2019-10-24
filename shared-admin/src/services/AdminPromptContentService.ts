@@ -1,6 +1,7 @@
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import PromptContent from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
+import {CactusElement} from "@shared/models/CactusElement";
 
 
 export default class AdminPromptContentService {
@@ -28,11 +29,25 @@ export default class AdminPromptContentService {
         return this.flamelinkService.save(model);
     }
 
-    async getById(id?: string): Promise<PromptContent | undefined> {
+    async getByEntryId(id?: string): Promise<PromptContent | undefined> {
         if (!id) {
             return undefined;
         }
-        return await this.flamelinkService.getById(id, PromptContent);
+        return await this.flamelinkService.getByEntryId(id, PromptContent);
+    }
+
+    async getByPromptId(promptId?: string): Promise<PromptContent|undefined> {
+        if (!promptId) {
+            return undefined;
+        }
+
+        return await this.flamelinkService.getByField({name: PromptContent.Fields.promptId, value: promptId}, PromptContent)
+    }
+
+    async setCactusElement(content: PromptContent, element: CactusElement): Promise<void> {
+        // const {promptId, element} = options;
+
+        return this.flamelinkService.update(content, {[PromptContent.Fields.cactusElement]: element})
     }
 
     async getAll(): Promise<PromptContent[]> {
