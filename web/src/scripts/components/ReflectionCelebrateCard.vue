@@ -53,20 +53,22 @@
                             </p>
                         </section>
                     </div>
-
-                    <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
-                        {{promptCopy.SIGN_UP_MESSAGE}}
-                    </button>
-                    <button class="primary authBtn"
-                            v-if="authLoaded && loggedIn && !isModal"
-                            @click="goToHome">
-                        {{promptCopy.GO_HOME}}
-                    </button>
-                    <button class="primary authBtn"
-                            v-if="authLoaded && loggedIn && isModal"
-                            @click="close">
-                        {{promptCopy.CLOSE}}
-                    </button>
+                    <div class="btnContainer">
+                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">Share Note</button>
+                        <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                            {{promptCopy.SIGN_UP_MESSAGE}}
+                        </button>
+                        <button class="primary authBtn"
+                                v-if="authLoaded && loggedIn && !isModal"
+                                @click="goToHome">
+                            {{promptCopy.GO_HOME}}
+                        </button>
+                        <button class="primary authBtn"
+                                v-if="authLoaded && loggedIn && isModal"
+                                @click="close">
+                            {{promptCopy.CLOSE}}
+                        </button>
+                    </div>
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
@@ -91,7 +93,7 @@
                         </svg>
                         Back
                     </button>
-                    <button @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                    <button class="secondary" @click="goToHome">{{promptCopy.GO_HOME}}</button>
                 </div>
             </div>
         </div>
@@ -303,6 +305,10 @@
                 this.cactusModalElement = CactusElement[element];
                 this.disableNavigation()
             },
+            tradeNote(){
+                this.showTradeNote = true;
+                this.flipped = true;
+            },
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
@@ -324,6 +330,7 @@
         justify-content: center;
         width: 100%;
 
+        &.flip-container .flip-card.back,
         &.flip-container .flip-card.front {
             height: auto;
             justify-content: flex-start;
@@ -378,20 +385,20 @@
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-        padding: 6.4rem 4rem;
+        padding: 6.4rem 4rem 4rem;
     }
 
     .cactusGarden {
         align-items: flex-end;
-        display: flex;
-        flex-flow: row nowrap;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(6rem, 9rem));
         justify-content: center;
         margin: -13.6rem 0 2.4rem;
-        min-height: 10rem;
     }
 
     .cactusContainer {
         cursor: pointer;
+        justify-self: center;
         transition: transform .3s;
 
         @include r(600) {
@@ -402,13 +409,13 @@
     }
 
     .cactusIllustration {
-        height: 10rem;
+        height: 14rem;
 
         &.count-2 {
             height: 12rem;
         }
-        &.count-3 {
-            height: 14rem;
+        &.count-1 {
+            height: 10rem;
         }
     }
 
@@ -420,14 +427,14 @@
 
     .metric {
         color: $lightGreen;
-        width: 10rem;
+        padding: 0 .8rem;
 
         @include r(600) {
-            width: 11rem;
         }
 
         p {
             font-size: 1.6rem;
+            white-space: nowrap;
         }
     }
 
@@ -512,6 +519,7 @@
         /* Lower Buttons */
 
         .authBtn {
+            box-shadow: none;
             bottom: 3.2rem;
             flex-grow: 0;
             left: 3.2rem;
@@ -528,6 +536,42 @@
 
         .authBtn {
             bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
+        }
+
+        .secondary,
+        .primary {
+            height: 4.8rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .secondary {
+            margin-right: .8rem;
+        }
+    }
+
+    .btnContainer {
+        display: flex;
+        flex-direction: column;
+
+        .authBtn {
+            width: 100%;
+
+            + .authBtn {
+                margin-top: 1.6rem;
+            }
+        }
+
+        @include r(374) {
+            flex-direction: row;
+
+            .authBtn {
+                width: auto;
+
+                + .authBtn {
+                    margin-top: 3.2rem;
+                }
+            }
         }
     }
 

@@ -31,7 +31,7 @@
                             </snackbar-content>
                         </transition>
                         <p class="directLink">Here's your direct link to share:</p>
-                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="secondary"/>
+                        <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
