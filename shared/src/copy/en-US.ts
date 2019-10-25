@@ -34,7 +34,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
     };
     navigation: NavigationCopy = {
-        INVITE_FRIENDS: "Invite Friends",
+        SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
     };
     prompts: PromptCopy = {

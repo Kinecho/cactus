@@ -19,6 +19,11 @@
                 >{{copy.common.SIGN_UP}}</a>
             </transition>
         </div>
+        <div class="navbar-social" v-if="loggedIn">
+            <a :href="socialHref">
+                <img alt="Friends" src="/assets/icons/friends.svg"/>
+            </a>
+        </div>
         <dropdown-menu :items="links" v-if="loggedIn">
             <div slot="custom-button">
                 <div class="navbar-avatar-container">
@@ -110,8 +115,8 @@
                     title: copy.navigation.MY_JOURNAL,
                     href: PageRoute.JOURNAL_HOME,
                 }, {
-                    title: copy.navigation.INVITE_FRIENDS,
-                    href: PageRoute.REFERRAL_PROGRAM,
+                    title: copy.navigation.SOCIAL,
+                    href: PageRoute.SOCIAL,
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
@@ -155,6 +160,9 @@
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
+            },
+            socialHref(): string {
+                return PageRoute.SOCIAL;
             }
         },
         methods: {
@@ -248,7 +256,7 @@
         }
     }
 
-    .navbar-avatar-container {
+    .navbar-avatar-container, .navbar-social {
         cursor: pointer;
         width: 4rem;
         height: 4rem;
@@ -299,6 +307,10 @@
             width: 3rem;
             height: 3rem;
         }
+    }
+
+    .navbar-social {
+        border-radius: 0;
     }
 
 
