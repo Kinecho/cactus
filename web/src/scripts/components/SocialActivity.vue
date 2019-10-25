@@ -1,8 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div>
+    <div class="socialActivity">
         <NavBar/>
         <div class="centered">
-            <h1>Friend Activity</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
             </div>
@@ -10,19 +9,29 @@
                 {{error}}
             </div>
 
-            <transition name="fade-in" appear>
-                <div class="activityContainer">
-                    <div class="activityCard">
-                        <div class="avatar">
-                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                        </div>
-                        <div class="info">
-                            <p class="date"># AGO</p>
-                            <p class="description"><span class="name">NAME</span> reflected on, QUESTION?</p>
+            <div class="contentContainer">
+                <div class="brandNew">
+                    <h2>Connect with Friends</h2>
+                    <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
+                    <img class="friendActivityimg" src="https://placekitten.com/300/250" alt="Example of friend activity"/>
+                    <button class="getStarted">Get Started</button>
+                </div>
+
+                <h2>Friend Activity</h2>
+                <transition name="fade-in" appear>
+                    <div class="activityContainer">
+                        <div class="activityCard">
+                            <div class="avatar">
+                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            </div>
+                            <div class="info">
+                                <p class="date"># AGO</p>
+                                <p class="description"><span class="name">NAME</span> reflected on, QUESTION?</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </transition>
+                </transition>
+            </div>
 
         </div>
         <Footer/>
@@ -125,6 +134,31 @@
     .loading {
         display: flex;
         justify-content: center;
+    }
+
+    .contentContainer {
+        max-width: 1200px;
+        padding: 2.4rem;
+    }
+
+    .subtext {
+        margin: 0 auto 2.4rem;
+        max-width: 50rem;
+        opacity: .8;
+    }
+
+    .friendActivityimg {
+        display: block;
+        margin: 0 auto 2.4rem;
+    }
+
+    .getStarted {
+        margin-bottom: 3.2rem;
+        width: 100%;
+
+        @include r(600) {
+            width: auto;
+        }
     }
 
     .activityCard {
