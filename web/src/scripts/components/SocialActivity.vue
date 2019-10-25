@@ -13,8 +13,8 @@
 
                 <!-- if brand new -->
                 <div class="brandNew">
-                    <h2>Connect with Friends</h2>
-                    <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
+                    <h2>Reflect with Friends</h2>
+                    <p class="subtext">Connect and see when you both reflect on the same prompt. Easily share, discuss, and grow <i>together</i>.</p>
                     <img class="friendActivityimg" src="https://placekitten.com/272/200" alt="Example of friend activity"/>
                     <button class="getStarted">Get Started</button>
                 </div>
