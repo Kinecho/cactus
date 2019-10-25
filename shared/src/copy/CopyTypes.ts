@@ -64,7 +64,7 @@ export interface AuthenticationCopy {
 
 export interface NavigationCopy {
     MY_JOURNAL: string,
-    INVITE_FRIENDS: string,
+    SOCIAL: string,
 }
 
 export interface LocaleSettings {

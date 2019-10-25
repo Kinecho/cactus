@@ -424,12 +424,12 @@ module.exports = {
         "includeInDev": true,
         "name": "account_settings"
     },
-    "referral_program": {
-        "title": "Invite a Friend | Cactus",
-        "path": "/invite",
+    "social_activity": {
+        "title": "Friends & Activity | Cactus",
+        "path": "/friends",
         "reflectionPrompt": false,
         "includeInDev": true,
-        "name": "referral_program"
+        "name": "social_activity"
     },
     "prompt": {
         "title": "Cactus Mindful Moment",

@@ -78,7 +78,11 @@
             },
             {
                 "source": "/invite",
-                "destination": "/referral_program.html"
+                "destination": "/social_activity.html"
+            },
+            {
+                "source": "/friends",
+                "destination": "/social_activity.html"
             },
             {
                 "source": "/who-is-the-best-teacher-you-ever-had",
