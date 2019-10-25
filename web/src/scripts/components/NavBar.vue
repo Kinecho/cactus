@@ -1,7 +1,7 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}" v-if="!hidden">
         <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-        <div>
+        <div v-if="displayLoginButton || displaySignupButton">
             <transition name="fade-in-slow" appear>
                 <a v-if="displayLoginButton"
                         class="login"
@@ -19,19 +19,18 @@
                 >{{copy.common.SIGN_UP}}</a>
             </transition>
         </div>
-        <div class="navbar-social" v-if="loggedIn">
-            <a :href="socialHref">
-                <img alt="Friends" src="/assets/icons/friends.svg"/>
+        <div class="navContainer">
+            <a class="navbar-social" :href="socialHref" v-if="loggedIn">
+                <img class="friendsIcon" alt="Friends" src="/assets/images/users.svg"/>
+                <span class="label">Friends</span>
             </a>
-        </div>
-        <dropdown-menu :items="links" v-if="loggedIn">
-            <div slot="custom-button">
-                <div class="navbar-avatar-container">
+            <dropdown-menu :items="links" v-if="loggedIn">
+                <div class="navbar-avatar-container" slot="custom-button">
                     <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
                     <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
                 </div>
-            </div>
-        </dropdown-menu>
+            </dropdown-menu>
+        </div>
     </header>
 </template>
 
@@ -226,61 +225,79 @@
         }
     }
 
-    header {
+    header.loggedIn {
+        display: flex;
+        justify-content: space-between;
+    }
 
-        &.loggedIn {
-            display: flex;
-            justify-content: space-between;
-        }
+    .nav-logo {
+        display: block;
+        height: 3.5rem;
+        position: relative;
+        top: 2px;
+        width: 7rem;
 
-        .nav-logo {
-            display: block;
+        @include r(374) {
             height: 5.8rem;
             position: static;
             top: 0;
             width: 11.7rem;
+        }
 
-            &.large-desktop {
-                @include biggerThanPhone {
-                    height: 8.8rem;
-                    width: 17.8rem;
-                }
-            }
-
-            @include isTinyPhone {
-                height: 3.5rem;
-                position: relative;
-                top: 2px;
-                width: 7rem;
+        &.large-desktop {
+            @include r(600) {
+                height: 8.8rem;
+                width: 17.8rem;
             }
         }
     }
 
-    .navbar-avatar-container, .navbar-social {
-        cursor: pointer;
-        width: 4rem;
-        height: 4rem;
+    .navContainer {
+        align-items: center;
+        display: flex;
+    }
+
+    .navbar-social {
+        align-items: center;
+        display: flex;
+        text-decoration: none;
+
+        .label {
+            display: none;
+
+            @include r(600) {
+                display: block;
+            }
+        }
+    }
+
+    .friendsIcon {
+        display: block;
+        height: 2.4rem;
+        width: 2.4rem;
+
+        @include r(600) {
+            height: 2.8rem;
+            margin-right: .8rem;
+            width: 2.8rem;
+        }
+    }
+
+    .navbar-avatar-container {
         border-radius: 50%;
+        cursor: pointer;
+        height: 3.2rem;
+        margin-left: 3.2rem;
         overflow: hidden;
-        display: inline-block;
         transition: transform .2s ease-in-out;
+        width: 3.2rem;
 
-        .initials {
-            background: $darkGreen;
-            color: white;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        @include r(600) {
+            width: 4rem;
+            height: 4rem;
         }
 
-        @include isPhone {
-            width: 3rem;
-            height: 3rem;
-        }
-
-        &.open {
+        .dropdownMenuOpen & {
             transform: scale(.9);
         }
 
@@ -297,21 +314,7 @@
         img {
             height: 100%;
             width: 100%;
-
         }
     }
-
-    @include isPhone {
-        font-size: 1.4rem;
-        .navbar-avatar-container {
-            width: 3rem;
-            height: 3rem;
-        }
-    }
-
-    .navbar-social {
-        border-radius: 0;
-    }
-
 
 </style>
