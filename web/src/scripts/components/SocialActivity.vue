@@ -1,9 +1,8 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="referralContainer">
+    <div>
         <NavBar/>
-        <div class="centered content">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
-            <h1>Invite Friends</h1>
+        <div class="centered">
+            <h1>Friend Activity</h1>
             <div class="loading" v-if="loading">
                 <Spinner message="Loading"/>
             </div>
@@ -12,52 +11,22 @@
             </div>
 
             <transition name="fade-in" appear>
-                <div v-if="member" class="member-container">
-                    <p class="label">
-                        Use this link to share Cactus with friends and family.
-                    </p>
-                    <div class="referral-link">
-                        <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
-                        <button class="copy secondary" v-clipboard:copy="referralLink"
-                                v-clipboard:success="handleCopySuccess"
-                                v-clipboard:error="handleCopyError">
-                            <span v-if="copySucceeded === true">Copied</span>
-                            <span v-if="copySucceeded === false">Copy</span>
-                        </button>
-                    </div>
-                    <social-sharing :url="referralLink"
-                            title="I'm inviting you to Cactus"
-                            description="See yourself and the world more positively."
-                            quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
-                            twitter-user="itscalledcactus"
-                            inline-template>
-                        <div class="sharing">
-                            <network network="email">
-                                <button class="emailBtn btn wiggle">
-                                    <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
-                                </button>
-                            </network>
-                            <network network="twitter">
-                                <button class="twBtn btn wiggle">
-                                    <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
-                                </button>
-                            </network>
-                            <network network="facebook">
-                                <button class="fbBtn btn wiggle">
-                                    <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
-                                </button>
-                            </network>
+                <div class="activityContainer">
+                    <div class="activityCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
                         </div>
-                    </social-sharing>
+                        <div class="info">
+                            <p class="date"># AGO</p>
+                            <p class="description"><span class="name">NAME</span> reflected on, QUESTION?</p>
+                        </div>
+                    </div>
                 </div>
             </transition>
-            <div>
 
-            </div>
         </div>
         <Footer/>
     </div>
-
 </template>
 
 <script lang="ts">
@@ -153,125 +122,51 @@
     @import "forms";
     @import "social";
 
-    .referralContainer {
-        display: flex;
-        flex-flow: column nowrap;
-        justify-content: space-between;
-
-        @include r(600) {
-            @include h(960) {
-                height: 100vh;
-            }
-        }
-
-        header, .centered {
-            width: 100%;
-        }
-
-        footer {
-            flex-shrink: 0;
-        }
-    }
-
-    .centered.content {
-        flex-grow: 1;
-        padding: 2.4rem;
-    }
-
     .loading {
         display: flex;
         justify-content: center;
     }
 
-    .graphic {
-        margin-bottom: 2.4rem;
-        max-width: 40rem;
-        width: 100%;
-    }
-
-    .member-container {
-        margin: 0 auto;
-        max-width: 70rem;
-    }
-
-    .label {
-        display: block;
-        margin-bottom: 3.2rem;
-    }
-
-    .referral-link {
-        margin-bottom: 3.2rem;
-        position: relative;
-    }
-
-    .link-input {
-        @include textInput;
-        color: $lightText;
-        margin-bottom: .8rem;
-        max-width: none;
-        width: 100%;
-
-        @include r(600) {
-            margin-bottom: 1.6rem;
-            padding-right: 9rem;
-        }
-    }
-
-    button.copy {
-        width: 100%;
-
-        @include r(600) {
-            border: none;
-            box-shadow: none;
-            padding: 1.2rem 2.4rem;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
-            &.secondary {
-                background-color: transparent;
-            }
-
-            &:hover {
-                background: transparent;
-            }
-
-            &:active {
-                background-color: $darkGreen;
-                color: $white;
-            }
-        }
-    }
-
-    .sharing {
+    .activityCard {
+        background-color: $white;
+        border-radius: 12px;
+        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
         display: flex;
-        flex-flow: column nowrap;
-        justify-content: center;
-        margin-bottom: 4.8rem;
+        margin-bottom: 3.2rem;
+        padding: 1.6rem 2.4rem;
+        text-align: left;
+
+        @include r(374) {
+            margin: 0 .8rem 3.2rem;
+        }
 
         @include r(600) {
-            flex-flow: row wrap;
+            margin: 0 auto 4.8rem;
+            max-width: 64rem;
+            padding: 2.4rem;
+        }
+
+        .date {
+            font-size: 1.4rem;
+        }
+
+        .avatar {
+            $avatarDiameter: 4.4rem;
+            border-radius: 50%;
+            height: $avatarDiameter;
+            margin-right: .8rem;
+            overflow: hidden;
+            width: $avatarDiameter;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        .name {
+            font-weight: bold;
         }
     }
-
-    .btn {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-        margin-bottom: .8rem;
-        width: 100%;
-
-        @include r(600) {
-            margin: 0 .4rem;
-            width: auto;
-        }
-    }
-
-    .icon {
-        height: 2rem;
-        margin-right: .8rem;
-        width: 2rem;
-    }
-
 
 </style>
