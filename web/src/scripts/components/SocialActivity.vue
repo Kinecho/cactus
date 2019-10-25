@@ -10,16 +10,25 @@
             </div>
 
             <div class="contentContainer">
+
+                <!-- if brand new -->
                 <div class="brandNew">
                     <h2>Connect with Friends</h2>
                     <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
                     <img class="friendActivityimg" src="https://placekitten.com/300/250" alt="Example of friend activity"/>
                     <button class="getStarted">Get Started</button>
                 </div>
+                <!-- end -->
 
+                <!-- if has friends -->
                 <h2>Friend Activity</h2>
                 <transition name="fade-in" appear>
                     <div class="activityContainer">
+
+                        <!-- if has friends but no activity yet -->
+                        <p class="subtext">No activity from friends just yet....so....yeah...</p>
+                        <!-- end -->
+
                         <div class="activityCard">
                             <div class="avatar">
                                 <img src="https://placekitten.com/44/44" alt="User avatar"/>
@@ -31,6 +40,8 @@
                         </div>
                     </div>
                 </transition>
+                <!-- end -->
+
             </div>
 
         </div>
@@ -143,7 +154,7 @@
 
     .subtext {
         margin: 0 auto 2.4rem;
-        max-width: 50rem;
+        max-width: 48rem;
         opacity: .8;
     }
 
