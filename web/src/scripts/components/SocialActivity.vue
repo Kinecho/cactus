@@ -14,7 +14,7 @@
                 <!-- if brand new -->
                 <div class="brandNew">
                     <h2>Reflect with Friends</h2>
-                    <p class="subtext">Connect and see when you both reflect on the same prompt. Easily share, discuss, and grow <i>together</i>.</p>
+                    <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow <i>together</i>.</p>
                     <img class="friendActivityimg" src="https://placekitten.com/272/200" alt="Example of friend activity"/>
                     <button class="getStarted">Get Started</button>
                 </div>
