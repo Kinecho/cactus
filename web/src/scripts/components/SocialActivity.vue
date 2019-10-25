@@ -15,18 +15,21 @@
                 <div class="brandNew">
                     <h2>Connect with Friends</h2>
                     <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
-                    <img class="friendActivityimg" src="https://placekitten.com/300/250" alt="Example of friend activity"/>
+                    <img class="friendActivityimg" src="https://placekitten.com/272/200" alt="Example of friend activity"/>
                     <button class="getStarted">Get Started</button>
                 </div>
                 <!-- end -->
 
                 <!-- if has friends -->
-                <h2>Friend Activity</h2>
+                <div class="flexContainer">
+                    <h2>Friend Activity</h2>
+                    <button class="secondary small">Friends</button>
+                </div>
                 <transition name="fade-in" appear>
                     <div class="activityContainer">
 
                         <!-- if has friends but no activity yet -->
-                        <p class="subtext">No activity from friends just yet....so....yeah...</p>
+                        <!-- <p class="subtext">No activity from friends just yet....so....yeah...</p> -->
                         <!-- end -->
 
                         <div class="activityCard">
@@ -165,10 +168,22 @@
 
     .getStarted {
         margin-bottom: 3.2rem;
+        max-width: 24rem;
         width: 100%;
 
         @include r(600) {
             width: auto;
+        }
+    }
+
+    .flexContainer {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3.2rem;
+
+        .secondary {
+            flex-grow: 0;
         }
     }
 
@@ -198,6 +213,7 @@
         .avatar {
             $avatarDiameter: 4.4rem;
             border-radius: 50%;
+            flex-shrink: 0;
             height: $avatarDiameter;
             margin-right: .8rem;
             overflow: hidden;
