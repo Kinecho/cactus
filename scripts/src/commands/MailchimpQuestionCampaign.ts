@@ -251,7 +251,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "previewText",
                 message: "Preview Text",
-                initial: (prev: string, values: ContentQuestionResponse) => values.subjectLine,
+                initial: (prev: string, values: ContentQuestionResponse) => values.question,
             },
             {
                 type: "text",
