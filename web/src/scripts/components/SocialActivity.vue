@@ -15,7 +15,16 @@
                 <div class="brandNew">
                     <h2>Connect with Friends</h2>
                     <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
-                    <img class="friendActivityimg" src="https://placekitten.com/272/200" alt="Example of friend activity"/>
+                    <div class="activityCard demo">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
+                        </div>
+                        <div class="info">
+                            <p class="date">8min ago</p>
+                            <p class="description"><span class="bold">Ryan Brown</span> reflected on <a href="#">If you had just one day left to live, what would you do?</a></p>
+                        </div>
+                    </div>
+
                     <button class="getStarted">Get Started</button>
                 </div>
                 <!-- end -->
@@ -38,7 +47,7 @@
                             </div>
                             <div class="info">
                                 <p class="date"># AGO</p>
-                                <p class="description"><span class="name">NAME</span> reflected on, QUESTION?</p>
+                                <p class="description"><span class="bold">NAME</span> reflected on, QUESTION?</p>
                             </div>
                         </div>
                     </div>
@@ -152,11 +161,15 @@
 
     .contentContainer {
         max-width: 1200px;
-        padding: 2.4rem;
+        padding: 3.2rem 1.6rem;
+
+        @include r(600) {
+            padding: 6.4rem 0;
+        }
     }
 
     .subtext {
-        margin: 0 auto 2.4rem;
+        margin: 0 auto 3.2rem;
         max-width: 48rem;
         opacity: .8;
     }
@@ -201,9 +214,13 @@
         }
 
         @include r(600) {
-            margin: 0 auto 4.8rem;
+            margin: 0 auto 3.2rem;
             max-width: 64rem;
             padding: 2.4rem;
+
+            &.demo {
+                max-width: 40rem;
+            }
         }
 
         .date {
@@ -225,7 +242,15 @@
             }
         }
 
-        .name {
+        a {
+            text-decoration: none;
+
+            &:hover {
+                color: $darkestGreen;
+            }
+        }
+
+        .bold {
             font-weight: bold;
         }
     }

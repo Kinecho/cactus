@@ -240,7 +240,6 @@
         @include r(374) {
             height: 5.8rem;
             position: static;
-            top: 0;
             width: 11.7rem;
         }
 
@@ -293,8 +292,9 @@
         width: 3.2rem;
 
         @include r(600) {
-            width: 4rem;
             height: 4rem;
+            margin-left: 4.4rem;
+            width: 4rem;
         }
 
         .dropdownMenuOpen & {
