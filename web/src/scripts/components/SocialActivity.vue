@@ -13,8 +13,8 @@
 
                 <!-- if brand new -->
                 <div class="brandNew">
-                    <h2>Connect with Friends</h2>
-                    <p class="subtext">Hold yourself accountable. See when friends reflect and they'll see when you&nbsp;reflect.</p>
+                    <h2>Reflect with Friends</h2>
+                    <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow <i>together</i>.</p>
                     <div class="activityCard demo">
                         <div class="avatar">
                             <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
@@ -24,7 +24,6 @@
                             <p class="description"><span class="bold">Ryan Brown</span> reflected on <a href="#">If you had just one day left to live, what would you do?</a></p>
                         </div>
                     </div>
-
                     <button class="getStarted">Get Started</button>
                 </div>
                 <!-- end -->

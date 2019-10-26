@@ -46,17 +46,17 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
-        "firebase": "^6.3.1",
-        "vue-clipboard2": "^0.3.0",
+        "firebase": "^6.6.2",
+        "vue-clipboard2": "^0.3.1",
         "vue-social-sharing": "^2.4.6",
         "vue2-touch-events": "^2.0.0"
     },
     "devDependencies": {
-        "firebase-tools": "^7.2.2",
-        "jest": "^24.8.0",
-        "ts-node": "^8.3.0",
-        "tsconfig-paths": "^3.8.0",
-        "tslint": "^5.18.0",
-        "typescript": "^3.5.3"
+        "firebase-tools": "^7.6.1",
+        "jest": "^24.9.0",
+        "ts-node": "^8.4.1",
+        "tsconfig-paths": "^3.9.0",
+        "tslint": "^5.20.0",
+        "typescript": "^3.6.4"
     }
 }
