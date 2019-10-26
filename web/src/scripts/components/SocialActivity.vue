@@ -14,7 +14,7 @@
                 <!-- if brand new -->
                 <div class="brandNew">
                     <h2>Reflect with Friends</h2>
-                    <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow <i>together</i>.</p>
+                    <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
                     <div class="activityCard demo">
                         <div class="avatar">
                             <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
@@ -153,6 +153,21 @@
     @import "forms";
     @import "social";
 
+    .socialActivity {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    header {
+        width: 100%;
+    }
+
+    .centered {
+        flex-grow: 1;
+        width: 100%;
+    }
+
     .loading {
         display: flex;
         justify-content: center;
@@ -204,12 +219,13 @@
         border-radius: 12px;
         box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
         display: flex;
-        margin-bottom: 3.2rem;
-        padding: 1.6rem 2.4rem;
+        margin: 0 -.8rem 3.2rem;
+        padding: 1.6rem;
         text-align: left;
 
         @include r(374) {
             margin: 0 .8rem 3.2rem;
+            padding: 1.6rem 2.4rem;
         }
 
         @include r(600) {
@@ -224,6 +240,7 @@
 
         .date {
             font-size: 1.4rem;
+            opacity: .8;
         }
 
         .avatar {
