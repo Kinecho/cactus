@@ -76,7 +76,7 @@ export default class AdminReflectionResponseService {
 
     async getResponsesForPromptId(promptId: string): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId);
-        let results = await this.firestoreService.executeQuery(query, ReflectionResponse);
+        const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return results.results
     }

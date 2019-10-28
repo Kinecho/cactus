@@ -33,6 +33,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
     const payload: EmailStatusRequest = req.body;
     console.log("signupEndpoints.email-status", payload);
+    let response:EmailStatusResponse|undefined = undefined;
     const email = payload.email;
     let exists = false;
 
@@ -42,7 +43,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
             text: `Magic Link endpoint called with no email in payload.`
         });
 
-        let response: EmailStatusResponse = {exists: false, error: "No email provided", success: false, email: ""};
+        response = {exists: false, error: "No email provided", success: false, email: ""};
         resp.send(response);
         return
 
@@ -63,9 +64,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
         text: `${email} triggered the Magic Link flow. Existing Email = ${exists}`
     });
 
-    const response: EmailStatusResponse = {exists, email};
-
-
+    response = {exists, email};
     resp.send(response);
     return;
 });
@@ -73,20 +72,14 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
 app.post("/login", async (req: functions.https.Request | any, resp: functions.Response) => {
     console.log("handling logged in ");
-
-
     const user = await getAuthUser(req);
-
     if (!user) {
         resp.sendStatus(401);
         return
     }
-
-
 });
 
 app.post("/magic-link", async (req: functions.https.Request | any, resp: functions.Response) => {
-
     const payload: MagicLinkRequest = req.body;
     console.log("signupEndpoints.magic-link", payload);
 
@@ -94,8 +87,8 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
     if (!email) {
         console.error("signupEndpoints.magic-link: No email provided in payload");
-        const response: MagicLinkResponse = {success: false, error: "No email provided", email: "", exists: false}
-        resp.send(response);
+        const errorResponse: MagicLinkResponse = {success: false, error: "No email provided", email: "", exists: false};
+        resp.send(errorResponse);
         return;
     }
 
