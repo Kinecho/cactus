@@ -338,6 +338,22 @@
             height: 4rem;
             margin-left: 4.4rem;
             width: 4rem;
+
+            &:after {
+                background-color: $green;
+                bottom: -26px;
+                content: "";
+                height: 1px;
+                right: 0;
+                position: absolute;
+                transform: scaleX(0);
+                transition: transform .2s ease-in-out;
+                width: 4rem;
+            }
+
+            &:hover:after {
+                transform: scaleX(1);
+            }
         }
 
         .dropdownMenuOpen & {
