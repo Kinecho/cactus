@@ -13,7 +13,7 @@
 
                 <!-- if brand new -->
                 <div class="brandNew">
-                    <h2>Reflect with Friends</h2>
+                    <h1>Reflect with Friends</h1>
                     <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
                     <div class="activityCard demo">
                         <div class="avatar">
@@ -28,10 +28,23 @@
                 </div>
                 <!-- end -->
 
+                <!-- find your friends -->
+                <div class="findFriends">
+                    <h1>Find Your Friends</h1>
+                    <p class="subtext">Invite people you know to join and reflect with you. Your reflections are always private unless you specifically share them.</p>
+                    <button class="primary">Share your Invite Link</button>
+                    <h2>Import Your Contacts</h2>
+                    <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
+                    <div class="btnContainer">
+                        <button class="secondary small">Gmail</button>
+                        <button class="secondary small">Yahoo</button>
+                    </div>
+                </div>
+
                 <!-- if has friends -->
                 <div class="flexContainer">
-                    <h2>Friend Activity</h2>
-                    <button class="secondary small">Friends</button>
+                    <h1>Friend Activity</h1>
+                    <button class="secondary small">Add Friends</button>
                 </div>
                 <transition name="fade-in" appear>
                     <div class="activityContainer">
@@ -212,14 +225,12 @@
     }
 
     .subtext {
-        margin: 0 auto 3.2rem;
-        max-width: 48rem;
         opacity: .8;
     }
 
-    .friendActivityimg {
-        display: block;
-        margin: 0 auto 2.4rem;
+    .brandNew .subtext {
+        margin: 0 auto 3.2rem;
+        max-width: 48rem;
     }
 
     .getStarted {
@@ -229,6 +240,29 @@
 
         @include r(600) {
             width: auto;
+        }
+    }
+
+    .findFriends {
+        max-width: 768px;
+        text-align: left;
+
+        .subtext {
+            margin: 0 0 2.4rem;
+            max-width: 60rem;
+        }
+
+        h2 {
+            margin-top: 6.4rem;
+        }
+
+        .btnContainer {
+            display: flex;
+
+            button {
+                flex-grow: 0;
+                margin-right: .8rem;
+            }
         }
     }
 
