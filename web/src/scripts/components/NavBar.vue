@@ -1,35 +1,41 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}" v-if="!hidden">
-        <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-        <div v-if="displayLoginButton || displaySignupButton">
-            <transition name="fade-in-slow" appear>
-                <a v-if="displayLoginButton"
-                        class="login"
-                        :href="loginHref"
-                        @click.prevent="goToLogin"
-                        type="link"
-                >{{copy.common.LOG_IN}}</a>
-            </transition>
-            <transition name="fade-in-slow" appear>
-                <a v-if="displaySignupButton"
-                        data-test="signup-button"
-                        class="jump-to-form button small"
-                        @click.prevent="scrollToSignup"
-                        type="button"
-                >{{copy.common.SIGN_UP}}</a>
-            </transition>
-        </div>
-        <div class="navContainer">
-            <a class="navbar-social" :href="socialHref" v-if="loggedIn">
-                <img class="friendsIcon" alt="Friends" src="/assets/images/users.svg"/>
-                <span class="label">Friends</span>
-            </a>
-            <dropdown-menu :items="links" v-if="loggedIn">
-                <div class="navbar-avatar-container" slot="custom-button">
-                    <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
-                    <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
-                </div>
-            </dropdown-menu>
+        <div class="centered">
+            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
+            <div v-if="displayLoginButton || displaySignupButton">
+                <transition name="fade-in-slow" appear>
+                    <a v-if="displayLoginButton"
+                            class="login"
+                            :href="loginHref"
+                            @click.prevent="goToLogin"
+                            type="link"
+                    >{{copy.common.LOG_IN}}</a>
+                </transition>
+                <transition name="fade-in-slow" appear>
+                    <a v-if="displaySignupButton"
+                            data-test="signup-button"
+                            class="jump-to-form button small"
+                            @click.prevent="scrollToSignup"
+                            type="button"
+                    >{{copy.common.SIGN_UP}}</a>
+                </transition>
+            </div>
+            <div class="navContainer">
+                <a class="navbarLink" :href="journalHref" v-if="loggedIn">
+                    <img class="icon" alt="Home to My Journal" src="/assets/images/homeIcon.svg"/>
+                    <span class="label">Home</span>
+                </a>
+                <a class="navbarLink" :href="socialHref" v-if="loggedIn">
+                    <img class="icon" alt="Friends" src="/assets/images/users.svg"/>
+                    <span class="label">Friends</span>
+                </a>
+                <dropdown-menu :items="links" v-if="loggedIn">
+                    <div class="navbar-avatar-container" slot="custom-button">
+                        <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
+                        <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
+                    </div>
+                </dropdown-menu>
+            </div>
         </div>
     </header>
 </template>
@@ -111,12 +117,12 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
-                    title: copy.navigation.MY_JOURNAL,
-                    href: PageRoute.JOURNAL_HOME,
-                }, {
-                    title: copy.navigation.SOCIAL,
-                    href: PageRoute.SOCIAL,
-                }, {
+                //     title: copy.navigation.MY_JOURNAL,
+                //     href: PageRoute.JOURNAL_HOME,
+                // }, {
+                //     title: copy.navigation.SOCIAL,
+                //     href: PageRoute.SOCIAL,
+                // }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
                         await this.logout()
@@ -159,6 +165,9 @@
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
+            },
+            journalHref(): string {
+                return PageRoute.JOURNAL_HOME;
             },
             socialHref(): string {
                 return PageRoute.SOCIAL;
@@ -256,10 +265,25 @@
         display: flex;
     }
 
-    .navbar-social {
+    .navbarLink {
         align-items: center;
         display: flex;
+        margin-left: 3.2rem;
         text-decoration: none;
+
+        @include r(600) {
+            margin-left: 4.4rem;
+        }
+
+        .icon {
+            display: block;
+            height: 2.4rem;
+            width: 2.4rem;
+
+            @include r(600) {
+                display: none;
+            }
+        }
 
         .label {
             display: none;
@@ -267,18 +291,6 @@
             @include r(600) {
                 display: block;
             }
-        }
-    }
-
-    .friendsIcon {
-        display: block;
-        height: 2.4rem;
-        width: 2.4rem;
-
-        @include r(600) {
-            height: 2.8rem;
-            margin-right: .8rem;
-            width: 2.8rem;
         }
     }
 
