@@ -234,7 +234,7 @@
     }
 
     .getStarted {
-        margin-bottom: 3.2rem;
+        margin-bottom: 6.4rem;
         max-width: 24rem;
         width: 100%;
 
@@ -244,7 +244,8 @@
     }
 
     .findFriends {
-        max-width: 768px;
+        margin: 0 auto 6.4rem;
+        max-width: 960px;
         text-align: left;
 
         .subtext {
@@ -270,7 +271,8 @@
         align-items: center;
         display: flex;
         justify-content: space-between;
-        margin-bottom: 3.2rem;
+        margin: 0 auto 3.2rem;
+        max-width: 960px;
 
         .secondary {
             flex-grow: 0;
