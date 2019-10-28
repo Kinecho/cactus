@@ -12,11 +12,11 @@
                 {{error}}
             </p>
         </div>
-        <div :class="(!doReflect && hasBackgroundImage ? 'textContainer' : '')" v-if="promptContent && !completed">
+        <div :class="{textContainer: !doReflect && hasBackgroundImage}" v-if="promptContent && !completed">
             <h3 class="topic" v-show="topicText">{{topicText}}</h3>
             <p class="subtext" v-show="subText">{{subText}}</p>
         </div>
-        <div :class="(!doReflect && hasBackgroundImage ? 'textContainer' : '')" v-if="promptContent && completed">
+        <div :class="{textContainer: !doReflect && hasBackgroundImage}" v-if="promptContent && completed">
             <h3 class="question" v-show="questionText">{{questionText}}</h3>
         </div>
         <div class="entry" v-if="!doReflect">{{responseText}}</div>
