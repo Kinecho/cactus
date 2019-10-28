@@ -28,6 +28,7 @@
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
                     <img class="icon" alt="Friends" src="/assets/images/users.svg"/>
                     <span class="label">Friends</span>
+                    <span class="badge">3</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -269,6 +270,7 @@
         align-items: center;
         display: flex;
         margin-left: 3.2rem;
+        position: relative;
         text-decoration: none;
 
         @include r(600) {
@@ -289,9 +291,22 @@
             display: none;
 
             @include r(600) {
+                color: $darkestGreen;
                 display: block;
             }
         }
+    }
+
+    .badge {
+        background-color: $green;
+        border-radius: 50%;
+        color: $green;
+        height: .8rem;
+        overflow: hidden;
+        position: absolute;
+        right: -.4rem;
+        top: -.4rem;
+        width: .8rem;
     }
 
     .navbar-avatar-container {
