@@ -30,6 +30,7 @@ declare var __FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_ENV_ID__: string;
 declare var __FIRST_PROMPT_ID__: string;
+declare var __CLOUDSPONGE_KEY__: string;
 
 declare var __API_DOMAIN__: string;
 declare var __FULL_STORY_TEAM_ID__: string;
@@ -47,6 +48,7 @@ export const Config = {
     flamelinkFirebaseConfig: __FLAMELINK_FIREBASE_CONFIG__,
     flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
     firstPromptId: __FIRST_PROMPT_ID__,
+    cloudSpongeKey: __CLOUDSPONGE_KEY__,
     apiDomain: __API_DOMAIN__,
     fullStoryTeamId: __FULL_STORY_TEAM_ID__,
     stripe: __STRIPE_CONFIG__,
