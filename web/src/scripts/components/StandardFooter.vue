@@ -4,7 +4,8 @@
             <div class="footerInfo">
                 <img class="logomark" src="/assets/images/logoMark.svg" alt="" />
                 <p class="copyright">&copy; 2019 Cactus. All rights reserved.<br>
-                    Have questions? <a class="contact" href="mailto:help@cactus.app">Send an email.</a>
+                    Have questions? <a class="contact" href="mailto:help@cactus.app">Send an email.</a><br>
+                    <a class="legal" href="/privacy-policy">Privacy Policy</a> | <a class="legal" href="/terms-of-service">Terms of Service</a>
                 </p>
             </div>
             <nav class="socialLinks">

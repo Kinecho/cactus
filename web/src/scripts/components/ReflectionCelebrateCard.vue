@@ -390,16 +390,17 @@
 
     .cactusGarden {
         align-items: flex-end;
-        display: grid;
-        grid-template-columns: repeat(5, minmax(6rem, 9rem));
+        display: flex;
         justify-content: center;
         margin: -13.6rem 0 2.4rem;
     }
 
     .cactusContainer {
         cursor: pointer;
-        justify-self: center;
+        display: flex;
+        justify-content: center;
         transition: transform .3s;
+        width: 6rem;
 
         @include r(600) {
             &:hover {
