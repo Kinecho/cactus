@@ -234,7 +234,7 @@
             padding: 2.4rem;
 
             &.demo {
-                max-width: 40rem;
+                max-width: 48rem;
             }
         }
 
@@ -244,11 +244,11 @@
         }
 
         .avatar {
-            $avatarDiameter: 4.4rem;
+            $avatarDiameter: 6.4rem;
             border-radius: 50%;
             flex-shrink: 0;
             height: $avatarDiameter;
-            margin-right: .8rem;
+            margin-right: 1.6rem;
             overflow: hidden;
             width: $avatarDiameter;
 
