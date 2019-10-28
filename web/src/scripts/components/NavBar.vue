@@ -275,6 +275,22 @@
 
         @include r(600) {
             margin-left: 4.4rem;
+
+            &:after {
+                background-color: $green;
+                bottom: -33px;
+                content: "";
+                height: 1px;
+                left: 0;
+                position: absolute;
+                transform: scaleX(0);
+                transition: transform .2s ease-in-out;
+                width: 100%;
+            }
+
+            &:hover:after {
+                transform: scaleX(1);
+            }
         }
 
         .icon {
