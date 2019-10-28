@@ -16,6 +16,11 @@
                 <span v-if="copySucceeded === false">Copy</span>
             </button>
         </div>
+        <div class="sharing native-sharing" v-if="nativeShareEnabled">
+            <button class="btn wiggle small secondary" @click="shareNatively()" >
+                <img class="icon" src="/assets/images/share.svg" alt="Share Icon"/> Share
+            </button>
+        </div>
         <social-sharing :url="attributedLink"
                 :title="meta.title"
                 :description="meta.description"
@@ -25,21 +30,22 @@
             <div class="sharing">
                 <network network="email">
                     <button class="emailBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
+                        <img class="icon" src="/assets/images/envelopeSolid.svg" alt="Email Icon"/>Email
                     </button>
                 </network>
                 <network network="twitter">
                     <button class="twBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
+                        <img class="icon" src="/assets/images/twitter.svg" alt="Twitter Icon"/>Twitter
                     </button>
                 </network>
                 <network network="facebook">
                     <button class="fbBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
+                        <img class="icon" src="/assets/images/facebook.svg" alt="Facebook Icon"/>Facebook
                     </button>
                 </network>
             </div>
         </social-sharing>
+
     </div>
 </template>
 
@@ -55,6 +61,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import {Config} from '@web/config';
     import VueClipboard from 'vue-clipboard2';
+    import SharingService from '@web/services/SharingService'
 
     Vue.use(SocialSharing);
     Vue.use(VueClipboard);
@@ -80,13 +87,15 @@
             loading: boolean,
             copySucceeded: boolean,
             error: any | undefined,
+            nativeShareEnabled: boolean,
         } {
             return {
                 member: undefined,
                 memberUnsubscriber: undefined,
                 loading: true,
                 copySucceeded: false,
-                error: undefined
+                error: undefined,
+                nativeShareEnabled: SharingService.canShareNatively()
             }
         },
         computed: {
@@ -122,6 +131,9 @@
             handleCopySuccess() {
                 this.copySucceeded = true;
                 setTimeout(() => this.copySucceeded = false, 2000);
+            },
+            async shareNatively() {
+                await SharingService.shareLinkNatively({url: this.attributedLink, text: this.meta.description, title: this.meta.title})
             }
         },
         destroyed(): void {
@@ -191,6 +203,10 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
+    .native-sharing {
+        margin-bottom: 0.8rem;
+    }
 
     .content-sharing {
         display: flex;

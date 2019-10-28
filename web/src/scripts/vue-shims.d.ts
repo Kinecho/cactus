@@ -36,3 +36,8 @@ interface HTMLElement {
 interface NodeModule {
     hot: any,
 }
+
+
+interface Navigator {
+    share: (options: {title?: string, url?: string, text?: string}) => Promise<void|any>
+}
