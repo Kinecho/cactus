@@ -45,8 +45,37 @@
                                 <img src="https://placekitten.com/44/44" alt="User avatar"/>
                             </div>
                             <div class="info">
-                                <p class="date"># AGO</p>
-                                <p class="description"><span class="bold">NAME</span> reflected on, QUESTION?</p>
+                                <p class="date">8min ago</p>
+                                <p class="description"><span class="bold">James Brown</span> accepted your friend request.</p>
+                            </div>
+                        </div>
+                        <div class="activityCard">
+                            <div class="avatar">
+                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            </div>
+                            <div class="info">
+                                <p class="date">2 days ago</p>
+                                <p class="description"><span class="bold">Ryan Brown</span> wants to add you as a friend.</p>
+                                <button class="small secondary">Add Friend</button>
+                            </div>
+                        </div>
+                        <div class="activityCard">
+                            <div class="avatar">
+                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            </div>
+                            <div class="info">
+                                <p class="date">1 week ago</p>
+                                <p class="description"><span class="bold">Sarah Burgess</span> reflected on, <span class="bold">If you had just one day left to live what would you do?</span></p>
+                            </div>
+                        </div>
+                        <div class="activityCard">
+                            <div class="avatar">
+                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            </div>
+                            <div class="info">
+                                <p class="date">2 weeks ago</p>
+                                <p class="description"><span class="bold">Bob Mulvihill</span> is on Cactus. Do you want to add them as a friend?</p>
+                                <button class="secondary small">Add Friend</button>
                             </div>
                         </div>
                     </div>
@@ -269,6 +298,10 @@
         .bold {
             font-weight: bold;
         }
+    }
+
+    .info button {
+        margin-top: 1.6rem;
     }
 
 </style>
