@@ -32,9 +32,23 @@ app.use(cors({origin: true}));
 app.post("/email-status", async (req: functions.https.Request | any, resp: functions.Response) => {
 
     const payload: EmailStatusRequest = req.body;
-
+    console.log("signupEndpoints.email-status", payload);
+    let response:EmailStatusResponse|undefined = undefined;
     const email = payload.email;
     let exists = false;
+
+    if (!email) {
+        console.error("No email was provided for the signup endpoint");
+        await AdminSlackService.getSharedInstance().sendActivityMessage({
+            text: `Magic Link endpoint called with no email in payload.`
+        });
+
+        response = {exists: false, error: "No email provided", success: false, email: ""};
+        resp.send(response);
+        return
+
+    }
+
     let user: UserRecord | undefined | null = undefined;
     try {
         user = await admin.auth().getUserByEmail(email);
@@ -50,9 +64,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
         text: `${email} triggered the Magic Link flow. Existing Email = ${exists}`
     });
 
-    const response: EmailStatusResponse = {exists, email};
-
-
+    response = {exists, email};
     resp.send(response);
     return;
 });
@@ -60,24 +72,25 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
 app.post("/login", async (req: functions.https.Request | any, resp: functions.Response) => {
     console.log("handling logged in ");
-
-
     const user = await getAuthUser(req);
-
     if (!user) {
         resp.sendStatus(401);
         return
     }
-
-
 });
 
 app.post("/magic-link", async (req: functions.https.Request | any, resp: functions.Response) => {
-
     const payload: MagicLinkRequest = req.body;
-
+    console.log("signupEndpoints.magic-link", payload);
 
     const {email, referredBy} = payload;
+
+    if (!email) {
+        console.error("signupEndpoints.magic-link: No email provided in payload");
+        const errorResponse: MagicLinkResponse = {success: false, error: "No email provided", email: "", exists: false};
+        resp.send(errorResponse);
+        return;
+    }
 
     let userExists = false;
     let memberExists = false;

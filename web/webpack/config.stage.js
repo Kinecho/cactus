@@ -39,6 +39,7 @@ module.exports = {
     __SENTRY__: {
         dsn: 'https://d41561516bba4e04b0d10a1526c83c27@sentry.io/1490133',
     },
+    __CLOUDSPONGE_KEY__: "PwpSNjcoLLh9EdPmpKxXVw"
 }
 
 

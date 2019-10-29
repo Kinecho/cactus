@@ -121,7 +121,7 @@ export default class AdminFlamelinkService {
 
         let content = results;
 
-        let values = Object.values(results);
+        const values = Object.values(results);
         if (Array.isArray(values)) {
             [content] = values;
         }

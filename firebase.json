@@ -81,6 +81,10 @@
                 "destination": "/social_activity.html"
             },
             {
+                "source": "/solo-proxy-auth",
+                "destination": "/solo_proxy_auth.html"
+            },
+            {
                 "source": "/friends",
                 "destination": "/social_activity.html"
             },
