@@ -26,7 +26,6 @@
     import FlamelinkImage from '@components/FlamelinkImage.vue'
     import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
-    import AddressBookService from '@web/services/AddressBookService'
 
     const copy = CopyService.getSharedInstance().copy;
 
