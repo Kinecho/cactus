@@ -21,12 +21,6 @@ declare module 'vue-simple-markdown'{
     export default VueSimpleMarkdown;
 }
 
-declare module '@cloudsponge/address-book-connector.js' {
-  import { PluginObject } from 'vue';
-  const addressBookConnector: PluginObject<any>;
-  export default addressBookConnector;
-}
-
 interface Window {
     [key:string]: any; // Add index signature
 }

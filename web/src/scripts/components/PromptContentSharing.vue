@@ -55,6 +55,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import {Config} from '@web/config';
     import VueClipboard from 'vue-clipboard2';
+    import AddressBookService from '@web/services/AddressBookService'
 
     Vue.use(SocialSharing);
     Vue.use(VueClipboard);
