@@ -10,8 +10,8 @@
             <h2>Import Your Contacts</h2>
             <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
             <div class="btnContainer">
-                <button class="secondary small cloudsponge-launch">Gmail</button>
-                <button class="secondary small cloudsponge-launch">Yahoo</button>
+                <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
+                <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
                 <textarea class="cloudsponge-contacts"></textarea>
             </div>
             <!-- end -->
