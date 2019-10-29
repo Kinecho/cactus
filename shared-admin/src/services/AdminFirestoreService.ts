@@ -55,8 +55,8 @@ export default class AdminFirestoreService {
         return this.firestore.collection(model.collection);
     }
 
-    getDocumentRefFromModel(model?: BaseModel): DocumentReference|undefined {
-        if (!model){
+    getDocumentRefFromModel(model?: BaseModel): DocumentReference | undefined {
+        if (!model) {
             return undefined
         }
         const collectionRef = this.getCollectionRefFromModel(model);
@@ -104,7 +104,7 @@ export default class AdminFirestoreService {
                 model.createdAt = new Date();
             }
 
-            if (options.setUpdatedAt){
+            if (options.setUpdatedAt) {
                 model.updatedAt = new Date();
             }
 
@@ -172,16 +172,12 @@ export default class AdminFirestoreService {
                 }
             }
 
-
             const snapshot = await query.get();
-
             const size = snapshot.size;
             const results: T[] = fromQuerySnapshot(snapshot, Type);
-            // if ()
-            let queryResult:QueryResult = {results, size};
-            if (snapshot.docs.size > 0){
-                let lastDoc:DocumentSnapshot = snapshot.docs[snapshot.docs.length - 1];
-                queryResult.lastCursor = lastDoc
+            const queryResult: QueryResult<T> = {results, size};
+            if (snapshot.docs.length > 0) {
+                queryResult.lastCursor = snapshot.docs[snapshot.docs.length - 1];
             }
 
             return queryResult;

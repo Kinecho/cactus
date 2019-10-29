@@ -244,11 +244,11 @@ export default class AdminCactusMemberService {
     }
 
     async getAllBatch(options: {
-        batchSize: number,
+        batchSize?: number,
         onData: (members: CactusMember[]) => Promise<void>
     }) {
         console.log("Getting batched result 1 for all members");
-        let query = this.getCollectionRef();
+        const query = this.getCollectionRef();
         let batchNumber = 0;
         let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
             pagination: {

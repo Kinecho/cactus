@@ -46,7 +46,7 @@ app.get("/contentJob", async (req, resp) => {
     if (qDate) {
         d = getDateFromISOString(qDate) || new Date();
     }
-    let result = await startSentPromptJob(d);
+    const result = await startSentPromptJob(d);
     return resp.send(result);
 });
 

@@ -77,15 +77,14 @@ export default class AdminPromptContentService {
                 endAt: endDateString,
             });
 
-            if (!raw){
+            if (!raw) {
                 console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
                 return
             }
 
-            // console.log("raw", raw);
-            let allValues = Object.values(raw);
+            const allValues = Object.values(raw);
             console.log(`Found ${allValues.length} that matched the criteria for the date range`);
-            let [content]: (any | undefined)[] = allValues;
+            const [content]: (any | undefined)[] = allValues;
             if (!content) {
                 return undefined
             }
