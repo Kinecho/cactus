@@ -55,7 +55,10 @@ export default class AdminFirestoreService {
         return this.firestore.collection(model.collection);
     }
 
-    getDocumentRefFromModel(model: BaseModel): DocumentReference {
+    getDocumentRefFromModel(model?: BaseModel): DocumentReference|undefined {
+        if (!model){
+            return undefined
+        }
         const collectionRef = this.getCollectionRefFromModel(model);
         let doc: DocumentReference;
         if (model.id) {
@@ -174,8 +177,14 @@ export default class AdminFirestoreService {
 
             const size = snapshot.size;
             const results: T[] = fromQuerySnapshot(snapshot, Type);
+            // if ()
+            let queryResult:QueryResult = {results, size};
+            if (snapshot.docs.size > 0){
+                let lastDoc:DocumentSnapshot = snapshot.docs[snapshot.docs.length - 1];
+                queryResult.lastCursor = lastDoc
+            }
 
-            return {results, size};
+            return queryResult;
         } catch (e) {
             console.error("Failed to execute query", e);
             Sentry.captureException(e);
