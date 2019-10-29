@@ -7,18 +7,31 @@
             <button class="primary">Share your Invite Link</button>
 
             <!-- if not imported -->
-            <h2>Import Your Contacts</h2>
-            <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
-            <div class="btnContainer">
-                <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
-                <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
-                <textarea class="cloudsponge-contacts"></textarea>
+            <div class="results" v-if="!importedContacts">
+                <h2>Import Your Contacts</h2>
+                <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
+                <div class="btnContainer">
+                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
+                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
+                    <textarea class="cloudsponge-contacts"></textarea>
+                </div>
+                <!-- end -->
             </div>
-            <!-- end -->
 
             <div class="results" v-if="importedContacts">
-                <h2>Import Your Contacts <span class="resultCount">(123)</span></h2>
+                <h2>Import Your Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <div class="contactCards" v-for="contact in importedContacts">
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
+                            <p class="email">{{contact.email}}</p>
+                        </div>
+                        <button class="secondary small">Invite</button>
+                    </div>
+                    <!--
                     <div class="contactCard">
                         <div class="avatar">
                             <img src="https://placekitten.com/44/44" alt="User avatar"/>
@@ -60,18 +73,8 @@
                             <p class="name">James Brown</p>
                             <p class="email">james@brown.com</p>
                         </div>
-                        <button class="secondary small">Invite</button>
-                    </div>
-                    <div class="contactCard">
-                        <div class="avatar">
-                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                        </div>
-                        <div class="contactInfo">
-                            <p class="name">James Brown</p>
-                            <p class="email">james@brown.com</p>
-                        </div>
                         <button class="secondary small">Invited</button>
-                    </div>
+                    </div>-->
                 </div>
             </div>
         </div>
@@ -103,8 +106,8 @@
             }
         },
         methods: {
-            importContacts: function(contacts: Array<object>) {
-                this.importedContacts = contacts;
+            importContacts: function(contacts: Array<any>) {
+                this.importedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
                 console.log(this.importedContacts);
             },
             configureCloudsponge: function() {
@@ -118,7 +121,6 @@
             }
         },
         computed: {
-            
         }
     })
 </script>

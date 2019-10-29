@@ -1,5 +1,21 @@
 import {Config} from "@web/config";
 
+export interface EmailAddress {
+  address: string
+}
+
+export interface CloudspongeContact {
+  first_name: string,
+  last_name: string,
+  email: Array<EmailAddress>
+}
+
+export interface EmailContact {
+  first_name: string,
+  last_name:string,
+  email: string
+}
+
 class AddressBookService {
     public static sharedInstance =new AddressBookService();
     cloudsponge: undefined;
@@ -18,6 +34,20 @@ class AddressBookService {
 
     initCloudsponge() {
       this.cloudsponge = window.cloudsponge;
+    }
+
+    formatContacts(rawContactData: Array<any>): Array<any> {
+      let formattedContacts: Array<EmailContact> = [];
+
+      rawContactData.forEach(function(contact: CloudspongeContact, index: number) {
+        formattedContacts.push({
+          first_name: contact['first_name'],
+          last_name: contact['last_name'],
+          email: contact['email'][0]['address']
+        })
+      });
+
+      return formattedContacts;
     }
 
 }
