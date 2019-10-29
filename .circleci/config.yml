@@ -126,7 +126,7 @@ commands:
           fail_only: true
           include_project_field: false
           include_job_number_field: false
-          failure_message: ":boom: *$CIRCLE_JOB* job failed in workflow <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> >\nBranch \\`<https://github.com/Kinecho/cactus-ios/compare/${CIRCLE_BRANCH}|${CIRCLE_BRANCH}>\\`"
+          failure_message: ":boom: *$CIRCLE_JOB* job failed in a <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| CI workflow >\nBranch \\`<https://github.com/Kinecho/cactus-ios/compare/${CIRCLE_BRANCH}|${CIRCLE_BRANCH}>\\`"
 
 jobs:
   get-changes:
@@ -363,9 +363,7 @@ jobs:
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
     parameters:
@@ -440,7 +438,6 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: ":white_check_mark: \\`${CIRCLE_BRANCH}\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > completed successfully.\n$(cat .slack_git_url.txt)"
-
 
 workflows:
   version: 2.1
