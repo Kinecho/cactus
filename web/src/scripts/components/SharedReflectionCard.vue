@@ -26,9 +26,9 @@
     import FlamelinkImage from '@components/FlamelinkImage.vue'
     import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
+    import AddressBookService from '@web/services/AddressBookService'
 
     const copy = CopyService.getSharedInstance().copy;
-
 
     export default Vue.extend({
         components: {
@@ -58,7 +58,7 @@
             this.deviceWidth = getDeviceDimensions().width;
             this.resizeListener = window.addEventListener("resize", () => {
                 this.deviceWidth = getDeviceDimensions().width;
-            })
+            });
         },
         computed: {
             memberName(): string | undefined {

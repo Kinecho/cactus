@@ -1,4 +1,4 @@
-import addressBookConnector from 'address-book-connector.js';
+import addressBookConnector from '@cloudsponge/address-book-connector.js';
 import {Config} from "@web/config";
 
 class AddressBookService {
