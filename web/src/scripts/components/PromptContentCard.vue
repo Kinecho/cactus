@@ -32,6 +32,9 @@
                         </transition>
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
+                        <div v-if="nativeShareEnabled" class="sharing">
+                            <button class="btn secondary" @click="shareNatively()"><img class="icon" src="/assets/images/share.svg" alt="Share Icon"/> Share</button>
+                        </div>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
@@ -289,6 +292,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import SharingService from '@web/services/SharingService'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -330,6 +334,7 @@
             linkCreated: boolean,
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
+            nativeShareEnabled: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -341,7 +346,8 @@
                 shareableLinkUrl: undefined,
                 linkCreated: false,
                 cactusModalVisible: false,
-                cactusModalElement: undefined
+                cactusModalElement: undefined,
+                nativeShareEnabled: SharingService.canShareNatively()
             }
         },
         beforeMount() {
@@ -428,6 +434,13 @@
             }
         },
         methods: {
+            async shareNatively() {
+                await SharingService.shareLinkNatively({
+                    url: this.shareableLinkUrl,
+                    title: "Read my private reflection on Cactus",
+                    text: "I'm practicing mindful self-reflection with Cactus and shared this private note with you"
+                })
+            },
             async createSharableLink() {
                 this.creatingLink = true;
                 let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
@@ -1041,6 +1054,36 @@
         margin-bottom: 1.6rem;
     }
 
+    .sharing {
+        margin-top: 1rem;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+
+        @include r(600) {
+            flex-flow: row wrap;
+        }
+
+        .btn {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            margin: 0 auto .8rem;
+            width: 100%;
+
+            @include r(600) {
+                margin: 0 .4rem;
+                width: auto;
+            }
+        }
+
+        .icon {
+            height: 1.6rem;
+            margin-right: .8rem;
+            width: 1.6rem;
+        }
+
+    }
 
     .snack {
         &-enter-active {
