@@ -16,9 +16,6 @@
                 <span v-if="copySucceeded === false">Copy</span>
             </button>
         </div>
-        <a class="cloudsponge-launch" href="#">
-            Import from Address Book
-        </a>
         <social-sharing :url="attributedLink"
                 :title="meta.title"
                 :description="meta.description"
@@ -58,7 +55,6 @@
     import {PageRoute} from '@web/PageRoutes'
     import {Config} from '@web/config';
     import VueClipboard from 'vue-clipboard2';
-    import AddressBookService from '@web/services/AddressBookService'
 
     Vue.use(SocialSharing);
     Vue.use(VueClipboard);
@@ -73,7 +69,7 @@
             })
         },
         mounted() {
-            AddressBookService.sharedInstance.start();
+            
         },
         props: {
             promptContent: {

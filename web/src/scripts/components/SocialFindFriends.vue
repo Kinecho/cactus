@@ -7,11 +7,11 @@
             <button class="primary">Share your Invite Link</button>
 
             <!-- if not imported -->
-            <!-- <h2>Import Your Contacts</h2>
+            <h2>Import Your Contacts</h2>
             <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
             <div class="btnContainer">
-                <button class="secondary small">Gmail</button>
-                <button class="secondary small">Yahoo</button>
+                <button class="secondary small cloudsponge-launch">Gmail</button>
+                <button class="secondary small cloudsponge-launch">Yahoo</button>
             </div> -->
             <!-- end -->
 
@@ -75,11 +75,14 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import AddressBookService from '@web/services/AddressBookService'
+
     export default Vue.extend({
         components: {
+
         },
-        created() {
-          
+        mounted() {
+          AddressBookService.sharedInstance.start();
         },
         destroyed() {
             
