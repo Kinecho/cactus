@@ -16,6 +16,9 @@
                 <span v-if="copySucceeded === false">Copy</span>
             </button>
         </div>
+        <a class="cloudsponge-launch" href="#">
+            Import from Address Book
+        </a>
         <social-sharing :url="attributedLink"
                 :title="meta.title"
                 :description="meta.description"
@@ -68,6 +71,9 @@
                     this.loading = false;
                 }
             })
+        },
+        mounted() {
+            AddressBookService.sharedInstance.start();
         },
         props: {
             promptContent: {
