@@ -9,9 +9,20 @@ class AddressBookService {
             cloudSpongeScript.setAttribute('id', 'cloudsponge-' + Config.cloudSpongeKey);
             cloudSpongeScript.setAttribute('src', 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js');
             document.head.appendChild(cloudSpongeScript);
+        this.initCloudsponge();
       }
     }
 
+    initCloudsponge() {
+      if (window.cloudsponge) {
+          window.cloudsponge.init({
+            include:['name','email']
+          });
+      } else {
+        console.log('Cloudsponge global not yet available');
+        setTimeout(this.initCloudsponge, 500);
+      }
+    }
 }
 
 export default AddressBookService
