@@ -12,7 +12,8 @@
             <div class="btnContainer">
                 <button class="secondary small cloudsponge-launch">Gmail</button>
                 <button class="secondary small cloudsponge-launch">Yahoo</button>
-            </div> -->
+                <textarea class="cloudsponge-contacts"></textarea>
+            </div>
             <!-- end -->
 
             <h2>Import Your Contacts <span class="resultCount">(123)</span></h2>
@@ -81,7 +82,7 @@
         components: {
 
         },
-        mounted() {
+        created() {
           AddressBookService.sharedInstance.start();
         },
         destroyed() {

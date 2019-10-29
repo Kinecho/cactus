@@ -115,7 +115,8 @@
         components: {
             NavBar,
             Footer,
-            Spinner
+            Spinner,
+            SocialFindFriends
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
