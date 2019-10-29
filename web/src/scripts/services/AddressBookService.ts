@@ -1,28 +1,25 @@
 import {Config} from "@web/config";
 
 class AddressBookService {
-    static sharedInstance =new AddressBookService();
+    public static sharedInstance =new AddressBookService();
+    cloudsponge: undefined;
 
-    start() {
+    start(callback?: object) {
       if (!document.getElementById('cloudsponge-' + Config.cloudSpongeKey)) {
         let cloudSpongeScript = document.createElement('script');
-            cloudSpongeScript.setAttribute('id', 'cloudsponge-' + Config.cloudSpongeKey);
-            cloudSpongeScript.setAttribute('src', 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js');
+            cloudSpongeScript.type = 'text/javascript';
+            cloudSpongeScript.async = true;
+            cloudSpongeScript.onload = this.initCloudsponge;
+            cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
+            cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
             document.head.appendChild(cloudSpongeScript);
-        this.initCloudsponge();
       }
     }
 
     initCloudsponge() {
-      if (window.cloudsponge) {
-          window.cloudsponge.init({
-            include:['name','email']
-          });
-      } else {
-        console.log('Cloudsponge global not yet available');
-        setTimeout(this.initCloudsponge, 500);
-      }
+      this.cloudsponge = window.cloudsponge;
     }
+
 }
 
 export default AddressBookService

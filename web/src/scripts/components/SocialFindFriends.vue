@@ -16,59 +16,63 @@
             </div>
             <!-- end -->
 
-            <h2>Import Your Contacts <span class="resultCount">(123)</span></h2>
-            <div class="contactCard">
-                <div class="avatar">
-                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
+            <div class="results" v-if="importedContacts">
+                <h2>Import Your Contacts <span class="resultCount">(123)</span></h2>
+                <div class="contactCards" v-for="contact in importedContacts">
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">James Brown</p>
+                            <p class="email">james@brown.com</p>
+                        </div>
+                        <button class="secondary small">Add Friend</button>
+                    </div>
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">James Brown</p>
+                            <p class="email">james@brown.com</p>
+                        </div>
+                        <button class="secondary small">Requested</button>
+                    </div>
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">James Brown</p>
+                            <p class="email">james@brown.com</p>
+                        </div>
+                        <p class="friendsStatus">
+                            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#FDBCA3" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+                            Friends
+                        </p>
+                    </div>
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">James Brown</p>
+                            <p class="email">james@brown.com</p>
+                        </div>
+                        <button class="secondary small">Invite</button>
+                    </div>
+                    <div class="contactCard">
+                        <div class="avatar">
+                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                        </div>
+                        <div class="contactInfo">
+                            <p class="name">James Brown</p>
+                            <p class="email">james@brown.com</p>
+                        </div>
+                        <button class="secondary small">Invited</button>
+                    </div>
                 </div>
-                <div class="contactInfo">
-                    <p class="name">James Brown</p>
-                    <p class="email">james@brown.com</p>
-                </div>
-                <button class="secondary small">Add Friend</button>
-            </div>
-            <div class="contactCard">
-                <div class="avatar">
-                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                </div>
-                <div class="contactInfo">
-                    <p class="name">James Brown</p>
-                    <p class="email">james@brown.com</p>
-                </div>
-                <button class="secondary small">Requested</button>
-            </div>
-            <div class="contactCard">
-                <div class="avatar">
-                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                </div>
-                <div class="contactInfo">
-                    <p class="name">James Brown</p>
-                    <p class="email">james@brown.com</p>
-                </div>
-                <p class="friendsStatus">
-                    <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#FDBCA3" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-                    Friends
-                </p>
-            </div>
-            <div class="contactCard">
-                <div class="avatar">
-                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                </div>
-                <div class="contactInfo">
-                    <p class="name">James Brown</p>
-                    <p class="email">james@brown.com</p>
-                </div>
-                <button class="secondary small">Invite</button>
-            </div>
-            <div class="contactCard">
-                <div class="avatar">
-                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                </div>
-                <div class="contactInfo">
-                    <p class="name">James Brown</p>
-                    <p class="email">james@brown.com</p>
-                </div>
-                <button class="secondary small">Invited</button>
             </div>
         </div>
     </div>
@@ -83,20 +87,35 @@
 
         },
         created() {
-          AddressBookService.sharedInstance.start();
+            AddressBookService.sharedInstance.start();
+        },
+        mounted() {
+            this.configureCloudsponge();
         },
         destroyed() {
             
         },
         data(): {
-            
+            importedContacts: Array<any> | undefined            
         } {
             return {
-              
+              importedContacts: undefined              
             }
         },
         methods: {
-          
+            importContacts: function(contacts: Array<object>) {
+                this.importedContacts = contacts;
+                console.log(this.importedContacts);
+            },
+            configureCloudsponge: function() {
+                if (window.cloudsponge) {
+                    window.cloudsponge.init({
+                        afterSubmitContacts: this.importContacts
+                    });
+                } else {
+                    setTimeout(this.configureCloudsponge, 500);
+                }
+            }
         },
         computed: {
             
