@@ -66,4 +66,5 @@ declare interface QueryResult<T extends BaseModel> {
     results: T[],
     size: number,
     error?: any,
+    lastCursor?: any|undefined,
 }

@@ -169,7 +169,8 @@ export interface Content {
 
 export enum PromptContentFields {
     promptId = "promptId",
-    cactusElement = "cactusElement"
+    cactusElement = "cactusElement",
+    scheduledSendAt = "scheduledSendAt",
 }
 
 export default class PromptContent extends FlamelinkModel {
