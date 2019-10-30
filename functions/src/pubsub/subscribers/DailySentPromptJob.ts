@@ -20,7 +20,7 @@ interface DailySentPromptMessage {
 
 
 interface JobResult {
-    dryRun: boolean,
+    dryRun?: boolean,
     promptContentEntryId?: string,
     subjectLine?: string,
     promptQuestion?: string,
@@ -62,7 +62,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
         if (!content) {
             await AdminSlackService.getSharedInstance()
                 .sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No prompt content was found for date ${isoDateStringToFlamelinkDateString(getISODate(contentDate))}${dryRun ? "\nThis was a DRY RUN" : ""}`);
-            return {error: "No PromptContent was found for given date", success: false};
+            return {error: "No PromptContent was found for given date", success: false, dryRun};
         }
         const promptId = content.promptId;
         if (!promptId) {
@@ -71,7 +71,8 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
             return {
                 error: "No promptId was found on the PromptContent",
                 promptContentEntryId: content.entryId,
-                success: false
+                success: false,
+                dryRun,
             };
         }
 
@@ -83,6 +84,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
                 error: "no ReflectionPrompt found for promptId " + promptId,
                 promptContentEntryId: content.entryId,
                 promptId,
+                dryRun,
             };
         }
 
@@ -110,7 +112,8 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
             success: false,
             totalProcessed: 0,
             numSuccess: 0,
-            numError: 0
+            numError: 0,
+            dryRun,
         }
     }
 }
