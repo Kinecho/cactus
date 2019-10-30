@@ -8,18 +8,17 @@
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Import Your Contacts</h2>
-                <p class="subtext">Import your contacts from email. Don't worry, you'll choose who to connect with before they're invited.</p>
+                <h2>Import from...</h2>
                 <div class="btnContainer">
                     <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
                     <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
-                    <textarea class="cloudsponge-contacts"></textarea>
                 </div>
+                <p class="subtext">Don't worry, you'll choose who to connect with before they're invited.</p>
                 <!-- end -->
             </div>
 
             <div class="results" v-if="importedContacts">
-                <h2>Import Your Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
+                <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <div class="contactCards" v-for="contact in importedContacts">
                     <div class="contactCard">
                         <div class="avatar">
@@ -84,6 +83,7 @@
 <script lang="ts">
     import Vue from "vue";
     import AddressBookService from '@web/services/AddressBookService'
+    import {EmailService} from "@shared/types/EmailContactTypes";
 
     export default Vue.extend({
         components: {
@@ -99,16 +99,18 @@
             
         },
         data(): {
-            importedContacts: Array<any> | undefined            
+            importedContacts: Array<any> | undefined,
+            importedService: string | undefined            
         } {
             return {
-              importedContacts: undefined              
+              importedContacts: undefined,
+              importedService: undefined              
             }
         },
         methods: {
-            importContacts: function(contacts: Array<any>) {
+            importContacts: function(contacts: Array<any>, source: string) {
                 this.importedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
-                console.log(this.importedContacts);
+                this.importedService = EmailService[source as keyof typeof EmailService];
             },
             configureCloudsponge: function() {
                 if (window.cloudsponge) {
