@@ -89,11 +89,11 @@ export function isoDateStringToFlamelinkDateString(input?: string|undefined): st
         return;
     }
 
-    return DateTime.fromJSDate(date).toISO({includeOffset: false, suppressMilliseconds: true});
+    return DateTime.fromJSDate(date).toISO({includeOffset: false, suppressMilliseconds: true, suppressSeconds: true});
 }
 
 export function getFlamelinkDateString(date: Date = new Date()): string {
-    return DateTime.fromJSDate(date).toISO({includeOffset: false, suppressMilliseconds: true});
+    return DateTime.fromJSDate(date).toISO({includeOffset: false, suppressMilliseconds: true, suppressSeconds: true});
 }
 
 export function getDateFromISOString(input?: ISODate): Date | undefined {

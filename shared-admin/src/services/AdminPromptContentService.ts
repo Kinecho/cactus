@@ -63,7 +63,9 @@ export default class AdminPromptContentService {
     async getPromptContentForDate(date: Date = new Date()): Promise<PromptContent | undefined> {
         try {
             const midnightDenver = getDateAtMidnightDenver(date);
+            midnightDenver.setHours(0);
             const nextDate = plusDays(1, midnightDenver);
+            nextDate.setHours(0);
             const startDateString = getFlamelinkDateString(nextDate);
             const endDateString = getFlamelinkDateString(midnightDenver);
 
