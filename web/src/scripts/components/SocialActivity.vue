@@ -12,78 +12,81 @@
             <div class="contentContainer">
 
                 <!-- if brand new -->
-                <div class="brandNew">
-                    <h1>Reflect with Friends</h1>
-                    <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
-                    <div class="activityCard demo">
-                        <div class="avatar">
-                            <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
-                        </div>
-                        <div class="info">
-                            <p class="date">8min ago</p>
-                            <p class="description"><span class="bold">Ryan Brown</span> reflected on <a href="#">If you had just one day left to live, what would you do?</a></p>
-                        </div>
-                    </div>
-                    <button class="getStarted">Get Started</button>
-                </div>
-                <!-- end -->
-
-                <SocialFindFriends />
-                
-                <!-- if has friends -->
-                <div class="flexContainer">
-                    <h1>Friend Activity</h1>
-                    <button class="secondary small">Add Friends</button>
-                </div>
-                <transition name="fade-in" appear>
-                    <div class="activityContainer">
-
-                        <!-- if has friends but no activity yet -->
-                        <!-- <p class="subtext">No activity from friends just yet....so....yeah...</p> -->
-                        <!-- end -->
-
-                        <div class="activityCard">
+                <transition name="fade-in" mode="out-in">
+                    <div class="brandNew" v-if="currentChild == 'welcome'">
+                        <h1>Reflect with Friends</h1>
+                        <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
+                        <div class="activityCard demo">
                             <div class="avatar">
-                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                                <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
                             </div>
                             <div class="info">
                                 <p class="date">8min ago</p>
-                                <p class="description"><span class="bold">James Brown</span> accepted your friend request.</p>
+                                <p class="description"><span class="bold">Ryan Brown</span> reflected on <a href="#">If you had just one day left to live, what would you do?</a></p>
                             </div>
                         </div>
-                        <div class="activityCard">
-                            <div class="avatar">
-                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                            </div>
-                            <div class="info">
-                                <p class="date">2 days ago</p>
-                                <p class="description"><span class="bold">Ryan Brown</span> wants to add you as a friend.</p>
-                                <button class="small secondary">Add Friend</button>
-                            </div>
+                        <button class="getStarted" @click.prevent="setVisible('findFriends')">Get Started</button>
+                        <button class="getStarted" @click.prevent="setVisible('friendActivity')">See Activity</button>
+                    </div>
+
+                    <SocialFindFriends v-if="currentChild == 'findFriends'"/>
+                    
+                    <!-- if has friends -->
+                    <div class="" v-if="currentChild == 'friendActivity'">
+                        <div class="flexContainer">
+                            <h1>Friend Activity</h1>
+                            <button class="secondary small" @click.prevent="setVisible('findFriends')">Add Friends</button>
                         </div>
-                        <div class="activityCard">
-                            <div class="avatar">
-                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                    
+                        <div class="activityContainer">
+
+                            <!-- if has friends but no activity yet -->
+                            <!-- <p class="subtext">No activity from friends just yet....so....yeah...</p> -->
+                            <!-- end -->
+
+                            <div class="activityCard">
+                                <div class="avatar">
+                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                                </div>
+                                <div class="info">
+                                    <p class="date">8min ago</p>
+                                    <p class="description"><span class="bold">James Brown</span> accepted your friend request.</p>
+                                </div>
                             </div>
-                            <div class="info">
-                                <p class="date">1 week ago</p>
-                                <p class="description"><span class="bold">Sarah Burgess</span> reflected on, <span class="bold">If you had just one day left to live what would you do?</span></p>
+                            <div class="activityCard">
+                                <div class="avatar">
+                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                                </div>
+                                <div class="info">
+                                    <p class="date">2 days ago</p>
+                                    <p class="description"><span class="bold">Ryan Brown</span> wants to add you as a friend.</p>
+                                    <button class="small secondary">Add Friend</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="activityCard">
-                            <div class="avatar">
-                                <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            <div class="activityCard">
+                                <div class="avatar">
+                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                                </div>
+                                <div class="info">
+                                    <p class="date">1 week ago</p>
+                                    <p class="description"><span class="bold">Sarah Burgess</span> reflected on, <span class="bold">If you had just one day left to live what would you do?</span></p>
+                                </div>
                             </div>
-                            <div class="info">
-                                <p class="date">2 weeks ago</p>
-                                <p class="description"><span class="bold">Bob Mulvihill</span> is on Cactus. Do you want to add them as a friend?</p>
-                                <button class="secondary small">Add Friend</button>
+                            <div class="activityCard">
+                                <div class="avatar">
+                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                                </div>
+                                <div class="info">
+                                    <p class="date">2 weeks ago</p>
+                                    <p class="description"><span class="bold">Bob Mulvihill</span> is on Cactus. Do you want to add them as a friend?</p>
+                                    <button class="secondary small">Add Friend</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </transition>
-                <!-- end -->
 
+                <!-- end -->
+                </transition>
             </div>
 
         </div>
@@ -129,6 +132,8 @@
                     }
                 }
             })
+
+            this.currentChild = 'welcome';
         },
         destroyed() {
             if (this.memberUnsubscriber) {
@@ -140,14 +145,16 @@
             copySucceeded: boolean,
             member: CactusMember | undefined | null,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            error: string | undefined
+            error: string | undefined,
+            currentChild: string | undefined
         } {
             return {
                 authLoaded: false,
                 copySucceeded: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
-                error: undefined
+                error: undefined,
+                currentChild: undefined
             }
         },
         methods: {
@@ -157,6 +164,9 @@
             handleCopySuccess() {
                 this.copySucceeded = true;
                 setTimeout(() => this.copySucceeded = false, 2000);
+            },
+            setVisible(child: string) {
+                this.currentChild = child;
             }
         },
         computed: {
@@ -185,6 +195,7 @@
     @import "variables";
     @import "forms";
     @import "social";
+    @import "transitions";
 
     .socialActivity {
         display: flex;
