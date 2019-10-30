@@ -2,7 +2,12 @@ import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import {getDateFromISOString, getISODate, isoDateStringToFlamelinkDateString} from "@shared/util/DateUtil";
+import {
+    getDateAtMidnightDenver,
+    getDateFromISOString,
+    getISODate,
+    isoDateStringToFlamelinkDateString
+} from "@shared/util/DateUtil";
 import PromptContent from "@shared/models/PromptContent";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
@@ -25,6 +30,7 @@ interface JobResult {
     subjectLine?: string,
     promptQuestion?: string,
     promptId?: string,
+    contentDate?: string,
     sendDate?: string,
     success: boolean,
     error?: string,
@@ -45,7 +51,7 @@ export async function onPublish(message: Message, context: functions.EventContex
     }
 
     const {dryRun} = job;
-    const contentDate = getDateFromISOString(job.contentDate) || getTodaysDate();
+    const contentDate = getDateFromISOString(job.contentDate) || getDateAtMidnightDenver();
     const sendDate: Date | undefined = getDateFromISOString(job.sendDate);
     await runJob(contentDate, sendDate, dryRun);
 }
@@ -118,19 +124,16 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
     }
 }
 
-function getTodaysDate(): Date {
-    return new Date()
-}
-
 
 export async function createSentPrompts(content: PromptContent, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<JobResult> {
-    const start = new Date()
+    const start = new Date();
     const result: JobResult = {
         dryRun,
         subjectLine: content.subjectLine,
         promptQuestion: prompt.question,
         promptContentEntryId: content.entryId,
         promptId: prompt.id,
+        contentDate: content.scheduledSendAt as string,
         sendDate: getISODate(sendDate),
         success: true,
         totalProcessed: 0,

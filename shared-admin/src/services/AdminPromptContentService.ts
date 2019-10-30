@@ -2,7 +2,7 @@ import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import PromptContent from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
-import {getDateAtMidnightDenver, getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
+import {getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 
 
@@ -62,7 +62,8 @@ export default class AdminPromptContentService {
 
     async getPromptContentForDate(date: Date = new Date()): Promise<PromptContent | undefined> {
         try {
-            const midnightDenver = getDateAtMidnightDenver(date);
+            // const midnightDenver = getDateAtMidnightDenver(date);
+            const midnightDenver = date;
             midnightDenver.setHours(0);
             const nextDate = plusDays(1, midnightDenver);
             nextDate.setHours(0);

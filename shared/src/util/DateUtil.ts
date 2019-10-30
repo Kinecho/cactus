@@ -58,7 +58,7 @@ export function formatDateTime(date?: Date, options: { format?: string, timezone
     return dt.toFormat(format)
 }
 
-export function plusDays(days: number, date: Date = new Date()):Date {
+export function plusDays(days: number, date: Date = new Date()): Date {
     return DateTime.fromJSDate(date).plus({days: days}).toJSDate();
 }
 
@@ -83,13 +83,17 @@ export function makeUTCDateIntoMailchimpDate(date: Date, keepTime: boolean = fal
     return dateWithZone.toISO();
 }
 
-export function isoDateStringToFlamelinkDateString(input?: string|undefined): string|undefined {
+export function isoDateStringToFlamelinkDateString(input?: string | undefined): string | undefined {
     const date = getDateFromISOString(input);
     if (!date) {
         return;
     }
 
-    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({includeOffset: false, suppressMilliseconds: true, suppressSeconds: true});
+    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({
+        includeOffset: false,
+        suppressMilliseconds: true,
+        suppressSeconds: true
+    });
 }
 
 export function getFlamelinkDateString(date: Date = new Date()): string {
@@ -102,6 +106,13 @@ export function getDateFromISOString(input?: ISODate): Date | undefined {
     }
 
     return DateTime.fromISO(input).toUTC().toJSDate() || undefined;
+}
+
+export function localDateFromISOString(input?: string): Date | undefined {
+    if (!input) {
+        return;
+    }
+    return DateTime.fromISO(input).toJSDate()
 }
 
 export function getDateAtMidnightDenver(date: Date = new Date()): Date {

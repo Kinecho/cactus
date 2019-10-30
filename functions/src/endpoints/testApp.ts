@@ -7,7 +7,7 @@ import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsServi
 import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import {getDateFromISOString} from "@shared/util/DateUtil";
+import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 // const Sentry = require('@sentry/node');
 const app = express();
@@ -31,10 +31,13 @@ app.get('/bq', async (req, resp) => {
 app.get("/content", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = new Date();
+    let d = getDateAtMidnightDenver();
     if (qDate) {
-        d = getDateFromISOString(qDate) || new Date();
+        console.log("date input", qDate);
+        d = localDateFromISOString(qDate) || d
     }
+
+    console.log("local date ", d);
     const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate(d);
     return resp.send((content && content.toJSON()) || "none")
 });
@@ -42,10 +45,11 @@ app.get("/content", async (req, resp) => {
 app.get("/contentJob", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = new Date();
+    let d = getDateAtMidnightDenver();
     if (qDate) {
-        d = getDateFromISOString(qDate) || new Date();
+        d = localDateFromISOString(qDate) || d;
     }
+    console.log("testApi: content Date", getISODate(d));
     const result = await startSentPromptJob(d, undefined, true);
     return resp.send(result);
 });
