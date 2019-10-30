@@ -89,7 +89,7 @@ export function isoDateStringToFlamelinkDateString(input?: string|undefined): st
         return;
     }
 
-    return DateTime.fromJSDate(date).toISO({includeOffset: false, suppressMilliseconds: true, suppressSeconds: true});
+    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({includeOffset: false, suppressMilliseconds: true, suppressSeconds: true});
 }
 
 export function getFlamelinkDateString(date: Date = new Date()): string {
