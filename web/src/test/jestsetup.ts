@@ -1,6 +1,7 @@
 window.__GOOGLE_ANALYTICS_ID__ = 'UA-127159143-6';
 window.__GOOGLE_OPTIMIZE_ID__ = '';
 window.__FIRST_PROMPT_ID__ = '12345';
+window.__CLOUDSPONGE_KEY__ = 'localhost';
 window.__API_DOMAIN__ = 'https://us-central1-cactus-app-stage.cloudfunctions.net';
 window.__FULL_STORY_TEAM_ID__ = '';
 window.__PUBLIC_DOMAIN__ = 'https://cactus-app-stage.web.app';
