@@ -61,7 +61,7 @@
 
     export default Vue.extend({
         props: {
-            contact: EmailContact
+            contact: {type: Object as () => EmailContact}
         },
         components: {
 
