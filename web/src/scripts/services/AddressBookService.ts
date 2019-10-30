@@ -1,20 +1,7 @@
 import {Config} from "@web/config";
-
-export interface EmailAddress {
-  address: string
-}
-
-export interface CloudspongeContact {
-  first_name: string,
-  last_name: string,
-  email: Array<EmailAddress>
-}
-
-export interface EmailContact {
-  first_name: string,
-  last_name:string,
-  email: string
-}
+import {CloudspongeContact, 
+        EmailContact, 
+        EmailService} from "@shared/types/EmailContactTypes";
 
 class AddressBookService {
     public static sharedInstance =new AddressBookService();
