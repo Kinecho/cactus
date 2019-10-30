@@ -2,7 +2,7 @@
 import Vue from "vue";
 import VueClipboard from 'vue-clipboard2';
 import SocialSharing from 'vue-social-sharing';
-import SocialActivity from "@components/SocialActivity.vue";
+import SocialHome from "@components/SocialHome.vue";
 
 import {commonInit} from "@web/common";
 
@@ -13,9 +13,9 @@ Vue.use(SocialSharing);
 
 new Vue({
     el: "#app",
-    template: `<SocialActivity/>`,
+    template: `<SocialHome/>`,
     components: {
-        SocialActivity,
+        SocialHome,
     }
 });
 

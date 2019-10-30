@@ -424,12 +424,12 @@ module.exports = {
         "includeInDev": true,
         "name": "account_settings"
     },
-    "social_activity": {
+    "social_home": {
         "title": "Friends & Activity | Cactus",
         "path": "/friends",
         "reflectionPrompt": false,
         "includeInDev": true,
-        "name": "social_activity"
+        "name": "social_home"
     },
     "prompt": {
         "title": "Cactus Mindful Moment",

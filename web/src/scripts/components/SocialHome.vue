@@ -1,5 +1,5 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="socialActivity">
+    <div class="socialHome">
         <NavBar/>
         <div class="centered">
             <div class="loading" v-if="loading">
@@ -197,7 +197,7 @@
     @import "social";
     @import "transitions";
 
-    .socialActivity {
+    .socialHome {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
