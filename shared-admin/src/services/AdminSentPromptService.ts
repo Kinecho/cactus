@@ -154,7 +154,7 @@ export default class AdminSentPromptService {
 
 
     //Mostly copied from the mailchimp recipient job above.
-    async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date): Promise<UpsertSentPromptResult> {
+    async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<UpsertSentPromptResult> {
         try {
 
 
@@ -207,8 +207,13 @@ export default class AdminSentPromptService {
             sentPrompt.userId = member.userId;
             sentPrompt.memberEmail = member.email;
 
-            const saved = await this.save(sentPrompt);
-            result.sentPrompt = saved;
+            if (!dryRun) {
+                const saved = await this.save(sentPrompt);
+                result.sentPrompt = saved;
+            } else {
+                result.sentPrompt = sentPrompt
+            }
+
             return result;
         } catch (error) {
             console.error("Failed to run upsertSentPromptForMember", error);

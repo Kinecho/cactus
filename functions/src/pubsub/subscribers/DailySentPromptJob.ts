@@ -15,11 +15,15 @@ import AdminSentPromptService, {UpsertSentPromptResult} from "@admin/services/Ad
 interface DailySentPromptMessage {
     contentDate?: string,
     sendDate?: string, //optional, will use promptDate if not set
+    dryRun?: boolean,
 }
 
 
 interface JobResult {
+    dryRun: boolean,
     promptContentEntryId?: string,
+    subjectLine?: string,
+    promptQuestion?: string,
     promptId?: string,
     sendDate?: string,
     success: boolean,
@@ -29,22 +33,25 @@ interface JobResult {
     numError?: number,
     numCreated?: number,
     numUpdated?: number,
+    numBatches?: number,
+    durationMs?: number,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    let job: DailySentPromptMessage = {};
+    let job: DailySentPromptMessage = {dryRun: false};
 
     if (message.json) {
         job = message.json as DailySentPromptMessage
     }
 
+    const {dryRun} = job;
     const contentDate = getDateFromISOString(job.contentDate) || getTodaysDate();
     const sendDate: Date | undefined = getDateFromISOString(job.sendDate);
-    await runJob(contentDate, sendDate);
+    await runJob(contentDate, sendDate, dryRun);
 }
 
 
-export async function runJob(contentDate: Date, sendDate?: Date | undefined): Promise<JobResult> {
+export async function runJob(contentDate: Date, sendDate?: Date | undefined, dryRun: boolean = false): Promise<JobResult> {
     try {
         const start = new Date();
         console.log("Starting DailySentPromptJob Processing job ");
@@ -54,13 +61,13 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined): Pr
 
         if (!content) {
             await AdminSlackService.getSharedInstance()
-                .sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No prompt content was found for date ${isoDateStringToFlamelinkDateString(getISODate(contentDate))}`);
+                .sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No prompt content was found for date ${isoDateStringToFlamelinkDateString(getISODate(contentDate))}${dryRun ? "\nThis was a DRY RUN" : ""}`);
             return {error: "No PromptContent was found for given date", success: false};
         }
         const promptId = content.promptId;
         if (!promptId) {
             await AdminSlackService.getSharedInstance()
-                .sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No promptId found on PromptContent \`\`\`${JSON.stringify(content.toJSON(), null, 2)}\`\`\``);
+                .sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No promptId found on PromptContent \`\`\`${JSON.stringify(content.toJSON(), null, 2)}\`\`\`${dryRun ? "\nThis was a DRY RUN" : ""}`);
             return {
                 error: "No promptId was found on the PromptContent",
                 promptContentEntryId: content.entryId,
@@ -70,7 +77,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined): Pr
 
         const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
         if (!prompt) {
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No prompt found for promptId \`${promptId}\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: \`DailySentPromptJob\` No prompt found for promptId \`${promptId}\`${dryRun ? "\nThis was a DRY RUN" : ""}`);
             return {
                 success: false,
                 error: "no ReflectionPrompt found for promptId " + promptId,
@@ -79,7 +86,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined): Pr
             };
         }
 
-        const result = await createSentPrompts(content, prompt, sendDate);
+        const result = await createSentPrompts(content, prompt, sendDate, dryRun);
 
         const end = new Date();
         const duration = end.getTime() - start.getTime();
@@ -113,9 +120,12 @@ function getTodaysDate(): Date {
 }
 
 
-export async function createSentPrompts(content: PromptContent, prompt: ReflectionPrompt, sendDate?: Date): Promise<JobResult> {
-
+export async function createSentPrompts(content: PromptContent, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<JobResult> {
+    const start = new Date()
     const result: JobResult = {
+        dryRun,
+        subjectLine: content.subjectLine,
+        promptQuestion: prompt.question,
         promptContentEntryId: content.entryId,
         promptId: prompt.id,
         sendDate: getISODate(sendDate),
@@ -124,14 +134,16 @@ export async function createSentPrompts(content: PromptContent, prompt: Reflecti
         numSuccess: 0,
         numError: 0,
         numCreated: 0,
-        numUpdated: 0
+        numUpdated: 0,
+        numBatches: 0,
     };
 
     try {
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             onData: async (members: CactusMember[]) => {
-                console.log("Got members for batch");
-                const sentPromptResults: UpsertSentPromptResult[] = await Promise.all(members.map(member => AdminSentPromptService.getSharedInstance().upsertForCactusMember(member, prompt, sendDate)));
+                console.log(`Got members for batch${dryRun ? "\nThis was a DRY RUN" : ""}`);
+                result.numBatches! += 1;
+                const sentPromptResults: UpsertSentPromptResult[] = await Promise.all(members.map(member => AdminSentPromptService.getSharedInstance().upsertForCactusMember(member, prompt, sendDate, dryRun)));
                 sentPromptResults.forEach(sp => {
                     if (!sp.error) {
                         result.numSuccess! += 1;
@@ -146,9 +158,11 @@ export async function createSentPrompts(content: PromptContent, prompt: Reflecti
                     }
                 });
                 result.totalProcessed! += members.length;
-                console.log(`processed ${result.totalProcessed} so far`);
+                console.log(`processed ${result.totalProcessed} so far ${dryRun ? "\nThis was a DRY RUN" : ""}`);
             }
         });
+        const end = new Date();
+        result.durationMs = end.getTime() - start.getTime();
     } catch (error) {
         result.error = error;
         result.success = false;

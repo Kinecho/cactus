@@ -6,7 +6,7 @@ import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@s
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 let firestoreService: AdminFirestoreService;
-
+const DEFAULT_BATCH_SIZE = 500;
 export default class AdminCactusMemberService {
     protected static sharedInstance: AdminCactusMemberService;
 
@@ -252,7 +252,7 @@ export default class AdminCactusMemberService {
         let batchNumber = 0;
         let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
             pagination: {
-                limit: options.batchSize || 100,
+                limit: options.batchSize || DEFAULT_BATCH_SIZE,
                 orderBy: BaseModelField.createdAt,
                 sortDirection: QuerySortDirection.asc
             }

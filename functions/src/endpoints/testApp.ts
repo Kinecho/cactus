@@ -8,6 +8,7 @@ import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 // const Sentry = require('@sentry/node');
 const app = express();
 app.use(cors({origin: true}));
@@ -38,16 +39,16 @@ app.get("/content", async (req, resp) => {
     return resp.send((content && content.toJSON()) || "none")
 });
 
-// app.get("/contentJob", async (req, resp) => {
-//     console.log("Trying to fetch content");
-//     const qDate = req.query.d;
-//     let d = new Date();
-//     if (qDate) {
-//         d = getDateFromISOString(qDate) || new Date();
-//     }
-//     const result = await startSentPromptJob(d);
-//     return resp.send(result);
-// });
+app.get("/contentJob", async (req, resp) => {
+    console.log("Trying to fetch content");
+    const qDate = req.query.d;
+    let d = new Date();
+    if (qDate) {
+        d = getDateFromISOString(qDate) || new Date();
+    }
+    const result = await startSentPromptJob(d, undefined, true);
+    return resp.send(result);
+});
 
 app.get("/error", async (req, resp) => {
     try {
