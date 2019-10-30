@@ -22,7 +22,7 @@
                 <div class="contactCards" v-for="contact in importedContacts">
                     <div class="contactCard">
                         <div class="avatar">
-                            <img src="https://placekitten.com/44/44" alt="User avatar"/>
+                            <img :src="'https://i.pravatar.cc/44?u=' + contact.email" alt="User avatar"/>
                         </div>
                         <div class="contactInfo">
                             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
