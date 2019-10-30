@@ -28,7 +28,6 @@ export default class SentPromptsDuplicateCleanup extends FirebaseCommand {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
 
-
         this.userResponse = await prompts([
             {
                 message: "what is the promptId that should be deleted?",
