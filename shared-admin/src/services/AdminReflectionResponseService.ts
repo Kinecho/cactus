@@ -74,6 +74,18 @@ export default class AdminReflectionResponseService {
         throw new Error("Not implemented");
     }
 
+    async getMemberResponsesForPromptId(opts: { memberId: string, promptId: string }): Promise<ReflectionResponse[]> {
+        const {promptId, memberId} = opts;
+        if (!memberId) {
+            return [];
+        }
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId)
+            .where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
+
+        return results.results
+    }
+
     async getResponsesForPromptId(promptId: string): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.promptId, "==", promptId);
         const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
