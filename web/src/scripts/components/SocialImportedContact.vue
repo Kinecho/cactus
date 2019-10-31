@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard">
         <div class="avatar">
-            <img :src="'https://i.pravatar.cc/44?u=' + contact.email" alt="User avatar"/>
+            <img :src="'assets/images/avatars/avatar' + (Math.floor(Math.random() * 5) + 1) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
