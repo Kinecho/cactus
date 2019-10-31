@@ -7,7 +7,18 @@
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
             <p class="email">{{contact.email}}</p>
         </div>
-        <button class="secondary small" @click.prevent="">Invite</button>
+        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click.prevent="readyToInvite = true">
+            <span>Invite</span>
+        </button>
+        
+        <div v-if="wasInvited">Invited!</div>
+        
+        <div class="invite" v-if="readyToInvite">
+            <textarea placeholder="Include a note... (optional)" />
+            <button class="primary small" @click.prevent="wasInvited = true; readyToInvite = false;">Send</button>
+            <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
+        </div>
+
     </div>
     <!--
     <div class="contactCard">
@@ -75,10 +86,12 @@
         },
         
         data(): {
-            readyToInvite: boolean      
+            readyToInvite: boolean,
+            wasInvited: boolean      
         } {
             return {
-              readyToInvite: false             
+              readyToInvite: false,
+              wasInvited: false             
             }
         },
         methods: {
@@ -90,3 +103,18 @@
         }
     })
 </script>
+
+<style scoped lang="scss">
+    @import "~styles/common";
+    @import "~styles/mixins";
+    @import "~styles/transitions";
+
+    .invite {
+        display: block;
+
+        textarea {
+            min-width: 20rem;
+            min-height: 3rem;
+        }
+    }
+</style>
