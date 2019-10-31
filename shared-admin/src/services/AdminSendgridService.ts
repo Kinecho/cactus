@@ -110,7 +110,7 @@ export default class AdminSendgridService {
 
             console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
-            await sgMail.send(mailParams);
+            //await sgMail.send(mailParams);
 
             console.log("Sendgrid email sent successfully");
             return true;
