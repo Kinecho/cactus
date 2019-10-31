@@ -14,9 +14,14 @@
         <div v-if="wasInvited">Invited!</div>
         
         <div class="invite" v-if="readyToInvite">
-            <textarea placeholder="Include a note... (optional)" />
-            <button class="primary small" @click.prevent="wasInvited = true; readyToInvite = false;">Send</button>
-            <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
+            <div v-if="sendingInvite">
+                Sending...
+            </div>
+            <div v-else>
+                <textarea placeholder="Include an optional note..." />
+                <button class="primary small" @click.prevent="sendInvite">Send</button>
+                <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
+            </div>
         </div>
 
     </div>
@@ -81,21 +86,35 @@
         },
         mounted() {
         },
-        destroyed() {
-            
+        destroyed() { 
         },
-        
+
         data(): {
             readyToInvite: boolean,
+            sendingInvite: boolean,
             wasInvited: boolean      
         } {
             return {
               readyToInvite: false,
+              sendingInvite: false
               wasInvited: false             
             }
         },
+
         methods: {
+            sendInvite(): boolean {
+                // put logic here to send an invite async
+                this.sendingInvite = true;
+
+                setTimeout(function () {  
+                    this.wasInvited = true; 
+                    this.readyToInvite = false;
+                }.bind(this), 2000)
+
+                return true;
+            }
         },
+
         computed: {
             randomAvatarNumber(): number {
                 return (Math.floor(Math.random() * 5) + 1);
