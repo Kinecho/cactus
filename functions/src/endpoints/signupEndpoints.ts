@@ -7,7 +7,9 @@ import {
     EmailStatusResponse,
     LoginEvent,
     MagicLinkRequest,
-    MagicLinkResponse
+    MagicLinkResponse,
+    InvitationRequest,
+    InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
@@ -356,6 +358,48 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         resp.sendStatus(500)
     }
 
+});
+
+app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload: InvitationRequest = req.body;
+    console.log("signupEndpoints.send-invite", payload);
+
+    const {to_email} = payload;
+
+    if (!to_email) {
+        console.error("signupEndpoints.send-invite: No email provided in payload");
+        const errorResponse: InvitationResponse = {success: false, error: "No email provided", to_email: ""};
+        resp.send(errorResponse);
+        return;
+    }
+
+    /*
+        Return ths response now, and finish everything afterwards, so that the user has a faster experience.
+     */
+    const response: InvitationResponse = {
+        success: true,
+        to_email,
+    };
+
+    try {
+        await AdminSendgridService.getSharedInstance().sendInvitation({
+            to_email: to_email,
+            link: 'https://cactus.app/test'
+        });
+        resp.send(response);
+    } catch (error) {
+        Sentry.captureException(error);
+        console.error(error);
+
+        resp.status(500).send({
+            to_email,
+            sendSuccess: false,
+            error: error,
+        });
+    }
+
+
+    return;
 });
 
 

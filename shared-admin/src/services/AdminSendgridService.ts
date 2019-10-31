@@ -1,6 +1,6 @@
 import {CactusConfig} from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
-import {MagicLinkEmail} from "@admin/services/SendgridServiceTypes";
+import {MagicLinkEmail, InvitationEmail} from "@admin/services/SendgridServiceTypes";
 
 // declare type MailService = sgMail.MailService;
 
@@ -88,6 +88,38 @@ export default class AdminSendgridService {
                 console.error("Failed to send Magic Link New User email", error.response.body);
             } else {
                 console.error("Failed to send Magic Link New User email", error);
+            }
+            return false;
+        }
+
+    }
+
+
+    async sendInvitation(options: InvitationEmail): Promise<boolean> {
+
+        try {
+            const mailParams = {
+                to: options.to_email,
+                from: {name: "Cactus", email: "help@cactus.app"},
+                templateId: this.config.sendgrid.template_ids.invitation,
+                categories: ["Invitation"],
+                dynamicTemplateData: {
+                    link: "",
+                }
+            };
+
+            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+
+            await sgMail.send(mailParams);
+
+            console.log("Sendgrid email sent successfully");
+            return true;
+
+        } catch (error) {
+            if (error.response && error.response.body) {
+                console.error("Failed to send Invitation email", error.response.body);
+            } else {
+                console.error("Failed to send Invitation email", error);
             }
             return false;
         }

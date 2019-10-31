@@ -27,6 +27,17 @@ export interface MagicLinkResponse extends ApiResponse {
     message?: string,
 }
 
+export interface InvitationRequest {
+    to_email: string,
+}
+
+export interface InvitationResponse extends ApiResponse {
+    success: boolean,
+    to_email: string,
+    error?: any,
+    message?: string,
+}
+
 export interface LoginEvent {
     userId?: string | null,
     isNewUser: boolean,
