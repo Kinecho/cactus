@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + (Math.floor(Math.random() * 5) + 1) + '.png'" alt="User avatar"/>
+            <img :src="'assets/images/avatars/avatar' + randomAvatarNumber + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
@@ -84,6 +84,9 @@
         methods: {
         },
         computed: {
+            randomAvatarNumber(): number {
+                return (Math.floor(Math.random() * 5) + 1);
+            }
         }
     })
 </script>
