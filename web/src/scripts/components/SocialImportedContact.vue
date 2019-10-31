@@ -111,12 +111,16 @@
 
                 const sendInviteResult = await sendInvite(this.contact);
 
-                if (sendInviteResult.success) {
+                console.log(sendInviteResult);
+
+                if (sendInviteResult.data && sendInviteResult.data.success) {
+                    this.sendingInvite = false;
                     this.wasInvited = true; 
                     this.readyToInvite = false;
                     this.error = undefined;
                     return;
                 } else {
+                    this.sendingInvite = false;
                     this.wasInvited = false;
                     this.readyToInvite = true;
                     this.error = sendInviteResult.message;
