@@ -74,6 +74,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
+    import {sendInvite} from '@web/invite'
 
     export default Vue.extend({
         props: {
@@ -92,26 +93,35 @@
         data(): {
             readyToInvite: boolean,
             sendingInvite: boolean,
-            wasInvited: boolean      
+            wasInvited: boolean,
+            error: string | undefined      
         } {
             return {
               readyToInvite: false,
-              sendingInvite: false
-              wasInvited: false             
+              sendingInvite: false,
+              wasInvited: false,
+              error: undefined             
             }
         },
 
         methods: {
-            sendInvite(): boolean {
+            async sendInvite(): Promise<void> {
                 // put logic here to send an invite async
                 this.sendingInvite = true;
 
-                setTimeout(function () {  
+                const sendInviteResult = await sendInvite(this.contact);
+
+                if (sendInviteResult.success) {
                     this.wasInvited = true; 
                     this.readyToInvite = false;
-                }.bind(this), 2000)
-
-                return true;
+                    this.error = undefined;
+                    return;
+                } else {
+                    this.wasInvited = false;
+                    this.readyToInvite = true;
+                    this.error = sendInviteResult.message;
+                    return;
+                }
             }
         },
 
