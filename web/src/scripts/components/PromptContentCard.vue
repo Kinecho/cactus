@@ -1,6 +1,6 @@
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
-        <section id="content-card" class="content">
+        <section class="content">
             <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
                 <div class="element-icon" >
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
