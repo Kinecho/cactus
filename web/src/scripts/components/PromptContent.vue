@@ -1074,14 +1074,6 @@
         }
     }
 
-    .flip-card.front {
-        visibility: visible;
-
-        .flipped & {
-            visibility: hidden;
-        }
-    }
-
     .flip-card.back {
         visibility: hidden;
 
