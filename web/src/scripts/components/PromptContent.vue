@@ -38,7 +38,7 @@
                 </div>
 
                 <div :class="['flipper', {flipped: showSharing}]">
-                    <div class="front flip-card" v-touch:tap="handleTap" :aria-hidden="showSharing">
+                    <div class="front flip-card" v-touch:tap="handleTap">
                         <transition :name="transitionName" mode="out-in" v-if="!completed">
                             <content-card
                                     v-bind:key="activeIndex"
@@ -71,7 +71,7 @@
                             />
                         </transition>
                     </div>
-                    <div class="back flip-card" :aria-hidden="!showSharing">
+                    <div class="back flip-card">
                         <prompt-content-sharing v-bind:promptContent="promptContent"/>
                     </div>
                 </div>
@@ -1007,7 +1007,7 @@
     .flipper {
         position: relative;
         transform-style: preserve-3d;
-        transition: 0.6s;
+        transition: 0.3s;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -1071,6 +1071,22 @@
                 border-radius: 12px;
                 box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             }
+        }
+    }
+
+    .flip-card.front {
+        visibility: visible;
+
+        .flipped & {
+            visibility: hidden;
+        }
+    }
+
+    .flip-card.back {
+        visibility: hidden;
+
+        .flipped & {
+            visibility: visible;
         }
     }
 
