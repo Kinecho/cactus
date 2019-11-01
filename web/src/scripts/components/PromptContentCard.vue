@@ -1,6 +1,6 @@
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
-        <section class="content">
+        <section id="content-card" class="content">
             <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
                 <div class="element-icon" >
                     <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
@@ -289,6 +289,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import TypeMate from "typemate";
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -346,6 +347,13 @@
         },
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
+        },
+        mounted() {
+            // remove orphans from text and quote elements
+            const content = document.getElementById('content-card');
+            if (content) {
+                TypeMate(content, { selector: '.text, .quote' }).apply();
+            }
         },
         watch: {
             saved(isSaved) {
@@ -425,7 +433,7 @@
                 }
 
                 return classes;
-            }
+            },
         },
         methods: {
             async createSharableLink() {

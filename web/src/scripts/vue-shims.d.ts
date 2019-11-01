@@ -21,6 +21,8 @@ declare module 'vue-simple-markdown'{
     export default VueSimpleMarkdown;
 }
 
+declare module 'typemate';
+
 interface Window {
     [key:string]: any; // Add index signature
 }

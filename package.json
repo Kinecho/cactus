@@ -47,6 +47,7 @@
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
         "firebase": "^6.3.1",
+        "typemate": "^0.7.1",
         "vue-clipboard2": "^0.3.0",
         "vue-social-sharing": "^2.4.6",
         "vue2-touch-events": "^2.0.0"
