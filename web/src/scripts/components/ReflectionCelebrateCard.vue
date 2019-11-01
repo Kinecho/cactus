@@ -1,7 +1,7 @@
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
-            <div :class="['front', 'flip-card']" :aria-hidden="showTradeNote">
+            <div :class="['front', 'flip-card']">
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>

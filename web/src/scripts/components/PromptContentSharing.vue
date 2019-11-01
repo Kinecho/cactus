@@ -24,7 +24,7 @@
                 inline-template>
             <div class="sharing">
                 <network network="email">
-                    <button aria-label="Use email to share" class="emailBtn small btn wiggle">
+                    <button aria-label="Email" class="emailBtn small btn wiggle">
                         <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
                     </button>
                 </network>
