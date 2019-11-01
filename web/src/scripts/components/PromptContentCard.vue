@@ -3,7 +3,7 @@
         <section class="content">
             <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
                 <div class="element-icon" >
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
                 </div>
                 <h4 class="label">{{cactusElement}}</h4>
             </a>

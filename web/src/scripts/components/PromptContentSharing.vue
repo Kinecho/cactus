@@ -9,7 +9,7 @@
         </div>
         <div class="referral-link">
             <input type="text" class="link-input" name="referral-link" disabled="true" :value="attributedLink">
-            <button aria-label="Copy link" class="copy secondary btn" v-clipboard:copy="attributedLink"
+            <button class="copy secondary btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
                 <span v-if="copySucceeded === true">Copied</span>
@@ -29,12 +29,12 @@
                     </button>
                 </network>
                 <network network="twitter">
-                    <button aria-label="Use Twitter to share" class="twBtn small btn wiggle">
+                    <button aria-label="Twitter" class="twBtn small btn wiggle">
                         <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
                     </button>
                 </network>
                 <network network="facebook">
-                    <button aria-label="Use Facebook to share" class="fbBtn small btn wiggle">
+                    <button aria-label="Facebook" class="fbBtn small btn wiggle">
                         <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
                     </button>
                 </network>
