@@ -115,13 +115,14 @@ export default class AdminFlamelinkService {
             value: opts.value,
             schemaKey: schema
         });
+
         if (!results) {
             return undefined
         }
 
         let content = results;
 
-        let values = Object.values(results);
+        const values = Object.values(results);
         if (Array.isArray(values)) {
             [content] = values;
         }

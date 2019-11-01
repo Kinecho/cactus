@@ -5,6 +5,7 @@ export enum PubSubTopic {
     bridge_to_monday_prune = "bridge_to_monday_prune",
     unsubscriber_sync = "unsubscriber_sync",
     slack_command = "slack_command",
+    create_daily_sent_prompts = "create_daily_sent_prompts",
 }
 
 

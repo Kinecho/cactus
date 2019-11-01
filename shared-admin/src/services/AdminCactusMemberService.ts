@@ -3,9 +3,10 @@ import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/mo
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 let firestoreService: AdminFirestoreService;
-
+const DEFAULT_BATCH_SIZE = 500;
 export default class AdminCactusMemberService {
     protected static sharedInstance: AdminCactusMemberService;
 
@@ -34,7 +35,7 @@ export default class AdminCactusMemberService {
     }
 
     async delete(id?: string): Promise<CactusMember | undefined> {
-        if (!id){
+        if (!id) {
             return undefined
         }
         return firestoreService.delete(id, CactusMember);
@@ -240,6 +241,37 @@ export default class AdminCactusMemberService {
         const query = this.getCollectionRef();
         const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
         return results.results;
+    }
+
+    async getAllBatch(options: {
+        batchSize?: number,
+        onData: (members: CactusMember[]) => Promise<void>
+    }) {
+        console.log("Getting batched result 1 for all members");
+        const query = this.getCollectionRef();
+        let batchNumber = 0;
+        let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
+            pagination: {
+                limit: options.batchSize || DEFAULT_BATCH_SIZE,
+                orderBy: BaseModelField.createdAt,
+                sortDirection: QuerySortDirection.asc
+            }
+        });
+        console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+        await options.onData(results.results);
+        while (results.results.length > 0 && results.lastCursor) {
+            batchNumber++;
+            results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
+                pagination: {
+                    limit: options.batchSize || 100,
+                    startAfter: results.lastCursor,
+                    orderBy: BaseModelField.createdAt,
+                    sortDirection: QuerySortDirection.asc
+                }
+            });
+            console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+            await options.onData(results.results)
+        }
     }
 
     async getMembersCreatedSince(date: Date = new Date()): Promise<CactusMember[]> {

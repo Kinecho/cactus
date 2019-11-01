@@ -5,7 +5,7 @@ import {
     formatDurationAsTime,
     getDateAtMidnightDenver,
     getMailchimpDateString,
-    getStreak, mailchimpTimeZone,
+    getStreak, isoDateStringToFlamelinkDateString, mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
 } from "@shared/util/DateUtil";
@@ -84,10 +84,10 @@ describe("format duration", () => {
 });
 
 describe("format date time", () => {
-    test("No options", () => {
+    test("denver options", () => {
         const denverTime = 1560924000000; //2019-06-19 at midnight
         const date = new Date(denverTime);
-        expect(formatDateTime(date)).toEqual("2019-06-19 12:00 AM MDT")
+        expect(formatDateTime(date, {timezone: "America/Denver"})).toEqual("2019-06-19 12:00 AM MDT")
     });
 
     test("new york timezone", () => {
@@ -347,4 +347,9 @@ describe('Get Date at Midnight Denver', function () {
         expect(midnightDate.getMinutes()).toEqual(expectedMinute);
         expect(midnightDate.getSeconds()).toEqual(0);
     })
+});
+
+test("iso date to flamelink string", () => {
+    const input = "2019-08-27T02:45:00.000-06:00";
+    expect(isoDateStringToFlamelinkDateString(input)).toEqual("2019-08-27T02:45")
 });

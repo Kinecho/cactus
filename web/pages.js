@@ -446,6 +446,12 @@ module.exports = {
         "includeInDev": true,
         "name": "terms_of_service"
     },
+    "solo_proxy_auth": {
+        "title": "oAuth Proxy",
+        "path": "/oauth-proxy",
+        "includeInDev": true,
+        "name": "solo_proxy_auth"
+    },
     "privacy_policy": {
         "title": "Privacy Policy",
         "path": "/privacy-policy",
