@@ -12,7 +12,7 @@
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
-                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                    <vue-simple-markdown class="prevent-orphans" :source="processedContent.text"></vue-simple-markdown>
                 </p>
             </div>
 
@@ -50,7 +50,7 @@
                 <div class="avatar-container" v-if="quoteAvatar">
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
-                <p class="quote">
+                <p class="quote prevent-orphans">
                     "{{processedContent.quote.text}}"
                 </p>
                 <div class="author">
@@ -289,7 +289,6 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
-    import TypeMate from "typemate";
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -349,10 +348,10 @@
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
         },
         mounted() {
-            // remove orphans from text and quote elements
-            const content = document.getElementById('content-card');
-            if (content) {
-                TypeMate(content, { selector: '.text, .quote' }).apply();
+            const elements = Array.from(document.querySelectorAll('.prevent-orphans'));
+
+            for (let elem of elements as any){ 
+                this.preventOrphans(elem);
             }
         },
         watch: {
@@ -495,6 +494,24 @@
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
+            },
+            preventOrphans(elem: HTMLElement) {
+                // Split words/tags into array
+                let textItems = elem.innerHTML.trim().replace(/&nbsp;/g, ' ').split(/ (?=[^>]*(?:<|$))/);
+
+                // Find the second to last work
+                var targetWord = textItems[(textItems.length - 2)];
+
+                // Stick a no break space to the end of the word and replace the instance in the array
+                textItems[(textItems.length - 2)] = targetWord + '&nbsp;';
+
+                // Join the words back together
+                let result = textItems.join(' ');
+
+                // Replace whitespace after no break spaces
+                result = result.replace(/&nbsp; /g, '&nbsp;');
+                
+                elem.innerHTML = result;
             }
         }
     })
