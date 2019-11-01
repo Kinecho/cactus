@@ -7,7 +7,7 @@ import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {getDateFromISOString} from "@shared/util/DateUtil";
+import {getDateFromISOString, isoDateStringToFlamelinkDateString} from "@shared/util/DateUtil";
 import PromptContent, {Content, ContentType} from "@shared/models/PromptContent";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
@@ -120,7 +120,7 @@ export default class CreatePromptModule extends FirebaseCommand {
             console.log("saved the prompt successfully. Id", promptId);
 
             savedContent.promptId = promptId;
-            savedContent.scheduledSendAt = this.mailchimpCommand ? this.mailchimpCommand.scheduleDateISO : undefined;
+            savedContent.scheduledSendAt = this.mailchimpCommand ? isoDateStringToFlamelinkDateString(this.mailchimpCommand.scheduleDateISO) : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
             savedContent.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
             savedContent.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
