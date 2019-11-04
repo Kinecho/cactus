@@ -259,7 +259,7 @@ describe("get streak", () => {
     });
 
     test("3 days in streak, 3 dates", () => {
-        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const startTime = DateTime.local().set({day: 1, month: 9, year: 2019, hour: 12, minute: 0, second: 0});
         const dates: Date[] = [
             startTime.minus({hours: 6}).toJSDate(),
             startTime.minus({hours: 13}).toJSDate(),
@@ -269,7 +269,7 @@ describe("get streak", () => {
     });
 
     test("broken streak after 2 days, 4 dates", () => {
-        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const startTime = DateTime.local().set({day: 1, month: 9, year: 2019, hour: 12, minute: 0, second: 0});
         const dates: Date[] = [
             startTime.minus({hours: 6}).toJSDate(),
             startTime.minus({hours: 13}).toJSDate(),
@@ -280,7 +280,7 @@ describe("get streak", () => {
     });
 
     test("broken streak after 3 days, 4 dates", () => {
-        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0});
+        const startTime = DateTime.local().set({day: 1, month: 9, year: 2019, hour: 12, minute: 0, second: 0});
         const dates: Date[] = [
             startTime.minus({hours: 6}).toJSDate(),
             startTime.minus({hours: 13}).toJSDate(),

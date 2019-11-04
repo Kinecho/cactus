@@ -187,7 +187,7 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date()): n
     const dt = DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0});
     const t = DateTime.fromJSDate(today).set({hour: 0, minute: 0, millisecond: 0, second: 0});
 
-    return t.diff(dt).as("day")
+    return Math.round(t.diff(dt).as("day"))
 }
 
 export function atMidnight(date: Date): Date {
