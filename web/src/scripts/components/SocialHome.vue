@@ -107,8 +107,7 @@
     import {PageRoute} from '@web/PageRoutes';
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
-    import {QueryParam} from '@shared/util/queryParams'
-    import {appendQueryParams} from '@shared/util/StringUtil'
+    import {generateReferralLink} from '@shared/util/SocialInviteUtil'
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -174,16 +173,14 @@
                 return !this.authLoaded;
             },
             referralLink(): string | undefined {
-                const url = `${Config.domain}`;
-                const params: { [key: string]: string } = {
-                    [QueryParam.UTM_SOURCE]: "cactus.app",
-                    [QueryParam.UTM_MEDIUM]: "invite-friends"
-                };
-                if (this.member && this.member.email) {
-                    params[QueryParam.REFERRED_BY_EMAIL] = this.member.email;
+                if (this.member) {
+                    return generateReferralLink({ 
+                        member: this.member, 
+                        utm_source: 'cactus.app', 
+                        utm_medium: 'invite-friends', 
+                        domain: Config.domain 
+                    });
                 }
-
-                return appendQueryParams(url, params);
             }
         }
     })
