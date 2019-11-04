@@ -9,7 +9,7 @@ export enum SocialInviteField {
 }
 
 export default class SocialInvite extends BaseModel {
-    readonly collection = Collection.invites;
+    readonly collection = Collection.socialInvites;
     static Field = SocialInviteField;
     senderMemberId?: string;
     recipientEmail?: string;
