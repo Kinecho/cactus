@@ -3,9 +3,11 @@ import {Endpoint, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 
 export interface InviteResult {
-    success: boolean,
     email: string,
     message: string,
+    data?: {
+      success: boolean
+    },
     error?: {
         title: string,
         message: string,
@@ -22,7 +24,9 @@ export async function sendInvite(contact: EmailContact): Promise<InviteResult> {
     return await request.post(Endpoint.sendInvite, options);
   } catch (e) {
     return {
-      success: false,
+      data: {
+        success: false,
+      },
       email: options.to_email,
       message: "Failed to send invitation",
       error: e
