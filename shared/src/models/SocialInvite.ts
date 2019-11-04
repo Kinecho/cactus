@@ -3,7 +3,7 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 export enum SocialInviteField {
     senderMemberId = "senderMemberId",
     recipientEmail = "recipientEmail",
-    recipientMemberId? = "recipientMemberId",
+    recipientMemberId = "recipientMemberId",
     sentAt = "sentAt",
     didJoin = "didJoin"
 }
