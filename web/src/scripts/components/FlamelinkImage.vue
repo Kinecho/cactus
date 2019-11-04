@@ -1,5 +1,5 @@
 <template>
-    <img :src="imageUrl" alt="" v-if="imageUrl"/>
+    <img :src="imageUrl" :alt="altText" v-if="imageUrl"/>
 </template>
 
 <script lang="ts">
@@ -35,6 +35,11 @@
         watch: {
             async imageId() {
                 await this.fetchImageUrl()
+            }
+        },
+        computed: {
+            altText(): string {
+                return this.image.altText || ''
             }
         },
         methods: {

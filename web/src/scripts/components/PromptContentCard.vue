@@ -3,7 +3,7 @@
         <section class="content">
             <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
                 <div class="element-icon" >
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
                 </div>
                 <h4 class="label">{{cactusElement}}</h4>
             </a>
@@ -12,7 +12,7 @@
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
-                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                    <vue-simple-markdown class="prevent-orphans" :source="processedContent.text"></vue-simple-markdown>
                 </p>
             </div>
 
@@ -50,7 +50,7 @@
                 <div class="avatar-container" v-if="quoteAvatar">
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
-                <p class="quote">
+                <p class="quote prevent-orphans">
                     "{{processedContent.quote.text}}"
                 </p>
                 <div class="author">
@@ -347,6 +347,13 @@
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
         },
+        mounted() {
+            const elements = Array.from(document.querySelectorAll('.prevent-orphans'));
+
+            for (let elem of elements as any){ 
+                this.preventOrphans(elem);
+            }
+        },
         watch: {
             saved(isSaved) {
                 console.log("saved changed", isSaved);
@@ -425,7 +432,7 @@
                 }
 
                 return classes;
-            }
+            },
         },
         methods: {
             async createSharableLink() {
@@ -487,6 +494,24 @@
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
+            },
+            preventOrphans(elem: HTMLElement) {
+                // Split words/tags into array
+                let textItems = elem.innerHTML.trim().replace(/&nbsp;/g, ' ').split(/ (?=[^>]*(?:<|$))/);
+
+                // Find the second to last work
+                var targetWord = textItems[(textItems.length - 2)];
+
+                // Stick a no break space to the end of the word and replace the instance in the array
+                textItems[(textItems.length - 2)] = targetWord + '&nbsp;';
+
+                // Join the words back together
+                let result = textItems.join(' ');
+
+                // Replace whitespace after no break spaces
+                result = result.replace(/&nbsp; /g, '&nbsp;');
+                
+                elem.innerHTML = result;
             }
         }
     })
