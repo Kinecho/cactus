@@ -30,6 +30,8 @@ function buildConfig(): CactusConfig {
         config.app.environment = "dev";
         config.web.domain = "localhost:8080";
         config.web.protocol = 'http'
+    } else {
+        config.web.protocol = 'https'
     }
 
     return config;
