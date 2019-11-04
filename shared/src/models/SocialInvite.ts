@@ -11,9 +11,9 @@ export enum SocialInviteField {
 export default class SocialInvite extends BaseModel {
     readonly collection = Collection.invites;
     static Field = SocialInviteField;
-    senderMemberId: string;
-    recipientEmail: string;
+    senderMemberId?: string;
+    recipientEmail?: string;
     recipientMemberId?: string;
-    sentAt: Date;
-    didJoin: boolean
+    sentAt?: Date;
+    didJoin?: boolean
 }
