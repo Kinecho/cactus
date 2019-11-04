@@ -1,19 +1,7 @@
 import {Config} from "@web/config";
 import {Endpoint, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
-
-export interface InviteResult {
-    email: string,
-    message: string,
-    data?: {
-      success: boolean
-    },
-    error?: {
-        title: string,
-        message: string,
-        friendlyMessage?: string
-    }
-}
+import {InviteResult} from "@shared/types/SocialInviteTypes";
 
 export async function sendInvite(contact: EmailContact): Promise<InviteResult> {
   const options = {

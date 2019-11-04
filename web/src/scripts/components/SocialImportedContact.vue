@@ -74,6 +74,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
+    import {InviteResult} from "@shared/types/SocialInviteTypes";
     import {sendInvite} from '@web/invite'
 
     export default Vue.extend({
@@ -106,12 +107,9 @@
 
         methods: {
             async sendInvite(): Promise<void> {
-                // put logic here to send an invite async
                 this.sendingInvite = true;
 
-                const sendInviteResult = await sendInvite(this.contact);
-
-                console.log(sendInviteResult);
+                const sendInviteResult: InviteResult = await sendInvite(this.contact);
 
                 if (sendInviteResult.data && sendInviteResult.data.success) {
                     this.sendingInvite = false;
