@@ -15,11 +15,11 @@ export default class AdminSocialInviteService {
     }
 
     getCollectionRef() {
-        return firestoreService.getCollectionRef(Collection.invites);
+        return firestoreService.getCollectionRef(Collection.socialInvites);
     }
 
     static initialize() {
-        firestoreService = AdminSocialInviteService.getSharedInstance();
+        firestoreService = AdminFirestoreService.getSharedInstance();
         AdminSocialInviteService.sharedInstance = new AdminSocialInviteService();
     }
 
