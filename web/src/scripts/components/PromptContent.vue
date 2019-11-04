@@ -11,13 +11,13 @@
 
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
-                    <button class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22">
+                    <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" aria-hidden="true">
                             <path fill="#29A389" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/>
                         </svg>
                         <span class="buttonText">Share Today's Prompt</span>
                     </button>
-                    <button class="share tertiary back" @click="showSharing = false" v-show="showSharing">
+                    <button aria-label="Back" class="share tertiary back" @click="showSharing = false" v-show="showSharing">
                         <div class="arrow-wrapper">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                                 <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
@@ -26,7 +26,7 @@
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
-                <button v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon">
+                <button aria-label="Close" v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                         <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
                     </svg>
@@ -76,16 +76,15 @@
                     </div>
                 </div>
 
-                <button class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing && !completed">
+                <button aria-label="Previous slide" class="previous arrow tertiary" @click="previous" v-show="hasPrevious && !showSharing && !completed">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
                 </button>
-                <button :class="['next', 'arrow', 'tertiary', {reflection: isReflection, complete: reflectionComplete}]"
+                <button aria-label="Next slide" :class="['next', 'arrow', 'tertiary', {reflection: isReflection, complete: reflectionComplete}]"
                         @click="next"
                         v-show="(hasNext || isLastCard) && !completed && !showSharing"
                 >
-
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                         <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                     </svg>
@@ -504,7 +503,7 @@
                         width: 1200,
                         transforms: ["w_1200","h_630","f_png","c_lpad"]});
                     ogImageTag.setAttribute("content", `${pngUrl}`);
-                    
+
                     if (twitterImageTag) {
                         twitterImageTag.setAttribute("content", `${pngUrl}`);
                     }
@@ -776,7 +775,6 @@
 
         button.secondary {
             transition: all .2s ease;
-            outline: transparent none;
 
             &:hover {
                 background-color: $lightGreen;
@@ -1009,7 +1007,7 @@
     .flipper {
         position: relative;
         transform-style: preserve-3d;
-        transition: 0.6s;
+        transition: 0.3s;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -1073,6 +1071,14 @@
                 border-radius: 12px;
                 box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             }
+        }
+    }
+
+    .flip-card.back {
+        visibility: hidden;
+
+        .flipped & {
+            visibility: visible;
         }
     }
 

@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
         <div class="info">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Two friends running, one with a green hat"/>
             <h2>Share With Friends</h2>
             <p>
                 {{meta.title}}
@@ -24,17 +24,17 @@
                 inline-template>
             <div class="sharing">
                 <network network="email">
-                    <button class="emailBtn small btn wiggle">
+                    <button aria-label="Email" class="emailBtn small btn wiggle">
                         <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
                     </button>
                 </network>
                 <network network="twitter">
-                    <button class="twBtn small btn wiggle">
+                    <button aria-label="Twitter" class="twBtn small btn wiggle">
                         <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
                     </button>
                 </network>
                 <network network="facebook">
-                    <button class="fbBtn small btn wiggle">
+                    <button aria-label="Facebook" class="fbBtn small btn wiggle">
                         <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
                     </button>
                 </network>
