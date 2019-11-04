@@ -18,7 +18,7 @@
                 Sending...
             </div>
             <div v-else>
-                <textarea placeholder="Include an optional note..." />
+                <textarea placeholder="Include an optional note..." v-model="message" />
                 <button class="primary small" @click.prevent="sendInvite">Send</button>
                 <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
             </div>
@@ -92,12 +92,14 @@
         },
 
         data(): {
+            message: string,
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
             error: string | undefined      
         } {
             return {
+              message: '',
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
@@ -109,7 +111,7 @@
             async sendInvite(): Promise<void> {
                 this.sendingInvite = true;
 
-                const sendInviteResult: InviteResult = await sendInvite(this.contact);
+                const sendInviteResult = await sendInvite(this.contact, this.message);
 
                 if (sendInviteResult.data && sendInviteResult.data.success) {
                     this.sendingInvite = false;
@@ -130,7 +132,7 @@
         computed: {
             randomAvatarNumber(): number {
                 return (Math.floor(Math.random() * 5) + 1);
-            }
+            },
         }
     })
 </script>

@@ -99,12 +99,13 @@ export default class AdminSendgridService {
 
         try {
             const mailParams = {
-                to: options.to_email,
+                to: options.toEmail,
                 from: {name: "Cactus", email: "help@cactus.app"},
                 templateId: this.config.sendgrid.template_ids.invitation,
                 categories: ["Invitation"],
                 dynamicTemplateData: {
                     link: "",
+                    message: options.message
                 }
             };
 

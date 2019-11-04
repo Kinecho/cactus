@@ -1,3 +1,5 @@
+import {EmailContact} from "@shared/types/EmailContactTypes";
+
 export interface InviteResult {
     email: string,
     message: string,
@@ -9,4 +11,10 @@ export interface InviteResult {
         message: string,
         friendlyMessage?: string
     }
+}
+
+export interface SocialInviteRequest {
+    toContact: EmailContact,
+    fromEmail: string,
+    message?: string
 }

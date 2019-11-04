@@ -8,9 +8,9 @@ import {
     LoginEvent,
     MagicLinkRequest,
     MagicLinkResponse,
-    InvitationRequest,
     InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
+import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
@@ -361,30 +361,43 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 });
 
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: InvitationRequest = req.body;
+    const payload: SocialInviteRequest = req.body;
     console.log("signupEndpoints.send-invite", payload);
 
-    const {to_email} = payload;
+    const requestUser = await getAuthUser(req);
+    if (!requestUser) {
+        console.log("No auth user was found on the request");
+        resp.sendStatus(401);
+        return
+    }
 
-    if (!to_email) {
-        console.error("signupEndpoints.send-invite: No email provided in payload");
-        const errorResponse: InvitationResponse = {success: false, error: "No email provided", to_email: ""};
+    const { toContact, fromEmail, message } = payload;
+
+    if (requestUser.email != fromEmail) {
+        console.log("Unauthorized: Request user does not match payload");
+        resp.sendStatus(403);
+        return
+    }
+
+    if (!toContact) {
+        console.error("signupEndpoints.send-invite: Email to send to was not provided in payload");
+        const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmail: ""};
         resp.send(errorResponse);
         return;
     }
-
-    /*
-        Return ths response now, and finish everything afterwards, so that the user has a faster experience.
-     */
+    
     const response: InvitationResponse = {
         success: true,
-        to_email,
+        toEmail: toContact.email,
+        fromEmail: fromEmail,
+        message: message
     };
-
+    
     try {
         await AdminSendgridService.getSharedInstance().sendInvitation({
-            to_email: to_email,
-            link: 'https://cactus.app/test'
+            toEmail: toContact.email,
+            fromEmail: fromEmail,
+            message: message
         });
         resp.send(response);
     } catch (error) {
@@ -392,7 +405,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         console.error(error);
 
         resp.status(500).send({
-            to_email,
+            toEmail: toContact.email,
             sendSuccess: false,
             error: error,
         });
