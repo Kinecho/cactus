@@ -11,6 +11,7 @@ import {
     InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
 import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import SocialInvite from "@shared/models/SocialInvite";
 import {generateReferralLink} from '@shared/util/SocialInviteUtil'
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
@@ -19,6 +20,7 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {appendDomain, getFullName, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminUserService from "@admin/services/AdminUserService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {getAuthUser} from "@api/util/RequestUtil";
@@ -414,6 +416,16 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
             message: message,
             link: referralLink
         });
+
+        if (response.success && member) {
+            let socialInvite = new SocialInvite();
+                socialInvite.senderMemberId = member.id;
+                socialInvite.recipientEmail = toContact.email;
+                socialInvite.sentAt = new Date();
+
+            await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+        }
+
         resp.send(response);
     } catch (error) {
         Sentry.captureException(error);

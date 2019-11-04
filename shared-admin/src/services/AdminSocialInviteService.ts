@@ -7,11 +7,11 @@ let firestoreService: AdminFirestoreService;
 export default class AdminSocialInviteService {
     protected static sharedInstance: AdminSocialInviteService;
 
-    static getSharedInstance(): AdminSocialInviteService {
-        if (!AdminSocialInviteService.sharedInstance) {
-            throw new Error("No shared instance available. Ensure you initialize AdminSocialInviteService before using it");
+    static getSharedInstance() {
+        if (AdminSocialInviteService.sharedInstance) {
+            return AdminSocialInviteService.sharedInstance;
         }
-        return AdminSocialInviteService.sharedInstance;
+        throw new Error("You must initialize AdminSocialInviteService service before calling getSharedInstance()");
     }
 
     getCollectionRef() {
