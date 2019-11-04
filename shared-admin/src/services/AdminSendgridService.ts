@@ -104,14 +104,15 @@ export default class AdminSendgridService {
                 templateId: this.config.sendgrid.template_ids.invitation,
                 categories: ["Invitation"],
                 dynamicTemplateData: {
-                    link: "",
+                    name: options.fromEmail,
+                    link: options.link,
                     message: options.message
                 }
             };
 
             console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
-            //await sgMail.send(mailParams);
+            await sgMail.send(mailParams);
 
             console.log("Sendgrid email sent successfully");
             return true;

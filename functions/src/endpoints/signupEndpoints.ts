@@ -11,6 +11,7 @@ import {
     InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
 import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import {generateReferralLink} from '@shared/util/SocialInviteUtil'
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
@@ -385,6 +386,8 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         resp.send(errorResponse);
         return;
     }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestUser.email);
     
     const response: InvitationResponse = {
         success: true,
@@ -393,11 +396,23 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         message: message
     };
     
+    const domain = Config.web.domain;
+    const protocol = Config.web.protocol;
+
+    const referralLink: string = 
+        generateReferralLink({ 
+            member: member, 
+            utm_source: 'cactus.app', 
+            utm_medium: 'invite-friends', 
+            domain: `${protocol}://${domain}`
+        });
+
     try {
         await AdminSendgridService.getSharedInstance().sendInvitation({
             toEmail: toContact.email,
             fromEmail: fromEmail,
-            message: message
+            message: message,
+            link: referralLink
         });
         resp.send(response);
     } catch (error) {

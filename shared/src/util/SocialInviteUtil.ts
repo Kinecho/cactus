@@ -3,7 +3,7 @@ import {appendQueryParams} from '@shared/util/StringUtil'
 import CactusMember from "@shared/models/CactusMember";
 
 export interface ReferralLinkParams {
-  member: CactusMember,
+  member: CactusMember | undefined,
   utm_source: string,
   utm_medium: string,
   domain?: string
