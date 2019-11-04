@@ -30,9 +30,10 @@ export function buildPromptContentURL(prompt?: ReflectionPrompt): string | undef
 
     const config = getConfig();
     const domain = config.web.domain;
+    const protocol = config.web.protocol;
 
     const path = prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath;
-    return `https://${domain}${path}`;
+    return `${protocol}://${domain}${path}`;
 
 
 }

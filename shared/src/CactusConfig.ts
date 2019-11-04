@@ -66,6 +66,7 @@ export interface CactusConfig {
     },
     web: {
         domain: string,
+        protocol: string,
     },
     ios: {
         bundle_id: string,

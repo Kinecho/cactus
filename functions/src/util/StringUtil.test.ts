@@ -43,7 +43,7 @@ describe("get prompt content url", () => {
 
     test("with content path prefixed with /", () => {
 
-        setTestConfig({web: {domain: "mydomain.com"}});
+        setTestConfig({web: {domain: "mydomain.com", protocol: "https"}});
 
         const input = new ReflectionPrompt();
         input.contentPath = "/test";
@@ -53,7 +53,7 @@ describe("get prompt content url", () => {
     });
 
     test("with content path not prefixed with /", () => {
-        setTestConfig({web: {domain: "mydomain.com"}});
+        setTestConfig({web: {domain: "mydomain.com", protocol: 'https'}});
 
         const input = new ReflectionPrompt();
         input.contentPath = "test/path";
