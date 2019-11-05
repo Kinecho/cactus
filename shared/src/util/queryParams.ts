@@ -19,5 +19,5 @@ export enum QueryParam {
     UTM_SOURCE = "utm_source",
     UTM_MEDIUM = "utm_medium",
     NO_NAV = "no_nav",
-    SOCIAL_INVITE_ID = "sid"
+    SOCIAL_INVITE_ID = "inviteId"
 }
