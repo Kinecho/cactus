@@ -168,7 +168,7 @@
                     }
 
 
-                    this.reflectionCount = reflections.length;
+                    this.totalCount = reflections.length;
                     this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
                     if (member) {
                         this.elementAccumulations = await ReflectionResponseService.sharedInstance.getElementAccumulationCounts(reflections);

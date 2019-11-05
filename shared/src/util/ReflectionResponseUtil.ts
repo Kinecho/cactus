@@ -20,3 +20,9 @@ export function calculateStreak(reflections: ReflectionResponse[], start?: Date|
 
     return getStreak(dates, start);
 }
+
+export function calculateDurationMs(reflections: ReflectionResponse[]): number {
+    return reflections.reduce((total, r) => {
+        return total + (r.reflectionDurationMs || 0)
+    }, 0)
+}

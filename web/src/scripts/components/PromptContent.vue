@@ -645,7 +645,7 @@
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
-                    this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
+                    this.reflectionResponse.totalDuration = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
                     const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true, updateReflectionLog: options.updateReflectionLog});
                     this.reflectionResponse = saved;

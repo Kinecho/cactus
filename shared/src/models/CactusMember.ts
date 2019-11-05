@@ -22,6 +22,12 @@ export type NotificationSettings = {
     [key in NotificationChannel]: NotificationStatus;
 };
 
+export interface ReflectionStats {
+    currentStreakDays: number,
+    totalDurationMs: number,
+    totalCount: number,
+}
+
 export enum Field {
     firstName = "firstName",
     lastName = "lastName",
@@ -37,6 +43,8 @@ export enum Field {
     signupConfirmedAt = "signupConfirmedAt",
     lastJournalEntryAt = "lastJournalEntryAt",
     unsubscribedAt = "unsubscribedAt",
+    stats = "stats",
+    stats_reflections = "reflections"
 }
 
 export default class CactusMember extends BaseModel {
@@ -71,6 +79,10 @@ export default class CactusMember extends BaseModel {
         utm_source?: string,
         utm_medium?: string,
         [name: string]: string | undefined
+    } = {};
+
+    stats: {
+        reflections?: ReflectionStats
     } = {};
 
     prepareForFirestore(): any {

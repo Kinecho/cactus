@@ -1,9 +1,11 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import CactusMember, {Field, JournalStatus, NotificationStatus} from "@shared/models/CactusMember";
+import AdminFirestoreService, {CollectionReference} from "@admin/services/AdminFirestoreService";
+import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import * as admin from "firebase-admin";
+import DocumentReference = admin.firestore.DocumentReference;
 
 let firestoreService: AdminFirestoreService;
 const DEFAULT_BATCH_SIZE = 500;
@@ -22,7 +24,7 @@ export default class AdminCactusMemberService {
         AdminCactusMemberService.sharedInstance = new AdminCactusMemberService();
     }
 
-    getCollectionRef() {
+    getCollectionRef(): CollectionReference {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.members);
     }
 
@@ -39,6 +41,17 @@ export default class AdminCactusMemberService {
             return undefined
         }
         return firestoreService.delete(id, CactusMember);
+    }
+
+    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }): Promise<void> {
+        const {memberId, stats} = options;
+        const doc:DocumentReference = this.getCollectionRef().doc(memberId);
+        const data: Partial<CactusMember> = {
+            stats: {
+                reflections: stats
+            }
+        };
+        await doc.set(data, {merge: true});
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {
@@ -303,4 +316,5 @@ export default class AdminCactusMemberService {
             return [];
         }
     }
+
 }
