@@ -405,7 +405,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         generateReferralLink({ 
             member: member, 
             utm_source: 'cactus.app', 
-            utm_medium: 'invite-friends', 
+            utm_medium: 'invite-contact', 
             domain: `${protocol}://${domain}`
         });
 
