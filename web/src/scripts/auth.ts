@@ -319,6 +319,9 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 
+    // remove landingquery params since we sent to backend
+    StorageService.removeItem(LocalStorageKey.landingQueryParams);
+
     return {
         success: statusResponse.success,
         existingEmail: statusResponse.exists,
@@ -358,6 +361,9 @@ export async function sendLoginEvent(args: {
                         console.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
                         await request.post(Endpoint.loginEvent, event, {headers});
+
+                        // remove landingquery params since we sent to backend
+                        StorageService.removeItem(LocalStorageKey.landingQueryParams);
                     } catch (error) {
                         console.error("failed to send login event", error);
                     } finally {
