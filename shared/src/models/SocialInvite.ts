@@ -5,7 +5,12 @@ export enum SocialInviteField {
     recipientEmail = "recipientEmail",
     recipientMemberId = "recipientMemberId",
     sentAt = "sentAt",
-    didJoin = "didJoin"
+    source = "source"
+}
+
+export enum SocialInviteSource {
+    IMPORTED_EMAIL = "imported_email",
+    PUBLIC_LINK = "public_link"
 }
 
 export default class SocialInvite extends BaseModel {
@@ -15,5 +20,5 @@ export default class SocialInvite extends BaseModel {
     recipientEmail?: string;
     recipientMemberId?: string;
     sentAt?: Date;
-    didJoin?: boolean
+    source?: SocialInviteSource;
 }
