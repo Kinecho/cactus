@@ -119,12 +119,37 @@ export default class ReflectionResponse extends BaseModel {
     shared: boolean = false;
     sharedAt?: Date;
     unsharedAt?: Date;
-    cactusElement?: CactusElement|null;
+    cactusElement?: CactusElement | null;
+    reflectionDates: Date[] = [];
+
+    /**
+     * Only Add a date log if the new date is not within 10 minutes of an existing date
+     * @param {Date} date
+     * @param {number=10} thresholdInMinutes - the threshold to look at for deciding if they recently have an entry
+     * @returns {boolean} Returns `true` if the date was added to the array, `false` if it was skipped
+     */
+    addReflectionLog(date: Date, thresholdInMinutes: number = 10): boolean {
+        const time = date.getTime();
+        const recentDate = this.reflectionDates.find(d => {
+            return Math.abs(d.getTime() - time) < thresholdInMinutes * 1000 * 60
+        });
+
+        if (recentDate) {
+            return false
+        }
+
+        this.reflectionDates.push(date);
+        return true
+    }
 
     decodeJSON(json: any) {
         super.decodeJSON(json);
 
         this.sharedAt = json.sharedAt ? new Date(json.sharedAt) : undefined;
         this.unsharedAt = json.unsharedAt ? new Date(json.unsharedAt) : undefined;
+        const dateArray = (json.reflectionDates || []) as number[];
+        this.reflectionDates = dateArray.map((timestamp: number) => {
+            return new Date(timestamp)
+        })
     }
 }
