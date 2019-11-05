@@ -33,7 +33,7 @@ export function commonInit() {
 
     try {
         const params = getAllQueryParams();
-        const existingLandingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
+        const existingLandingParams = StorageService.getItem(LocalStorageKey.landingQueryParams);
 
         if (params && !existingLandingParams) {
             StorageService.saveJSON(LocalStorageKey.landingQueryParams, params);
