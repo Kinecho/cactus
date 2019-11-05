@@ -401,12 +401,21 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     const domain = Config.web.domain;
     const protocol = Config.web.protocol;
 
+    let socialInvite = new SocialInvite();
+    if (member) {
+        socialInvite.senderMemberId = member.id;
+    }
+    socialInvite.recipientEmail = toContact.email;
+    await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+    console.log(socialInvite.id);
+
     const referralLink: string = 
         generateReferralLink({ 
             member: member, 
             utm_source: 'cactus.app', 
             utm_medium: 'invite-contact', 
-            domain: `${protocol}://${domain}`
+            domain: `${protocol}://${domain}`,
+            social_invite_id: (socialInvite ? socialInvite.id : undefined)
         });
 
     try {
@@ -417,12 +426,9 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
             link: referralLink
         });
 
-        if (response.success && member) {
-            let socialInvite = new SocialInvite();
-                socialInvite.senderMemberId = member.id;
-                socialInvite.recipientEmail = toContact.email;
-                socialInvite.sentAt = new Date();
-
+        if (response.success) {
+            // update the SocialInvite record with the sentAt date
+            socialInvite.sentAt = new Date();
             await AdminSocialInviteService.getSharedInstance().save(socialInvite);
         }
 
