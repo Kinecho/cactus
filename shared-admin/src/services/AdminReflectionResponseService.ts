@@ -15,7 +15,7 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
-import {calculateDurationMs, calculateStreak} from "@shared/util/ReflectionResponseUtil";
+import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 
 
 export interface ResetUserResponse {
@@ -197,10 +197,13 @@ export default class AdminReflectionResponseService {
         const streak = calculateStreak(reflections);
         const duration = calculateDurationMs(reflections);
 
+        const elementAccumulation = getElementAccumulationCounts(reflections);
+
         const stats: ReflectionStats = {
             totalCount: reflections.length,
             currentStreakDays: streak,
             totalDurationMs: duration,
+            elementAccumulation: elementAccumulation
         };
 
         console.log("calculated stats", stats);

@@ -1,8 +1,9 @@
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import {getStreak} from "@shared/util/DateUtil";
+import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 
 
-export function calculateStreak(reflections: ReflectionResponse[], start?: Date|undefined): number {
+export function calculateStreak(reflections: ReflectionResponse[], start?: Date | undefined): number {
     const unsortedDates: Date[] = [];
     // const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
 
@@ -25,4 +26,17 @@ export function calculateDurationMs(reflections: ReflectionResponse[]): number {
     return reflections.reduce((total, r) => {
         return total + (r.reflectionDurationMs || 0)
     }, 0)
+}
+
+export function getElementAccumulationCounts(reflections: ReflectionResponse[]): ElementAccumulation {
+    const initial: ElementAccumulation = createElementAccumulation();
+
+    // const reflections = await this.getAllReflections();
+    return reflections.reduce((current, reflection) => {
+        if (reflection.cactusElement) {
+            current[reflection.cactusElement] += 1
+        }
+
+        return current
+    }, initial)
 }

@@ -1,5 +1,6 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
+import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -26,6 +27,7 @@ export interface ReflectionStats {
     currentStreakDays: number,
     totalDurationMs: number,
     totalCount: number,
+    elementAccumulation: ElementAccumulation
 }
 
 export enum Field {

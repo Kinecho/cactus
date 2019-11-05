@@ -9,7 +9,7 @@ import {getStreak} from "@shared/util/DateUtil";
 import {Config} from "@web/config";
 import {PageRoute} from "@web/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {calculateStreak} from "@shared/util/ReflectionResponseUtil";
+import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 
 export interface ReflectionSaveOptions {
     saveIfAnonymous?: boolean,
@@ -254,20 +254,4 @@ export default class ReflectionResponseService {
     static getCurrentStreak(reflections: ReflectionResponse[]): number {
         return calculateStreak(reflections)
     }
-
-    async getElementAccumulationCounts(refelections: ReflectionResponse[]): Promise<ElementAccumulation | undefined> {
-        const initial: ElementAccumulation = createElementAccumulation();
-
-        const reflections = await this.getAllReflections();
-        return reflections.reduce((current, reflection) => {
-            if (reflection.cactusElement) {
-                current[reflection.cactusElement] += 1
-            }
-
-            return current
-        }, initial)
-
-
-    }
-
 }
