@@ -143,72 +143,72 @@
 
     .centered {
         flex-grow: 1;
+        text-align: left;
         width: 100%;
     }
 
     .contentContainer {
         max-width: 1200px;
-        padding: 3.2rem 1.6rem;
+        padding: 3.2rem 2.4rem 6.4rem;
 
         @include r(600) {
             padding: 6.4rem 2.4rem;
         }
-    }
-
-    .subtext {
-        opacity: .8;
-    }
-
-    .brandNew .subtext {
-        margin: 0 auto 3.2rem;
-        max-width: 48rem;
-    }
-
-    .getStarted {
-        margin-bottom: 6.4rem;
-        max-width: 24rem;
-        width: 100%;
-
-        @include r(600) {
-            width: auto;
+        @include r(768) {
+            padding: 6.4rem 1.6rem;
         }
     }
 
-    .findFriends {
-        margin: 0 auto 6.4rem;
-        max-width: 960px;
-        text-align: left;
+    // .brandNew .subtext {
+    //     margin: 0 auto 3.2rem;
+    //     max-width: 48rem;
+    // }
 
-        .subtext {
-            margin: 0 0 2.4rem;
-            max-width: 60rem;
-        }
+    // .getStarted {
+    //     margin-bottom: 6.4rem;
+    //     max-width: 24rem;
+    //     width: 100%;
+    //
+    //     @include r(600) {
+    //         width: auto;
+    //     }
+    // }
 
-        h2 {
-            margin-top: 6.4rem;
-        }
+    // .findFriends {
+    //     margin: 0 auto 6.4rem;
+    //     max-width: 960px;
+    //     text-align: left;
+    //
+    //     .subtext {
+    //         margin: 0 0 2.4rem;
+    //         max-width: 60rem;
+    //     }
+    //
+    //     h2 {
+    //         margin-top: 6.4rem;
+    //     }
+    //
+    //     .btnContainer {
+    //         display: flex;
+    //
+    //         button {
+    //             flex-grow: 0;
+    //             margin-right: .8rem;
+    //         }
+    //     }
+    // }
 
-        .btnContainer {
-            display: flex;
-
-            button {
-                flex-grow: 0;
-                margin-right: .8rem;
-            }
-        }
-    }
-
-    .flexContainer {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        margin: 0 auto 3.2rem;
-        max-width: 960px;
-
-        .secondary {
-            flex-grow: 0;
-        }
-    }
+    // .flexContainer {
+    //     align-items: center;
+    //     display: flex;
+    //     justify-content: space-between;
+    //     margin: 0 auto 3.2rem;
+    //     max-width: 960px;
+    //
+    //     .secondary {
+    //         flex-grow: 0;
+    //     }
+    // }
 
     // .activityCard {
     //     background-color: $white;
@@ -268,8 +268,8 @@
     //     }
     // }
 
-    .info button {
-        margin-top: 1.6rem;
-    }
+    // .info button {
+    //     margin-top: 1.6rem;
+    // }
 
 </style>

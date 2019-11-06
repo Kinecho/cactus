@@ -274,16 +274,10 @@ $widthDesktop: $widthXL;
 
 @mixin secondaryButton() {
     background-color: $white;
-    border: 1px solid $lightGreen;
+    border: 1px solid $darkestGreen;
     box-shadow: none;
-    color: $darkGreen;
+    color: $darkestGreen;
     padding: 1.2rem 2.4rem;
-
-    @include r(600) {
-        &:hover {
-            background-color: $lightGreen;
-        }
-    }
 }
 
 @mixin tertiaryButton() {

@@ -5,17 +5,15 @@
         </div>
       <!-- find your friends -->
         <div class="find-friends">
-            <h1>Invite Friends</h1>
-            <p class="label">
-                Use this link to share Cactus with friends and family.
-            </p>
+            <h1>Invite others to reflect</h1>
+            <p class="subtext">Use this link to share Cactus with friends and family.</p>
             <div class="referral-link">
                 <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
-                <button class="copy secondary" v-clipboard:copy="referralLink"
+                <button class="copy" v-clipboard:copy="referralLink"
                         v-clipboard:success="handleCopySuccess"
                         v-clipboard:error="handleCopyError">
-                    <span v-if="copySucceeded === true">Copied</span>
-                    <span v-if="copySucceeded === false">Copy</span>
+                    <span v-if="copySucceeded === true">Copied!</span>
+                    <span v-if="copySucceeded === false">Copy <span class="invitetxt">Invite</span> Link</span>
                 </button>
             </div>
             <social-sharing :url="referralLink"
@@ -24,19 +22,19 @@
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
                     inline-template>
-                <div class="sharing">
+                <div class="btnContainer">
                     <network network="email">
-                        <button class="emailBtn btn wiggle">
-                            <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
+                        <button aria-label="Email" class="secondary btn wiggle">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18"><path fill="#29A389" d="M19 0c1.652 0 3 1.348 3 3v12c0 1.652-1.348 3-3 3H3c-1.652 0-3-1.348-3-3V3c0-1.652 1.348-3 3-3h16zm1 4.92l-8.427 5.9a1 1 0 01-1.146 0L2 4.92V15c0 .548.452 1 1 1h16c.548 0 1-.452 1-1V4.92zM19 2H3c-.388 0-.728.227-.893.554L11 8.779l8.893-6.225A1.006 1.006 0 0019 2z"/></svg>Email
                         </button>
                     </network>
                     <network network="twitter">
-                        <button class="twBtn btn wiggle">
+                        <button aria-label="Twitter" class="twBtn btn wiggle">
                             <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
                         </button>
                     </network>
                     <network network="facebook">
-                        <button class="fbBtn btn wiggle">
+                        <button aria-label="Facebook" class="fbBtn btn wiggle">
                             <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
                         </button>
                     </network>
@@ -45,12 +43,18 @@
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Import from...</h2>
+                <h2>Import contacts</h2>
+                <p class="subtext">Import contacts from your email. Don't worry, you'll choose which contacts before they're invited.</p>
                 <div class="btnContainer">
-                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
-                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
+                    <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D44638" d="M22 6.25v12.5c0 .708-.542 1.25-1.25 1.25H19.5V8.656L12 14.042 4.5 8.656V20H3.25C2.54 20 2 19.458 2 18.75V6.25c0-.354.135-.667.36-.89.223-.227.537-.36.89-.36h.417L12 11.042 20.333 5h.417c.354 0 .667.135.89.36.226.223.36.536.36.89z"/></svg>
+                        Gmail
+                    </button>
+                    <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="yahoo">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#440099" d="M13.18 22s-.7-.127-1.263-.127c-.508 0-1.27.127-1.27.127l.16-8.496C9.627 11.466 6.162 5.258 4 2c1.088.248 1.545.232 2.638 0l.016.028c1.377 2.439 3.483 5.838 5.263 8.784C13.674 7.918 16.44 3.398 17.19 2c.85.223 1.707.215 2.657 0-1 1.348-4.638 7.644-6.837 11.504L13.174 22h.007z"/></svg>
+                        Yahoo
+                    </button>
                 </div>
-                <p class="subtext">Don't worry, you'll choose which of your contacts to invite.</p>
                 <!-- end -->
             </div>
 
@@ -173,35 +177,18 @@
     @import "social";
     @import "transitions";
 
-    .centered.content {
+    .content {
         flex-grow: 1;
         padding: 2.4rem;
     }
 
-    .loading {
-        display: flex;
-        justify-content: center;
-    }
-
-    .graphic {
-        margin-bottom: 2.4rem;
-        max-width: 40rem;
-        width: 100%;
-    }
-
     .find-friends {
-        margin: 0 auto;
         max-width: 70rem;
     }
 
-    .label {
-        display: block;
-        margin-bottom: 3.2rem;
-    }
-
-    .loading {
-        display: flex;
-        justify-content: center;
+    .subtext {
+        margin-bottom: 1.6rem;
+        opacity: .8;
     }
 
     .referral-link {
@@ -210,15 +197,22 @@
     }
 
     .link-input {
-        @include textInput;
-        color: $lightText;
-        margin-bottom: .8rem;
-        max-width: none;
-        width: 100%;
+        display: none;
 
         @include r(600) {
+            @include textInput;
+            color: $lightText;
+            display: block;
             margin-bottom: 1.6rem;
+            max-width: none;
             padding-right: 9rem;
+            width: 100%;
+        }
+    }
+
+    .invitetxt {
+        @include r(600) {
+            display: none;
         }
     }
 
@@ -233,8 +227,10 @@
             right: 0;
             top: 0;
             width: auto;
+
             &.secondary {
                 background-color: transparent;
+                border: 0;
             }
 
             &:hover {
@@ -248,14 +244,28 @@
         }
     }
 
-    .sharing {
+    .btnContainer {
         display: flex;
         flex-flow: column nowrap;
         justify-content: center;
-        margin-bottom: 4.8rem;
 
         @include r(600) {
             flex-flow: row wrap;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            margin-bottom: .8rem;
+            width: 100%;
+
+            @include r(600) {
+                flex-grow: 0;
+                margin: 0 .4rem;
+                width: auto;
+            }
         }
 
         .icon {
@@ -265,16 +275,9 @@
         }
     }
 
-    .btn {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-        margin-bottom: .8rem;
-        width: 100%;
-
-        @include r(600) {
-            margin: 0 .4rem;
-            width: auto;
-        }
+    .results h2 {
+        margin: 4.8rem 0 .8rem;
     }
+
+
 </style>
