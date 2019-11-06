@@ -23,7 +23,7 @@
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
                         <transition name="snack" appear>
-                            <snackbar-content :autoHide="false" v-if="linkCreated">
+                            <snackbar-content :autoHide="true" v-if="linkCreated">
                                 <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                                     <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                                 </svg>
@@ -33,7 +33,7 @@
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                         <div v-if="nativeShareEnabled" class="sharing">
-                            <button class="btn secondary" @click="shareNatively()"><img class="icon" src="/assets/images/share.svg" alt="Share Icon"/> Share</button>
+                            <button class="btn secondary" @click="shareNatively()"><img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
                         </div>
                     </div>
                     <button v-else class="button primary getLink"
@@ -1055,34 +1055,24 @@
     }
 
     .sharing {
-        margin-top: 1rem;
         display: flex;
-        flex-flow: column nowrap;
         justify-content: center;
 
-        @include r(600) {
-            flex-flow: row wrap;
-        }
-
-        .btn {
-            align-items: center;
+        button {
             display: flex;
+            flex-grow: 0;
             justify-content: center;
-            margin: 0 auto .8rem;
-            width: 100%;
+            margin-top: 1.6rem;
+            width: auto;
 
             @include r(600) {
-                margin: 0 .4rem;
-                width: auto;
+                width: 50%;
             }
         }
 
-        .icon {
-            height: 1.6rem;
+        img {
             margin-right: .8rem;
-            width: 1.6rem;
         }
-
     }
 
     .snack {
