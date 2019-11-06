@@ -115,7 +115,7 @@
             member: CactusMember | undefined | null,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             importedContacts: Array<any> | undefined,
-            importedService: string | undefined            
+            importedService: string | undefined
         } {
             return {
               authLoaded: false,
@@ -123,7 +123,7 @@
               importedContacts: undefined,
               importedService: undefined,
               member: undefined,
-              memberUnsubscriber: undefined,              
+              memberUnsubscriber: undefined,
             }
         },
         methods: {
@@ -154,11 +154,11 @@
             },
             referralLink(): string | undefined {
                 if (this.member) {
-                    return generateReferralLink({ 
-                        member: this.member, 
-                        utm_source: 'cactus.app', 
-                        utm_medium: 'invite-friends', 
-                        domain: Config.domain 
+                    return generateReferralLink({
+                        member: this.member,
+                        utm_source: 'cactus.app',
+                        utm_medium: 'invite-friends',
+                        domain: Config.domain
                     });
                 }
             }
@@ -257,6 +257,12 @@
         @include r(600) {
             flex-flow: row wrap;
         }
+
+        .icon {
+            height: 2rem;
+            margin-right: .8rem;
+            width: 2rem;
+        }
     }
 
     .btn {
@@ -270,11 +276,5 @@
             margin: 0 .4rem;
             width: auto;
         }
-    }
-
-    .icon {
-        height: 2rem;
-        margin-right: .8rem;
-        width: 2rem;
     }
 </style>
