@@ -2,13 +2,6 @@
     <div class="socialHome">
         <NavBar/>
         <div class="centered">
-            <div class="loading" v-if="loading">
-                <Spinner message="Loading"/>
-            </div>
-            <div v-if="error" class="alert error">
-                {{error}}
-            </div>
-
             <div class="contentContainer">
 
                 <!-- if brand new -->
@@ -16,17 +9,7 @@
                     <div class="brandNew" v-if="currentChild == 'welcome'">
                         <h1>Reflect with Friends</h1>
                         <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
-                        <div class="activityCard demo">
-                            <div class="avatar">
-                                <img src="https://placekitten.com/44/44" alt="Ryan Brown, CEO"/>
-                            </div>
-                            <div class="info">
-                                <p class="date">8min ago</p>
-                                <p class="description"><span class="bold">Ryan Brown</span> reflected on <a href="#">If you had just one day left to live, what would you do?</a></p>
-                            </div>
-                        </div>
                         <button class="getStarted" @click.prevent="setVisible('findFriends')">Get Started</button>
-                        <button class="getStarted" @click.prevent="setVisible('friendActivity')">See Activity</button>
                     </div>
 
                     <SocialFindFriends v-if="currentChild == 'findFriends'"/>
@@ -100,18 +83,6 @@
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import SocialFindFriends from "@components/SocialFindFriends.vue"
-    import CactusMember from "@shared/models/CactusMember";
-    import CactusMemberService from '@web/services/CactusMemberService';
-    import {Config} from "@web/config";
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {PageRoute} from '@web/PageRoutes';
-    import VueClipboard from 'vue-clipboard2';
-    import SocialSharing from 'vue-social-sharing';
-    import {generateReferralLink} from '@shared/util/SocialInviteUtil'
-
-    Vue.use(VueClipboard);
-    Vue.use(SocialSharing);
-
 
     export default Vue.extend({
         components: {
@@ -121,67 +92,21 @@
             SocialFindFriends
         },
         created() {
-            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
-                    this.member = member;
-                    this.authLoaded = true;
-
-                    if (!member) {
-                        window.location.href = PageRoute.HOME;
-                    }
-                }
-            })
-
-            this.currentChild = 'welcome';
-        },
-        destroyed() {
-            if (this.memberUnsubscriber) {
-                this.memberUnsubscriber();
-            }
+            this.currentChild = 'findFriends';
         },
         data(): {
-            authLoaded: boolean,
-            copySucceeded: boolean,
-            member: CactusMember | undefined | null,
-            memberUnsubscriber: ListenerUnsubscriber | undefined,
-            error: string | undefined,
             currentChild: string | undefined
         } {
             return {
-                authLoaded: false,
-                copySucceeded: false,
-                member: undefined,
-                memberUnsubscriber: undefined,
-                error: undefined,
                 currentChild: undefined
             }
         },
         methods: {
-            handleCopyError() {
-                alert("Copied Failed");
-            },
-            handleCopySuccess() {
-                this.copySucceeded = true;
-                setTimeout(() => this.copySucceeded = false, 2000);
-            },
             setVisible(child: string) {
                 this.currentChild = child;
             }
         },
         computed: {
-            loading(): boolean {
-                return !this.authLoaded;
-            },
-            referralLink(): string | undefined {
-                if (this.member) {
-                    return generateReferralLink({ 
-                        member: this.member, 
-                        utm_source: 'cactus.app', 
-                        utm_medium: 'invite-friends', 
-                        domain: Config.domain 
-                    });
-                }
-            }
         }
     })
 </script>
@@ -196,8 +121,22 @@
 
     .socialHome {
         display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+        flex-flow: column nowrap;
+        justify-content: space-between;
+
+        @include r(600) {
+            @include h(960) {
+                height: 100vh;
+            }
+        }
+
+        header, .centered {
+            width: 100%;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
     }
 
     header {
@@ -207,11 +146,6 @@
     .centered {
         flex-grow: 1;
         width: 100%;
-    }
-
-    .loading {
-        display: flex;
-        justify-content: center;
     }
 
     .contentContainer {
@@ -245,6 +179,7 @@
     .contactCard {
         align-items: center;
         display: flex;
+        text-align: left;
         max-width: 768px;
         padding: 1.6rem 0;
 
