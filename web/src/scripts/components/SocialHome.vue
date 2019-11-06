@@ -81,14 +81,12 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
-    import Spinner from "@components/Spinner.vue";
     import SocialFindFriends from "@components/SocialFindFriends.vue"
 
     export default Vue.extend({
         components: {
             NavBar,
             Footer,
-            Spinner,
             SocialFindFriends
         },
         created() {

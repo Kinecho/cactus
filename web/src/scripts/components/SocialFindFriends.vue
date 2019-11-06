@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="SocialFindFriends">
         <div class="loading" v-if="loading">
-            <Spinner message="Loading"/>
+            <Spinner message="Loading" name="socialFindFriends"/>
         </div>
       <!-- find your friends -->
         <div class="find-friends">
@@ -66,6 +66,7 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import Spinner from "@components/Spinner.vue";
     import AddressBookService from '@web/services/AddressBookService'
     import SocialImportedContact from "@components/SocialImportedContact.vue"
     import {EmailService} from "@shared/types/EmailContactTypes";
@@ -83,6 +84,7 @@
 
     export default Vue.extend({
         components: {
+            Spinner,
             SocialImportedContact
         },
         created() {
