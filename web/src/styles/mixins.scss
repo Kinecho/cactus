@@ -367,15 +367,15 @@ $widthDesktop: $widthXL;
     @include iconButton;
   }
 
-  &.small {
-    @include smallButton;
-  }
-
   &.secondary {
     @include secondaryButton;
   }
 
   &.tertiary {
     @include tertiaryButton;
+  }
+
+  &.small {
+    @include smallButton;
   }
 }
