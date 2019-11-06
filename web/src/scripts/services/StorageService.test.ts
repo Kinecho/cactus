@@ -71,3 +71,45 @@ describe("storage service tests", () => {
         expect(map[model2.promptId]).toEqual(model2);
     })
 });
+
+describe("booleans", () => {
+    beforeEach(() => {
+        console.log("clearing localstorage before test");
+        localStorage.clear();
+    });
+
+    test("set and fetch a true value", () => {
+        const inputValue = true;
+        StorageService.saveBoolean(LocalStorageKey.memberStatsEnabled, inputValue);
+
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled)).toBe(true);
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, true)).toBe(true);
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, false)).toBe(true);
+    });
+
+    test("set and fetch a false value", () => {
+        const inputValue = false;
+        StorageService.saveBoolean(LocalStorageKey.memberStatsEnabled, inputValue);
+
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled)).toBe(false);
+
+        //use true as the default
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, true)).toBe(false);
+
+        //use false as the default
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, false)).toBe(false);
+    });
+
+    test("fetch value with defaults", () => {//
+
+        //no default provided -> false
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled)).toBe(false);
+
+        //default passed in as false -> false
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, false)).toBe(false);
+
+        //default passed as true -> true
+        expect(StorageService.getBoolean(LocalStorageKey.memberStatsEnabled, true)).toBe(true);
+
+    })
+});

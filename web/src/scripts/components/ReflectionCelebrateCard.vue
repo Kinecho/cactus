@@ -1,3 +1,4 @@
+import {LocalStorageKey} from '@web/services/StorageService'
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
@@ -151,7 +152,7 @@
                     this.authLoaded = true;
                     this.loggedIn = !!member;
 
-                    if (member && member.stats.reflections) {
+                    if (StorageService.getBoolean(LocalStorageKey.memberStatsEnabled) && member && member.stats.reflections) {
                         console.log("using member stats");
                         this.setDurationMs(member.stats.reflections.totalDurationMs);
                         this.reflectionCount = member.stats.reflections.totalCount;
@@ -279,7 +280,7 @@
 
                 // this.elementAccumulations = anonymousAccumulations;
             },
-            setDurationMs(totalDuration:number) {
+            setDurationMs(totalDuration: number) {
                 if (totalDuration < (60 * 1000)) {
                     this.totalDuration = `${Math.round(totalDuration / 1000)}`;
                     this.durationLabel = copy.prompts.SECONDS
