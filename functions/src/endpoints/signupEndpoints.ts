@@ -311,6 +311,15 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             await AdminCactusMemberService.getSharedInstance().save(member);
             console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
 
+            if (member.signupQueryParams.inviteId) {
+                try {
+                    await AdminSocialInviteService.getSharedInstance().updateMemberJoined(member);
+                    console.log('updated SocialInvite record with recipientMemberId');
+                } catch (e) {
+                    console.error("failed to update social invite", e);
+                }
+            }
+
             if (member.email && referredByEmail) {
                 console.log("Updating mailchimp ref email to ", referredByEmail);
                 await MailchimpService.getSharedInstance().updateMergeFields({
