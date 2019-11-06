@@ -177,15 +177,6 @@
         justify-content: center;
     }
 
-    .contentContainer {
-        max-width: 1200px;
-        padding: 3.2rem 1.6rem;
-
-        @include r(600) {
-            padding: 6.4rem 0;
-        }
-    }
-
     .subtext {
         opacity: .8;
     }
@@ -202,39 +193,6 @@
 
         @include r(600) {
             width: auto;
-        }
-    }
-
-    .contactCard {
-        align-items: center;
-        display: flex;
-        max-width: 768px;
-        padding: 1.6rem 0;
-
-        .contactInfo {
-            flex-grow: 1;
-        }
-
-        .avatar {
-            $avatarDiameter: 4.4rem;
-            height: $avatarDiameter;
-            width: $avatarDiameter;
-        }
-
-        button {
-            flex-grow: 0;
-        }
-
-        .friendsStatus {
-            align-items: center;
-            color: $darkestPink;
-            display: flex;
-
-            .check {
-                height: 1.8rem;
-                margin-right: .8rem;
-                width: 1.8rem;
-            }
         }
     }
 

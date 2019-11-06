@@ -13,14 +13,14 @@
                     </div>
 
                     <SocialFindFriends v-if="currentChild == 'findFriends'"/>
-                    
+
                     <!-- if has friends -->
                     <div class="" v-if="currentChild == 'friendActivity'">
                         <div class="flexContainer">
                             <h1>Friend Activity</h1>
                             <button class="secondary small" @click.prevent="setVisible('findFriends')">Add Friends</button>
                         </div>
-                    
+
                         <div class="activityContainer">
 
                             <!-- if has friends but no activity yet -->
@@ -151,7 +151,7 @@
         padding: 3.2rem 1.6rem;
 
         @include r(600) {
-            padding: 6.4rem 0;
+            padding: 6.4rem 2.4rem;
         }
     }
 
@@ -171,40 +171,6 @@
 
         @include r(600) {
             width: auto;
-        }
-    }
-
-    .contactCard {
-        align-items: center;
-        display: flex;
-        text-align: left;
-        max-width: 768px;
-        padding: 1.6rem 0;
-
-        .contactInfo {
-            flex-grow: 1;
-        }
-
-        .avatar {
-            $avatarDiameter: 4.4rem;
-            height: $avatarDiameter;
-            width: $avatarDiameter;
-        }
-
-        button {
-            flex-grow: 0;
-        }
-
-        .friendsStatus {
-            align-items: center;
-            color: $darkestPink;
-            display: flex;
-
-            .check {
-                height: 1.8rem;
-                margin-right: .8rem;
-                width: 1.8rem;
-            }
         }
     }
 
@@ -244,63 +210,63 @@
         }
     }
 
-    .activityCard {
-        background-color: $white;
-        border-radius: 12px;
-        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-        display: flex;
-        margin: 0 -.8rem 3.2rem;
-        padding: 1.6rem;
-        text-align: left;
+    // .activityCard {
+    //     background-color: $white;
+    //     border-radius: 12px;
+    //     box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+    //     display: flex;
+    //     margin: 0 -.8rem 3.2rem;
+    //     padding: 1.6rem;
+    //     text-align: left;
+    //
+    //     @include r(374) {
+    //         margin: 0 .8rem 3.2rem;
+    //         padding: 1.6rem 2.4rem;
+    //     }
+    //
+    //     @include r(600) {
+    //         margin: 0 auto 3.2rem;
+    //         max-width: 64rem;
+    //         padding: 2.4rem;
+    //
+    //         &.demo {
+    //             max-width: 48rem;
+    //         }
+    //     }
+    //
+    //     a {
+    //         text-decoration: none;
+    //
+    //         &:hover {
+    //             color: $darkestGreen;
+    //         }
+    //     }
+    //
+    //     .bold {
+    //         font-weight: bold;
+    //     }
+    // }
 
-        @include r(374) {
-            margin: 0 .8rem 3.2rem;
-            padding: 1.6rem 2.4rem;
-        }
+    // .email,
+    // .date {
+    //     font-size: 1.4rem;
+    //     opacity: .8;
+    // }
 
-        @include r(600) {
-            margin: 0 auto 3.2rem;
-            max-width: 64rem;
-            padding: 2.4rem;
-
-            &.demo {
-                max-width: 48rem;
-            }
-        }
-
-        a {
-            text-decoration: none;
-
-            &:hover {
-                color: $darkestGreen;
-            }
-        }
-
-        .bold {
-            font-weight: bold;
-        }
-    }
-
-    .email,
-    .date {
-        font-size: 1.4rem;
-        opacity: .8;
-    }
-
-    .avatar {
-        $avatarDiameter: 6.4rem;
-        border-radius: 50%;
-        flex-shrink: 0;
-        height: $avatarDiameter;
-        margin-right: 1.6rem;
-        overflow: hidden;
-        width: $avatarDiameter;
-
-        img {
-            width: 100%;
-            height: 100%;
-        }
-    }
+    // .avatar {
+    //     $avatarDiameter: 6.4rem;
+    //     border-radius: 50%;
+    //     flex-shrink: 0;
+    //     height: $avatarDiameter;
+    //     margin-right: 1.6rem;
+    //     overflow: hidden;
+    //     width: $avatarDiameter;
+    //
+    //     img {
+    //         width: 100%;
+    //         height: 100%;
+    //     }
+    // }
 
     .info button {
         margin-top: 1.6rem;

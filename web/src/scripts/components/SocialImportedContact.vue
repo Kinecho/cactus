@@ -17,11 +17,11 @@
             <div v-if="sendingInvite">
                 Sending...
             </div>
-            <div v-else>
+            <template v-else>
                 <textarea placeholder="Include an optional note..." v-model="message" />
                 <button class="primary small" @click.prevent="sendInvite">Send</button>
                 <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
-            </div>
+            </template>
         </div>
 
     </div>
@@ -142,12 +142,59 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    .invite {
-        display: block;
+    .contactCard {
+        align-items: center;
+        display: flex;
+        max-width: 60rem;
+        padding: 1.6rem 0;
 
-        textarea {
-            min-width: 20rem;
-            min-height: 3rem;
+        button {
+            flex-grow: 0;
         }
     }
+
+    .contactInfo {
+        flex-grow: 1;
+    }
+
+    .email {
+        font-size: 1.4rem;
+        opacity: .8;
+    }
+
+    .avatar {
+        $avatarDiameter: 4.4rem;
+        border-radius: 50%;
+        flex-shrink: 0;
+        height: $avatarDiameter;
+        margin-right: .8rem;
+        overflow: hidden;
+        width: $avatarDiameter;
+
+        @include r(600) {
+            margin-right: 1.6rem;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .friendsStatus {
+        align-items: center;
+        color: $darkestPink;
+        display: flex;
+
+        .check {
+            height: 1.8rem;
+            margin-right: .8rem;
+            width: 1.8rem;
+        }
+    }
+
+    .invite {
+
+    }
+
 </style>
