@@ -115,6 +115,7 @@ export default class AdminFlamelinkService {
             value: opts.value,
             schemaKey: schema
         });
+
         if (!results) {
             return undefined
         }

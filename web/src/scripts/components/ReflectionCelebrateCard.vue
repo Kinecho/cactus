@@ -347,6 +347,22 @@
         }
     }
 
+    .flip-card.front {
+        visibility: visible;
+
+        .flipped & {
+            visibility: hidden;
+        }
+    }
+
+    .flip-card.back {
+        visibility: hidden;
+
+        .flipped & {
+            visibility: visible;
+        }
+    }
+
     .successText {
         flex-grow: 1;
         padding: 6.4rem 4rem;
@@ -463,7 +479,7 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: 0.6s;
+            transition: 0.3s;
 
             @include r(600) {
                 border-radius: 12px;

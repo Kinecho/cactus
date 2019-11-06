@@ -20,12 +20,12 @@
                     </p>
                 </div>
                 <div class="btnContainer" v-if="navigationEnabled">
-                    <button class="tertiary icon left no-loading" :class="{disabled: !hasPrevious}" @click="previous" :disabled="!hasPrevious">
+                    <button aria-label="Previous cactus" class="tertiary icon left no-loading" :class="{disabled: !hasPrevious}" @click="previous" :disabled="!hasPrevious">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                             <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
                     </button>
-                    <button class="tertiary icon right no-loading" :class="{disabled: !hasNext}" @click="next" :disabled="!hasNext">
+                    <button aria-label="Next cactus" class="tertiary icon right no-loading" :class="{disabled: !hasNext}" @click="next" :disabled="!hasNext">
                         <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
                             <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
