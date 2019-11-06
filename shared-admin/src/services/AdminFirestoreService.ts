@@ -11,7 +11,7 @@ import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
-
+export type CollectionReference = firebaseAdmin.firestore.CollectionReference
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
 }
 

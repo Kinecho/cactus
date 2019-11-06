@@ -1,3 +1,4 @@
+import {LocalStorageKey} from '@web/services/StorageService'
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
@@ -5,16 +6,19 @@
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement">Today’s question focused on <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>, which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.</p>
+                    <p class="subtext" v-if="cactusElement">Today’s question focused on
+                        <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>,
+                        which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.
+                    </p>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
                         <a class="cactusContainer" v-for="(count, element) in elementAccumulations" v-if="count > 0 && cactusElement !== undefined" @click.prevent="showCactusModal(element)">
                             <img
-                                :class="['cactusIllustration', `count-${count}`]"
-                                :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
-                                :alt="element + ' cactus'"
-                                :title="elementCopy[element.toUpperCase()]"
+                                    :class="['cactusIllustration', `count-${count}`]"
+                                    :src="'/assets/images/cacti/'+ element + '-' + (count > 3 ? 3 : count) + '.svg'"
+                                    :alt="element + ' cactus'"
+                                    :title="elementCopy[element.toUpperCase()]"
                             />
                         </a>
                     </div>
@@ -54,7 +58,9 @@
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">Share Note</button>
+                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                            Share Note
+                        </button>
                         <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
                         </button>
@@ -98,11 +104,11 @@
             </div>
         </div>
         <element-description-modal
-            :cactusElement = "cactusModalElement"
-            :showModal="cactusModalVisible"
-            :navigationEnabled="true"
-            :showIntroCard="false"
-            @close="hideCactusModal" />
+                :cactusElement="cactusModalElement"
+                :showModal="cactusModalVisible"
+                :navigationEnabled="true"
+                :showIntroCard="false"
+                @close="hideCactusModal"/>
     </div>
 </template>
 
@@ -111,7 +117,7 @@
     import Spinner from "@components/Spinner.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
-    import {createElementAccumulation, ElementAccumulation} from '@shared/models/ElementAccumulation'
+    import {ElementAccumulation} from '@shared/models/ElementAccumulation'
     import ReflectionResponse from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -120,13 +126,14 @@
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {PromptCopy, ElementCopy} from '@shared/copy/CopyTypes'
+    import {ElementCopy, PromptCopy} from '@shared/copy/CopyTypes'
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -145,37 +152,17 @@
                     this.authLoaded = true;
                     this.loggedIn = !!member;
 
-                    const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
-                    console.log("all reflections", reflections);
-                    if (reflections.length === 0 && this.reflectionResponse) {
-                        reflections.push(this.reflectionResponse);
-                    }
-
-                    const totalDuration = reflections.reduce((duration, doc) => {
-                        const current = doc.reflectionDurationMs || 0;
-                        console.log("current response duration ", current);
-                        return duration + (Number(current) || 0);
-                    }, 0);
-
-
-                    console.log("totalDuration", totalDuration);
-                    if (totalDuration < (60 * 1000)) {
-                        this.totalDuration = `${Math.round(totalDuration / 1000)}`;
-                        this.durationLabel = copy.prompts.SECONDS
+                    if (StorageService.getBoolean(LocalStorageKey.memberStatsEnabled) && member && member.stats.reflections) {
+                        console.log("using member stats");
+                        this.setDurationMs(member.stats.reflections.totalDurationMs);
+                        this.reflectionCount = member.stats.reflections.totalCount;
+                        this.streakDays = member.stats.reflections.currentStreakDays;
+                        this.elementAccumulations = member.stats.reflections.elementAccumulation;
                     } else {
-                        this.durationLabel = copy.prompts.MINUTES;
-                        this.totalDuration = millisecondsToMinutes(totalDuration);
-                    }
-
-
-                    this.reflectionCount = reflections.length;
-                    this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
-                    if (member) {
-                        this.elementAccumulations = await ReflectionResponseService.sharedInstance.getElementAccumulationCounts(reflections);
-                    } else if (this.reflectionResponse.cactusElement) {
-                        const anonymousAccumulations = createElementAccumulation();
-                        anonymousAccumulations[this.reflectionResponse.cactusElement] += 1;
-                        this.elementAccumulations = anonymousAccumulations;
+                        //this will calculate stats if the member doesn't have the new stats object
+                        //Or, if the user is anonymous/not logged in.
+                        console.log("calculating streak from raw data");
+                        await this.calculateStats()
                     }
 
                     this.loading = false;
@@ -242,7 +229,7 @@
                 const celebrations = copy.prompts.CELEBRATIONS || ["Nice Work!"];
                 return celebrations[Math.floor(Math.random() * celebrations.length - 1)] || celebrations[0]
             },
-            sharingContentCard():Content|undefined {
+            sharingContentCard(): Content | undefined {
                 let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
                 const sharingCard: Content = {
                     contentType: ContentType.share_reflection,
@@ -252,7 +239,7 @@
 
                 return sharingCard
             },
-            elementName():string|undefined {
+            elementName(): string | undefined {
                 switch (this.cactusElement) {
                     case CactusElement.emotions:
                         return this.elementCopy.EMOTIONS;
@@ -270,6 +257,38 @@
             }
         },
         methods: {
+            async calculateStats() {
+                // const member = this.member;
+                const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
+                console.log("all reflections", reflections);
+                if (reflections.length === 0 && this.reflectionResponse) {
+                    reflections.push(this.reflectionResponse);
+                }
+
+                const totalDuration = reflections.reduce((duration, doc) => {
+                    const current = doc.reflectionDurationMs || 0;
+                    console.log("current response duration ", current);
+                    return duration + (Number(current) || 0);
+                }, 0);
+
+
+                console.log("totalDuration", totalDuration);
+                this.setDurationMs(totalDuration);
+                this.elementAccumulations = getElementAccumulationCounts(reflections);
+                this.reflectionCount = reflections.length;
+                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
+
+                // this.elementAccumulations = anonymousAccumulations;
+            },
+            setDurationMs(totalDuration: number) {
+                if (totalDuration < (60 * 1000)) {
+                    this.totalDuration = `${Math.round(totalDuration / 1000)}`;
+                    this.durationLabel = copy.prompts.SECONDS
+                } else {
+                    this.durationLabel = copy.prompts.MINUTES;
+                    this.totalDuration = millisecondsToMinutes(totalDuration);
+                }
+            },
             goToHome() {
                 window.location.href = PageRoute.JOURNAL_HOME;
             },
@@ -305,7 +324,7 @@
                 this.cactusModalElement = CactusElement[element];
                 this.disableNavigation()
             },
-            tradeNote(){
+            tradeNote() {
                 this.showTradeNote = true;
                 this.flipped = true;
             },
@@ -431,6 +450,7 @@
         &.count-2 {
             height: 12rem;
         }
+
         &.count-1 {
             height: 10rem;
         }

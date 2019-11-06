@@ -14,7 +14,8 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
-import CactusMember from "@shared/models/CactusMember";
+import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
+import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 
 
 export interface ResetUserResponse {
@@ -175,6 +176,39 @@ export default class AdminReflectionResponseService {
             console.error(error);
             return [];
         }
+    }
+
+    async getResponsesForMember(memberId: string): Promise<ReflectionResponse[]> {
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        const result = await this.firestoreService.executeQuery(query, ReflectionResponse);
+        return result.results
+    }
+
+    async calculateStatsForMember(options: { memberId: string }): Promise<ReflectionStats | undefined> {
+        const {memberId} = options;
+        if (!memberId) {
+            console.error("No memberId provided");
+            return
+        }
+
+        const reflections = await this.getResponsesForMember(memberId);
+        console.log(`fetched ${reflections.length} for member ${memberId}`);
+
+        const streak = calculateStreak(reflections);
+        const duration = calculateDurationMs(reflections);
+
+        const elementAccumulation = getElementAccumulationCounts(reflections);
+
+        const stats: ReflectionStats = {
+            totalCount: reflections.length,
+            currentStreakDays: streak,
+            totalDurationMs: duration,
+            elementAccumulation: elementAccumulation
+        };
+
+        console.log("calculated stats", stats);
+
+        return stats
     }
 
     async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {

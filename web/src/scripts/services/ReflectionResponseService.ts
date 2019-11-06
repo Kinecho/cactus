@@ -9,6 +9,17 @@ import {getStreak} from "@shared/util/DateUtil";
 import {Config} from "@web/config";
 import {PageRoute} from "@web/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+
+export interface ReflectionSaveOptions {
+    saveIfAnonymous?: boolean,
+    updateReflectionLog?: boolean
+}
+
+export const DefaultSaveOptions: ReflectionSaveOptions = {
+    saveIfAnonymous: false,
+    updateReflectionLog: false,
+};
 
 export default class ReflectionResponseService {
     public static sharedInstance = new ReflectionResponseService();
@@ -37,7 +48,7 @@ export default class ReflectionResponseService {
 
         response.shared = true;
         response.sharedAt = new Date();
-        return await this.save(response, {saveIfAnonymous: true});
+        return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
     }
 
     async unShareResponse(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
@@ -50,7 +61,7 @@ export default class ReflectionResponseService {
 
         response.shared = false;
         response.unsharedAt = new Date();
-        return await this.save(response, {saveIfAnonymous: true});
+        return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
     }
 
     static createPossiblyAnonymousReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
@@ -107,12 +118,21 @@ export default class ReflectionResponseService {
         response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
         response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
-
         return response;
     }
 
-    async save(model: ReflectionResponse, options: { saveIfAnonymous: boolean } = {saveIfAnonymous: false}): Promise<ReflectionResponse | undefined> {
-        if (model.cactusMemberId || options.saveIfAnonymous) {
+    async save(model: ReflectionResponse, options: ReflectionSaveOptions = DefaultSaveOptions): Promise<ReflectionResponse | undefined> {
+        const {
+            saveIfAnonymous = DefaultSaveOptions.saveIfAnonymous,
+            updateReflectionLog = DefaultSaveOptions.updateReflectionLog,
+        } = options;
+
+
+        if (updateReflectionLog) {
+            model.addReflectionLog(new Date())
+        }
+
+        if (model.cactusMemberId || saveIfAnonymous) {
             const saved = this.firestoreService.save(model);
             //TODO: using cactusMemberId on this may be a weak way to go - we might want to check the current logged in status of the member instead. (shrug)
             return saved;
@@ -137,14 +157,13 @@ export default class ReflectionResponseService {
         }
     }
 
-    observeSharedReflection(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?:any) => void }): ListenerUnsubscriber | undefined {
+    observeSharedReflection(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?: any) => void }): ListenerUnsubscriber | undefined {
         return this.firestoreService.observeById(reflectionId, ReflectionResponse, {
             queryName: "observeSharedReflection",
-            onData: (model:ReflectionResponse|undefined, error) => {
-                if (model && model.shared){
+            onData: (model: ReflectionResponse | undefined, error) => {
+                if (model && model.shared) {
                     options.onData(model, error);
-                }
-                else {
+                } else {
                     options.onData(undefined, error);
                 }
 
@@ -233,26 +252,6 @@ export default class ReflectionResponseService {
     }
 
     static getCurrentStreak(reflections: ReflectionResponse[]): number {
-        const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
-
-
-        return getStreak(dates);
+        return calculateStreak(reflections)
     }
-
-    async getElementAccumulationCounts(refelections: ReflectionResponse[]): Promise<ElementAccumulation|undefined> {
-        const initial:ElementAccumulation = createElementAccumulation();
-
-        const reflections = await this.getAllReflections();
-        return reflections.reduce((current, reflection) => {
-            if (reflection.cactusElement) {
-                current[reflection.cactusElement] += 1
-            }
-
-            return current
-        }, initial)
-
-
-
-    }
-
 }
