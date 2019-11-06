@@ -6,7 +6,7 @@
                 v-clipboard:success="handleCopySuccess"
                 v-clipboard:error="handleCopyError">
             <span v-if="copySucceeded === true">Copied</span>
-            <span v-if="copySucceeded === false">Copy</span>
+            <span v-if="copySucceeded === false">Copy Link</span>
         </button>
     </div>
 </template>
