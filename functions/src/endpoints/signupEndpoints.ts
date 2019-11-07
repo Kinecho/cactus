@@ -311,29 +311,8 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             await AdminCactusMemberService.getSharedInstance().save(member);
             console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
 
-            // update existing invite record
-            if (member.signupQueryParams.inviteId) {
-                try {
-                    await AdminSocialInviteService.getSharedInstance().updateMemberJoined(member);
-                    console.log('updated SocialInvite record with recipientMemberId');
-                } catch (e) {
-                    console.error("failed to update social invite", e);
-                }
-            // create a new invite record if one doesn't exist but they were invited
-            } else if (referredByEmail) {
-                try {
-                    const invitedByMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(referredByEmail);
-                    if (invitedByMember) {
-                        await AdminSocialInviteService.getSharedInstance().generateInviteRecord(
-                            invitedByMember, 
-                            member
-                        );
-                        console.log('created new SocialInvite record with recipientMemberId');
-                    }
-                } catch (e) {
-                    console.error("failed to create new social invite", e);
-                }
-            }
+            const invitedByMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(referredByEmail);
+            await AdminSocialInviteService.getSharedInstance().handleMemberJoined(member, invitedByMember);
 
             if (member.email && referredByEmail) {
                 console.log("Updating mailchimp ref email to ", referredByEmail);

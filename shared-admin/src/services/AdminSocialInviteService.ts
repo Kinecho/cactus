@@ -35,7 +35,7 @@ export default class AdminSocialInviteService {
         return await firestoreService.getById(id, SocialInvite);
     }
 
-    async updateMemberJoined(member: CactusMember): Promise<SocialInvite | undefined> {
+    async updateMemberInvite(member: CactusMember): Promise<SocialInvite | undefined> {
         if (member.signupQueryParams.inviteId) {
             const socialInvite = await firestoreService.getById(member.signupQueryParams.inviteId, SocialInvite);
             if (socialInvite && member) {
@@ -55,5 +55,28 @@ export default class AdminSocialInviteService {
             socialInvite.sentAt = new Date(); 
             
         return await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+    }
+
+    async handleMemberJoined(memberJoined: CactusMember, invitedByMember: CactusMember | undefined) {
+        // update existing invite record
+        if (memberJoined.signupQueryParams.inviteId) {
+            try {
+                await AdminSocialInviteService.getSharedInstance().updateMemberInvite(memberJoined);
+                console.log('updated SocialInvite record with recipientMemberId');
+            } catch (e) {
+                console.error("failed to update social invite", e);
+            }
+        // create a new invite record if one doesn't exist but they were invited
+        } else if (invitedByMember) {
+            try {
+                await AdminSocialInviteService.getSharedInstance().generateInviteRecord(
+                    invitedByMember, 
+                    memberJoined
+                );
+                console.log('created new SocialInvite record with recipientMemberId');
+            } catch (e) {
+                console.error("failed to create new social invite", e);
+            }
+        }
     }
 }

@@ -209,7 +209,7 @@ export default class AdminCactusMemberService {
         return await firestoreService.getFirst(query, CactusMember);
     }
 
-    async getMemberByEmail(emailInput?: string): Promise<CactusMember | undefined> {
+    async getMemberByEmail(emailInput?: string | null): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;
         }
