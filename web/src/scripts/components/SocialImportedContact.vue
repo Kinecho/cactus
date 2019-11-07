@@ -1,28 +1,27 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="contactCard">
+    <div :class="['contactCard', {inviting: readyToInvite}]">
         <div class="avatar">
             <img :src="'assets/images/avatars/avatar' + randomAvatarNumber + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
             <p class="email">{{contact.email}}</p>
+            <div class="invite" v-if="readyToInvite">
+                <div v-if="sendingInvite">
+                    Sending...
+                </div>
+                <template v-else>
+                    <textarea placeholder="Include an optional note..." v-model="message" />
+                    <button class="primary" @click.prevent="sendInvite">Send Invite</button>
+                    <button class="tertiary" @click.prevent="readyToInvite = false">Cancel</button>
+                </template>
+            </div>
         </div>
         <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click.prevent="readyToInvite = true">
-            <span>Invite</span>
+            <span>Invite...</span>
         </button>
-        
+
         <div v-if="wasInvited">Invited!</div>
-        
-        <div class="invite" v-if="readyToInvite">
-            <div v-if="sendingInvite">
-                Sending...
-            </div>
-            <template v-else>
-                <textarea placeholder="Include an optional note..." v-model="message" />
-                <button class="primary small" @click.prevent="sendInvite">Send</button>
-                <button class="secondary small" @click.prevent="readyToInvite = false">Cancel</button>
-            </template>
-        </div>
 
     </div>
     <!--
@@ -88,7 +87,7 @@
         },
         mounted() {
         },
-        destroyed() { 
+        destroyed() {
         },
 
         data(): {
@@ -96,14 +95,14 @@
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
-            error: string | undefined      
+            error: string | undefined
         } {
             return {
               message: '',
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
-              error: undefined             
+              error: undefined
             }
         },
 
@@ -115,7 +114,7 @@
 
                 if (sendInviteResult.data && sendInviteResult.data.success) {
                     this.sendingInvite = false;
-                    this.wasInvited = true; 
+                    this.wasInvited = true;
                     this.readyToInvite = false;
                     this.error = undefined;
                     return;
@@ -151,6 +150,10 @@
         button {
             flex-grow: 0;
         }
+
+        &.inviting {
+            align-items: flex-start;
+        }
     }
 
     .contactInfo {
@@ -159,7 +162,11 @@
 
     .email {
         font-size: 1.4rem;
+        max-width: 90%;
         opacity: .8;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .avatar {
@@ -194,7 +201,14 @@
     }
 
     .invite {
-
+        textarea {
+            border: 1px solid $green;
+            border-radius: .4rem;
+            font-size: 1.6rem;
+            margin: .8rem 0;
+            padding: 0.8rem;
+            width: 100%;
+        }
     }
 
 </style>

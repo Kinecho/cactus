@@ -60,9 +60,9 @@
 
             <div class="results" v-if="importedContacts">
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
-                <div class="contactCards" v-for="contact in importedContacts">
+                <template v-for="contact in importedContacts">
                     <SocialImportedContact v-bind:contact="contact"/>
-                </div>
+                </template>
             </div>
         </div>
     </div>
