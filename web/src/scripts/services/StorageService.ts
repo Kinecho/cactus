@@ -9,6 +9,7 @@ export enum LocalStorageKey {
     anonReflectionResponse = "anonReflectionResponse",
     landingQueryParams = "landingQueryParams",
     flamelinkEnvironmentOverride = "flamelinkEnvironmentOverride",
+    memberStatsEnabled = "memberStatsEnabled"
 }
 
 export default class StorageService {
@@ -43,6 +44,19 @@ export default class StorageService {
             console.error(`Failed to get item ${key} from local storage`);
             return;
         }
+    }
+
+    static saveBoolean(key: LocalStorageKey, value: boolean) {
+        localStorage.setItem(key, `${value}`)
+    }
+
+    static getBoolean(key: LocalStorageKey, defaultValue: boolean = false): boolean {
+        const storedValue = this.getItem(key);
+        if (storedValue === undefined || storedValue === null || storedValue.trim() === "") {
+            return defaultValue
+        }
+
+        return storedValue === "true" || false
     }
 
     static saveJSON(key: LocalStorageKey, object: any) {

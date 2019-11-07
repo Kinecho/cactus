@@ -23,6 +23,34 @@ import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 import {getWordCount} from "@shared/util/StringUtil";
 
+
+export const updateReflectionStatsTrigger = functions.firestore
+    .document(`${Collection.reflectionResponses}/{responseId}`)
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+        console.log("updating member stats");
+        const snapshot = change.after || change.before;
+        if (!snapshot) {
+            console.warn("No snapshot was found in the change event");
+            return
+        }
+
+        const data = snapshot.data();
+        if (!data) {
+            console.error("No data could be retrieved from the snapshot", snapshot);
+            return;
+        }
+        const memberId = data[ReflectionResponse.Field.cactusMemberId];
+        if (!memberId) {
+            console.warn("No member ID was found in the document data", data);
+            return;
+        }
+
+        const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId});
+        if (reflectionStats) {
+            await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
+        }
+    });
+
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
  * @type {CloudFunction<DocumentSnapshot>}
@@ -102,12 +130,12 @@ export const onReflectionResponseCreated = functions.firestore
 
             const reflectionText = reflectionResponse.content.text || "";
             const wordCount = getWordCount(reflectionText);
-            const didJournal = (wordCount > 0 ? 'Yes' : 'No');           
-            
+            const didJournal = (wordCount > 0 ? 'Yes' : 'No');
+
             fields.push({
-                    title: "Reflection Info",
-                    value: `Journaled: ${didJournal}`
-                });
+                title: "Reflection Info",
+                value: `Journaled: ${didJournal}`
+            });
 
 
             if (prompt && prompt.question) {

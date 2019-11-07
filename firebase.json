@@ -89,11 +89,6 @@
                 "destination": "/social_home.html"
             },
             {
-                "source": "/solo-proxy-auth",
-                "destination": "/solo_proxy_auth.html"
-            },
-
-            {
                 "source": "/who-is-the-best-teacher-you-ever-had",
                 "destination": "/who_is_the_best_teacher_you_ever_had.html"
             },
