@@ -47,7 +47,7 @@ header {
         padding: 1.6rem 2.4rem;
     }
     @include r(600) {
-        border-bottom: 1px solid lighten($lightGreen, 11%);
+        border-bottom: 1px solid lighten($lightestGreen, 5%);
     }
     @include r(768) {
         background-color: transparent;

@@ -194,10 +194,13 @@
     }
 
     .container {
-        text-align: left;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
         min-height: 100vh;
+        padding: 2.4rem 0;
+        text-align: left;
+
+        @include r(768) {
+            padding: 6.4rem 0;
+        }
     }
 
     .login-container {

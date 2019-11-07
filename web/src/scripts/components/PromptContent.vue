@@ -771,6 +771,7 @@
 
         @include r(600) {
             background-color: transparent;
+            padding: 6.4rem 0;
         }
 
         button.secondary {
