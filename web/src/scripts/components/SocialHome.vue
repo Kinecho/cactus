@@ -13,60 +13,7 @@
                     </div>
 
                     <SocialFindFriends v-if="currentChild == 'findFriends'"/>
-
-                    <!-- if has friends -->
-                    <div class="" v-if="currentChild == 'friendActivity'">
-                        <div class="flexContainer">
-                            <h1>Friend Activity</h1>
-                            <button class="secondary small" @click.prevent="setVisible('findFriends')">Add Friends</button>
-                        </div>
-
-                        <div class="activityContainer">
-
-                            <!-- if has friends but no activity yet -->
-                            <!-- <p class="subtext">No activity from friends just yet....so....yeah...</p> -->
-                            <!-- end -->
-
-                            <div class="activityCard">
-                                <div class="avatar">
-                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                                </div>
-                                <div class="info">
-                                    <p class="date">8min ago</p>
-                                    <p class="description"><span class="bold">James Brown</span> accepted your friend request.</p>
-                                </div>
-                            </div>
-                            <div class="activityCard">
-                                <div class="avatar">
-                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                                </div>
-                                <div class="info">
-                                    <p class="date">2 days ago</p>
-                                    <p class="description"><span class="bold">Ryan Brown</span> wants to add you as a friend.</p>
-                                    <button class="small secondary">Add Friend</button>
-                                </div>
-                            </div>
-                            <div class="activityCard">
-                                <div class="avatar">
-                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                                </div>
-                                <div class="info">
-                                    <p class="date">1 week ago</p>
-                                    <p class="description"><span class="bold">Sarah Burgess</span> reflected on, <span class="bold">If you had just one day left to live what would you do?</span></p>
-                                </div>
-                            </div>
-                            <div class="activityCard">
-                                <div class="avatar">
-                                    <img src="https://placekitten.com/44/44" alt="User avatar"/>
-                                </div>
-                                <div class="info">
-                                    <p class="date">2 weeks ago</p>
-                                    <p class="description"><span class="bold">Bob Mulvihill</span> is on Cactus. Do you want to add them as a friend?</p>
-                                    <button class="secondary small">Add Friend</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <SocialActivityFeed v-if="currentChild == 'activityFeed'"/>
 
                 <!-- end -->
                 </transition>
@@ -81,13 +28,15 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
+    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialFindFriends from "@components/SocialFindFriends.vue"
 
     export default Vue.extend({
         components: {
             NavBar,
             Footer,
-            SocialFindFriends
+            SocialFindFriends,
+            SocialActivityFeed
         },
         created() {
             this.currentChild = 'findFriends';

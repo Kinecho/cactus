@@ -1,6 +1,6 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">                    
     <!-- if has friends -->
-    <div class="" v-if="currentChild == 'friendActivity'">
+    <div class="socialActivityFeed">
         <div class="flexContainer">
             <h1>Friend Activity</h1>
             <button class="secondary small" @click.prevent="setVisible('findFriends')">Add Friends</button>
