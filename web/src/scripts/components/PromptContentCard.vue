@@ -356,7 +356,7 @@
         mounted() {
             const elements = Array.from(document.querySelectorAll('.prevent-orphans'));
 
-            for (let elem of elements as any){ 
+            for (let elem of elements as any){
                 this.preventOrphans(elem);
             }
         },
@@ -523,7 +523,7 @@
 
                 // Replace whitespace after no break spaces
                 result = result.replace(/&nbsp; /g, '&nbsp;');
-                
+
                 elem.innerHTML = result;
             }
         }
@@ -685,6 +685,11 @@
         }
     }
 
+    .element-container {
+        cursor: pointer;
+        margin: 4rem 0 -1.6rem;
+    }
+
     .text {
         font-size: 2rem;
         padding: 4rem 1.6rem;
@@ -754,11 +759,6 @@
         flex: 1;
         flex-direction: column;
         justify-content: center;
-    }
-
-    .element-container {
-        margin-bottom: -1.6rem;
-        cursor: pointer;
     }
 
     .element-icon {
