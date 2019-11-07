@@ -11,6 +11,7 @@ export enum Endpoint {
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
+    sendInvite = "signup/send-invite",
     updateSubscriberStatus = "mailchimp/status",
     loginEvent = "signup/login-event",
 }

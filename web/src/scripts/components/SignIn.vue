@@ -291,7 +291,11 @@
     .centered {
         position: relative;
         z-index: 1;
-        padding: 2.6rem;
+        padding: 2.4rem;
+
+        @include r(600) {
+            padding: 6.4rem 0;
+        }
     }
 
     .divider {

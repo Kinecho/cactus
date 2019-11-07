@@ -46,6 +46,7 @@
     },
     "homepage": "https://github.com/Kinecho/cactus#readme",
     "dependencies": {
+        "@cloudsponge/address-book-connector.js": "^1.0.9",
         "firebase": "^6.3.1",
         "vue-clipboard2": "^0.3.0",
         "vue-social-sharing": "^2.4.6",

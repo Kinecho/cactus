@@ -424,12 +424,12 @@ module.exports = {
         "includeInDev": true,
         "name": "account_settings"
     },
-    "referral_program": {
-        "title": "Invite a Friend | Cactus",
-        "path": "/invite",
+    "social_home": {
+        "title": "Friends & Activity | Cactus",
+        "path": "/friends",
         "reflectionPrompt": false,
         "includeInDev": true,
-        "name": "referral_program"
+        "name": "social_home"
     },
     "prompt": {
         "title": "Cactus Mindful Moment",
@@ -448,7 +448,7 @@ module.exports = {
     },
     "solo_proxy_auth": {
         "title": "oAuth Proxy",
-        "path": "/oauth-proxy",
+        "path": "/solo-proxy-auth",
         "includeInDev": true,
         "name": "solo_proxy_auth"
     },

@@ -19,4 +19,20 @@ export enum QueryParam {
     UTM_SOURCE = "utm_source",
     UTM_MEDIUM = "utm_medium",
     NO_NAV = "no_nav",
+    SOCIAL_INVITE_ID = "inviteId"
+}
+
+export function includesLandingQueryParams(params: object | undefined): boolean {
+    const expectedLandingQueryParams: Array<string> = [QueryParam.UTM_SOURCE, 
+                                                       QueryParam.UTM_MEDIUM, 
+                                                       QueryParam.REFERRED_BY_EMAIL, 
+                                                       QueryParam.SOCIAL_INVITE_ID];
+    if (params) {
+        for (const param of Object.keys(params)) {
+            if (expectedLandingQueryParams.includes(param)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

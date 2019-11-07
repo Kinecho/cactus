@@ -29,7 +29,6 @@
 
     const copy = CopyService.getSharedInstance().copy;
 
-
     export default Vue.extend({
         components: {
             FlamelinkImage,
@@ -58,7 +57,7 @@
             this.deviceWidth = getDeviceDimensions().width;
             this.resizeListener = window.addEventListener("resize", () => {
                 this.deviceWidth = getDeviceDimensions().width;
-            })
+            });
         },
         computed: {
             memberName(): string | undefined {

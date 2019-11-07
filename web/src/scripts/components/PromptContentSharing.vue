@@ -76,6 +76,9 @@
                 }
             })
         },
+        mounted() {
+            
+        },
         props: {
             promptContent: {
                 type: Object as () => PromptContent | undefined,

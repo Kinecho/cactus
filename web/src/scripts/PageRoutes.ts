@@ -7,6 +7,7 @@ export enum PageRoute {
     JOURNAL_MARKETING = "/journal",
     JOURNAL_HOME = "/home",
     PROMPTS_ROOT = "/prompts",
-    REFERRAL_PROGRAM = "/invite",
+    REFERRAL_PROGRAM = "/friends",
     SHARED_REFLECTION = "/reflection",
+    SOCIAL = "/friends"
 }
