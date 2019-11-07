@@ -1,5 +1,5 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div :class="['contactCard', {inviting: readyToInvite}]">
+    <div class="contactCard" :class="{inviting: readyToInvite}">
         <div class="avatar">
             <img :src="'assets/images/avatars/avatar' + randomAvatarNumber + '.png'" alt="User avatar"/>
         </div>
