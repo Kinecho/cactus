@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite}">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + randomAvatarNumber + '.png'" alt="User avatar"/>
+            <img :src="'assets/images/avatars/avatar' + avatarNumber(contact.email) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
@@ -74,7 +74,8 @@
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
     import {InviteResult} from "@shared/types/SocialInviteTypes";
-    import {sendInvite} from '@web/invite'
+    import {sendInvite} from '@web/invite';
+    import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
 
     export default Vue.extend({
         props: {
@@ -125,14 +126,11 @@
                     this.error = sendInviteResult.message;
                     return;
                 }
-            }
-        },
-
-        computed: {
-            randomAvatarNumber(): number {
-                return (Math.floor(Math.random() * 5) + 1);
             },
-        }
+            avatarNumber(email: string): number {
+                return getIntegerFromStringBetween(email, 4) + 1;
+            },
+        },      
     })
 </script>
 
