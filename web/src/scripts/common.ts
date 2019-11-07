@@ -1,7 +1,7 @@
 import {init as initAnalytics, startFullstory} from '@web/analytics'
 import {initializeFirebase} from "@web/firebase";
 import {getAllQueryParams, getQueryParam} from "@web/util";
-import {QueryParam, includesLandingQueryParams} from "@shared/util/queryParams";
+import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 
@@ -13,6 +13,13 @@ export function commonInit() {
 
     const emailAutoFill = getQueryParam(QueryParam.EMAIL);
     const referredByEmail = getQueryParam(QueryParam.REFERRED_BY_EMAIL);
+    const contactEnabled = getQueryParam(QueryParam.CONTACT_IMPORT_ENABLED);
+
+    if (contactEnabled === "true") {
+        StorageService.saveBoolean(LocalStorageKey.contactsImportEnabled, true)
+    } else if (contactEnabled === "false") {
+        StorageService.saveBoolean(LocalStorageKey.contactsImportEnabled, false)
+    }
 
     if (emailAutoFill) {
         try {
