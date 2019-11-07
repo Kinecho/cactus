@@ -6,7 +6,7 @@
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
             <p class="email">{{contact.email}}</p>
-            <div class="invite" v-if="readyToInvite && !sendingInvite">
+            <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
                 <textarea placeholder="Include an optional note..." v-model="message" />
                 <button class="primary" @click.prevent="sendInvite">Send Invite</button>
                 <button class="tertiary" @click.prevent="readyToInvite = false">Cancel</button>
@@ -21,6 +21,9 @@
         <div class="status" v-if="wasInvited">
             <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
             Invited
+        </div>
+        <div class="status error" v-if="error">
+            Not Sent
         </div>
 
     </div>
@@ -221,6 +224,9 @@
         display: flex;
         font-size: 1.6rem;
         padding: 0 1.2rem;
+        &.error {
+            color: red;
+        }
     }
 
     .check {
