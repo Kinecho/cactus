@@ -3,7 +3,7 @@
         <section class="content">
             <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
                 <div class="element-icon" >
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" :alt="cactusElement"/>
+                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
                 </div>
                 <h4 class="label">{{cactusElement}}</h4>
             </a>
@@ -12,7 +12,7 @@
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
-                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                    <vue-simple-markdown class="prevent-orphans" :source="processedContent.text"></vue-simple-markdown>
                 </p>
             </div>
 
@@ -23,7 +23,7 @@
                 <transition name="fade-in" mode="out-in">
                     <div v-if="shareableLinkUrl" class="share-note-link-container">
                         <transition name="snack" appear>
-                            <snackbar-content :autoHide="false" v-if="linkCreated">
+                            <snackbar-content :autoHide="true" v-if="linkCreated">
                                 <svg slot="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                                     <path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                                 </svg>
@@ -32,6 +32,9 @@
                         </transition>
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
+                        <div v-if="nativeShareEnabled" class="sharing">
+                            <button class="btn secondary" @click="shareNatively()"><img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
+                        </div>
                     </div>
                     <button v-else class="button primary getLink"
                             :disabled="creatingLink"
@@ -50,7 +53,7 @@
                 <div class="avatar-container" v-if="quoteAvatar">
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
-                <p class="quote">
+                <p class="quote prevent-orphans">
                     "{{processedContent.quote.text}}"
                 </p>
                 <div class="author">
@@ -289,6 +292,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import SharingService from '@web/services/SharingService'
 
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
@@ -330,6 +334,7 @@
             linkCreated: boolean,
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
+            nativeShareEnabled: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -341,11 +346,19 @@
                 shareableLinkUrl: undefined,
                 linkCreated: false,
                 cactusModalVisible: false,
-                cactusModalElement: undefined
+                cactusModalElement: undefined,
+                nativeShareEnabled: SharingService.canShareNatively()
             }
         },
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
+        },
+        mounted() {
+            const elements = Array.from(document.querySelectorAll('.prevent-orphans'));
+
+            for (let elem of elements as any){ 
+                this.preventOrphans(elem);
+            }
         },
         watch: {
             saved(isSaved) {
@@ -425,9 +438,16 @@
                 }
 
                 return classes;
-            }
+            },
         },
         methods: {
+            async shareNatively() {
+                await SharingService.shareLinkNatively({
+                    url: this.shareableLinkUrl,
+                    title: "Read my private reflection on Cactus",
+                    text: "I'm practicing mindful self-reflection with Cactus and shared this private note with you"
+                })
+            },
             async createSharableLink() {
                 this.creatingLink = true;
                 let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
@@ -487,6 +507,24 @@
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
+            },
+            preventOrphans(elem: HTMLElement) {
+                // Split words/tags into array
+                let textItems = elem.innerHTML.trim().replace(/&nbsp;/g, ' ').split(/ (?=[^>]*(?:<|$))/);
+
+                // Find the second to last work
+                var targetWord = textItems[(textItems.length - 2)];
+
+                // Stick a no break space to the end of the word and replace the instance in the array
+                textItems[(textItems.length - 2)] = targetWord + '&nbsp;';
+
+                // Join the words back together
+                let result = textItems.join(' ');
+
+                // Replace whitespace after no break spaces
+                result = result.replace(/&nbsp; /g, '&nbsp;');
+                
+                elem.innerHTML = result;
             }
         }
     })
@@ -1041,6 +1079,26 @@
         margin-bottom: 1.6rem;
     }
 
+    .sharing {
+        display: flex;
+        justify-content: center;
+
+        button {
+            display: flex;
+            flex-grow: 0;
+            justify-content: center;
+            margin-top: 1.6rem;
+            width: auto;
+
+            @include r(600) {
+                width: 50%;
+            }
+        }
+
+        img {
+            margin-right: .8rem;
+        }
+    }
 
     .snack {
         &-enter-active {

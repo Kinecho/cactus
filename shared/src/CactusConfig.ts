@@ -66,6 +66,7 @@ export interface CactusConfig {
     },
     web: {
         domain: string,
+        protocol: string,
     },
     ios: {
         bundle_id: string,
@@ -75,6 +76,7 @@ export interface CactusConfig {
         template_ids: {
             magic_link: string,
             magic_link_new_user: string,
+            invitation: string
         }
     },
     sheets: {

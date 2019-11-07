@@ -29,6 +29,9 @@ function buildConfig(): CactusConfig {
     if (config.isEmulator) {
         config.app.environment = "dev";
         config.web.domain = "localhost:8080";
+        config.web.protocol = 'http'
+    } else {
+        config.web.protocol = 'https'
     }
 
     return config;
@@ -88,6 +91,7 @@ const defaultTestConfig: CactusConfig = {
     },
     web: {
         domain: "cactus-app-stage.web.app",
+        protocol: "https"
     },
     ios: {
         bundle_id: "com.cactus.TestApp"
@@ -127,6 +131,7 @@ const defaultTestConfig: CactusConfig = {
         template_ids: {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
+            invitation: '1234invite'
         }
     },
     sheets: {

@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
         <div class="info">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Friends running"/>
+            <img class="graphic" src="/assets/images/friend2.svg" alt="Two friends running, one with a green hat"/>
             <h2>Share With Friends</h2>
             <p>
                 {{meta.title}}
@@ -9,37 +9,44 @@
         </div>
         <div class="referral-link">
             <input type="text" class="link-input" name="referral-link" disabled="true" :value="attributedLink">
-            <button class="copy secondary btn" v-clipboard:copy="attributedLink"
+            <button class="copy btn" v-clipboard:copy="attributedLink"
                     v-clipboard:success="handleCopySuccess"
                     v-clipboard:error="handleCopyError">
                 <span v-if="copySucceeded === true">Copied</span>
-                <span v-if="copySucceeded === false">Copy</span>
+                <span v-if="copySucceeded === false">Copy Link</span>
             </button>
         </div>
-        <social-sharing :url="attributedLink"
-                :title="meta.title"
-                :description="meta.description"
-                :quote="meta.quote"
-                twitter-user="itscalledcactus"
-                inline-template>
-            <div class="sharing">
-                <network network="email">
-                    <button class="emailBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/envelopeSolid.svg" alt=""/>Email
-                    </button>
-                </network>
-                <network network="twitter">
-                    <button class="twBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
-                    </button>
-                </network>
-                <network network="facebook">
-                    <button class="fbBtn small btn wiggle">
-                        <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
-                    </button>
-                </network>
+        <div class="flexContainer">
+            <div class="sharing native-sharing" v-if="nativeShareEnabled">
+                <button class="btn wiggle  secondary" @click="shareNatively()" >
+                    <img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>
+                </button>
             </div>
-        </social-sharing>
+            <social-sharing :url="attributedLink"
+                    :title="meta.title"
+                    :description="meta.description"
+                    :quote="meta.quote"
+                    twitter-user="itscalledcactus"
+                    inline-template>
+                <div class="sharing">
+                    <network network="email">
+                        <button aria-label="Email" class="secondary btn wiggle">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18"><path fill="#29A389" d="M19 0c1.652 0 3 1.348 3 3v12c0 1.652-1.348 3-3 3H3c-1.652 0-3-1.348-3-3V3c0-1.652 1.348-3 3-3h16zm1 4.92l-8.427 5.9a1 1 0 01-1.146 0L2 4.92V15c0 .548.452 1 1 1h16c.548 0 1-.452 1-1V4.92zM19 2H3c-.388 0-.728.227-.893.554L11 8.779l8.893-6.225A1.006 1.006 0 0019 2z"/></svg>
+                        </button>
+                    </network>
+                    <network network="twitter">
+                        <button aria-label="Twitter" class="twBtn btn wiggle secondary">
+                            <img src="/assets/images/twitter.svg" alt="Twitter Icon"/>
+                        </button>
+                    </network>
+                    <network network="facebook">
+                        <button aria-label="Facebook" class="fbBtn btn wiggle secondary">
+                            <img src="/assets/images/facebook.svg" alt="Facebook Icon"/>
+                        </button>
+                    </network>
+                </div>
+            </social-sharing>
+        </div>
     </div>
 </template>
 
@@ -55,6 +62,7 @@
     import {PageRoute} from '@web/PageRoutes'
     import {Config} from '@web/config';
     import VueClipboard from 'vue-clipboard2';
+    import SharingService from '@web/services/SharingService'
 
     Vue.use(SocialSharing);
     Vue.use(VueClipboard);
@@ -83,13 +91,15 @@
             loading: boolean,
             copySucceeded: boolean,
             error: any | undefined,
+            nativeShareEnabled: boolean,
         } {
             return {
                 member: undefined,
                 memberUnsubscriber: undefined,
                 loading: true,
                 copySucceeded: false,
-                error: undefined
+                error: undefined,
+                nativeShareEnabled: SharingService.canShareNatively()
             }
         },
         computed: {
@@ -125,6 +135,9 @@
             handleCopySuccess() {
                 this.copySucceeded = true;
                 setTimeout(() => this.copySucceeded = false, 2000);
+            },
+            async shareNatively() {
+                await SharingService.shareLinkNatively({url: this.attributedLink, text: this.meta.description, title: this.meta.title})
             }
         },
         destroyed(): void {
@@ -139,37 +152,32 @@
 <style lang=scss>
     @import "social";
 
+    .flexContainer {
+        display: flex;
+        justify-content: center;
+    }
+
     .content-sharing {
         .sharing {
             display: flex;
-            flex-flow: column nowrap;
             justify-content: center;
-
-            @include r(600) {
-                flex-flow: row wrap;
-            }
 
             .btn {
                 align-items: center;
                 display: flex;
                 justify-content: center;
-                margin: 0 auto .8rem;
-                width: 100%;
-
-                @include r(600) {
-                    margin: 0 .4rem;
-                    width: auto;
-                }
+                margin: 0 .4rem .8rem;
+                width: auto;
             }
 
-            .icon {
-                height: 1.6rem;
-                margin-right: .8rem;
-                width: 1.6rem;
+            img, svg {
+                height: 1.8rem;
+                width: 1.8rem;
             }
 
             .twBtn {
                 background-color: $twitter;
+                border-color: $twitter;
 
                 &:hover {
                     background-color: darken($twitter, 5%)
@@ -178,6 +186,7 @@
 
             .fbBtn {
                 background-color: $facebook;
+                border-color: $facebook;
 
                 &:hover {
                     background-color: darken($facebook, 5%)
@@ -211,6 +220,14 @@
             height: 100%;
         }
 
+        &.centered {
+            margin: -.8rem;
+
+            @include r(600) {
+                margin: 0;
+            }
+        }
+
         .graphic {
             margin-bottom: 1.6rem;
             width: 50%;
@@ -229,10 +246,6 @@
             margin-bottom: 1.6rem;
             position: relative;
 
-            @include r(374) {
-                margin-bottom: 3.2rem;
-            }
-
             .link-input {
                 @include textInput;
                 color: $lightText;
@@ -247,28 +260,16 @@
             }
 
             button.copy {
-                background-color: $lightGreen;
                 width: 100%;
                 margin-bottom: 1.2rem;
 
                 @include r(600) {
-                    background-color: transparent;
-                    border: none;
                     box-shadow: none;
                     padding: 1.2rem 2.4rem;
                     position: absolute;
                     right: 0;
                     top: 0;
                     width: auto;
-
-                    &:hover {
-                        background: transparent;
-                    }
-
-                    &:active {
-                        background-color: $darkGreen;
-                        color: $white;
-                    }
                 }
             }
         }

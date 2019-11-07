@@ -11,7 +11,8 @@ export interface Image extends FlamelinkFile {
     url?: string,
     flamelinkFileName?: string,
     storageUrl?: string,
-    fileIds?: string[]
+    fileIds?: string[],
+    altText?: string
 }
 
 export interface Video extends FlamelinkFile {
@@ -169,7 +170,8 @@ export interface Content {
 
 export enum PromptContentFields {
     promptId = "promptId",
-    cactusElement = "cactusElement"
+    cactusElement = "cactusElement",
+    scheduledSendAt = "scheduledSendAt",
 }
 
 export default class PromptContent extends FlamelinkModel {

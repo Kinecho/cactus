@@ -17,6 +17,8 @@
   }
 }
 
-.wiggle:hover img {
-  animation: wiggle .5s forwards;
-}
+.wiggle:hover {
+    img, svg {
+        animation: wiggle .5s forwards;
+    }
+} 

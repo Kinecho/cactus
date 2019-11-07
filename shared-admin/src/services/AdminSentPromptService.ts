@@ -20,6 +20,13 @@ export interface CampaignSentPromptProcessingResult {
     warning?: { message?: string, campaignId?: string, promptId?: string }
 }
 
+
+export interface UpsertSentPromptResult {
+    sentPrompt?: SentPrompt | undefined,
+    existed?: boolean,
+    error?: any
+}
+
 let firestoreService: AdminFirestoreService;
 
 export default class AdminSentPromptService {
@@ -143,6 +150,76 @@ export default class AdminSentPromptService {
         sentPrompt.memberEmail = member.email;
 
         return await this.save(sentPrompt);
+    }
+
+
+    //Mostly copied from the mailchimp recipient job above.
+    async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<UpsertSentPromptResult> {
+        try {
+
+
+            console.log("processing cactus member", member.email);
+            // let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address);
+            if (!member.id) {
+                console.error("No ID found on the cactus member object.");
+                return {error: "No ID found on the cactus member object"};
+            }
+            const email = member.email;
+            if (!prompt || !prompt.id) {
+                console.error("no prompt id was provided to processMailchimpRecipient");
+                return {error: "no prompt id was provided to processMailchimpRecipient"};
+            }
+            const result: UpsertSentPromptResult = {};
+            let sentPrompt = await this.getSentPromptForCactusMemberId({
+                cactusMemberId: member.id,
+                promptId: prompt.id
+            });
+
+            if (sentPrompt) {
+                result.existed = true;
+                console.log("Found existing SentPrompt", sentPrompt, "for user email", email);
+                // we don't want to push more events to this user,
+                // because of automation processing we can have lots of duplicates.
+                // If we can find a solution to figuring out if a sent was already logged, handling for the automation case,
+                // we can push history to these objects
+                // API Docs: https://developer.mailchimp.com/documentation/mailchimp/reference/reports/sent-to/#read-get_reports_campaign_id_sent_to
+            } else {
+                result.existed = false;
+                sentPrompt = new SentPrompt();
+                sentPrompt.createdAt = new Date();
+                sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
+                sentPrompt.firstSentAt = sendDate || prompt.sendDate || new Date();
+                sentPrompt.sendHistory.push({
+                    sendDate: sentPrompt.firstSentAt,
+                    email,
+                    medium: PromptSendMedium.CRON_JOB,
+                });
+            }
+
+            //only update the sendDate if it's not an automation
+            //TODO: not sure if we need a way to update the send date on this. We can easly add this if needed
+            // if (campaign && campaign.type !== 'automation') {
+            //     sentPrompt.firstSentAt = sendDate || prompt.sendDate || new Date();
+            // }
+
+            sentPrompt.promptId = prompt.id;
+            sentPrompt.cactusMemberId = member.id;
+            sentPrompt.userId = member.userId;
+            sentPrompt.memberEmail = member.email;
+
+            if (!dryRun) {
+                const saved = await this.save(sentPrompt);
+                result.sentPrompt = saved;
+            } else {
+                result.sentPrompt = sentPrompt
+            }
+
+            return result;
+        } catch (error) {
+            console.error("Failed to run upsertSentPromptForMember", error);
+            return {error};
+        }
+
     }
 
 

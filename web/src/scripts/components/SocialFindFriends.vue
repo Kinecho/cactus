@@ -1,27 +1,68 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="SocialFindFriends">
+        <div class="loading" v-if="loading">
+            <Spinner message="Loading" name="socialFindFriends"/>
+        </div>
       <!-- find your friends -->
-        <div class="findFriends">
-            <h1>Find Your Friends</h1>
-            <p class="subtext">Invite people you know to join and reflect with you. Your reflections are always private unless you specifically share them.</p>
-            <button class="primary">Share your Invite Link</button>
+        <div class="find-friends">
+            <h1>Invite others to reflect</h1>
+            <p class="subtext">Use this link to share Cactus with friends and family.</p>
+            <div class="referral-link">
+                <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
+                <button class="copy" v-clipboard:copy="referralLink"
+                        v-clipboard:success="handleCopySuccess"
+                        v-clipboard:error="handleCopyError">
+                    <span v-if="copySucceeded === true">Copied!</span>
+                    <span v-if="copySucceeded === false">Copy <span class="invitetxt">Invite</span> Link</span>
+                </button>
+            </div>
+            <social-sharing :url="referralLink"
+                    title="I'm inviting you to Cactus"
+                    description="See yourself and the world more positively."
+                    quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
+                    twitter-user="itscalledcactus"
+                    inline-template>
+                <div class="btnContainer">
+                    <network network="email">
+                        <button aria-label="Email" class="secondary btn wiggle">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 18"><path fill="#29A389" d="M19 0c1.652 0 3 1.348 3 3v12c0 1.652-1.348 3-3 3H3c-1.652 0-3-1.348-3-3V3c0-1.652 1.348-3 3-3h16zm1 4.92l-8.427 5.9a1 1 0 01-1.146 0L2 4.92V15c0 .548.452 1 1 1h16c.548 0 1-.452 1-1V4.92zM19 2H3c-.388 0-.728.227-.893.554L11 8.779l8.893-6.225A1.006 1.006 0 0019 2z"/></svg>Email
+                        </button>
+                    </network>
+                    <network network="twitter">
+                        <button aria-label="Twitter" class="twBtn btn wiggle">
+                            <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
+                        </button>
+                    </network>
+                    <network network="facebook">
+                        <button aria-label="Facebook" class="fbBtn btn wiggle">
+                            <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
+                        </button>
+                    </network>
+                </div>
+            </social-sharing>
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Import from...</h2>
+                <h2>Import contacts</h2>
+                <p class="subtext">Import contacts from your email. Don't worry, you'll choose which contacts before they're invited.</p>
                 <div class="btnContainer">
-                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="gmail">Gmail</button>
-                    <button class="secondary small cloudsponge-launch" data-cloudsponge-source="yahoo">Yahoo</button>
+                    <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D44638" d="M22 6.25v12.5c0 .708-.542 1.25-1.25 1.25H19.5V8.656L12 14.042 4.5 8.656V20H3.25C2.54 20 2 19.458 2 18.75V6.25c0-.354.135-.667.36-.89.223-.227.537-.36.89-.36h.417L12 11.042 20.333 5h.417c.354 0 .667.135.89.36.226.223.36.536.36.89z"/></svg>
+                        Gmail
+                    </button>
+                    <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="yahoo">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#440099" d="M13.18 22s-.7-.127-1.263-.127c-.508 0-1.27.127-1.27.127l.16-8.496C9.627 11.466 6.162 5.258 4 2c1.088.248 1.545.232 2.638 0l.016.028c1.377 2.439 3.483 5.838 5.263 8.784C13.674 7.918 16.44 3.398 17.19 2c.85.223 1.707.215 2.657 0-1 1.348-4.638 7.644-6.837 11.504L13.174 22h.007z"/></svg>
+                        Yahoo
+                    </button>
                 </div>
-                <p class="subtext">Don't worry, you'll choose who to connect with before they're invited.</p>
                 <!-- end -->
             </div>
 
             <div class="results" v-if="importedContacts">
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
-                <div class="contactCards" v-for="contact in importedContacts">
+                <template v-for="contact in importedContacts">
                     <SocialImportedContact v-bind:contact="contact"/>
-                </div>
+                </template>
             </div>
         </div>
     </div>
@@ -29,33 +70,74 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import Spinner from "@components/Spinner.vue";
     import AddressBookService from '@web/services/AddressBookService'
     import SocialImportedContact from "@components/SocialImportedContact.vue"
     import {EmailService} from "@shared/types/EmailContactTypes";
+    import VueClipboard from 'vue-clipboard2';
+    import SocialSharing from 'vue-social-sharing';
+    import CactusMember from "@shared/models/CactusMember";
+    import CactusMemberService from '@web/services/CactusMemberService';
+    import {Config} from "@web/config";
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
+    import {PageRoute} from '@web/PageRoutes';
+    import {generateReferralLink} from '@shared/util/SocialInviteUtil';
+
+    Vue.use(VueClipboard);
+    Vue.use(SocialSharing);
 
     export default Vue.extend({
         components: {
+            Spinner,
             SocialImportedContact
         },
         created() {
             AddressBookService.sharedInstance.start();
+
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.member = member;
+                    this.authLoaded = true;
+
+                    if (!member) {
+                        window.location.href = PageRoute.HOME;
+                    }
+                }
+            })
         },
         mounted() {
             this.configureCloudsponge();
         },
         destroyed() {
-            
+            if (this.memberUnsubscriber) {
+                this.memberUnsubscriber();
+            }
         },
         data(): {
+            authLoaded: boolean,
+            copySucceeded: boolean,
+            member: CactusMember | undefined | null,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
             importedContacts: Array<any> | undefined,
-            importedService: string | undefined            
+            importedService: string | undefined
         } {
             return {
+              authLoaded: false,
+              copySucceeded: false,
               importedContacts: undefined,
-              importedService: undefined              
+              importedService: undefined,
+              member: undefined,
+              memberUnsubscriber: undefined,
             }
         },
         methods: {
+            handleCopyError() {
+                alert("Copied Failed");
+            },
+            handleCopySuccess() {
+                this.copySucceeded = true;
+                setTimeout(() => this.copySucceeded = false, 2000);
+            },
             importContacts: function(contacts: Array<any>, source: string) {
                 this.importedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
                 this.importedService = EmailService[source as keyof typeof EmailService];
@@ -71,6 +153,131 @@
             }
         },
         computed: {
+            loading(): boolean {
+                return !this.authLoaded;
+            },
+            referralLink(): string | undefined {
+                if (this.member) {
+                    return generateReferralLink({
+                        member: this.member,
+                        utm_source: 'cactus.app',
+                        utm_medium: 'invite-friends',
+                        domain: Config.domain
+                    });
+                }
+            }
         }
     })
 </script>
+<style lang="scss">
+    @import "common";
+    @import "mixins";
+    @import "variables";
+    @import "forms";
+    @import "social";
+    @import "transitions";
+
+    .content {
+        flex-grow: 1;
+        padding: 2.4rem;
+    }
+
+    .find-friends {
+        max-width: 70rem;
+    }
+
+    .subtext {
+        margin-bottom: 1.6rem;
+        opacity: .8;
+    }
+
+    .referral-link {
+        margin-bottom: 3.2rem;
+        position: relative;
+    }
+
+    .link-input {
+        display: none;
+
+        @include r(600) {
+            @include textInput;
+            color: $lightText;
+            display: block;
+            margin-bottom: 1.6rem;
+            max-width: none;
+            padding-right: 9rem;
+            width: 100%;
+        }
+    }
+
+    .invitetxt {
+        @include r(600) {
+            display: none;
+        }
+    }
+
+    button.copy {
+        width: 100%;
+
+        @include r(600) {
+            border: none;
+            box-shadow: none;
+            padding: 1.2rem 2.4rem;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+
+            &.secondary {
+                background-color: transparent;
+                border: 0;
+            }
+
+            &:hover {
+                background: transparent;
+            }
+
+            &:active {
+                background-color: $darkGreen;
+                color: $white;
+            }
+        }
+    }
+
+    .btnContainer {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+
+        @include r(600) {
+            flex-flow: row wrap;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            margin-bottom: .8rem;
+            width: 100%;
+
+            @include r(600) {
+                flex-grow: 0;
+                margin: 0 .4rem;
+                width: auto;
+            }
+        }
+
+        .icon {
+            height: 2rem;
+            margin-right: .8rem;
+            width: 2rem;
+        }
+    }
+
+    .results h2 {
+        margin: 4.8rem 0 .8rem;
+    }
+
+
+</style>

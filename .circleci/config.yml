@@ -113,6 +113,20 @@ commands:
                 paths:
                   - node_modules
                 key: v3-root-dependency-{{ .Branch }}-{{ checksum "package.json" }}
+  notify-on-failure:
+    parameters:
+      workflow_name:
+        type: string
+        default: "<not set>"
+        description: "The message to send to slack"
+    steps:
+      - get-repo-link
+      - slack/status:
+          <<: *webhook-engineering-ci
+          fail_only: true
+          include_project_field: false
+          include_job_number_field: false
+          failure_message: ":boom: *$CIRCLE_JOB* job failed in a <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| CI workflow >\nBranch \\`<https://github.com/Kinecho/cactus-ios/compare/${CIRCLE_BRANCH}|${CIRCLE_BRANCH}>\\`"
 
 jobs:
   get-changes:
@@ -154,9 +168,7 @@ jobs:
               echo "Starting firebase deploy for --only ${MODULES}"
               firebase deploy --only $MODULES -P stage
             fi
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
 
   install-all:
     executor: cactus-web
@@ -175,9 +187,7 @@ jobs:
           module: *scripts-module
       - install-module:
           module: *admin-module
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   test-web:
     executor: cactus-web
     resource_class: small
@@ -202,9 +212,7 @@ jobs:
           path: web/reports/coverage
       - store_artifacts:
           path: web/reports
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   test-functions:
     executor: cactus-web
     resource_class: small
@@ -231,9 +239,7 @@ jobs:
           path: functions/reports/coverage
       - store_artifacts:
           path: functions/reports
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
 
   test-shared:
     executor: cactus-web
@@ -254,9 +260,7 @@ jobs:
           path: shared/reports/coverage
       - store_artifacts:
           path: shared/reports
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   test-scripts:
     executor: cactus-web
     resource_class: small
@@ -278,9 +282,7 @@ jobs:
           path: scripts/reports/tests
       - store_artifacts:
           path: scripts/reports
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   ready-for-deploy:
     executor: cactus-web
     resource_class: small
@@ -361,9 +363,7 @@ jobs:
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
             npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
-      - slack/status:
-          <<: *webhook-engineering-ci
-          fail_only: true
+      - notify-on-failure
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
     parameters:
@@ -438,7 +438,6 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: ":white_check_mark: \\`${CIRCLE_BRANCH}\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > completed successfully.\n$(cat .slack_git_url.txt)"
-
 
 workflows:
   version: 2.1

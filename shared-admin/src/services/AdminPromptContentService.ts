@@ -2,6 +2,8 @@ import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import PromptContent from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
+import {getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
+import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 
 
 export default class AdminPromptContentService {
@@ -36,12 +38,15 @@ export default class AdminPromptContentService {
         return await this.flamelinkService.getByEntryId(id, PromptContent);
     }
 
-    async getByPromptId(promptId?: string): Promise<PromptContent|undefined> {
+    async getByPromptId(promptId?: string): Promise<PromptContent | undefined> {
         if (!promptId) {
             return undefined;
         }
 
-        return await this.flamelinkService.getByField({name: PromptContent.Fields.promptId, value: promptId}, PromptContent)
+        return await this.flamelinkService.getByField({
+            name: PromptContent.Fields.promptId,
+            value: promptId
+        }, PromptContent)
     }
 
     async setCactusElement(content: PromptContent, element: CactusElement): Promise<void> {
@@ -55,4 +60,43 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
+    async getPromptContentForDate(date: Date = new Date()): Promise<PromptContent | undefined> {
+        try {
+            // const midnightDenver = getDateAtMidnightDenver(date);
+            const midnightDenver = date;
+            midnightDenver.setHours(0);
+            const nextDate = plusDays(1, midnightDenver);
+            nextDate.setHours(0);
+            const startDateString = getFlamelinkDateString(nextDate);
+            const endDateString = getFlamelinkDateString(midnightDenver);
+
+            console.log("start date", startDateString);
+            console.log("end date", endDateString);
+            const raw = await this.flamelinkService.content.get({
+                schemaKey: SchemaName.promptContent,
+                // field: PromptContent.Fields.scheduledSendAt,
+                orderBy: {field: PromptContent.Fields.scheduledSendAt, order: "desc"},
+                startAt: startDateString,
+                endAt: endDateString,
+            });
+
+            if (!raw) {
+                console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
+                return
+            }
+
+            const allValues = Object.values(raw);
+            console.log(`Found ${allValues.length} that matched the criteria for the date range`);
+            const [content]: (any | undefined)[] = allValues;
+            if (!content) {
+                return undefined
+            }
+
+            return fromFlamelinkData(content, PromptContent);
+        } catch (error) {
+            console.error("Failed to fetch content", error);
+            return undefined;
+        }
+
+    }
 }

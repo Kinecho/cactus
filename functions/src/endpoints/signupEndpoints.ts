@@ -7,8 +7,12 @@ import {
     EmailStatusResponse,
     LoginEvent,
     MagicLinkRequest,
-    MagicLinkResponse
+    MagicLinkResponse,
+    InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
+import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import SocialInvite from "@shared/models/SocialInvite";
+import {generateReferralLink} from '@shared/util/SocialInviteUtil'
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
@@ -16,6 +20,7 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {appendDomain, getFullName, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminUserService from "@admin/services/AdminUserService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {getAuthUser} from "@api/util/RequestUtil";
@@ -306,6 +311,30 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             await AdminCactusMemberService.getSharedInstance().save(member);
             console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
 
+            // update existing invite record
+            if (member.signupQueryParams.inviteId) {
+                try {
+                    await AdminSocialInviteService.getSharedInstance().updateMemberJoined(member);
+                    console.log('updated SocialInvite record with recipientMemberId');
+                } catch (e) {
+                    console.error("failed to update social invite", e);
+                }
+            // create a new invite record if one doesn't exist but they were invited
+            } else if (referredByEmail) {
+                try {
+                    const invitedByMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(referredByEmail);
+                    if (invitedByMember) {
+                        await AdminSocialInviteService.getSharedInstance().generateInviteRecord(
+                            invitedByMember, 
+                            member
+                        );
+                        console.log('created new SocialInvite record with recipientMemberId');
+                    }
+                } catch (e) {
+                    console.error("failed to create new social invite", e);
+                }
+            }
+
             if (member.email && referredByEmail) {
                 console.log("Updating mailchimp ref email to ", referredByEmail);
                 await MailchimpService.getSharedInstance().updateMergeFields({
@@ -356,6 +385,91 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         resp.sendStatus(500)
     }
 
+});
+
+app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload: SocialInviteRequest = req.body;
+    console.log("signupEndpoints.send-invite", payload);
+
+    const requestUser = await getAuthUser(req);
+    if (!requestUser) {
+        console.log("No auth user was found on the request");
+        resp.sendStatus(401);
+        return
+    }
+
+    const { toContact, fromEmail, message } = payload;
+
+    if (requestUser.email != fromEmail) {
+        console.log("Unauthorized: Request user does not match payload");
+        resp.sendStatus(403);
+        return
+    }
+
+    if (!toContact) {
+        console.error("signupEndpoints.send-invite: Email to send to was not provided in payload");
+        const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmail: ""};
+        resp.send(errorResponse);
+        return;
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestUser.email);
+    
+    const response: InvitationResponse = {
+        success: true,
+        toEmail: toContact.email,
+        fromEmail: fromEmail,
+        message: message
+    };
+    
+    const domain = Config.web.domain;
+    const protocol = Config.web.protocol;
+
+    let socialInvite = new SocialInvite();
+    if (member) {
+        socialInvite.senderMemberId = member.id;
+    }
+    socialInvite.recipientEmail = toContact.email;
+    await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+    console.log(socialInvite.id);
+
+    const referralLink: string = 
+        generateReferralLink({ 
+            member: member, 
+            utm_source: 'cactus.app', 
+            utm_medium: 'invite-contact', 
+            domain: `${protocol}://${domain}`,
+            social_invite_id: (socialInvite ? socialInvite.id : undefined)
+        });
+
+    try {
+        await AdminSendgridService.getSharedInstance().sendInvitation({
+            toEmail: toContact.email,
+            fromEmail: fromEmail,
+            message: message,
+            link: referralLink
+        });
+
+        if (response.success) {
+            // update the SocialInvite record with the sentAt date
+            socialInvite.sentAt = new Date();
+            await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+        }
+
+        resp.send(response);
+    } catch (error) {
+        Sentry.captureException(error);
+        console.error(error);
+
+        resp.status(500).send({
+            toEmail: toContact.email,
+            sendSuccess: false,
+            error: error,
+        });
+    }
+
+
+    return;
 });
 
 

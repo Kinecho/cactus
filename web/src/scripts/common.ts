@@ -1,7 +1,7 @@
 import {init as initAnalytics, startFullstory} from '@web/analytics'
 import {initializeFirebase} from "@web/firebase";
 import {getAllQueryParams, getQueryParam} from "@web/util";
-import {QueryParam} from "@shared/util/queryParams";
+import {QueryParam, includesLandingQueryParams} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 
@@ -33,7 +33,8 @@ export function commonInit() {
 
     try {
         const params = getAllQueryParams();
-        if (params) {
+
+        if (params && includesLandingQueryParams(params)) {
             StorageService.saveJSON(LocalStorageKey.landingQueryParams, params);
         }
     } catch (error) {

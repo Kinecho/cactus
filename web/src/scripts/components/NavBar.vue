@@ -28,7 +28,7 @@
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
                     <img class="icon" alt="Friends" src="/assets/images/users.svg"/>
                     <span class="label">Friends</span>
-                    <span class="badge">3</span>
+                    <!--span class="badge">3</span-->
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn">
                     <div class="navbar-avatar-container" slot="custom-button">
