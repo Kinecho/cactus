@@ -81,7 +81,7 @@
             Spinner,
             SocialFindFriends
         },
-        created() {
+        beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
@@ -92,7 +92,8 @@
                     }
                 }
             })
-
+        },
+        created() {
             this.currentChild = 'welcome';
         },
         destroyed() {

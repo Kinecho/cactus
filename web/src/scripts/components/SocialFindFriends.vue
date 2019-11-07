@@ -92,9 +92,7 @@
             Spinner,
             SocialImportedContact
         },
-        created() {
-            AddressBookService.sharedInstance.start();
-
+        beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
@@ -105,6 +103,9 @@
                     }
                 }
             })
+        },
+        created() {
+            AddressBookService.sharedInstance.start();
         },
         mounted() {
             this.configureCloudsponge();
