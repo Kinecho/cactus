@@ -15,6 +15,5 @@ export interface InviteResult {
 
 export interface SocialInviteRequest {
     toContact: EmailContact,
-    fromEmail: string,
     message?: string
 }

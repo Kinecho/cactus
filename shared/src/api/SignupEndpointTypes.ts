@@ -30,7 +30,7 @@ export interface MagicLinkResponse extends ApiResponse {
 export interface InvitationResponse extends ApiResponse {
     success: boolean,
     toEmail: string,
-    fromEmail?: string,
+    fromEmail?: string | undefined,
     message?: string,
     error?: any,
 }

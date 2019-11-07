@@ -19,7 +19,6 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
     console.log(currentUser);
     const requestOptions: SocialInviteRequest = {
       toContact: contact,
-      fromEmail: currentUser.email || '',
       message: message
     }
 

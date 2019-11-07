@@ -392,19 +392,13 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     console.log("signupEndpoints.send-invite", payload);
 
     const requestUser = await getAuthUser(req);
-    if (!requestUser) {
+    if (!requestUser || !requestUser.email) {
         console.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
 
-    const { toContact, fromEmail, message } = payload;
-
-    if (requestUser.email != fromEmail) {
-        console.log("Unauthorized: Request user does not match payload");
-        resp.sendStatus(403);
-        return
-    }
+    const { toContact, message } = payload;
 
     if (!toContact) {
         console.error("signupEndpoints.send-invite: Email to send to was not provided in payload");
@@ -418,7 +412,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     const response: InvitationResponse = {
         success: true,
         toEmail: toContact.email,
-        fromEmail: fromEmail,
+        fromEmail: requestUser.email,
         message: message
     };
     
@@ -445,7 +439,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     try {
         await AdminSendgridService.getSharedInstance().sendInvitation({
             toEmail: toContact.email,
-            fromEmail: fromEmail,
+            fromEmail: requestUser.email,
             message: message,
             link: referralLink
         });
