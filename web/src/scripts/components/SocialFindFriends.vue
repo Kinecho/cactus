@@ -29,13 +29,14 @@
                         </button>
                     </network>
                     <network network="twitter">
-                        <button aria-label="Twitter" class="twBtn btn wiggle">
-                            <img class="icon" src="/assets/images/twitter.svg" alt=""/>Twitter
+                        <button aria-label="Twitter" class="secondary btn wiggle">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#1da1f2" d="M47 9.424a18.957 18.957 0 01-5.42 1.488 9.49 9.49 0 004.149-5.224 18.901 18.901 0 01-5.997 2.29A9.42 9.42 0 0032.844 5c-5.21 0-9.437 4.227-9.437 9.437 0 .738.084 1.46.245 2.149-7.843-.393-14.795-4.157-19.45-9.866a9.402 9.402 0 00-1.278 4.754 9.421 9.421 0 004.199 7.85 9.357 9.357 0 01-4.276-1.18v.12c0 4.571 3.25 8.384 7.57 9.255a9.355 9.355 0 01-2.486.33c-.611 0-1.201-.056-1.777-.168 1.2 3.742 4.684 6.48 8.812 6.55A18.888 18.888 0 013.247 38.27c-.765 0-1.51-.042-2.247-.126a26.708 26.708 0 0014.465 4.234c17.358 0 26.851-14.38 26.851-26.844 0-.415-.007-.822-.028-1.23A18.877 18.877 0 0047 9.424"/></svg>Twitter
                         </button>
                     </network>
                     <network network="facebook">
-                        <button aria-label="Facebook" class="fbBtn btn wiggle">
-                            <img class="icon" src="/assets/images/facebook.svg" alt=""/>Facebook
+                        <button aria-label="Facebook" class="secondary btn wiggle">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#3b5998" d="M41.151 3H6.85C4.75 3 3 4.75 3 6.849V41.15C3 43.25 4.75 45 6.849 45H24V27.5h-5.25v-5.25H24V17c0-4.375 1.75-7 7-7h5.25v5.25h-2.276C32.4 15.25 31 16.651 31 18.224v4.026h7l-.875 5.25H31V45h10.151C43.25 45 45 43.25 45 41.151V6.85C45 4.75 43.25 3 41.151 3z"/></svg>
+                            Facebook
                         </button>
                     </network>
                 </div>
@@ -231,10 +232,6 @@
             &.secondary {
                 background-color: transparent;
                 border: 0;
-            }
-
-            &:hover {
-                background: transparent;
             }
 
             &:active {

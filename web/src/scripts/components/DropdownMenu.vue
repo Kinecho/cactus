@@ -132,13 +132,14 @@
 
             svg {
                 fill: $darkGreen;
-                height: 1.6rem;
+                height: 3.2rem;
                 margin-right: .8rem;
-                width: 1.6rem;
+                padding: 5px;
+                width: 3.2rem;
             }
 
             &.icon {
-                padding: .9rem;
+                padding: 0;
 
                 svg {
                     margin-right: 0;
