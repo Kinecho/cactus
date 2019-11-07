@@ -5,8 +5,8 @@
         </div>
       <!-- find your friends -->
         <div class="find-friends">
-            <h1>Invite others to reflect</h1>
-            <p class="subtext">Use this link to share Cactus with friends and family.</p>
+            <h1>Invite friends to reflect</h1>
+            <p class="subtext">Share your unique link.</p>
             <div class="referral-link">
                 <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
                 <button class="copy" v-clipboard:copy="referralLink"
@@ -18,7 +18,7 @@
             </div>
             <social-sharing :url="referralLink"
                     title="I'm inviting you to Cactus"
-                    description="See yourself and the world more positively."
+                    description="Boost your mood and emotional intelligence in one minute."
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
                     inline-template>
@@ -44,8 +44,8 @@
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Import contacts</h2>
-                <p class="subtext">Import contacts from your email. Don't worry, you'll choose which contacts before they're invited.</p>
+                <h2>Invite your contacts</h2>
+                <p class="subtext">You'll choose which of your contacts to invite.</p>
                 <div class="btnContainer">
                     <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#D44638" d="M22 6.25v12.5c0 .708-.542 1.25-1.25 1.25H19.5V8.656L12 14.042 4.5 8.656V20H3.25C2.54 20 2 19.458 2 18.75V6.25c0-.354.135-.667.36-.89.223-.227.537-.36.89-.36h.417L12 11.042 20.333 5h.417c.354 0 .667.135.89.36.226.223.36.536.36.89z"/></svg>
