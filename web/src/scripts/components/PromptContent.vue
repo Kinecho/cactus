@@ -641,13 +641,13 @@
                 }
             },
 
-            async save(): Promise<ReflectionResponse | undefined> {
+            async save(options: {updateReflectionLog: boolean} = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
-                    this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
+                    this.reflectionResponse.reflectionDurationMs= this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
-                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true});
+                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true, updateReflectionLog: options.updateReflectionLog});
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {
                         console.log("Member is not logged in, saving to localstorage");
@@ -666,7 +666,7 @@
                 }
 
                 this.transitionName = "slide";
-                const saveTask = this.isReflection ? this.save() : () => undefined;
+                const saveTask = this.isReflection ? this.save({updateReflectionLog: true}) : () => undefined;
                 const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
@@ -690,7 +690,7 @@
 
             },
             async previous() {
-                const saveTask = this.isReflection ? this.save() : () => undefined;
+                const saveTask = this.isReflection ? this.save({updateReflectionLog: false}) : () => undefined;
                 this.transitionName = "slide-out";
                 const content = this.contentItems || [];
                 if (this.completed) {
@@ -718,7 +718,7 @@
                 await saveTask;
             },
             async complete() {
-                const saveTask = this.save();
+                const saveTask = this.save({updateReflectionLog: true});
                 this.transitionName = "slide";
                 // this.activeIndex = 0;
                 pushQueryParam(QueryParam.CONTENT_INDEX, "done");
@@ -730,7 +730,7 @@
                 await saveTask;
             },
             async restart() {
-                const saveTask = this.save();
+                const saveTask = this.save({updateReflectionLog: false});
                 this.activeIndex = 0;
                 this.completed = false;
                 await saveTask;

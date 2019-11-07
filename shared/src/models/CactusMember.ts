@@ -1,5 +1,6 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
+import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -22,6 +23,13 @@ export type NotificationSettings = {
     [key in NotificationChannel]: NotificationStatus;
 };
 
+export interface ReflectionStats {
+    currentStreakDays: number,
+    totalDurationMs: number,
+    totalCount: number,
+    elementAccumulation: ElementAccumulation
+}
+
 export enum Field {
     firstName = "firstName",
     lastName = "lastName",
@@ -37,6 +45,8 @@ export enum Field {
     signupConfirmedAt = "signupConfirmedAt",
     lastJournalEntryAt = "lastJournalEntryAt",
     unsubscribedAt = "unsubscribedAt",
+    stats = "stats",
+    stats_reflections = "reflections"
 }
 
 export default class CactusMember extends BaseModel {
@@ -71,6 +81,10 @@ export default class CactusMember extends BaseModel {
         utm_source?: string,
         utm_medium?: string,
         [name: string]: string | undefined
+    } = {};
+
+    stats: {
+        reflections?: ReflectionStats
     } = {};
 
     prepareForFirestore(): any {

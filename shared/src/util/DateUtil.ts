@@ -66,6 +66,14 @@ export function minusDays(days: number, date: Date = new Date()): Date {
     return DateTime.fromJSDate(date).minus({days: days}).toJSDate();
 }
 
+export function plusHours(hours: number, date: Date = new Date()): Date {
+    return DateTime.fromJSDate(date).plus({hours}).toJSDate();
+}
+
+export function minusHours(hours: number, date: Date = new Date()): Date {
+    return DateTime.fromJSDate(date).minus({hours}).toJSDate();
+}
+
 export function minutesToMilliseconds(minutes: number): number {
     return Duration.fromObject({minutes: minutes}).valueOf();
 }
@@ -196,10 +204,20 @@ export function atMidnight(date: Date): Date {
 
 /**
  * Assumes ordered by date DESC already
- * @param {Date[]} dates
+ * @param {Date[]} d
  * @param {Date} start
  */
-export function getStreak(dates: Date[], start: Date = new Date()) {
+export function getStreak(d: Date[], start: Date = new Date()) {
+    let dates = d;
+    if (dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = dates.findIndex(date => date.getTime() <= start.getTime())
+    console.log("Starting the date index at ", startIndex);
+    dates = dates.slice(startIndex);
+
     if (dates.length === 0) {
         return 0;
     }
@@ -210,7 +228,7 @@ export function getStreak(dates: Date[], start: Date = new Date()) {
     let i = 1;
     let diff = numDaysAgoFromMidnights(next, currentDate);
 
-    if (diff < 2) {
+    if (diff >= 0 && diff < 2) {
         streak = 1;
     }
 
