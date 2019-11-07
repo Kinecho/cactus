@@ -10,7 +10,8 @@ export interface EmailAddress {
 export interface CloudspongeContact {
   first_name: string,
   last_name: string,
-  email: Array<EmailAddress>
+  email: Array<EmailAddress>,
+  selectedEmail(): string
 }
 
 export interface EmailContact {

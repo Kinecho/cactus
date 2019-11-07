@@ -31,7 +31,7 @@ class AddressBookService {
       formattedContacts.push({
         first_name: contact['first_name'],
         last_name: contact['last_name'],
-        email: contact['email'][0]['address']
+        email: contact.selectedEmail()
       })
     });
 
