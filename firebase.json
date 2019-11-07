@@ -366,10 +366,6 @@
                 "destination": "/checkout_redirect.html"
             },
             {
-                "source": "/oauth-proxy",
-                "destination": "/solo_proxy_auth.html"
-            },
-            {
                 "source": "/",
                 "destination": "/index.html"
             },
