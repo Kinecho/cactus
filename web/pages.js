@@ -448,7 +448,7 @@ module.exports = {
     },
     "solo_proxy_auth": {
         "title": "oAuth Proxy",
-        "path": "/oauth-proxy",
+        "path": "/solo-proxy-auth",
         "includeInDev": true,
         "name": "solo_proxy_auth"
     },
