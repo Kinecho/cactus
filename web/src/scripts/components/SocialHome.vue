@@ -38,14 +38,11 @@
             SocialFindFriends,
             SocialActivityFeed
         },
-        created() {
-            this.currentChild = 'findFriends';
-        },
         data(): {
             currentChild: string | undefined
         } {
             return {
-                currentChild: undefined
+                currentChild: 'findFriends'
             }
         },
         methods: {
