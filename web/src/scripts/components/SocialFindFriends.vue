@@ -1,4 +1,3 @@
-import {LocalStorageKey} from '@web/services/StorageService'
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="SocialFindFriends">
         <div class="loading" v-if="loading">
