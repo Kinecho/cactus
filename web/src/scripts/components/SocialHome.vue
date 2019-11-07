@@ -124,7 +124,7 @@
 
         @include r(600) {
             @include h(960) {
-                height: 100vh;
+                min-height: 100vh;
             }
         }
 
