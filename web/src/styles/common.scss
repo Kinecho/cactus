@@ -48,6 +48,10 @@ header {
     }
     @include r(600) {
         border-bottom: 1px solid lighten($lightestGreen, 5%);
+
+        &.noborder {
+            border-bottom: 0;
+        }
     }
     @include r(768) {
         background-color: transparent;

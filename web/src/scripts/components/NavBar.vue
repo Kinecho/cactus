@@ -1,8 +1,8 @@
 <template lang="html">
-    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent}" v-if="!hidden">
+    <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-            <div v-if="displayLoginButton || displaySignupButton">
+            <div v-if="displayLoginButton || displaySignupButton" class="anonLinks">
                 <transition name="fade-in-slow" appear>
                     <a v-if="displayLoginButton"
                             class="login"
@@ -20,7 +20,7 @@
                     >{{copy.common.SIGN_UP}}</a>
                 </transition>
             </div>
-            <div class="navContainer">
+            <div class="navContainer" v-if="loggedIn">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My Journal</title><path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/></svg>
                     <span class="label">Home</span>
@@ -205,13 +205,11 @@
 
     .login {
         font-size: 1.6rem;
-        margin-left: .8rem;
         text-decoration: none;
         transition: background-color .2s ease-in-out;
 
         @include r(600) {
             font-size: 1.8rem;
-            margin-left: 1.6rem;
 
             &:last-child {
                 border: 1px solid $lightGreen;
@@ -229,9 +227,13 @@
         flex-grow: 0;
         margin-left: .8rem;
 
+        @include r(374) {
+            margin-left: 1.6rem;
+        }
+
         @include r(600) {
             font-size: 1.8rem;
-            margin-left: 1.6rem;
+            margin-left: 3.2rem;
         }
     }
 

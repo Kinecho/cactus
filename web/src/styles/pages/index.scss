@@ -37,12 +37,14 @@ body {
 .hero {
   display: grid;
   grid-template-areas: "heroText" "demo" "target" "form";
+  margin-top: 2.4rem;
   position: relative;
 
   @include r(768) {
     grid-template-columns: 50% auto;
     grid-template-rows: auto auto;
     grid-template-areas: "heroText demo" "form     demo";
+    margin-top: 0;
     text-align: left;
   }
   @include r(1024) {
@@ -53,10 +55,18 @@ body {
   .heroText {
     align-self: end;
     grid-area: heroText;
+    margin: 0 auto;
+    max-width: 60rem;
+
+    @include r(768) {
+      margin: 0;
+      max-width: none;
+    }
   }
 
   h1 {
-    margin: .8rem 2.4rem 1.6rem;
+    line-height: 1.2;
+    margin: .8rem 2.4rem .4rem;
 
     @include r(768) {
       margin: 0 2.4rem 2.4rem;
