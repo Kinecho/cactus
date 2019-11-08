@@ -20,7 +20,6 @@ export enum QueryParam {
     UTM_MEDIUM = "utm_medium",
     NO_NAV = "no_nav",
     SOCIAL_INVITE_ID = "inviteId",
-    CONTACT_IMPORT_ENABLED = "contactsEnabled"
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {
