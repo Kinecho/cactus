@@ -2,6 +2,7 @@
     <modal :show="showModal"
             v-on:close="$emit('close')"
             :showCloseButton="true"
+            v-if="member"
     >
         <div slot="body" class="modalContainer">
             <h3>What's your name?</h3>
