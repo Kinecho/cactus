@@ -21,16 +21,23 @@
 
                     <div class="item">
                         <label class="label">
-                            {{copy.common.EMAIL}}
+                            {{copy.common.FIRST_NAME}}
                         </label>
-                        <span class="value">{{member.email}}</span>
+                        <input v-model="member.firstName" v-on:keyup="changesToSave = true">
                     </div>
 
-                    <div class="item" v-if="displayName">
+                    <div class="item">
                         <label class="label">
-                            {{copy.auth.DISPLAY_NAME}}
+                            {{copy.common.LAST_NAME}}
                         </label>
-                        <span class="value">{{displayName}}</span>
+                        <input v-model="member.lastName" v-on:keyup="changesToSave = true;">
+                    </div>
+                    
+                    <div class="item">
+                        <label class="label">
+                            {{copy.common.EMAIL_ADDRESS}}
+                        </label>
+                        <span class="value">{{member.email}}</span>
                     </div>
 
                     <div class="item">
@@ -77,6 +84,11 @@
                             :color="snackbar.color"
                     />
                 </transition-group>
+            </div>
+
+            <div class="saveCancel" v-if="changesToSave == true">
+                <button @click="save">Save Changes</button>
+                <button @click="reloadPage" class="secondary">Cancel</button>
             </div>
         </div>
         <Footer/>
@@ -154,7 +166,8 @@
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
-            }
+            },
+            changesToSave: boolean
         } {
             return {
                 authLoaded: false,
@@ -168,7 +181,8 @@
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
-                }
+                },
+                changesToSave: false
             }
         },
         computed: {
@@ -313,6 +327,9 @@
                     await this.save();
                     this.addSnackbar({message: "Timezone Updated", color: "success"});
                 }
+            },
+            reloadPage() {
+                window.location.reload();
             }
         }
     })
