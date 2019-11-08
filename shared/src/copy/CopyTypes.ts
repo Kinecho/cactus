@@ -32,10 +32,13 @@ export interface CommonCopy {
     WELCOME_BACK: string,
     ACCOUNT: string,
     EMAIL: string,
+    EMAIL_ADDRESS: string,
     TIME_ZONE: string,
     NOTIFICATIONS: string,
     REMOVE: string,
     LOADING: string,
+    FIRST_NAME: string,
+    LAST_NAME: string
 }
 
 export interface ElementCopy {
@@ -63,6 +66,7 @@ export interface AuthenticationCopy {
 }
 
 export interface NavigationCopy {
+    ACCOUNT: string
     MY_JOURNAL: string,
     SOCIAL: string,
 }

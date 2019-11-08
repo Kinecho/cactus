@@ -9,5 +9,6 @@ export enum PageRoute {
     PROMPTS_ROOT = "/prompts",
     REFERRAL_PROGRAM = "/friends",
     SHARED_REFLECTION = "/reflection",
-    SOCIAL = "/friends"
+    SOCIAL = "/friends",
+    ACCOUNT = "/account"
 }
