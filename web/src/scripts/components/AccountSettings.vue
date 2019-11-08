@@ -385,6 +385,10 @@
         margin-bottom: .8rem;
     }
 
+    input {
+        @include textInput;
+    }
+
     .providers {
         padding: 0;
         margin: 0 -1rem;
