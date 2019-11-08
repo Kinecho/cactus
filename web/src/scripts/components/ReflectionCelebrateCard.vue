@@ -109,6 +109,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 :navigationEnabled="true"
                 :showIntroCard="false"
                 @close="hideCactusModal"/>
+        <input-name-modal
+                :showModal="inputNameModalVisible"
+                @close="hideInputNameModal"/>
     </div>
 </template>
 
@@ -133,6 +136,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
 
     const copy = CopyService.getSharedInstance().copy;
@@ -144,6 +148,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             MagicLink,
             PromptContentCard,
             ElementDescriptionModal,
+            InputNameModal
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -193,7 +198,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             elementCopy: ElementCopy,
             showTradeNote: boolean,
             cactusModalVisible: boolean,
-            cactusModalElement: string | undefined
+            cactusModalElement: string | undefined,
+            inputNameModalVisible: boolean
         } {
             return {
                 reflectionCount: undefined,
@@ -211,7 +217,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 elementCopy: copy.elements,
                 showTradeNote: false,
                 cactusModalVisible: false,
-                cactusModalElement: undefined
+                cactusModalElement: undefined,
+                inputNameModalVisible: false
             }
         },
         destroyed() {
@@ -325,12 +332,24 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             tradeNote() {
-                this.showTradeNote = true;
-                this.flipped = true;
+                if (this.member && !this.member.firstName) {
+                    this.showInputNameModal();
+                } else { 
+                    this.showTradeNote = true;
+                    this.flipped = true;
+                }
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;
                 this.enableNavigation()
+            },
+            showInputNameModal() {
+                this.inputNameModalVisible = true;
+            },
+            hideInputNameModal() {
+                this.inputNameModalVisible = false;
+                this.showTradeNote = true;
+                this.flipped = true;
             }
         }
     })
