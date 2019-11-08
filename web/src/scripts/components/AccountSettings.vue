@@ -12,61 +12,72 @@
 
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
-                    <div class="item" v-if="memberSince">
-                        <label class="label">
-                            {{copy.auth.MEMBER_SINCE}}
-                        </label>
-                        <span class="value">{{ memberSince }}</span>
+                    <div class="settings-group profile">
+                        <h3>Profile</h3>
+                        <div class="item" v-if="memberSince">
+                            <label class="label">
+                                {{copy.auth.MEMBER_SINCE}}
+                            </label>
+                            <span class="value">{{ memberSince }}</span>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.FIRST_NAME}}
+                            </label>
+                            <input v-model="member.firstName" @keyup="changesToSave = true">
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.LAST_NAME}}
+                            </label>
+                            <input v-model="member.lastName" @keyup="changesToSave = true;">
+                        </div>
+                        
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.EMAIL_ADDRESS}}
+                            </label>
+                            <span class="value">{{member.email}}</span>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.TIME_ZONE}}
+                            </label>
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
+                        </div>
+                        <div class="saveCancel" v-if="changesToSave == true">
+                            <button @click="save">Save Changes</button>
+                            <button @click="reloadPage" class="secondary">Cancel</button>
+                        </div>
                     </div>
 
-                    <div class="item">
-                        <label class="label">
-                            {{copy.common.FIRST_NAME}}
-                        </label>
-                        <input v-model="member.firstName" v-on:keyup="changesToSave = true">
+                    <div class="settings-group notifications">
+                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
+                        <div class="item">
+                            <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                            <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
+
+                        </div>
                     </div>
 
-                    <div class="item">
-                        <label class="label">
-                            {{copy.common.LAST_NAME}}
-                        </label>
-                        <input v-model="member.lastName" v-on:keyup="changesToSave = true;">
-                    </div>
-                    
-                    <div class="item">
-                        <label class="label">
-                            {{copy.common.EMAIL_ADDRESS}}
-                        </label>
-                        <span class="value">{{member.email}}</span>
-                    </div>
-
-                    <div class="item">
-                        <label class="label">
-                            {{copy.common.TIME_ZONE}}
-                        </label>
-                        <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
+                    <div class="settings-group profile">
+                        <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
+                        <div class="item" v-if="showProviders">
+                            <ul class="providers">
+                                <li v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
+                                    <provider-icon :providerId="provider.providerId" class="icon"/>
+                                    <div class="space-between">
+                                        <span class="provider-name">{{provider.displayName}}</span>
+                                        <span class="remove">{{copy.common.REMOVE}}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="item">
-                        <label class="label">
-                            {{copy.common.NOTIFICATIONS}}
-                        </label>
-                        <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
-                        <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
-
-                    </div>
-                    <div class="item" v-if="showProviders">
-                        <label class="label">{{copy.auth.CONNECTED_ACCOUNTS}}</label>
-                        <ul class="providers">
-                            <li v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
-                                <provider-icon :providerId="provider.providerId" class="icon"/>
-                                <div class="space-between">
-                                    <span class="provider-name">{{provider.displayName}}</span>
-                                    <span class="remove">{{copy.common.REMOVE}}</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
                 </div>
             </transition>
             <div class="snackbar-container">
@@ -84,11 +95,6 @@
                             :color="snackbar.color"
                     />
                 </transition-group>
-            </div>
-
-            <div class="saveCancel" v-if="changesToSave == true">
-                <button @click="save">Save Changes</button>
-                <button @click="reloadPage" class="secondary">Cancel</button>
             </div>
         </div>
         <Footer/>
@@ -286,6 +292,7 @@
                 if (this.member) {
                     await CactusMemberService.sharedInstance.save(this.member);
                     console.log("Save success");
+                    this.addSnackbar({message: "Changes Saved", color: "success"});
                 }
             },
             async saveEmailStatus(status: NotificationStatus) {
@@ -324,8 +331,7 @@
             async tzSelected(value: ZoneInfo | null | undefined) {
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
-                    await this.save();
-                    this.addSnackbar({message: "Timezone Updated", color: "success"});
+                    this.changesToSave = true;
                 }
             },
             reloadPage() {
