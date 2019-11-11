@@ -307,7 +307,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
             const accountAttachment: SlackAttachment = {fields, color: "good"};
             member.referredByEmail = referredByEmail || undefined;
-            member.signupQueryParams = Object.assign(member.signupQueryParams, payload.signupQueryParams);
+            member.signupQueryParams = {...payload.signupQueryParams, ...member.signupQueryParams};
             await AdminCactusMemberService.getSharedInstance().save(member);
             console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
 
