@@ -6,7 +6,7 @@
             </div>
             <div class="info">
                 <p class="name">{{memberName}}</p>
-                <p class="email">{{memberEmail}}</p>
+                <p class="email" v-if="!memberName">{{memberEmail}}</p>
                 <p class="date">{{shareDate}}</p>
             </div>
         </div>
