@@ -92,6 +92,7 @@ export enum ReflectionResponseField {
     mailchimpMemberId = "mailchimpMemberId",
     mailchimpUniqueEmailId = "mailchimpUniqueEmailId",
     memberEmail = "memberEmail",
+    memberName = "memberName",
     content = "content",
     promptId = "promptId",
     promptQuestion = "promptQuestion",
@@ -112,6 +113,7 @@ export default class ReflectionResponse extends BaseModel {
     mailchimpMemberId?: string;
     mailchimpUniqueEmailId?: string;
     memberEmail?: string;
+    memberName?: string;
     content: ReflectionContent = {};
     promptId?: string;
     promptQuestion?: string;
