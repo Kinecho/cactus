@@ -347,9 +347,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.inputNameModalVisible = true;
             },
             hideInputNameModal() {
+                this.updateResponseMemberName();
                 this.inputNameModalVisible = false;
                 this.showTradeNote = true;
                 this.flipped = true;
+            },
+            async updateResponseMemberName() {
+                if (this.reflectionResponse && this.member) {
+                    await ReflectionResponseService.sharedInstance.updateResponseMemberName(this.reflectionResponse, this.member);  
+                } 
             }
         }
     })

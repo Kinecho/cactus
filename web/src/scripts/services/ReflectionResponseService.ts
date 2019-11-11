@@ -65,6 +65,18 @@ export default class ReflectionResponseService {
         return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
     }
 
+    async updateResponseMemberName(response?: ReflectionResponse, member?: CactusMember): Promise<ReflectionResponse | undefined> {
+        if (!response) {
+            return;
+        }
+        if (!member) {
+            return;
+        }
+
+        response.memberName = getFullName(member);
+        return await this.save(response);
+    }
+
     static createPossiblyAnonymousReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
         const response = new ReflectionResponse();
         response.promptId = promptId;
