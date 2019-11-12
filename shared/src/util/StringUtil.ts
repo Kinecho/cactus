@@ -117,13 +117,6 @@ export function destructureDisplayName(displayName?: string | null): { firstName
 
 }
 
-export function getFullName(member?: CactusMember): string {
-    if (!member) {
-        return "";
-    }
-    return `${member.firstName || ""} ${member.lastName || ""}`.trim();
-}
-
 export function getInitials(input?: string): string {
     if (!input) {
         return "";

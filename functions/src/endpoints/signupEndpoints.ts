@@ -17,7 +17,7 @@ import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} f
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import {appendDomain, getFullName, getProviderDisplayName} from "@shared/util/StringUtil";
+import {appendDomain, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
@@ -124,7 +124,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     if (member) {
         console.log(`Found cactus member for ${email}`);
         memberExists = true;
-        displayName = getFullName(member);
+        displayName = member.getFullName();
     } else {
         console.log(`no cactus member found for ${email}`);
     }

@@ -63,8 +63,8 @@
             memberName(): string | undefined {
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.response && this.response.memberName) {
-                    return this.response.memberName;
+                } else if (this.response && this.response.getMemberFullName()) {
+                    return this.response.getMemberFullName();
                 }
             },
             memberEmail(): string | undefined {
