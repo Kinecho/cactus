@@ -6,7 +6,6 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {getStreak} from "@shared/util/DateUtil";
-import {getFullName} from "@shared/util/StringUtil";
 import {Config} from "@web/config";
 import {PageRoute} from "@web/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
@@ -90,7 +89,8 @@ export default class ReflectionResponseService {
             response.userId = cactusMember.userId;
             response.cactusMemberId = cactusMember.id;
             response.memberEmail = cactusMember.email;
-            response.memberName = getFullName(cactusMember);
+            response.memberFirstName = cactusMember.firstName;
+            response.memberLastName = cactusMember.lastName;
             response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
             response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
@@ -108,7 +108,8 @@ export default class ReflectionResponseService {
             response.userId = cactusMember.userId;
             response.cactusMemberId = cactusMember.id;
             response.memberEmail = cactusMember.email;
-            response.memberName = getFullName(cactusMember);
+            response.memberFirstName = cactusMember.firstName;
+            response.memberLastName = cactusMember.lastName;
             response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
             response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
@@ -129,7 +130,8 @@ export default class ReflectionResponseService {
         response.userId = cactusMember.userId;
         response.cactusMemberId = cactusMember.id;
         response.memberEmail = cactusMember.email;
-        response.memberName = getFullName(cactusMember);
+        response.memberFirstName = cactusMember.firstName;
+        response.memberLastName = cactusMember.lastName;
         response.responseMedium = ResponseMedium.JOURNAL_WEB;
         response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
         response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;

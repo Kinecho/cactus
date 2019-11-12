@@ -117,4 +117,8 @@ export default class CactusMember extends BaseModel {
         }
         return;
     }
+
+    getFullName(): string {
+        return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+    }
 }
