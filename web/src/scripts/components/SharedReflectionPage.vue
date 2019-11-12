@@ -80,7 +80,7 @@
                 let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
 
                 if (this.reflectionResponse) {
-                    let identifier = this.reflectionResponse.memberEmail;
+                    let identifier = this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
                     let question = this.reflectionResponse.promptQuestion;
                     let shareDate = formatDate(this.reflectionResponse.sharedAt, copy.settings.dates.longFormat);
 

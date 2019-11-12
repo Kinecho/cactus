@@ -6,7 +6,7 @@
             </div>
             <div class="info">
                 <p class="name">{{memberName}}</p>
-                <p class="email">{{memberEmail}}</p>
+                <p class="email" v-if="!memberName">{{memberEmail}}</p>
                 <p class="date">{{shareDate}}</p>
             </div>
         </div>
@@ -63,8 +63,8 @@
             memberName(): string | undefined {
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.response) {
-                    // return "some User but we don't have their profile";
+                } else if (this.response && this.response.getMemberFullName()) {
+                    return this.response.getMemberFullName();
                 }
             },
             memberEmail(): string | undefined {

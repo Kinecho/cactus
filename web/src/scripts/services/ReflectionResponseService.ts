@@ -77,6 +77,8 @@ export default class ReflectionResponseService {
             response.userId = cactusMember.userId;
             response.cactusMemberId = cactusMember.id;
             response.memberEmail = cactusMember.email;
+            response.memberFirstName = cactusMember.firstName;
+            response.memberLastName = cactusMember.lastName;
             response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
             response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
@@ -94,6 +96,8 @@ export default class ReflectionResponseService {
             response.userId = cactusMember.userId;
             response.cactusMemberId = cactusMember.id;
             response.memberEmail = cactusMember.email;
+            response.memberFirstName = cactusMember.firstName;
+            response.memberLastName = cactusMember.lastName;
             response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
             response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
@@ -114,6 +118,8 @@ export default class ReflectionResponseService {
         response.userId = cactusMember.userId;
         response.cactusMemberId = cactusMember.id;
         response.memberEmail = cactusMember.email;
+        response.memberFirstName = cactusMember.firstName;
+        response.memberLastName = cactusMember.lastName;
         response.responseMedium = ResponseMedium.JOURNAL_WEB;
         response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
         response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;

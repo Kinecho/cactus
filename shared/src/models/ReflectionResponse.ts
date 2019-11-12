@@ -92,6 +92,8 @@ export enum ReflectionResponseField {
     mailchimpMemberId = "mailchimpMemberId",
     mailchimpUniqueEmailId = "mailchimpUniqueEmailId",
     memberEmail = "memberEmail",
+    memberFirstName = "memberFirstName",
+    memberLastName = "memberLastName",
     content = "content",
     promptId = "promptId",
     promptQuestion = "promptQuestion",
@@ -112,6 +114,8 @@ export default class ReflectionResponse extends BaseModel {
     mailchimpMemberId?: string;
     mailchimpUniqueEmailId?: string;
     memberEmail?: string;
+    memberFirstName?: string;
+    memberLastName?: string;
     content: ReflectionContent = {};
     promptId?: string;
     promptQuestion?: string;
@@ -151,5 +155,9 @@ export default class ReflectionResponse extends BaseModel {
         this.reflectionDates = dateArray.map((timestamp: number) => {
             return new Date(timestamp)
         })
+    }
+
+    getMemberFullName(): string {
+        return `${this.memberFirstName || ""} ${this.memberLastName || ""}`.trim();
     }
 }
