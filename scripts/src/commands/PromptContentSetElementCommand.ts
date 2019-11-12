@@ -56,15 +56,15 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
 
         this.inputData = await this.loadCsv();
 
-        let tasks: Promise<RowResult>[] = this.inputData.map(row => this.updatePromptContent(row));
-        let results = await Promise.all(tasks);
+        const tasks: Promise<RowResult>[] = this.inputData.map(row => this.updatePromptContent(row));
+        const results = await Promise.all(tasks);
 
         interface ResultAgg {
             responses: number,
             errors: number,
             successes: number
         }
-        let agg = results.reduce((total: ResultAgg, r) => {
+        const agg = results.reduce((total: ResultAgg, r) => {
             total.responses += (r.totalBackfilled || 0);
             total.errors += r.error ? 1 : 0;
             total.successes += r.error ? 0 : 1;
@@ -84,7 +84,7 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
     async updatePromptContent(row: DataRow): Promise<RowResult> {
         try {
             console.log("processing row for promptId", row.promptId);
-            let promptContent = await this.promptContentService.getByPromptId(row.promptId);
+            const promptContent = await this.promptContentService.getByPromptId(row.promptId);
             if (!promptContent) {
                 console.log(chalk.red(`no content found for row with promptId ${row.promptId}`));
                 return {error: `No content was found for promptId ${row.promptId}`}
@@ -98,7 +98,7 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
             }
 
             promptContent.cactusElement = row.element;
-            let [first] = promptContent.content;
+            const [first] = promptContent.content;
             if (first) {
                 first.showElementIcon = true
             }
@@ -133,7 +133,7 @@ export default class PromptContentSetElementCommand extends FirebaseCommand {
         const responses = await AdminReflectionResponseService.getSharedInstance().getResponsesForPromptId(promptContent.promptId);
 
         const tasks: Promise<ReflectionResponse>[] = [];
-        responses.filter(response => response.cactusElement != promptContent.cactusElement)
+        responses.filter(response => response.cactusElement !== promptContent.cactusElement)
             .map(response => {
                 response.cactusElement = promptContent.cactusElement || null;
                 tasks.push(AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false}))
