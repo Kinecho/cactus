@@ -56,7 +56,7 @@ async function sendPush(member: CactusMember, prompt: ReflectionPrompt): Promise
     const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContentEntryId);
     const data: admin.messaging.DataMessagePayload = {};
 
-    let title = `Your daily question from Cactus`;
+    let title = `Today's Prompt`;
     let body = `${prompt.question}`;
     // let imageUrl: string | undefined = undefined;
     if (promptContent) {
