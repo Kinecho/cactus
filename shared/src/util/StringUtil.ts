@@ -1,5 +1,4 @@
 import * as queryString from "query-string";
-import CactusMember from "@shared/models/CactusMember";
 import * as camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 
@@ -115,13 +114,6 @@ export function destructureDisplayName(displayName?: string | null): { firstName
 
     return {}
 
-}
-
-export function getFullName(member?: CactusMember): string {
-    if (!member) {
-        return "";
-    }
-    return `${member.firstName || ""} ${member.lastName || ""}`.trim();
 }
 
 export function getInitials(input?: string): string {
