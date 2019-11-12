@@ -1,5 +1,4 @@
 import * as queryString from "query-string";
-import CactusMember from "@shared/models/CactusMember";
 import * as camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 
