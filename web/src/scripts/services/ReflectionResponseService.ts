@@ -72,7 +72,8 @@ export default class ReflectionResponseService {
             return;
         }
 
-        response.memberName = getFullName(member);
+        response.memberFirstName = member.firstName;
+        response.memberLastName = member.lastName;
         return await this.save(response);
     }
 
