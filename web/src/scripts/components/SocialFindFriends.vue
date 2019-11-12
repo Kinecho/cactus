@@ -51,7 +51,7 @@
             </social-sharing>
 
             <!-- if not imported -->
-            <div class="results" v-if="!importedContacts && importEnabled">
+            <div class="results" v-if="!importedContacts">
                 <h2>Invite your contacts</h2>
                 <p class="subtext">You'll choose which of your contacts to invite.</p>
                 <div class="btnContainer">
@@ -95,7 +95,7 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {PageRoute} from '@web/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import StorageService from '@web/services/StorageService'
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -106,8 +106,6 @@
             SocialImportedContact
         },
         beforeMount() {
-            this.importEnabled = StorageService.getBoolean(LocalStorageKey.contactsImportEnabled, false);
-
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
@@ -137,7 +135,6 @@
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
-            importEnabled: boolean,
         } {
             return {
                 authLoaded: false,
@@ -146,7 +143,6 @@
                 importedService: undefined,
                 member: undefined,
                 memberUnsubscriber: undefined,
-                importEnabled: false
             }
         },
         methods: {

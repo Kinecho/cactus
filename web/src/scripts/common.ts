@@ -13,13 +13,6 @@ export function commonInit() {
 
     const emailAutoFill = getQueryParam(QueryParam.EMAIL);
     const referredByEmail = getQueryParam(QueryParam.REFERRED_BY_EMAIL);
-    const contactEnabled = getQueryParam(QueryParam.CONTACT_IMPORT_ENABLED);
-
-    if (contactEnabled === "true") {
-        StorageService.saveBoolean(LocalStorageKey.contactsImportEnabled, true)
-    } else if (contactEnabled === "false") {
-        StorageService.saveBoolean(LocalStorageKey.contactsImportEnabled, false)
-    }
 
     if (emailAutoFill) {
         try {
