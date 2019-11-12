@@ -9,6 +9,7 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import * as Sentry from "@sentry/node";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
 /**
  * The purpose of this method is to send a push notification to the recipient of a new SentPrompt!
@@ -51,15 +52,41 @@ async function sendPush(member: CactusMember, prompt: ReflectionPrompt): Promise
         return
     }
 
+    const promptContentEntryId = prompt.promptContentEntryId;
+    const promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContentEntryId);
+    const data: admin.messaging.DataMessagePayload = {};
+
+    let title = `Today's Prompt`;
+    let body = `${prompt.question}`;
+    // let imageUrl: string | undefined = undefined;
+    if (promptContent) {
+        title = promptContent.subjectLine || title;
+
+        const firstContent = promptContent.content && promptContent.content.length > 0 && promptContent.content[0]
+        if (firstContent && firstContent.text) {
+            body = firstContent.text
+        }
+    }
+
+    if (promptContentEntryId) {
+        data.promptContentEntryId = promptContentEntryId
+    }
+
+    if (prompt.id) {
+        data.promptId = prompt.id
+    }
+
     const tokens = member.fcmTokens;
     const tasks: Promise<any>[] = tokens.map(token => {
         return new Promise(async (resolve, reject) => {
             try {
                 const payload: admin.messaging.MessagingPayload = {
                     notification: {
-                        title: `Your daily question from Cactus`,
-                        body: `${prompt.question}`
-                    }
+                        title: title,
+                        body: body,
+                        badge: "1",
+                    },
+                    data
                 };
                 const result = await messaging.sendToDevice(token, payload);
 
@@ -77,6 +104,6 @@ async function sendPush(member: CactusMember, prompt: ReflectionPrompt): Promise
     });
 
     const results = await Promise.all(tasks);
-    console.log(`Got ${results.length} resuluts`);
+    console.log(`Got ${results.length} results`);
 
 }

@@ -48,7 +48,7 @@ export default class AdminSocialInviteService {
     }
 
     async generateInviteRecord(invitedByMember: CactusMember, memberJoined: CactusMember): Promise<SocialInvite | undefined> {
-        let socialInvite = new SocialInvite();
+        const socialInvite = new SocialInvite();
             socialInvite.senderMemberId = invitedByMember.id;
             socialInvite.recipientMemberId = memberJoined.id;
             socialInvite.recipientEmail = memberJoined.email;

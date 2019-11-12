@@ -6,14 +6,47 @@ import * as Sentry from "@sentry/node";
 import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
 import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
+import * as admin from "firebase-admin"
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
-// const Sentry = require('@sentry/node');
+
 const app = express();
 app.use(cors({origin: true}));
 app.get('/', (req, res) => {
     res.status(200).json({status: 'ok', queryParams: req.query});
+});
+
+app.get("/fcm", async (req, res) => {
+    try {
+        console.log("Staring the message send process");
+        let title = req.query.title || "Cactus Test Push Message";
+        let body = req.query.body || "This is the body of the request";
+
+        const token = req.query.token || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
+
+        const payload: admin.messaging.MessagingPayload = {
+            notification: {
+                title: title,
+                body: body,
+                badge: req.query.badge || "1",
+            }, data: {
+                promptId: req.query.promptId || "123",
+                promptEntryId: req.query.entryId || "entry123"
+            }
+        };
+        const result = await admin.messaging().sendToDevice(token, payload);
+
+        console.log("Send Message Result", result);
+
+
+        return res.sendStatus(201);
+    } catch (error) {
+        console.error("failed to send message", error);
+        res.send(error);
+    }
+    return;
+
 });
 
 app.get("/operation", async (req, res) => {
