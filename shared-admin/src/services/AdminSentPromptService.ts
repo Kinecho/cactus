@@ -11,6 +11,7 @@ import PendingUser from "@shared/models/PendingUser";
 import CactusMember from "@shared/models/CactusMember";
 import User from "@shared/models/User";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 
 export interface CampaignSentPromptProcessingResult {
@@ -75,7 +76,7 @@ export default class AdminSentPromptService {
 
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
 
-        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId);
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
 
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
