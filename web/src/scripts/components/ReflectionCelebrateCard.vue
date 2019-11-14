@@ -111,7 +111,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 @close="hideCactusModal"/>
         <input-name-modal
                 :showModal="inputNameModalVisible"
-                @close="hideInputNameModal"/>
+                @close="transitionToTradeNote"/>
     </div>
 </template>
 
@@ -199,7 +199,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             showTradeNote: boolean,
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined,
-            inputNameModalVisible: boolean
+            inputNameModalVisible: boolean,
+            sawInputNameModal: boolean,
         } {
             return {
                 reflectionCount: undefined,
@@ -218,7 +219,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 showTradeNote: false,
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
-                inputNameModalVisible: false
+                inputNameModalVisible: false,
+                sawInputNameModal: false
             }
         },
         destroyed() {
@@ -332,7 +334,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             tradeNote() {
-                if (this.member && !this.member.getFullName()) {
+                if (this.member && !this.member.getFullName() && !this.sawInputNameModal) {
                     this.showInputNameModal();
                 } else { 
                     this.showTradeNote = true;
@@ -345,17 +347,20 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             showInputNameModal() {
                 this.inputNameModalVisible = true;
+                this.sawInputNameModal = true;
             },
             hideInputNameModal() {
-                this.updateResponseMemberName();
                 this.inputNameModalVisible = false;
-                this.showTradeNote = true;
-                this.flipped = true;
             },
             async updateResponseMemberName() {
                 if (this.reflectionResponse && this.member) {
                     await ReflectionResponseService.sharedInstance.updateResponseMemberName(this.reflectionResponse, this.member);  
                 } 
+            },
+            transitionToTradeNote() {
+                this.updateResponseMemberName(); 
+                this.hideInputNameModal(); 
+                this.tradeNote();
             }
         }
     })
