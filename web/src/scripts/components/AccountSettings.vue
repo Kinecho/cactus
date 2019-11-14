@@ -58,8 +58,6 @@
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
                             <CheckBox label="Receive an email when a new prompt is ready" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
-                            <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
-
                         </div>
                     </div>
 
