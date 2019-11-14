@@ -279,87 +279,27 @@ form {
   }
 }
 
-.how {
-  padding: 8rem 2.4rem;
-
-  @include r(768) {
-      padding: 11rem 2.4rem;
-  }
-
-  .flexContainer {
-    background: url(assets/images/lineMobile.svg) no-repeat 12px 35px;
-    background-size: 9% 80%;
-    margin: 0 auto;
-    max-width: 40rem;
-
-    @include r(768) {
-      background: url(assets/images/lineDesktop.svg) no-repeat center top 11px;
-      background-size: 70vw;
-      max-width: none;
-    }
-    @include r(1140) {
-      background-position: center top;
-      background-size: auto;
-    }
-  }
-
-  .benefit {
-    align-items: flex-start;
-    display: flex;
-    margin-bottom: 4rem;
-    min-height: 7.5rem;
-    text-align: left;
-
-    @include r(768) {
-      align-items: center;
-      flex-basis: 25%;
-      flex-flow: column wrap;
-      margin-bottom: 0;
-      min-height: none;
-      text-align: center;
-    }
-  }
-
-  .icon {
+.fortify {
     align-items: center;
-    background-color: $lightGreen;
-    border-radius: 4rem;
     display: flex;
-    flex-shrink: 0;
-    height: 4.8rem;
-    justify-content: center;
-    margin-right: 1.6rem;
-    width: 4.8rem;
+    flex-direction: column;
+    padding: 4.8rem 2.4rem;
 
     @include r(768) {
-      height: 6.4rem;
-      margin: 0 0 1.6rem;
-      width: 6.4rem;
+        padding: 11rem 2.4rem;
     }
-  }
 
-  .iconImg {
-    height: 4rem;
-    overflow: visible;
-    padding: .8rem;
-    width: 4rem;
-
-    @include r(768) {
-      height: 4.8rem;
-      width: 4.8rem;
+    .subtext {
+        margin-bottom: 2.4rem;
+        opacity: .8;
     }
-  }
 
-  .text {
-    margin: 0;
-
-    @include r(768) {
-      padding: 0 2.4rem;
+    .sectionImg {
+        margin-left: 1.6rem;
+        width: 40rem;
     }
-  }
 }
 
-.how h2,
 .testimonials h2,
 .private h2 {
   margin: 0 0 3.2rem;
