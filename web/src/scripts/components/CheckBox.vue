@@ -83,77 +83,71 @@
     $checkHeight: 2.5rem;
 
     .checkbox-container {
-        display: flex;
-        align-items: center;
-        position: relative;
         cursor: pointer;
-        margin-bottom: 1rem;
+        display: flex;
+        position: relative;
         user-select: none;
-        &.disabled {
-            cursor: default;
-            color: $lightText;
-        }
 
-        .checkbox-label {
-            font-weight: normal;
-            color: $darkText;
-            /*font-size: 1.2rem;*/
-        }
-
-        &:hover input:not(:checked) ~ .checkmark{
+        &:hover input:not(:checked) ~ .checkmark {
             border-color: $darkGreen;
         }
 
-        /* Hide the browser's default checkbox */
-        input {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-            height: 0;
-            width: 0;
+        &.disabled {
+            color: $lightText;
+            cursor: default;
+        }
+    }
 
-            &:disabled ~ .checkmark {
-                background-color: $lightText;
-                cursor: default;
-            }
+    /* Hide the browser's default checkbox */
+    input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
 
-            &:disabled:checked ~ .checkmark {
-                background-color: $lightText;
-                &:after {
-                    display: block;
-                }
-            }
+        &:disabled ~ .checkmark {
+            background-color: $lightText;
+            cursor: default;
+        }
 
-            &:checked ~ .checkmark {
-                background-color: $green;
-                &:after {
-                    display: block;
-                }
+        &:disabled:checked ~ .checkmark {
+            background-color: $lightText;
+            &:after {
+                display: block;
             }
         }
 
-        /* Create a custom checkbox */
-        .checkmark {
-            border: 1px solid $green;
-            border-radius: .7rem;
-            height: $checkHeight;
-            width: $checkHeight;
-            margin-right: .8rem;
-            /* Create the checkmark/indicator (hidden when not checked) */
+        &:checked ~ .checkmark {
+            background-color: $green;
             &:after {
-                content: "";
-                position: absolute;
-                display: none;
-                left: 9px;
-                top: 5px;
-                width: 5px;
-                height: 10px;
-                border: solid white;
-                border-width: 0 3px 3px 0;
-                -webkit-transform: rotate(45deg);
-                -ms-transform: rotate(45deg);
-                transform: rotate(45deg);
+                display: block;
             }
         }
     }
+
+    /* Create a custom checkbox */
+    .checkmark {
+        border: 1px solid $green;
+        border-radius: .4rem;
+        flex-shrink: 0;
+        height: $checkHeight;
+        margin-right: .8rem;
+        width: $checkHeight;
+
+        /* Create the checkmark/indicator (hidden when not checked) */
+        &:after {
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            content: "";
+            display: none;
+            height: 10px;
+            left: 9px;
+            position: absolute;
+            top: 5px;
+            transform: rotate(45deg);
+            width: 5px;
+        }
+    }
+
 </style>
