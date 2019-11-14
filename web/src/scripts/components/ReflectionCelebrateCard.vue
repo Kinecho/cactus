@@ -332,7 +332,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             tradeNote() {
-                if (this.member && !this.member.firstName) {
+                if (this.member && !this.member.getFullName()) {
                     this.showInputNameModal();
                 } else { 
                     this.showTradeNote = true;
