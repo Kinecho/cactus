@@ -55,7 +55,7 @@ body {
   .heroText {
     align-self: end;
     grid-area: heroText;
-    margin: 0 auto;
+    margin: 0 auto 4rem;
     max-width: 60rem;
 
     @include r(768) {
@@ -83,17 +83,16 @@ body {
   }
 
   .heroForm {
-    align-self: start;
-    background-color: white;
-    grid-area: form;
-    justify-content: center;
-    padding-top: 3.2rem;
-    z-index: 2;
+    display: none;
+
     @include r(768) {
+        align-self: start;
       background-color: transparent;
+      display: block;
+      grid-area: form;
       justify-content: flex-start;
       max-width: 70rem;
-      padding-top: 0;
+      z-index: 2;
     }
 
     input[type=email],
@@ -114,36 +113,79 @@ body {
   top: 32rem;
 }
 
-.phoneContainer {
-  grid-area: demo;
-  height: 58rem;
-  overflow: hidden;
-  position: relative;
-  text-align: center;
+.graphicContainer {
+    background: url(assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
+    grid-area: demo;
+    overflow: hidden;
+    position: relative;
 
-  &:after {
-    background: url(assets/images/device.png) center top no-repeat;
-    content: "";
-    display: block;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
+    .promptDemo {
+        background-color: $beige;
+        border-radius: 1.2rem 1.2rem 0 0;
+        margin: 0 auto;
+        padding: .8rem;
+        width: 24rem;
+    }
 
-  @include r(768) {
-    height: auto;
-  }
+    .progressBar {
+        background-color: $darkestGreen;
+        border-radius: .2rem;
+        height: .4rem;
+        margin-bottom: 11rem;
+        position: relative;
 
-  video, img {
-    margin: 70px auto;
-  }
+        &:after {
+            background-color: $green;
+            border-radius: .2rem 0 0 .2rem;
+            content: "";
+            display: block;
+            height: .4rem;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 20%;
+        }
+    }
 
-  img {
-    max-height: 569px;
-    max-width: 264px;
-  }
+    .demoCactus {
+        background-color: $pink;
+        border-radius: 50%;
+        display: block;
+        height: 5.6rem;
+        margin: 0 auto .8rem;
+        padding: .4rem;
+        width: 5.6rem;
+    }
+
+    .demoTheme {
+        letter-spacing: 1px;
+        margin-bottom: .8rem;
+        text-transform: uppercase;
+    }
+
+    .demoText {
+        margin-bottom: 11rem;
+        padding: 0 1.6rem;
+    }
+
+    .sampleQuestion {
+        @include shadowbox;
+        font-size: 1.6rem;
+        font-weight: bold;
+        padding: .8rem 1.6rem;
+        position: absolute;
+        text-align: left;
+        width: 20rem;
+
+        &:nth-child(1) {
+            right: 1.6rem;
+            top: 3.2rem;
+        }
+        &:nth-child(2) {
+            bottom: 3.2rem;
+            left: 1.6rem;
+        }
+    }
 }
 
 form {
