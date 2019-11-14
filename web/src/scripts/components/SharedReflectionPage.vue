@@ -85,7 +85,7 @@
                     let shareDate = formatDate(this.reflectionResponse.sharedAt, copy.settings.dates.longFormat);
 
                     if (question) { question = question.trim(); }
-                    
+
                     let title = `Read ${identifier}'s private note on '${question}'`;
                     let description = `This reflection note was shared on ${shareDate}.`;
 
@@ -96,7 +96,7 @@
 
                         if (twitterTitleTag && twitterDescriptionTag) {
                             twitterTitleTag.setAttribute("content", `${title}`);
-                            twitterDescriptionTag.setAttribute("content", `${description}`); 
+                            twitterDescriptionTag.setAttribute("content", `${description}`);
                         }
                     }
                 }
@@ -142,7 +142,7 @@
 
     .reflection-container {
         flex-grow: 1;
-        padding: 2.4rem;
+        padding: 6.4rem 2.4rem;
     }
 
     .error {

@@ -5,19 +5,17 @@
             v-if="member"
     >
         <div slot="body" class="modalContainer">
-            <h3>What's your name?</h3>
-            <p>This will be shown to people you invite or share with.</p>
+            <h2>What's your name?</h2>
+            <p>Your name is shown on notes you share and to people you invite.</p>
             <div class="item">
-                <label class="label">First Name</label>
-                <input v-model="member.firstName">
+                <label for="fname" class="label">First Name</label>
+                <input v-model="member.firstName" type="text" name="fname">
             </div>
             <div class="item">
-                <label class="label">Last Name</label>
-                <input v-model="member.lastName">
+                <label for="lname" class="label">Last Name</label>
+                <input v-model="member.lastName" type="text" name="lname">
             </div>
-            <div class="save">
-                <button @click="save">Save</button>
-            </div>
+            <button class="item save" @click="save">Save</button>
         </div>
     </modal>
 </template>
@@ -57,14 +55,14 @@
         } {
             return {
                member: undefined,
-               memberUnsubscriber: undefined, 
+               memberUnsubscriber: undefined,
             }
         },
         computed: {
 
         },
         watch: {
-            
+
         },
         methods: {
             async save() {
@@ -82,13 +80,41 @@
     @import "common";
     @import "mixins";
     @import "variables";
+    @import "forms";
 
     .modalContainer {
-        background-color: $white;
-        border-radius: 1.2rem;
+        @include shadowbox;
         min-height: 34rem;
-        overflow: hidden;
-        width: 30rem;
+        padding: 3.2rem;
+    }
+
+    h2 {
+        margin-top: 1.6rem;
+    }
+
+    p {
+        margin-bottom: 3.2rem;
+        opacity: .8;
+    }
+
+    .item {
+        margin-bottom: 3.2rem;
+    }
+
+    .label {
+        display: block;
+        font-size: 1.6rem;
+        margin-bottom: .4rem;
+        opacity: .8;
+    }
+
+    input {
+        @include textInputAlt;
+        width: 100%;
+    }
+
+    .save {
+        min-width: 16rem;
     }
 
 </style>
