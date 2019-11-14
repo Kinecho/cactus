@@ -13,7 +13,7 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <div class="settings-group profile">
-                        <h3>Profile</h3>
+                        <h3>Personal Info</h3>
                         <div class="item" v-if="memberSince">
                             <label class="label">
                                 {{copy.auth.MEMBER_SINCE}}
@@ -22,24 +22,24 @@
                         </div>
 
                         <div class="item">
-                            <label class="label">
+                            <label for="fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
-                            <input v-model="member.firstName" @keyup="changesToSave = true">
+                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname">
+                        </div>
+
+                        <div class="item">
+                            <label for="lname" class="label">
+                                {{copy.common.LAST_NAME}}
+                            </label>
+                            <input v-model="member.lastName" @keyup="changesToSave = true;" type="text" name="lname">
                         </div>
 
                         <div class="item">
                             <label class="label">
-                                {{copy.common.LAST_NAME}}
-                            </label>
-                            <input v-model="member.lastName" @keyup="changesToSave = true;">
-                        </div>
-                        
-                        <div class="item">
-                            <label class="label">
                                 {{copy.common.EMAIL_ADDRESS}}
                             </label>
-                            <span class="value">{{member.email}}</span>
+                            <p class="value">{{member.email}}</p>
                         </div>
 
                         <div class="item">
@@ -57,7 +57,7 @@
                     <div class="settings-group notifications">
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
-                            <CheckBox label="Email" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                            <CheckBox label="Receive an email when a new prompt is ready" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                             <!--                        <CheckBox label="Push" @change="save" v-model="member.notificationSettings.push" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>-->
 
                         </div>
@@ -66,15 +66,14 @@
                     <div class="settings-group profile">
                         <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
                         <div class="item" v-if="showProviders">
-                            <ul class="providers">
-                                <li v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
-                                    <provider-icon :providerId="provider.providerId" class="icon"/>
-                                    <div class="space-between">
-                                        <span class="provider-name">{{provider.displayName}}</span>
-                                        <span class="remove">{{copy.common.REMOVE}}</span>
-                                    </div>
-                                </li>
-                            </ul>
+                            <div v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
+                                <provider-icon :providerId="provider.providerId" class="provider-icon"/>
+                                <span class="provider-name">{{provider.displayName}}</span>
+                                <button class="red tertiary remove">
+                                    <img src="assets/images/trash.svg" alt="" />
+                                    {{copy.common.REMOVE}}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -348,7 +347,6 @@
     @import "forms";
 
     .accountContainer {
-
         display: flex;
         flex-flow: column nowrap;
         min-height: 100vh;
@@ -357,78 +355,76 @@
         header, .centered {
             width: 100%;
         }
-
-        footer {
-            flex-shrink: 0;
-        }
     }
 
     .centered.content {
-        position: relative;
         flex-grow: 1;
         max-width: 70rem;
-        padding: 2.4rem;
+        padding: 6.4rem 2.4rem;
         text-align: left;
     }
 
-    h1 {
+    h1, .item {
         margin-bottom: 3.2rem;
     }
 
-    .item {
+    h3 {
         margin-bottom: 2.4rem;
+    }
+
+    h3 {
+        color: $darkestPink;
     }
 
     .label {
         display: block;
-        font-size: 1.4rem;
-        margin-bottom: .8rem;
+        font-size: 1.6rem;
+        margin-bottom: .4rem;
+        opacity: .8;
+    }
+
+    .value {
+        line-height: 1.5;
     }
 
     input {
-        @include textInput;
+        @include textInputAlt;
+        width: 100%;
     }
 
-    .providers {
-        padding: 0;
-        margin: 0 -1rem;
-
-        li {
-            list-style: none;
-            padding: 1rem 1rem;
-        }
-
-        .provider-info {
-            display: flex;
-
-            &:hover {
-                background-color: $lightBlue;
-                cursor: pointer;
-            }
-
-            .icon {
-                margin-right: 1rem;
-            }
-
-            .space-between {
-                display: flex;
-                flex-grow: 1;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .remove {
-                font-size: 1.2rem;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-                color: $darkestPink;
-                @include r(768) {
-                    font-size: 1.4rem;
-                }
-            }
-        }
+    .settings-group {
+        margin-bottom: 4.8rem;
     }
 
+    .provider-info {
+        align-items: center;
+        background-color: lighten($lightestGreen, 9%);
+        border-radius: .8rem;
+        display: flex;
+        padding: .4rem 1.6rem;
+        width: 100%;
+    }
+
+    .provider-icon {
+        margin-right: .8rem;
+    }
+
+    .provider-name {
+        flex-grow: 1;
+    }
+
+    .remove {
+        align-items: center;
+        display: flex;
+        flex-grow: 0;
+        padding: 1.2rem 0;
+
+        img {
+            height: 1.6rem;
+            margin-right: .6rem;
+            width: 1.6rem;
+        }
+    }
 
     .snackbar-container {
         position: fixed;
@@ -439,6 +435,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+
         @include r(600) {
             bottom: unset;
             top: 9rem;
@@ -448,7 +445,6 @@
             display: flex;
             flex-direction: column;
         }
-
     }
 
     .snackbar-item {
@@ -464,10 +460,7 @@
     }
 
     .snackbar-leave-to {
-        //opacity: 0;
-        //transform: translateX(-200px);
         animation: snackbar-out .3s;
-
     }
 
     .snackbar-leave-active {

@@ -37,7 +37,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
     };
     navigation: NavigationCopy = {
-        ACCOUNT: "Account & Settings",
+        ACCOUNT: "Account",
         SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
     };
