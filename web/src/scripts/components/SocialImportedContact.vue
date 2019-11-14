@@ -8,11 +8,11 @@
             <p class="email">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
                 <textarea placeholder="Include an optional note..." v-model="message" />
-                <button class="primary" @click.prevent="sendInvite">Send Invite</button>
-                <button class="tertiary" @click.prevent="endInvite">Cancel</button>
+                <button class="primary" @click="sendInvite">Send Invite</button>
+                <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
         </div>
-        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click.prevent="beginInvite">
+        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click="beginInvite">
             <span>Invite...</span>
         </button>
         <div class="status" v-if="sendingInvite">
