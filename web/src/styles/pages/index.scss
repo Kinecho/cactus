@@ -153,7 +153,7 @@ body {
         display: block;
         height: 5.6rem;
         margin: 0 auto .8rem;
-        padding: .4rem;
+        padding: .8rem;
         width: 5.6rem;
     }
 
@@ -205,25 +205,10 @@ form {
 }
 
 
-.listHeader {
-  color: $darkestPink;
-}
-
-.list {
-  .subtext {
-    display: none;
-
-    @include r(768) {
-      display: block;
-      margin-bottom: 4.8rem;
-    }
-  }
-}
-
 .why {
-  background-color: $lightPink;
-  padding: 8rem 2.4rem;
-  position: relative;
+    background-color: $darkestGreen;
+    padding: 4.8rem 2.4rem;
+    position: relative;
 
   @include r(768) {
       padding: 11rem 2.4rem;
@@ -250,32 +235,23 @@ form {
     }
   }
 
-  .listHeader {
-    margin: 0 0 4rem;
-
-    @include r(768) {
-      margin-bottom: 1.6rem;
-    }
-  }
-
-  .flexContainer {
-    @include r(768) {
-      flex-direction: row-reverse;
-    }
-  }
-
   .benefit {
     padding-bottom: 5.6rem;
 
+    &:last-child {
+        padding-bottom: 0;
+    }
+
     @include r(768) {
-      flex-basis: 33%;
+      flex-basis: 25%;
       padding-bottom: 0;
     }
 
     .text {
-      color: $darkText;
+      color: $white;
       margin: 0 auto;
-      max-width: 40rem;
+      max-width: 25rem;
+      opacity: .8;
 
       @include r(768) {
         padding: 0 2.4rem;
@@ -283,11 +259,17 @@ form {
     }
   }
 
-  .illustration {
-    margin-bottom: 2.4rem;
-    height: 21rem;
-    width: 23rem;
-  }
+    .illustration {
+        margin-bottom: 1.6rem;
+        height: 11rem;
+        width: auto;
+    }
+
+    h5 {
+        color: $white;
+        font-size: 2rem;
+        margin: 0 0 .8rem;
+    }
 }
 
 .flexContainer {
