@@ -64,14 +64,7 @@ export default class ReflectionResponseService {
         return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
     }
 
-    async updateResponseMemberName(response?: ReflectionResponse, member?: CactusMember): Promise<ReflectionResponse | undefined> {
-        if (!response) {
-            return;
-        }
-        if (!member) {
-            return;
-        }
-
+    async updateResponseMemberName(response: ReflectionResponse, member: CactusMember): Promise<ReflectionResponse | undefined> {
         response.memberFirstName = member.firstName;
         response.memberLastName = member.lastName;
         return await this.save(response);
