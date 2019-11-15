@@ -34,6 +34,10 @@ body {
   grid-area: target;
 }
 
+.subtext {
+    opacity: .8;
+}
+
 .hero {
   display: grid;
   grid-template-areas: "heroText" "demo" "target" "form";
@@ -291,7 +295,6 @@ form {
 
     .subtext {
         margin-bottom: 2.4rem;
-        opacity: .8;
     }
 
     .sectionImg {
@@ -300,24 +303,20 @@ form {
     }
 }
 
-.testimonials h2 {
-  margin: 0 0 3.2rem;
-
-  @include r(768) {
-    margin-bottom: 1.6rem;
-  }
-}
-
 .testimonials {
-  padding: 8rem 0;
+    padding: 4.8rem 0;
 
-  @include r(768) {
+  /* @include r(768) {
     background: no-repeat;
     background-image: url(assets/images/greenVs.svg), url(assets/images/pinkBlob.svg);
     background-position: right -16rem center, right -24rem center;
     background-size: 39rem, 45rem;
     padding: 11rem 0 4rem;
-  }
+  } */
+
+    .subtext {
+      padding: 0 2.4rem 2.4rem;
+    }
 
   .flexContainer {
     display: flex;
@@ -357,10 +356,10 @@ form {
     text-align: center;
   }
 
-  .avatarImg {
-    height: 8.7rem;
-    width: 8.2rem;
-  }
+    .avatarImg {
+        height: auto;
+        width: 16rem;
+    }
 
   .name {
     font-size: 1.6rem;
@@ -381,6 +380,10 @@ form {
 
     @include r(768) {
         padding: 11rem 2.4rem;
+    }
+
+    .magenta {
+        color: $magenta;
     }
 
     .subtext {
