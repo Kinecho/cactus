@@ -28,12 +28,16 @@ export default class EnglishCopy extends LocalizedCopy {
         WELCOME_BACK: "Welcome back",
         ACCOUNT: "Account",
         EMAIL: "Email",
+        EMAIL_ADDRESS: "Email Address",
+        FIRST_NAME: "First Name",
+        LAST_NAME: "Last Name",
         NOTIFICATIONS: "Notifications",
         REMOVE: "Remove",
         TIME_ZONE: "Time Zone",
         LOADING: "Loading",
     };
     navigation: NavigationCopy = {
+        ACCOUNT: "Account",
         SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
     };

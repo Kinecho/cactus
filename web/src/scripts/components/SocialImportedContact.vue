@@ -8,11 +8,11 @@
             <p class="email">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
                 <textarea placeholder="Include an optional note..." v-model="message" />
-                <button class="primary" @click.prevent="sendInvite">Send Invite</button>
-                <button class="tertiary" @click.prevent="readyToInvite = false">Cancel</button>
+                <button class="primary" @click="sendInvite">Send Invite</button>
+                <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
         </div>
-        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click.prevent="readyToInvite = true">
+        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click="beginInvite">
             <span>Invite...</span>
         </button>
         <div class="status" v-if="sendingInvite">
@@ -25,7 +25,9 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
-
+        <input-name-modal
+            :showModal="inputNameModalVisible"
+            @close="hideInputNameModal"/>
     </div>
     <!--
     <div class="contactCard">
@@ -79,13 +81,16 @@
     import {InviteResult} from "@shared/types/SocialInviteTypes";
     import {sendInvite} from '@web/invite';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import InputNameModal from "@components/InputNameModal.vue";
+    import CactusMember from "@shared/models/CactusMember";
 
     export default Vue.extend({
         props: {
-            contact: {type: Object as () => EmailContact}
+            contact: {type: Object as () => EmailContact},
+            member: {type: Object as () => CactusMember}
         },
         components: {
-
+            InputNameModal
         },
         created() {
         },
@@ -99,14 +104,16 @@
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
-            error: string | undefined
+            error: string | undefined,
+            inputNameModalVisible: boolean
         } {
             return {
               message: '',
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
-              error: undefined
+              error: undefined,
+              inputNameModalVisible: false
             }
         },
 
@@ -133,7 +140,21 @@
             avatarNumber(email: string): number {
                 return getIntegerFromStringBetween(email, 4) + 1;
             },
-        },      
+            beginInvite() {
+                if (!this.member.getFullName()) {
+                    this.inputNameModalVisible = true;
+                } else {
+                    this.readyToInvite = true;
+                }
+            },
+            endInvite() {
+                this.readyToInvite = false;
+            },
+            hideInputNameModal() {
+                this.inputNameModalVisible = false;
+                this.readyToInvite = true;
+            },
+        },     
     })
 </script>
 

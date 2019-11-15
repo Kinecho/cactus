@@ -7,6 +7,7 @@ export interface MagicLinkEmail {
 export interface InvitationEmail {
     toEmail: string,
     fromEmail: string,
+    fromName: string | undefined,
     link: string,
     message?: string,
 }
