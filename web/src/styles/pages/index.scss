@@ -31,18 +31,19 @@ body {
 .hero {
   display: grid;
   grid-template-areas: "heroText" "demo" "target" "form";
-  margin-top: 2.4rem;
+  margin: 2.4rem auto 0;
+  max-width: 50rem;
   position: relative;
 
   @include r(768) {
     grid-template-columns: 50% auto;
     grid-template-rows: auto auto;
     grid-template-areas: "heroText demo" "form     demo";
-    margin-top: 0;
-    text-align: left;
+    margin-top: 4.8rem;
+    max-width: none;
   }
   @include r(1024) {
-    grid-template-columns: 66% auto;
+    grid-template-columns: 60% auto;
     grid-template-rows: auto auto;
   }
 
@@ -55,6 +56,7 @@ body {
     @include r(768) {
       margin: 0;
       max-width: none;
+      text-align: left;
     }
   }
 
@@ -86,13 +88,15 @@ body {
       grid-area: form;
       justify-content: flex-start;
       max-width: 70rem;
+      text-align: left;
       z-index: 2;
     }
 
     input[type=email],
     button {
       @include r(768) {
-        margin-bottom: 1.6rem;
+          display: inline;
+          margin-bottom: 1.6rem;
       }
       @include r(1024) {
         margin-bottom: 0;
@@ -108,6 +112,7 @@ body {
 }
 
 .graphicContainer {
+    align-self: end;
     background: url(assets/images/demoBg.png) no-repeat center bottom -10rem/38rem;
     grid-area: demo;
     overflow: hidden;
@@ -119,6 +124,10 @@ body {
         margin: 0 auto;
         padding: .8rem;
         width: 24rem;
+
+        @include r(960) {
+            width: 27rem;
+        }
     }
 
     .progressBar {
@@ -229,15 +238,30 @@ form {
     }
   }
 
-  .benefit {
-    padding-bottom: 5.6rem;
-
-    &:last-child {
-        padding-bottom: 0;
+    .flexContainer {
+        @include r(600) {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-around;
+        }
+        @include r(960) {
+          flex-wrap: nowrap;
+          justify-content: center;
+        }
     }
 
-    @include r(768) {
-      flex-basis: 25%;
+    .benefit {
+        padding-bottom: 5.6rem;
+
+        @include r(600) {
+            flex-basis: 50%;
+        }
+        @include r(960) {
+            flex-basis: 25%;
+            padding-bottom: 0;
+        }
+
+    &:last-child {
       padding-bottom: 0;
     }
 
@@ -247,7 +271,7 @@ form {
       max-width: 25rem;
       opacity: .8;
 
-      @include r(768) {
+      @include r(960) {
         padding: 0 2.4rem;
       }
     }
@@ -264,13 +288,6 @@ form {
         font-size: 2rem;
         margin: 0 0 .8rem;
     }
-}
-
-.flexContainer {
-  @include r(768) {
-    display: flex;
-    justify-content: center;
-  }
 }
 
 .fortify {
