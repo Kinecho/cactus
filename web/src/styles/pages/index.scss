@@ -300,8 +300,7 @@ form {
     }
 }
 
-.testimonials h2,
-.private h2 {
+.testimonials h2 {
   margin: 0 0 3.2rem;
 
   @include r(768) {
@@ -375,8 +374,8 @@ form {
 }
 
 .private {
-    background-color: lighten($lightGreen, 10%);
-    padding: 8rem 2.4rem;
+    background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
+    padding: 4.8rem 2.4rem 8rem;
     position: relative;
     z-index: 0;
 
@@ -384,45 +383,12 @@ form {
         padding: 11rem 2.4rem;
     }
 
-    &:before {
-        background-image: url(assets/images/yellowBlob.svg);
-        background-repeat: no-repeat;
-        background-size: 170px;
-        content: "";
-        height: 170px;
-        position: absolute;
-        right: -110px;
-        top: -30px;
-        width: 170px;
-
-        @include r(768) {
-            background-position: calc(50% - 72px) 0;
-            right: 0;
-            top: 62px;
-            width: 100%;
-            z-index: -1;
-        }
-    }
-
-    &:after {
-        @include r(768) {
-            background-image: url(assets/images/maroonTriangleBlob.svg);
-            background-position: calc(50% - 32px) 0;
-            background-repeat: no-repeat;
-            background-size: 290px;
-            content: "";
-            height: 250px;
-            position: absolute;
-            right: 87px;
-            top: 140px;
-            width: 100%;
-            z-index: -1;
-        }
+    .subtext {
+        margin-bottom: 2.4rem;
     }
 
     .centered {
         max-width: 60rem;
-        text-align: left;
 
         @include r(768) {
             align-items: center;
@@ -432,24 +398,14 @@ form {
         }
     }
 
-    .text {
-        @include r(768) {
-            margin-left: 12.8rem;
-            max-width: 42rem;
-        }
-
-        p {
-            margin-bottom: 1.6rem;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-        }
+    em {
+        background-color: $yellow;
+        font-style: normal;
+        padding: .2rem;
     }
 
     .reflection {
         @include shadowbox;
-        margin-bottom: 5.6rem;
         padding: 2.4rem;
         position: relative;
         text-align: left;
@@ -457,44 +413,6 @@ form {
         @include r(768) {
             max-width: 48rem;
             width: 50%;
-        }
-
-        &:before {
-            @include shadowbox;
-            background-color: mix($lightGreen, white, 33%);
-            bottom: -1.6rem;
-            content: '';
-            filter: blur(2px);
-            height: 50px;
-            left: 0;
-            margin: 0 auto;
-            position: absolute;
-            right: 0;
-            width: 80%;
-            z-index: -1;
-
-            @include r(768) {
-                bottom: -3.2rem;
-            }
-        }
-
-        &:after {
-            @include shadowbox;
-            background-color: mix($lightGreen, white, 50%);
-            bottom: -3.2rem;
-            content: '';
-            filter: blur(4px);
-            height: 50px;
-            left: 0;
-            margin: 0 auto;
-            position: absolute;
-            right: 0;
-            width: 60%;
-            z-index: -2;
-
-            @include r(768) {
-                bottom: -6.4rem;
-            }
         }
 
         .flexContainer {
@@ -505,26 +423,20 @@ form {
         }
 
         .date {
-            color: $darkestPink;
             font-size: 1.6rem;
-            }
-
-        button {
-            background: transparent;
-            border: 1px solid $lightGreen;
-            box-shadow: none;
-            display: flex;
-            flex-grow: 0;
-            height: 3rem;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            width: 3rem;
+            opacity: .8;
         }
 
-        .iconImg {
-            height: 2rem;
-            width: 2rem;
+        button {
+            border: 0;
+            cursor: default;
+            flex-grow: 0;
+            padding: 0;
+
+            img {
+                height: 2.4rem;
+                width: 2.4rem;
+            }
         }
 
         .question {
@@ -533,8 +445,31 @@ form {
         }
     }
 
-    .blink {
-        animation: blink 1s infinite;
+    .reply {
+        background-color: $lightestGreen;
+        border-radius: .4rem;
+        height: 1.8rem;
+        margin: 3.6rem 0 2.4rem;
+        position: relative;
+
+        &:before,
+        &:after {
+            background-color: $lightestGreen;
+            border-radius: .4rem;
+            content: "";
+            height: 1.8rem;
+            left: 0;
+            position: absolute;
+        }
+
+        &:before {
+            top: -2.4rem;
+            width: 90%;
+        }
+        &:after {
+            bottom: -2.4rem;
+            width: 30%;
+        }
     }
 }
 
