@@ -261,21 +261,22 @@ form {
             padding-bottom: 0;
         }
 
-    &:last-child {
-      padding-bottom: 0;
-    }
+        &:last-child {
+            padding-bottom: 0;
+        }
 
-    .text {
-      color: $white;
-      margin: 0 auto;
-      max-width: 25rem;
-      opacity: .8;
+        .text {
+            color: $white;
+            margin: 0 auto;
+            max-width: 25rem;
+            opacity: .8;
 
-      @include r(960) {
-        padding: 0 2.4rem;
-      }
+            @include r(960) {
+                max-width: 35rem;
+                padding: 0 2.4rem;
+            }
+        }
     }
-  }
 
     .illustration {
         margin-bottom: 1.6rem;
@@ -301,13 +302,126 @@ form {
         padding: 11rem 2.4rem;
     }
 
-    .subtext {
-        margin-bottom: 2.4rem;
-    }
-
     .sectionImg {
         margin-left: 1.6rem;
         width: 40rem;
+    }
+}
+
+.split {
+    @include r(768) {
+        display: flex;
+        max-width: none;
+
+        .private,
+        .fortify {
+            flex-basis: 50%;
+        }
+    }
+
+    .subtext {
+        margin: 0 auto 2.4rem;
+        max-width: 40rem;
+        text-align: center;
+
+        @include r(768) {
+            margin-bottom: 5.6rem;
+        }
+    }
+}
+
+.private {
+    align-items: center;
+    background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
+    display: flex;
+    flex-direction: column;
+    padding: 4.8rem 2.4rem 8rem;
+    position: relative;
+    z-index: 0;
+
+    @include r(768) {
+        background-position: center top 27rem;
+        background-size: 44rem;
+        padding: 11rem 2.4rem;
+    }
+
+    .magenta {
+        color: $magenta;
+    }
+
+    em {
+        background-color: $yellow;
+        font-style: normal;
+        padding: .2rem;
+    }
+
+    .reflection {
+        @include shadowbox;
+        padding: 2.4rem;
+        position: relative;
+        text-align: left;
+
+        @include r(768) {
+            margin-top: 4rem;
+            max-width: 48rem;
+            width: 50%;
+        }
+
+        .flexContainer {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.6rem;
+        }
+
+        .date {
+            font-size: 1.6rem;
+            opacity: .8;
+        }
+
+        button {
+            border: 0;
+            cursor: default;
+            flex-grow: 0;
+            padding: 0;
+
+            img {
+                height: 2.4rem;
+                width: 2.4rem;
+            }
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: .8rem;
+        }
+    }
+
+    .reply {
+        background-color: $lightestGreen;
+        border-radius: .4rem;
+        height: 1.8rem;
+        margin: 3.6rem 0 2.4rem;
+        position: relative;
+
+        &:before,
+        &:after {
+            background-color: $lightestGreen;
+            border-radius: .4rem;
+            content: "";
+            height: 1.8rem;
+            left: 0;
+            position: absolute;
+        }
+
+        &:before {
+            top: -2.4rem;
+            width: 90%;
+        }
+        &:after {
+            bottom: -2.4rem;
+            width: 30%;
+        }
     }
 }
 
@@ -379,110 +493,6 @@ form {
   .quoteText {
     margin: 0;
   }
-}
-
-.private {
-    background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
-    padding: 4.8rem 2.4rem 8rem;
-    position: relative;
-    z-index: 0;
-
-    @include r(768) {
-        padding: 11rem 2.4rem;
-    }
-
-    .magenta {
-        color: $magenta;
-    }
-
-    .subtext {
-        margin-bottom: 2.4rem;
-    }
-
-    .centered {
-        max-width: 60rem;
-
-        @include r(768) {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            max-width: 1200px;
-        }
-    }
-
-    em {
-        background-color: $yellow;
-        font-style: normal;
-        padding: .2rem;
-    }
-
-    .reflection {
-        @include shadowbox;
-        padding: 2.4rem;
-        position: relative;
-        text-align: left;
-
-        @include r(768) {
-            max-width: 48rem;
-            width: 50%;
-        }
-
-        .flexContainer {
-            align-items: center;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1.6rem;
-        }
-
-        .date {
-            font-size: 1.6rem;
-            opacity: .8;
-        }
-
-        button {
-            border: 0;
-            cursor: default;
-            flex-grow: 0;
-            padding: 0;
-
-            img {
-                height: 2.4rem;
-                width: 2.4rem;
-            }
-        }
-
-        .question {
-            font-weight: bold;
-            margin-bottom: .8rem;
-        }
-    }
-
-    .reply {
-        background-color: $lightestGreen;
-        border-radius: .4rem;
-        height: 1.8rem;
-        margin: 3.6rem 0 2.4rem;
-        position: relative;
-
-        &:before,
-        &:after {
-            background-color: $lightestGreen;
-            border-radius: .4rem;
-            content: "";
-            height: 1.8rem;
-            left: 0;
-            position: absolute;
-        }
-
-        &:before {
-            top: -2.4rem;
-            width: 90%;
-        }
-        &:after {
-            bottom: -2.4rem;
-            width: 30%;
-        }
-    }
 }
 
 .email {
