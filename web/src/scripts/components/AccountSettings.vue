@@ -61,7 +61,7 @@
                         </div>
                     </div>
 
-                    <div class="settings-group profile">
+                    <div class="settings-group profile" v-if="providers.length > 0">
                         <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
                         <div class="item" v-if="showProviders">
                             <div v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
