@@ -4,16 +4,6 @@
 @import "~styles/modal";
 
 body {
-  overflow-x: hidden;
-}
-
-html {
-  @include maxW(768) {
-    overflow-x: hidden;
-  }
-}
-
-body {
   background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
   background-position: center 365px, center 285px;
   background-size: 745px, 740px;
@@ -287,6 +277,7 @@ form {
     align-items: center;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     padding: 4.8rem 2.4rem;
 
     @include r(768) {
