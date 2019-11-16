@@ -69,8 +69,10 @@ h1, h2 {
 
     @include r(768) {
       margin: 0;
-      padding-top: 8rem;
       text-align: left;
+    }
+    @include r(1140) {
+      padding-top: 8rem;
     }
   }
 
@@ -102,9 +104,12 @@ h1, h2 {
       grid-area: form;
       justify-content: flex-start;
       max-width: 70rem;
-      padding: 0 2.4rem 14rem 0;
+      padding: 0 2.4rem 4.4rem 0;
       text-align: left;
       z-index: 2;
+    }
+    @include r(1140) {
+        padding-bottom: 14rem;
     }
 
     input[type=email],
