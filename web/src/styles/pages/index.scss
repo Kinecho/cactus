@@ -24,8 +24,18 @@ body {
   grid-area: target;
 }
 
+h1, h2 {
+    @include r(960) {
+      font-size: 5.6rem;
+    }
+}
+
 .subtext {
     opacity: .8;
+
+    @include r(960) {
+        font-size: 2rem;
+    }
 }
 
 .hero {
@@ -41,10 +51,14 @@ body {
     grid-template-areas: "heroText demo" "form     demo";
     margin-top: 4.8rem;
     max-width: none;
+    padding: 0 1.6rem;
   }
   @include r(1024) {
     grid-template-columns: 60% auto;
     grid-template-rows: auto auto;
+  }
+  @include r(1200) {
+    padding: 0;
   }
 
   .heroText {
@@ -55,7 +69,7 @@ body {
 
     @include r(768) {
       margin: 0;
-      max-width: none;
+      padding-top: 8rem;
       text-align: left;
     }
   }
@@ -65,7 +79,7 @@ body {
     margin: .8rem 2.4rem .4rem;
 
     @include r(768) {
-      margin: 0 2.4rem 2.4rem;
+      margin: 0 2.4rem 2.4rem 0;
       max-width: 65rem;
     }
   }
@@ -74,7 +88,7 @@ body {
     margin: 0 2.4rem;
 
     @include r(768) {
-      margin-bottom: 2.4rem;
+      margin: 0 2.4rem 2.4rem 0;
     }
   }
 
@@ -118,6 +132,10 @@ body {
     overflow: hidden;
     position: relative;
 
+    @include r(960) {
+        background-size: 47rem;
+    }
+
     .promptDemo {
         background-color: $beige;
         border-radius: 1.2rem 1.2rem 0 0;
@@ -126,7 +144,8 @@ body {
         width: 24rem;
 
         @include r(960) {
-            width: 27rem;
+            padding: 1.6rem;
+            width: 32rem;
         }
     }
 
@@ -183,6 +202,10 @@ body {
         &:nth-child(1) {
             right: 1.6rem;
             top: 3.2rem;
+
+            @include r(960) {
+                top: 4.8rem;
+            }
         }
         &:nth-child(2) {
             bottom: 3.2rem;
@@ -198,6 +221,7 @@ form {
 
   @include r(600) {
     flex-direction: row;
+    padding: 0 2.4rem 14rem 0;
   }
 
   &.lower {
@@ -213,30 +237,22 @@ form {
     padding: 4.8rem 2.4rem;
     position: relative;
 
-  @include r(768) {
-      padding: 11rem 2.4rem;
-  }
-  @include r(1024) {
-    &:before {
-      background: no-repeat;
-      background-image: url(assets/images/maroonTriangleBlob.svg), url(assets/images/darkGreenBlob.svg);
-      background-position: 5rem 8rem, 0 0;
-      background-size: 44.5rem, 44rem;
-      content: "";
-      display: block;
-      height: 47rem;
-      left: -35rem;
-      position: absolute;
-      top: -29rem;
-      width: 55rem;
+    @include r(768) {
+        padding: 9rem 2.4rem 11rem;
     }
-  }
-  @include r(1500) {
-    &:before {
-      left: -25rem;
-      top: -24rem;
+
+    h2 {
+        color: $white;
     }
-  }
+
+    .subtext {
+        color: $white;
+        padding-bottom: 5.6rem;
+
+        @include r(768) {
+            padding-bottom: 9rem;
+        }
+    }
 
     .flexContainer {
         @include r(600) {
@@ -259,6 +275,7 @@ form {
         @include r(960) {
             flex-basis: 25%;
             padding-bottom: 0;
+            text-align: left;
         }
 
         &:last-child {
@@ -272,8 +289,8 @@ form {
             opacity: .8;
 
             @include r(960) {
-                max-width: 35rem;
-                padding: 0 2.4rem;
+                margin: 0;
+                padding-right: 2.4rem;
             }
         }
     }
@@ -282,6 +299,10 @@ form {
         margin-bottom: 1.6rem;
         height: 11rem;
         width: auto;
+
+        @include r(960) {
+            height: 16rem;
+        }
     }
 
     h5 {
@@ -428,16 +449,16 @@ form {
 .testimonials {
     padding: 4.8rem 0 0;
 
-  /* @include r(768) {
-    background: no-repeat;
-    background-image: url(assets/images/greenVs.svg), url(assets/images/pinkBlob.svg);
-    background-position: right -16rem center, right -24rem center;
-    background-size: 39rem, 45rem;
-    padding: 11rem 0 4rem;
-  } */
+    @include r(768) {
+        padding: 11rem 0 0;
+    }
 
     .subtext {
-      padding: 0 2.4rem 2.4rem;
+        padding: 0 2.4rem 2.4rem;
+
+        @include r(768) {
+            padding-bottom: 4rem;
+        }
     }
 
   .flexContainer {
@@ -450,6 +471,7 @@ form {
 
     @include r(768) {
       flex-flow: row wrap;
+      justify-content: center;
     }
   }
 

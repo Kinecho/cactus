@@ -187,6 +187,11 @@ $widthDesktop: $widthXL;
       @content;
     }
   }
+  @if $point==1200 {
+    @media (min-width: 1200px) {
+      @content;
+    }
+  }
   @if $point==1500 {
     @media (min-width: 1500px) {
       @content;
