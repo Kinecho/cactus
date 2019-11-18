@@ -290,6 +290,16 @@ $widthDesktop: $widthXL;
             background-color: $lightGreen;
         }
     }
+
+    &.red {
+        color: $red;
+
+        @include r(600) {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
 }
 
 @mixin smallButton() {

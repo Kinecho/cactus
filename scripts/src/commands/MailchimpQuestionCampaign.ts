@@ -116,6 +116,7 @@ export default class MailchimpQuestionCampaign implements Command {
 
     reflectionPromptId?: string;
     topic?: string;
+    introText?: string;
 
     scheduleDateISO?: ISODate;
 
@@ -240,6 +241,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "inspirationText",
                 message: "Inspiration text (optional)",
+                initial: this.introText
             },
             {
                 type: "text",

@@ -29,12 +29,31 @@ export default class CreatePromptModule extends FirebaseCommand {
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
         resetConsole();
         console.log(chalk.bold.green('Let\'s create Reflection Prompt.'));
-        console.log(chalk.dim('This will walk you through making a new landing page, email campaign, and record in the database'));
+        console.log(chalk.dim('This will walk you through making a new content prompt, email campaign, and record in the database'));
+
         const response = await prompts([
             {
                 type: "text",
                 name: 'question',
                 message: 'What is the question/prompt text?',
+            },
+            {
+                type: "text",
+                name: 'introText',
+                message: 'What is the intro text?',
+            },
+            {
+                type: "select",
+                max: 1,
+                name: 'cactusElement',
+                message: 'What is the Cactus element?',
+                choices: [
+                    {title: "energy", value: "energy"},
+                    {title: "experience", value: "experience"},
+                    {title: "relationships", value: "relationships"},
+                    {title: "emotions", value: "emotions"},
+                    {title: "meaning", value: "meaning"}
+                ]
             },
             {
                 type: "text",
@@ -46,7 +65,7 @@ export default class CreatePromptModule extends FirebaseCommand {
         response.reflectionPrompt = true;
         this.response = response;
 
-        const {question, topic} = response;
+        const {question, topic, introText, cactusElement} = response;
 
         const promptId: string = AdminReflectionPromptService.getSharedInstance().createDocId();
 
@@ -56,6 +75,12 @@ export default class CreatePromptModule extends FirebaseCommand {
         prompt.question = question;
         prompt.topic = topic;
 
+        const firstCard: Content = {
+            contentType: ContentType.text,
+            showElementIcon: true,
+            text: introText,
+        };
+
         const reflection: Content = {
             contentType: ContentType.reflect,
             text: prompt.question,
@@ -63,7 +88,8 @@ export default class CreatePromptModule extends FirebaseCommand {
 
         const content = new PromptContent();
         content.promptId = promptId;
-        content.content = [reflection];
+        content.cactusElement = cactusElement;
+        content.content = [firstCard, reflection];
 
         const savedContent = await AdminPromptContentService.getSharedInstance().save(content);
         if (savedContent) {
@@ -94,6 +120,7 @@ export default class CreatePromptModule extends FirebaseCommand {
             mailchimpCommand.question = question;
             mailchimpCommand.reflectionPromptId = promptId;
             mailchimpCommand.topic = topic;
+            mailchimpCommand.introText = introText;
             if (savedContent) { 
                 mailchimpCommand.promptContentId = savedContent.entryId;
             }

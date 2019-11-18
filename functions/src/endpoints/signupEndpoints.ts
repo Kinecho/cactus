@@ -419,6 +419,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         await AdminSendgridService.getSharedInstance().sendInvitation({
             toEmail: toContact.email,
             fromEmail: requestUser.email,
+            fromName: member ? member.getFullName() : undefined,
             message: message,
             link: referralLink
         });
