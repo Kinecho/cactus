@@ -810,14 +810,14 @@
                         border-radius: .8rem;
                         flex-grow: 1;
                         height: .4rem;
-                        background-color: $lightGreen;
+                        background-color: $darkestGreen;
 
                         &:not(:last-child) {
                             margin-right: 2px;
                         }
 
                         &.complete {
-                            background-color: $darkPink;
+                            background-color: $green;
                         }
                     }
                 }
@@ -1067,11 +1067,6 @@
             padding: 2.4rem;
             position: relative;
             transform: rotateY(180deg);
-
-            @include r(600) {
-                border-radius: 12px;
-                box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            }
         }
     }
 

@@ -1,14 +1,13 @@
 <template>
-    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
+    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, `bgImg-${processedContent.backgroundImage.position}`, {reflectScreen: isReflectScreen}]">
         <section class="content">
-            <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
-                <div class="element-icon" >
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
-                </div>
-                <h4 class="label">{{cactusElement}}</h4>
-            </a>
-
             <div v-if="processedContent.text" class="text">
+                <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
+                    <div class="element-icon" >
+                        <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
+                    </div>
+                    <h4 class="label">{{cactusElement}}</h4>
+                </a>
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
@@ -207,11 +206,11 @@
                 </svg>
             </div>
             <!--    END Grow -->
-        </section>
 
-        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
-            <flamelink-image v-bind:image="processedContent.backgroundImage"/>
-        </div>
+            <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
+                <flamelink-image v-bind:image="processedContent.backgroundImage"/>
+            </div>
+        </section>
 
         <section class="lowerActions" v-if="tapAnywhereEnabled || (isReflectScreen && response)">
 
@@ -538,85 +537,89 @@
     @import "transitions";
 
     .content-card {
-        background: $lightBlue no-repeat;
+        background: $beige no-repeat;
         display: flex;
         flex-direction: column;
-        height: 100%;
+        flex-grow: 1;
         justify-content: space-between;
         padding: 2.4rem;
         width: 100%;
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            box-shadow:
+                0 11px 15px -7px rgba(0,0,0,.16),
+                0 24px 38px 3px rgba(0,0,0,.1),
+                0 9px 46px 8px rgba(0,0,0,.08);
+            height: 100%;
             overflow: hidden;
             position: relative;
         }
 
-        .slide-1 & {
-            background-image: url(/assets/images/greenNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg);
-            background-position: right -210px bottom 38vh,
-            right -140px bottom 28vh;
-            background-size: 250px, 180px;
-        }
+        // .slide-1 & {
+        //     background-image: url(/assets/images/greenNeedleBlob.svg),
+        //     url(/assets/images/pinkBlob.svg);
+        //     background-position: right -210px bottom 38vh,
+        //     right -140px bottom 28vh;
+        //     background-size: 250px, 180px;
+        // }
+        //
+        // .slide-2 &, .slide-3 & {
+        //     background-image: url(/assets/images/greenNeedleBlob.svg),
+        //     url(/assets/images/pinkBlob.svg),
+        //     url(/assets/images/yellowNeedleBlob.svg),
+        //     url(/assets/images/yellowBlob.svg);
+        //     background-position: left -210px bottom 38vh,
+        //     left -150px bottom 28vh,
+        //     right -440px bottom 48vh,
+        //     right -205px bottom 67vh;
+        //     background-size: 250px, 180px, 470px, 240px;
+        // }
+        //
+        // .slide-4 & {
+        //     background-image: url(/assets/images/yellowNeedleBlob.svg),
+        //     url(/assets/images/yellowBlob.svg),
+        //     url(/assets/images/yellowNeedleBlob.svg),
+        //     url(/assets/images/pinkBlob.svg);
+        //     background-position: left -375px bottom 48vh,
+        //     left -215px bottom 68vh,
+        //     right -415px bottom -22vh,
+        //     right -155px bottom 4vh;
+        //     background-size: 470px, 240px, 470px, 180px;
+        // }
+        //
+        // .slide-5 &, .slide-6 & {
+        //     background-image: url(/assets/images/yellowNeedleBlob.svg),
+        //     url(/assets/images/pinkBlob.svg),
+        //     url(/assets/images/maroonTriangleBlob.svg),
+        //     url(/assets/images/lightGreenBlob.svg);
+        //     background-position: left -280px bottom -22vh,
+        //     left -165px bottom 4vh,
+        //     right -335px bottom 32vh,
+        //     right -250px bottom 44vh;
+        //     background-size: 470px, 180px, 390px, 270px;
+        // }
+        //
+        // .slide-7 &, .slide-8 & {
+        //     background-image: url(/assets/images/maroonTriangleBlob.svg),
+        //     url(/assets/images/lightGreenBlob.svg);
+        //     background-position: left -335px bottom 32vh,
+        //     left -250px bottom 44vh;
+        //     background-size: 390px, 270px;
+        // }
 
-        .slide-2 &, .slide-3 & {
-            background-image: url(/assets/images/greenNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg),
-            url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/yellowBlob.svg);
-            background-position: left -210px bottom 38vh,
-            left -150px bottom 28vh,
-            right -440px bottom 48vh,
-            right -205px bottom 67vh;
-            background-size: 250px, 180px, 470px, 240px;
-        }
-
-        .slide-4 & {
-            background-image: url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/yellowBlob.svg),
-            url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg);
-            background-position: left -375px bottom 48vh,
-            left -215px bottom 68vh,
-            right -415px bottom -22vh,
-            right -155px bottom 4vh;
-            background-size: 470px, 240px, 470px, 180px;
-        }
-
-        .slide-5 &, .slide-6 & {
-            background-image: url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg),
-            url(/assets/images/maroonTriangleBlob.svg),
-            url(/assets/images/lightGreenBlob.svg);
-            background-position: left -280px bottom -22vh,
-            left -165px bottom 4vh,
-            right -335px bottom 32vh,
-            right -250px bottom 44vh;
-            background-size: 470px, 180px, 390px, 270px;
-        }
-
-        .slide-7 &, .slide-8 & {
-            background-image: url(/assets/images/maroonTriangleBlob.svg),
-            url(/assets/images/lightGreenBlob.svg);
-            background-position: left -335px bottom 32vh,
-            left -250px bottom 44vh;
-            background-size: 390px, 270px;
-        }
-
-        @include r(600) {
-            .slide-1 &,
-            .slide-2 &,
-            .slide-3 &,
-            .slide-4 &,
-            .slide-5 &,
-            .slide-6 &,
-            .slide-7 &,
-            .slide-8 & {
-                background-image: none;
-            }
-        }
+        // @include r(600) {
+        //     .slide-1 &,
+        //     .slide-2 &,
+        //     .slide-3 &,
+        //     .slide-4 &,
+        //     .slide-5 &,
+        //     .slide-6 &,
+        //     .slide-7 &,
+        //     .slide-8 & {
+        //         background-image: none;
+        //     }
+        // }
 
         &.type-share_reflection {
             // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
@@ -627,6 +630,10 @@
                 padding: 0 0 2.4rem;
             }
         }
+
+        &.bgImg-bottom .content {
+            justify-content: flex-end;
+        }
     }
 
     .content, .lowerActions {
@@ -634,13 +641,10 @@
     }
 
     .backgroundImage {
-        bottom: 0;
-        left: 0;
-        margin: 0 -2.4rem -2.4rem;
-        max-height: 40vh;
-        position: relative;
-        right: 0;
-        overflow: hidden;
+
+        &:empty {
+            display: none;
+        }
 
         .slide-0 &:empty {
             $backgrounds: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
@@ -653,10 +657,16 @@
             $nth: nth($backgrounds, $bgKey);
 
             background: #{$nth} no-repeat;
+            display: block;
             height: 200px;
             margin: 0;
             position: absolute;
             width: 100%;
+
+            img {
+                transform: translateY(11px);
+                width: 111%;
+            }
         }
 
         @include r(600) {
@@ -672,27 +682,29 @@
         }
 
         &.bottom {
-            margin-bottom: -2.4rem;
+            align-items: flex-end;
+            margin: 0 -2.4rem -3.2rem;
+            min-height: 53%;
+            overflow: hidden;
         }
 
         img {
-            transform: translateY(11px);
-            width: 111%;
-
-            @include r(600) {
-                max-height: 30rem;
-            }
+            max-height: 35rem;
+            max-width: 100%;
         }
     }
 
     .element-container {
         cursor: pointer;
-        margin: 4rem 0 -1.6rem;
+        margin-top: 4rem;
     }
 
     .text {
+        display: flex;
+        flex-direction: column;
         font-size: 2rem;
-        padding: 4rem 1.6rem;
+        justify-content: center;
+        padding: 6.4rem 1.6rem 4rem;
 
         .reflectScreen & {
             margin-top: -5.6rem;
@@ -700,6 +712,9 @@
 
         @include r(374) {
             font-size: 2.4rem;
+        }
+        @include r(600) {
+            padding-top: 4rem;
         }
 
         p {
@@ -755,10 +770,12 @@
     }
 
     .content {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        justify-content: center;
+        @include r(600) {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center;
+        }
     }
 
     .element-icon {
@@ -879,9 +896,10 @@
     .grow-container {
         align-items: center;
         display: flex;
+        // flex-basis: 50%;
+        // flex-grow: 1;
         height: 156px;
         justify-content: center;
-        margin: -2.4rem 0 2.4rem;
     }
 
     .leaf7 {
