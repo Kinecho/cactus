@@ -57,15 +57,6 @@
             member: async function() {
                 if (this.member.id) {
                     this.confirmedFriends = await SocialConnectionService.sharedInstance.getFriends(this.member.id);
-                    console.log(this.confirmedFriends);
-                    let sc = new SocialConnection();
-                        sc.memberId = this.member.id;
-                        sc.friendId = "zNHpIZZgwpxVRykPCdnL";
-                        sc.confirmedAt = new Date();
-                        sc.confirmed = true;
-                        sc.sentAt = new Date();
-                        //SocialConnectionService.sharedInstance.save(sc);
-
                 }
             }
         },
