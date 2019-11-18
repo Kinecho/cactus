@@ -836,12 +836,14 @@
                 padding: 0;
                 position: absolute;
                 top: 50%;
-                z-index: 10;
+                z-index: 20;
 
                 &.previous {
                     left: .8rem;
+                    padding: 2rem 2rem 2rem 0;
                 }
                 &.next {
+                    padding: 2rem 0 2rem 2rem;
                     right: .8rem;
                 }
 
