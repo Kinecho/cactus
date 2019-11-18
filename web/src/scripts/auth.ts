@@ -331,7 +331,7 @@ export async function sendLoginEvent(args: {
     additionalUserInfo?: AdditionalUserInfo | null,
 }): Promise<void> {
     return new Promise(async resolve => {
-        let unsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+        const unsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
             onData: async ({member}) => {
                 if (member) {
                     try {

@@ -10,13 +10,13 @@ class AddressBookService {
 
   start(callback?: object) {
     if (!document.getElementById('cloudsponge-' + Config.cloudSpongeKey)) {
-      let cloudSpongeScript = document.createElement('script');
-          cloudSpongeScript.type = 'text/javascript';
-          cloudSpongeScript.async = true;
-          cloudSpongeScript.onload = this.initCloudsponge;
-          cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
-          cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
-          document.head.appendChild(cloudSpongeScript);
+      const cloudSpongeScript = document.createElement('script');
+            cloudSpongeScript.type = 'text/javascript';
+            cloudSpongeScript.async = true;
+            cloudSpongeScript.onload = this.initCloudsponge;
+            cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
+            cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
+            document.head.appendChild(cloudSpongeScript);
     }
   }
 
@@ -25,7 +25,7 @@ class AddressBookService {
   }
 
   formatContacts(rawContactData: Array<any>): Array<any> {
-    let formattedContacts: Array<EmailContact> = [];
+    const formattedContacts: Array<EmailContact> = [];
 
     rawContactData.forEach(function(contact: CloudspongeContact, index: number) {
       formattedContacts.push({
