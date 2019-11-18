@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="SocialFindFriends">
         <!-- suggested friends -->
-        <suggested-friends v-bind:member="member" />
+        <friend-list v-bind:member="member" />
 
         <div class="loading" v-if="loading">
             <Spinner message="Loading" name="socialFindFriends"/>
@@ -102,7 +102,7 @@
     import {PageRoute} from '@web/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import StorageService from '@web/services/StorageService';
-    import SocialSuggestedFriends from "@components/SocialSuggestedFriends.vue"
+    import SocialFriendList from "@components/SocialFriendList.vue"
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -111,7 +111,7 @@
         components: {
             Spinner,
             SocialImportedContact,
-            SuggestedFriends: SocialSuggestedFriends
+            FriendList: SocialFriendList
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({

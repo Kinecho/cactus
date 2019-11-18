@@ -7,11 +7,23 @@
             {{name}}
         </div>
         <div class="status">
-            <button v-if="!status" class="small secondary">Connect</button>
+            <button v-if="!status" class="small secondary">
+                Connect
+            </button>
+            
+            <div v-if="status == 'Confirmable'">
+                <button class="small primary">
+                    Confirm
+                </button>
+                <button class="small secondary">
+                    Ignore
+                </button>
+            </div>
+            
             <div v-if="status == 'Pending'">
-                
                 Pending
             </div>
+            
             <div v-if="status == 'Connected'">
                 <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
                 Friends
@@ -53,6 +65,8 @@
             status() {
                 if (this.friend.confirmed) {
                     return "Connected";
+                } else if (this.friend.friendId == this.member.id) {
+                    return "Confirmable"
                 }
             }
         },

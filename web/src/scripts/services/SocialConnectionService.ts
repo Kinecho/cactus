@@ -40,7 +40,21 @@ export default class SocialConnectionService {
         return await this.getFirst(query);
     }
 
-    async getFriends(memberId: string): Promise<SocialConnection[]> {
+    async getRequestedConnections(memberId: string): Promise<SocialConnection[]> {
+        const member = await CactusMemberService.sharedInstance.getById(memberId);
+        if (member && member.id) {
+          const query = this.getCollectionRef()
+            .where(SocialConnection.Fields.friendId, "==", member.id)
+            .where(SocialConnection.Fields.confirmed, "==", false)
+            .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
+          const results = await this.firestoreService.executeQuery(query, SocialConnection);
+          return results.results;
+        }
+
+        return [];
+    }
+
+    async getConfirmedConnections(memberId: string): Promise<SocialConnection[]> {
         const member = await CactusMemberService.sharedInstance.getById(memberId);
         if (member && member.id) {
           const query = this.getCollectionRef()

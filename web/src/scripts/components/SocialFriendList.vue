@@ -1,5 +1,14 @@
 <template>
-    <div class="socialSuggestedFriends">
+    <div class="socialFriendList">
+        <div v-if="friendRequests.length > 0">
+            <h2>Friend Requests</h2>
+            <friend 
+                v-for="(friend, index) in friendRequests"
+                v-bind:member="member"
+                v-bind:friend="friend"
+                v-bind:key="friend.memberId" 
+            />
+        </div> 
         <div v-if="suggestedFriends.length > 0">
             <h2>Suggested Friends</h2>
             <friend 
@@ -43,10 +52,12 @@
         },
         data(): {
             suggestedFriends: Array<any>,
+            friendRequests: Array<any>,
             confirmedFriends: Array<any>
         } {
             return {
                 suggestedFriends: [],
+                friendRequests: [],
                 confirmedFriends: []
             }
         },
@@ -56,7 +67,8 @@
         watch: {
             member: async function() {
                 if (this.member.id) {
-                    this.confirmedFriends = await SocialConnectionService.sharedInstance.getFriends(this.member.id);
+                    this.friendRequests = await SocialConnectionService.sharedInstance.getRequestedConnections(this.member.id);
+                    this.confirmedFriends = await SocialConnectionService.sharedInstance.getConfirmedConnections(this.member.id);
                 }
             }
         },
@@ -71,8 +83,8 @@
     @import "mixins";
     @import "variables";
 
-    .socialSuggestedFriends {
-        width: 40rem;
+    .socialFriendList {
+        width: 80rem;
     }
 
 </style>
