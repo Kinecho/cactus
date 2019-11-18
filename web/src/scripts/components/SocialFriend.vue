@@ -60,7 +60,7 @@
         },
         computed: {
             name() {
-                return this.friend.memberId;
+                return this.friend.friendId;
             },
             status() {
                 if (this.friend.confirmed) {

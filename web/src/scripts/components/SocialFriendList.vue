@@ -15,7 +15,7 @@
                 v-for="(friend, index) in suggestedFriends"
                 v-bind:member="member"
                 v-bind:friend="friend"
-                v-bind:key="friend.memberId" 
+                v-bind:key="friend.friendId" 
             />
         </div> 
         <div v-if="friends.length > 0">
@@ -24,7 +24,7 @@
                 v-for="(friend, index) in friends"
                 v-bind:member="member"
                 v-bind:friend="friend"
-                v-bind:key="friend.memberId" 
+                v-bind:key="friend.friendId" 
             />
         </div> 
     </div>
