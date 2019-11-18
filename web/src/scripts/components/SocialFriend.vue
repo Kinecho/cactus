@@ -67,6 +67,8 @@
                     return "Connected";
                 } else if (this.friend.friendId == this.member.id) {
                     return "Confirmable"
+                } else if (this.friend.memberId == this.member.id && this.friend.confirmed == false) {
+                    return "Pending"
                 }
             }
         },

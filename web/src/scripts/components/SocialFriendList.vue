@@ -18,10 +18,10 @@
                 v-bind:key="friend.memberId" 
             />
         </div> 
-        <div v-if="confirmedFriends.length > 0">
+        <div v-if="friends.length > 0">
             <h2>Your Friends</h2>
             <friend 
-                v-for="(friend, index) in confirmedFriends"
+                v-for="(friend, index) in friends"
                 v-bind:member="member"
                 v-bind:friend="friend"
                 v-bind:key="friend.memberId" 
@@ -53,12 +53,12 @@
         data(): {
             suggestedFriends: Array<any>,
             friendRequests: Array<any>,
-            confirmedFriends: Array<any>
+            friends: Array<any>
         } {
             return {
                 suggestedFriends: [],
                 friendRequests: [],
-                confirmedFriends: []
+                friends: []
             }
         },
         computed: {
@@ -68,7 +68,7 @@
             member: async function() {
                 if (this.member.id) {
                     this.friendRequests = await SocialConnectionService.sharedInstance.getRequestedConnections(this.member.id);
-                    this.confirmedFriends = await SocialConnectionService.sharedInstance.getConfirmedConnections(this.member.id);
+                    this.friends = await SocialConnectionService.sharedInstance.getConfirmedAndPendingConnections(this.member.id);
                 }
             }
         },
