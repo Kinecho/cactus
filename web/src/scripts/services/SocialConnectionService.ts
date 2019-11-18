@@ -56,7 +56,7 @@ export default class SocialConnectionService {
         if (member && member.id) {
           const query = this.getCollectionRef()
             .where(SocialConnection.Fields.confirmedMembers, "array-contains", member.id)
-            .orderBy(SocialConnection.Fields.confirmedAt, QuerySortDirection.desc);
+            .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
           const results = await this.firestoreService.executeQuery(query, SocialConnection);
           return results.results;
         }
