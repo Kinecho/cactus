@@ -58,7 +58,7 @@ export default class SocialConnectionService {
         const member = await CactusMemberService.sharedInstance.getById(memberId);
         if (member && member.id) {
           const query = this.getCollectionRef()
-            .where(SocialConnection.Fields.memberId, "==", member.id)
+            .where(SocialConnection.Fields.confirmedMembers, "array-contains", member.id)
             .orderBy(SocialConnection.Fields.confirmedAt, QuerySortDirection.desc);
           const results = await this.firestoreService.executeQuery(query, SocialConnection);
           return results.results;

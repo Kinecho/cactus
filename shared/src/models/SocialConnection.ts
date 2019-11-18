@@ -5,7 +5,8 @@ export enum SocialConnectionFields {
     friendId = "friendId",
     confirmed = "confirmed",
     sentAt = "sentAt",
-    confirmedAt = "confirmedAt"
+    confirmedAt = "confirmedAt",
+    confirmedMembers = "confirmedMembers"
 }
 
 export default class SocialConnection extends BaseModel {
@@ -16,4 +17,20 @@ export default class SocialConnection extends BaseModel {
     confirmed?: boolean;
     sentAt?: Date;
     confirmedAt?: Date;
+    confirmedMembers?: Array<string>;
+
+    prepareForFirestore(): any {
+        super.prepareForFirestore();
+        
+        this.confirmedMembers = [];
+
+        if (this.memberId) {
+            this.confirmedMembers.push(this.memberId);
+        }
+
+        if (this.confirmed && this.friendId) {
+            this.confirmedMembers.push(this.friendId);
+        }
+        return this;
+    }
 }
