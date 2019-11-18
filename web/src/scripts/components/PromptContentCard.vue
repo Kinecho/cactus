@@ -541,7 +541,7 @@
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        min-height: 100%;
+        min-height: 100vh;
         justify-content: center;
         padding: 2.4rem;
         width: 100%;
@@ -552,6 +552,7 @@
                 0 11px 15px -7px rgba(0,0,0,.16),
                 0 24px 38px 3px rgba(0,0,0,.1),
                 0 9px 46px 8px rgba(0,0,0,.08);
+            min-height: 100%;
             overflow: hidden;
             justify-content: space-between;
             position: relative;
@@ -688,7 +689,7 @@
 
         &.bottom {
             align-items: flex-end;
-            margin: 0 -2.4rem -3.2rem;
+            margin: 0 -2.4rem -4rem;
             overflow: hidden;
         }
 

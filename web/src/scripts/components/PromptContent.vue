@@ -833,7 +833,6 @@
 
             .arrow {
                 margin: auto;
-                padding: 0;
                 position: absolute;
                 top: 50%;
                 z-index: 20;
@@ -854,15 +853,17 @@
                     height: 4.8rem;
                     justify-content: center;
                     margin: 0 1%;
-                    padding: 0;
+
                     top: 30vh;
                     width: 4.8rem;
 
                     &.previous {
                         left: -6.4rem;
+                        padding: 0;
                     }
                     &.next {
                         right: -6.4rem;
+                        padding: 0;
                     }
                 }
 
