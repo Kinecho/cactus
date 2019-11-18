@@ -9,6 +9,15 @@
                 v-bind:key="friend.memberId" 
             />
         </div> 
+        <div v-if="confirmedFriends.length > 0">
+            <h2>Your Friends</h2>
+            <friend 
+                v-for="(friend, index) in confirmedFriends"
+                v-bind:member="member"
+                v-bind:friend="friend"
+                v-bind:key="friend.memberId" 
+            />
+        </div> 
     </div>
 </template>
 
@@ -17,7 +26,9 @@
     import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
-    import SocialFriend from "@components/SocialFriend.vue"
+    import SocialFriend from "@components/SocialFriend.vue";
+    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -28,25 +39,35 @@
         props: {
             member: {type: Object as () => CactusMember},
         },
-        beforeMount() {
-            
+        created() {
         },
         data(): {
-            suggestedFriends: Array<any>
+            suggestedFriends: Array<any>,
+            confirmedFriends: Array<any>
         } {
             return {
-                suggestedFriends: [
-                    {memberId: 'asdsfsdfs1', name: 'Ryan Brown', status: undefined},
-                    {memberId: 'sd23231rrs', name: 'Jane Fonda', status: 'Pending'},
-                    {memberId: 'asda232321', name: 'Robert Redford', status: 'Connected'},
-                ]
+                suggestedFriends: [],
+                confirmedFriends: []
             }
         },
         computed: {
             
         },
         watch: {
-            
+            member: async function() {
+                if (this.member.id) {
+                    this.confirmedFriends = await SocialConnectionService.sharedInstance.getFriends(this.member.id);
+                    console.log(this.confirmedFriends);
+                    let sc = new SocialConnection();
+                        sc.memberId = this.member.id;
+                        sc.friendId = "zNHpIZZgwpxVRykPCdnL";
+                        sc.confirmedAt = new Date();
+                        sc.confirmed = true;
+                        sc.sentAt = new Date();
+                        //SocialConnectionService.sharedInstance.save(sc);
+
+                }
+            }
         },
         methods: {
         

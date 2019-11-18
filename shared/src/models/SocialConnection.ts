@@ -1,6 +1,6 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
-export enum SocialConnectionField {
+export enum SocialConnectionFields {
     memberId = "memberId",
     friendId = "friendId",
     confirmed = "confirmed",
@@ -10,7 +10,7 @@ export enum SocialConnectionField {
 
 export default class SocialConnection extends BaseModel {
     readonly collection = Collection.socialConnections;
-    static Field = SocialConnectionField;
+    static Fields = SocialConnectionFields;
     memberId?: string;
     friendId?: string;
     confirmed?: boolean;

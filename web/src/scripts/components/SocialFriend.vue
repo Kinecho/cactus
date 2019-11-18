@@ -25,6 +25,7 @@
     import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
+    import SocialConnection from "@shared/models/SocialConnection";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
 
 
@@ -35,7 +36,7 @@
         },
         props: {
             member: {type: Object as () => CactusMember},
-            friend: {type: Object}
+            friend: {type: Object as () => SocialConnection}
         },
         beforeMount() {
             
@@ -47,10 +48,12 @@
         },
         computed: {
             name() {
-                return this.friend.name;
+                return this.friend.memberId;
             },
             status() {
-                return this.friend.status;
+                if (this.friend.confirmed) {
+                    return "Connected";
+                }
             }
         },
         watch: {
