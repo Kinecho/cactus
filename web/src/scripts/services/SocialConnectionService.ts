@@ -11,9 +11,6 @@ export default class SocialConnectionService {
 
     authUnsubscriber?: Unsubscribe;
 
-    constructor() {
-    }
-
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.socialConnections);
     }
