@@ -1,5 +1,5 @@
 <template>
-    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, `bgImg-${processedContent.backgroundImage.position}`, {reflectScreen: isReflectScreen}]">
+    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, processedContent.backgroundImage ? processedContent.backgroundImage.position : '', {reflectScreen: isReflectScreen}]">
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
@@ -167,7 +167,7 @@
                     </g>
                     <g>
                         <path fill="#000" fill-opacity=".25" d="M58 111.5c0 5.248-10.298 9.5-23 9.5-12.703 0-23-4.252-23-9.5s10.297-9.5 23-9.5c12.702 0 23 4.252 23 9.5"/>
-                        <path fill="#FFBCA3" d="M12 78l9.959 34.968S25.956 114 35.664 114c9.707 0 12.856-1.03 12.856-1.03L58 78"/>
+                        <path fill="#F57647" d="M12 78l9.959 34.968S25.956 114 35.664 114c9.707 0 12.856-1.03 12.856-1.03L58 78"/>
                     </g>
                 </svg>
                 <svg v-else class="grow5 energy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 150">
@@ -553,78 +553,11 @@
                 0 24px 38px 3px rgba(0,0,0,.1),
                 0 9px 46px 8px rgba(0,0,0,.08);
             min-height: 100%;
-            overflow: hidden;
             justify-content: space-between;
             position: relative;
         }
 
-        // .slide-1 & {
-        //     background-image: url(/assets/images/greenNeedleBlob.svg),
-        //     url(/assets/images/pinkBlob.svg);
-        //     background-position: right -210px bottom 38vh,
-        //     right -140px bottom 28vh;
-        //     background-size: 250px, 180px;
-        // }
-        //
-        // .slide-2 &, .slide-3 & {
-        //     background-image: url(/assets/images/greenNeedleBlob.svg),
-        //     url(/assets/images/pinkBlob.svg),
-        //     url(/assets/images/yellowNeedleBlob.svg),
-        //     url(/assets/images/yellowBlob.svg);
-        //     background-position: left -210px bottom 38vh,
-        //     left -150px bottom 28vh,
-        //     right -440px bottom 48vh,
-        //     right -205px bottom 67vh;
-        //     background-size: 250px, 180px, 470px, 240px;
-        // }
-        //
-        // .slide-4 & {
-        //     background-image: url(/assets/images/yellowNeedleBlob.svg),
-        //     url(/assets/images/yellowBlob.svg),
-        //     url(/assets/images/yellowNeedleBlob.svg),
-        //     url(/assets/images/pinkBlob.svg);
-        //     background-position: left -375px bottom 48vh,
-        //     left -215px bottom 68vh,
-        //     right -415px bottom -22vh,
-        //     right -155px bottom 4vh;
-        //     background-size: 470px, 240px, 470px, 180px;
-        // }
-        //
-        // .slide-5 &, .slide-6 & {
-        //     background-image: url(/assets/images/yellowNeedleBlob.svg),
-        //     url(/assets/images/pinkBlob.svg),
-        //     url(/assets/images/maroonTriangleBlob.svg),
-        //     url(/assets/images/lightGreenBlob.svg);
-        //     background-position: left -280px bottom -22vh,
-        //     left -165px bottom 4vh,
-        //     right -335px bottom 32vh,
-        //     right -250px bottom 44vh;
-        //     background-size: 470px, 180px, 390px, 270px;
-        // }
-        //
-        // .slide-7 &, .slide-8 & {
-        //     background-image: url(/assets/images/maroonTriangleBlob.svg),
-        //     url(/assets/images/lightGreenBlob.svg);
-        //     background-position: left -335px bottom 32vh,
-        //     left -250px bottom 44vh;
-        //     background-size: 390px, 270px;
-        // }
-
-        // @include r(600) {
-        //     .slide-1 &,
-        //     .slide-2 &,
-        //     .slide-3 &,
-        //     .slide-4 &,
-        //     .slide-5 &,
-        //     .slide-6 &,
-        //     .slide-7 &,
-        //     .slide-8 & {
-        //         background-image: none;
-        //     }
-        // }
-
         &.type-share_reflection {
-            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
             background: transparent;
             box-shadow: none;
 
@@ -637,8 +570,12 @@
             justify-content: space-between;
         }
 
-        &.bgImg-bottom .content {
-            justify-content: flex-end;
+        &.bottom {
+            overflow: hidden;
+
+            .content {
+                justify-content: flex-end;
+            }
         }
     }
 
@@ -650,29 +587,6 @@
 
         &:empty {
             display: none;
-        }
-
-        .slide-0 &:empty {
-            $backgrounds: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
-            url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-            url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
-            url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
-            url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
-
-            $bgKey: random(length($backgrounds));
-            $nth: nth($backgrounds, $bgKey);
-
-            background: #{$nth} no-repeat;
-            display: block;
-            height: 200px;
-            margin: 0;
-            position: absolute;
-            width: 100%;
-
-            img {
-                transform: translateY(11px);
-                width: 111%;
-            }
         }
 
         @include r(600) {
@@ -690,7 +604,6 @@
         &.bottom {
             align-items: flex-end;
             margin: 0 -2.4rem -4rem;
-            overflow: hidden;
         }
 
         img {
@@ -765,6 +678,7 @@
     }
 
     .label {
+        color: $darkestGreen;
         margin-bottom: 1.6rem;
     }
 
