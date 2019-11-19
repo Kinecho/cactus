@@ -44,7 +44,7 @@ export default class MemberProfileService {
     }
 
     observeByMemberId(id: string, options: DocObserverOptions<MemberProfile>): ListenerUnsubscriber {
-        const query = this.getCollectionRef().where(MemberProfile.Field.cactusMemberId, "==", userId).where(MemberProfile.Field.isPublic, "==", true);
+        const query = this.getCollectionRef().where(MemberProfile.Field.cactusMemberId, "==", id).where(MemberProfile.Field.isPublic, "==", true);
         return this.firestoreService.observeFirst(query, MemberProfile, options);
     }
 
