@@ -30,6 +30,7 @@
     import SocialFriendRequest from "@components/SocialFriendRequest.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -45,11 +46,15 @@
         },
         data(): {
             friendRequests: Array<any>,
-            friends: Array<any>
+            friends: Array<any>,
+            friendRequestsUnsubscriber?: ListenerUnsubscriber,
+            friendsUnsubscriber?: ListenerUnsubscriber
         } {
             return {
                 friendRequests: [],
-                friends: []
+                friends: [],
+                friendRequestsUnsubscriber: undefined,
+                friendsUnsubscriber: undefined
             }
         },
         computed: {
@@ -58,13 +63,30 @@
         watch: {
             member: async function() {
                 if (this.member.id) {
-                    this.friendRequests = await SocialConnectionService.sharedInstance.getRequestedConnections(this.member.id);
-                    this.friends = await SocialConnectionService.sharedInstance.getConfirmedAndPendingConnections(this.member.id);
+                    this.friendRequestsUnsubscriber = SocialConnectionService.sharedInstance.observeRequestedConnections(this.member.id, {
+                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                                this.friendRequests = socialConnections;
+                            }
+                        });
+                    
+                    this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                                this.friends = socialConnections;
+                            }
+                        });
                 }
             }
         },
         methods: {
         
+        },
+        destroyed() {
+            if (this.friendsUnsubscriber) {
+                this.friendsUnsubscriber();
+            }
+            if (this.friendRequestsUnsubscriber) {
+                this.friendRequestsUnsubscriber();
+            }
         }
     })
 </script>

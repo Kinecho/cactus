@@ -37,30 +37,28 @@ export default class SocialConnectionService {
         return await this.getFirst(query);
     }
 
-    async getRequestedConnections(memberId: string): Promise<SocialConnection[]> {
-        const member = await CactusMemberService.sharedInstance.getById(memberId);
-        if (member && member.id) {
-          const query = this.getCollectionRef()
-            .where(SocialConnection.Fields.friendId, "==", member.id)
+    observeRequestedConnections(memberId: string, options: QueryObserverOptions<SocialConnection>): ListenerUnsubscriber {
+        const query = this.getCollectionRef()
+            .where(SocialConnection.Fields.friendId, "==", memberId)
             .where(SocialConnection.Fields.confirmed, "==", false)
             .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
-          const results = await this.firestoreService.executeQuery(query, SocialConnection);
-          return results.results;
-        }
 
-        return [];
+        options.queryName = "observeRequestedConnectionsForCactusMemberId=" + memberId;
+        return this.firestoreService.observeQuery(query, SocialConnection, options);
     }
 
-    async getConfirmedAndPendingConnections(memberId: string): Promise<SocialConnection[]> {
-        const member = await CactusMemberService.sharedInstance.getById(memberId);
-        if (member && member.id) {
-          const query = this.getCollectionRef()
-            .where(SocialConnection.Fields.confirmedMembers, "array-contains", member.id)
+    observeConnections(memberId: string, options: QueryObserverOptions<SocialConnection>): ListenerUnsubscriber {
+        const query = this.getCollectionRef()
+            .where(SocialConnection.Fields.confirmedMembers, "array-contains", memberId)
             .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
-          const results = await this.firestoreService.executeQuery(query, SocialConnection);
-          return results.results;
-        }
 
-        return [];
+        options.queryName = "observeSocialConnectionsForCactusMemberId=" + memberId;
+        return this.firestoreService.observeQuery(query, SocialConnection, options);
+    }
+
+    async confirm(connection: SocialConnection): Promise<SocialConnection | undefined> {
+        connection.confirmed = true;
+        connection.confirmedAt = new Date();
+        return this.save(connection);
     }
 }
