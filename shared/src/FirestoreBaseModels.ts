@@ -12,7 +12,7 @@ export enum Collection {
     sentPrompts = "sentPrompts",
     pendingUsers = "pendingUsers",
     socialInvites = "socialInvites",
-    socialConnections = "socialConnections"
+    socialConnections = "socialConnections",
     memberProfiles = "memberProfiles",
 }
 
