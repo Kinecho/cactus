@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import {Collection} from "@shared/FirestoreBaseModels";
-import {fromFirestoreData} from "@shared/util/FirestoreUtil";
+import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import CactusMember from "@shared/models/CactusMember";
 import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
 import * as admin from "firebase-admin";
@@ -12,12 +12,17 @@ export const updateMemberProfileTrigger = functions.firestore
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
         console.log("Starting member profile update");
 
-        const data = change.after?.data();
-        if (!data) {
+        const snapshot = change.after;
+        if (!snapshot) {
             console.warn("No data found on the 'after' snapshot. Not updating.");
             return;
         }
-        const member = fromFirestoreData(data, CactusMember);
+        const member = fromDocumentSnapshot(snapshot, CactusMember);
+
+        if (!member) {
+            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", snapshot.data());
+            return;
+        }
 
         const userId = member.userId;
         let userRecord: UserRecord | undefined = undefined;
