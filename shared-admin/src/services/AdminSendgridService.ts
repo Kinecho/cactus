@@ -104,6 +104,7 @@ export default class AdminSendgridService {
                 templateId: this.config.sendgrid.template_ids.invitation,
                 categories: ["Invitation"],
                 dynamicTemplateData: {
+                    name: options.fromName,
                     email: options.fromEmail,
                     link: options.link,
                     message: options.message

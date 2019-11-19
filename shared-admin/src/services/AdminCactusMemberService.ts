@@ -1,4 +1,8 @@
-import AdminFirestoreService, {CollectionReference} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {
+    CollectionReference,
+    GetOptions,
+    SaveOptions
+} from "@admin/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
@@ -28,12 +32,12 @@ export default class AdminCactusMemberService {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.members);
     }
 
-    async save(model: CactusMember): Promise<CactusMember> {
-        return firestoreService.save(model);
+    async save(model: CactusMember, options?: SaveOptions): Promise<CactusMember> {
+        return firestoreService.save(model, options);
     }
 
-    async getById(id: string): Promise<CactusMember | undefined> {
-        return await firestoreService.getById(id, CactusMember);
+    async getById(id: string, options?: GetOptions): Promise<CactusMember | undefined> {
+        return await firestoreService.getById(id, CactusMember, options);
     }
 
     async delete(id?: string): Promise<CactusMember | undefined> {
@@ -200,22 +204,40 @@ export default class AdminCactusMemberService {
         return cactusMember;
     }
 
-    async getMemberByUserId(userId?: string): Promise<CactusMember | undefined> {
+    async getMemberByUserId(userId?: string, options?: GetOptions): Promise<CactusMember | undefined> {
         if (!userId) {
             return;
         }
 
         const query = this.getCollectionRef().where(Field.userId, "==", userId);
-        return await firestoreService.getFirst(query, CactusMember);
+        return await firestoreService.getFirst(query, CactusMember, options);
     }
 
-    async getMemberByEmail(emailInput?: string | null): Promise<CactusMember | undefined> {
+    async findCactusMember(options: {email?: string, userId?: string, cactusMemberId?: string}, getOptions?: GetOptions): Promise<CactusMember|undefined> {
+        const {email, userId, cactusMemberId} = options;
+        let member: CactusMember|undefined = undefined;
+        if (cactusMemberId) {
+            member = await this.getById(cactusMemberId, getOptions)
+        }
+
+        if (!member && userId) {
+            member = await this.getMemberByUserId(userId, getOptions);
+        }
+
+        if (!member && email) {
+            member = await this.getMemberByEmail(email, getOptions)
+        }
+
+        return member
+    }
+
+    async getMemberByEmail(emailInput?: string | null, options?: GetOptions): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;
         }
         const email = emailInput.toLowerCase().trim();
         const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
-        const result = await firestoreService.executeQuery(query, CactusMember);
+        const result = await firestoreService.executeQuery(query, CactusMember, options);
         if (result.size > 0) {
             const [member] = result.results;
             if (result.size > 1) {

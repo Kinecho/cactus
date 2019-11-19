@@ -118,12 +118,9 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
-                //     title: copy.navigation.MY_JOURNAL,
-                //     href: PageRoute.JOURNAL_HOME,
-                // }, {
-                //     title: copy.navigation.SOCIAL,
-                //     href: PageRoute.SOCIAL,
-                // }, {
+                    title: copy.navigation.ACCOUNT,
+                    href: PageRoute.ACCOUNT,
+                }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
                         await this.logout()

@@ -1,27 +1,51 @@
 import * as firebaseAdmin from "firebase-admin";
-import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 import Timestamp = firebaseAdmin.firestore.Timestamp;
-import {GetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
-import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
+import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
-
+export import Transaction = firebaseAdmin.firestore.Transaction;
+export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
-export type CollectionReference = firebaseAdmin.firestore.CollectionReference
+
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
+    transaction?: Transaction
 }
+
+export interface GetOptions extends IGetOptions {
+    transaction?: Transaction
+}
+
+export const DefaultQueryOptions: QueryOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+    transaction: undefined
+};
+
+export const DefaultGetOptions: GetOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+    transaction: undefined
+};
+
 
 export interface SaveOptions {
-    setUpdatedAt: boolean
+    setUpdatedAt?: boolean,
+    transaction?: Transaction
 }
+
 
 export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
     setUpdatedAt: true,
+    transaction: undefined
 };
+
+export function getDefaultOptions(): SaveOptions {
+    return {...DEFAULT_SAVE_OPTIONS}
+}
 
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
@@ -93,8 +117,15 @@ export default class AdminFirestoreService {
         return model;
     }
 
-    async save<T extends BaseModel>(model: T, options: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
+    async runTransaction(updateFunction: (transaction: Transaction) => Promise<{}>, options?: {maxAttempts: number|undefined}): Promise<{}> {
+        return this.firestore.runTransaction(async t => {
+            return updateFunction(t)
+        }, options)
+    }
+
+    async save<T extends BaseModel>(model: T, opts: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
         try {
+            const options = {...DEFAULT_SAVE_OPTIONS, ...opts};
             const collectionRef = this.getCollectionRef(model.collection);
             let doc = collectionRef.doc();
             if (model.id) {
@@ -110,11 +141,13 @@ export default class AdminFirestoreService {
 
             // const doc = this.getDocumentRefFromModel(model);
 
-
             const data = await model.toFirestoreData();
             // console.log("Data to save:", JSON.stringify(data));
-
-            await doc.set(data, {merge: true});
+            if (options.transaction){
+                await options.transaction.set(doc, data, {merge: true})
+            } else {
+                await doc.set(data, {merge: true});
+            }
 
             return model;
         } catch (e) {
@@ -128,7 +161,13 @@ export default class AdminFirestoreService {
 
         const collection = this.getCollectionRef(type.collection);
 
-        const doc = await collection.doc(id).get();
+        const docRef = collection.doc(id);
+        let doc;
+        if (options.transaction){
+            doc = await options.transaction.get(docRef)
+        }else {
+            doc = await docRef.get();
+        }
 
         if (!doc) {
             return;
@@ -172,7 +211,13 @@ export default class AdminFirestoreService {
                 }
             }
 
-            const snapshot = await query.get();
+            let snapshot;
+            if (options.transaction) {
+                snapshot = await options.transaction.get(query)
+            } else {
+                snapshot = await query.get();
+            }
+
             const size = snapshot.size;
             const results: T[] = fromQuerySnapshot(snapshot, Type);
             const queryResult: QueryResult<T> = {results, size};

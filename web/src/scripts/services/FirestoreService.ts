@@ -4,17 +4,15 @@ import CollectionReference = firebaseClient.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
-import Query = firebaseClient.firestore.Query;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import {getFirestore} from "@web/firebase";
 import {
     DocObserverOptions,
-    GetOptions,
+    IGetOptions,
     IQueryObserverOptions,
     IQueryOptions,
     QueryResult,
 } from "@shared/types/FirestoreTypes";
-import {DefaultGetOptions, DefaultQueryOptions} from "@shared/types/FirestoreConstants";
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import FieldValue = firebaseClient.firestore.FieldValue;
 import {addModal, handleDatabaseError, showModal} from "@web/util";
@@ -22,8 +20,19 @@ import {addModal, handleDatabaseError, showModal} from "@web/util";
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 export type QueryOptions = IQueryOptions<QueryCursor>;
+export type GetOptions = IGetOptions
 export type QueryObserverOptions<T extends BaseModel> = IQueryObserverOptions<QueryCursor, T>
 export type ListenerUnsubscriber = () => void;
+
+const DefaultGetOptions: GetOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+};
+
+const DefaultQueryOptions: QueryOptions = {
+    includeDeleted: false,
+    onlyDeleted: false,
+};
 
 export default class FirestoreService {
     firestore: firebaseClient.firestore.Firestore = getFirestore();

@@ -20,8 +20,8 @@ app.get('/', (req, res) => {
 app.get("/fcm", async (req, res) => {
     try {
         console.log("Staring the message send process");
-        let title = req.query.title || "Cactus Test Push Message";
-        let body = req.query.body || "This is the body of the request";
+        const title = req.query.title || "Cactus Test Push Message";
+        const body = req.query.body || "This is the body of the request";
 
         const token = req.query.token || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
 
@@ -89,14 +89,12 @@ app.get("/contentJob", async (req, resp) => {
 
 app.get("/error", async (req, resp) => {
     try {
+        // noinspection ExceptionCaughtLocallyJS
         throw new Error("This is a test API Error");
     } catch (e) {
         Sentry.captureException(e);
         return resp.sendStatus(500);
     }
-    resp.send("done");
-    return;
-
 });
 
 
