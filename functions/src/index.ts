@@ -12,7 +12,7 @@ import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
-import {onCreate, onDelete} from "@api/endpoints/UserTriggers";
+import {onDelete, transactionalOnCreate} from "@api/endpoints/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
@@ -38,7 +38,8 @@ export const cloudFunctions = {
     unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
 
     //auth triggers
-    userCreatedTrigger: functions.auth.user().onCreate(onCreate),
+    // userCreatedTrigger: functions.auth.user().onCreate(onCreate),
+    userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
 
     //firestore triggers

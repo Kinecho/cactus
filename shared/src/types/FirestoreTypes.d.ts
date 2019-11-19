@@ -32,17 +32,17 @@ declare interface Operation {
     }
 }
 
-declare interface GetOptions {
+declare interface IGetOptions {
     includeDeleted?: false,
     onlyDeleted?: false,
 }
 
-declare interface DocObserverOptions<IModel extends BaseModel> extends GetOptions {
+declare interface DocObserverOptions<IModel extends BaseModel> extends IGetOptions {
     queryName?:string,
     onData: (model?: IModel, error?: any) => void | Promise<void>
 }
 
-declare interface IQueryOptions<IQueryCursor> extends GetOptions {
+declare interface IQueryOptions<IQueryCursor> extends IGetOptions {
     pagination?: {
         startAt?: IQueryCursor,
         startAfter?: IQueryCursor,

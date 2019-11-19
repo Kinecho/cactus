@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {QueryOptions, SaveOptions, Transaction} from "@admin/services/AdminFirestoreService";
 import PendingUser, {PendingUserStatus} from "@shared/models/PendingUser";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -31,22 +31,22 @@ export default class AdminPendingUserService {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.pendingUsers);
     }
 
-    async save(model: PendingUser): Promise<PendingUser> {
-        return firestoreService.save(model);
+    async save(model: PendingUser, options?: SaveOptions): Promise<PendingUser> {
+        return firestoreService.save(model, options);
     }
 
     async getById(id: string): Promise<PendingUser | undefined> {
         return await firestoreService.getById(id, PendingUser);
     }
 
-    async getPendingByEmail(email: string): Promise<PendingUser | undefined> {
+    async getPendingByEmail(email: string, options?: QueryOptions ): Promise<PendingUser | undefined> {
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
                 .where(PendingUser.Field.status, "==", PendingUserStatus.PENDING)
                 .orderBy(PendingUser.Field.magicLinkSentAt, QuerySortDirection.desc);
 
-            return await AdminFirestoreService.getSharedInstance().getFirst(query, PendingUser);
+            return await AdminFirestoreService.getSharedInstance().getFirst(query, PendingUser, options);
         } catch (e) {
             console.error("Failed to execute getPendingByEmail", e);
             return;
@@ -144,20 +144,30 @@ export default class AdminPendingUserService {
 
     }
 
-    async completeSignup(args: { userId: string, email: string }): Promise<PendingUser | undefined> {
+    async completeSignup(args: { userId: string, email: string }, options?: QueryOptions): Promise<PendingUser | undefined> {
         const {email, userId} = args;
-        const pendingUser = await this.getPendingByEmail(email);
-        if (pendingUser) {
-            pendingUser.signupCompletedAt = new Date();
-            pendingUser.signupCompleted = true;
-            pendingUser.userId = userId;
-            pendingUser.status = PendingUserStatus.COMPLETED;
-            return await this.save(pendingUser);
-        }
 
+        const transaction = options && options.transaction;
+
+        const transactionJob = async (t: Transaction) => {
+            const pendingUser = await this.getPendingByEmail(email, {transaction: t});
+            if (pendingUser) {
+                pendingUser.signupCompletedAt = new Date();
+                pendingUser.signupCompleted = true;
+                pendingUser.userId = userId;
+                pendingUser.status = PendingUserStatus.COMPLETED;
+                return await this.save(pendingUser, {transaction: t});
+            }
+            return
+        };
+
+        if (transaction) {
+            await transactionJob(transaction)
+        } else {
+            await firestoreService.firestore.runTransaction(transactionJob);
+        }
         return;
     }
-
 
     async deleteForEmail(email: string): Promise<number> {
         const query = this.getCollectionRef()

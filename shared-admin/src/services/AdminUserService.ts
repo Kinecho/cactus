@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {GetOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
 import User, {Field} from "@shared/models/User";
 import * as admin from "firebase-admin";
 import {Collection} from "@shared/FirestoreBaseModels";
@@ -53,8 +53,8 @@ export default class AdminUserService {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.users);
     }
 
-    async save(model: User): Promise<User> {
-        return firestoreService.save(model);
+    async save(model: User, options?: SaveOptions): Promise<User> {
+        return firestoreService.save(model, options);
     }
 
     async getMagicLinkUrl(email: string, options: SendMagicLinkOptions = DefaultSendMagicLinkOptions): Promise<SendMagicLinkResult> {
@@ -91,11 +91,11 @@ export default class AdminUserService {
         return foundUser;
     }
 
-    async getById(id?: string | undefined): Promise<User | undefined> {
+    async getById(id?: string | undefined, options?: GetOptions): Promise<User | undefined> {
         if (!id) {
             return undefined;
         }
-        return await firestoreService.getById(id, User);
+        return await firestoreService.getById(id, User, options);
     }
 
     /**
