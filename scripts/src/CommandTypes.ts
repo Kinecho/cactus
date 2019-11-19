@@ -27,7 +27,7 @@ export interface ProjectInput {
 
 export abstract class FirebaseCommand implements Command {
     project?: Project; //default project to stage
-    app?: admin.app.App;
+    app!: admin.app.App;
     useAdmin: boolean;
     abstract name: string;
     description?: string;
