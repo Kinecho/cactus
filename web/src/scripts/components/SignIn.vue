@@ -259,6 +259,11 @@
                 }
             }
 
+            .firebaseui-card-footer {
+                width: 30rem;
+                margin: 3rem auto;
+            }
+
 
         }
 
