@@ -22,7 +22,6 @@
 <script lang="ts">
     import Vue from "vue";
     import CopyService from '@shared/copy/CopyService';
-    import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import SocialConnection, {SocialConnectionStatus} from "@shared/models/SocialConnection";
@@ -58,14 +57,14 @@
             }
         },
         computed: {
-            status() {
+            status(): SocialConnectionStatus {
                 if (this.connection.confirmed) {
                     return SocialConnectionStatus.CONFIRMED
                 } else {
                     return SocialConnectionStatus.PENDING
                 }
             }, 
-            name() {
+            name(): string|undefined {
                 if (this.friendProfile) {
                     if (this.friendProfile.getFullName()) {
                         return this.friendProfile.getFullName();
