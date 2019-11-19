@@ -2,29 +2,20 @@
     <div class="socialFriendList">
         <div v-if="friendRequests.length > 0">
             <h2>Friend Requests</h2>
-            <friend 
-                v-for="(friend, index) in friendRequests"
+            <friend-request 
+                v-for="(connection, index) in friendRequests"
                 v-bind:member="member"
-                v-bind:friend="friend"
-                v-bind:key="friend.memberId" 
-            />
-        </div> 
-        <div v-if="suggestedFriends.length > 0">
-            <h2>Suggested Friends</h2>
-            <friend 
-                v-for="(friend, index) in suggestedFriends"
-                v-bind:member="member"
-                v-bind:friend="friend"
-                v-bind:key="friend.friendId" 
+                v-bind:connectionRequest="connection"
+                v-bind:key="connection.memberId" 
             />
         </div> 
         <div v-if="friends.length > 0">
             <h2>Your Friends</h2>
             <friend 
-                v-for="(friend, index) in friends"
+                v-for="(connection, index) in friends"
                 v-bind:member="member"
-                v-bind:friend="friend"
-                v-bind:key="friend.friendId" 
+                v-bind:connection="connection"
+                v-bind:key="connection.friendId" 
             />
         </div> 
     </div>
@@ -36,6 +27,7 @@
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import SocialFriend from "@components/SocialFriend.vue";
+    import SocialFriendRequest from "@components/SocialFriendRequest.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
 
@@ -43,7 +35,8 @@
 
     export default Vue.extend({
         components: {
-            friend: SocialFriend
+            friend: SocialFriend,
+            friendRequest: SocialFriendRequest
         },
         props: {
             member: {type: Object as () => CactusMember},
@@ -51,12 +44,10 @@
         created() {
         },
         data(): {
-            suggestedFriends: Array<any>,
             friendRequests: Array<any>,
             friends: Array<any>
         } {
             return {
-                suggestedFriends: [],
                 friendRequests: [],
                 friends: []
             }

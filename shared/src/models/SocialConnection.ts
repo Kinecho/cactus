@@ -9,6 +9,12 @@ export enum SocialConnectionFields {
     confirmedMembers = "confirmedMembers"
 }
 
+export enum SocialConnectionStatus {
+    CONFIRMED = "confirmed",
+    PENDING = "pending",
+    NEEDS_CONFIRMATION = "confirmable"
+}
+
 export default class SocialConnection extends BaseModel {
     readonly collection = Collection.socialConnections;
     static Fields = SocialConnectionFields;
