@@ -48,6 +48,9 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
     console.log(`Starting signup process for ${email} userId = ${userId}`);
     try {
+        /*
+        Note: All read actions must happen first. Then the writes.
+         */
         return await AdminFirestoreService.getSharedInstance().firestore.runTransaction(async transaction => {
             console.log(`Transaction beginning for ${email} userId = ${userId}`);
             const user = await AdminUserService.getSharedInstance().getById(userId, {transaction});
@@ -74,17 +77,27 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
                 return result;
             }
 
-            console.log("Completing pending user signup....");
-            const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({
-                userId,
-                email
-            }, {transaction});
-            result.pendingUser = pendingUser;
-            console.log("Pending user signup finished", pendingUser);
+            console.log("Looking for pending user....");
+            const pendingUser = await AdminPendingUserService.getSharedInstance().getPendingByEmail(email, {transaction});
+
+            /*
+                END OF THE DB READs SECTION.
+                Next up, write to the DB.
+             */
+
+            console.log(`Pending User for email = ${email}`, pendingUser);
+            if (pendingUser) {
+                console.log(`Completing pending user signup for ${email}, ${userId}....`);
+                result.pendingUser = await AdminPendingUserService.getSharedInstance().completeSignupForPendingUser({
+                    pendingUser,
+                    userId
+                }, {transaction});
+                console.log("Pending user signup completed", result.pendingUser);
+            }
 
             console.log("\ncreating cactus member....");
             const createMemberResult = await createCactusMember({user: userRecord, pendingUser, transaction, email});
-            console.log("Cactus Member created", createMemberResult);
+            console.log(`Cactus Member created ${email}, userId = ${userId}, memberId = ${member && member.id}`, createMemberResult);
 
             result.member = createMemberResult.member;
             result.mailchimpError = createMemberResult.mailchimpError;
@@ -95,11 +108,11 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
                 member: createMemberResult.member,
                 transaction
             });
-            console.log("Cactus User created", createUserResult);
+            console.log(`Cactus User created ${email}, userId = ${userId}`, createUserResult);
 
             result.user = createUserResult.user;
 
-            console.log("Transaction returning...", result);
+            console.log(`Transaction returning ${email}, ${userId}...`, result);
             return result
         });
     } catch (error) {
@@ -175,6 +188,7 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
     console.log("Setting up user using new transactional method");
+    await AdminSlackService.getSharedInstance().sendActivityMessage(`[temp testing message] Starting transactional onCreate trigger for email ${user.email}, userId ${user.uid}`)
     try {
         const userCheckResult = await setupUserTransaction(user);
         console.log("setupUserTransaction finished", userCheckResult);

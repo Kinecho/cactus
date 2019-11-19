@@ -39,7 +39,7 @@ export default class AdminPendingUserService {
         return await firestoreService.getById(id, PendingUser);
     }
 
-    async getPendingByEmail(email: string, options?: QueryOptions ): Promise<PendingUser | undefined> {
+    async getPendingByEmail(email: string, options?: QueryOptions): Promise<PendingUser | undefined> {
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
@@ -144,6 +144,16 @@ export default class AdminPendingUserService {
 
     }
 
+    async completeSignupForPendingUser(args: {pendingUser: PendingUser, userId: string}, options? : QueryOptions): Promise<PendingUser> {
+        const {userId, pendingUser} = args;
+        console.log("Found pending user for email", pendingUser);
+        pendingUser.signupCompletedAt = new Date();
+        pendingUser.signupCompleted = true;
+        pendingUser.userId = userId;
+        pendingUser.status = PendingUserStatus.COMPLETED;
+        return await this.save(pendingUser, options);
+    }
+
     async completeSignup(args: { userId: string, email: string }, options?: QueryOptions): Promise<PendingUser | undefined> {
         const {email, userId} = args;
 
@@ -152,16 +162,20 @@ export default class AdminPendingUserService {
         const transactionJob = async (t: Transaction) => {
             const pendingUser = await this.getPendingByEmail(email, {transaction: t});
             if (pendingUser) {
+                console.log("Found pending user for email", email, pendingUser);
                 pendingUser.signupCompletedAt = new Date();
                 pendingUser.signupCompleted = true;
                 pendingUser.userId = userId;
                 pendingUser.status = PendingUserStatus.COMPLETED;
                 return await this.save(pendingUser, {transaction: t});
+            } else {
+                console.log("No pending user was found for email", email);
             }
             return
         };
 
         if (transaction) {
+            console.log("Using existing transaction to run pending user job");
             await transactionJob(transaction)
         } else {
             await firestoreService.firestore.runTransaction(transactionJob);
