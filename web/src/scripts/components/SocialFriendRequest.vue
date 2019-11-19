@@ -1,5 +1,5 @@
 <template>
-    <div class="contactCard">
+    <div class="contactCard" v-if="!confirmed">
         <div class="avatar">
             <img :src="'assets/images/avatars/avatar' + avatarNumber(name) + '.png'" alt="User avatar"/>
         </div>
@@ -8,10 +8,10 @@
         </div>
         <div class="status">          
             <div>
-                <button class="small primary">
+                <button class="small primary" @click="confirmRequest">
                     Confirm
                 </button>
-                <button class="small secondary">
+                <button class="small secondary" @click="ignoreRequest">
                     Ignore
                 </button>
             </div>
@@ -25,6 +25,7 @@
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import SocialConnection, {SocialConnectionStatus} from "@shared/models/SocialConnection";
+    import SocialConnectionService from '@web/services/SocialConnectionService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
 
 
@@ -48,6 +49,9 @@
         computed: {
             name() {
                 return this.connectionRequest.friendId;
+            },
+            confirmed() {
+                return this.connectionRequest.confirmed;
             }            
         },
         watch: {
@@ -59,6 +63,17 @@
             },
             socialConnectionStatus(key: keyof typeof SocialConnectionStatus): string {
                 return SocialConnectionStatus[key];
+            },
+            async confirmRequest() {
+                try {
+                    const result = await SocialConnectionService.sharedInstance.confirm(this.connectionRequest);
+                    return (result ? true : false);                      
+                } catch(e) {
+                    return false;
+                }
+            },
+            ignoreRequest(): boolean {
+                return false;
             }
         }
     })
