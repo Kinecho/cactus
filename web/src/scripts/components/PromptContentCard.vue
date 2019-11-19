@@ -765,7 +765,6 @@
     }
 
     .label {
-        color: $darkestPink;
         margin-bottom: 1.6rem;
     }
 
@@ -780,7 +779,7 @@
 
     .element-icon {
         align-items: center;
-        background-color: $lightPink;
+        background-color: $pink;
         border-radius: 50%;
         display: inline-flex;
         height: 6.4rem;
