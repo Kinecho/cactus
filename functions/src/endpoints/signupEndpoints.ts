@@ -399,7 +399,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     const domain = Config.web.domain;
     const protocol = Config.web.protocol;
 
-    let socialInvite = new SocialInvite();
+    const socialInvite = new SocialInvite();
     if (member) {
         socialInvite.senderMemberId = member.id;
     }
