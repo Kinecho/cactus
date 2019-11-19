@@ -42,7 +42,7 @@
         "@sendgrid/inbound-mail-parser": "^6.4.0",
         "@sendgrid/mail": "^    6.4.0",
         "@sentry/integrations": "^5.6.1",
-        "@sentry/node": "^5.6.1",
+        "@sentry/node": "^5.9.0",
         "@slack/client": "^5.0.1",
         "axios": "^0.19.0",
         "body-parser": "^1.19.0",
@@ -93,10 +93,10 @@
         "firebase-tools": "^7.2.2",
         "jest": "^24.8.0",
         "jest-junit": "^6.4.0",
-        "ts-jest": "^24.0.2",
-        "ts-node": "^8.3.0",
-        "tslint": "^5.18.0",
-        "typescript": "^3.2.2"
+        "ts-jest": "^24.1.0",
+        "ts-node": "^8.5.2",
+        "tslint": "^5.20.1",
+        "typescript": "^3.7.2"
     },
     "private": true
 }
