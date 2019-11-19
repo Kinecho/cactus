@@ -1,5 +1,4 @@
 import * as firebaseAdmin from "firebase-admin";
-import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import DocumentReference = firebaseAdmin.firestore.DocumentReference;
@@ -9,9 +8,8 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 export import Transaction = firebaseAdmin.firestore.Transaction;
-
+export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
-export type CollectionReference = firebaseAdmin.firestore.CollectionReference
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
     transaction?: Transaction

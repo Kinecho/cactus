@@ -4,7 +4,6 @@ import CollectionReference = firebaseClient.firestore.CollectionReference;
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
-import Query = firebaseClient.firestore.Query;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import {getFirestore} from "@web/firebase";
 import {
