@@ -13,6 +13,7 @@ export enum Collection {
     pendingUsers = "pendingUsers",
     socialInvites = "socialInvites",
     socialConnections = "socialConnections"
+    memberProfiles = "memberProfiles",
 }
 
 export interface FirestoreIdentifiable {

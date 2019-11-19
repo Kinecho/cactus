@@ -101,8 +101,7 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {PageRoute} from '@web/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
-    import StorageService from '@web/services/StorageService';
-    import SocialFriendList from "@components/SocialFriendList.vue"
+    import SocialFriendList from "@components/SocialFriendList.vue";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
