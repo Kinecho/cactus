@@ -671,4 +671,16 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
     }
 
+    .auth-card {
+        padding: 2.4rem;
+
+        @include r(600) {
+            padding: 3.2rem;
+        }
+
+        h2 {
+            line-height: 1.1;
+        }
+    }
+
 </style>
