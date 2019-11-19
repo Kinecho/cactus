@@ -17,6 +17,7 @@ import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
+import {updateMemberProfileTrigger} from "@api/triggers/MemberTriggers";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -45,5 +46,6 @@ export const cloudFunctions = {
     //firestore triggers
     reflectionResponseCreatedTrigger: onReflectionResponseCreated,
     sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
-    updateReflectionStatsTrigger: updateReflectionStatsTrigger
+    updateReflectionStatsTrigger: updateReflectionStatsTrigger,
+    updateMemberProfileTrigger: updateMemberProfileTrigger,
 };
