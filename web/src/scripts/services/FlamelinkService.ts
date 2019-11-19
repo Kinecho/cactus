@@ -2,7 +2,7 @@ import {getFlamelink} from "@web/firebase";
 import flamelink from "flamelink/app";
 import FlamelinkModel from "@shared/FlamelinkModel";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
-import {GetOptions} from "@shared/types/FirestoreTypes";
+import {IGetOptions} from "@shared/types/FirestoreTypes";
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 
 export interface PopulateOptions {
@@ -10,7 +10,7 @@ export interface PopulateOptions {
     subfields?: [PopulateOptions | string]
 }
 
-export interface EntryObserverOptions<IModel extends FlamelinkModel> extends GetOptions {
+export interface EntryObserverOptions<IModel extends FlamelinkModel> extends IGetOptions {
     onData: (model?: IModel, error?: any) => void | Promise<void>,
     populate?: PopulateOptions
 }

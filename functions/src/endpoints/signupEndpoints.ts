@@ -263,15 +263,13 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId)
         ]);
 
-
         if (!user) {
             resp.status(400).send({message: `Unable to find a user for userId ${userId}`});
             return;
         }
 
         const previousLoginDate = user.lastLoginAt;
-        user.lastLoginAt = new Date();
-        await AdminUserService.getSharedInstance().save(user);
+
         if (previousLoginDate) {
             fields.push({title: "Last Logged In", value: getISODateTime(previousLoginDate)});
         }
@@ -279,6 +277,9 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         if (providerId && !user.providerIds.includes(providerId)) {
             user.providerIds.push(providerId);
         }
+        user.lastLoginAt = new Date();
+        await AdminUserService.getSharedInstance().save(user);
+
         message.text = `${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
 
         if (user.email) {
