@@ -189,6 +189,17 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
         } else {
             console.log("No pending user was found, not doing anything about sent prompts");
         }
+
+
+        const slackMessage = createSlackMessage({
+            member: userCheckResult.member,
+            user: user,
+            pendingUser: userCheckResult.pendingUser,
+            existingCactusMember: !userCheckResult.isNewMember,
+            errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
+        });
+        await slackService.sendActivityNotification(slackMessage);
+
     } catch (error) {
         console.error("Failed to run check for user transaction", error)
     }
@@ -196,144 +207,159 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
     console.log("finished transactionalOnCreate function")
 }
 
-export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
-    const email = user.email;
-    const userId = user.uid;
-    const displayName = user.displayName || "";
-    const errorAttachments: SlackAttachment[] = [];
+// /**
+//  * @deprecated use the new transactionalOnCreate instead
+//  * @param {admin.auth.UserRecord} user
+//  * @return {Promise<void>}
+//  */
+// export async function onCreate(user: admin.auth.UserRecord): Promise<void> {
+//     const email = user.email;
+//     const userId = user.uid;
+//     const displayName = user.displayName || "";
+//     const errorAttachments: SlackAttachment[] = [];
+//
+//
+//     if (!email) {
+//         await AdminSlackService.getSharedInstance().sendActivityMessage({
+//             text: "Unable to complete registration",
+//             attachments: [{
+//                 text: ":warning: No email found on newly created Admin user " + user.uid + `\n\`\`\`${JSON.stringify(user.toJSON())}\`\`\``,
+//                 color: AttachmentColor.error
+//             }]
+//         });
+//         console.error("No email found on the new auth.User", JSON.stringify(user.toJSON(), null, 2));
+//         return;
+//     }
+//
+//     const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({email, userId});
+//     console.log("Fetched pending user", JSON.stringify(pendingUser, null, 2));
+//
+//     const initializeResult = await initializeCactusMember({
+//         email,
+//         displayName,
+//         pendingUser,
+//         user,
+//     });
+//
+//     const {member: cactusMember, existingCactusMember, errorAttachments: cactusMemberErrors} = initializeResult;
+//
+//     errorAttachments.push(...cactusMemberErrors);
+//
+//     const userModel = new User();
+//     userModel.createdAt = new Date();
+//     userModel.email = user.email;
+//     userModel.id = userId;
+//     userModel.phoneNumber = user.phoneNumber;
+//     userModel.providerIds = user.providerData.map(provider => provider.providerId);
+//     userModel.cactusMemberId = cactusMember.id;
+//
+//     const savedUser = await userService.save(userModel);
+//     console.log("Saved user to db. UserId = ", savedUser.id);
+//
+//     await AdminSentPromptService.getSharedInstance().initializeSentPromptsFromPendingUser({
+//         pendingUser,
+//         user: savedUser,
+//         member: cactusMember
+//     });
+//
+//     const slackMessage = createSlackMessage({
+//         member: cactusMember,
+//         user,
+//         pendingUser,
+//         existingCactusMember,
+//         errorAttachments
+//     });
+//
+//     await slackService.sendActivityNotification(slackMessage);
+//
+// }
 
 
-    if (!email) {
-        await AdminSlackService.getSharedInstance().sendActivityMessage({
-            text: "Unable to complete registration",
-            attachments: [{
-                text: ":warning: No email found on newly created Admin user " + user.uid + `\n\`\`\`${JSON.stringify(user.toJSON())}\`\`\``,
-                color: AttachmentColor.error
-            }]
-        });
-        console.error("No email found on the new auth.User", JSON.stringify(user.toJSON(), null, 2));
-        return;
-    }
+// interface InitializeMemberOptions {
+//     email: string,
+//     displayName?: string,
+//     pendingUser?: PendingUser,
+//     user: admin.auth.UserRecord,
+//     transaction?: Transaction,
+// }
+//
+// interface InitializeMemberResult {
+//     member: CactusMember,
+//     existingCactusMember: boolean,
+//     errorAttachments: SlackAttachment[]
+// }
 
-    const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({email, userId});
-    console.log("Fetched pending user", JSON.stringify(pendingUser, null, 2));
+// /**
+//  * @deprecated should use new transactional method instead
+//  * Old style for setting up a cactus member
+//  * @param {InitializeMemberOptions} options
+//  * @return {Promise<InitializeMemberResult>}
+//  */
+// async function initializeCactusMember(options: InitializeMemberOptions): Promise<InitializeMemberResult> {
+//     const {email, displayName, pendingUser, user} = options;
+//     const userId = user.uid;
+//     const {firstName, lastName} = destructureDisplayName(displayName);
+//     const errorAttachments: SlackAttachment[] = [];
+//     console.log(`Setting up cactus member for email ${email}`);
+//
+//
+//     let cactusMember = await memberService.findCactusMember({email, userId});
+//
+//     const existingCactusMember = !!cactusMember;
+//     if (!cactusMember) {
+//         console.log(`No member found for email ${email} - creating a cactus member now. userId = ${userId}`);
+//         cactusMember = new CactusMember();
+//         cactusMember.id = userId;
+//         cactusMember.createdAt = new Date();
+//         cactusMember.userId = user.uid;
+//         cactusMember.email = email;
+//         cactusMember.lastName = lastName;
+//         cactusMember.firstName = firstName;
+//         cactusMember.signupAt = new Date();
+//         cactusMember.signupConfirmedAt = new Date();
+//         cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
+//         cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
+//
+//         const subscription: SubscriptionRequest = new SubscriptionRequest(email);
+//         subscription.lastName = lastName;
+//         subscription.firstName = firstName;
+//         subscription.referredByEmail = cactusMember.referredByEmail;
+//         const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(subscription);
+//
+//         cactusMember.mailchimpListMember = mailchimpListMember;
+//
+//         if (mailchimpError) {
+//             errorAttachments.push({
+//                 text: `Failed to save mailchimp list member\n\`\`\`${JSON.stringify(mailchimpError, null, 2)}\`\`\``,
+//                 color: AttachmentColor.error
+//             });
+//         }
+//     } else {
+//         cactusMember.userId = user.uid;
+//         try {
+//             await MailchimpService.getSharedInstance().updateMemberStatus({
+//                 email: email,
+//                 status: ListMemberStatus.subscribed
+//             });
+//         } catch (e) {
+//             console.error("failed to updated subscriber status", e);
+//             errorAttachments.push({
+//                 text: `:warning: Unable to set mailchimp subscriber status to Subscribed during the User Created trigger for email ${email}\`\`\``,
+//                 color: AttachmentColor.error
+//             });
+//         }
+//     }
+//
+//     const savedMember = await AdminCactusMemberService.getSharedInstance().save(cactusMember);
+//
+//     return {member: savedMember, errorAttachments, existingCactusMember};
+// }
 
-    const initializeResult = await initializeCactusMember({
-        email,
-        displayName,
-        pendingUser,
-        user,
-    });
-
-    const {member: cactusMember, existingCactusMember, errorAttachments: cactusMemberErrors} = initializeResult;
-
-    errorAttachments.push(...cactusMemberErrors);
-
-    const userModel = new User();
-    userModel.createdAt = new Date();
-    userModel.email = user.email;
-    userModel.id = userId;
-    userModel.phoneNumber = user.phoneNumber;
-    userModel.providerIds = user.providerData.map(provider => provider.providerId);
-    userModel.cactusMemberId = cactusMember.id;
-
-    const savedUser = await userService.save(userModel);
-    console.log("Saved user to db. UserId = ", savedUser.id);
-
-    await AdminSentPromptService.getSharedInstance().initializeSentPromptsFromPendingUser({
-        pendingUser,
-        user: savedUser,
-        member: cactusMember
-    });
-
-    const slackMessage = createSlackMessage({
-        member: cactusMember,
-        user,
-        pendingUser,
-        existingCactusMember,
-        errorAttachments
-    });
-
-    await slackService.sendActivityNotification(slackMessage);
-
-}
-
-
-interface InitializeMemberOptions {
-    email: string,
-    displayName?: string,
-    pendingUser?: PendingUser,
-    user: admin.auth.UserRecord,
-    transaction?: Transaction,
-}
-
-interface InitializeMemberResult {
-    member: CactusMember,
-    existingCactusMember: boolean,
-    errorAttachments: SlackAttachment[]
-}
-
-async function initializeCactusMember(options: InitializeMemberOptions): Promise<InitializeMemberResult> {
-    const {email, displayName, pendingUser, user} = options;
-    const userId = user.uid;
-    const {firstName, lastName} = destructureDisplayName(displayName);
-    const errorAttachments: SlackAttachment[] = [];
-    console.log(`Setting up cactus member for email ${email}`);
-
-
-    let cactusMember = await memberService.findCactusMember({email, userId});
-
-    const existingCactusMember = !!cactusMember;
-    if (!cactusMember) {
-        console.log(`No member found for email ${email} - creating a cactus member now. userId = ${userId}`);
-        cactusMember = new CactusMember();
-        cactusMember.id = userId;
-        cactusMember.createdAt = new Date();
-        cactusMember.userId = user.uid;
-        cactusMember.email = email;
-        cactusMember.lastName = lastName;
-        cactusMember.firstName = firstName;
-        cactusMember.signupAt = new Date();
-        cactusMember.signupConfirmedAt = new Date();
-        cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
-        cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
-
-        const subscription: SubscriptionRequest = new SubscriptionRequest(email);
-        subscription.lastName = lastName;
-        subscription.firstName = firstName;
-        subscription.referredByEmail = cactusMember.referredByEmail;
-        const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(subscription);
-
-        cactusMember.mailchimpListMember = mailchimpListMember;
-
-        if (mailchimpError) {
-            errorAttachments.push({
-                text: `Failed to save mailchimp list member\n\`\`\`${JSON.stringify(mailchimpError, null, 2)}\`\`\``,
-                color: AttachmentColor.error
-            });
-        }
-    } else {
-        cactusMember.userId = user.uid;
-        try {
-            await MailchimpService.getSharedInstance().updateMemberStatus({
-                email: email,
-                status: ListMemberStatus.subscribed
-            });
-        } catch (e) {
-            console.error("failed to updated subscriber status", e);
-            errorAttachments.push({
-                text: `:warning: Unable to set mailchimp subscriber status to Subscribed during the User Created trigger for email ${email}\`\`\``,
-                color: AttachmentColor.error
-            });
-        }
-    }
-
-    const savedMember = await AdminCactusMemberService.getSharedInstance().save(cactusMember);
-
-    return {member: savedMember, errorAttachments, existingCactusMember};
-}
-
-
+/**
+ * Create or update a mailchimp list member
+ * @param {SubscriptionRequest} subscription
+ * @return {Promise<{mailchimpListMember?: ListMember; error?: any}>}
+ */
 async function upsertMailchimpSubscriber(subscription: SubscriptionRequest): Promise<{ mailchimpListMember?: ListMember, error?: any }> {
     const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
     if (mailchimpResult.success) {
@@ -343,7 +369,6 @@ async function upsertMailchimpSubscriber(subscription: SubscriptionRequest): Pro
             mailchimpMember = await mailchimpService.getMemberByEmail(subscription.email);
         }
 
-
         // mailchimpListMember = mailchimpMember;
         return {mailchimpListMember: mailchimpMember};
     } else {
@@ -352,7 +377,15 @@ async function upsertMailchimpSubscriber(subscription: SubscriptionRequest): Pro
     }
 }
 
-function createSlackMessage(args: { member?: CactusMember, user: admin.auth.UserRecord, pendingUser?: PendingUser, existingCactusMember: boolean, errorAttachments: SlackAttachment[] }): SlackMessage {
+interface SlackMessageInput {
+    member?: CactusMember,
+    user: admin.auth.UserRecord,
+    pendingUser?: PendingUser,
+    existingCactusMember: boolean,
+    errorAttachments: SlackAttachment[]
+}
+
+function createSlackMessage(args: SlackMessageInput): SlackMessage {
     const {member, user, existingCactusMember, errorAttachments, pendingUser} = args;
 
     const fields: SlackAttachmentField[] = [];
@@ -407,6 +440,12 @@ function createSlackMessage(args: { member?: CactusMember, user: admin.auth.User
     return slackMessage;
 }
 
+
+/**
+ * Delete a user from the auth. This will clean up related records and send a slack notification.
+ * @param {admin.auth.UserRecord} user
+ * @return {Promise<void>}
+ */
 export async function onDelete(user: admin.auth.UserRecord) {
     const deletedUser = await userService.delete(user.uid);
     const attachment: SlackAttachment = {
