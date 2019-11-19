@@ -24,8 +24,10 @@
     import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
+    import MemberProfile from "@shared/models/MemberProfile";
     import SocialConnection, {SocialConnectionStatus} from "@shared/models/SocialConnection";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import MemberProfileService from '@web/services/MemberProfileService';
 
 
     const copy = CopyService.getSharedInstance().copy;
@@ -40,22 +42,39 @@
         beforeMount() {
             
         },
+        async created() {
+            if (this.connection) {
+                const memberProfileId = this.connection.memberId == this.member.id ? this.connection.friendId : this.connection.memberId;
+                if (memberProfileId) {
+                    this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(memberProfileId);  
+                }
+            }
+        },
         data(): {
+            friendProfile: MemberProfile | undefined
         } {
             return {
+                friendProfile: undefined
             }
         },
         computed: {
-            name() {
-                return this.connection.friendId;
-            },
             status() {
                 if (this.connection.confirmed) {
                     return SocialConnectionStatus.CONFIRMED
                 } else {
                     return SocialConnectionStatus.PENDING
                 }
-            }            
+            }, 
+            name() {
+                if (this.friendProfile) {
+                    if (this.friendProfile.getFullName()) {
+                        return this.friendProfile.getFullName();
+                    } else {
+                        return this.friendProfile.email;
+                    }
+                } 
+                return 'Loading...';
+            }          
         },
         watch: {
             
