@@ -15,7 +15,7 @@
         },
         props: {
             value: {
-                type: String,
+                type: [String, Boolean],
             },
             disabled: {
                 type: Boolean,
@@ -23,7 +23,7 @@
             },
             modelValue: {
                 default: false,
-                // type: Boolean,
+                type: [Boolean, String, Array],
             },
             label: {
                 type: String,
@@ -34,16 +34,17 @@
             // we can always use them instead of checking whether or not they are set.
             // Also can use camelCase here, but hyphen-separating the attribute name
             // when using the component will still work
-            trueValue:
-                {
-                    default:
-                        true,
-                }
-            ,
-            falseValue: {
-                default:
-                    false,
+            trueValue: {
+                type: Boolean,
+                default: true,
             },
+            falseValue: {
+                type: Boolean,
+                default: false,
+            },
+        },
+        data() {
+            return {}
         },
         computed: {
             shouldBeChecked() {
@@ -53,11 +54,14 @@
                 // Note that `true-value` and `false-value` are camelCase in the JS
                 return this.modelValue === this.trueValue
             },
-        }
-        ,
+        },
         methods: {
-            updateInput(event: any) {
-                let isChecked = event.target.checked;
+            updateInput(event: Event): void {
+                let isChecked = false;
+                let checkbox = event.target as HTMLInputElement;
+                if (checkbox) {
+                    isChecked = checkbox.checked;
+                }
 
                 if (Array.isArray(this.modelValue)) {
                     let newValue = [...this.modelValue];
