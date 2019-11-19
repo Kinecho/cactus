@@ -15,7 +15,8 @@
                     <a v-if="displaySignupButton"
                             data-test="signup-button"
                             class="jump-to-form button small"
-                            @click.prevent="scrollToSignup"
+                            :href="signupHref"
+                            @click.prevent="goToSignup"
                             type="button"
                     >{{copy.common.SIGN_UP}}</a>
                 </transition>
@@ -164,6 +165,9 @@
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
             },
+            signupHref(): string {
+                return PageRoute.SIGNUP;
+            },
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
             },
@@ -178,6 +182,9 @@
             },
             goToLogin() {
                 window.location.href = this.loginHref;
+            },
+            goToSignup() {
+                window.location.href = this.signupHref;
             },
 
             scrollToSignup() {
