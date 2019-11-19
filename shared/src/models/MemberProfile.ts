@@ -10,9 +10,18 @@ export interface MemberProfileConstructor {
     isPublic?: boolean
 }
 
+export enum MemberProfileField {
+    email = "email",
+    firstName = "firstName",
+    lastName = "lastName",
+    userId = "userId",
+    cactusMemberId = "cactusMemberId",
+    isPublic = "isPublic"
+}
+
 export default class MemberProfile extends BaseModel {
     readonly collection = Collection.memberProfiles;
-
+    static Field = MemberProfileField;
     firstName?: string;
     lastName?: string;
     avatarUrl?: string;
@@ -23,7 +32,7 @@ export default class MemberProfile extends BaseModel {
 
     constructor(options?: MemberProfileConstructor) {
         super();
-        if (options){
+        if (options) {
             this.id = options.cactusMemberId;
             this.cactusMemberId = options.cactusMemberId;
             this.userId = options.userId;
