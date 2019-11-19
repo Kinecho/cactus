@@ -1,14 +1,13 @@
 <template>
-    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, {reflectScreen: isReflectScreen}]">
+    <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, processedContent.backgroundImage ? processedContent.backgroundImage.position : '', {reflectScreen: isReflectScreen}]">
         <section class="content">
-            <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
-                <div class="element-icon" >
-                    <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
-                </div>
-                <h4 class="label">{{cactusElement}}</h4>
-            </a>
-
             <div v-if="processedContent.text" class="text">
+                <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
+                    <div class="element-icon" >
+                        <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
+                    </div>
+                    <h4 class="label">{{cactusElement}}</h4>
+                </a>
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
@@ -168,7 +167,7 @@
                     </g>
                     <g>
                         <path fill="#000" fill-opacity=".25" d="M58 111.5c0 5.248-10.298 9.5-23 9.5-12.703 0-23-4.252-23-9.5s10.297-9.5 23-9.5c12.702 0 23 4.252 23 9.5"/>
-                        <path fill="#FFBCA3" d="M12 78l9.959 34.968S25.956 114 35.664 114c9.707 0 12.856-1.03 12.856-1.03L58 78"/>
+                        <path fill="#F57647" d="M12 78l9.959 34.968S25.956 114 35.664 114c9.707 0 12.856-1.03 12.856-1.03L58 78"/>
                     </g>
                 </svg>
                 <svg v-else class="grow5 energy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 150">
@@ -207,11 +206,11 @@
                 </svg>
             </div>
             <!--    END Grow -->
-        </section>
 
-        <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
-            <flamelink-image v-bind:image="processedContent.backgroundImage"/>
-        </div>
+            <div :class="['backgroundImage', processedContent.backgroundImage.position]" v-if="processedContent.backgroundImage && processedContent.backgroundImage">
+                <flamelink-image v-bind:image="processedContent.backgroundImage"/>
+            </div>
+        </section>
 
         <section class="lowerActions" v-if="tapAnywhereEnabled || (isReflectScreen && response)">
 
@@ -538,93 +537,44 @@
     @import "transitions";
 
     .content-card {
-        background: $lightBlue no-repeat;
+        background: $beige no-repeat;
         display: flex;
         flex-direction: column;
-        height: 100%;
-        justify-content: space-between;
+        flex-grow: 1;
+        min-height: 100vh;
+        justify-content: center;
         padding: 2.4rem;
         width: 100%;
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            overflow: hidden;
+            box-shadow:
+                0 11px 15px -7px rgba(0,0,0,.16),
+                0 24px 38px 3px rgba(0,0,0,.1),
+                0 9px 46px 8px rgba(0,0,0,.08);
+            min-height: 100%;
+            justify-content: space-between;
             position: relative;
         }
 
-        .slide-1 & {
-            background-image: url(/assets/images/greenNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg);
-            background-position: right -210px bottom 38vh,
-            right -140px bottom 28vh;
-            background-size: 250px, 180px;
-        }
-
-        .slide-2 &, .slide-3 & {
-            background-image: url(/assets/images/greenNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg),
-            url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/yellowBlob.svg);
-            background-position: left -210px bottom 38vh,
-            left -150px bottom 28vh,
-            right -440px bottom 48vh,
-            right -205px bottom 67vh;
-            background-size: 250px, 180px, 470px, 240px;
-        }
-
-        .slide-4 & {
-            background-image: url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/yellowBlob.svg),
-            url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg);
-            background-position: left -375px bottom 48vh,
-            left -215px bottom 68vh,
-            right -415px bottom -22vh,
-            right -155px bottom 4vh;
-            background-size: 470px, 240px, 470px, 180px;
-        }
-
-        .slide-5 &, .slide-6 & {
-            background-image: url(/assets/images/yellowNeedleBlob.svg),
-            url(/assets/images/pinkBlob.svg),
-            url(/assets/images/maroonTriangleBlob.svg),
-            url(/assets/images/lightGreenBlob.svg);
-            background-position: left -280px bottom -22vh,
-            left -165px bottom 4vh,
-            right -335px bottom 32vh,
-            right -250px bottom 44vh;
-            background-size: 470px, 180px, 390px, 270px;
-        }
-
-        .slide-7 &, .slide-8 & {
-            background-image: url(/assets/images/maroonTriangleBlob.svg),
-            url(/assets/images/lightGreenBlob.svg);
-            background-position: left -335px bottom 32vh,
-            left -250px bottom 44vh;
-            background-size: 390px, 270px;
-        }
-
-        @include r(600) {
-            .slide-1 &,
-            .slide-2 &,
-            .slide-3 &,
-            .slide-4 &,
-            .slide-5 &,
-            .slide-6 &,
-            .slide-7 &,
-            .slide-8 & {
-                background-image: none;
-            }
-        }
-
         &.type-share_reflection {
-            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
             background: transparent;
             box-shadow: none;
 
             .text {
                 padding: 0 0 2.4rem;
+            }
+        }
+
+        &.reflectScreen {
+            justify-content: space-between;
+        }
+
+        &.bottom {
+            overflow: hidden;
+
+            .content {
+                justify-content: flex-end;
             }
         }
     }
@@ -634,29 +584,9 @@
     }
 
     .backgroundImage {
-        bottom: 0;
-        left: 0;
-        margin: 0 -2.4rem -2.4rem;
-        max-height: 40vh;
-        position: relative;
-        right: 0;
-        overflow: hidden;
 
-        .slide-0 &:empty {
-            $backgrounds: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px,
-            url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px,
-            url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px,
-            url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px,
-            url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px;
-
-            $bgKey: random(length($backgrounds));
-            $nth: nth($backgrounds, $bgKey);
-
-            background: #{$nth} no-repeat;
-            height: 200px;
-            margin: 0;
-            position: absolute;
-            width: 100%;
+        &:empty {
+            display: none;
         }
 
         @include r(600) {
@@ -672,34 +602,33 @@
         }
 
         &.bottom {
-            margin-bottom: -2.4rem;
+            align-items: flex-end;
+            margin: 0 -2.4rem -4rem;
         }
 
         img {
-            transform: translateY(11px);
-            width: 111%;
-
-            @include r(600) {
-                max-height: 30rem;
-            }
+            max-height: 35rem;
+            max-width: 100%;
+            min-height: 30rem; /*for slow loading*/
         }
     }
 
     .element-container {
         cursor: pointer;
-        margin: 4rem 0 -1.6rem;
     }
 
     .text {
+        display: flex;
+        flex-direction: column;
         font-size: 2rem;
-        padding: 4rem 1.6rem;
-
-        .reflectScreen & {
-            margin-top: -5.6rem;
-        }
+        justify-content: center;
+        padding: 6.4rem 1.6rem 4rem;
 
         @include r(374) {
             font-size: 2.4rem;
+        }
+        @include r(600) {
+            padding-top: 4rem;
         }
 
         p {
@@ -750,20 +679,22 @@
     }
 
     .label {
-        color: $darkestPink;
+        color: $darkestGreen;
         margin-bottom: 1.6rem;
     }
 
     .content {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        justify-content: center;
+        @include r(600) {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center;
+        }
     }
 
     .element-icon {
         align-items: center;
-        background-color: $lightPink;
+        background-color: $pink;
         border-radius: 50%;
         display: inline-flex;
         height: 6.4rem;
@@ -879,9 +810,10 @@
     .grow-container {
         align-items: center;
         display: flex;
+        // flex-basis: 50%;
+        // flex-grow: 1;
         height: 156px;
         justify-content: center;
-        margin: -2.4rem 0 2.4rem;
     }
 
     .leaf7 {

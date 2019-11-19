@@ -762,7 +762,7 @@
     }
 
     .page-wrapper {
-        background-color: $lightBlue;
+        background-color: $beige;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
@@ -810,14 +810,14 @@
                         border-radius: .8rem;
                         flex-grow: 1;
                         height: .4rem;
-                        background-color: $lightGreen;
+                        background-color: $darkestGreen;
 
                         &:not(:last-child) {
                             margin-right: 2px;
                         }
 
                         &.complete {
-                            background-color: $darkPink;
+                            background-color: $green;
                         }
                     }
                 }
@@ -833,15 +833,16 @@
 
             .arrow {
                 margin: auto;
-                padding: 0;
                 position: absolute;
                 top: 50%;
-                z-index: 10;
+                z-index: 20;
 
                 &.previous {
                     left: .8rem;
+                    padding: 2rem 2rem 2rem 0;
                 }
                 &.next {
+                    padding: 2rem 0 2rem 2rem;
                     right: .8rem;
                 }
 
@@ -852,15 +853,17 @@
                     height: 4.8rem;
                     justify-content: center;
                     margin: 0 1%;
-                    padding: 0;
+
                     top: 30vh;
                     width: 4.8rem;
 
                     &.previous {
                         left: -6.4rem;
+                        padding: 0;
                     }
                     &.next {
                         right: -6.4rem;
+                        padding: 0;
                     }
                 }
 
@@ -1067,11 +1070,6 @@
             padding: 2.4rem;
             position: relative;
             transform: rotateY(180deg);
-
-            @include r(600) {
-                border-radius: 12px;
-                box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-            }
         }
     }
 
