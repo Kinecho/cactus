@@ -51,15 +51,20 @@ app.get("/", async (req: express.Request, res: express.Response) => {
 });
 
 app.get("/unsubscribe", async (req: express.Request, res: express.Response) => {
-    const email = req.query.email;
-    console.log(`unsubscribing  ${email} from mailchimp`);
+    const mailchimpId = req.query.mcuid;
+    let email: string|undefined;
+    if (mailchimpId) {
+        const mailchimpMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpId);
+        email = mailchimpMember?.email;
+    }
 
     if (!email){
         const errorMessage = "The link you clicked was not formatted properly. Unable to find the user to unsubscribe.";
-        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
+        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
         return
     }
 
+    console.log(`unsubscribing  ${email} from mailchimp`);
     const statusRequest: UpdateStatusRequest = {
         status: ListMemberStatus.unsubscribed,
         email,
@@ -115,7 +120,7 @@ app.get("/unsubscribe", async (req: express.Request, res: express.Response) => {
         const successMessage = "You have successfully unsubscribed";
         res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(successMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=true`)
     } else {
-        const errorMessage = "Unable to unsubscribe from mailchimp. Please try again later"
+        const errorMessage = "Unable to unsubscribe from mailchimp. Please try again later";
         res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
     }
 });
