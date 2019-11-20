@@ -148,6 +148,9 @@ export function configureLoginForm(formId: string) {
                     event_category: "email_signup",
                     event_label: `${formId}`
                 });
+                if (window.fbq) {
+                    window.fbq('track','Lead');
+                }
                 showModal(modalId);
 
 
