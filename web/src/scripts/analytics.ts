@@ -127,6 +127,20 @@ export function setUser(user?: User | null) {
     }
 }
 
+export function fireConfirmedSignupEvent() {
+    /* Facebook */
+    if (window.fbq) {
+        window.fbq('track','CompleteRegistration');
+    }
+}
+
+export function fireSignupEvent() {
+    /* Facebook */
+    if (window.fbq) {
+        window.fbq('track','Lead');
+    }
+}
+
 function createGTag() {
     if (!_gtag) {
         window.dataLayer = window.dataLayer || [];
