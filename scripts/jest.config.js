@@ -11,6 +11,7 @@ module.exports = {
         '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
         '^@api/(.*)$': '<rootDir>/../functions/src/$1',
         '^@web/(.*)$': '<rootDir>/../web/src/$1',
+        '^@web-root/(.*)$': '<rootDir>/../web/$1',
 
     },
 }
