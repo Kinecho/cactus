@@ -1,9 +1,22 @@
 // tslint:disable-next-line:no-implicit-dependencies
-import "@styles/pages/$PAGE_NAME$.scss"
+import Vue from "vue";
+
+// import Page from "@components/YOUR_PAGE"
 import {commonInit} from "@web/common";
 
 commonInit();
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("$PAGE_NAME$ loaded");
+new Vue({
+    el: "#app",
+    template: `<!--<YOUR_PAGE/>-->`,
+    components: {
+        // YOUR_PAGE,
+    }
 });
+
+//enables hot reload
+if (module.hot) {
+    module.hot.accept((error: any) => {
+        console.error("Error accepting hot reload", error);
+    })
+}
