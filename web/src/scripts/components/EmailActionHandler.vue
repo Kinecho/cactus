@@ -52,7 +52,7 @@ import {EmailActionMode} from '@web/firebase'
     import {getQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import {EmailActionMode, getAuth} from '@web/firebase'
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import {appendQueryParams} from '@shared/util/StringUtil'
 
     export default Vue.extend({

@@ -35,9 +35,13 @@ import CactusMember from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
 import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {getAuthUser} from "@api/util/RequestUtil";
+import {getHostname} from "@api/config/configService";
+import {PageRoute} from "@shared/PageRoutes";
+import {QueryParam} from "@shared/util/queryParams";
+import chalk from "chalk";
+
 
 const app = express();
-
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: true}));
@@ -46,6 +50,75 @@ app.get("/", async (req: express.Request, res: express.Response) => {
     return res.send({success: true, message: "got the get request"})
 });
 
+app.get("/unsubscribe", async (req: express.Request, res: express.Response) => {
+    const email = req.query.email;
+    console.log(`unsubscribing  ${email} from mailchimp`);
+
+    if (!email){
+        const errorMessage = "The link you clicked was not formatted properly. Unable to find the user to unsubscribe.";
+        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
+        return
+    }
+
+    const statusRequest: UpdateStatusRequest = {
+        status: ListMemberStatus.unsubscribed,
+        email,
+    };
+    console.log(chalk.yellow("sending status request"), JSON.stringify(statusRequest, null, 2));
+    // MailchimpService.getSharedInstance()
+    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+    let cactusMember: CactusMember | undefined = undefined;
+    if (response.listMember) {
+        cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
+        console.log("updated member after changing the status", cactusMember);
+    }
+
+    const attachments: SlackAttachment[] = [];
+    const fields: SlackAttachmentField[] = [
+        {
+            title: "Email",
+            value: statusRequest.email,
+            short: false,
+        },
+        {
+            title: "Reason Code",
+            value: `Unsubscribed from an email`,
+            short: false,
+        },
+
+        {
+            title: "Cactus Member ID",
+            value: (cactusMember ? cactusMember.id : "") || "not found",
+            short: false,
+        },
+        {
+            title: "Sign Up Date",
+            value: (cactusMember && cactusMember.signupConfirmedAt) ? getISODate(cactusMember.signupConfirmedAt) : "Unknown"
+        }
+    ];
+
+    attachments.push({
+        title: `${statusRequest.email} ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        fields: fields
+    });
+
+    const slackMessage = {
+        text: `User Has manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        attachments
+    };
+
+    await AdminSlackService.getSharedInstance().sendActivityMessage(slackMessage);
+
+
+    if (response.success){
+        res.status(302);
+        const successMessage = "You have successfully unsubscribed";
+        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(successMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=true`)
+    } else {
+        const errorMessage = "Unable to unsubscribe from mailchimp. Please try again later"
+        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
+    }
+});
 
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const event = req.body as WebhookEvent;

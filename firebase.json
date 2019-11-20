@@ -49,6 +49,10 @@
         ],
         "rewrites": [
             {
+                "source": "/unsubscribe-confirmed",
+                "destination": "/unsubscribe_confirmed.html"
+            },
+            {
                 "source": "/reflection/**",
                 "destination": "/shared_reflection.html"
             },

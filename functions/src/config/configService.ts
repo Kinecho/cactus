@@ -20,6 +20,10 @@ export function getConfig(): CactusConfig {
     return _config
 }
 
+export function getHostname(): string {
+    return `${_config.web.protocol}://${_config.web.domain}`
+}
+
 function buildConfig(): CactusConfig {
     const functionsConfig = functions.config() as CactusConfig;
 

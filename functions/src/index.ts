@@ -12,7 +12,7 @@ import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
-import {onDelete, transactionalOnCreate} from "@api/endpoints/UserTriggers";
+import {onDelete, transactionalOnCreate} from "@api/triggers/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";

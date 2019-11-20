@@ -125,7 +125,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'

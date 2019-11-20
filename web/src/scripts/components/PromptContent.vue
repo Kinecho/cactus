@@ -96,7 +96,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
