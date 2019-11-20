@@ -120,22 +120,10 @@ export function setUser(user?: User | null) {
         }
 
         Sentry.setUser(sentryUser);
-
-        if (window.FS) {
-            // TODO: Add your own custom user variables here, details at
-            // http://help.fullstory.com/develop-js/setuservars
-            window.FS.identify(user.uid, {
-                email: user.email,
-                displayName: user.displayName
-            })
-        }
+        
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
-        if (window.FS) {
-            window.FS.identify(false);
-        }
-
     }
 }
 
