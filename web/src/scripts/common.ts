@@ -1,4 +1,4 @@
-import {init as initAnalytics, startFullstory} from '@web/analytics'
+import {init as initAnalytics} from '@web/analytics'
 import {initializeFirebase} from "@web/firebase";
 import {getAllQueryParams, getQueryParam} from "@web/util";
 import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
@@ -7,7 +7,6 @@ import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 export function commonInit() {
     initAnalytics();
-    startFullstory();
 
     initializeFirebase();
 

@@ -33,7 +33,6 @@ declare var __FIRST_PROMPT_ID__: string;
 declare var __CLOUDSPONGE_KEY__: string;
 
 declare var __API_DOMAIN__: string;
-declare var __FULL_STORY_TEAM_ID__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
 declare var __PUBLIC_DOMAIN__: string;
 declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
@@ -50,7 +49,6 @@ export const Config = {
     firstPromptId: __FIRST_PROMPT_ID__,
     cloudSpongeKey: __CLOUDSPONGE_KEY__,
     apiDomain: __API_DOMAIN__,
-    fullStoryTeamId: __FULL_STORY_TEAM_ID__,
     stripe: __STRIPE_CONFIG__,
     domain: __PUBLIC_DOMAIN__,
     firebaseDynamicLink: __FIREBASE_DYNAMIC_LINK__,
