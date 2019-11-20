@@ -358,6 +358,12 @@ export async function sendLoginEvent(args: {
                         console.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
                         await request.post(Endpoint.loginEvent, event, {headers});
+
+                        /* Note: This may move to the backend later when we have time to 
+                           implement the Facebook Ads API */
+                        if (event.isNewUser && window.fbq) {
+                            window.fbq('track','CompleteRegistration');
+                        }
                     } catch (error) {
                         console.error("failed to send login event", error);
                     } finally {
