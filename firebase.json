@@ -35,6 +35,7 @@
             "bash ./sentry-web-start.sh",
             "npm --prefix ./web run config:get",
             "npm --prefix ./web run build:firebase",
+            "mkdir web/public/.well-known/; cp ./apple-app-site-association ./web/public/.well-known/; cp ./apple-app-site-association ./web/public/",
             "bash ./sentry-web-upload.sh"
         ],
         "postdeploy": [
@@ -47,7 +48,31 @@
             "**/.*",
             "**/node_modules/**"
         ],
+        "headers": [
+            {
+                "source": "/.well-known/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            },
+            {
+                "source": "/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            }
+        ],
         "rewrites": [
+            {
+                "source": "/apple-app-site-association",
+                "destination": "/.well-known/apple-app-site-association"
+            },
             {
                 "source": "/reflection/**",
                 "destination": "/shared_reflection.html"

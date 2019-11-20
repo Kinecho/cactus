@@ -13,7 +13,8 @@
         "rootDirs": [
             "src",
             "../shared/src",
-            "../functions/src"
+            "../functions/src",
+            "../web/src"
         ],
         "paths": {
             "@scripts/*": [
@@ -30,6 +31,9 @@
             ],
             "@web/*": [
                 "../web/src/*"
+            ],
+            "@web-root/*": [
+                "../web/*"
             ]
         }
     },
