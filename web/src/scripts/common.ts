@@ -1,4 +1,5 @@
-import {init as initAnalytics, startFacebookPixel} from '@web/analytics'
+import {init as initAnalytics} from '@web/analytics';
+import {startFacebookPixel} from '@web/facebook.js';
 import {initializeFirebase} from "@web/firebase";
 import {getAllQueryParams, getQueryParam} from "@web/util";
 import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
