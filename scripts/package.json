@@ -19,6 +19,8 @@
         "@scripts": "lib/scripts/src",
         "@shared": "lib/shared/src",
         "@api": "lib/api/src",
+        "@web": "lib/web/src",
+        "@web-root": "lib/web",
         "@admin": "lib/scripts-admin/src"
     },
     "author": "Neil Poulin",

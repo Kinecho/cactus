@@ -7,6 +7,9 @@ shared/lib/
 shared-admin/lib/
 scripts/output/
 
+# This is generated at deploy time
+apple-app-site-association
+
 tmp/
 
 web/src/pages-index.html

@@ -1,8 +1,11 @@
 import chalk from "chalk";
 import {getCactusConfig, Project} from "@scripts/config";
 import AdminSlackService, {ChatMessage} from "@admin/services/AdminSlackService";
-
+import helpers from "@scripts/helpers";
 import * as simplegit from 'simple-git/promise';
+import {CactusConfig} from "@shared/CactusConfig";
+import {getAppSiteConfig} from "@scripts/appleAppSiteAssociation";
+import {writeFileSync} from "fs";
 
 const git = simplegit();
 
@@ -20,6 +23,9 @@ const git = simplegit();
     console.log(chalk.green(`${resource} Starting Deploy to ${isProd ? "Prod" : "Stage"}`));
 
     const config = await getCactusConfig(isProd ? Project.PROD : Project.STAGE);
+
+
+    createAppAssociationFile(config);
 
     let resourceName = resource;
     if (resource.toLowerCase().trim() === "hosting") {
@@ -58,3 +64,9 @@ const git = simplegit();
 
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));
 
+function createAppAssociationFile(config: CactusConfig) {
+    const appAssociation = getAppSiteConfig(config);
+
+    const fileContents = JSON.stringify(appAssociation);
+    writeFileSync(helpers.appAssociationFile, fileContents);
+}
