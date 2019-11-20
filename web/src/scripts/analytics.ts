@@ -46,6 +46,7 @@ let hasInit = false;
 export function init() {
     if (hasInit) {
         console.warn("Analytics already initialized, not reinitializing");
+        return;
     }
 
 
