@@ -1,6 +1,6 @@
 import "@styles/article.scss"
 import {configureMailchimpSignupForm, setupJumpToForm} from "@web/mailchimp";
-import {init as initAnalytics, startFullstory} from "@web/analytics";
+import {init as initAnalytics} from "@web/analytics";
 import {getAuth, initializeFirebase} from "@web/firebase";
 import {setupNavigation} from "@web/NavigationUtil";
 
@@ -15,7 +15,6 @@ export function initializeArticlePage() {
 
     initializeFirebase();
     initAnalytics();
-    startFullstory();
 
     setupNavigation({showSignupButton: true, showLoginButton: true});
     setupJumpToForm();

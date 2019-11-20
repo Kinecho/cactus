@@ -4,7 +4,6 @@ module.exports = {
     __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
     __FIRST_PROMPT_ID__: 'iqRGVLbclcpbjmuP6LZ3',
     __API_DOMAIN__: 'https://us-central1-cactus-app-stage.cloudfunctions.net',
-    __FULL_STORY_TEAM_ID__: '',
     __PUBLIC_DOMAIN__: 'https://cactus-app-stage.web.app',
     __BUILD_ENV__: 'stage',
     __FIREBASE_CONFIG__: {
