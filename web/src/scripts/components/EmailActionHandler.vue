@@ -40,7 +40,7 @@
             </section>
 
 
-            <a class="button" v-show="showContinueButton" :href="continueUrl">Continue</a>
+            <a class="button" v-show="showContinueButton" :href="continueUrl">{{continueText}}</a>
         </div>
 
     </div>
@@ -99,6 +99,12 @@
                     window.location.assign(url);
                     break;
                 default:
+                    console.error("No valid code was found");
+                    this.error ="Invalid link.";
+                    this.loading = false;
+                    this.showContinueButton = true;
+                    this.continueUrl = "/";
+                    this.continueText = "Go Home";
                     break;
             }
 
@@ -117,6 +123,7 @@
             passwordResetEmail?: string | null,
             submitting: boolean,
             loading: boolean,
+            continueText: string,
         } {
             return {
                 mode: undefined,
@@ -132,6 +139,7 @@
                 passwordResetEmail: undefined,
                 submitting: false,
                 loading: true,
+                continueText: "Continue",
             }
         },
         methods: {
