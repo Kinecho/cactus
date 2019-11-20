@@ -145,7 +145,7 @@ export async function createJS(response: InputResponse): Promise<void> {
 
 
 export async function createVueComponent(response: InputResponse): Promise<void> {
-    const outputFilePath = `${webHelpers.componentsDirectory}/${response.componentName}.vue`;
+    const outputFilePath = `${webHelpers.componentsDir}/${response.componentName}.vue`;
 // console.log("creating js file with response = ", response);
     console.log("creating vue file from template:\n", chalk.blue(outputFilePath), "\n");
 
