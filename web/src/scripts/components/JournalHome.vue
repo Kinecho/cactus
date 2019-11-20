@@ -16,8 +16,8 @@
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
                         <p>To get started, you'll learn about how Cactus works and reflect on your first question of the day.</p>
+                        <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
-                        <img class="graphic" src="assets/images/music2.svg" alt=""/>
                     </section>
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && sentPrompts.length > 0">
@@ -220,23 +220,6 @@
         text-align: center;
     }
 
-    .loading-container {
-        /*display: flex;*/
-        /*height: 0;*/
-        /*top: 4rem;*/
-        /*position: relative;*/
-        /*justify-content: center;*/
-        /*align-items: center;*/
-        /*flex-direction: column;*/
-
-        /*.loading {*/
-        /*    width: 2rem;*/
-        /*    height: 2rem;*/
-        /*    transform-origin: center;*/
-        /*    animation: rotate 1s linear infinite;*/
-        /*}*/
-    }
-
     .section-container {
 
         .journalList {
@@ -262,16 +245,33 @@
                 padding: 2.4rem;
                 text-align: center;
 
+                h1 {
+                    line-height: 1.2;
+                    margin-bottom: .4rem;
+                }
+
                 p {
-                    margin: 1.6rem auto 3.2rem;
+                    margin: 0 auto 2.4rem;
                     max-width: 60rem;
                     opacity: .8;
+
+                    @include r(768) {
+                        margin-bottom: 1.6rem;
+                    }
                 }
 
                 .graphic {
-                    margin-top: 10rem;
-                    max-width: 64rem;
+                    margin-bottom: 2.4rem;
+                    max-width: 56rem;
                     width: 90%;
+
+                    @include r(768) {
+                        margin-bottom: 1.6rem;
+                    }
+                }
+
+                .button {
+                    min-width: 22rem;
                 }
             }
 

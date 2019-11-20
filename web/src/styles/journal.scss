@@ -73,38 +73,10 @@
 
   img {
     display: block;
-    height: 100%;
-    width: 100%;
+    margin: auto;
+    max-height: 100%;
+    max-width: 100%;
   }
-
-  /* .random-placeholder {
-    height:100%;
-    width: 100%;
-    min-height: 24rem;
-    //background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px;
-
-
-    &.bg0 {
-      background: url(assets/images/maroonTriangleBlob.svg) left -56px bottom -28px/260px no-repeat
-    }
-
-    &.bg1 {
-      background: url(assets/images/yellowNeedleBlob.svg) right -216px bottom -180px/480px no-repeat
-    }
-
-    &.bg2 {
-      background: url(assets/images/pinkBlob.svg) left -56px bottom -11px/180px no-repeat
-    }
-
-    &.bg3 {
-      background: url(assets/images/lightGreenBlob.svg) right -56px bottom -11px/180px no-repeat
-    }
-
-    &.bg4 {
-      background: url(assets/images/yellowBlob.svg) left -56px bottom -11px/180px no-repeat
-    }
-
-  } */
 }
 
 .menuParent {
