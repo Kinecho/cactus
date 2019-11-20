@@ -27,7 +27,6 @@ export interface PageConfig {
     pageName: string,
     title: string,
     pagePath: string,
-    reflectionPrompt: boolean,
     indexPath?: boolean,
 }
 
@@ -96,21 +95,8 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
     const newPage:PageEntry = {
         title: response.title,
         path: response.pagePath,
-        reflectionPrompt: response.reflectionPrompt,
-        includeInDev: true,
         name: response.pageName,
     };
-
-    if (response.reflectionPrompt){
-        //turning off all other pages in dev
-        Object.keys(pages).forEach(title => {
-            const page = pages[title];
-            if (page.reflectionPrompt && page.includeInDev){
-                page.includeInDev = false;
-            }
-        });
-    }
-
 
     pages[response.pageName] = newPage;
 

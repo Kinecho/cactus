@@ -7,7 +7,6 @@ const helpers = require('./../helpers')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const WebpackNotifierPlugin = require('webpack-notifier')
 const chalk = require('chalk')
-const pagesUtil = require('./../pagesUtil')
 const simplegit = require('simple-git/promise')
 
 function getCommitHash() {
@@ -32,8 +31,6 @@ module.exports = (config) => {
             const isDev = config.isDev || false
             // noinspection MissingOrObsoleteGoogRequiresInspection
             config.__SENTRY_VERSION__ = process.env.SENTRY_VERSION || gitcommit
-
-
             console.log('got git commit hash', gitcommit)
 
             let parsedConfig = {}
@@ -42,28 +39,18 @@ module.exports = (config) => {
                 parsedConfig[key] = JSON.stringify(config[key])
             })
 
-            let pages = pagesUtil.getPages(config, allPages)
-            let jsEntries = Object.keys(pages).reduce((entries, title) => {
-                const page = pages[title]
-                if (!page.reflectionPrompt) {
-                    console.log(chalk.yellow('adding entry ', title))
-                    entries[title] = `${helpers.scriptDir}/pages/${title}.ts`
-                } else {
-                    console.log(chalk.gray('skipping entry for article page', title))
-                }
+            let jsEntries = Object.keys(allPages).reduce((entries, title) => {
+                console.log(chalk.yellow('adding entry ', title))
+                entries[title] = `${helpers.scriptDir}/pages/${title}.ts`
                 return entries
-            }, {
-                // commonScripts: `${helpers.scriptDir}/common.ts`,
-                article: `${helpers.scriptDir}/articleCommon.ts`,
-            })
+            }, {})
 
+            //add the little dev pages index
             if (isDev) {
                 jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
             }
 
-            // console.log('pages to use', chalk.yellow(JSON.stringify(pages, null, 2)))
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
-
 
             const plugins = [new MiniCssExtractPlugin({
                 filename: isDev ? '[name].css' : '[id].[hash].css',
@@ -72,8 +59,8 @@ module.exports = (config) => {
             })]
 
 
-            const cssCacheGroups = {};
-            Object.keys(pages).filter(filename => filename !== 'commonScripts' && filename !== 'article').map(filename => {
+            const cssCacheGroups = {}
+            Object.keys(allPages).map(filename => {
                 cssCacheGroups[`${filename}Styles`] = {
                     name: filename,
                     test: (m, c, entry = filename) => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
@@ -86,7 +73,6 @@ module.exports = (config) => {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
-                    // chunkFilename: '[name].js',
                     filename: isDev ? '[name].js' : '[name].[hash].js',
                     publicPath: '/',
                 },
@@ -124,22 +110,6 @@ module.exports = (config) => {
                 optimization: {
                     splitChunks: {
                         cacheGroups: cssCacheGroups,
-                        // cacheGroups: {
-                        // fooStyles: {
-                        //     name: 'foo',
-                        //     test: (m, c, entry = 'foo') =>
-                        //         m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
-                        //     chunks: 'all',
-                        //     enforce: true,
-                        // },
-                        // barStyles: {
-                        //     name: 'bar',
-                        //     test: (m, c, entry = 'bar') =>
-                        //         m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
-                        //     chunks: 'all',
-                        //     enforce: true,
-                        // },
-                        // },
                     },
                 },
                 module: {
@@ -193,20 +163,11 @@ module.exports = (config) => {
                     ],
                 },
                 plugins: [...plugins,
-                    // new MiniCssExtractPlugin({
-                    //     filename: isDev ? '[name].css' : '[id].[hash].css',
-                    //     chunkFilename: isDev ? '[name].css' : '[id].[hash].css',
-                    //
-                    // }),
-                    ...Object.keys(pages).filter(filename => filename !== 'commonScripts' && filename !== 'article').map(filename => {
-                        const page = pages[filename]
+                    ...Object.keys(allPages).map(filename => {
+                        const page = allPages[filename]
 
                         const chunks = []
-                        if (page.reflectionPrompt) {
-                            chunks.push('article')
-                        } else {
-                            chunks.push(filename)
-                        }
+                        chunks.push(filename)
 
                         console.log(chalk.green('Configuring HTML page ', filename, 'chunks: ', chunks.join(', ')))
                         return new HtmlWebpackPlugin({
