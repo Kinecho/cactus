@@ -8,8 +8,7 @@ const webHelpers = helpers.webHelpers;
 import {
     addToSitemap,
     createHtml,
-    createJS,
-    createScss,
+    createJS, createVueComponent,
     PageConfig,
     updateFirebaseJson,
     updatePagesFile, validatePageName, validateUrl
@@ -22,6 +21,9 @@ export interface InputResponse extends PageConfig {
     title: string,
     pagePath: string,
     writeUrls: boolean,
+    addToSitemap: boolean,
+    createVueComponent: boolean,
+    componentName?: string,
     looksGood: boolean,
 }
 
@@ -53,6 +55,21 @@ export default class CreateLandingPage implements Command {
                 initial: (prev: any, values: any) => getUrlFromInput(values.title),
                 validate: (value: string) => validateUrl(value),
                 format: (value: string) => getUrlFromInput(value)
+            },
+            {
+                type: "confirm",
+                name: "addToSitemap",
+                message: "Add to sitemap?"
+            },
+            {
+                type: "confirm",
+                name: "createVueComponent",
+                message: "Create a Vue Component?"
+            },
+            {
+                type: (prev: boolean) => prev ? "text" : null,
+                name: "componentName",
+                message: "Vue Component Name",
             },
             {
                 type: "confirm",
@@ -91,11 +108,18 @@ Continue?`
         const fileTasks = [
             createHtml(response),
             createJS(response),
-            createScss(response),
-            addToSitemap(response),
+            // createScss(response),
             updateFirebaseJson(response),
             updatePagesFile(response)
         ];
+
+        if (response.addToSitemap) {
+            fileTasks.push(addToSitemap(response))
+        }
+
+        if (response.createVueComponent) {
+            fileTasks.push(createVueComponent(response))
+        }
 
         await Promise.all(fileTasks);
         console.log("Your page has been created. Be sure to add the new files to git!");

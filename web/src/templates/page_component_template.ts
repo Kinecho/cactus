@@ -1,16 +1,15 @@
-// tslint:disable-next-line:no-implicit-dependencies
+// @ts-ignore
+import $COMPONENT$ from "@components/$COMPONENT$"
 import Vue from "vue";
-
-// import Page from "@components/YOUR_PAGE"
 import {commonInit} from "@web/common";
 
 commonInit();
 
 new Vue({
     el: "#app",
-    template: `<!--<YOUR_PAGE/>-->`,
+    template: `<$COMPONENT$/>`,
     components: {
-        // YOUR_PAGE,
+        $COMPONENT$,
     }
 });
 
