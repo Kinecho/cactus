@@ -1,6 +1,7 @@
 module.exports = {
     __GOOGLE_ANALYTICS_ID__: 'UA-127159143-5',
     __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
+    __FACEBOOK_PIXEL_ID__: '1422468787913495',
     __FIRST_PROMPT_ID__: 'nIVmhvgppLNgNMAsWEb0',
     __API_DOMAIN__: 'https://us-central1-cactus-app-prod.cloudfunctions.net',
     __PUBLIC_DOMAIN__: 'https://cactus.app',

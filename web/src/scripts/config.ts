@@ -26,6 +26,7 @@ export interface SentryConfig {
 //these variables come from the webpack Define plugin
 declare var __GOOGLE_ANALYTICS_ID__: string;
 declare var __GOOGLE_OPTIMIZE_ID__: string;
+declare var __FACEBOOK_PIXEL_ID__: string;
 declare var __FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_ENV_ID__: string;
@@ -43,6 +44,7 @@ declare var __BUILD_ENV__: string;
 export const Config = {
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
     googleOptimizeID: __GOOGLE_OPTIMIZE_ID__,
+    facebookPixelID: __FACEBOOK_PIXEL_ID__,
     firebase: __FIREBASE_CONFIG__,
     flamelinkFirebaseConfig: __FLAMELINK_FIREBASE_CONFIG__,
     flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
