@@ -132,40 +132,46 @@ h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
         <div class="tabset">
             <input type="radio" name="tabset" id="tab1" aria-controls="free" checked>
             <label for="tab1">Free</label>
+            <section id="free" class="tab-panel free-panel">
+                <ul>
+                    <li>Available on web</li>
+                    <li>Unlimited reflection journal note archive</li>
+                    <li>Daily reflection prompts</li>
+                    <li>128-bit encryption on all notes</li>
+                    <li>Notifications via email</li>
+                </ul>
+                <button class="secondary">Sign Up Free</button>
+            </section>
 
             <input type="radio" name="tabset" id="tab2" aria-controls="premium">
             <label for="tab2">Premium</label>
+            <section id="premium" class="tab-panel premium-panel">
+                <ul>
+                    <li>Available on web</li>
+                    <li class="enhance">Available on iPhone and iPad</li>
+                    <li>Unlimited reflection journal note archive</li>
+                    <li>Daily reflection prompts</li>
+                    <li>128-bit encryption on all notes</li>
+                    <li>Notifications via email</li>
+                    <li class="enhance">Notifications via push</li>
+                </ul>
+                <div class="flexContainer">
+                    <input type="radio" name="priceSet" id="price1" aria-controls="Monthly" checked>
+                    <label for="price1">
+                        <span>Monthly</span>
+                        <span>$2.99</span>
+                        <span>per month</span>
+                    </label>
+                    <input type="radio" name="priceSet" id="price2" aria-controls="Annually">
+                    <label for="price2">
+                        <span>Annual</span>
+                        <span>$29</span>
+                        <span>per year</span>
+                    </label>
+                </div>
+                <button>Purchase &mdash; $29</button>
+            </section>
 
-            <div class="tab-panels">
-                <section id="free" class="tab-panel">
-                    <ul>
-                        <li>Available on web</li>
-                        <li>Unlimited reflection journal note archive</li>
-                        <li>Daily reflection prompts</li>
-                        <li>128-bit encryption on all notes</li>
-                        <li>Notifications via email</li>
-                    </ul>
-                    <button class="secondary">Sign Up Free</button>
-                </section>
-                <section id="premium" class="tab-panel">
-                    <ul>
-                        <li>Available on web</li>
-                        <li class="enhance">Available on iPhone and iPad</li>
-                        <li>Unlimited reflection journal note archive</li>
-                        <li>Daily reflection prompts</li>
-                        <li>128-bit encryption on all notes</li>
-                        <li>Notifications via email</li>
-                        <li class="enhance">Notifications via push</li>
-                    </ul>
-                    <div class="flexContainer">
-                        <input type="radio" name="priceSet" id="price1" aria-controls="Monthly" checked>
-                        <label for="price1">Monthly</label>
-                        <input type="radio" name="priceSet" id="price2" aria-controls="Annually">
-                        <label for="price2">Annually</label>
-                    </div>
-                    <button>Purchase &mdash; $29</button>
-                </section>
-            </div>
         </div>
       </div>
   </section>
