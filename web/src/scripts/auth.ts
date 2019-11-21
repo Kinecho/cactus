@@ -17,6 +17,7 @@ import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
 import AuthUI = firebaseui.auth.AuthUI;
+import {fireConfirmedSignupEvent} from "@web/analytics";
 
 const firebase = initializeFirebase();
 let authUi: AuthUI;
@@ -358,6 +359,12 @@ export async function sendLoginEvent(args: {
                         console.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
                         await request.post(Endpoint.loginEvent, event, {headers});
+
+                        /* Note: This may move to the backend later when we have time to 
+                           implement the Facebook Ads API */
+                        if (event.isNewUser) {
+                            fireConfirmedSignupEvent();
+                        }
                     } catch (error) {
                         console.error("failed to send login event", error);
                     } finally {

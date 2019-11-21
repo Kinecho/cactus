@@ -8,8 +8,7 @@ const webHelpers = helpers.webHelpers;
 import {
     addToSitemap,
     createHtml,
-    createJS,
-    createScss,
+    createJS, createVueComponent,
     PageConfig,
     updateFirebaseJson,
     updatePagesFile, validatePageName, validateUrl
@@ -22,6 +21,9 @@ export interface InputResponse extends PageConfig {
     title: string,
     pagePath: string,
     writeUrls: boolean,
+    addToSitemap: boolean,
+    createVueComponent: boolean,
+    componentName?: string,
     looksGood: boolean,
 }
 
@@ -30,7 +32,6 @@ export default class CreateLandingPage implements Command {
     response?: InputResponse;
     description = "Creates a standalone webpage";
     showInList = true;
-
 
     getQuestions():any[]{
         return [
@@ -57,6 +58,21 @@ export default class CreateLandingPage implements Command {
             },
             {
                 type: "confirm",
+                name: "addToSitemap",
+                message: "Add to sitemap?"
+            },
+            {
+                type: "confirm",
+                name: "createVueComponent",
+                message: "Create a Vue Component?"
+            },
+            {
+                type: (prev: boolean) => prev ? "text" : null,
+                name: "componentName",
+                message: "Vue Component Name",
+            },
+            {
+                type: "confirm",
                 name: "looksGood",
                 message: (prev: any, values: any) => `\n\nHere's the current configuration:
         
@@ -76,9 +92,8 @@ Continue?`
     async start(): Promise<any> {
         resetConsole();
         console.log(chalk.green(`Let\'s create a landing page.`));
-        console.log(chalk.dim(`This will not create any email campaigns or add anything to the database. If you want to create a Reflection Prompt page, please use the ${chalk.yellow("CreateReflectionPrompt.ts")} script.`));
+        console.log(chalk.dim(`This will not create any email campaigns or add anything to the database.`));
         const response = await prompts(this.getQuestions());
-        response.reflectionPrompt = false;
         this.response = response;
         const {pagePath, title, looksGood} = response;
 
@@ -93,11 +108,18 @@ Continue?`
         const fileTasks = [
             createHtml(response),
             createJS(response),
-            createScss(response),
-            addToSitemap(response),
+            // createScss(response),
             updateFirebaseJson(response),
             updatePagesFile(response)
         ];
+
+        if (response.addToSitemap) {
+            fileTasks.push(addToSitemap(response))
+        }
+
+        if (response.createVueComponent) {
+            fileTasks.push(createVueComponent(response))
+        }
 
         await Promise.all(fileTasks);
         console.log("Your page has been created. Be sure to add the new files to git!");

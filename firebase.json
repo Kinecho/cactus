@@ -35,6 +35,7 @@
             "bash ./sentry-web-start.sh",
             "npm --prefix ./web run config:get",
             "npm --prefix ./web run build:firebase",
+            "mkdir web/public/.well-known/; cp ./apple-app-site-association ./web/public/.well-known/; cp ./apple-app-site-association ./web/public/",
             "bash ./sentry-web-upload.sh"
         ],
         "postdeploy": [
@@ -47,7 +48,31 @@
             "**/.*",
             "**/node_modules/**"
         ],
+        "headers": [
+            {
+                "source": "/.well-known/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            },
+            {
+                "source": "/apple-app-site-association",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ]
+            }
+        ],
         "rewrites": [
+            {
+                "source": "/apple-app-site-association",
+                "destination": "/.well-known/apple-app-site-association"
+            },
             {
                 "source": "/reflection/**",
                 "destination": "/shared_reflection.html"
@@ -89,34 +114,6 @@
                 "destination": "/social_home.html"
             },
             {
-                "source": "/who-is-the-best-teacher-you-ever-had",
-                "destination": "/who_is_the_best_teacher_you_ever_had.html"
-            },
-            {
-                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190721",
-                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190721.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190720",
-                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190720.html"
-            },
-            {
-                "source": "/what-makes-you-laugh",
-                "destination": "/what_makes_you_laugh.html"
-            },
-            {
-                "source": "/what-relationships-bring-meaning-and-care-into-your-life",
-                "destination": "/what_relationships_bring_meaning_and_care_into_your_life.html"
-            },
-            {
-                "source": "/how-has-a-growth-mindset-improved-your-life",
-                "destination": "/how_has_a_growth_mindset_improved_your_life.html"
-            },
-            {
-                "source": "/what-do-you-love-about-cooking",
-                "destination": "/what_do_you_love_about_cooking.html"
-            },
-            {
                 "source": "/home",
                 "destination": "/journal_home.html"
             },
@@ -137,212 +134,8 @@
                 "destination": "/sign_up.html"
             },
             {
-                "source": "/what-brings-out-your-playful-side",
-                "destination": "/what_brings_out_your_playful_side.html"
-            },
-            {
-                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190714",
-                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190714.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190713",
-                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190713.html"
-            },
-            {
-                "source": "/what-makes-you-feel-calm-peaceful-or-serene",
-                "destination": "/what_makes_you_feel_calm_peaceful_or_serene.html"
-            },
-            {
-                "source": "/what-is-essential-to-your-happiness",
-                "destination": "/what_is_essential_to_your_happiness.html"
-            },
-            {
-                "source": "/how-do-you-benefit-from-moments-of-reflection",
-                "destination": "/how_do_you_benefit_from_moments_of_reflection.html"
-            },
-            {
-                "source": "/when-do-you-feel-completely-free-to-be-yourself",
-                "destination": "/when_do_you_feel_completely_free_to_be_yourself.html"
-            },
-            {
-                "source": "/how-has-friendship-enriched-your-life",
-                "destination": "/how_has_friendship_enriched_your_life.html"
-            },
-            {
-                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190707",
-                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190707.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190706",
-                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190706.html"
-            },
-            {
-                "source": "/what-does-the-power-to-choose-provide-you",
-                "destination": "/what_does_the_power_to_choose_provide_you.html"
-            },
-            {
-                "source": "/what-makes-freedom-meaningful-to-you",
-                "destination": "/what_makes_freedom_meaningful_to_you.html"
-            },
-            {
-                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week-20190630",
-                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week_20190630.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful-20190629",
-                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful_20190629.html"
-            },
-            {
-                "source": "/what-work-of-art-do-you-appreciate-experiencing",
-                "destination": "/what_work_of_art_do_you_appreciate_experiencing.html"
-            },
-            {
-                "source": "/what-gifts-and-benefits-do-you-receive-from-helping-others",
-                "destination": "/what_gifts_and_benefits_do_you_receive_from_helping_others.html"
-            },
-            {
-                "source": "/what-experience-inspired-you-to-see-many-new-possibilities",
-                "destination": "/what_experience_inspired_you_to_see_many_new_possibilities.html"
-            },
-            {
-                "source": "/what-is-a-meaningful-gift-you-received-from-another-person",
-                "destination": "/what_is_a_meaningful_gift_you_received_from_another_person.html"
-            },
-            {
-                "source": "/what-is-a-physical-sensation-you-savor",
-                "destination": "/what_is_a_physical_sensation_you_savor.html"
-            },
-            {
-                "source": "/what-do-you-love-about-your-morning-rituals",
-                "destination": "/what_do_you_love_about_your_morning_rituals.html"
-            },
-            {
-                "source": "/what-film-television-series-or-work-of-theater-allows-you-to-think-and-feel-in-new-ways",
-                "destination": "/what_film_television_series_or_work_of_theater_allows_you_to_think_and_feel_in_new_ways.html"
-            },
-            {
-                "source": "/what-makes-dinner-meaningful-to-you",
-                "destination": "/what_makes_dinner_meaningful_to_you.html"
-            },
-            {
-                "source": "/what-three-things-are-you-looking-forward-to-experiencing-this-week",
-                "destination": "/what_three_things_are_you_looking_forward_to_experiencing_this_week.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-that-you-received-this-past-week-for-which-you-are-grateful",
-                "destination": "/what_are_three_benefits_or_gifts_that_you_received_this_past_week_for_which_you_are_grateful.html"
-            },
-            {
-                "source": "/what-do-you-enjoy-and-savor-about-your-daily-work",
-                "destination": "/what_do_you_enjoy_and_savor_about_your_daily_work.html"
-            },
-            {
                 "source": "/journal",
                 "destination": "/journal.html"
-            },
-            {
-                "source": "/what-are-your-simple-pleasures",
-                "destination": "/what_are_your_simple_pleasures.html"
-            },
-            {
-                "source": "/what-gifts-does-nature-provide-you",
-                "destination": "/what_gifts_does_nature_provide_you.html"
-            },
-            {
-                "source": "/what-are-three-benefits-or-gifts-you-have-received-this-past-week-which-you-are-grateful-for",
-                "destination": "/what_are_three_benefits_or_gifts_you_have_received_this_past_week_which_you_are_grateful_for.html"
-            },
-            {
-                "source": "/what-brings-you-joy",
-                "destination": "/what_brings_you_joy.html"
-            },
-            {
-                "source": "/what-experiences-bring-out-your-harmonious-passions",
-                "destination": "/what_experiences_bring_out_your_harmonious_passions.html"
-            },
-            {
-                "source": "/when-do-you-feel-deep-satisfaction",
-                "destination": "/when_do_you_feel_deep_satisfaction.html"
-            },
-            {
-                "source": "/what-makes-you-feel-rested-and-renewed",
-                "destination": "/what_makes_you_feel_rested_and_renewed.html"
-            },
-            {
-                "source": "/what-provides-you-with-a-sense-of-belonging",
-                "destination": "/what_provides_you_with_a_sense_of_belonging.html"
-            },
-            {
-                "source": "/what-piece-of-music-are-you-grateful-for",
-                "destination": "/what_piece_of_music_are_you_grateful_for.html"
-            },
-            {
-                "source": "/who-empowers-you-to-be-your-authentic-self",
-                "destination": "/who_empowers_you_to_be_your_authentic_self.html"
-            },
-            {
-                "source": "/what-activity-gives-you-the-most-physical-energy",
-                "destination": "/what_activity_gives_you_the_most_physical_energy.html"
-            },
-            {
-                "source": "/what-is-your-most-cherished-memory-you-have-with-another-person",
-                "destination": "/what_is_your_most_cherished_memory_you_have_with_another_person.html"
-            },
-            {
-                "source": "/whats-your-favorite-aspect-of-your-home",
-                "destination": "/whats_your_favorite_aspect_of_your_home.html"
-            },
-            {
-                "source": "/what-do-you-appreciate-most-about-your-best-friend",
-                "destination": "/what_do_you_appreciate_most_about_your_best_friend.html"
-            },
-            {
-                "source": "/when-has-being-open-minded-enriched-your-life",
-                "destination": "/when_has_being_open_minded_enriched_your_life.html"
-            },
-            {
-                "source": "/what-actions-do-you-take-to-show-someone-you-love-them",
-                "destination": "/what_actions_do_you_take_to_show_someone_you_love_them.html"
-            },
-            {
-                "source": "/what-makes-you-feel-self-confident",
-                "destination": "/what_makes_you_feel_self_confident.html"
-            },
-            {
-                "source": "/what-makes-you-cry-tears-of-joy",
-                "destination": "/what_makes_you_cry_tears_of_joy.html"
-            },
-            {
-                "source": "/who-is-a-friend-you-can-always-rely-on",
-                "destination": "/who_is_a_friend_you_can_always_rely_on.html"
-            },
-            {
-                "source": "/what-food-brings-you-the-most-joy",
-                "destination": "/what_food_brings_you_the_most_joy.html"
-            },
-            {
-                "source": "/what-have-you-pursued-where-the-journey-became-the-reward",
-                "destination": "/what_have_you_pursued_where_the_journey_became_the_reward.html"
-            },
-            {
-                "source": "/what-makes-your-body-and-mind-feel-connected-in-a-positive-way",
-                "destination": "/what_makes_your_body_and_mind_feel_connected_in_a_positive_way.html"
-            },
-            {
-                "source": "/what-place-changed-the-way-you-view-the-world-for-the-better",
-                "destination": "/what_place_changed_the_way_you_view_the_world_for_the_better.html"
-            },
-            {
-                "source": "/what-experiences-or-activities-make-you-lose-track-of-time",
-                "destination": "/what_experiences_or_activities_make_you_lose_track_of_time.html"
-            },
-            {
-                "source": "/what-spiritual-experience-are-you-grateful-for",
-                "destination": "/what_spiritual_experience_are_you_grateful_for.html"
-            },
-            {
-                "source": "/how-do-you-celebrate",
-                "destination": "/how_do_you_celebrate.html"
             },
             {
                 "source": "/success",
