@@ -96,14 +96,23 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
             //get all responses to ensure it's completed
             //if any reflections are found that are _not_ deleted, then this sent prompt is still considered completed
             if (reflectionResponse.deleted) {
-                const allResponses = await AdminReflectionResponseService.getSharedInstance().getMemberResponsesForPromptId({memberId, promptId})
+                const allResponses = await AdminReflectionResponseService.getSharedInstance().getMemberResponsesForPromptId({
+                    memberId,
+                    promptId
+                });
                 const anyCompleted = allResponses.find(r => !r.deleted);
                 isComplete = !!anyCompleted
             }
 
+            if (isComplete && sentPrompt.completed) {
+                //there is nothing to do, no need to update the record.
+                return;
+            }
+
             //set completed and completedAt
             sentPrompt.completed = isComplete;
-            sentPrompt.completedAt = new Date();
+
+            sentPrompt.completedAt = isComplete ? new Date() : undefined;
             const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
 
             console.log(`Successfully saved sentPrompt.id ${saved.id} for member ${memberId} and promptId ${promptId}`);
