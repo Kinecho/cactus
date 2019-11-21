@@ -40,7 +40,7 @@
                         <span>per {{plan.per}}</span>
                     </label>
                 </div>
-                <button @click="puchaseSelectedPlan">Upgrade &mdash; ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}</button>
+                <button v-bind:disabled="isProcessing" @click="puchaseSelectedPlan">Upgrade &mdash; ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}</button>
             </section>
 
         </div>
@@ -50,8 +50,10 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import {Config} from "@web/config";
     import {PageRoute} from '@web/PageRoutes';
     import {PremiumPlan} from '@shared/types/PlanTypes';
+    import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
 
     export default Vue.extend({
         created() {
@@ -63,14 +65,14 @@
                 required: true,
                 default: [
                           { 
-                            id: 'plan-monthly', 
+                            id: Config.stripe.monthlyPlanId, 
                             plan_param: 'm', 
                             name: 'Monthly', 
                             price_dollars: 2.99, 
                             per: 'month' 
                           },
                           { 
-                            id: 'plan-yearly', 
+                            id: Config.stripe.yearlyPlanId, 
                             plan_param: 'y', 
                             name: 'Annual', 
                             price_dollars: 29, 
@@ -80,10 +82,12 @@
           },
         },
         data(): {
-          selectedPlan: PremiumPlan | undefined
+          selectedPlan: PremiumPlan | undefined,
+          isProcessing: boolean,
         } {
             return {
-              selectedPlan: this.plans[0]    
+              selectedPlan: this.plans[0],
+              isProcessing: false    
             }
         },
         beforeMount() {
@@ -102,10 +106,14 @@
             selectPlan(plan: PremiumPlan) {
               this.selectedPlan = plan;
             },
-            puchaseSelectedPlan() {
-              if (this.selectedPlan) {
-                window.location.href = PageRoute.CHECKOUT + '?p=' + this.selectedPlan.plan_param;
+            async puchaseSelectedPlan() {
+              this.isProcessing = true;
+
+              if (this.selectedPlan && this.selectedPlan.id) {
+                configureStripe('checkout-button', this.selectedPlan.id);
+                await redirectToCheckoutWithPlanId(this.selectedPlan.id);
               } else {
+                this.isProcessing = false;
                 alert('There was a problem. Please contact us at help@cactus.app.');
               }
             }
