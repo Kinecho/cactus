@@ -329,13 +329,6 @@
           margin-bottom: 2.4rem;
           justify-content: space-between;
 
-          > input:focus,
-          > input:checked {
-              + label {
-                  border-color: $green;
-              }
-          }
-
           .planButton {
               background-color: transparentize($white, .9);
               border: 2px solid $darkestGreen;
@@ -345,6 +338,10 @@
               padding: .8rem;
               text-align: center;
               width: 49%;
+
+              &.selected {
+                  border-color: $green;
+              }
 
               span {
                   display: block;
