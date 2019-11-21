@@ -36,7 +36,7 @@
                 </ul>
                 <div class="flexContainer">
                 <template v-for="plan in plans">
-                    <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)">
+                    <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
                         <span>{{plan.name}}</span>
                         <span>${{plan.price_dollars}}</span>
                         <span>per {{plan.per}}</span>
@@ -136,6 +136,9 @@
                 this.isProcessing = false;
                 alert('There was a problem. Please contact us at help@cactus.app.');
               }
+            },
+            isSelectedPlan(plan: PremiumPlan) {
+              return plan == this.selectedPlan
             }
         },
 
