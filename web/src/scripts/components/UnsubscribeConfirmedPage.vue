@@ -13,6 +13,7 @@
             <div v-else>
                 <h2>Sorry, we were unable to process your request.</h2>
                 <p>{{serverMessage}}</p>
+                You can always manage your notification preferences in your <a :href="accountPath">settings</a>.
             </div>
         </div>
 
