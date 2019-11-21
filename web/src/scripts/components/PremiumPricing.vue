@@ -1,8 +1,10 @@
 <template>
   <section class="premium">
       <div class="centered">
-        <h2>Introducing Premium</h2>
-        <p class="subtext">Get more from Cactus, now conveniently in your&nbsp;pocket</p>
+        <div class="textContainer">
+            <h2>Introducing Premium</h2>
+            <p class="subtext">Get more from Cactus, now conveniently in your&nbsp;pocket</p>
+        </div>
 
         <div class="tabset">
             <input type="radio" name="tabset" id="tab1" aria-controls="free" checked>
@@ -68,21 +70,21 @@
                 type: Array as () => PremiumPlan[],
                 required: true,
                 default: [
-                          { 
-                            id: Config.stripe.monthlyPlanId, 
-                            plan_param: 'm', 
-                            name: 'Monthly', 
-                            price_dollars: 2.99, 
-                            per: 'month' 
+                          {
+                            id: Config.stripe.monthlyPlanId,
+                            plan_param: 'm',
+                            name: 'Monthly',
+                            price_dollars: 2.99,
+                            per: 'month'
                           },
-                          { 
-                            id: Config.stripe.yearlyPlanId, 
-                            plan_param: 'y', 
-                            name: 'Annual', 
-                            price_dollars: 29, 
-                            per: 'year' 
+                          {
+                            id: Config.stripe.yearlyPlanId,
+                            plan_param: 'y',
+                            name: 'Annual',
+                            price_dollars: 29,
+                            per: 'year'
                           }
-                        ]   
+                        ]
           }
         },
         data(): {
@@ -97,7 +99,7 @@
               isProcessing: false,
               member: undefined,
               memberEmail: undefined,
-              memberUnsubscriber: undefined    
+              memberUnsubscriber: undefined
             }
         },
         beforeMount() {
@@ -112,13 +114,13 @@
             })
         },
         destroyed() {
-            
+
         },
         computed: {
-            
+
         },
         watch: {
-            
+
         },
         methods: {
             selectPlan(plan: PremiumPlan) {
@@ -146,20 +148,42 @@
     @import "variables";
     @import "transitions";
 
-  .premium {
-      background: #1D7A81 url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
-      color: $white;
-      padding: 4.8rem 0 0;
+    .premium {
+        background: #1D7A81;
+        color: $white;
+        padding: 4.8rem 0 0;
 
-      @include r(768) {
-          padding: 11rem 0 0;
-      }
+        @include r(768) {
+            padding: 11rem 0 0;
+        }
+
+        .centered {
+            @include r(960) {
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: center;
+                text-align: left;
+            }
+        }
+    }
+
+    .textContainer {
+        @include r(960) {
+            max-width: 32rem;
+            padding: 8rem 0 0 4.8rem;
+        }
+
+        h2 {
+            line-height: 1.1;
+            margin-bottom: .8rem;
+        }
+    }
 
       .subtext {
           padding: 0 2.4rem 2.4rem;
 
           @include r(768) {
-              padding-bottom: 4rem;
+              padding: 0 0 4rem;
           }
       }
 
@@ -171,21 +195,21 @@
               "tab1 tab2"
               "tabpanel tabpanel";
           grid-template-columns: repeat(2, 1fr);
-          margin: 0 .8rem;
+          margin: 0 2.4rem;
           text-align: left;
 
-          @include r(374) {
-              margin: 0 2.4rem;
-          }
           @include r(600) {
               margin: 0 auto;
-              max-width: 60rem;
+              max-width: 64rem;
           }
           @include r(768) {
               background-color: transparent;
               grid-template-areas: "tabpanel1 tabpanel2";
-              grid-template-columns: 29rem 34rem;
+          }
+          @include r(960) {
               margin: 0;
+          }
+          @include r(1140) {
               max-width: none;
           }
       }
@@ -333,5 +357,4 @@
               }
           }
       }
-  }
 </style>
