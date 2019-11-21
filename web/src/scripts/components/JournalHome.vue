@@ -52,7 +52,7 @@
     import {FirebaseUser} from '@web/firebase';
     import JournalEntryCard from "@components/JournalEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'

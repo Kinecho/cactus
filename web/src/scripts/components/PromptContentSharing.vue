@@ -59,7 +59,7 @@
     import {appendQueryParams} from '@shared/util/StringUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContent from "@shared/models/PromptContent"
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import {Config} from '@web/config';
     import VueClipboard from 'vue-clipboard2';
     import SharingService from '@web/services/SharingService'
