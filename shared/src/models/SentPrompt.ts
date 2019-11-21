@@ -38,6 +38,6 @@ export default class SentPrompt extends BaseModel {
     memberEmail?:string;
     sendHistory: SentPromptHistoryItem[] = [];
     promptContentEntryId?:string;
-    completed?: boolean = false;
+    completed: boolean = false;
     completedAt?: Date;
 }

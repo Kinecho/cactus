@@ -75,9 +75,7 @@ export default class AdminSentPromptService {
     }
 
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
-
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
-
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
     }
@@ -157,8 +155,6 @@ export default class AdminSentPromptService {
     //Mostly copied from the mailchimp recipient job above.
     async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<UpsertSentPromptResult> {
         try {
-
-
             console.log("processing cactus member", member.email);
             // let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address);
             if (!member.id) {
