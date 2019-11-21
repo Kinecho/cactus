@@ -32,13 +32,14 @@
                     <li>Notifications via email</li>
                     <li><span class="enhance">Notifications via push</span></li>
                 </ul>
-                <div class="flexContainer" v-for="plan in plans">
-                    <input type="radio" name="priceSet" :id="plan.id" :aria-controls="plan.name" v-bind:checked="plan.id == selectedPlan.id" @click="selectPlan(plan)">
-                    <label :for="plan.id">
+                <div class="flexContainer">
+                <template v-for="plan in plans">
+                    <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)">
                         <span>{{plan.name}}</span>
                         <span>${{plan.price_dollars}}</span>
                         <span>per {{plan.per}}</span>
-                    </label>
+                    </div>
+                </template>
                 </div>
                 <button v-bind:disabled="isProcessing" @click="puchaseSelectedPlan">Upgrade &mdash; ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}</button>
             </section>
@@ -285,6 +286,7 @@
           }
 
           button {
+              max-width: none;
               width: 100%;
           }
       }
@@ -307,7 +309,7 @@
               }
           }
 
-          label {
+          .planButton {
               background-color: transparentize($white, .9);
               border: 2px solid $darkestGreen;
               border-radius: .8rem;
