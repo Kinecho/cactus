@@ -4,12 +4,15 @@
         <div class="centered">
             <div v-if="unsubscribeSuccess">
                 <h2>Notification Settings Updated</h2>
-                <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails.</p>
-                <p>You can start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
+                <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
                 <br><br>
                 <p>
                     Interested in <b>Push Notifications</b> instead?<br>
                     <a href="/pricing">Learn about Cactus Premium</a>
+                </p>
+                <br><br>
+                <p>
+                    Have feedback or questions? <a href="mailto:help@cactus.app">help@cactus.app</a>
                 </p>
             </div>
             <div v-else>
