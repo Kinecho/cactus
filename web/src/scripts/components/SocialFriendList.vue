@@ -1,5 +1,13 @@
 <template>
     <div class="socialFriendList">
+        <div class="first-friend" v-if="referredByProfile && !isConnection(referredByProfile.cactusMemberId)">
+            People you may know
+            <friend-add
+                v-bind:member="member"
+                v-bind:friendProfile="referredByProfile"
+                v-bind:key="referredByProfile.memberId" 
+            />
+        </div>
         <div v-if="friendRequests.length > 0">
             <h2>Friend Requests</h2>
             <friend-request 
@@ -26,8 +34,11 @@
     import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from "@web/services/MemberProfileService";
     import SocialFriend from "@components/SocialFriend.vue";
     import SocialFriendRequest from "@components/SocialFriendRequest.vue";
+    import SocialFriendAdd from "@components/SocialFriendAdd.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -37,7 +48,8 @@
     export default Vue.extend({
         components: {
             friend: SocialFriend,
-            friendRequest: SocialFriendRequest
+            friendRequest: SocialFriendRequest,
+            friendAdd: SocialFriendAdd
         },
         props: {
             member: {type: Object as () => CactusMember},
@@ -48,17 +60,19 @@
             friendRequests: Array<any>,
             friends: Array<any>,
             friendRequestsUnsubscriber?: ListenerUnsubscriber,
-            friendsUnsubscriber?: ListenerUnsubscriber
+            friendsUnsubscriber?: ListenerUnsubscriber,
+            referredByProfile?: MemberProfile
         } {
             return {
                 friendRequests: [],
                 friends: [],
                 friendRequestsUnsubscriber: undefined,
-                friendsUnsubscriber: undefined
+                friendsUnsubscriber: undefined,
+                referredByProfile: undefined
             }
         },
         computed: {
-            
+     
         },
         watch: {
             member: async function() {
@@ -74,11 +88,24 @@
                                 this.friends = socialConnections;
                             }
                         });
+
+                    if (this.member.referredByEmail) {
+                        this.referredByProfile = await MemberProfileService.sharedInstance.getByEmail(this.member.referredByEmail);
+                    }
                 }
             }
         },
         methods: {
-        
+            isConnection(friendId: string): boolean {
+                if (this.friends) {
+                    for(let x=0; x < this.friends.length; x++) {
+                        if (this.friends[x].memberId == friendId || this.friends[x].friendId == friendId) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }   
         },
         destroyed() {
             if (this.friendsUnsubscriber) {

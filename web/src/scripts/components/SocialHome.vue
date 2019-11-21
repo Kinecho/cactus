@@ -3,20 +3,8 @@
         <NavBar/>
         <div class="centered">
             <div class="contentContainer">
-
-                <!-- if brand new -->
-                <transition name="fade-in" mode="out-in">
-                    <div class="brandNew" v-if="currentChild == 'welcome'">
-                        <h1>Reflect with Friends</h1>
-                        <p class="subtext">Connect and see when you reflect on the same prompt. Easily share, discuss, and grow&nbsp;<i>together</i>.</p>
-                        <button class="getStarted" @click.prevent="setVisible('findFriends')">Get Started</button>
-                    </div>
-
-                    <SocialFindFriends v-if="currentChild == 'findFriends'"/>
-                    <SocialActivityFeed v-if="currentChild == 'activityFeed'"/>
-
-                <!-- end -->
-                </transition>
+                <SocialFindFriends v-if="currentChild == 'findFriends'"/>
+                <SocialActivityFeed v-if="currentChild == 'activityFeed'"/>
             </div>
 
         </div>
