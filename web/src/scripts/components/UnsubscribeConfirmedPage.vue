@@ -61,10 +61,19 @@
 
     .wrapper {
         min-height: 100vh;
-        .centered {
-            max-width: 900px;
-            margin-top: 5rem;
 
+        .centered {
+            margin: 3.2rem;
+
+            @include r(768) {
+                margin: 6.4rem auto;
+                max-width: 60rem;
+            }
+        }
+
+        h2 {
+            line-height: 1.1;
+            margin-bottom: .8rem;
         }
     }
 
