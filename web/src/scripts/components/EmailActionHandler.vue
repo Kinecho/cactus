@@ -1,10 +1,12 @@
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
-import {EmailActionMode} from '@web/firebase'
 <template>
     <div class="root centered">
         <NavBar/>
-        <div class="centered wrapper">
+        <div class="loading" v-if="loading">
+            <div>
+                <Spinner message="Loading..."/>
+            </div>
+        </div>
+        <div class="centered wrapper" v-else>
             <div class="success alert" v-if="successMessage">
                 {{successMessage}}
             </div>
@@ -13,7 +15,6 @@ import {EmailActionMode} from '@web/firebase'
             </div>
             <section v-if="mode === 'recoverEmail'" class="recoverEmail">
                 <h2>Recover Email</h2>
-
             </section>
             <section v-if="mode === 'resetPassword' && !showPasswordResetButton" class="resetPassword">
                 <form v-on:submit.prevent="handleResetPassword">
@@ -39,7 +40,7 @@ import {EmailActionMode} from '@web/firebase'
             </section>
 
 
-            <a class="button" v-show="showContinueButton" :href="continueUrl">Continue</a>
+            <a class="button" v-show="showContinueButton" :href="continueUrl">{{continueText}}</a>
         </div>
 
     </div>
@@ -54,10 +55,12 @@ import {EmailActionMode} from '@web/firebase'
     import {EmailActionMode, getAuth} from '@web/firebase'
     import {PageRoute} from '@shared/PageRoutes'
     import {appendQueryParams} from '@shared/util/StringUtil'
+    import Spinner from "@components/Spinner.vue"
 
     export default Vue.extend({
         components: {
             NavBar: NavBar,
+            Spinner,
         },
         async created(): Promise<void> {
             const mode: EmailActionMode | null | undefined = getQueryParam(QueryParam.MODE) as EmailActionMode | undefined | null;
@@ -74,12 +77,15 @@ import {EmailActionMode} from '@web/firebase'
             switch (mode) {
                 case EmailActionMode.recoverEmail:
                     await this.handleRecoverEmail();
+                    this.loading = false;
                     break;
                 case EmailActionMode.resetPassword:
                     await this.verifyPasswordResetCode();
+                    this.loading = false;
                     break;
                 case EmailActionMode.verifyEmail:
                     await this.handleVerifyEmail();
+                    this.loading = false;
                     break;
                 case EmailActionMode.signIn:
                     const continueUrl = getQueryParam(QueryParam.CONTINUE_URL) || PageRoute.LOGIN;
@@ -93,6 +99,12 @@ import {EmailActionMode} from '@web/firebase'
                     window.location.assign(url);
                     break;
                 default:
+                    console.error("No valid code was found");
+                    this.error ="Invalid link.";
+                    this.loading = false;
+                    this.showContinueButton = true;
+                    this.continueUrl = "/";
+                    this.continueText = "Go Home";
                     break;
             }
 
@@ -110,6 +122,8 @@ import {EmailActionMode} from '@web/firebase'
             showPasswordResetButton: boolean,
             passwordResetEmail?: string | null,
             submitting: boolean,
+            loading: boolean,
+            continueText: string,
         } {
             return {
                 mode: undefined,
@@ -124,6 +138,8 @@ import {EmailActionMode} from '@web/firebase'
                 showPasswordResetButton: false,
                 passwordResetEmail: undefined,
                 submitting: false,
+                loading: true,
+                continueText: "Continue",
             }
         },
         methods: {
@@ -313,17 +329,21 @@ import {EmailActionMode} from '@web/firebase'
         min-height: 100vh;
     }
 
+    .loading {
+        margin-top: 20rem;
+    }
+
 
     .wrapper {
         @include shadowbox;
-        margin: 0 auto;
+        margin: 3rem auto;
         max-width: 60rem;
         padding: 3rem;
 
         .alert {
             padding: 1rem;
             border-radius: 1rem;
-            border-width: 1px;
+            border-width: 0px;
             border-style: solid;
             margin-bottom: 2rem;
 
@@ -339,12 +359,9 @@ import {EmailActionMode} from '@web/firebase'
                 border-color: $darkestGreen;
             }
         }
-
-
     }
 
     section {
-
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -354,8 +371,13 @@ import {EmailActionMode} from '@web/firebase'
             margin-bottom: 1.6rem;
         }
 
-        input {
-            margin-bottom: 1.6rem;
+        input, input[type=password] {
+            margin-bottom: 1.2rem;
+            margin-right: 0;
+        }
+
+        button {
+            margin-top: 1rem;
         }
     }
 </style>

@@ -1,15 +1,15 @@
+// @ts-ignore
+import $COMPONENT$ from "@components/$COMPONENT$"
 import Vue from "vue";
-import EmailActionHandler from "@components/EmailActionHandler.vue";
-
 import {commonInit} from "@web/common";
 
 commonInit();
 
 new Vue({
     el: "#app",
-    template: '<EmailAction/>',
+    template: `<$COMPONENT$/>`,
     components: {
-        EmailAction: EmailActionHandler
+        $COMPONENT$,
     }
 });
 

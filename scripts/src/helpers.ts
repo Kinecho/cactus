@@ -1,12 +1,12 @@
 const path = require("path");
 const scriptsRoot = path.resolve(__dirname, "..");
-const webHelpers = require("../../web/helpers.js");
+const webHelpers = require("@web-root/helpers.js");
 const commandsDirRelativeToSource = "commands";
 
 const publicCommandsDirRelativeToSource =`${commandsDirRelativeToSource}`;
-
+const projectRoot = path.resolve(scriptsRoot, "..");
 export default {
-    projectRoot: path.resolve(scriptsRoot, ".."),
+    projectRoot: projectRoot,
     scriptsRoot: scriptsRoot,
     srcDir: path.resolve(scriptsRoot, "src"),
     dataDir: path.resolve(scriptsRoot, "src", "data"),
@@ -17,4 +17,5 @@ export default {
     sharedDir: path.resolve(scriptsRoot, "..", "shared"),
     outputDir: path.resolve(scriptsRoot, "output"),
     webHelpers,
+    appAssociationFile: path.resolve(projectRoot, "apple-app-site-association")
 }

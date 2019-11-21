@@ -98,7 +98,9 @@ const defaultTestConfig: CactusConfig = {
         protocol: "https"
     },
     ios: {
-        bundle_id: "com.cactus.TestApp"
+        bundle_id: "com.cactus.TestApp",
+        team_id: "XYZ123",
+        app_id: "XYZ123.com.cactus.TestApp",
     },
     bigquery_service_account: {
         "type": "service_account",

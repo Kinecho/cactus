@@ -1,13 +1,20 @@
-import {init as initAnalytics, startFullstory} from '@web/analytics'
+import {init as initAnalytics} from '@web/analytics';
+import {startFacebookPixel} from '@web/facebook.js';
 import {initializeFirebase} from "@web/firebase";
 import {getAllQueryParams, getQueryParam} from "@web/util";
 import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
+let hasCommonInit = false;
 
 export function commonInit() {
+    if (hasCommonInit) {
+        console.warn("Common already initialized, not reinitializing");
+        return;
+    }
+
     initAnalytics();
-    startFullstory();
+    startFacebookPixel();
 
     initializeFirebase();
 
@@ -53,6 +60,8 @@ export function commonInit() {
         //Nothing to do here
 
     });
+
+    hasCommonInit = true;
 
 }
 

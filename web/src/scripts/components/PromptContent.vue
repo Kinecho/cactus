@@ -853,7 +853,6 @@
                     height: 4.8rem;
                     justify-content: center;
                     margin: 0 1%;
-
                     top: 30vh;
                     width: 4.8rem;
 
@@ -868,15 +867,13 @@
                 }
 
                 @include r(768) {
-                    left: 0;
                     margin: auto;
-                    right: 0;
 
                     &.previous {
-                        transform: translateX(-32rem);
+                        left: -11rem;
                     }
                     &.next {
-                        transform: translateX(32rem);
+                        right: -11rem;
                     }
                 }
 

@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import {promisify} from "util";
 import {getFilenameFromInput} from "@shared/util/StringUtil";
+import {InputResponse} from "@scripts/commands/CreateLandingPage";
 
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +15,7 @@ export interface PageEntry {
     path?: string,
     title: string,
     name: string,
-    includeInDev?:boolean,
+    includeInDev?: boolean,
     reflectionPrompt?: boolean,
     indexPath?: boolean,
 }
@@ -27,7 +28,6 @@ export interface PageConfig {
     pageName: string,
     title: string,
     pagePath: string,
-    reflectionPrompt: boolean,
     indexPath?: boolean,
 }
 
@@ -54,7 +54,6 @@ export function validateUrl(input: string): boolean | string {
 
     return `This URL is already mapped. Please choose a new URL.`;
 }
-
 
 
 export interface FirebaseConfig {
@@ -93,24 +92,11 @@ export async function updatePagesFile(response: PageConfig): Promise<void> {
     if (pages[response.pageName]) {
         console.warn("A Page with the same key already exists in pages.js");
     }
-    const newPage:PageEntry = {
+    const newPage: PageEntry = {
         title: response.title,
         path: response.pagePath,
-        reflectionPrompt: response.reflectionPrompt,
-        includeInDev: true,
         name: response.pageName,
     };
-
-    if (response.reflectionPrompt){
-        //turning off all other pages in dev
-        Object.keys(pages).forEach(title => {
-            const page = pages[title];
-            if (page.reflectionPrompt && page.includeInDev){
-                page.includeInDev = false;
-            }
-        });
-    }
-
 
     pages[response.pageName] = newPage;
 
@@ -143,27 +129,49 @@ export async function addToSitemap(response: PageConfig): Promise<void> {
     return;
 }
 
-export async function createJS(response: PageConfig): Promise<void> {
+export async function createJS(response: InputResponse): Promise<void> {
     const outputFilePath = `${webHelpers.pagesScriptsDir}/${response.pageName}.ts`;
-// console.log("creating js file with response = ", response);
     console.log("creating javascript file from template:\n", chalk.blue(outputFilePath), "\n");
 
-    const templateFile = path.resolve(webHelpers.srcDir, "templates", "page_script.ts");
+    const templateFileName = response.createVueComponent ? "page_component_template.ts" : "page_script.ts";
+    const templateFile = path.resolve(webHelpers.srcDir, "templates", templateFileName);
 
     const data = await readFile(templateFile, {encoding: 'utf8'});
-    const content = data.replace(/\$PAGE_NAME\$/g, response.pageName);
+    const content = data.replace(/\$PAGE_NAME\$/g, response.pageName).replace(/\$COMPONENT\$/g, response.componentName);
 
     await writeFile(outputFilePath, content, 'utf8');
+    return;
+}
+
+
+export async function createVueComponent(response: InputResponse): Promise<void> {
+    const outputFilePath = `${webHelpers.componentsDir}/${response.componentName}.vue`;
+// console.log("creating js file with response = ", response);
+    console.log("creating vue file from template:\n", chalk.blue(outputFilePath), "\n");
+
+    const templateFile = path.resolve(webHelpers.srcDir, "templates", "component_template.vue");
+
+    const data = await readFile(templateFile, {encoding: 'utf8'});
+    // const content = data.replace(/\$PAGE_NAME\$/g, response.pageName);
+
+    await writeFile(outputFilePath, data, 'utf8');
     return;
 
 }
 
+/**
+ * @Deprecated
+ * This is no longer used
+ * @param {PageConfig} response
+ * @return {Promise<void>}
+ */
 export async function createScss(response: PageConfig): Promise<void> {
-    const templateFile = path.resolve(webHelpers.srcDir, "templates", "page_style.scss");
-    const scssFilePath = `${webHelpers.pagesStylesDir}/${response.pageName}.scss`;
-    console.log("creating SCSS file\n", chalk.blue(scssFilePath), "\n");
-
-    const data = await readFile(templateFile, {encoding: 'utf8'});
-    await writeFile(scssFilePath, data);
+    //We don't use this anymore
+    // const templateFile = path.resolve(webHelpers.srcDir, "templates", "page_style.scss");
+    // const scssFilePath = `${webHelpers.pagesStylesDir}/${response.pageName}.scss`;
+    // console.log("creating SCSS file\n", chalk.blue(scssFilePath), "\n");
+    //
+    // const data = await readFile(templateFile, {encoding: 'utf8'});
+    // await writeFile(scssFilePath, data);
     return;
 }

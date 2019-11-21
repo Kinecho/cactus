@@ -23,7 +23,7 @@ export interface CactusConfig {
     },
     sentry: {
         api_token: string,
-        functions_dsn:string,
+        functions_dsn: string,
         release?: string,
     },
     slack: {
@@ -36,7 +36,7 @@ export interface CactusConfig {
             activity: string,
             data_log: string,
             ci: string,
-            [key: string] : string,
+            [key: string]: string,
         }
         app: {
             app_id: string,
@@ -70,6 +70,8 @@ export interface CactusConfig {
     },
     ios: {
         bundle_id: string,
+        team_id: string,
+        app_id: string,
     },
     sendgrid: {
         api_key: string,

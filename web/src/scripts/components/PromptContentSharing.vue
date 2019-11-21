@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="content-sharing centered">
         <div class="info">
-            <img class="graphic" src="/assets/images/friend2.svg" alt="Two friends running, one with a green hat"/>
+            <img class="graphic" src="/assets/images/shareFriends.png" alt="Two blobs smiling at one another"/>
             <h2>Share With Friends</h2>
             <p>
                 {{meta.title}}
@@ -77,7 +77,7 @@
             })
         },
         mounted() {
-            
+
         },
         props: {
             promptContent: {
@@ -220,17 +220,9 @@
             height: 100%;
         }
 
-        &.centered {
-            margin: -.8rem;
-
-            @include r(600) {
-                margin: 0;
-            }
-        }
-
         .graphic {
             margin-bottom: 1.6rem;
-            width: 50%;
+            width: 90%;
 
             @include r(374) {
                 margin-bottom: 3.2rem;
