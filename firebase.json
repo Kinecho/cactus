@@ -70,6 +70,10 @@
         ],
         "rewrites": [
             {
+                "source": "/pricing",
+                "destination": "/pricing.html"
+            },
+            {
                 "source": "/apple-app-site-association",
                 "destination": "/.well-known/apple-app-site-association"
             },
