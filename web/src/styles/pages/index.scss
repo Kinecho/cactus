@@ -500,7 +500,7 @@ h1, h2 {
     .tabset > label {
         background-color: darken($darkestGreen, 5%);
         cursor: pointer;
-        font-size: 2.4rem;
+        font-size: 2rem;
         font-weight: bold;
         padding: 1.6rem;
         text-align: center;
@@ -514,6 +514,7 @@ h1, h2 {
 
         @include r(768) {
             background-color: transparent;
+            font-size: 2.4rem;
             text-align: left;
         }
     }
@@ -544,16 +545,13 @@ h1, h2 {
         }
 
         ul {
-            align-items: flex-start;
-            display: flex;
-            flex-direction: column;
             list-style: none;
-            margin: 0 0 3.2rem -.8rem;
+            margin: 0 0 3.2rem -.6rem;
         }
 
         li {
             margin-bottom: 1.2rem;
-            text-indent: -3.2rem;
+            text-indent: -3.4rem;
 
             &:before {
                 background-image: url(assets/images/check.svg);
@@ -573,7 +571,8 @@ h1, h2 {
     }
 
     .enhance {
-        background: linear-gradient($royal, $royal) 3.1rem 80%/100% .8rem no-repeat;
+        background: linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat;
+        display: inline;
         padding-right: .2rem;
     }
 
