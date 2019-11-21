@@ -16,6 +16,8 @@ export enum SentPromptField {
     mailchimpMemberId = "mailchimpMemberId",
     sendHistory = "sendHistory",
     memberEmail = "memberEmail",
+    completed = "completed",
+    completedAt = "completedAt",
 }
 
 export interface SentPromptHistoryItem {

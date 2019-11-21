@@ -1,14 +1,16 @@
 import * as firebaseAdmin from "firebase-admin";
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import {BaseModel, BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {fromDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
-import DocumentReference = firebaseAdmin.firestore.DocumentReference;
-import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
-import Timestamp = firebaseAdmin.firestore.Timestamp;
 import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import DocumentReference = firebaseAdmin.firestore.DocumentReference;
+import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
+import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
+
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
@@ -46,6 +48,8 @@ export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
 export function getDefaultOptions(): SaveOptions {
     return {...DEFAULT_SAVE_OPTIONS}
 }
+
+export const DEFAULT_BATCH_SIZE = 500;
 
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
@@ -117,7 +121,7 @@ export default class AdminFirestoreService {
         return model;
     }
 
-    async runTransaction(updateFunction: (transaction: Transaction) => Promise<{}>, options?: {maxAttempts: number|undefined}): Promise<{}> {
+    async runTransaction(updateFunction: (transaction: Transaction) => Promise<{}>, options?: { maxAttempts: number | undefined }): Promise<{}> {
         return this.firestore.runTransaction(async t => {
             return updateFunction(t)
         }, options)
@@ -143,7 +147,7 @@ export default class AdminFirestoreService {
 
             const data = await model.toFirestoreData();
             // console.log("Data to save:", JSON.stringify(data));
-            if (options.transaction){
+            if (options.transaction) {
                 await options.transaction.set(doc, data, {merge: true})
             } else {
                 await doc.set(data, {merge: true});
@@ -163,9 +167,9 @@ export default class AdminFirestoreService {
 
         const docRef = collection.doc(id);
         let doc;
-        if (options.transaction){
+        if (options.transaction) {
             doc = await options.transaction.get(docRef)
-        }else {
+        } else {
             doc = await docRef.get();
         }
 
@@ -233,6 +237,40 @@ export default class AdminFirestoreService {
             return {size: 0, results: [], error: e};
         }
 
+    }
+
+    async executeBatchedQuery<T extends BaseModel>(options: {
+        query: FirebaseFirestore.Query,
+        type: { new(): T }
+        batchSize?: number,
+        onData: (sentPrompts: T[], batchNumber: number) => Promise<void>,
+        orderBy?: string,
+        sortDirection?: QuerySortDirection,
+    }) {
+        const {query, type} = options;
+        let batchNumber = 0;
+        let results = await this.executeQuery(query, type, {
+            pagination: {
+                limit: options.batchSize || DEFAULT_BATCH_SIZE,
+                sortDirection: options.sortDirection || QuerySortDirection.asc,
+                orderBy: options.orderBy || BaseModelField.createdAt,
+            }
+        });
+        console.log(`Fetched ${results.size} sentPrompts in batch ${batchNumber}`);
+        await options.onData(results.results, 0);
+        while (results.results.length > 0 && results.lastCursor) {
+            batchNumber++;
+            results = await this.executeQuery(query, type, {
+                pagination: {
+                    startAfter: results.lastCursor,
+                    limit: options.batchSize || DEFAULT_BATCH_SIZE,
+                    orderBy: options.orderBy || BaseModelField.createdAt,
+                    sortDirection: options.sortDirection || QuerySortDirection.asc,
+                }
+            });
+            console.log(`Fetched ${results.size} results in batch ${batchNumber}`);
+            await options.onData(results.results, batchNumber);
+        }
     }
 
     async delete<T extends BaseModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
