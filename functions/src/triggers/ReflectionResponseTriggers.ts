@@ -86,13 +86,23 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
                 return;
             }
 
-            if (sentPrompt.completed) {
+            if (sentPrompt.completed && !reflectionResponse.deleted) {
                 console.info("Sent prompt already completed");
                 return;
             }
 
+            let isComplete = !reflectionResponse.deleted;
+
+            //get all responses to ensure it's completed
+            //if any reflections are found that are _not_ deleted, then this sent prompt is still considered completed
+            if (reflectionResponse.deleted) {
+                const allResponses = await AdminReflectionResponseService.getSharedInstance().getMemberResponsesForPromptId({memberId, promptId})
+                const anyCompleted = allResponses.find(r => !r.deleted);
+                isComplete = !!anyCompleted
+            }
+
             //set completed and completedAt
-            sentPrompt.completed = true;
+            sentPrompt.completed = isComplete;
             sentPrompt.completedAt = new Date();
             const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
 
