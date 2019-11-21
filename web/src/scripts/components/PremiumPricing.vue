@@ -53,7 +53,10 @@
     import {Config} from "@web/config";
     import {PageRoute} from '@web/PageRoutes';
     import {PremiumPlan} from '@shared/types/PlanTypes';
+    import CactusMember from "@shared/models/CactusMember";
+    import CactusMemberService from '@web/services/CactusMemberService';
     import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
 
     export default Vue.extend({
         created() {
@@ -79,19 +82,33 @@
                             per: 'year' 
                           }
                         ]   
-          },
+          }
         },
         data(): {
           selectedPlan: PremiumPlan | undefined,
           isProcessing: boolean,
+          member: CactusMember | undefined | null,
+          memberEmail: string | undefined,
+          memberUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
               selectedPlan: this.plans[0],
-              isProcessing: false    
+              isProcessing: false,
+              member: undefined,
+              memberEmail: undefined,
+              memberUnsubscriber: undefined    
             }
         },
         beforeMount() {
-            
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.member = member;
+
+                    if (this.member?.email) {
+                      this.memberEmail = this.member.email;
+                    }
+                }
+            })
         },
         destroyed() {
             
@@ -111,7 +128,7 @@
 
               if (this.selectedPlan && this.selectedPlan.id) {
                 configureStripe('checkout-button', this.selectedPlan.id);
-                await redirectToCheckoutWithPlanId(this.selectedPlan.id);
+                await redirectToCheckoutWithPlanId(this.selectedPlan.id, this.memberEmail);
               } else {
                 this.isProcessing = false;
                 alert('There was a problem. Please contact us at help@cactus.app.');

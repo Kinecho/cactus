@@ -56,7 +56,8 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
 
 
 
-export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.monthlyPlanId) {
+export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.monthlyPlanId, 
+                                                   memberEmail:string|undefined|null=getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS)) {
     const stripe = Stripe(Config.stripe.apiKey);
 
     const stripeOptions:any = {
@@ -75,9 +76,8 @@ export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.m
         cancelUrl: `${Config.domain}`,
     };
 
-    const email = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-    if (email){
-        stripeOptions.customerEmail = email;
+    if (memberEmail){
+        stripeOptions.customerEmail = memberEmail;
     }
 
     console.log("stripe options:", stripeOptions);
