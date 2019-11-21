@@ -51,6 +51,58 @@ export const updateReflectionStatsTrigger = functions.firestore
         }
     });
 
+export const updateSentPromptOnReflectionWrite = functions.firestore
+    .document(`${Collection.reflectionResponses}/{responseId}`)
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+        console.log("starting updateSentPromptOnReflectionWrite");
+        try {
+            const snapshot = change.after;
+            if (!snapshot) {
+                console.warn("No snapshot was found in the change event");
+                return
+            }
+
+            const reflectionResponse = fromDocumentSnapshot(snapshot, ReflectionResponse);
+            if (!reflectionResponse) {
+                console.error(`Unable to de-serialize the reflection response for snapshot.id = ${snapshot.id}`);
+                return;
+            }
+
+            console.log(`Processing reflection response ${reflectionResponse.id}`);
+            const promptId = reflectionResponse.promptId;
+            const memberId = reflectionResponse.cactusMemberId;
+
+            if (!promptId || !memberId) {
+                console.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
+                return;
+            }
+
+            const sentPrompt = await AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({
+                cactusMemberId: memberId,
+                promptId: promptId
+            });
+            if (!sentPrompt) {
+                console.info(`No sent prompt found for memberId = ${memberId} and promptId = ${promptId}. ReflectionResponseId = ${reflectionResponse.id}`);
+                return;
+            }
+
+            if (sentPrompt.completed) {
+                console.info("Sent prompt already completed");
+                return;
+            }
+
+            //set completed and completedAt
+            sentPrompt.completed = true;
+            sentPrompt.completedAt = new Date();
+            const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+
+            console.log(`Successfully saved sentPrompt.id ${saved.id} for member ${memberId} and promptId ${promptId}`);
+            return;
+        } catch (error) {
+            console.error("Failed to process the ReflectionResponse.");
+        }
+    });
+
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
  * @type {CloudFunction<DocumentSnapshot>}
@@ -192,6 +244,8 @@ async function createSentPromptIfNeeded(options: { member?: CactusMember, prompt
                 medium: PromptSendMedium.PROMPT_CONTENT,
             })
         }
+        sentPrompt.completed = true;
+        sentPrompt.completedAt = new Date();
 
         const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
         return {sentPrompt: saved, created: true};
