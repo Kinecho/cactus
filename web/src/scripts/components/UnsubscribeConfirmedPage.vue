@@ -2,18 +2,13 @@
     <div class="wrapper">
         <NavBar/>
         <div class="centered">
-            <div v-if="unsubscribeSuccess">
+            <div class="leftAlign" v-if="unsubscribeSuccess">
                 <h2>Notification Settings Updated</h2>
                 <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
-                <br><br>
-                <p>
-                    Interested in <b>Push Notifications</b> instead?<br>
-                    <a href="/pricing">Learn about Cactus Premium</a>
-                </p>
-                <br><br>
-                <p>
-                    Have feedback or questions? <a href="mailto:help@cactus.app">help@cactus.app</a>
-                </p>
+                <h3>Interested in Push Notifications instead?</h3>
+                <p>Learn about <a href="/pricing">Cactus Premium</a></p>
+                <h3>Have feedback or questions?</h3>
+                <p>Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
             </div>
             <div v-else>
                 <h2>Sorry, we were unable to process your request.</h2>
@@ -80,9 +75,21 @@
             }
         }
 
+        .leftAlign {
+            text-align: left;
+        }
+
         h2 {
             line-height: 1.1;
             margin-bottom: .8rem;
+        }
+
+        h3 {
+            margin-bottom: .4rem;
+        }
+
+        p {
+            margin: 0 0 3.2rem;
         }
     }
 
