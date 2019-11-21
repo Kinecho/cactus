@@ -3,6 +3,10 @@
 @import "~styles/common";
 @import "~styles/simplyCentered";
 
+header {
+  border-bottom: none;
+}
+
 .message {
   max-width: 720px;
   line-height: 1.5em;
