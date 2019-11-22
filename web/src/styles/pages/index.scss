@@ -359,7 +359,7 @@ h1, h2 {
     }
 
     em {
-        background-color: $yellow;
+        background: linear-gradient(rgba(101, 144, 237, 0.6), rgba(101, 144, 237, 0.6)) 0 90%/100% 0.8rem no-repeat;
         font-style: normal;
         padding: .2rem;
     }
