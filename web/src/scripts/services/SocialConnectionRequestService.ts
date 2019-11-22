@@ -76,7 +76,7 @@ export default class SocialConnectionRequestService {
                       friendConnection.memberId = connectionRequest.friendMemberId;
                       friendConnection.friendMemberId = connectionRequest.memberId;
 
-                const resultFriend = await SocialConnectionService.sharedInstance.save(memberConnection);
+                const resultFriend = await SocialConnectionService.sharedInstance.save(friendConnection);
 
                 return await this.save(connectionRequest);
             });
