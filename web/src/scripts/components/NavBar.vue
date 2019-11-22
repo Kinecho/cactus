@@ -46,7 +46,7 @@
     import Vue from "vue";
     import {FirebaseUser, getAuth} from '@web/firebase'
     import {getInitials} from '@shared/util/StringUtil'
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {logout} from '@web/auth'

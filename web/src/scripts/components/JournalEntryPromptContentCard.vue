@@ -72,7 +72,7 @@
     import PromptContent, {Content, ContentType, Image} from "@shared/models/PromptContent"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import PromptContentService from '@web/services/PromptContentService'
-    import {PageRoute} from "@web/PageRoutes"
+    import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
     import SentPrompt from "@shared/models/SentPrompt"
     import {formatDate} from "@shared/util/DateUtil"

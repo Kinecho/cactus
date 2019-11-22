@@ -1,9 +1,9 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
+import SentPrompt, {PromptSendMedium, SentPromptField} from "@shared/models/SentPrompt";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {getDateFromISOString} from "@shared/util/DateUtil";
@@ -75,9 +75,7 @@ export default class AdminSentPromptService {
     }
 
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
-
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
-
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
     }
@@ -157,8 +155,6 @@ export default class AdminSentPromptService {
     //Mostly copied from the mailchimp recipient job above.
     async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<UpsertSentPromptResult> {
         try {
-
-
             console.log("processing cactus member", member.email);
             // let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address);
             if (!member.id) {
@@ -384,7 +380,29 @@ export default class AdminSentPromptService {
             return total + num
         }, 0);
 
-        console.log(`Permanently deleted ${totalDeleted} sent prompts for member ${member.email || member.id}`)
+        console.log(`Permanently deleted ${totalDeleted} sent prompts for member ${member.email || member.id}`);
         return totalDeleted
+    }
+
+    async getAllBatch(options: {
+        batchSize?: number,
+        excludeCompleted?: boolean
+        onData: (sentPrompts: SentPrompt[], batchNumber: number) => Promise<void>
+    }) {
+        console.log("Getting batched result 1 for all members");
+        let query:FirebaseFirestore.Query = this.getCollectionRef();
+
+        if (options.excludeCompleted === true) {
+            query = query.where(SentPromptField.completed, "==", false);
+        }
+
+        await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
+            query,
+            type: SentPrompt,
+            onData: options.onData,
+            batchSize: options.batchSize,
+            sortDirection: QuerySortDirection.asc,
+            orderBy: BaseModelField.createdAt
+        })
     }
 }

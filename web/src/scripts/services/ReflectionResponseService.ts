@@ -7,7 +7,7 @@ import CactusMember from "@shared/models/CactusMember";
 import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {getStreak} from "@shared/util/DateUtil";
 import {Config} from "@web/config";
-import {PageRoute} from "@web/PageRoutes";
+import {PageRoute} from "@shared/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 

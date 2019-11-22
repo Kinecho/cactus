@@ -78,6 +78,10 @@
                 "destination": "/.well-known/apple-app-site-association"
             },
             {
+                "source": "/unsubscribe-confirmed",
+                "destination": "/unsubscribe_confirmed.html"
+            },
+            {
                 "source": "/reflection/**",
                 "destination": "/shared_reflection.html"
             },

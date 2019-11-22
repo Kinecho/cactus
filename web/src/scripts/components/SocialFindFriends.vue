@@ -95,7 +95,7 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {PageRoute} from '@web/PageRoutes';
+    import {PageRoute} from '@shared/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
 
     Vue.use(VueClipboard);

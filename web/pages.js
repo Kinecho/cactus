@@ -89,5 +89,12 @@ module.exports = {
         "title": "Pricing",
         "path": "/pricing",
         "name": "pricing"
+    },
+    "unsubscribe_confirmed": {
+        "title": "Unsubscribe Confirmed",
+        "path": "/unsubscribe-confirmed",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "unsubscribe_confirmed"
     }
 }
