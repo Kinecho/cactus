@@ -6,7 +6,7 @@ import {QueryParam} from "@shared/util/queryParams";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import {Endpoint, request} from "@web/requestUtils";
 import {gtag} from "@web/analytics";
-import StripeCheckoutOptions = stripe.StripeCheckoutOptions;
+import StripeCheckoutOptions = stripe.StripeClientCheckoutOptions;
 
 export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessionRequest, errorElementId:string|undefined="stripe-error-message"):Promise<any|null|undefined> {
     const stripe = Stripe(Config.stripe.apiKey);
@@ -38,7 +38,7 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
         });
 
 
-        const result = await stripe.redirectToCheckout(stripeOptions as StripeCheckoutOptions);
+        const result = await stripe.redirectToCheckout(stripeOptions);
 
         if (result.error) {
             // If `redirectToCheckout` fails due to a browser or network
@@ -60,7 +60,7 @@ export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.m
                                                    memberEmail:string|undefined|null=getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS)) {
     const stripe = Stripe(Config.stripe.apiKey);
 
-    const stripeOptions:any = {
+    const stripeOptions:StripeCheckoutOptions = {
         items: [
             {
                 plan: planId, quantity: 1
