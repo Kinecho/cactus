@@ -3,6 +3,12 @@ declare module '*.vue' {
     export default Vue;
 }
 
+
+declare module 'vue-virtual-scroll-list' {
+    import Vue from "vue";
+    export default Vue;
+}
+
 declare module 'vue-clipboard2' {
   import { PluginObject } from 'vue';
   const VueClipboard: PluginObject<any>;

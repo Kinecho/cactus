@@ -48,6 +48,7 @@
                     onData: prompt => {
                         this.prompt = prompt;
                         this.promptLoaded = true;
+                        this.$emit('loaded')
                     }
                 });
 
@@ -55,6 +56,7 @@
                     onData: responses => {
                         this.responses = responses;
                         this.responsesLoaded = true;
+                        this.$emit('loaded')
                     }
                 })
             } else {

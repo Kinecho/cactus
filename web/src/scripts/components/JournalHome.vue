@@ -15,19 +15,21 @@
                 <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the day.</p>
+                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the
+                            day.</p>
                         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                     </section>
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && sentPrompts.length > 0">
                     <section class="journalList">
-                        <transition-group
-                                tag="div"
-                                appear
-                                v-bind:css="false"
-                                v-on:before-enter="beforeEnter"
-                                v-on:enter="enter">
+                        <!--                        <transition-group-->
+                        <!--                                tag="div"-->
+                        <!--                                appear-->
+                        <!--                                v-bind:css="false"-->
+                        <!--                                v-on:before-enter="beforeEnter"-->
+                        <!--                                v-on:enter="enter">-->
+                        <virtual-list :size="220" :remain="8" :pagemode="true" ref="virtualList">
                             <entry
                                     class="journalListItem"
                                     v-for="(sentPrompt, index) in sentPrompts"
@@ -35,8 +37,11 @@
                                     v-bind:index="index"
                                     v-bind:key="sentPrompt.id"
                                     v-bind:data-index="index"
+                                    @loaded="dataLoaded(index)"
                             ></entry>
-                        </transition-group>
+                        </virtual-list>
+
+                        <!--                        </transition-group>-->
                     </section>
                 </div>
             </transition>
@@ -60,6 +65,7 @@
     import SentPromptService from '@web/services/SentPromptService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
+    import virtualList from 'vue-virtual-scroll-list'
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -73,7 +79,18 @@
     }
 
     export default Vue.extend({
-        created() {
+        components: {
+            NavBar,
+            entry: JournalEntryCard,
+            AutoPromptContentModal,
+            SkeletonCard,
+            'virtual-list': virtualList,
+        },
+        props: {
+            loginPath: {type: String, default: PageRoute.SIGNUP},
+            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
+        },
+        beforeMount() {
             console.log("Journal Home calling Created function");
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
@@ -100,16 +117,7 @@
                 }
             });
         },
-        components: {
-            NavBar,
-            entry: JournalEntryCard,
-            AutoPromptContentModal,
-            SkeletonCard,
-        },
-        props: {
-            loginPath: {type: String, default: PageRoute.SIGNUP},
-            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
-        },
+
         data(): JournalHomeData {
             return {
                 cactusMember: undefined,
@@ -153,6 +161,10 @@
 
         },
         methods: {
+            dataLoaded(index: number) {
+                console.log("data loaded", index);
+                this.$refs.virtualList.updateVariable(index);
+            },
             beforeEnter: function (el: HTMLElement) {
                 el.classList.add("out");
             },
