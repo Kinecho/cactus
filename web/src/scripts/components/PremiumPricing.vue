@@ -71,8 +71,9 @@
         props: {
           plans: {
                 type: Array as () => PremiumPlan[],
-                required: true,
-                default: [
+                required: false,
+                default: function() { 
+                  return [
                           {
                             id: Config.stripe.monthlyPlanId,
                             plan_param: 'm',
@@ -88,6 +89,7 @@
                             per: 'year'
                           }
                         ]
+                }
           }
         },
         data(): {
