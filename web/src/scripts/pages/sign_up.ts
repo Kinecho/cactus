@@ -1,7 +1,7 @@
 import "@styles/pages/sign_up.scss"
 import {getAuthUI, getAuthUIConfig} from "@web/auth";
 import {configureLoginForm} from "@web/mailchimp";
-import {PageRoute} from "@web/PageRoutes";
+import {PageRoute} from "@shared/PageRoutes";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";

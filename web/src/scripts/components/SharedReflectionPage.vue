@@ -15,7 +15,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from "@web/PageRoutes"
+    import {PageRoute} from "@shared/PageRoutes"
     import NavBar from "@components/NavBar.vue"
     import Footer from "@components/StandardFooter.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'

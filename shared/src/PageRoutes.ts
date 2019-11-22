@@ -10,5 +10,6 @@ export enum PageRoute {
     REFERRAL_PROGRAM = "/friends",
     SHARED_REFLECTION = "/reflection",
     SOCIAL = "/friends",
-    ACCOUNT = "/account"
+    ACCOUNT = "/account",
+    UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed"
 }

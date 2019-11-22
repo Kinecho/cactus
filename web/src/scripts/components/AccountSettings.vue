@@ -112,7 +112,7 @@
     import TimezonePicker from "@components/TimezonePicker.vue"
     import {ZoneInfo} from '@web/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
-    import {PageRoute} from '@web/PageRoutes'
+    import {PageRoute} from '@shared/PageRoutes'
     import {FirebaseUser} from '@web/firebase'
     import {getProviderDisplayName} from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";

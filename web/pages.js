@@ -84,5 +84,12 @@ module.exports = {
         "path": "/reflection",
         "name": "shared_reflection",
         "indexPath": true
+    },
+    "unsubscribe_confirmed": {
+        "title": "Unsubscribe Confirmed",
+        "path": "/unsubscribe-confirmed",
+        "reflectionPrompt": false,
+        "includeInDev": true,
+        "name": "unsubscribe_confirmed"
     }
 }

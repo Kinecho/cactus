@@ -3,7 +3,7 @@ import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {addModal, getAllQueryParams, getQueryParam, showConfirmEmailModal} from "@web/util";
 import {AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase,} from "@web/firebase";
 import * as firebaseui from "firebaseui";
-import {PageRoute} from "@web/PageRoutes";
+import {PageRoute} from "@shared/PageRoutes";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {
     EmailStatusRequest,

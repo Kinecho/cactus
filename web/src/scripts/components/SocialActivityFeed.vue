@@ -64,7 +64,7 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {PageRoute} from '@web/PageRoutes';
+    import {PageRoute} from '@shared/PageRoutes';
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
     import {QueryParam} from '@shared/util/queryParams'

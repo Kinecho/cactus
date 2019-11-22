@@ -469,9 +469,9 @@ export default class MailchimpService {
         console.log("Updating member status with patch", updateRequest);
 
         try {
-            const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}`, {
+            const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}?exclude_fields=_links`, {
                 status: updateRequest.status
-            });
+            },);
 
 
             const member:ListMember = response.data ;

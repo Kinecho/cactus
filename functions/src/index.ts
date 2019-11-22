@@ -7,12 +7,16 @@ import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCam
 import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
-import {onReflectionResponseCreated, updateReflectionStatsTrigger} from "@api/triggers/ReflectionResponseTriggers";
+import {
+    onReflectionResponseCreated,
+    updateReflectionStatsTrigger,
+    updateSentPromptOnReflectionWrite
+} from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
-import {onDelete, transactionalOnCreate} from "@api/endpoints/UserTriggers";
+import {onDelete, transactionalOnCreate} from "@api/triggers/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
@@ -48,4 +52,5 @@ export const cloudFunctions = {
     sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
     updateReflectionStatsTrigger: updateReflectionStatsTrigger,
     updateMemberProfileTrigger: updateMemberProfileTrigger,
+    updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
 };
