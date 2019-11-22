@@ -66,6 +66,8 @@
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
     import virtualList from 'vue-virtual-scroll-list'
+    // import VueVirtualScroller from "vue-virtual-scroller"
+    import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -76,6 +78,7 @@
         sentPromptsUnsubscriber?: ListenerUnsubscriber,
         sentPrompts: SentPrompt[],
         sentPromptsLoaded: boolean,
+        dataSource?: JournalFeedDataSource,
     }
 
     export default Vue.extend({
@@ -92,6 +95,7 @@
         },
         beforeMount() {
             console.log("Journal Home calling Created function");
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
@@ -100,7 +104,7 @@
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
-
+                    // const memberChanged =  member && member.id && this.cactusMember?.id === member?.id;
 
                     this.cactusMember = member;
                     this.user = user;
@@ -109,9 +113,23 @@
                     }
 
                     if (isFreshLogin) {
-                        this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                        // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
                         console.log(`JournalHome fetched ${this.sentPrompts.length} prompts when the current member was loaded`);
-                        this.sentPromptsLoaded = true;
+                        // this.sentPromptsLoaded = true;
+
+                        this.dataSource = new JournalFeedDataSource(member!);
+                        this.dataSource.delegate = {
+                            didLoad: (hasData) => {
+
+                                this.sentPromptsLoaded = true
+                            },
+                            updateAll: (entries) => {
+
+                            }
+                        };
+
+                        this.dataSource?.start()
+
                     }
 
                 }
@@ -126,6 +144,7 @@
                 sentPromptsUnsubscriber: undefined,
                 sentPrompts: [],
                 sentPromptsLoaded: false,
+                dataSource: undefined
             };
         },
         watch: {
@@ -163,6 +182,7 @@
         methods: {
             dataLoaded(index: number) {
                 console.log("data loaded", index);
+                //@ts-ignore - stupid component doesn't have types
                 this.$refs.virtualList.updateVariable(index);
             },
             beforeEnter: function (el: HTMLElement) {

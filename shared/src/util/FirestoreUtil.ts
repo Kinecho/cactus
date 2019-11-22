@@ -48,9 +48,21 @@ export interface DocumentSnapshot {
     readonly exists: boolean;
 }
 
+// export interface DocumentChange {
+//
+// }
+//
+// export interface SnapshotMetadata {
+//
+// }
+
 export interface SnapshotOptions {
     readonly serverTimestamps?: 'estimate' | 'previous' | 'none';
 }
+
+// export interface SnapshotListenOptions {
+//     includeMetadataChanges: boolean,
+// }
 
 export interface QueryDocumentSnapshot extends DocumentSnapshot {
     data(options?: SnapshotOptions): DocumentData
@@ -59,6 +71,13 @@ export interface QueryDocumentSnapshot extends DocumentSnapshot {
 export interface QuerySnapshot {
     forEach(callback: (doc: DocumentSnapshot) => void): void,
 
+    // docChanges(options?: SnapshotListenOptions): DocumentChange[],
+    docs: QueryDocumentSnapshot[],
+
+    isEqual(other: QuerySnapshot): boolean,
+
+    // metadata: SnapshotMetadata,
+    size: number
     empty: boolean,
 }
 

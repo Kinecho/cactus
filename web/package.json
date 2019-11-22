@@ -64,6 +64,7 @@
         "vue-simple-markdown": "^1.0.9",
         "vue-social-sharing": "^2.4.5",
         "vue-virtual-scroll-list": "^1.4.3",
+        "vue-virtual-scroller": "^1.0.0-rc.2",
         "vue2-touch-events": "^2.0.0"
     },
     "devDependencies": {
