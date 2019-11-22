@@ -242,9 +242,12 @@
               "tab1 tab2"
               "tabpanel tabpanel";
           grid-template-columns: 48% 52%;
-          margin: 0 2.4rem;
           position: relative;
           text-align: left;
+
+          @include r(374) {
+              margin: 0 2.4rem;
+          }
 
           @include r(600) {
               margin: 0 auto;
@@ -253,7 +256,7 @@
           @include r(768) {
               background-color: transparent;
               grid-template-areas: "tabpanel1 tabpanel2";
-              max-width: 67rem;
+              max-width: 74rem;
           }
           @include r(960) {
               margin: 0;
@@ -381,6 +384,7 @@
 
           button {
               max-width: none;
+              white-space: nowrap;
               width: 100%;
           }
       }

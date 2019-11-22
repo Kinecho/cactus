@@ -355,18 +355,21 @@ $widthDesktop: $widthXL;
     box-shadow: none;
     color: $darkText;
     cursor: default;
+    text-indent: 1.2rem;
 
     &:not(.no-loading) {
       &:before {
         animation: rotate 1s linear infinite;
         background: url(assets/images/loading.svg) no-repeat;
-        background-size: 2rem;
+        background-size: 1.6rem;
         content: '';
         display: block;
-        height: 2rem;
+        height: 1.6rem;
+        margin: .4rem 0 0 -.8rem;
+        margin-top: .4rem;
         position: absolute;
         transform-origin: center;
-        width: 2rem;
+        width: 1.6rem;
         z-index: 1;
       }
     }
