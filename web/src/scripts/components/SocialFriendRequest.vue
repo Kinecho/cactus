@@ -1,19 +1,23 @@
 <template>
     <div class="contactCard">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(name) + '.png'" alt="User avatar"/>
+            <img :src="'assets/images/avatars/avatar' + avatarNumber(email) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
-            {{name}}
+            <strong v-if="name">{{name}}<br></strong>
+            {{email}}
         </div>
         <div class="status">          
-            <div>
+            <div v-if="received">
                 <button class="small primary" @click="confirmRequest">
                     Confirm
                 </button>
                 <button class="small secondary" @click="ignoreRequest">
                     Ignore
                 </button>
+            </div>
+            <div v-if="!received">
+                Pending Confirmation
             </div>
         </div>
     </div>
@@ -24,9 +28,11 @@
     import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
+    import MemberProfile from "@shared/models/MemberProfile";
     import SocialConnection, {SocialConnectionRequest} from "@shared/models/SocialConnection";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import MemberProfileService from '@web/services/MemberProfileService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
 
 
@@ -39,18 +45,30 @@
             member: {type: Object as () => CactusMember},
             connectionRequest: {type: Object as () => SocialConnectionRequest}
         },
-        beforeMount() {
-            
+        async beforeMount() {
+            if (this.connectionRequest?.friendMemberId) {
+                this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(this.connectionRequest.friendMemberId);  
+            }
         },
         data(): {
+            friendProfile: MemberProfile | undefined
         } {
             return {
+                friendProfile: undefined
             }
         },
         computed: {
-            name() {
-                return this.connectionRequest.friendMemberId;
-            }           
+            name(): string|undefined {
+                if (this.friendProfile?.getFullName()) {
+                    return this.friendProfile.getFullName();
+                }
+            },
+            email(): string {
+                return this.friendProfile?.email || '';
+            },
+            received(): boolean {
+                return this.connectionRequest.friendMemberId == this.member.id;
+            }            
         },
         watch: {
             
@@ -69,7 +87,8 @@
             },
             ignoreRequest(): boolean {
                 return false;
-            }
+            },
+            
         }
     })
 </script>

@@ -51,8 +51,8 @@
                     return this.friendProfile.getFullName();
                 }
             },
-            email(): string|undefined {
-                return this.friendProfile?.email;
+            email(): string {
+                return this.friendProfile?.email || '';
             },           
         },
         watch: {
