@@ -131,7 +131,7 @@ export function configureLoginForm(formId: string) {
 
                 let title = "Welcome!";
                 const message = `To confirm your email address and securely sign in, tap the button in the email sent to ${emailAddress}.`;
-                const imageUrl = '/assets/images/success.svg';
+                const imageUrl = '/assets/images/benefit4.png';
 
                 if (signupResult.existingEmail) {
                     title = "Welcome back!";
