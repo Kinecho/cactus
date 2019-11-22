@@ -2,8 +2,8 @@
   <section class="premium">
       <div class="centered">
         <div class="textContainer">
-            <h2>Introducing Premium</h2>
-            <p class="subtext">Get more from Cactus, now conveniently in your&nbsp;pocket</p>
+            <h2>Choose your Cactus</h2>
+            <p class="subtext">Free to use, better with&nbsp;premium</p>
         </div>
         <div class="graphics">
             <img class="blobGraphic" src="/assets/images/royalBlob.png" alt="" />
@@ -178,8 +178,7 @@
 
     .textContainer {
         @include r(960) {
-            max-width: 32rem;
-            padding: 9rem 0 0 4.8rem;
+            padding: 16.5rem 0 0 4.8rem;
         }
 
         h2 {
@@ -211,7 +210,7 @@
                   right: 0;
               }
               @include r(960) {
-                  left: 53%;
+                  left: 51%;
                   right: auto;
               }
           }
@@ -228,7 +227,7 @@
                   width: 109%;
               }
               @include r(960) {
-                  left: 4%;
+                  left: 3%;
                   top: 3rem;
                   width: 75%;
               }
