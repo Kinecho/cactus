@@ -57,7 +57,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {Config} from "@web/config";
-    import {PageRoute} from '@web/PageRoutes';
+    import {PageRoute} from '@shared/PageRoutes';
     import {PremiumPlan} from '@shared/types/PlanTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
