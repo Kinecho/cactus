@@ -47,7 +47,7 @@
         },
         async beforeMount() {
             if (this.connectionRequest?.friendMemberId) {
-                this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(this.connectionRequest.friendMemberId);  
+                this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(this.getFriendMemberId());  
             }
         },
         data(): {
@@ -88,6 +88,10 @@
             ignoreRequest(): boolean {
                 return false;
             },
+            getFriendMemberId(): string {
+                return this.received ? this.connectionRequest.memberId : this.connectionRequest.friendMemberId
+            },
+            
             
         }
     })

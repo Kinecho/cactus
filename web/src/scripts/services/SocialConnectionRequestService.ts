@@ -1,10 +1,11 @@
-import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
+import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions, Transaction} from "@web/services/FirestoreService";
 import SocialConnection, {SocialConnectionRequest, SocialConnectionRequestFields} from "@shared/models/SocialConnection";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import SocialConnectionService from "@web/services/SocialConnectionService";
+
 
 export default class SocialConnectionRequestService {
     public static sharedInstance = new SocialConnectionRequestService();
@@ -61,14 +62,27 @@ export default class SocialConnectionRequestService {
     }
 
     async confirmRequest(connectionRequest: SocialConnectionRequest): Promise<SocialConnectionRequest | undefined> {
-        connectionRequest.confirmedAt = new Date();
+        try {
+            return await FirestoreService.sharedInstance.firestore.runTransaction(async transaction => {
+                connectionRequest.confirmedAt = new Date();
 
-        const memberConnection = new SocialConnection();
-              memberConnection.memberId = connectionRequest.memberId;
-              memberConnection.friendMemberId = connectionRequest.friendMemberId;
+                const memberConnection = new SocialConnection();
+                      memberConnection.memberId = connectionRequest.memberId;
+                      memberConnection.friendMemberId = connectionRequest.friendMemberId;
 
-        const result = SocialConnectionService.sharedInstance.save(memberConnection);
+                const resultMember = await SocialConnectionService.sharedInstance.save(memberConnection);
 
-        return this.save(connectionRequest);
+                const friendConnection = new SocialConnection();
+                      friendConnection.memberId = connectionRequest.friendMemberId;
+                      friendConnection.friendMemberId = connectionRequest.memberId;
+
+                const resultFriend = await SocialConnectionService.sharedInstance.save(memberConnection);
+
+                return await this.save(connectionRequest);
+            });
+        } catch (error) {
+            console.error("Failed to create connections", error);
+            return;
+        }
     }
 }

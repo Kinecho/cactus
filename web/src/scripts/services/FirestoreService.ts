@@ -16,6 +16,7 @@ import {
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import FieldValue = firebaseClient.firestore.FieldValue;
 import {addModal, handleDatabaseError, showModal} from "@web/util";
+export import Transaction = firebaseClient.firestore.Transaction;
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;

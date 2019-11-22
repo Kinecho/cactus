@@ -1,6 +1,9 @@
 <template>
     <div class="socialFriendList">
-        <div class="first-friend" v-if="referredByProfile && !isConnection(referredByProfile.cactusMemberId) && !isRequest(referredByProfile.cactusMemberId)">
+        <div class="first-friend" v-if="referredByProfile && 
+                                        !isConnection(referredByProfile.cactusMemberId) && 
+                                        !isSentRequest(referredByProfile.cactusMemberId) && 
+                                        !isReceivedRequest(referredByProfile.cactusMemberId)">
             People you may know
             <friend-add
                 v-bind:member="member"
@@ -125,10 +128,20 @@
                 }
                 return false;
             },
-            isRequest(friendId: string): boolean {
+            isSentRequest(friendId: string): boolean {
                 if (this.sentFriendRequests) {
                     for(let x=0; x < this.sentFriendRequests.length; x++) {
                         if (this.sentFriendRequests[x].friendMemberId == friendId) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            },
+            isReceivedRequest(friendId: string): boolean {
+                if (this.receivedFriendRequests) {
+                    for(let x=0; x < this.receivedFriendRequests.length; x++) {
+                        if (this.receivedFriendRequests[x].memberId == friendId) {
                             return true;
                         }
                     }
