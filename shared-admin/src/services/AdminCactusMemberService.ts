@@ -13,6 +13,7 @@ import DocumentReference = admin.firestore.DocumentReference;
 
 let firestoreService: AdminFirestoreService;
 const DEFAULT_BATCH_SIZE = 500;
+
 export default class AdminCactusMemberService {
     protected static sharedInstance: AdminCactusMemberService;
 

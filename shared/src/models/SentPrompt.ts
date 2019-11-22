@@ -16,6 +16,8 @@ export enum SentPromptField {
     mailchimpMemberId = "mailchimpMemberId",
     sendHistory = "sendHistory",
     memberEmail = "memberEmail",
+    completed = "completed",
+    completedAt = "completedAt",
 }
 
 export interface SentPromptHistoryItem {
@@ -38,4 +40,6 @@ export default class SentPrompt extends BaseModel {
     memberEmail?:string;
     sendHistory: SentPromptHistoryItem[] = [];
     promptContentEntryId?:string;
+    completed: boolean = false;
+    completedAt?: Date;
 }
