@@ -33,7 +33,7 @@ export const DEFAULT_REMINDER_TEMPLATE_ID = 53981;
 export const TOPIC_MORNING_TEMPLATE_ID = 59013;
 export const TOPIC_REMINDER_TEMPLATE_ID = 59169;
 
-export const PROMPT_MODULE_TEMPLATE_ID = 63697;
+export const PROMPT_MODULE_TEMPLATE_ID = 84565;
 export const PROMPT_MODULE_REMINDER_TEMPLATE_ID = 59169;
 
 const prompts = require('prompts');
