@@ -21,7 +21,7 @@
                     <li>128-bit encryption on all notes</li>
                     <li>Notifications via email</li>
                 </ul>
-                <button class="secondary">Sign Up Free</button>
+                <button class="secondary" @click="goToSignup">Sign Up Free</button>
             </section>
 
             <input type="radio" name="tabset" id="tab2" aria-controls="premium">
@@ -71,8 +71,9 @@
         props: {
           plans: {
                 type: Array as () => PremiumPlan[],
-                required: true,
-                default: [
+                required: false,
+                default: function() { 
+                  return [
                           {
                             id: Config.stripe.monthlyPlanId,
                             plan_param: 'm',
@@ -88,6 +89,7 @@
                             per: 'year'
                           }
                         ]
+                }
           }
         },
         data(): {
@@ -142,6 +144,9 @@
             },
             isSelectedPlan(plan: PremiumPlan) {
               return plan == this.selectedPlan
+            },
+            goToSignup() {
+              window.location.href = PageRoute.SIGNUP;
             }
         },
 
