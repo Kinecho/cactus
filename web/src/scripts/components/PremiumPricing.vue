@@ -3,7 +3,7 @@
       <div class="centered">
         <div class="textContainer">
             <h2>Choose your Cactus</h2>
-            <p class="subtext">Free to use, better with&nbsp;premium</p>
+            <p class="subtext">Free to use, better with&nbsp;Premium</p>
         </div>
         <div class="graphics">
             <img class="blobGraphic" src="/assets/images/royalBlob.png" alt="" />
