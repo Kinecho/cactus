@@ -505,17 +505,13 @@ h1, h2 {
 }
 
 .email {
-  background: url(assets/images/yellowNeedles.svg) $yellow;
-  background-size: 80%;
+  background-color: $beige;
   padding: 5.6rem 0 .8rem;
   position: relative;
   z-index: 1;
 
-  @include r(768) {
-    background-size: 30%;
-  }
-
   .emailHeader {
+      color: $magenta;
     padding: 0 2.4rem;
   }
 

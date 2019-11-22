@@ -160,7 +160,7 @@
         padding: 4.8rem 0 0;
 
         @include r(768) {
-            padding: 11rem 2.4rem 0;
+            padding: 9rem 2.4rem 0;
         }
 
         .centered {
@@ -178,7 +178,7 @@
 
     .textContainer {
         @include r(960) {
-            padding: 16.5rem 0 0 4.8rem;
+            padding: 19rem 0 0 4.8rem;
         }
 
         h2 {
