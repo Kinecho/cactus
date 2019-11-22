@@ -45,7 +45,7 @@ export default class SocialConnectionRequestService {
             .where(SocialConnectionRequest.Fields.rejectedAt, "==", null)
             .orderBy(SocialConnectionRequest.Fields.sentAt, QuerySortDirection.desc);
 
-        options.queryName = "observeRequestedConnectionsForCactusMemberId=" + memberId;
+        options.queryName = "observeSentConnectionsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SocialConnectionRequest, options);
     }
 
@@ -56,7 +56,7 @@ export default class SocialConnectionRequestService {
             .where(SocialConnectionRequest.Fields.rejectedAt, "==", null)
             .orderBy(SocialConnectionRequest.Fields.sentAt, QuerySortDirection.desc);
 
-        options.queryName = "observeReceivedConnectionRequestsForCactusMemberId=" + memberId;
+        options.queryName = "observeReceivedConnectionsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SocialConnectionRequest, options);
     }
 

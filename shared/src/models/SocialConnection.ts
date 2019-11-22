@@ -2,13 +2,13 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum SocialConnectionFields {
     memberId = "memberId",
-    friendMemberId = "friendId",
+    friendMemberId = "friendMemberId",
     createdAt = "createdAt"
 }
 
 export enum SocialConnectionRequestFields {
     memberId = "memberId",
-    friendMemberId = "friendId",
+    friendMemberId = "friendMemberId",
     confirmedAt = "confirmedAt",
     rejectedAt = "rejectedAt",
     sentAt = "sentAt"
