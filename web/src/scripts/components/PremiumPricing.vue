@@ -5,7 +5,10 @@
             <h2>Introducing Premium</h2>
             <p class="subtext">Get more from Cactus, now conveniently in your&nbsp;pocket</p>
         </div>
-
+        <div class="graphics">
+            <img class="blobGraphic" src="/assets/images/royalBlob.png" alt="" />
+            <img class="arcGraphic" src="/assets/images/arc.svg" alt="" />
+        </div>
         <div class="tabset">
             <input type="radio" name="tabset" id="tab1" aria-controls="free" checked>
             <label class="tab-label free-tab" for="tab1">Free</label>
@@ -22,9 +25,9 @@
             </section>
 
             <input type="radio" name="tabset" id="tab2" aria-controls="premium">
-            <label class="tab-label premium-tab" for="tab2">Premium</label>
+            <label class="tab-label premium-tab" for="tab2">Premium<span class="newStatus">New</span></label>
             <section id="premium" class="tab-panel premium-panel">
-                <h3 class="tab-header premium-header">Premium</h3>
+                <h3 class="tab-header premium-header">Premium<span class="newStatus">New</span></h3>
                 <ul>
                     <li>Available on web</li>
                     <li><span class="enhance">Available on iPhone and iPad</span></li>
@@ -152,15 +155,18 @@
     @import "transitions";
 
     .premium {
-        background: #1D7A81;
+        background: #1D7A81 url(assets/images/grainy.png);
         color: $white;
         padding: 4.8rem 0 0;
 
         @include r(768) {
-            padding: 11rem 0 0;
+            padding: 11rem 2.4rem 0;
         }
 
         .centered {
+            overflow: hidden;
+            position: relative;
+
             @include r(960) {
                 display: flex;
                 flex-direction: row-reverse;
@@ -173,7 +179,7 @@
     .textContainer {
         @include r(960) {
             max-width: 32rem;
-            padding: 8rem 0 0 4.8rem;
+            padding: 9rem 0 0 4.8rem;
         }
 
         h2 {
@@ -190,6 +196,44 @@
           }
       }
 
+      .graphics {
+          bottom: -3rem;
+          left: 0;
+          position: absolute;
+          right: 0;
+
+          .blobGraphic {
+              bottom: 0;
+              right: -8rem;
+              position: absolute;
+
+              @include r(768) {
+                  right: 0;
+              }
+              @include r(960) {
+                  left: 53%;
+                  right: auto;
+              }
+          }
+
+          .arcGraphic {
+              bottom: -12rem;
+              height: auto;
+              left: -2rem;
+              position: relative;
+              width: 95rem;
+
+              @include r(768) {
+
+              }
+              @include r(960) {
+                  left: 5%;
+                  top: 3rem;
+                  width: 75%;
+              }
+          }
+      }
+
       .tabset {
           background-color: $darkestGreen;
           border-radius: 1.2rem 1.2rem 0 0;
@@ -197,23 +241,22 @@
           grid-template-areas:
               "tab1 tab2"
               "tabpanel tabpanel";
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: 48% 52%;
           margin: 0 2.4rem;
+          position: relative;
           text-align: left;
 
           @include r(600) {
               margin: 0 auto;
-              max-width: 64rem;
+              max-width: 90%;
           }
           @include r(768) {
               background-color: transparent;
               grid-template-areas: "tabpanel1 tabpanel2";
+              max-width: 67rem;
           }
           @include r(960) {
               margin: 0;
-          }
-          @include r(1140) {
-              max-width: none;
           }
       }
 
@@ -272,17 +315,41 @@
           margin-bottom: 2.4rem;
       }
 
+      .newStatus {
+          display: none;
+
+          @include r(600) {
+              background-color: $aqua;
+              border-radius: 2rem;
+              color: $darkestGreen;
+              display: inline-block;
+              font-size: 1.4rem;
+              font-weight: bold;
+              letter-spacing: 1px;
+              margin-left: .8rem;
+              padding: 0 .8rem;
+              text-transform: uppercase;
+              vertical-align: super;
+          }
+      }
+
       .tab-panel {
           grid-area: tabpanel;
           padding: 2.4rem 2.4rem 3.2rem;
 
           @include r(768) {
+              padding: 3.2rem;
+
               &.free-panel {
                   align-self: end;
                   background-color: $white;
                   border-radius: 1.8rem 0 0 0;
                   color: $darkestGreen;
                   grid-area: tabpanel1;
+
+                  ul {
+                      margin-bottom: 7.2rem;
+                  }
               }
               &.premium-panel {
                   background-color: $darkestGreen;
@@ -293,7 +360,7 @@
 
           ul {
               list-style: none;
-              margin: 0 0 3.2rem -.6rem;
+              margin: 0 0 4rem -.6rem;
           }
 
           li {
@@ -319,7 +386,9 @@
       }
 
       .enhance {
-          background: linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat;
+          background:
+            linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat,
+            url(assets/images/grainy.png) repeat;
           display: inline;
           padding-right: .2rem;
       }
@@ -341,6 +410,7 @@
 
               &.selected {
                   border-color: $green;
+                  box-shadow: inset 0 0 0 .4rem $darkestGreen;
               }
 
               span {
