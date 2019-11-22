@@ -32,33 +32,17 @@ export default class SocialConnectionService {
         return await this.getFirst(query);
     }
 
-    async getByFriendId(friendId: string): Promise<SocialConnection | undefined> {
-        const query = this.getCollectionRef().where(SocialConnectionFields.friendId, "==", friendId);
+    async getByFriendId(friendMemberId: string): Promise<SocialConnection | undefined> {
+        const query = this.getCollectionRef().where(SocialConnectionFields.friendMemberId, "==", friendMemberId);
         return await this.getFirst(query);
-    }
-
-    observeRequestedConnections(memberId: string, options: QueryObserverOptions<SocialConnection>): ListenerUnsubscriber {
-        const query = this.getCollectionRef()
-            .where(SocialConnection.Fields.friendId, "==", memberId)
-            .where(SocialConnection.Fields.confirmed, "==", false)
-            .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
-
-        options.queryName = "observeRequestedConnectionsForCactusMemberId=" + memberId;
-        return this.firestoreService.observeQuery(query, SocialConnection, options);
     }
 
     observeConnections(memberId: string, options: QueryObserverOptions<SocialConnection>): ListenerUnsubscriber {
         const query = this.getCollectionRef()
-            .where(SocialConnection.Fields.confirmedMembers, "array-contains", memberId)
-            .orderBy(SocialConnection.Fields.sentAt, QuerySortDirection.desc);
+            .where(SocialConnection.Fields.memberId, "==", memberId)
+            .orderBy(SocialConnection.Fields.createdAt, QuerySortDirection.desc);
 
         options.queryName = "observeSocialConnectionsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SocialConnection, options);
-    }
-
-    async confirm(connection: SocialConnection): Promise<SocialConnection | undefined> {
-        connection.confirmed = true;
-        connection.confirmedAt = new Date();
-        return this.save(connection);
     }
 }

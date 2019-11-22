@@ -40,7 +40,10 @@
     import SocialFriendRequest from "@components/SocialFriendRequest.vue";
     import SocialFriendAdd from "@components/SocialFriendAdd.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
-    import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import SocialConnection, {SocialConnectionRequest, 
+                              SocialConnectionRequestFields, 
+                              SocialConnectionFields} from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     const copy = CopyService.getSharedInstance().copy;
@@ -77,9 +80,9 @@
         watch: {
             member: async function() {
                 if (this.member.id) {
-                    this.friendRequestsUnsubscriber = SocialConnectionService.sharedInstance.observeRequestedConnections(this.member.id, {
-                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
-                                this.friendRequests = socialConnections;
+                    this.friendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(this.member.id, {
+                            onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                                this.friendRequests = socialConnectionRequests;
                             }
                         });
                     

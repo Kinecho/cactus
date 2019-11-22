@@ -6,15 +6,9 @@
         <div class="contactInfo">
             {{name}}
         </div>
-        <div class="status">
-            <div v-if="status == socialConnectionStatus('PENDING')">
-                Pending
-            </div>
-            
-            <div v-if="status == socialConnectionStatus('CONFIRMED')">
-                <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-                Friends
-            </div>
+        <div class="status">            
+            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            Friends
         </div>
     </div>
 </template>
@@ -24,7 +18,7 @@
     import CopyService from '@shared/copy/CopyService';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
-    import SocialConnection, {SocialConnectionStatus} from "@shared/models/SocialConnection";
+    import SocialConnection from "@shared/models/SocialConnection";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import MemberProfileService from '@web/services/MemberProfileService';
 
@@ -42,11 +36,8 @@
             
         },
         async created() {
-            if (this.connection) {
-                const memberProfileId = this.connection.memberId == this.member.id ? this.connection.friendId : this.connection.memberId;
-                if (memberProfileId) {
-                    this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(memberProfileId);  
-                }
+            if (this.connection?.friendMemberId) {
+                this.friendProfile = await MemberProfileService.sharedInstance.getByMemberId(this.connection.friendMemberId);  
             }
         },
         data(): {
@@ -57,13 +48,6 @@
             }
         },
         computed: {
-            status(): SocialConnectionStatus {
-                if (this.connection.confirmed) {
-                    return SocialConnectionStatus.CONFIRMED
-                } else {
-                    return SocialConnectionStatus.PENDING
-                }
-            }, 
             name(): string|undefined {
                 if (this.friendProfile) {
                     if (this.friendProfile.getFullName()) {
@@ -81,9 +65,6 @@
         methods: {
             avatarNumber(email: string): number {
                 return getIntegerFromStringBetween(email, 4) + 1;
-            },
-            socialConnectionStatus(key: keyof typeof SocialConnectionStatus): string {
-                return SocialConnectionStatus[key];
             }
         }
     })

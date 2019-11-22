@@ -14,6 +14,7 @@ export enum Collection {
     socialInvites = "socialInvites",
     socialConnections = "socialConnections",
     memberProfiles = "memberProfiles",
+    socialConnectionRequests = "socialConnectionRequests"
 }
 
 export interface FirestoreIdentifiable {

@@ -2,41 +2,46 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 
 export enum SocialConnectionFields {
     memberId = "memberId",
-    friendId = "friendId",
-    confirmed = "confirmed",
-    sentAt = "sentAt",
-    confirmedAt = "confirmedAt",
-    confirmedMembers = "confirmedMembers"
+    friendMemberId = "friendId",
+    createdAt = "createdAt"
 }
 
-export enum SocialConnectionStatus {
-    CONFIRMED = "confirmed",
-    PENDING = "pending",
-    NEEDS_CONFIRMATION = "confirmable"
+export enum SocialConnectionRequestFields {
+    memberId = "memberId",
+    friendMemberId = "friendId",
+    confirmedAt = "confirmedAt",
+    rejectedAt = "rejectedAt",
+    sentAt = "sentAt"
+}
+
+export class SocialConnectionRequest extends BaseModel {
+    readonly collection = Collection.socialConnectionRequests;
+    static Fields = SocialConnectionRequestFields;
+    memberId: string;
+    friendMemberId: string;
+    confirmedAt: Date | null;
+    rejectedAt: Date | null;
+    sentAt: Date;
+
+    constructor() {
+        super();
+        this.memberId = '';
+        this.friendMemberId = '';
+        this.confirmedAt = null;
+        this.rejectedAt = null,
+        this.sentAt = new Date();
+    }
 }
 
 export default class SocialConnection extends BaseModel {
     readonly collection = Collection.socialConnections;
     static Fields = SocialConnectionFields;
-    memberId?: string;
-    friendId?: string;
-    confirmed?: boolean;
-    sentAt?: Date;
-    confirmedAt?: Date;
-    confirmedMembers?: Array<string>;
+    memberId: string;
+    friendMemberId: string;
 
-    prepareForFirestore(): any {
-        super.prepareForFirestore();
-        
-        this.confirmedMembers = [];
-
-        if (this.memberId) {
-            this.confirmedMembers.push(this.memberId);
-        }
-
-        if (this.confirmed && this.friendId) {
-            this.confirmedMembers.push(this.friendId);
-        }
-        return this;
+    constructor() {
+        super();
+        this.memberId = '';
+        this.friendMemberId = '';
     }
 }

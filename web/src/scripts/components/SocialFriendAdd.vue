@@ -26,8 +26,8 @@
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
-    import SocialConnection, {SocialConnectionStatus} from "@shared/models/SocialConnection";
-    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnection";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
 
 
@@ -66,17 +66,20 @@
                 return getIntegerFromStringBetween(email, 4) + 1;
             },
             async sendRequest() {
-                try {
-                    let connectionRequest = new SocialConnection();
-                        connectionRequest.memberId = this.member.id;
-                        connectionRequest.friendId = this.friendProfile.cactusMemberId;
-                        connectionRequest.confirmed = false;
-                        connectionRequest.sentAt = new Date();
+                if (this.member?.id && this.friendProfile?.cactusMemberId) {
+                    try {
+                        let connectionRequest = new SocialConnectionRequest();
+                            connectionRequest.memberId = this.member.id;
+                            connectionRequest.friendMemberId = this.friendProfile.cactusMemberId;
+                            connectionRequest.sentAt = new Date();
 
-                    const result = await SocialConnectionService.sharedInstance.save(connectionRequest);
-                    this.sent = true;
-                    return (result ? true : false);                      
-                } catch(e) {
+                        const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
+                        this.sent = true;
+                        return (result ? true : false);                      
+                    } catch(e) {
+                        return false;
+                    }
+                } else {
                     return false;
                 }
             },
