@@ -23,7 +23,7 @@
                 v-for="(connection, index) in friends"
                 v-bind:member="member"
                 v-bind:connection="connection"
-                v-bind:key="connection.friendId" 
+                v-bind:key="connection.friendMemberId" 
             />
         </div> 
     </div>
