@@ -224,10 +224,11 @@
               width: 95rem;
 
               @include r(768) {
-
+                  left: 0;
+                  width: 109%;
               }
               @include r(960) {
-                  left: 5%;
+                  left: 4%;
                   top: 3rem;
                   width: 75%;
               }
