@@ -28,7 +28,7 @@ export class SocialConnectionRequest extends BaseModel {
         this.memberId = '';
         this.friendMemberId = '';
         this.confirmedAt = null;
-        this.rejectedAt = null,
+        this.rejectedAt = null;
         this.sentAt = new Date();
     }
 }
