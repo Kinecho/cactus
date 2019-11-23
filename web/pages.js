@@ -36,7 +36,7 @@ module.exports = {
     "journal_home": {
         "title": "Journal | Home",
         "path": "/home",
-        "name": "journal_home",
+        "name": "journal_home"
     },
     "values_home": {
         "title": "Values",
@@ -84,6 +84,11 @@ module.exports = {
         "path": "/reflection",
         "name": "shared_reflection",
         "indexPath": true
+    },
+    "pricing": {
+        "title": "Pricing",
+        "path": "/pricing",
+        "name": "pricing"
     },
     "unsubscribe_confirmed": {
         "title": "Unsubscribe Confirmed",

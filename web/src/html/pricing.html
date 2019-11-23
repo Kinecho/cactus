@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <meta name="description" content="Take a moment for mindful reflection.">
 
     <!--
       Mailchimp style sheet - might not need it, but is useful for error responses from form validation, etc
@@ -13,20 +12,20 @@
      -->
     <!--<link href="//cdn-images.mailchimp.com/embedcode/classic-10_7.css" rel="stylesheet" type="text/css">-->
 
-    <!-- Default Open Graph Properties -->
-    <meta property="og:site_name" content="Cactus">
-    <meta property="og:title" content="<%= htmlWebpackPlugin.options.title %>">
-    <meta property="og:description" content="Take a moment for mindful reflection.">
-    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-prompt-blobs.png?alt=media&token=39128f5f-d635-42fb-8bea-a78233fbbba2">
+    <meta name="description" content="Learn about Cactus Premium.">
+    <meta name="og:site_name" content="Cactus">
+    <meta name="og:title" content="Pricing">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-image.png?alt=media&token=b2d52de3-ecc5-42f4-a401-f4158d1c4296">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:type" content="image/png">
+    <meta property="og:description" content="Learn about Cactus Premium.">
+    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Ftwitter-image.png?alt=media&token=a26531e8-3add-4459-be15-c2a14ae2d9ff">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@itscalledcactus">
+    <meta name="twitter:title" content="Pricing">
+    <meta name="twitter:description" content="Learn about Cactus Premium.">
 
-    <!-- Twitter Card Summary -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@itscalledcatus" />
-    <meta name="twitter:title" content="<%= htmlWebpackPlugin.options.title %>" />
-    <meta name="twitter:description" content="Take a moment for mindful reflection." />
-    <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-prompt-blobs.png?alt=media&token=39128f5f-d635-42fb-8bea-a78233fbbba2" />
-    
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
@@ -36,9 +35,14 @@
 
     <!--note CSS is included via webpack-->
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
+
+    <!-- Load Stripe.js on your website. -->
+    <script src="https://js.stripe.com/v3"></script>
 </head>
 
 <body>
-<div id="app"></div>
+    <header></header>
+    <div id="premium-pricing"></div>
+    <footer id="footer"></footer>
 </body>
 </html>

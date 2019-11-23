@@ -1,13 +1,3 @@
-// import * as Stripe from "stripe";
-// import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
-
-import * as Stripe from "stripe";
-import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
-
-export enum WebhookEventType {
-    CheckoutSessionCompleted = "checkout.session.completed",
-}
-
 export type StripeString = string|null
 
 export interface WebhookEvent {
@@ -100,7 +90,7 @@ export interface PaymentMethod {
     metadata: any,
     type: string,
 }
-
-export interface PaymentIntent extends IPaymentIntent {
-    payment_method: string,
-}
+//
+// export interface PaymentIntent extends IPaymentIntent {
+//     payment_method: string,
+// }
