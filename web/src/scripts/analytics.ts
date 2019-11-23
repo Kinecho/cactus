@@ -23,8 +23,6 @@ declare global {
 
 let _gtag: null | ((name: string, event?: any, options?: any) => void) = null;
 
-// window.dataLayer = window.dataLayer || {};
-
 /**
  * gtag('event', <action>, {
       'event_category': <category>,
@@ -60,7 +58,7 @@ export function init() {
 
     const sentryIntegrations = [];
     if (!Config.isDev) {
-        sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}))
+        sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
         Sentry.init({
             dsn: Config.sentry.dsn,
             release: Config.version,
@@ -111,13 +109,10 @@ export function setUser(user?: User | null) {
         const email = user.email;
         setUserId(user.uid);
 
-        const sentryUser: Sentry.User = {};
-        if (email) {
-            sentryUser.email = email;
-        }
-        if (user.uid) {
-            sentryUser.id = user.uid;
-        }
+        const sentryUser: Sentry.User = {
+            id: user.uid,
+            email: email || undefined,
+        };
 
         Sentry.setUser(sentryUser);
         
