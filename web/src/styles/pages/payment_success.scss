@@ -3,14 +3,37 @@
 @import "~styles/common";
 @import "~styles/simplyCentered";
 
-.message {
-  max-width: 720px;
-  line-height: 1.5em;
-  a {
-    @include fancyLink;
-  }
+body {
+    align-items: flex-start;
+    background-color: $beige;
 
-  &.smaller {
-    font-size: 1.6rem;
-  }
+    @include r(600) {
+        align-items: center;
+    }
+}
+
+.centered {
+    text-align: left;
+
+    @include r(600) {
+        text-align: center;
+    }
+}
+
+.graphic {
+    max-width: 60vw;
+}
+
+h1 {
+    line-height: 1.2;
+    margin-bottom: .8rem;
+}
+
+p {
+    margin: 0 auto 2.4rem;
+    max-width: 60rem;
+}
+
+.button {
+    display: inline-block;
 }

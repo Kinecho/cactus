@@ -18,6 +18,6 @@ export interface CreateSessionResponse {
     success: boolean,
     error?: any,
     sessionId?: string,
-    amount?: number,
+    amount?: number|null|undefined,
     productId?:string,
 }

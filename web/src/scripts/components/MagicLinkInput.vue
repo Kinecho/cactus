@@ -83,7 +83,7 @@
 
                         let title = copy.exclamation(copy.common.WELCOME);
                         const message = copy.auth.magicLinkSuccess(email);
-                        const imageUrl = '/assets/images/success.svg';
+                        const imageUrl = '/assets/images/benefit4.png';
 
                         if (signupResult.existingEmail) {
                             title = copy.exclamation(copy.common.WELCOME_BACK);

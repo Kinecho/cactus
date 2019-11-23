@@ -1,8 +1,11 @@
 import "@styles/pages/index.scss"
+import Vue from "vue";
 import {configureLoginForm, setupJumpToForm} from '@web/mailchimp'
 import {initializeFirebase} from "@web/firebase";
 import {PageRoute} from "@shared/PageRoutes";
 import {setupNavigation} from "@web/NavigationUtil";
+import PremiumPricing from "@components/PremiumPricing.vue";
+
 
 import {commonInit} from "@web/common";
 
@@ -36,6 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
     configureLoginForm("sign-up-top");
 
     setupJumpToForm();
+});
+
+new Vue({
+    el: "#premium-pricing",
+    template: `<PremiumPricing/>`,
+    components: {PremiumPricing: PremiumPricing}
 });
 
 //enables hot reload
