@@ -34,13 +34,13 @@
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
-                                    v-bind:key="entry.sentPrompt.id"
+                                    v-bind:key="entry.promptId"
                                     v-bind:data-index="index"
                             ></entry>
                         </transition-group>
 
                     </section>
-                    <spinner message="Loading More" v-show="dataSource.loadingPage"/>
+                    <spinner message="Loading More" v-show="showPageLoading"/>
                 </div>
             </transition>
 
@@ -123,18 +123,29 @@
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
+
+                                // this.$set(this.journalEntries, this.dataSource!.journalEntries);
                                 this.journalEntries = this.dataSource!.journalEntries;
                                 this.dataHasLoaded = true;
+                            },
+                            onAdded: (entry: JournalEntry, index) => {
+                                // this.$set(this.journalEntries, index, entry);
+                            },
+                            onRemoved: (entry: JournalEntry, removedIndex) => {
+                                // this.journalEntries.splice(removedIndex, 1);
                             },
                             updateAll: (entries) => {
                                 console.log("got entries in journal home", entries);
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                console.log(`entry updated at index ${index}`, entry);
+                                // console.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.journalEntries, index, entry);
                                 }
+                            },
+                            pageLoaded: (hasMore: boolean) => {
+                                this.showPageLoading = false
                             }
                         };
 
@@ -182,10 +193,10 @@
                 if (distance <= threshold) {
                     console.log("load more! Offset = ", distance);
 
-                    this.showPageLoading = this.dataSource?.loadNextPage() || false
+                    const willLoad = this.dataSource?.loadNextPage() || false;
+                    this.showPageLoading = this.dataSource?.loadingPage || willLoad
 
                 }
-
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)

@@ -12,6 +12,7 @@ interface JournalFeedDataSourceDelegate {
     onAdded?: (journalEntry: JournalEntry, newIndex: number) => void
     onRemoved?: (journalEntry: JournalEntry, removedIndex: number) => void
     onUpdated?: (journalEntry: JournalEntry, index: number) => void
+    pageLoaded?: (hasMore: boolean) => void
 }
 
 interface SetupJournalEntryResult {
@@ -69,12 +70,11 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             onData: (page) => {
                 console.log("🌵 🥇Got first page results", page);
                 firstPage.result = page;
-                this.delegate?.didLoad?.(page.results.length > 0);
 
                 this.handlePageResult(page);
                 this.hasLoaded = true;
                 this.loadingPage = false;
-
+                this.delegate?.didLoad?.(page.results.length > 0);
             }
         });
     }
@@ -189,10 +189,11 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             onData: (page) => {
                 console.log("🌵 Got Next page results", page);
                 nextPage.result = page;
-                this.delegate?.didLoad?.(page.results.length > 0);
 
                 this.handlePageResult(page);
                 this.loadingPage = false;
+                // this.delegate?.didLoad?.(page.results.length > 0);
+                this.delegate?.pageLoaded?.(page.mightHaveMore);
             }
         });
 
@@ -214,7 +215,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
     entryUpdated(entry: JournalEntry) {
         const index = this.getIndexForEntry(entry);
-        console.log("entry updated for index", index);
+        // console.log("entry updated for index", index);
         this.delegate?.onUpdated?.(entry, index);
     }
 
