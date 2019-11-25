@@ -7,7 +7,7 @@ import {SocialConnectionRequestNotification,
         SocialConnectionRequestNotificationResult} from "@shared/types/SocialConnectionRequestTypes";
 import SocialInvite from "@shared/models/SocialInvite";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {getConfig} from "@api/config/configService";
+import {getConfig, getHostname} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -15,7 +15,6 @@ import {getAuthUser} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import {generateReferralLink} from '@shared/util/SocialInviteUtil';
 import {PageRoute} from "@shared/PageRoutes";
-import {getHostname} from "@api/config/configService";
 
 
 const Config = getConfig();
