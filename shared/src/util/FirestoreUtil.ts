@@ -24,6 +24,10 @@ export function isTimestamp(value: any): boolean {
     return isNotNull(value) && (value instanceof TimestampClass || (value.seconds && value.nanoseconds))
 }
 
+export function toTimestamp(date: Date): TimestampInterface {
+    return TimestampClass.fromDate(date);
+}
+
 export function timestampToDate(timestamp: any): Date | undefined {
     if (isTimestamp(timestamp)) {
         if (timestamp.toDate) {

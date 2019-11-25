@@ -94,4 +94,38 @@ export default class FlamelinkService {
             }
         });
     }
+
+    observeByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
+        const {name, value, Type} = args;
+
+        const type = new Type();
+        const schema = type.schema;
+
+        return this.content.subscribe({
+            schemaKey: schema,
+            populate: options.populate,
+            filters: [[name, "==", value]],
+            callback: (error: any, data: {[entryId: string]: any}) => {
+                let entry: any|undefined = undefined;
+                if (data){
+                    entry = Object.values(data).find(d => d[name] === value);
+                }
+
+
+                if (error) {
+                    console.error("Failed to load data from flamelink", error);
+                    options.onData(undefined, error);
+                    return;
+                }
+                if (!entry) {
+                    console.log(`No entry found for ${schema} where ${name}=${value}`);
+                    options.onData(undefined, undefined);
+                    return;
+                }
+
+                const model = fromFlamelinkData(entry, Type);
+                options.onData(model);
+            }
+        });
+    }
 }

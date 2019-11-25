@@ -13,7 +13,7 @@ export class PageLoader<T extends BaseModel> implements IPageLoader<T> {
     listener?: ListenerUnsubscriber;
 
     get finishedLoading() {
-        return !!this.result
+        return !!this.result?.results
     }
 
     deinit() {

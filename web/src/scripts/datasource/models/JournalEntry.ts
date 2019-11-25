@@ -1,7 +1,85 @@
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import PromptContent from "@shared/models/PromptContent";
+import SentPrompt from "@shared/models/SentPrompt";
+import {ListenerUnsubscriber} from "@web/services/FirestoreService";
+import SentPromptService from "@web/services/SentPromptService";
+import ReflectionResponseService from "@web/services/ReflectionResponseService";
+import ReflectionPromptService from "@web/services/ReflectionPromptService";
+import PromptContentService from "@web/services/PromptContentService";
 
+export interface JournalEntryDelegate {
+    entryUpdated: (entry: JournalEntry) => void
+}
 
 class JournalEntry {
-    test: boolean = false
+    sentPrompt: SentPrompt;
+    promptId: string;
+
+    delegate?: JournalEntryDelegate;
+
+    responses?: ReflectionResponse[];
+    responsesLoaded: boolean = false;
+    responsesUnsubscriber?: ListenerUnsubscriber;
+
+    prompt?: ReflectionPrompt;
+    promptLoaded: boolean = false;
+    promptUnsubscriber?: ListenerUnsubscriber;
+
+    promptContent?: PromptContent;
+    promptContentLoaded: boolean = false;
+    promptContentUnsubscriber?: ListenerUnsubscriber;
+
+    constructor(sentPrompt: SentPrompt) {
+        this.sentPrompt = sentPrompt;
+        this.promptId = sentPrompt.promptId!
+    }
+
+    get allLoaded(): boolean {
+        return this.responsesLoaded && this.promptLoaded && this.promptContentLoaded;
+    }
+
+    start() {
+        console.log("Starting listeners for journal entry");
+        const promptId = this.promptId;
+        this.responsesUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
+            onData: (responses) => {
+                this.responses = responses;
+                this.responsesLoaded = true;
+                this.delegate?.entryUpdated(this);
+            }
+        });
+
+        this.promptUnsubscriber = ReflectionPromptService.sharedInstance.observeById(promptId, {
+            onData: (prompt) => {
+                this.prompt = prompt;
+                this.promptLoaded = true;
+                this.delegate?.entryUpdated(this);
+            }
+        });
+
+        this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByPromptId(promptId, {
+            onData: (promptContent) => {
+                this.promptContent = promptContent;
+                this.promptContentLoaded = true;
+                this.delegate?.entryUpdated(this);
+            }
+        })
+    }
+
+    stop() {
+        console.log("Stopping entries for prompt id");
+        this.promptUnsubscriber?.();
+        this.promptUnsubscriber = undefined;
+
+        this.promptContentUnsubscriber?.();
+        this.promptContentUnsubscriber = undefined;
+
+        this.responsesUnsubscriber?.();
+        this.responsesUnsubscriber = undefined;
+
+    }
+
 }
 
 

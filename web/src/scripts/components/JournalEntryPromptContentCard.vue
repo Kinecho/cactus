@@ -105,25 +105,25 @@
             SkeletonCard
         },
         created() {
-            this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
-                onData: (promptContent, error) => {
-                    this.error = undefined;
-                    if (error) {
-                        console.error("JournalEntryPromptContentCard: Failed to get prompt content via subscriber", error);
-                        this.promptContent = undefined;
-                        this.error = "Unable to load the prompt";
-                        this.loading = false;
-                        return;
-                    }
-
-                    if (!promptContent) {
-                        this.error = "Oops, we were unable to find the Prompt for this day."
-                    } else {
-                        this.promptContent = promptContent;
-                    }
-                    this.loading = false;
-                }
-            });
+            // this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
+            //     onData: (promptContent, error) => {
+            //         this.error = undefined;
+            //         if (error) {
+            //             console.error("JournalEntryPromptContentCard: Failed to get prompt content via subscriber", error);
+            //             this.promptContent = undefined;
+            //             this.error = "Unable to load the prompt";
+            //             this.loading = false;
+            //             return;
+            //         }
+            //
+            //         if (!promptContent) {
+            //             this.error = "Oops, we were unable to find the Prompt for this day."
+            //         } else {
+            //             this.promptContent = promptContent;
+            //         }
+            //         this.loading = false;
+            //     }
+            // });
         },
         props: {
             entryId: {type: String, required: true},
@@ -137,12 +137,16 @@
                 default: [],
             },
             responsesLoaded: Boolean,
+            promptContent: {
+                type: Object as () => PromptContent,
+                required: true,
+            },
         },
         data(): {
             canReflectInline: boolean,
-            promptContent: PromptContent | undefined,
+            // promptContent: PromptContent | undefined,
             error: any | undefined,
-            promptContentUnsubscriber: ListenerUnsubscriber | undefined,
+            // promptContentUnsubscriber: ListenerUnsubscriber | undefined,
             loading: boolean,
             showContent: boolean,
             editedText: string,
@@ -155,10 +159,10 @@
         } {
             return {
                 canReflectInline: false,
-                promptContent: undefined,
+                // promptContent: undefined,
                 error: undefined,
-                promptContentUnsubscriber: undefined,
-                loading: true,
+                // promptContentUnsubscriber: undefined,
+                loading: false,
                 showContent: false,
                 editedText: "",
                 editedResponses: [],

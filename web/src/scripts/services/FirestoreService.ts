@@ -228,15 +228,15 @@ export default class FirestoreService {
         const {limit, lastResult, onData} = options;
         let query = _query;
 
+        query = query.where(BaseModelField.deleted, "==", false);
+
         if (limit) {
             query = query.limit(limit);
         }
 
         if (lastResult?.firstSnapshot) {
-            query = query.startAfter(lastResult.firstSnapshot)
+            query = query.startAfter(lastResult.firstSnapshot);
         }
-
-        query = query.where(BaseModelField.deleted, "==", false)
 
         return query.onSnapshot(this.getPaginatedSnapshotHandler(onData, Type, limit))
     }

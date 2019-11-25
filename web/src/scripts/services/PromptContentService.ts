@@ -13,6 +13,10 @@ export default class PromptContentService {
     observeByEntryId(entryId: string, options: EntryObserverOptions<PromptContent>): ListenerUnsubscriber {
         return this.flamelinkService.observeByEntryId(entryId, PromptContent, options)
     }
+
+    observeByPromptId(promptId: string, options: EntryObserverOptions<PromptContent>): ListenerUnsubscriber {
+        return this.flamelinkService.observeByField({name: PromptContent.Fields.promptId, value: promptId, Type: PromptContent}, options)
+    }
 }
 
 

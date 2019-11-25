@@ -9,7 +9,7 @@ import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -102,7 +102,7 @@ export default class SentPromptService {
 
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
-            .where(SentPrompt.Fields.firstSentAt, ">", convertDateToTimestamp(since));
+            .where(SentPrompt.Fields.firstSentAt, ">", toTimestamp(since));
 
 
 
@@ -121,9 +121,10 @@ export default class SentPromptService {
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
 
         if (beforeOrEqualTo) {
-            query = query.where(SentPrompt.Fields.firstSentAt, "<=", convertDateToTimestamp(beforeOrEqualTo))
+            const beforeTimestamp = toTimestamp(beforeOrEqualTo);
+            console.log("beforeOrEqualTo Timestamp", beforeTimestamp);
+            query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
         }
-
 
         return this.firestoreService.observePaginated(query, {
             limit: limit,
