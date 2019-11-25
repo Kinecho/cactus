@@ -18,7 +18,7 @@
                     <li>Available on web</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on all notes</li>
+                    <li>128-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email</li>
                 </ul>
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
@@ -33,7 +33,7 @@
                     <li><span class="enhance">Available on iPhone and iPad</span></li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on all notes</li>
+                    <li>128-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email</li>
                     <li><span class="enhance">Notifications via push</span></li>
                     <li class="heart"><span class="enhance">Supports Cactus development</span></li>
@@ -370,6 +370,7 @@
           ul {
               list-style: none;
               margin: 0 0 4rem -.6rem;
+              min-width: 26rem;
           }
 
           li {
