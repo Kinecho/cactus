@@ -153,3 +153,5 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
 
     return;
 });
+
+export default app;
