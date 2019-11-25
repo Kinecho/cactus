@@ -36,7 +36,7 @@
                     <li>128-bit encryption on all notes</li>
                     <li>Notifications via email</li>
                     <li><span class="enhance">Notifications via push</span></li>
-                    <li class="heart">Support Cactus development</li>
+                    <li class="heart"><span class="enhance">Supports Cactus development</span></li>
                 </ul>
                 <div class="flexContainer">
                 <template v-for="plan in plans">
