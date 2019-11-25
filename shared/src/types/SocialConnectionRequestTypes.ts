@@ -5,5 +5,6 @@ export interface SocialConnectionRequestNotification {
 
 export interface SocialConnectionRequestNotificationResult {
     success: boolean,
-    error?: string | object
+    message?: string,
+    error?: string | object | undefined
 }

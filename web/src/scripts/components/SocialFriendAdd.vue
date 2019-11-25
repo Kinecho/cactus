@@ -29,6 +29,7 @@
     import {SocialConnectionRequest} from "@shared/models/SocialConnection";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import {notifyFriendRequest} from '@web/social';
 
 
     const copy = CopyService.getSharedInstance().copy;

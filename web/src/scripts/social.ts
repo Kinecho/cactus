@@ -46,13 +46,10 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
     const currentUser = getAuth().currentUser;
     const toMember = await MemberProfileService.sharedInstance.getByMemberId(socialConnectionRequest.friendMemberId);
 
-    if (!currentUser || !toMember) {
+    if (!currentUser || !toMember?.email || !socialConnectionRequest.id) {
         return {
-            data: {
-                success: false,
-            },
-            email: contact.email,
-            message: "Current user or member to sent to is not set."
+            success: false,
+            message: "Data is missing to notify the friend."
         }
     } else {
         const requestOptions: SocialConnectionRequestNotification = {

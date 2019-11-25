@@ -79,7 +79,7 @@
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
     import {InviteResult} from "@shared/types/SocialInviteTypes";
-    import {sendInvite} from '@web/invite';
+    import {sendInvite} from '@web/social';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
