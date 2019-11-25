@@ -16,7 +16,7 @@
                 <h3 class="tab-header free-header">Free</h3>
                 <ul>
                     <li>Available on web</li>
-                    <li>Unlimited reflection journal note archive</li>
+                    <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>128-bit encryption on all notes</li>
                     <li>Notifications via email</li>
@@ -31,7 +31,7 @@
                 <ul>
                     <li>Available on web</li>
                     <li><span class="enhance">Available on iPhone and iPad</span></li>
-                    <li>Unlimited reflection journal note archive</li>
+                    <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>128-bit encryption on all notes</li>
                     <li>Notifications via email</li>
