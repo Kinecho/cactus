@@ -1,5 +1,5 @@
 <template>
-    <MountingPortal :mountTo="target">
+    <MountingPortal v-if="hasShown || show" :mountTo="target">
         <transition name="modal" v-if="show" appear>
             <div :class="['modal-mask', {show, opaque, light, dark}]">
                 <div class="modal-wrapper">
@@ -49,7 +49,7 @@
             }
             //
         },
-        created() {
+        beforeMount() {
             this.escapeListener = (evt: KeyboardEvent) => {
                 if (evt.code === "Escape" || evt.keyCode === 27) {
                     this.close()
@@ -58,21 +58,9 @@
 
             document.addEventListener('keyup', this.escapeListener);
 
-        },
-        beforeMount() {
+
             if (!this.id) {
                 this.id = uuid()
-            }
-            if (this.key){
-                let modal = document.getElementById(this.key);
-                if (!modal) {
-                    const wrapper = document.createElement("div");
-                    const portal = document.createElement("div");
-                    portal.classList.add("portal-target");
-                    wrapper.setAttribute("id", this.key);
-                    wrapper.appendChild(portal)
-                    document.body.appendChild(wrapper)
-                }
             }
 
         },
@@ -85,28 +73,60 @@
                 }
             }
 
+            window.clearInterval(this.cleanupInterval);
+            this.removeModal();
         },
         data(): {
             escapeListener: any,
             id?: string,
+            cleanupInterval?: any,
+            hasShown: boolean,
         } {
             return {
                 escapeListener: undefined,
+                cleanupInterval: undefined,
+                hasShown: this.show,
             }
         },
         methods: {
             close() {
                 this.$emit("close");
+            },
+            removeModal() {
+                if (this.key){
+                    const wrapper = document.getElementById(this.key);
+                    wrapper?.remove();
+                }
             }
         },
         watch: {
             show(newValue) {
                 if (newValue) {
+                    if (this.key){
+                        let modal = document.getElementById(this.key);
+                        if (!modal) {
+                            const wrapper = document.createElement("div");
+                            const portal = document.createElement("div");
+                            portal.classList.add("portal-target");
+                            wrapper.setAttribute("id", this.key);
+                            wrapper.appendChild(portal);
+                            document.body.appendChild(wrapper)
+                        }
+                    }
+
+                    this.hasShown = true;
+
                     document.body.classList.add("no-scroll");
                     this.$root.$el.classList.add("modal-mask-in")
                 } else {
                     document.body.classList.remove("no-scroll");
-                    this.$root.$el.classList.remove("modal-mask-in")
+                    this.$root.$el.classList.remove("modal-mask-in");
+
+                    //wait for a bit before removing the wrapper element so that any animations can finish.
+                    this.cleanupInterval = window.setTimeout(() => {
+                        this.removeModal()
+                    }, 1000)
+
                 }
             }
         },
