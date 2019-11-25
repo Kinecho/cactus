@@ -13,7 +13,9 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
-import {generateReferralLink} from '@shared/util/SocialInviteUtil'
+import {generateReferralLink} from '@shared/util/SocialInviteUtil';
+import {PageRoute} from "@shared/PageRoutes";
+import {getHostname} from "@api/config/configService";
 
 
 const Config = getConfig();
@@ -129,10 +131,20 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
     };
 
     try {
+        await AdminSlackService.getSharedInstance().sendActivityMessage({
+           text: `:busts_in_silhouette: ${requestUser.email} sent a friend request to ${toEmail}`
+        });
+    } catch(error) {
+        Sentry.captureException(error);
+        console.error(error);
+    }
+
+    try {
         await AdminSendgridService.getSharedInstance().sendFriendRequest({
-            toEmail: "scottrocher@gmail.com",
+            toEmail: toEmail,
             fromEmail: requestUser.email,
-            fromName: member ? member.getFullName() : undefined
+            fromName: member ? member.getFullName() : undefined,
+            link: `${getHostname()}${PageRoute.SOCIAL}`
         });
 
         resp.send(response);
@@ -146,10 +158,6 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
             error: error,
         });
     }
-
-    await AdminSlackService.getSharedInstance().sendActivityMessage({
-        text: `:busts_in_silhouette: ${requestUser.email} sent a friend request to ${toEmail}`
-    });
 
     return;
 });

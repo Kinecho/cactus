@@ -141,7 +141,8 @@ export default class AdminSendgridService {
                 categories: ["FriendRequest"],
                 dynamicTemplateData: {
                     name: options.fromName,
-                    email: options.fromEmail
+                    email: options.fromEmail,
+                    link: options.link
                 }
             };
 

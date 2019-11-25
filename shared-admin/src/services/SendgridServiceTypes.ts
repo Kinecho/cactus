@@ -15,5 +15,6 @@ export interface InvitationEmail {
 export interface FriendRequestEmail {
     toEmail: string,
     fromEmail: string,
-    fromName: string | undefined
+    fromName: string | undefined,
+    link: string
 }
