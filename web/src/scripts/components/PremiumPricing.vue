@@ -73,7 +73,7 @@
           plans: {
                 type: Array as () => PremiumPlan[],
                 required: false,
-                default: function() { 
+                default: function() {
                   return [
                           {
                             id: Config.stripe.monthlyPlanId,
@@ -262,7 +262,7 @@
           @include r(768) {
               background-color: transparent;
               grid-template-areas: "tabpanel1 tabpanel2";
-              max-width: 74rem;
+              min-width: 67rem;
           }
           @include r(960) {
               margin: 0;
@@ -370,7 +370,6 @@
           ul {
               list-style: none;
               margin: 0 0 4rem -.6rem;
-              min-width: 26rem;
           }
 
           li {
