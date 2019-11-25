@@ -75,6 +75,9 @@
 
                         const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
                         this.sent = true;
+
+                        const notifyResult = await notifyFriendRequest(connectionRequest);
+                        
                         return (result ? true : false);                      
                     } catch(e) {
                         return false;

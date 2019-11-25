@@ -6,6 +6,7 @@ import {SocialConnectionRequestNotification,
 import {getAuth} from "@web/firebase";
 import MemberProfile from "@shared/models/MemberProfile";
 import MemberProfileService from '@web/services/MemberProfileService';
+import {SocialConnectionRequest} from "@shared/models/SocialConnection";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;
@@ -64,11 +65,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
             return await request.post(Endpoint.notifyFriendRequest, requestOptions, {headers});
         } catch (e) {
             return {
-                data: {
-                    success: false,
-                },
-                email: requestOptions.toContact.email,
-                message: "Failed to send invitation",
+                success: false,
                 error: e
             }
         }
