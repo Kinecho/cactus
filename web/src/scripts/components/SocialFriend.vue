@@ -86,10 +86,6 @@
         }
     }
 
-    .contactInfo {
-        flex-grow: 1;
-    }
-
     .email {
         font-size: 1.4rem;
         max-width: 12.3rem;

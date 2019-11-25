@@ -12,9 +12,6 @@
                 <button class="small primary" @click="sendRequest">
                     Add
                 </button>
-                <button class="small secondary" @click="">
-                    Ignore
-                </button>
             </div>
         </div>
     </div>
@@ -112,7 +109,7 @@
     }
 
     .contactInfo {
-        flex-grow: 1;
+        flex-grow: 0;
     }
 
     .email {
