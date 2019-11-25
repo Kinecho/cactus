@@ -36,6 +36,7 @@
                     <li>128-bit encryption on all notes</li>
                     <li>Notifications via email</li>
                     <li><span class="enhance">Notifications via push</span></li>
+                    <li class="heart">Support Cactus development</li>
                 </ul>
                 <div class="flexContainer">
                 <template v-for="plan in plans">
@@ -384,6 +385,11 @@
                   height: 1.3rem;
                   margin-right: 1.6rem;
                   width: 1.8rem;
+              }
+
+              &.heart:before {
+                background-image: url(assets/icons/heart.svg);
+                height: 1.5rem;
               }
           }
 
