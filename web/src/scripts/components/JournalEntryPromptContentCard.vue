@@ -70,8 +70,6 @@
 <script lang="ts">
     import Vue from "vue";
     import PromptContent, {Content, ContentType, Image} from "@shared/models/PromptContent"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import PromptContentService from '@web/services/PromptContentService'
     import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
     import SentPrompt from "@shared/models/SentPrompt"
@@ -92,6 +90,7 @@
     import {PromptCopy} from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
+
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -107,27 +106,10 @@
         },
         props: {
             entryId: {type: String, required: true},
-            // prompt: {type: Object as () => ReflectionPrompt},
-            // sentPrompt: {
-            //     type: Object as () => SentPrompt
-            // },
-
-
-            // responses: {
-            //     type: Array as () => ReflectionResponse[],
-            //     required: false,
-            //     default: [],
-            // },
-
-            // responsesLoaded: Boolean,
-            // promptContent: {
-            //     type: Object as () => PromptContent,
-            //     required: true,
-            // },
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
-            }
+            },
         },
         data(): {
             canReflectInline: boolean,
@@ -144,6 +126,7 @@
             localEntry: JournalEntry,
             responses: ReflectionResponse[]|undefined,
             promptContent: PromptContent,
+            content: Content[],
             prompt: ReflectionPrompt|undefined,
             sentPrompt: SentPrompt,
             responsesLoaded: boolean,
@@ -165,6 +148,7 @@
                 localEntry: this.entry,
                 responses: this.entry.responses,
                 promptContent: this.entry.promptContent!,
+                content: this.entry.promptContent!.content,
                 prompt: this.entry.prompt,
                 sentPrompt: this.entry.sentPrompt,
                 responsesLoaded: this.entry.responsesLoaded,
@@ -208,10 +192,16 @@
                 return classes;
             },
             questionText(): string | undefined {
-                return this.promptContent && this.promptContent.getQuestion();
+                let contentList = this.content;
+                if (contentList) {
+                    const reflectCard = contentList.find(c => c.contentType === ContentType.reflect);
+                    return reflectCard && reflectCard.text;
+                }
+                return
+                // return this.promptContent && this.promptContent.getQuestion();
             },
             backgroundImage(): Image | undefined {
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
+                const [first]: Content[] = this.content;
                 if (first && first.backgroundImage) {
                     return first.backgroundImage
                 }
@@ -221,14 +211,14 @@
                 return hasImage(this.backgroundImage);
             },
             topicText(): string | undefined {
-                return this.promptContent && this.promptContent.subjectLine;
+                return this.promptContent?.subjectLine;
             },
             subText(): string | undefined {
                 if (!this.promptContent) {
                     return;
                 }
 
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
+                const [first]: Content[] = this.content;
                 return first && first.text
             },
             promptContentPath(): string {

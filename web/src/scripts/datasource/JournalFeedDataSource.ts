@@ -199,11 +199,11 @@ class JournalFeedDataSource implements JournalEntryDelegate{
         return true;
     }
 
-    deinit() {
+    stop() {
         console.log("deinit journalEntryDataSource");
 
         this.pages.forEach(page => {
-            page.deinit()
+            page.stop()
         });
 
         this.journalEntries.forEach(entry => {

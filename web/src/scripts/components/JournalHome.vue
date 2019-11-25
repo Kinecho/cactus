@@ -12,7 +12,7 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && sentPromptsLoaded" :key="'empty'">
+                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && dataHasLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
                         <p>To get started, you'll learn about how Cactus works and reflect on your first question of the
@@ -21,7 +21,7 @@
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                     </section>
                 </div>
-                <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && journalEntries.length > 0">
+                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <section class="journalList">
                         <transition-group
                                 tag="div"
@@ -29,7 +29,6 @@
                                 v-bind:css="false"
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
-                            <!--                        <virtual-list :size="220" :remain="8" :pagemode="true" ref="virtualList">-->
                             <entry
                                     class="journalListItem"
                                     v-for="(entry, index) in journalEntries"
@@ -38,7 +37,6 @@
                                     v-bind:key="entry.sentPrompt.id"
                                     v-bind:data-index="index"
                             ></entry>
-                            <!--                        </virtual-list>-->
                         </transition-group>
 
                     </section>
@@ -61,12 +59,9 @@
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import SentPrompt from "@shared/models/SentPrompt"
-    import SentPromptService from '@web/services/SentPromptService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
     import virtualList from 'vue-virtual-scroll-list'
-    // import VueVirtualScroller from "vue-virtual-scroller"
     import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
@@ -78,11 +73,10 @@
         user?: FirebaseUser,
         memberUnsubscriber?: ListenerUnsubscriber,
         loginReady: boolean,
-        sentPromptsUnsubscriber?: ListenerUnsubscriber,
-        sentPromptsLoaded: boolean,
         dataSource?: JournalFeedDataSource,
         journalEntries: JournalEntry[],
         showPageLoading: boolean,
+        dataHasLoaded: boolean,
     }
 
     export default Vue.extend({
@@ -130,7 +124,7 @@
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
                                 this.journalEntries = this.dataSource!.journalEntries;
-                                this.sentPromptsLoaded = true;
+                                this.dataHasLoaded = true;
                             },
                             updateAll: (entries) => {
                                 console.log("got entries in journal home", entries);
@@ -139,20 +133,7 @@
                             onUpdated: (entry: JournalEntry, index?: number) => {
                                 console.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
-                                    // this.updateIndex(index);
-
                                     this.$set(this.journalEntries, index, entry);
-                                    // let responses = this.journalEntries[index].responses;
-                                    // if (responses){
-                                    //     responses.splice(0, responses.length);
-                                    //     entry.responses?.forEach(response => {
-                                    //         responses?.push(response);
-                                    //     })
-                                    // }
-
-                                    // this.journalEntries = this.dataSource!.journalEntries;
-                                    // this.$se this.journalEntries
-                                    // this.$forceUpdate()
                                 }
                             }
                         };
@@ -168,52 +149,17 @@
                 cactusMember: undefined,
                 loginReady: false,
                 authUnsubscribe: undefined,
-                sentPromptsUnsubscriber: undefined,
-                // sentPrompts: [],
-                sentPromptsLoaded: false,
                 dataSource: undefined,
                 journalEntries: [],
                 showPageLoading: false,
+                dataHasLoaded: false,
             };
         },
-        watch: {
-            //TODO: add pagination
-            async cactusMember(newMember: CactusMember | undefined | null, oldMember: CactusMember | undefined | null) {
-                const newId = newMember ? newMember.id : undefined;
-                const oldId = oldMember ? oldMember.id : undefined;
-                if (newId && newId !== oldId) {
-                    // console.log("configuring prompt observer");
-                    // this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(newId, {
-                    //     onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
-                    //         console.log(`loaded ${sentPrompts.length} prompts via promptObserver on JournalHome`);
-                    //
-                    //         //TODO: this is a temporary hack to improve initial pageload. I need to ad infinite scrolling
-                    //         setTimeout(() => this.sentPrompts = sentPrompts, 2000);
-                    //         this.sentPromptsLoaded = true;
-                    //     }
-                    // });
-                } else if (!newId && this.sentPromptsUnsubscriber) {
-                    console.log("removing journal prompt subscriber since there is no current member");
-                    this.sentPromptsUnsubscriber();
-                }
-
-            },
-        },
         destroyed() {
-            if (this.authUnsubscribe) {
-                this.authUnsubscribe();
-            }
-            if (this.sentPromptsUnsubscriber) {
-                this.sentPromptsUnsubscriber();
-            }
-
+            this.authUnsubscribe?.();
+            this.dataSource?.stop();
         },
         methods: {
-            updateIndex(index: number) {
-                // console.log("data loaded at index", index);
-                //@ts-ignore - stupid component doesn't have types
-                this.$refs.virtualList?.updateVariable(index);
-            },
             beforeEnter: function (el: HTMLElement) {
                 const index = Number(el.dataset.index);
                 if (index > 10) {

@@ -16,7 +16,7 @@ export class PageLoader<T extends BaseModel> implements IPageLoader<T> {
         return !!this.result?.results
     }
 
-    deinit() {
+    stop() {
         this.listener?.()
     }
 }
