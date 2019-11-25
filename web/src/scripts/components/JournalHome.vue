@@ -23,26 +23,26 @@
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && journalEntries.length > 0">
                     <section class="journalList">
-                        <!--                        <transition-group-->
-                        <!--                                tag="div"-->
-                        <!--                                appear-->
-                        <!--                                v-bind:css="false"-->
-                        <!--                                v-on:before-enter="beforeEnter"-->
-                        <!--                                v-on:enter="enter">-->
-                        <virtual-list :size="220" :remain="8" :pagemode="true" ref="virtualList">
+                        <transition-group
+                                tag="div"
+                                appear
+                                v-bind:css="false"
+                                v-on:before-enter="beforeEnter"
+                                v-on:enter="enter">
+                            <!--                        <virtual-list :size="220" :remain="8" :pagemode="true" ref="virtualList">-->
                             <entry
                                     class="journalListItem"
-                                    v-for="(entry, index) in dataSource.journalEntries"
+                                    v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
                                     v-bind:key="entry.sentPrompt.id"
                                     v-bind:data-index="index"
-                                    @loaded="updateIndex(index)"
                             ></entry>
-                        </virtual-list>
+                            <!--                        </virtual-list>-->
+                        </transition-group>
 
-                        <!--                        </transition-group>-->
                     </section>
+                    <spinner message="Loading More" v-show="dataSource.loadingPage"/>
                 </div>
             </transition>
 
@@ -69,6 +69,8 @@
     // import VueVirtualScroller from "vue-virtual-scroller"
     import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
     import JournalEntry from '@web/datasource/models/JournalEntry'
+    import {debounce} from "debounce"
+    import Spinner from "@components/Spinner.vue"
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -77,10 +79,10 @@
         memberUnsubscriber?: ListenerUnsubscriber,
         loginReady: boolean,
         sentPromptsUnsubscriber?: ListenerUnsubscriber,
-        sentPrompts: SentPrompt[],
         sentPromptsLoaded: boolean,
         dataSource?: JournalFeedDataSource,
         journalEntries: JournalEntry[],
+        showPageLoading: boolean,
     }
 
     export default Vue.extend({
@@ -90,10 +92,15 @@
             AutoPromptContentModal,
             SkeletonCard,
             'virtual-list': virtualList,
+            Spinner,
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
             firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
+        },
+        mounted() {
+            let handler = debounce(this.scrollHandler, 10);
+            window.addEventListener('scroll', handler);
         },
         beforeMount() {
             console.log("Journal Home calling Created function");
@@ -116,14 +123,12 @@
 
                     if (isFreshLogin) {
                         // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        console.log(`JournalHome fetched ${this.sentPrompts.length} prompts when the current member was loaded`);
                         // this.sentPromptsLoaded = true;
-
+                        console.log("[JournalHome] fresh login. Setting up data source");
                         this.dataSource = new JournalFeedDataSource(member!);
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
-                                this.sentPrompts = this.dataSource!.sentPrompts;
                                 this.journalEntries = this.dataSource!.journalEntries;
                                 this.sentPromptsLoaded = true;
                             },
@@ -132,8 +137,21 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
+                                console.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
-                                    this.updateIndex(index)
+                                    // this.updateIndex(index);
+
+                                    this.$set(this.journalEntries, index, entry);
+                                    // let responses = this.journalEntries[index].responses;
+                                    // if (responses){
+                                    //     responses.splice(0, responses.length);
+                                    //     entry.responses?.forEach(response => {
+                                    //         responses?.push(response);
+                                    //     })
+                                    // }
+
+                                    // this.journalEntries = this.dataSource!.journalEntries;
+                                    // this.$se this.journalEntries
                                     // this.$forceUpdate()
                                 }
                             }
@@ -151,10 +169,11 @@
                 loginReady: false,
                 authUnsubscribe: undefined,
                 sentPromptsUnsubscriber: undefined,
-                sentPrompts: [],
+                // sentPrompts: [],
                 sentPromptsLoaded: false,
                 dataSource: undefined,
                 journalEntries: [],
+                showPageLoading: false,
             };
         },
         watch: {
@@ -191,21 +210,40 @@
         },
         methods: {
             updateIndex(index: number) {
-                console.log("data loaded", index);
+                // console.log("data loaded at index", index);
                 //@ts-ignore - stupid component doesn't have types
-                this.$refs.virtualList.updateVariable(index);
+                this.$refs.virtualList?.updateVariable(index);
             },
             beforeEnter: function (el: HTMLElement) {
+                const index = Number(el.dataset.index);
+                if (index > 10) {
+                    return;
+                }
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
-                const delay = Math.min(Number(el.dataset.index) * 100, 2000);
+                const index = Number(el.dataset.index);
+                const delay = Math.min(index * 100, 2000);
+
                 setTimeout(function () {
                     el.classList.remove("out");
                     done();
                 }, delay)
             },
+            scrollHandler(): void {
+                const threshold = 200;
+                const distance = this.getScrollOffset();
+                if (distance <= threshold) {
+                    console.log("load more! Offset = ", distance);
 
+                    this.showPageLoading = this.dataSource?.loadNextPage() || false
+
+                }
+
+            },
+            getScrollOffset(): number {
+                return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
+            }
         },
         computed: {
             email(): string | undefined | null {

@@ -1,6 +1,6 @@
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
-    <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: responseText}">
+    <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
         <div class="doneStatus" v-show="responsesLoaded && completed">{{promptCopy.DONE}}</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
@@ -91,6 +91,7 @@
     import CopyService from "@shared/copy/CopyService";
     import {PromptCopy} from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
+    import JournalEntry from '@web/datasource/models/JournalEntry'
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -104,49 +105,33 @@
             FlamelinkImage,
             SkeletonCard
         },
-        created() {
-            // this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
-            //     onData: (promptContent, error) => {
-            //         this.error = undefined;
-            //         if (error) {
-            //             console.error("JournalEntryPromptContentCard: Failed to get prompt content via subscriber", error);
-            //             this.promptContent = undefined;
-            //             this.error = "Unable to load the prompt";
-            //             this.loading = false;
-            //             return;
-            //         }
-            //
-            //         if (!promptContent) {
-            //             this.error = "Oops, we were unable to find the Prompt for this day."
-            //         } else {
-            //             this.promptContent = promptContent;
-            //         }
-            //         this.loading = false;
-            //     }
-            // });
-        },
         props: {
             entryId: {type: String, required: true},
-            prompt: {type: Object as () => ReflectionPrompt},
-            sentPrompt: {
-                type: Object as () => SentPrompt
-            },
-            responses: {
-                type: Array as () => ReflectionResponse[],
-                required: false,
-                default: [],
-            },
-            responsesLoaded: Boolean,
-            promptContent: {
-                type: Object as () => PromptContent,
+            // prompt: {type: Object as () => ReflectionPrompt},
+            // sentPrompt: {
+            //     type: Object as () => SentPrompt
+            // },
+
+
+            // responses: {
+            //     type: Array as () => ReflectionResponse[],
+            //     required: false,
+            //     default: [],
+            // },
+
+            // responsesLoaded: Boolean,
+            // promptContent: {
+            //     type: Object as () => PromptContent,
+            //     required: true,
+            // },
+            entry: {
+                type: Object as () => JournalEntry,
                 required: true,
-            },
+            }
         },
         data(): {
             canReflectInline: boolean,
-            // promptContent: PromptContent | undefined,
             error: any | undefined,
-            // promptContentUnsubscriber: ListenerUnsubscriber | undefined,
             loading: boolean,
             showContent: boolean,
             editedText: string,
@@ -156,6 +141,12 @@
             promptCopy: PromptCopy,
             initialIndex: number | undefined,
             showShareNote: boolean,
+            localEntry: JournalEntry,
+            responses: ReflectionResponse[]|undefined,
+            promptContent: PromptContent,
+            prompt: ReflectionPrompt|undefined,
+            sentPrompt: SentPrompt,
+            responsesLoaded: boolean,
         } {
             return {
                 canReflectInline: false,
@@ -171,6 +162,12 @@
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
                 showShareNote: false,
+                localEntry: this.entry,
+                responses: this.entry.responses,
+                promptContent: this.entry.promptContent!,
+                prompt: this.entry.prompt,
+                sentPrompt: this.entry.sentPrompt,
+                responsesLoaded: this.entry.responsesLoaded,
             }
         },
         computed: {
@@ -199,13 +196,13 @@
             backgroundClasses(): { [name: string]: string } {
                 const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
-                const id = this.prompt.id;
+                const id = this.sentPrompt.promptId || "";
 
                 const showRandomBackground = !bgImage;
 
                 const classes: { [name: string]: any } = {
                     randomBackground: showRandomBackground,
-                    [`bg${getIntegerFromStringBetween(id || "", NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
+                    [`bg${getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
                 };
 
                 return classes;
@@ -244,10 +241,10 @@
                 return getResponseText(this.responses);
             },
             completed(): boolean {
-                return this.responses.length > 0;
+                return this.responses && this.responses.length > 0 || false;
             },
             hasNote(): boolean {
-                return !isBlank(this.responseText);
+                return !isBlank(getResponseText(this.responses));
             },
             linkItems(): {
                 title: string,

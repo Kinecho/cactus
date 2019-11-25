@@ -103,6 +103,7 @@
                         name: "prompt-content",
                         props: {
                             sentPrompt: sentPrompt,
+                            entry: entry,
                             prompt: entry.prompt,
                             entryId: entry.promptContent.entryId,
                             promptContent: entry.promptContent,
@@ -117,6 +118,7 @@
                             prompt: entry.prompt,
                             sentPrompt: entry.sentPrompt,
                             responses: entry.responses,
+                            entry: entry,
                             responsesLoaded: entry.responsesLoaded,
                         }
                     };

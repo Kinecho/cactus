@@ -34,6 +34,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
     orderedPromptIds: string[] = [];
     journalEntriesByPromptId: { [promptId: string]: JournalEntry } = {};
 
+    loadingPage: boolean = false;
 
     journalEntries: JournalEntry[] = [];
 
@@ -46,7 +47,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
     start() {
         const futurePage = new PageLoader<SentPrompt>();
         const firstPage = new PageLoader<SentPrompt>();
-
+        this.loadingPage = true;
         this.pages = [
             futurePage,
             firstPage
@@ -72,7 +73,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
                 this.handlePageResult(page);
                 this.hasLoaded = true;
-
+                this.loadingPage = false;
 
             }
         });
@@ -146,6 +147,56 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             created: true,
             entry,
         }
+    }
+
+    /**
+     *
+     * @return {boolean} True if the next page will be loaded, false if not.
+     */
+    loadNextPage(): boolean {
+        if (this.loadingPage){
+            console.log("[JournalFeedDataSource] Page is loading, not doing anything");
+            return false;
+        }
+        if (!this.hasLoaded) {
+            console.log("[JournalFeedDataSource] Not set up, can't load next page");
+            return false;
+        }
+
+        if (this.pages.length === 0) {
+            console.log("[JournalFeedDataSource] There are no pages. Can't load next page");
+            return false;
+        }
+        const lastPage = this.pages[this.pages.length - 1];
+
+        if (!lastPage.finishedLoading) {
+            console.log("[JournalFeedDataSource] Last page has not finished loading.");
+            return false;
+        }
+
+        if (lastPage.result?.mightHaveMore !== true) {
+            console.log("[JournalFeedDataSource] There is no more expected data. Not loading");
+            return false;
+        }
+
+        const nextPage = new PageLoader<SentPrompt>();
+        this.pages.push(nextPage);
+        nextPage.listener = SentPromptService.sharedInstance.observePage({
+            memberId: this.memberId,
+            // beforeOrEqualTo: this.startDate,
+            limit: this.pageSize,
+            lastResult: lastPage.result,
+            onData: (page) => {
+                console.log("🌵 Got Next page results", page);
+                nextPage.result = page;
+                this.delegate?.didLoad?.(page.results.length > 0);
+
+                this.handlePageResult(page);
+                this.loadingPage = false;
+            }
+        });
+
+        return true;
     }
 
     deinit() {

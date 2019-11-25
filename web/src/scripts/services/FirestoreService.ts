@@ -234,8 +234,8 @@ export default class FirestoreService {
             query = query.limit(limit);
         }
 
-        if (lastResult?.firstSnapshot) {
-            query = query.startAfter(lastResult.firstSnapshot);
+        if (lastResult?.lastSnapshot) {
+            query = query.startAfter(lastResult.lastSnapshot);
         }
 
         return query.onSnapshot(this.getPaginatedSnapshotHandler(onData, Type, limit))
