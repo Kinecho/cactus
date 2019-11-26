@@ -12,15 +12,16 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="loggedIn && loginReady && sentPrompts.length === 0 && sentPromptsLoaded" :key="'empty'">
+                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && dataHasLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the day.</p>
+                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the
+                            day.</p>
                         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                     </section>
                 </div>
-                <div class="section-container" v-if="loggedIn && loginReady && sentPromptsLoaded && sentPrompts.length > 0">
+                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <section class="journalList">
                         <transition-group
                                 tag="div"
@@ -30,14 +31,16 @@
                                 v-on:enter="enter">
                             <entry
                                     class="journalListItem"
-                                    v-for="(sentPrompt, index) in sentPrompts"
-                                    v-bind:sentPrompt="sentPrompt"
+                                    v-for="(entry, index) in journalEntries"
+                                    :journalEntry="entry"
                                     v-bind:index="index"
-                                    v-bind:key="sentPrompt.id"
+                                    v-bind:key="entry.promptId"
                                     v-bind:data-index="index"
                             ></entry>
                         </transition-group>
+
                     </section>
+                    <spinner message="Loading More" v-show="showPageLoading"/>
                 </div>
             </transition>
 
@@ -56,10 +59,12 @@
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import SentPrompt from "@shared/models/SentPrompt"
-    import SentPromptService from '@web/services/SentPromptService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
+    import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
+    import JournalEntry from '@web/datasource/models/JournalEntry'
+    import {debounce} from "debounce"
+    import Spinner from "@components/Spinner.vue"
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -67,14 +72,32 @@
         user?: FirebaseUser,
         memberUnsubscriber?: ListenerUnsubscriber,
         loginReady: boolean,
-        sentPromptsUnsubscriber?: ListenerUnsubscriber,
-        sentPrompts: SentPrompt[],
-        sentPromptsLoaded: boolean,
+        dataSource?: JournalFeedDataSource,
+        journalEntries: JournalEntry[],
+        showPageLoading: boolean,
+        dataHasLoaded: boolean,
     }
 
     export default Vue.extend({
-        created() {
+        components: {
+            NavBar,
+            entry: JournalEntryCard,
+            AutoPromptContentModal,
+            SkeletonCard,
+            Spinner,
+        },
+        props: {
+            loginPath: {type: String, default: PageRoute.SIGNUP},
+            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
+        },
+        mounted() {
+            let handler = debounce(this.scrollHandler, 10);
+            window.addEventListener('scroll', handler);
+            this.scrollHandler()
+        },
+        beforeMount() {
             console.log("Journal Home calling Created function");
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
@@ -83,7 +106,7 @@
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
-
+                    // const memberChanged =  member && member.id && this.cactusMember?.id === member?.id;
 
                     this.cactusMember = member;
                     this.user = user;
@@ -92,78 +115,94 @@
                     }
 
                     if (isFreshLogin) {
-                        this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        console.log(`JournalHome fetched ${this.sentPrompts.length} prompts when the current member was loaded`);
-                        this.sentPromptsLoaded = true;
-                    }
+                        // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
+                        // this.sentPromptsLoaded = true;
+                        console.log("[JournalHome] fresh login. Setting up data source");
+                        this.dataSource = new JournalFeedDataSource(member!);
+                        this.dataSource.delegate = {
+                            didLoad: (hasData) => {
+                                console.log("[JournalHome] didLoad called. Has Data = ", hasData);
 
+                                // this.$set(this.journalEntries, this.dataSource!.journalEntries);
+                                this.journalEntries = this.dataSource!.journalEntries;
+                                // this.$set(this.$data.journalEntries)
+                                this.dataHasLoaded = true;
+                            },
+                            onAdded: (entry: JournalEntry, index) => {
+                                //not implemented
+                            },
+                            onRemoved: (entry: JournalEntry, removedIndex) => {
+                                //not implemented
+                            },
+                            updateAll: (entries) => {
+                                console.log("got entries in journal home", entries);
+                                this.journalEntries = entries;
+                            },
+                            onUpdated: (entry: JournalEntry, index?: number) => {
+                                console.log(`entry updated at index ${index}`, entry);
+                                if (index && index >= 0) {
+                                    this.$set(this.$data.journalEntries, index, entry);
+                                }
+
+                                this.journalEntries = this.dataSource?.journalEntries || this.journalEntries
+                            },
+                            pageLoaded: (hasMore: boolean) => {
+                                this.showPageLoading = false
+                            }
+                        };
+
+                        this.dataSource?.start()
+                    }
                 }
             });
         },
-        components: {
-            NavBar,
-            entry: JournalEntryCard,
-            AutoPromptContentModal,
-            SkeletonCard,
-        },
-        props: {
-            loginPath: {type: String, default: PageRoute.SIGNUP},
-            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
-        },
+
         data(): JournalHomeData {
             return {
                 cactusMember: undefined,
                 loginReady: false,
                 authUnsubscribe: undefined,
-                sentPromptsUnsubscriber: undefined,
-                sentPrompts: [],
-                sentPromptsLoaded: false,
+                dataSource: undefined,
+                journalEntries: [],
+                showPageLoading: false,
+                dataHasLoaded: false,
             };
         },
-        watch: {
-            //TODO: add pagination
-            async cactusMember(newMember: CactusMember | undefined | null, oldMember: CactusMember | undefined | null) {
-                const newId = newMember ? newMember.id : undefined;
-                const oldId = oldMember ? oldMember.id : undefined;
-                if (newId && newId !== oldId) {
-                    console.log("configuring prompt observer");
-                    this.sentPromptsUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(newId, {
-                        onData: async (sentPrompts: SentPrompt[]): Promise<void> => {
-                            console.log(`loaded ${sentPrompts.length} prompts via promptObserver on JournalHome`);
-
-                            //TODO: this is a temporary hack to improve initial pageload. I need to ad infinite scrolling
-                            setTimeout(() => this.sentPrompts = sentPrompts, 2000);
-                            this.sentPromptsLoaded = true;
-                        }
-                    });
-                } else if (!newId && this.sentPromptsUnsubscriber) {
-                    console.log("removing journal prompt subscriber since there is no current member");
-                    this.sentPromptsUnsubscriber();
-                }
-
-            },
-        },
         destroyed() {
-            if (this.authUnsubscribe) {
-                this.authUnsubscribe();
-            }
-            if (this.sentPromptsUnsubscriber) {
-                this.sentPromptsUnsubscriber();
-            }
-
+            this.authUnsubscribe?.();
+            this.dataSource?.stop();
         },
         methods: {
             beforeEnter: function (el: HTMLElement) {
+                const index = Number(el.dataset.index);
+                if (index > 10) {
+                    return;
+                }
                 el.classList.add("out");
             },
             enter: function (el: HTMLElement, done: () => void) {
-                const delay = Math.min(Number(el.dataset.index) * 100, 2000);
+                const index = Number(el.dataset.index);
+                const delay = Math.min(index * 100, 2000);
+
                 setTimeout(function () {
                     el.classList.remove("out");
                     done();
                 }, delay)
             },
+            scrollHandler(): void {
+                const threshold = window.innerHeight / 3;
+                const distance = this.getScrollOffset();
+                if (distance <= threshold) {
+                    console.log("load more! Offset = ", distance);
 
+                    const willLoad = this.dataSource?.loadNextPage() || false;
+                    this.showPageLoading = this.dataSource?.loadingPage || willLoad
+
+                }
+            },
+            getScrollOffset(): number {
+                return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
+            }
         },
         computed: {
             email(): string | undefined | null {

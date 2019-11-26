@@ -42,6 +42,7 @@
     import SentPrompt from "@shared/models/SentPrompt"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
+    import JournalEntry from '@web/datasource/models/JournalEntry'
 
     export default Vue.extend({
         components: {
@@ -52,32 +53,30 @@
 
         },
         props: {
-            prompt: {
-                type: Object as () => ReflectionPrompt,
+            entry: {
+                type: Object as () => JournalEntry,
                 required: true,
             },
-            sentPrompt: {
-                type: Object as () => SentPrompt,
-                required: true,
-            },
-            responses: {
-                type: Array as () => ReflectionResponse[],
-                required: false,
-                default: [],
-            },
-            responsesLoaded: Boolean,
         },
         data(): {
             doReflect: boolean,
             editedText: string,
             editedResponses: { id: string | undefined, text: string }[],
             responseMedium: ResponseMedium,
+            prompt: ReflectionPrompt,
+            sentPrompt: SentPrompt,
+            responses: ReflectionResponse[]|undefined,
+            responsesLoaded: boolean,
         } {
             return {
                 doReflect: false,
                 editedText: "",
                 editedResponses: [],
                 responseMedium: ResponseMedium.JOURNAL_WEB,
+                responses: this.entry.responses,
+                prompt: this.entry.prompt!,
+                sentPrompt: this.entry.sentPrompt,
+                responsesLoaded: this.entry.responsesLoaded,
             }
         },
         computed: {
@@ -94,7 +93,7 @@
                     href?: string,
                     onClick?: () => void,
                 }[] = [];
-                if (this.responses.length > 0) {
+                if (this.responses && this.responses.length > 0) {
                     linkItems.push({
                         title: "Edit Note",
                         onClick: () => {
@@ -120,7 +119,7 @@
                     return this.prompt.question
                 }
 
-                if (this.responses.length > 0) {
+                if (this.responses && this.responses.length > 0) {
                     return this.responses[0].promptQuestion;
                 }
                 return;

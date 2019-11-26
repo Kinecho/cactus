@@ -6,25 +6,12 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import SentPrompt from "@shared/models/SentPrompt"
-    import {ListenerUnsubscriber} from "@web/services/FirestoreService"
-    import ReflectionPromptService from "@web/services/ReflectionPromptService"
-    import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import PromptContentEntryCard from "@components/JournalEntryPromptContentCard.vue";
     import PromptQuestionEntryCard from "@components/JournalEntryQuestionCard.vue";
     import Spinner from "@components/Spinner.vue";
     import SkeletonEntry from "@components/JournalEntrySkeleton.vue";
+    import JournalEntry from '@web/datasource/models/JournalEntry'
 
-    declare interface ReflectionResponseCardData {
-        prompt?: ReflectionPrompt,
-        responses: ReflectionResponse[],
-        promptUnsubscriber?: ListenerUnsubscriber,
-        responseUnsubscriber?: ListenerUnsubscriber,
-        responsesLoaded: boolean,
-        promptLoaded: boolean,
-    }
 
     export default Vue.extend({
         components: {
@@ -34,76 +21,41 @@
             SkeletonEntry,
         },
         props: {
-            sentPrompt: {
-                type: Object as () => SentPrompt,
+            journalEntry: {
+                type: Object as () => JournalEntry,
                 required: true
             }
         },
-        created() {
-            const sentPrompt = this.sentPrompt;
-            const promptId = sentPrompt.promptId;
-            if (promptId) {
-                this.promptUnsubscriber = ReflectionPromptService.sharedInstance.observeById(promptId, {
-                    includeDeleted: false,
-                    onData: prompt => {
-                        this.prompt = prompt;
-                        this.promptLoaded = true;
-                    }
-                });
-
-                this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
-                    onData: responses => {
-                        this.responses = responses;
-                        this.responsesLoaded = true;
-                    }
-                })
-            } else {
-                console.log("NO prompt id found on the sent prompt");
-            }
-        },
-
-        destroyed() {
-            if (this.promptUnsubscriber) {
-                this.promptUnsubscriber();
-            }
-            if (this.responseUnsubscriber) {
-                this.responseUnsubscriber();
-            }
-        },
-        data(): ReflectionResponseCardData {
+        data(): {entry: JournalEntry} {
             return {
-                promptUnsubscriber: undefined,
-                responseUnsubscriber: undefined,
-                prompt: undefined,
-                responses: [],
-                responsesLoaded: false,
-                promptLoaded: false,
+                entry: this.journalEntry
             }
         },
-        watch: {},
+
         computed: {
             bodyComponent(): { name: string, props?: any } | undefined {
-                if (!this.promptLoaded) {
+                const entry: JournalEntry = this.entry;
+                console.log("updating body component with journal entry stuffs");
+                if (!entry.allLoaded) {
                     return {name: "skeleton-entry"};
-                } else if (this.prompt && this.prompt.promptContentEntryId) {
+                } else if (entry.promptContent) {
                     return {
                         name: "prompt-content",
                         props: {
-                            sentPrompt: this.sentPrompt,
-                            prompt: this.prompt,
-                            entryId: this.prompt.promptContentEntryId,
-                            responses: this.responses,
-                            responsesLoaded: this.responsesLoaded,
+                            entry: entry,
+                            entryId: entry.promptContent.entryId,
+                            content: entry.promptContent.content,
                         }
                     };
-                } else if (this.prompt) {
+                } else if (entry.prompt) {
                     return {
                         name: "question-content",
                         props: {
-                            prompt: this.prompt,
-                            sentPrompt: this.sentPrompt,
-                            responses: this.responses,
-                            responsesLoaded: this.responsesLoaded,
+                            prompt: entry.prompt,
+                            sentPrompt: entry.sentPrompt,
+                            responses: entry.responses,
+                            entry: entry,
+                            responsesLoaded: entry.responsesLoaded,
                         }
                     };
                 }

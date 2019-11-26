@@ -84,7 +84,6 @@ export interface ReflectionContent {
 }
 
 export enum ReflectionResponseField {
-    responseDate = "responseDate",
     userId = "userId",
     cactusMemberId = "cactusMemberId",
     emailReplyId = "emailReplyId",

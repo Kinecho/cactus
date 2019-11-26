@@ -1,5 +1,6 @@
 import FirestoreService, {
-    ListenerUnsubscriber,
+    ListenerUnsubscriber, PageListenerResult,
+    PageResult,
     Query,
     QueryCursor,
     QueryObserverOptions
@@ -8,6 +9,31 @@ import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
+import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
+
+export interface SentPromptPageOptions {
+    memberId: string,
+    beforeOrEqualTo?: Date,
+    limit?: number,
+    lastResult?: PageResult<SentPrompt>,
+    onData: (pageResult: PageResult<SentPrompt>) => void
+}
+
+export interface SentPromptPageListenerOptions {
+    memberId: string,
+    beforeOrEqualTo?: Date,
+    limit?: number,
+    lastResult?: PageResult<SentPrompt>,
+    onData: (pageResult: PageListenerResult<SentPrompt>) => void
+}
+
+export interface FutureSentPromptPageListenerOptions {
+    memberId: string,
+    since: Date,
+    limit?: number,
+    lastResult?: PageResult<SentPrompt>,
+    onData: (pageResult: PageListenerResult<SentPrompt>) => void
+}
 
 export default class SentPromptService {
     public static sharedInstance = new SentPromptService();
@@ -69,6 +95,43 @@ export default class SentPromptService {
             }
 
         }
+    }
+
+    observeFuturePrompts(options: FutureSentPromptPageListenerOptions): ListenerUnsubscriber {
+        const {memberId, since, lastResult, limit, onData} = options;
+
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
+            .where(SentPrompt.Fields.firstSentAt, ">", toTimestamp(since));
+
+
+
+        return this.firestoreService.observePaginated(query, {
+            limit: limit,
+            onData,
+            lastResult,
+        }, SentPrompt)
+
+    }
+
+    observePage(options: SentPromptPageListenerOptions): ListenerUnsubscriber {
+        const {memberId, beforeOrEqualTo, lastResult, limit, onData} = options;
+
+        let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+
+        if (beforeOrEqualTo) {
+            const beforeTimestamp = toTimestamp(beforeOrEqualTo);
+            console.log("beforeOrEqualTo Timestamp", beforeTimestamp);
+            query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
+        }
+
+        return this.firestoreService.observePaginated(query, {
+            limit: limit,
+            onData,
+            lastResult,
+        }, SentPrompt)
+
     }
 
     observeForCactusMemberId(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
