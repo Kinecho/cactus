@@ -131,10 +131,10 @@
                                 this.dataHasLoaded = true;
                             },
                             onAdded: (entry: JournalEntry, index) => {
-                                // this.$set(this.journalEntries, index, entry);
+                                //not implemented
                             },
                             onRemoved: (entry: JournalEntry, removedIndex) => {
-                                // this.journalEntries.splice(removedIndex, 1);
+                                //not implemented
                             },
                             updateAll: (entries) => {
                                 console.log("got entries in journal home", entries);
@@ -144,8 +144,9 @@
                                 console.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
-                                    // this.$forceUpdate();
                                 }
+
+                                this.journalEntries = this.dataSource?.journalEntries || this.journalEntries
                             },
                             pageLoaded: (hasMore: boolean) => {
                                 this.showPageLoading = false

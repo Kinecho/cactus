@@ -52,37 +52,20 @@ export interface DocumentSnapshot {
     readonly exists: boolean;
 }
 
-// export interface DocumentChange {
-//
-// }
-//
-// export interface SnapshotMetadata {
-//
-// }
-
 export interface SnapshotOptions {
     readonly serverTimestamps?: 'estimate' | 'previous' | 'none';
 }
-
-// export interface SnapshotListenOptions {
-//     includeMetadataChanges: boolean,
-// }
 
 export interface QueryDocumentSnapshot extends DocumentSnapshot {
     data(options?: SnapshotOptions): DocumentData
 }
 
 export interface QuerySnapshot {
-    forEach(callback: (doc: DocumentSnapshot) => void): void,
-
-    // docChanges(options?: SnapshotListenOptions): DocumentChange[],
     docs: QueryDocumentSnapshot[],
-
-    isEqual(other: QuerySnapshot): boolean,
-
-    // metadata: SnapshotMetadata,
     size: number
     empty: boolean,
+    forEach(callback: (doc: DocumentSnapshot) => void): void,
+    isEqual(other: QuerySnapshot): boolean,
 }
 
 export function convertDateToTimestamp(input: any): any {
@@ -111,9 +94,6 @@ export function convertTimestampToDate(input: any): any {
     const copy = Object.assign({}, input);
 
     return transformObjectSync(copy, (value) => {
-        // if (isNotNull(value) && value instanceof TimestampClass) {
-        //     return value.toDate();
-        // }
         if (isTimestamp(value)) {
             return timestampToDate(value);
         }

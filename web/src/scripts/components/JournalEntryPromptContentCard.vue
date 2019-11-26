@@ -133,9 +133,7 @@
         } {
             return {
                 canReflectInline: false,
-                // promptContent: undefined,
                 error: undefined,
-                // promptContentUnsubscriber: undefined,
                 loading: false,
                 showContent: false,
                 editedText: "",
@@ -245,10 +243,6 @@
                     {
                         title: copy.prompts.REFLECT,
                         href: this.promptContentPath,
-                        // onClick: () => {
-                        //     this.initialIndex = 0;
-                        //     this.showContent = true;
-                        // }
                     },
                     {
                         title: this.hasNote ? copy.prompts.EDIT_NOTE : copy.prompts.ADD_A_NOTE,
@@ -268,7 +262,6 @@
                 if (this.hasNote && this.promptContent && this.promptContent.content) {
                     linkItems.push({
                         title: copy.prompts.SHARE_NOTE,
-                        // href: `${this.promptContentPath}?${QueryParam.CONTENT_INDEX}=share`,
                         onClick: () => {
                             this.showShareNote = true
                         }

@@ -35,7 +35,6 @@
         computed: {
             bodyComponent(): { name: string, props?: any } | undefined {
                 const entry: JournalEntry = this.entry;
-                // const sentPrompt = entry.sentPrompt;
                 console.log("updating body component with journal entry stuffs");
                 if (!entry.allLoaded) {
                     return {name: "skeleton-entry"};
@@ -43,14 +42,9 @@
                     return {
                         name: "prompt-content",
                         props: {
-                            // sentPrompt: sentPrompt,
                             entry: entry,
-                            // prompt: entry.prompt,
                             entryId: entry.promptContent.entryId,
                             content: entry.promptContent.content,
-                            // promptContent: entry.promptContent,
-                            // responses: entry.responses,
-                            // responsesLoaded: entry.responsesLoaded,
                         }
                     };
                 } else if (entry.prompt) {

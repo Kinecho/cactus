@@ -53,19 +53,10 @@
 
         },
         props: {
-            // prompt: {
-            //     type: Object as () => ReflectionPrompt,
-            //     required: true,
-            // },
-            // sentPrompt: {
-            //     type: Object as () => SentPrompt,
-            //     required: true,
-            // },
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
             },
-            // responsesLoaded: Boolean,
         },
         data(): {
             doReflect: boolean,

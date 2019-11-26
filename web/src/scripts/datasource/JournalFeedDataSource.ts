@@ -201,8 +201,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
     }
 
     stop() {
-        console.log("deinit journalEntryDataSource");
-
+        console.log("[JournalEntryDataSource] stop() called");
         this.pages.forEach(page => {
             page.stop()
         });
@@ -215,7 +214,6 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
     entryUpdated(entry: JournalEntry) {
         const index = this.getIndexForEntry(entry);
-        // console.log("entry updated for index", index);
         this.delegate?.onUpdated?.(entry, index);
     }
 
