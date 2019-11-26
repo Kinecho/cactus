@@ -10,7 +10,7 @@
             <img class="arcGraphic" src="/assets/images/arc.svg" alt="" />
         </div>
         <div class="tabset">
-            <input type="radio" name="tabset" id="tab1" aria-controls="free" checked>
+            <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
             <label class="tab-label free-tab" for="tab1">Free</label>
             <section id="free" class="tab-panel free-panel">
                 <h3 class="tab-header free-header">Free</h3>
@@ -24,7 +24,7 @@
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
             </section>
 
-            <input type="radio" name="tabset" id="tab2" aria-controls="premium">
+            <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
             <label class="tab-label premium-tab" for="tab2">Premium<span class="newStatus">New</span></label>
             <section id="premium" class="tab-panel premium-panel">
                 <h3 class="tab-header premium-header">Premium<span class="newStatus">New</span></h3>
@@ -64,6 +64,9 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
+    import {getQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
+
 
     export default Vue.extend({
         created() {
@@ -99,13 +102,15 @@
           member: CactusMember | undefined | null,
           memberEmail: string | undefined,
           memberUnsubscriber: ListenerUnsubscriber | undefined,
+          premiumDefault: boolean
         } {
             return {
               selectedPlan: this.plans[0],
               isProcessing: false,
               member: undefined,
               memberEmail: undefined,
-              memberUnsubscriber: undefined
+              memberUnsubscriber: undefined,
+              premiumDefault: false
             }
         },
         beforeMount() {
@@ -118,6 +123,12 @@
                     }
                 }
             })
+
+            const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
+
+            if (prem) {
+              this.premiumDefault = true;
+            }
         },
         destroyed() {
 
