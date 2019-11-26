@@ -7,7 +7,7 @@
             <strong v-if="name">{{name}}<br></strong>
             {{email}}
         </div>
-        <div class="status">          
+        <div class="status">
             <div>
                 <button class="small primary" @click="sendRequest">
                     Add
@@ -39,7 +39,7 @@
             friendProfile: {type: Object as () => MemberProfile}
         },
         beforeMount() {
-            
+
         },
         data(): {
             sent: boolean
@@ -54,10 +54,10 @@
             },
             email() {
                 return this.friendProfile.email;
-            },           
+            },
         },
         watch: {
-            
+
         },
         methods: {
             avatarNumber(email: string): number {
@@ -75,8 +75,8 @@
                         this.sent = true;
 
                         const notifyResult = await notifyFriendRequest(connectionRequest);
-                        
-                        return (result ? true : false);                      
+
+                        return (result ? true : false);
                     } catch(e) {
                         return false;
                     }
@@ -92,98 +92,10 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
-    .contactCard {
-        align-items: center;
-        display: flex;
-        max-width: 60rem;
-        padding: 1.6rem 0;
-
-        button {
-            flex-grow: 0;
-        }
-
-        &.inviting {
-            align-items: flex-start;
-        }
-    }
+    @import "social";
 
     .contactInfo {
         flex-grow: 0;
-    }
-
-    .email {
-        font-size: 1.4rem;
-        max-width: 12.3rem;
-        opacity: .8;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        @include r(374) {
-            max-width: 17.3rem;
-        }
-        @include r(600) {
-            max-width: none;
-        }
-    }
-
-    .avatar {
-        $avatarDiameter: 4.4rem;
-        border-radius: 50%;
-        flex-shrink: 0;
-        height: $avatarDiameter;
-        margin-right: .8rem;
-        overflow: hidden;
-        width: $avatarDiameter;
-
-        @include r(600) {
-            margin-right: 1.6rem;
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-        }
-    }
-
-    .friendsStatus {
-        align-items: center;
-        color: $darkestPink;
-        display: flex;
-
-        .check {
-            height: 1.8rem;
-            margin-right: .8rem;
-            width: 1.8rem;
-        }
-    }
-
-    .invite {
-        textarea {
-            border: 1px solid $green;
-            border-radius: .4rem;
-            font-size: 1.6rem;
-            margin: .8rem 0;
-            padding: 0.8rem;
-            width: 100%;
-        }
-    }
-
-    .status {
-        align-items: center;
-        display: flex;
-        font-size: 1.6rem;
-        padding: 0 1.2rem;
-        &.error {
-            color: red;
-        }
-    }
-
-    .check {
-        height: 1.6rem;
-        margin-right: .8rem;
-        width: 1.6rem;
     }
 
 </style>

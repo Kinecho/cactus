@@ -171,5 +171,6 @@
     .socialFriendList {
         width: 80rem;
     }
+    @import "social";
 
 </style>
