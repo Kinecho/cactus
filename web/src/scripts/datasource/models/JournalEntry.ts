@@ -15,17 +15,17 @@ class JournalEntry {
     sentPrompt: SentPrompt;
     promptId: string;
 
-    delegate?: JournalEntryDelegate;
+    delegate?: JournalEntryDelegate = undefined;
 
-    responses?: ReflectionResponse[];
+    responses?: ReflectionResponse[] = undefined;
     responsesLoaded: boolean = false;
     responsesUnsubscriber?: ListenerUnsubscriber;
 
-    prompt?: ReflectionPrompt;
+    prompt?: ReflectionPrompt = undefined;
     promptLoaded: boolean = false;
-    promptUnsubscriber?: ListenerUnsubscriber;
+    promptUnsubscriber?: ListenerUnsubscriber = undefined;
 
-    promptContent?: PromptContent;
+    promptContent?: PromptContent = undefined;
     promptContentLoaded: boolean = false;
     promptContentUnsubscriber?: ListenerUnsubscriber;
 
