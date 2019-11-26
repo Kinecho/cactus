@@ -93,7 +93,7 @@
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
             window.addEventListener('scroll', handler);
-            this.scrollHandler()
+            this.scrollHandler();
         },
         beforeMount() {
             console.log("Journal Home calling Created function");
