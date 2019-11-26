@@ -69,13 +69,11 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import PromptContent, {Content, ContentType, Image} from "@shared/models/PromptContent"
+    import {Content, ContentType, Image} from "@shared/models/PromptContent"
     import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
-    import SentPrompt from "@shared/models/SentPrompt"
     import {formatDate} from "@shared/util/DateUtil"
     import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
-    import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {getIntegerFromStringBetween, getResponseText, isBlank} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
@@ -123,12 +121,6 @@
             promptCopy: PromptCopy,
             initialIndex: number | undefined,
             showShareNote: boolean,
-            // responses: ReflectionResponse[]|undefined,
-            // promptContent: PromptContent,
-            // content: Content[],
-            // prompt: ReflectionPrompt|undefined,
-            // sentPrompt: SentPrompt,
-            // responsesLoaded: boolean,
         } {
             return {
                 canReflectInline: false,
@@ -142,12 +134,6 @@
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
                 showShareNote: false,
-                // responses: this.entry.responses,
-                // promptContent: this.entry.promptContent!,
-                // content: this.entry.promptContent!.content,
-                // prompt: this.entry.prompt,
-                // sentPrompt: this.entry.sentPrompt,
-                // responsesLoaded: this.entry.responsesLoaded,
             }
         },
         computed: {
