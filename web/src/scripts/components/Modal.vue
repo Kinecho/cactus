@@ -47,7 +47,6 @@
                 type: Boolean,
                 default: false,
             }
-            //
         },
         beforeMount() {
             this.escapeListener = (evt: KeyboardEvent) => {
@@ -101,6 +100,7 @@
         },
         watch: {
             show(newValue) {
+                window.clearInterval(this.cleanupInterval);
                 if (newValue) {
                     if (this.key){
                         let modal = document.getElementById(this.key);
@@ -124,7 +124,8 @@
 
                     //wait for a bit before removing the wrapper element so that any animations can finish.
                     this.cleanupInterval = window.setTimeout(() => {
-                        this.removeModal()
+                        this.removeModal();
+                        this.hasShown = false;
                     }, 1000)
 
                 }
