@@ -1,7 +1,9 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="socialFindFriends">
         <!-- suggested friends -->
-        <friend-list v-bind:member="member" />
+        <div class="socialFriendList">
+            <friend-list v-bind:member="member" />
+        </div>
 
         <div class="loading" v-if="loading">
             <Spinner message="Loading" name="socialFindFriends"/>
@@ -199,12 +201,23 @@
     @import "transitions";
     @import "social";
 
+    .socialFindFriends {
+        display: grid;
+        grid-template-areas: "main side";
+        grid-template-columns: 70rem 1fr;
+    }
+
+    .socialFriendList {
+        grid-area: side;
+    }
+
     .content {
         flex-grow: 1;
         padding: 2.4rem;
     }
 
     .find-friends {
+        grid-area: main;
         max-width: 70rem;
     }
 
