@@ -183,7 +183,6 @@ class JournalFeedDataSource implements JournalEntryDelegate{
         this.pages.push(nextPage);
         nextPage.listener = SentPromptService.sharedInstance.observePage({
             memberId: this.memberId,
-            // beforeOrEqualTo: this.startDate,
             limit: this.pageSize,
             lastResult: lastPage.result,
             onData: (page) => {
@@ -192,7 +191,6 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
                 this.handlePageResult(page);
                 this.loadingPage = false;
-                // this.delegate?.didLoad?.(page.results.length > 0);
                 this.delegate?.pageLoaded?.(page.mightHaveMore);
             }
         });
