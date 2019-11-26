@@ -61,7 +61,6 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
-    import virtualList from 'vue-virtual-scroll-list'
     import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
@@ -85,7 +84,6 @@
             entry: JournalEntryCard,
             AutoPromptContentModal,
             SkeletonCard,
-            'virtual-list': virtualList,
             Spinner,
         },
         props: {
