@@ -4,6 +4,8 @@ import {fromDocumentSnapshot} from "@shared/util/FirestoreUtil";
 import CactusMember from "@shared/models/CactusMember";
 import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
 import * as admin from "firebase-admin";
+import MailchimpService from "@admin/services/MailchimpService";
+import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
 import UserRecord = admin.auth.UserRecord;
 
 
@@ -20,17 +22,46 @@ export const updateMemberProfileTrigger = functions.firestore
         const member = fromDocumentSnapshot(snapshot, CactusMember);
 
         if (!member) {
-            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", snapshot.data());
+            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null,  2));
             return;
         }
 
-        const userId = member.userId;
-        let userRecord: UserRecord | undefined = undefined;
-        if (userId) {
-            userRecord = await admin.auth().getUser(userId);
+        //update the public profile
+        try {
+            const userId = member.userId;
+            let userRecord: UserRecord | undefined = undefined;
+            if (userId) {
+                userRecord = await admin.auth().getUser(userId);
+            }
+
+
+            const profile = await AdminMemberProfileService.getSharedInstance().upsertMember({member, userRecord});
+            console.log("Updated profile to", profile);
+
+        } catch (error) {
+            console.error(`Failed to update the member's public profile. MemberId = ${member.id}`, error);
         }
 
-        const profile = await AdminMemberProfileService.getSharedInstance().upsertMember({member, userRecord});
-        console.log("Updated profile to", profile);
+        try {
+            //update mailchimp
+            const mailchimpMember = member.mailchimpListMember;
+            const email = member.email || mailchimpMember?.email_address;
+            if (!email){
+                return;
+            }
+            if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
+                const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
+                    email: email,
+                    mergeFields: {
+                        [MergeField.FNAME]: member.firstName || "",
+                        [MergeField.LNAME]: member.lastName || "",
+                    }
+                });
+                console.log("Update mailchimp merge fields response:", mailchimpResponse);
+            }
+        } catch (error) {
+            console.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
+        }
+
         return;
     });
