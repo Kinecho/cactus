@@ -3,7 +3,6 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
 import SentPrompt from "@shared/models/SentPrompt";
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
-import SentPromptService from "@web/services/SentPromptService";
 import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
 import PromptContentService from "@web/services/PromptContentService";

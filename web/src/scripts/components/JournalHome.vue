@@ -95,6 +95,7 @@
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
             window.addEventListener('scroll', handler);
+            this.scrollHandler()
         },
         beforeMount() {
             console.log("Journal Home calling Created function");
@@ -126,6 +127,7 @@
 
                                 // this.$set(this.journalEntries, this.dataSource!.journalEntries);
                                 this.journalEntries = this.dataSource!.journalEntries;
+                                // this.$set(this.$data.journalEntries)
                                 this.dataHasLoaded = true;
                             },
                             onAdded: (entry: JournalEntry, index) => {
@@ -139,9 +141,10 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                // console.log(`entry updated at index ${index}`, entry);
+                                console.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
-                                    this.$set(this.journalEntries, index, entry);
+                                    this.$set(this.$data.journalEntries, index, entry);
+                                    // this.$forceUpdate();
                                 }
                             },
                             pageLoaded: (hasMore: boolean) => {
@@ -188,7 +191,7 @@
                 }, delay)
             },
             scrollHandler(): void {
-                const threshold = 200;
+                const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
                     console.log("load more! Offset = ", distance);

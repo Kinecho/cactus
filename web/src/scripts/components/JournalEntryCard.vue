@@ -21,7 +21,6 @@
             SkeletonEntry,
         },
         props: {
-
             journalEntry: {
                 type: Object as () => JournalEntry,
                 required: true
@@ -37,7 +36,7 @@
             bodyComponent(): { name: string, props?: any } | undefined {
                 const entry: JournalEntry = this.entry;
                 // const sentPrompt = entry.sentPrompt;
-
+                console.log("updating body component with journal entry stuffs");
                 if (!entry.allLoaded) {
                     return {name: "skeleton-entry"};
                 } else if (entry.promptContent) {
