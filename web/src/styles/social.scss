@@ -2,17 +2,22 @@
 @import "mixins";
 
 .contactCard {
-    align-items: center;
-    display: flex;
+    display: grid;
+    grid-template-columns: 5.2rem 1fr 9rem;
+    margin: 1.6rem 0 2.4rem;
     max-width: 60rem;
-    padding: 1.6rem 0;
 
     button {
+        align-self: flex-start;
         flex-grow: 0;
     }
+}
 
-    &.inviting {
-        align-items: flex-start;
+.name {
+    font-size: 1.6rem;
+
+    @include r(600) {
+        font-size: 1.8rem;
     }
 }
 
@@ -63,24 +68,23 @@
     }
 }
 
-.invite {
-    textarea {
-        border: 1px solid $green;
-        border-radius: .4rem;
-        font-size: 1.6rem;
-        margin: .8rem 0;
-        padding: 0.8rem;
-        width: 100%;
-    }
+.invite textarea {
+    border: 1px solid $green;
+    border-radius: .4rem;
+    font-size: 1.6rem;
+    margin: .8rem 0;
+    padding: 0.8rem;
+    width: 100%;
 }
 
 .status {
     align-items: center;
     display: flex;
     font-size: 1.6rem;
-    padding: 0 1.2rem;
+    justify-content: center;
+
     &.error {
-        color: red;
+        color: $red;
     }
 }
 
@@ -88,6 +92,46 @@
     height: 1.6rem;
     margin-right: .8rem;
     width: 1.6rem;
+}
+
+.contactInfo {
+    display: flex;
+    flex-flow: column nowrap;
+    flex-grow: 1;
+    justify-content: center;
+    margin-right: .8rem;
+}
+
+.btnContainer {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+
+    @include r(600) {
+        flex-flow: row wrap;
+        justify-content: flex-start;
+        margin-left: -.6rem;
+    }
+
+    .btn, button {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        margin-bottom: .8rem;
+        width: 100%;
+
+        @include r(600) {
+            flex-grow: 0;
+            margin: 0 .4rem;
+            width: auto;
+        }
+    }
+
+    .icon {
+        height: 2rem;
+        margin-right: .8rem;
+        width: 2rem;
+    }
 }
 
 /* .twBtn {

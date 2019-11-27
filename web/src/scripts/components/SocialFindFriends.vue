@@ -1,5 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="socialFindFriends">
+        <h1>Friends</h1>
+
         <!-- suggested friends -->
         <div class="socialFriendList">
             <friend-list v-bind:member="member" />
@@ -11,7 +13,7 @@
 
         <!-- find your friends -->
         <div class="find-friends">
-            <h1>Invite friends to reflect</h1>
+            <h2>Invite friends to reflect</h2>
             <p class="subtext">Share your unique link.</p>
             <div class="referral-link">
                 <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
@@ -193,32 +195,38 @@
         }
     })
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
     @import "forms";
     @import "transitions";
-    @import "social";
+
+    h1 {
+        margin-bottom: 4rem;
+    }
 
     .socialFindFriends {
-        display: grid;
-        grid-template-areas: "main side";
-        grid-template-columns: 70rem 1fr;
+
+        @include r(960) {
+            display: grid;
+            grid-gap: 6.4rem;
+            grid-template-areas: "main side";
+            grid-template-columns: 1fr 33%;
+        }
     }
 
     .socialFriendList {
-        grid-area: side;
-    }
-
-    .content {
-        flex-grow: 1;
-        padding: 2.4rem;
+        @include r(600) {
+            grid-area: side;
+        }
     }
 
     .find-friends {
-        grid-area: main;
-        max-width: 70rem;
+        @include r(600) {
+            grid-area: main;
+        }
     }
 
     .subtext {
@@ -228,6 +236,7 @@
 
     .referral-link {
         margin-bottom: 3.2rem;
+        max-width: 60rem;
         position: relative;
     }
 
@@ -275,41 +284,8 @@
         }
     }
 
-    .btnContainer {
-        display: flex;
-        flex-flow: column nowrap;
-        justify-content: center;
-
-        @include r(600) {
-            flex-flow: row wrap;
-            justify-content: flex-start;
-            margin-left: -.6rem;
-        }
-
-        .btn {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            margin-bottom: .8rem;
-            width: 100%;
-
-            @include r(600) {
-                flex-grow: 0;
-                margin: 0 .4rem;
-                width: auto;
-            }
-        }
-
-        .icon {
-            height: 2rem;
-            margin-right: .8rem;
-            width: 2rem;
-        }
-    }
-
     .results h2 {
         margin: 4.8rem 0 .8rem;
     }
-
 
 </style>

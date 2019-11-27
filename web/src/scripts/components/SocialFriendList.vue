@@ -1,18 +1,18 @@
 <template>
-    <div class="socialFriendList">
-        <div class="first-friend" v-if="referredByProfile &&
+    <div>
+        <section class="youMayKnow" v-if="referredByProfile &&
                                         !isConnection(referredByProfile.cactusMemberId) &&
                                         !isSentRequest(referredByProfile.cactusMemberId) &&
                                         !isReceivedRequest(referredByProfile.cactusMemberId)">
-            <h3>People you may know</h3>
+            <h4>People you may know</h4>
             <friend-add
                 v-bind:member="member"
                 v-bind:friendProfile="referredByProfile"
                 v-bind:key="referredByProfile.memberId"
             />
-        </div>
-        <div v-if="receivedFriendRequests.length > 0 || sentFriendRequests.length > 0">
-            <h3>Friend Requests</h3>
+        </section>
+        <section class="friendRequests" v-if="receivedFriendRequests.length > 0 || sentFriendRequests.length > 0">
+            <h4>Friend Requests</h4>
             <friend-request
                 v-for="(connection, index) in receivedFriendRequests"
                 v-bind:member="member"
@@ -25,16 +25,16 @@
                 v-bind:connectionRequest="connection"
                 v-bind:key="connection.friendMemberId"
             />
-        </div>
-        <div v-if="friends.length > 0">
-            <h3>Your Friends</h3>
+        </section>
+        <!-- <section class="yourFriends" v-if="friends.length > 0">
+            <h4>Friends</h4>
             <friend
                 v-for="(connection, index) in friends"
                 v-bind:member="member"
                 v-bind:connection="connection"
                 v-bind:key="connection.friendMemberId"
             />
-        </div>
+        </section> -->
     </div>
 </template>
 
@@ -167,6 +167,9 @@
     @import "common";
     @import "mixins";
     @import "variables";
-    @import "social";
+
+    section {
+        margin-bottom: 4.8rem;
+    }
 
 </style>
