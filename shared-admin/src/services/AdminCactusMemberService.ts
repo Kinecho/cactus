@@ -1,6 +1,6 @@
 import AdminFirestoreService, {
     CollectionReference,
-    GetOptions,
+    GetOptions, QueryOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";
@@ -48,7 +48,7 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }): Promise<void> {
+    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }, queryOptions?: SaveOptions): Promise<void> {
         const {memberId, stats} = options;
         const doc:DocumentReference = this.getCollectionRef().doc(memberId);
         const data: Partial<CactusMember> = {
@@ -56,7 +56,12 @@ export default class AdminCactusMemberService {
                 reflections: stats
             }
         };
-        await doc.set(data, {merge: true});
+
+        if (queryOptions?.transaction) {
+            await queryOptions?.transaction.set(doc, data, {merge: true})
+        } else {
+            await doc.set(data, {merge: true});
+        }
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {

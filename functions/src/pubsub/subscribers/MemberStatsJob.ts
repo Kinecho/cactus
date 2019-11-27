@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/node"
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import CactusMember from "@shared/models/CactusMember";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 
 export async function onPublish(message: Message, context: functions.EventContext) {
     try {
@@ -31,11 +32,15 @@ async function handleMember(member: CactusMember) {
     if (!memberId) {
         return;
     }
-    const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId});
+    await AdminFirestoreService.getSharedInstance().runTransaction(async t => {
+        const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId}, {transaction: t});
 
-    if (stats) {
-        await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: stats});
-        console.log("successfully saved the member")
-    }
+        if (stats) {
+            await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: stats}, {transaction: t});
+        }
+
+        return;
+    });
+
     return;
 }
