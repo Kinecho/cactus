@@ -4,21 +4,19 @@
             <img :src="'assets/images/avatars/avatar' + avatarNumber(email) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
-            <strong v-if="name">{{name}}<br></strong>
-            {{email}}
+            <p class="name" v-if="name">{{name}}</p>
+            <p class="email">{{email}}</p>
         </div>
-        <div class="status">
-            <div v-if="received">
-                <button class="small primary" @click="confirmRequest">
-                    Confirm
-                </button>
-                <button class="small secondary" @click="ignoreRequest">
-                    Ignore
-                </button>
-            </div>
-            <div v-if="!received">
-                Pending Confirmation
-            </div>
+        <div class="btnContainer" v-if="received">
+            <button class="small secondary" @click="confirmRequest">
+                Confirm
+            </button>
+            <button v-if="false" class="small secondary" @click="ignoreRequest">
+                Ignore
+            </button>
+        </div>
+        <div class="status" v-if="!received">
+            Pending
         </div>
     </div>
 </template>
@@ -101,10 +99,23 @@
     @import "common";
     @import "mixins";
     @import "variables";
-    @import "social";
 
     .contactInfo {
-        flex-grow: 1;
+        margin-right: .8rem;
+    }
+
+    .btnContainer {
+        flex-direction: row;
+
+        .tertiary {
+            margin-right: -1.6rem;
+        }
+    }
+
+    .email {
+        @include r(600) {
+            max-width: 17.3rem;
+        }
     }
 
 </style>

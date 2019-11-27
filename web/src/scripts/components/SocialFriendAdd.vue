@@ -4,16 +4,12 @@
             <img :src="'assets/images/avatars/avatar' + avatarNumber(name) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
-            <strong v-if="name">{{name}}<br></strong>
-            {{email}}
+            <p class="name" v-if="name">{{name}}</p>
+            <p class="email">{{email}}</p>
         </div>
-        <div class="status">
-            <div>
-                <button class="small primary" @click="sendRequest">
-                    Add
-                </button>
-            </div>
-        </div>
+        <button class="small secondary" @click="sendRequest">
+            Add
+        </button>
     </div>
 </template>
 
@@ -27,7 +23,6 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import {notifyFriendRequest} from '@web/social';
-
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -92,10 +87,5 @@
     @import "common";
     @import "mixins";
     @import "variables";
-    @import "social";
-
-    .contactInfo {
-        flex-grow: 0;
-    }
 
 </style>

@@ -4,12 +4,8 @@
             <img :src="'assets/images/avatars/avatar' + avatarNumber(email) + '.png'" alt="User avatar"/>
         </div>
         <div class="contactInfo">
-            <strong v-if="name">{{name}}<br></strong>
-            {{email}}
-        </div>
-        <div class="status">
-            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-            Friends
+            <p class="name" v-if="name">{{name}}</p>
+            <p class="email">{{email}}</p>
         </div>
     </div>
 </template>
@@ -70,6 +66,5 @@
     @import "common";
     @import "mixins";
     @import "variables";
-    @import "social";
 
 </style>
