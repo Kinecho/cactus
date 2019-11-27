@@ -170,7 +170,7 @@
 
     .addNewFriends {
         @include shadowbox;
-        background-color: $lightestGreen;
+        background-color: lighten($lightestGreen, 5%);
         margin: 0 -1.6rem 4.8rem;
         padding: 1.6rem;
 
