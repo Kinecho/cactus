@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="addNewFriends">
         <section class="youMayKnow" v-if="referredByProfile &&
                                         !isConnection(referredByProfile.cactusMemberId) &&
                                         !isSentRequest(referredByProfile.cactusMemberId) &&
@@ -168,8 +168,24 @@
     @import "mixins";
     @import "variables";
 
-    section {
-        margin-bottom: 4.8rem;
+    .addNewFriends {
+        @include shadowbox;
+        background-color: $lightestGreen;
+        margin: 0 -1.6rem 4.8rem;
+        padding: 1.6rem;
+
+        @include r(600) {
+            margin: 0 0 4.8rem;
+            padding: 2.4rem;
+        }
+    }
+
+    section:first-child {
+        margin-top: .8rem;
+    }
+
+    section + section {
+        margin-top: 4.8rem;
     }
 
 </style>

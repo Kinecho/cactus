@@ -10,6 +10,9 @@
         <button class="small secondary" @click="sendRequest">
             Add
         </button>
+        <!-- <button class="small secondary" @click="ignoreRequest">
+            Hide
+        </button> -->
     </div>
 </template>
 
@@ -78,6 +81,9 @@
                 } else {
                     return false;
                 }
+            },
+            ignoreRequest(): boolean {
+                return false;
             },
         }
     })

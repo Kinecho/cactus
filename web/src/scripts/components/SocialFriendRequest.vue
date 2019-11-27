@@ -11,9 +11,9 @@
             <button class="small secondary" @click="confirmRequest">
                 Confirm
             </button>
-            <button v-if="false" class="small secondary" @click="ignoreRequest">
-                Ignore
-            </button>
+            <!-- <button class="small secondary" @click="ignoreRequest">
+                Hide
+            </button> -->
         </div>
         <div class="status" v-if="!received">
             Pending

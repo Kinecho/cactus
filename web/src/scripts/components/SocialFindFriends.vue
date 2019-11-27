@@ -208,12 +208,22 @@
     }
 
     .socialFindFriends {
+        margin: 0 auto;
+        max-width: 60rem;
 
         @include r(960) {
             display: grid;
             grid-gap: 6.4rem;
             grid-template-areas: "main side";
-            grid-template-columns: 1fr 33%;
+            grid-template-columns: 1fr minmax(38rem, 33%);
+            margin: 0;
+            max-width: none;
+        }
+    }
+
+    h1 {
+        @include r(960) {
+            display: none;
         }
     }
 
@@ -226,6 +236,7 @@
     .find-friends {
         @include r(600) {
             grid-area: main;
+            max-width: 60rem;
         }
     }
 
@@ -236,7 +247,6 @@
 
     .referral-link {
         margin-bottom: 3.2rem;
-        max-width: 60rem;
         position: relative;
     }
 

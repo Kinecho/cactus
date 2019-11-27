@@ -91,6 +91,9 @@
         @include r(768) {
             padding: 6.4rem 1.6rem;
         }
+        @include r(1200) {
+            padding: 6.4rem 0;
+        }
     }
 
     // .brandNew .subtext {

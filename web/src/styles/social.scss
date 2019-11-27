@@ -32,9 +32,6 @@
     @include r(374) {
         max-width: 17.3rem;
     }
-    @include r(600) {
-        max-width: none;
-    }
 }
 
 .avatar {
