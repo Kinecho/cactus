@@ -178,6 +178,10 @@
             margin: 0 0 4.8rem;
             padding: 2.4rem;
         }
+
+        &:empty {
+            display: none;
+        }
     }
 
     section:first-child {
