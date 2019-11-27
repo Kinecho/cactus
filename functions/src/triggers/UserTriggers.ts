@@ -188,7 +188,6 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
     console.log("Setting up user using new transactional method");
-    await AdminSlackService.getSharedInstance().sendActivityMessage(`[temp testing message] Starting transactional onCreate trigger for email ${user.email}, userId ${user.uid}`)
     try {
         const userCheckResult = await setupUserTransaction(user);
         console.log("setupUserTransaction finished", userCheckResult);

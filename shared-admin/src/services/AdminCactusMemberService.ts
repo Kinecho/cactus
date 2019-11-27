@@ -281,7 +281,7 @@ export default class AdminCactusMemberService {
 
     async getAllBatch(options: {
         batchSize?: number,
-        onData: (members: CactusMember[]) => Promise<void>
+        onData: (members: CactusMember[], batchNumber: number) => Promise<void>
     }) {
         console.log("Getting batched result 1 for all members");
         const query = this.getCollectionRef();
@@ -294,7 +294,7 @@ export default class AdminCactusMemberService {
             }
         });
         console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-        await options.onData(results.results);
+        await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;
             results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
@@ -306,7 +306,7 @@ export default class AdminCactusMemberService {
                 }
             });
             console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-            await options.onData(results.results)
+            await options.onData(results.results, batchNumber)
         }
     }
 
