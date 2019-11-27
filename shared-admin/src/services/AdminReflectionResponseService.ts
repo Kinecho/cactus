@@ -185,30 +185,30 @@ export default class AdminReflectionResponseService {
     }
 
     async calculateStatsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
-        const {memberId} = options;
-        if (!memberId) {
-            console.error("No memberId provided");
-            return
+        try {
+            const {memberId} = options;
+            if (!memberId) {
+                console.error("No memberId provided to calculate stats.");
+                return
+            }
+
+            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            const streak = calculateStreak(reflections);
+            const duration = calculateDurationMs(reflections);
+
+            const elementAccumulation = getElementAccumulationCounts(reflections);
+
+            return {
+                totalCount: reflections.length,
+                currentStreakDays: streak,
+                totalDurationMs: duration,
+                elementAccumulation: elementAccumulation
+            };
+        } catch (error) {
+            console.error("Failed to calculate stats for memberId", options.memberId);
+            return undefined;
         }
 
-        const reflections = await this.getResponsesForMember(memberId, queryOptions);
-        console.log(`fetched ${reflections.length} for member ${memberId}`);
-
-        const streak = calculateStreak(reflections);
-        const duration = calculateDurationMs(reflections);
-
-        const elementAccumulation = getElementAccumulationCounts(reflections);
-
-        const stats: ReflectionStats = {
-            totalCount: reflections.length,
-            currentStreakDays: streak,
-            totalDurationMs: duration,
-            elementAccumulation: elementAccumulation
-        };
-
-        console.log("calculated stats", stats);
-
-        return stats
     }
 
     async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
