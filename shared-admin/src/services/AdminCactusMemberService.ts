@@ -1,6 +1,6 @@
 import AdminFirestoreService, {
     CollectionReference,
-    GetOptions, QueryOptions,
+    GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";

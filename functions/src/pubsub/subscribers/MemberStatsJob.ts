@@ -35,13 +35,20 @@ async function handleMember(member: CactusMember) {
         return;
     }
     await AdminFirestoreService.getSharedInstance().runTransaction(async t => {
-        const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId}, {transaction: t});
+        try {
+            const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId}, {transaction: t});
 
-        if (stats) {
-            await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: stats}, {transaction: t});
+            if (stats) {
+                await AdminCactusMemberService.getSharedInstance().setReflectionStats({
+                    memberId,
+                    stats: stats
+                }, {transaction: t});
+            }
+            return {success: true};
+        } catch (error) {
+            console.error("Failed to update member stats for memberId", memberId);
+            return {success: false};
         }
-
-        return;
     });
 
     return;
