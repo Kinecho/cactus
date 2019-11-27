@@ -5,6 +5,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 export async function onPublish(message: Message, context: functions.EventContext) {
     try {
@@ -23,7 +24,8 @@ export async function onPublish(message: Message, context: functions.EventContex
 
     } catch (error) {
         console.error("Failed to process MemberStats job", error);
-        Sentry.captureException(error)
+        Sentry.captureException(error);
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: An error occurred while running \`MemberStatsJob\`\n,\`\`\`${JSON.stringify(error)}\`\`\``)
     }
 }
 
