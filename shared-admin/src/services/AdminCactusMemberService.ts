@@ -48,7 +48,7 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }): Promise<void> {
+    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }, queryOptions?: SaveOptions): Promise<void> {
         const {memberId, stats} = options;
         const doc:DocumentReference = this.getCollectionRef().doc(memberId);
         const data: Partial<CactusMember> = {
@@ -56,7 +56,12 @@ export default class AdminCactusMemberService {
                 reflections: stats
             }
         };
-        await doc.set(data, {merge: true});
+
+        if (queryOptions?.transaction) {
+            await queryOptions?.transaction.set(doc, data, {merge: true})
+        } else {
+            await doc.set(data, {merge: true});
+        }
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {
@@ -281,7 +286,7 @@ export default class AdminCactusMemberService {
 
     async getAllBatch(options: {
         batchSize?: number,
-        onData: (members: CactusMember[]) => Promise<void>
+        onData: (members: CactusMember[], batchNumber: number) => Promise<void>
     }) {
         console.log("Getting batched result 1 for all members");
         const query = this.getCollectionRef();
@@ -294,7 +299,7 @@ export default class AdminCactusMemberService {
             }
         });
         console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-        await options.onData(results.results);
+        await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;
             results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
@@ -306,7 +311,7 @@ export default class AdminCactusMemberService {
                 }
             });
             console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-            await options.onData(results.results)
+            await options.onData(results.results, batchNumber)
         }
     }
 

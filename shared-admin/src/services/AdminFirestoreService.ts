@@ -121,9 +121,15 @@ export default class AdminFirestoreService {
         return model;
     }
 
-    async runTransaction(updateFunction: (transaction: Transaction) => Promise<{}>, options?: { maxAttempts: number | undefined }): Promise<{}> {
+    /**
+     * Get a Firestore transaction. The function must return a result of the transaction.
+     * @param {(transaction: Transaction) => Promise<any>} updateFunction
+     * @param {{maxAttempts: number | undefined}} options
+     * @return {Promise<{}>}
+     */
+    async runTransaction(updateFunction: (transaction: Transaction) => Promise<any>, options?: { maxAttempts: number | undefined }): Promise<{}> {
         return this.firestore.runTransaction(async t => {
-            return updateFunction(t)
+            return await updateFunction(t);
         }, options)
     }
 

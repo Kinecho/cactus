@@ -6,6 +6,7 @@ export enum PubSubTopic {
     unsubscriber_sync = "unsubscriber_sync",
     slack_command = "slack_command",
     create_daily_sent_prompts = "create_daily_sent_prompts",
+    member_stats_sync = "member_stats_sync",
 }
 
 
