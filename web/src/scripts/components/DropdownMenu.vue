@@ -160,6 +160,11 @@
             margin-right: .8rem;
             transition: all .2s ease;
 
+            &:focus {
+                box-shadow: 0 0 3px 2pt $darkGreen;
+                outline: none;
+            }
+
             &.open {
                 transform: rotate(90deg);
                 transform-origin: center;
