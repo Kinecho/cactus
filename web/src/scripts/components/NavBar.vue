@@ -31,7 +31,7 @@
                     <span class="navLabel">Friends</span>
                     <!--span class="badge">3</span-->
                 </a>
-                <dropdown-menu :items="links" v-if="loggedIn">
+                <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
                         <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
@@ -127,13 +127,6 @@
                         await this.logout()
                     }
                 }];
-
-                if (this.user && this.user.email) {
-                    links.unshift({
-                        static: true,
-                        title: this.user.email,
-                    })
-                }
 
                 return links;
             },
