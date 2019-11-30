@@ -339,7 +339,7 @@ h1, h2 {
     }
 }
 
-.private {
+section.private {
     align-items: center;
     background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
     display: flex;
@@ -504,7 +504,7 @@ h1, h2 {
   }
 }
 
-.email {
+section.email {
   background-color: $beige;
   padding: 5.6rem 0 .8rem;
   position: relative;
