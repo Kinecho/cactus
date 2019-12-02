@@ -1,6 +1,6 @@
 <template>
-    <div class="addNewFriends">
-        <section class="yourFriends" v-if="friends.length > 0">
+    <div class="addNewFriends" v-if="friends.length > 0">
+        <section class="yourFriends">
             <h4>Friends</h4>
             <friend
                 v-for="(connection, index) in friends"
