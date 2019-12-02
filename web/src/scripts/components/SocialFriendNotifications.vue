@@ -166,7 +166,7 @@
         padding: 1.6rem;
 
         @include r(600) {
-            margin: 0 0 4.8rem;
+            margin: 0 0 6.4rem;
             padding: 2.4rem;
         }
 

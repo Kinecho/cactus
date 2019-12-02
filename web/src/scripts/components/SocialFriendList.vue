@@ -1,15 +1,13 @@
 <template>
-    <div class="addNewFriends">
-        <section class="yourFriends" v-if="friends.length > 0">
-            <h4>Friends</h4>
-            <friend
-                v-for="(connection, index) in friends"
-                v-bind:member="member"
-                v-bind:connection="connection"
-                v-bind:key="connection.friendMemberId"
-            />
-        </section>
-    </div>
+    <section class="yourFriends" v-if="friends.length > 0">
+        <h2>Friends</h2>
+        <friend
+            v-for="(connection, index) in friends"
+            v-bind:member="member"
+            v-bind:connection="connection"
+            v-bind:key="connection.friendMemberId"
+        />
+    </section>
 </template>
 
 <script lang="ts">
@@ -80,28 +78,9 @@
     @import "mixins";
     @import "variables";
 
-    .addNewFriends {
-        @include shadowbox;
-        background-color: lighten($lightestGreen, 5%);
-        margin: 0 -1.6rem 4.8rem;
-        padding: 1.6rem;
-
-        @include r(600) {
-            margin: 0 0 4.8rem;
-            padding: 2.4rem;
-        }
-
-        &:empty {
-            display: none;
+    h2 {
+        @include r(768) {
+            font-size: 3.2rem;
         }
     }
-
-    section:first-child {
-        margin-top: .8rem;
-    }
-
-    section + section {
-        margin-top: 4.8rem;
-    }
-
 </style>

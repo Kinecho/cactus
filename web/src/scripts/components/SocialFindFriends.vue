@@ -1,6 +1,5 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="socialFindFriends">
-        <h1>Friends</h1>
 
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications">
@@ -221,30 +220,25 @@
 
         @include r(960) {
             display: grid;
-            grid-gap: 6.4rem;
-            grid-template-areas: "main side";
+            grid-column-gap: 6.4rem;
             grid-template-columns: 1fr minmax(38rem, 33%);
             margin: 0;
             max-width: none;
         }
     }
 
-    h1 {
+    .socialFriendNotifications {
         @include r(960) {
-            display: none;
-        }
-    }
-
-    .socialFriendList, .socialFriendNotifications {
-        @include r(600) {
-            grid-area: side;
+            grid-column: 2;
+            grid-row: 1;
         }
     }
 
     .find-friends {
+        margin-bottom: 4.8rem;
+
         @include r(600) {
-            grid-area: main;
-            max-width: 60rem;
+            margin-bottom: 6.4rem;
         }
     }
 
@@ -255,6 +249,7 @@
 
     .referral-link {
         margin-bottom: 3.2rem;
+        max-width: 60rem;
         position: relative;
     }
 
@@ -304,6 +299,10 @@
 
     .results h2 {
         margin: 4.8rem 0 .8rem;
+
+        @include r(600) {
+            margin: 6.4rem 0 .8rem;
+        }
     }
 
 </style>
