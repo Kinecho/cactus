@@ -24,9 +24,16 @@ export default class CreatePromptModule extends FirebaseCommand {
     response?: InputResponse;
     description = "New reflection prompt in Flamelink and Mailchimp Emails";
     showInList = true;
-
+    repeatRun = true;
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
+        while(this.repeatRun) {
+            await this.createPrompt(app, firestoreService);
+        }
+        return;
+    }
+
+    protected async createPrompt(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
         resetConsole();
         console.log(chalk.bold.green('Let\'s create Reflection Prompt.'));
         console.log(chalk.dim('This will walk you through making a new content prompt, email campaign, and record in the database'));
@@ -161,6 +168,17 @@ export default class CreatePromptModule extends FirebaseCommand {
         } else {
             console.warn(chalk.red("DID NOT SAVE PROMPT TO DATABASE"));
         }
+
+        const {repeatRun} = await prompts([{
+            type: "toggle",
+            message: "Add another prompt?",
+            name: "repeatRun",
+            initial: false,
+            active: 'yes',
+            inactive: 'no',
+        }]);
+
+        this.repeatRun = repeatRun;
 
         return;
     }
