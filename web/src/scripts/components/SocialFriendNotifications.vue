@@ -76,7 +76,21 @@
             }
         },
         computed: {
-
+            hasSuggestedFriends: function(): boolean {
+                if (this.referredByProfile &&
+                    !this.isConnection(this.referredByProfile.cactusMemberId) &&
+                    !this.isSentRequest(this.referredByProfile.cactusMemberId) &&
+                    !this.isReceivedRequest(this.referredByProfile.cactusMemberId)) {
+                    return true;
+                }
+                return false;
+            },
+            hasFriendRequests: function(): boolean {
+                if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
+                    return true;
+                }
+                return false;
+            }
         },
         watch: {
             member: async function() {
@@ -136,21 +150,6 @@
                 }
                 return false;
             },
-            hasSuggestedFriends: function(): boolean {
-                if (this.referredByProfile &&
-                    !this.isConnection(this.referredByProfile.cactusMemberId) &&
-                    !this.isSentRequest(this.referredByProfile.cactusMemberId) &&
-                    !this.isReceivedRequest(this.referredByProfile.cactusMemberId)) {
-                    return true;
-                }
-                return false;
-            },
-            hasFriendRequests: function(): boolean {
-                if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
-                    return true;
-                }
-                return false;
-            }
         },
         destroyed() {
             if (this.friendsUnsubscriber) {
