@@ -2,7 +2,7 @@
     <div class="elements-container">
         <a href="#" class="element-icon" v-for="element in elements" @click="showCactusModal(element)">
             <img :src="'/assets/images/cacti/'+ element + '-3.svg'" alt=""/>
-            <h4 class="maroon label">{{element}}</h4>
+            <h4 class="label">{{element}}</h4>
         </a>
         <element-description-modal
             :cactusElement = "cactusModalElement"
@@ -87,6 +87,10 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
+
+        .label {
+            color: $darkestGreen;
+        }
 
         .element-icon {
             text-decoration: none;

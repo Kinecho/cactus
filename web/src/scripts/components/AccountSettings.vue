@@ -371,7 +371,7 @@
     }
 
     h3 {
-        color: $darkestPink;
+        color: $royal;
     }
 
     .label {
