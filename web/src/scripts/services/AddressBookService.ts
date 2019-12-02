@@ -1,8 +1,5 @@
 import {Config} from "@web/config";
-import {CloudspongeContact, 
-        EmailContact, 
-        EmailService} from "@shared/types/EmailContactTypes";
-import {Endpoint} from "@web/requestUtils";
+import {CloudspongeContact, EmailContact} from "@shared/types/EmailContactTypes";
 
 class AddressBookService {
   public static sharedInstance =new AddressBookService();
@@ -11,12 +8,12 @@ class AddressBookService {
   start(callback?: object) {
     if (!document.getElementById('cloudsponge-' + Config.cloudSpongeKey)) {
       const cloudSpongeScript = document.createElement('script');
-            cloudSpongeScript.type = 'text/javascript';
-            cloudSpongeScript.async = true;
-            cloudSpongeScript.onload = this.initCloudsponge;
-            cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
-            cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
-            document.head.appendChild(cloudSpongeScript);
+      cloudSpongeScript.type = 'text/javascript';
+      cloudSpongeScript.async = true;
+      cloudSpongeScript.onload = this.initCloudsponge;
+      cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
+      cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
+      document.head.appendChild(cloudSpongeScript);
     }
   }
 
@@ -29,8 +26,8 @@ class AddressBookService {
 
     rawContactData.forEach(function(contact: CloudspongeContact, index: number) {
       formattedContacts.push({
-        first_name: contact['first_name'],
-        last_name: contact['last_name'],
+        first_name: contact.first_name,
+        last_name: contact.last_name,
         email: contact.selectedEmail()
       })
     });

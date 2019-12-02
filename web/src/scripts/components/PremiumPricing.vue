@@ -10,32 +10,33 @@
             <img class="arcGraphic" src="/assets/images/arc.svg" alt="" />
         </div>
         <div class="tabset">
-            <input type="radio" name="tabset" id="tab1" aria-controls="free" checked>
+            <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
             <label class="tab-label free-tab" for="tab1">Free</label>
             <section id="free" class="tab-panel free-panel">
                 <h3 class="tab-header free-header">Free</h3>
                 <ul>
                     <li>Available on web</li>
-                    <li>Unlimited reflection journal note archive</li>
+                    <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on all notes</li>
+                    <li>128-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email</li>
                 </ul>
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
             </section>
 
-            <input type="radio" name="tabset" id="tab2" aria-controls="premium">
+            <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
             <label class="tab-label premium-tab" for="tab2">Premium<span class="newStatus">New</span></label>
             <section id="premium" class="tab-panel premium-panel">
                 <h3 class="tab-header premium-header">Premium<span class="newStatus">New</span></h3>
                 <ul>
                     <li>Available on web</li>
                     <li><span class="enhance">Available on iPhone and iPad</span></li>
-                    <li>Unlimited reflection journal note archive</li>
+                    <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on all notes</li>
+                    <li>128-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email</li>
                     <li><span class="enhance">Notifications via push</span></li>
+                    <li class="heart"><span class="enhance">Supports Cactus development</span></li>
                 </ul>
                 <div class="flexContainer">
                 <template v-for="plan in plans">
@@ -63,6 +64,9 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
+    import {getQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
+
 
     export default Vue.extend({
         created() {
@@ -72,7 +76,7 @@
           plans: {
                 type: Array as () => PremiumPlan[],
                 required: false,
-                default: function() { 
+                default: function() {
                   return [
                           {
                             id: Config.stripe.monthlyPlanId,
@@ -98,13 +102,15 @@
           member: CactusMember | undefined | null,
           memberEmail: string | undefined,
           memberUnsubscriber: ListenerUnsubscriber | undefined,
+          premiumDefault: boolean
         } {
             return {
               selectedPlan: this.plans[0],
               isProcessing: false,
               member: undefined,
               memberEmail: undefined,
-              memberUnsubscriber: undefined
+              memberUnsubscriber: undefined,
+              premiumDefault: false
             }
         },
         beforeMount() {
@@ -117,6 +123,12 @@
                     }
                 }
             })
+
+            const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
+
+            if (prem) {
+              this.premiumDefault = true;
+            }
         },
         destroyed() {
 
@@ -261,7 +273,7 @@
           @include r(768) {
               background-color: transparent;
               grid-template-areas: "tabpanel1 tabpanel2";
-              max-width: 74rem;
+              min-width: 67rem;
           }
           @include r(960) {
               margin: 0;
@@ -384,6 +396,11 @@
                   height: 1.3rem;
                   margin-right: 1.6rem;
                   width: 1.8rem;
+              }
+
+              &.heart:before {
+                background-image: url(assets/icons/heart.svg);
+                height: 1.5rem;
               }
           }
 

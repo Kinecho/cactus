@@ -24,6 +24,10 @@ export function isTimestamp(value: any): boolean {
     return isNotNull(value) && (value instanceof TimestampClass || (value.seconds && value.nanoseconds))
 }
 
+export function toTimestamp(date: Date): TimestampInterface {
+    return TimestampClass.fromDate(date);
+}
+
 export function timestampToDate(timestamp: any): Date | undefined {
     if (isTimestamp(timestamp)) {
         if (timestamp.toDate) {
@@ -57,9 +61,11 @@ export interface QueryDocumentSnapshot extends DocumentSnapshot {
 }
 
 export interface QuerySnapshot {
-    forEach(callback: (doc: DocumentSnapshot) => void): void,
-
+    docs: QueryDocumentSnapshot[],
+    size: number
     empty: boolean,
+    forEach(callback: (doc: DocumentSnapshot) => void): void,
+    isEqual(other: QuerySnapshot): boolean,
 }
 
 export function convertDateToTimestamp(input: any): any {
@@ -88,9 +94,6 @@ export function convertTimestampToDate(input: any): any {
     const copy = Object.assign({}, input);
 
     return transformObjectSync(copy, (value) => {
-        // if (isNotNull(value) && value instanceof TimestampClass) {
-        //     return value.toDate();
-        // }
         if (isTimestamp(value)) {
             return timestampToDate(value);
         }

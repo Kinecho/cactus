@@ -20,7 +20,8 @@ export enum QueryParam {
     UTM_MEDIUM = "utm_medium",
     NO_NAV = "no_nav",
     SOCIAL_INVITE_ID = "inviteId",
-    UNSUBSCRIBE_SUCCESS = "unsub_success"
+    UNSUBSCRIBE_SUCCESS = "unsub_success",
+    PREMIUM_DEFAULT = 'prem'
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

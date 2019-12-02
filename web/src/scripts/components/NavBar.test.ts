@@ -10,6 +10,14 @@ jest.mock("@web/auth", () => {
     }
 });
 
+jest.mock("@web/analytics", () => {
+    return {
+        gtag() {
+            console.log("gtag called with args", arguments);
+        }
+    }
+});
+
 jest.mock("@web/firebase", () => {
     return {
         getAuth: () => mockauth,

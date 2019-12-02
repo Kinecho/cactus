@@ -1,7 +1,7 @@
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
-    <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: responseText}">
-        <div class="doneStatus" v-show="responsesLoaded && completed">{{promptCopy.DONE}}</div>
+    <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
+        <div class="doneStatus" v-show="entry.responsesLoaded && completed">{{promptCopy.DONE}}</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
@@ -12,18 +12,18 @@
                 {{error}}
             </p>
         </div>
-        <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="promptContent && !completed">
+        <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && !completed">
             <h3 class="topic" v-show="topicText">{{topicText}}</h3>
             <p class="subtext" v-show="subText">{{subText}}</p>
         </div>
-        <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="promptContent && completed">
+        <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && completed">
             <h3 class="question" v-show="questionText">{{questionText}}</h3>
         </div>
         <div class="entry" v-if="!canReflectInline">{{responseText}}</div>
         <edit-reflection
                 :show="canReflectInline"
-                :responses="responses"
-                :prompt="prompt"
+                :responses="entry.responses"
+                :prompt="entry.prompt"
                 :responseMedium="responseMedium"
                 @close="canReflectInline = false"
         />
@@ -54,7 +54,7 @@
             </modal>
             <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
                 <div class="sharing-card" slot="body">
-                    <PromptSharing :promptContent="promptContent"/>
+                    <PromptSharing :promptContent="entry.promptContent"/>
                 </div>
             </modal>
             <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
@@ -69,15 +69,11 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import PromptContent, {Content, ContentType, Image} from "@shared/models/PromptContent"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import PromptContentService from '@web/services/PromptContentService'
+    import {Content, ContentType, Image} from "@shared/models/PromptContent"
     import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
-    import SentPrompt from "@shared/models/SentPrompt"
     import {formatDate} from "@shared/util/DateUtil"
     import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
-    import ReflectionPrompt from '@shared/models/ReflectionPrompt'
     import {getIntegerFromStringBetween, getResponseText, isBlank} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
@@ -91,6 +87,8 @@
     import CopyService from "@shared/copy/CopyService";
     import {PromptCopy} from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
+    import JournalEntry from '@web/datasource/models/JournalEntry'
+
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -104,45 +102,16 @@
             FlamelinkImage,
             SkeletonCard
         },
-        created() {
-            this.promptContentUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.entryId, {
-                onData: (promptContent, error) => {
-                    this.error = undefined;
-                    if (error) {
-                        console.error("JournalEntryPromptContentCard: Failed to get prompt content via subscriber", error);
-                        this.promptContent = undefined;
-                        this.error = "Unable to load the prompt";
-                        this.loading = false;
-                        return;
-                    }
-
-                    if (!promptContent) {
-                        this.error = "Oops, we were unable to find the Prompt for this day."
-                    } else {
-                        this.promptContent = promptContent;
-                    }
-                    this.loading = false;
-                }
-            });
-        },
         props: {
             entryId: {type: String, required: true},
-            prompt: {type: Object as () => ReflectionPrompt},
-            sentPrompt: {
-                type: Object as () => SentPrompt
+            entry: {
+                type: Object as () => JournalEntry,
+                required: true,
             },
-            responses: {
-                type: Array as () => ReflectionResponse[],
-                required: false,
-                default: [],
-            },
-            responsesLoaded: Boolean,
         },
         data(): {
             canReflectInline: boolean,
-            promptContent: PromptContent | undefined,
             error: any | undefined,
-            promptContentUnsubscriber: ListenerUnsubscriber | undefined,
             loading: boolean,
             showContent: boolean,
             editedText: string,
@@ -155,10 +124,8 @@
         } {
             return {
                 canReflectInline: false,
-                promptContent: undefined,
                 error: undefined,
-                promptContentUnsubscriber: undefined,
-                loading: true,
+                loading: false,
                 showContent: false,
                 editedText: "",
                 editedResponses: [],
@@ -171,17 +138,17 @@
         },
         computed: {
             shareNote():{content: Content, response: ReflectionResponse}|undefined {
-                if (!this.promptContent || !this.responses || this.responses.length === 0){
+                if (!this.entry.promptContent || !this.entry.responses || this.entry.responses.length === 0){
                     return;
                 }
-                let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
+                let shareReflectionCopy = isBlank(this.entry.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.entry.promptContent.shareReflectionCopy_md;
                 const sharingCard: Content = {
                     contentType: ContentType.share_reflection,
                     text_md: shareReflectionCopy,
                     title: copy.prompts.SHARE_YOUR_NOTE,
                 };
 
-                const [response] = this.responses;
+                const [response] = this.entry.responses;
                 if (response){
                     return {content: sharingCard, response: response}
                 } else {
@@ -190,27 +157,32 @@
 
             },
             allLoaded(): boolean {
-                return !this.loading && this.responsesLoaded;
+                return !this.loading && this.entry.responsesLoaded;
             },
-            backgroundClasses(): { [name: string]: string } {
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
+            backgroundClasses(): { [name: string]: string|boolean } {
+                const [first]: Content[] = (this.entry.promptContent && this.entry.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
-                const id = this.prompt.id;
+                const id = this.entry.sentPrompt.promptId || "";
 
                 const showRandomBackground = !bgImage;
 
-                const classes: { [name: string]: any } = {
+                return {
                     randomBackground: showRandomBackground,
-                    [`bg${getIntegerFromStringBetween(id || "", NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
+                    [`bg${getIntegerFromStringBetween(id, NUM_RANDO_BACKGROUND_IMAGES - 1)}`]: showRandomBackground
                 };
 
-                return classes;
             },
             questionText(): string | undefined {
-                return this.promptContent && this.promptContent.getQuestion();
+                let contentList = this.entry.promptContent?.content || [];
+                if (contentList) {
+                    const reflectCard = contentList.find(c => c.contentType === ContentType.reflect);
+                    return reflectCard && reflectCard.text;
+                }
+                return
+                // return this.promptContent && this.promptContent.getQuestion();
             },
             backgroundImage(): Image | undefined {
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
+                const [first]: Content[] = this.entry.promptContent?.content || [];
                 if (first && first.backgroundImage) {
                     return first.backgroundImage
                 }
@@ -220,30 +192,30 @@
                 return hasImage(this.backgroundImage);
             },
             topicText(): string | undefined {
-                return this.promptContent && this.promptContent.subjectLine;
+                return this.entry.promptContent?.subjectLine;
             },
             subText(): string | undefined {
-                if (!this.promptContent) {
+                if (!this.entry.promptContent) {
                     return;
                 }
 
-                const [first]: Content[] = (this.promptContent && this.promptContent.content) || [];
+                const [first]: Content[] = this.entry.promptContent?.content || [];
                 return first && first.text
             },
             promptContentPath(): string {
                 return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
             },
             promptDate(): string | undefined {
-                return formatDate(this.sentPrompt.firstSentAt, copy.settings.dates.longFormat)
+                return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat)
             },
             responseText(): string | undefined {
-                return getResponseText(this.responses);
+                return getResponseText(this.entry.responses);
             },
             completed(): boolean {
-                return this.responses.length > 0;
+                return this.entry.responsesLoaded && (this.entry.responses?.length || 0) > 0 || false;
             },
             hasNote(): boolean {
-                return !isBlank(this.responseText);
+                return !isBlank(getResponseText(this.entry.responses));
             },
             linkItems(): {
                 title: string,
@@ -254,10 +226,6 @@
                     {
                         title: copy.prompts.REFLECT,
                         href: this.promptContentPath,
-                        // onClick: () => {
-                        //     this.initialIndex = 0;
-                        //     this.showContent = true;
-                        // }
                     },
                     {
                         title: this.hasNote ? copy.prompts.EDIT_NOTE : copy.prompts.ADD_A_NOTE,
@@ -274,10 +242,9 @@
                 ];
 
 
-                if (this.hasNote && this.promptContent && this.promptContent.content) {
+                if (this.hasNote && this.entry.promptContent && this.entry.promptContent.content) {
                     linkItems.push({
                         title: copy.prompts.SHARE_NOTE,
-                        // href: `${this.promptContentPath}?${QueryParam.CONTENT_INDEX}=share`,
                         onClick: () => {
                             this.showShareNote = true
                         }
@@ -289,9 +256,9 @@
         },
         watch: {
             showContent(show) {
-                if (show && this.promptContent && this.promptContent.entryId) {
+                if (show && this.entry.promptContent && this.entry.promptContent.entryId) {
                     console.log("adding prompt content entry id query param");
-                    updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.promptContent.entryId);
+                    updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.entry.promptContent.entryId);
                 } else {
                     console.log("removing prompt content entry id");
                     removeQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);

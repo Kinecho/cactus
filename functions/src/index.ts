@@ -14,7 +14,7 @@ import {
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
-
+import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import {onDelete, transactionalOnCreate} from "@api/triggers/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
@@ -43,9 +43,9 @@ export const cloudFunctions = {
     processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
     slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
     unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
+    memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
 
     //auth triggers
-    // userCreatedTrigger: functions.auth.user().onCreate(onCreate),
     userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
 

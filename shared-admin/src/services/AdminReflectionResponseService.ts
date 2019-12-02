@@ -1,4 +1,4 @@
-import AdminFirestoreService, {SaveOptions} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -178,37 +178,37 @@ export default class AdminReflectionResponseService {
         }
     }
 
-    async getResponsesForMember(memberId: string): Promise<ReflectionResponse[]> {
+    async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
-        const result = await this.firestoreService.executeQuery(query, ReflectionResponse);
+        const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
         return result.results
     }
 
-    async calculateStatsForMember(options: { memberId: string }): Promise<ReflectionStats | undefined> {
-        const {memberId} = options;
-        if (!memberId) {
-            console.error("No memberId provided");
-            return
+    async calculateStatsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
+        try {
+            const {memberId} = options;
+            if (!memberId) {
+                console.error("No memberId provided to calculate stats.");
+                return
+            }
+
+            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            const streak = calculateStreak(reflections);
+            const duration = calculateDurationMs(reflections);
+
+            const elementAccumulation = getElementAccumulationCounts(reflections);
+
+            return {
+                totalCount: reflections.length,
+                currentStreakDays: streak,
+                totalDurationMs: duration,
+                elementAccumulation: elementAccumulation
+            };
+        } catch (error) {
+            console.error("Failed to calculate stats for memberId", options.memberId);
+            return undefined;
         }
 
-        const reflections = await this.getResponsesForMember(memberId);
-        console.log(`fetched ${reflections.length} for member ${memberId}`);
-
-        const streak = calculateStreak(reflections);
-        const duration = calculateDurationMs(reflections);
-
-        const elementAccumulation = getElementAccumulationCounts(reflections);
-
-        const stats: ReflectionStats = {
-            totalCount: reflections.length,
-            currentStreakDays: streak,
-            totalDurationMs: duration,
-            elementAccumulation: elementAccumulation
-        };
-
-        console.log("calculated stats", stats);
-
-        return stats
     }
 
     async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {

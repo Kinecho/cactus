@@ -1,22 +1,24 @@
 // noinspection ES6UnusedImports
 import * as firebaseClient from "firebase/app";
-import CollectionReference = firebaseClient.firestore.CollectionReference;
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import DocumentReference = firebaseClient.firestore.DocumentReference;
-import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
-import Timestamp = firebaseClient.firestore.Timestamp;
+import {BaseModel, BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getFirestore} from "@web/firebase";
 import {
     DocObserverOptions,
     IGetOptions,
+    IPageListenerResult,
+    IPageResult,
     IQueryObserverOptions,
     IQueryOptions,
     QueryResult,
 } from "@shared/types/FirestoreTypes";
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
-import FieldValue = firebaseClient.firestore.FieldValue;
 import {addModal, handleDatabaseError, showModal} from "@web/util";
 export import Transaction = firebaseClient.firestore.Transaction;
+import CollectionReference = firebaseClient.firestore.CollectionReference;
+import DocumentReference = firebaseClient.firestore.DocumentReference;
+import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
+import Timestamp = firebaseClient.firestore.Timestamp;
+import FieldValue = firebaseClient.firestore.FieldValue;
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
@@ -24,6 +26,27 @@ export type QueryOptions = IQueryOptions<QueryCursor>;
 export type GetOptions = IGetOptions
 export type QueryObserverOptions<T extends BaseModel> = IQueryObserverOptions<QueryCursor, T>
 export type ListenerUnsubscriber = () => void;
+
+
+export interface PageListenerResult<T extends BaseModel> extends IPageListenerResult<T, DocumentSnapshot> {
+}
+
+export interface PageResult<T extends BaseModel> extends IPageResult<T, DocumentSnapshot> {
+}
+
+type QuerySnapshotHandler = (snapshot: firebaseClient.firestore.QuerySnapshot, error?: any) => void
+
+export interface PaginationOptions<T extends BaseModel> {
+    limit?: number,
+    lastResult?: PageResult<T>,
+    onData: (pageResult: PageResult<T>) => void
+}
+
+export interface PaginationListenerOptions<T extends BaseModel> {
+    limit?: number,
+    lastResult?: PageResult<T>,
+    onData: (pageResult: PageListenerResult<T>) => void
+}
 
 const DefaultGetOptions: GetOptions = {
     includeDeleted: false,
@@ -178,6 +201,95 @@ export default class FirestoreService {
             console.error(`there was an error fetching the document snapshot "${options.queryName || "unknown"}"`, error);
             options.onData(undefined, error)
         });
+    }
+
+    async getPaginated<T extends BaseModel>(_query: Query, options: PaginationListenerOptions<T>, Type: { new(): T }): Promise<PageResult<T>> {
+        return new Promise<PageResult<T>>(async (resolve) => {
+            const {limit, lastResult, onData} = options;
+            let query = _query;
+
+            if (limit) {
+                query = query.limit(limit);
+            }
+
+            if (lastResult?.firstSnapshot) {
+                query = query.startAfter(lastResult.firstSnapshot)
+            }
+
+            query = query.where(BaseModelField.deleted, "==", false)
+            const snapshot = await query.get();
+            const handler = this.getPaginatedSnapshotHandler((pageData) => {
+                resolve(pageData)
+            }, Type);
+            handler(snapshot)
+        })
+    }
+
+    observePaginated<T extends BaseModel>(_query: Query, options: PaginationOptions<T>, Type: { new(): T }): ListenerUnsubscriber {
+        const {limit, lastResult, onData} = options;
+        let query = _query;
+
+        query = query.where(BaseModelField.deleted, "==", false);
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+
+        if (lastResult?.lastSnapshot) {
+            query = query.startAfter(lastResult.lastSnapshot);
+        }
+
+        return query.onSnapshot(this.getPaginatedSnapshotHandler(onData, Type, limit))
+    }
+
+
+    private getPaginatedSnapshotHandler<T extends BaseModel>(onData: (pageData: PageResult<T>) => void, Type: { new(): T }, limit?: number): QuerySnapshotHandler {
+        return (snapshot, error) => {
+            const result: PageListenerResult<T> = {
+                results: [],
+                added: [],
+                removed: [],
+                updated: [],
+                pageSize: limit,
+                mightHaveMore: false,
+                error: error,
+            };
+
+            snapshot.docs.forEach(doc => {
+                const m = fromDocumentSnapshot(doc, Type);
+                if (m) {
+                    result.results?.push(m);
+                } else {
+                    console.error(`Failed to decode model for doc.id ${doc.id} and type ${Type}`);
+                }
+            });
+
+            if (snapshot.docs.length > 0) {
+                result.firstSnapshot = snapshot.docs[0];
+                result.lastSnapshot = snapshot.docs[snapshot.docs.length - 1]
+            }
+
+            if (limit && snapshot.docs.length === limit) {
+                result.mightHaveMore = true
+            }
+
+            snapshot.docChanges().forEach(change => {
+                const model = fromDocumentSnapshot(change.doc, Type);
+                if (!model) {
+                    return;
+                }
+                switch (change.type) {
+                    case "added":
+                        result.added?.push(model);
+                    case "modified":
+                        result.updated?.push(model);
+                    case "removed":
+                        result.removed?.push(model);
+                }
+            });
+
+            onData(result);
+        };
     }
 
     buildQuery<T extends BaseModel>(originalQuery: Query, options: QueryOptions = DefaultQueryOptions): Query {

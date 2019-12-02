@@ -1,6 +1,7 @@
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import {BaseModel} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {DocumentSnapshot} from "@shared/util/FirestoreUtil";
 
 declare enum OperationState {
     SUCCESSFUL = "SUCCESSFUL",
@@ -67,4 +68,19 @@ declare interface QueryResult<T extends BaseModel> {
     size: number,
     error?: any,
     lastCursor?: any|undefined,
+}
+
+declare interface IPageResult<T extends BaseModel, S extends DocumentSnapshot> {
+    error?: any,
+    results: T[],
+    firstSnapshot?: S,
+    lastSnapshot?: S,
+    pageSize?: number,
+    mightHaveMore: boolean,
+}
+
+declare interface IPageListenerResult<T extends BaseModel, S extends DocumentSnapshot> extends IPageResult<T, S> {
+    added?: T[],
+    removed?: T[],
+    updated?: T[],
 }

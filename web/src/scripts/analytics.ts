@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
 import {LocalStorageKey} from "@web/services/StorageService";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 declare global {
     interface Window {
@@ -64,6 +65,16 @@ export function init() {
             release: Config.version,
             environment: Config.env,
             integrations: sentryIntegrations,
+            beforeSend(event: Sentry.Event): Promise<Sentry.Event | null> | Sentry.Event | null {
+                const email = CactusMemberService.sharedInstance.getCurrentCactusMember()?.email;
+                if (email) {
+                    const tags = event.tags || {};
+                    tags["user.email"] = email;
+                    event.tags = tags;
+                }
+
+                return event
+            }
         });
     }
 
