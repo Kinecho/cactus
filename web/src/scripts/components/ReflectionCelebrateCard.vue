@@ -449,7 +449,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .lowerContainer {
-        background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+        background: $darkerGreen url(assets/images/grainy.png);
         padding: 6.4rem 4rem 4rem;
     }
 
@@ -575,8 +575,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
 
             &.back {
-                background: url(assets/images/yellowNeedles.svg) $yellow;
-                background-size: 80%;
+                background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
                 transform: rotateY(180deg);
 
                 @include r(600) {
@@ -662,15 +661,20 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
         .backBtn {
             align-items: center;
+            color: $white;
             display: flex;
             justify-content: center;
 
             svg {
-                fill: $darkGreen;
+                fill: $white;
                 height: 1.4rem;
                 margin-right: .8rem;
                 transform: scale(-1);
                 width: 1.4rem;
+            }
+
+            &:hover {
+                background: transparent;
             }
         }
     }

@@ -98,6 +98,7 @@
         background-color: $white;
         border-radius: 12px;
         box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+        color: $darkestGreen;
         margin-bottom: 3.2rem;
         padding: 1.6rem 2.4rem;
         text-align: left;

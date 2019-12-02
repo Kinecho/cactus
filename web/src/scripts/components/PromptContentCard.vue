@@ -551,6 +551,12 @@
         &.type-share_reflection {
             background: transparent;
             box-shadow: none;
+            color: $white;
+            padding-top: 4rem;
+
+            .tight {
+                opacity: .8;
+            }
 
             .text {
                 padding: 0 0 2.4rem;
@@ -1000,6 +1006,7 @@
 
     .directLink {
         margin-bottom: 1.6rem;
+        opacity: .8;
     }
 
     .sharing {
