@@ -16,7 +16,7 @@
             </button> -->
         </div>
         <div class="status" v-if="!received">
-            Pending
+            Requested
         </div>
     </div>
 </template>
