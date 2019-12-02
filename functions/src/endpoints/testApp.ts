@@ -8,8 +8,11 @@ import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
+// import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
+import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import CactusMember from "@shared/models/CactusMember";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -59,6 +62,46 @@ app.get('/bq', async (req, resp) => {
     const results = await getActiveUserCountForTrailingDays(1);
 
     return resp.send({results: results});
+});
+
+app.get("/next-prompt", async (req, res) => {
+    let memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member) {
+        res.status(404);
+        res.send("No member found");
+        return;
+    }
+
+    memberId = member.id;
+
+    console.log("Got member", memberId, member.email);
+
+
+    console.log("getting next prompt for member Id", memberId);
+
+    const timeZone = member.timeZone;
+    let userDate = new Date();
+    const systemDate = new Date();
+    if (timeZone) {
+        console.log("timezone =", timeZone);
+        userDate = DateUtil.getDateForTimezone(timeZone, systemDate);
+        console.log("user date", userDate.toISOString())
+    }
+
+    res.send({
+        timeZone,
+        userDate: userDate.toISOString(),
+        systemDate: systemDate.toISOString(),
+        member: member.toJSON()
+    });
 });
 
 app.get("/content", async (req, resp) => {

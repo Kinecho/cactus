@@ -14,6 +14,10 @@ export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
+export function getDateForTimezone(timeZone: string, date: Date): Date {
+    return DateTime.fromJSDate(date, {zone: timeZone}).toJSDate();
+}
+
 /**
  *
  * @param {Date} start
