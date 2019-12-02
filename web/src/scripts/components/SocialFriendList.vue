@@ -1,6 +1,6 @@
 <template>
     <section class="yourFriends" v-if="friends.length > 0">
-        <h2>Friends</h2>
+        <h4>Friends</h4>
         <friend
             v-for="(connection, index) in friends"
             v-bind:member="member"
@@ -78,9 +78,20 @@
     @import "mixins";
     @import "variables";
 
-    h2 {
-        @include r(768) {
-            font-size: 3.2rem;
+    .yourFriends {
+        border: 1px solid lighten($lightestGreen, 5%);
+        border-radius: 1.2rem;
+        margin: 0 -1.6rem 4.8rem;
+        padding: 1.6rem;
+
+        @include r(600) {
+            margin: 0 0 6.4rem;
+            padding: 2.4rem;
+        }
+
+        &:empty {
+            display: none;
         }
     }
+
 </style>

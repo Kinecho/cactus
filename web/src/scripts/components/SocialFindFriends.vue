@@ -227,17 +227,12 @@
         }
     }
 
-    .socialFriendNotifications {
-        @include r(960) {
-            grid-column: 2;
-            grid-row: 1;
-        }
-    }
-
     .find-friends {
         margin-bottom: 4.8rem;
 
         @include r(600) {
+            grid-column: 1;
+            grid-row: 1 / 3;
             margin-bottom: 6.4rem;
         }
     }
