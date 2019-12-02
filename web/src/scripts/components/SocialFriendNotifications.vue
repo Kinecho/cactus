@@ -1,9 +1,6 @@
 <template>
-    <div class="addNewFriends">
-        <section class="youMayKnow" v-if="referredByProfile &&
-                                        !isConnection(referredByProfile.cactusMemberId) &&
-                                        !isSentRequest(referredByProfile.cactusMemberId) &&
-                                        !isReceivedRequest(referredByProfile.cactusMemberId)">
+    <div class="addNewFriends" v-if="hasSuggestedFriends || hasFriendRequests">
+        <section class="youMayKnow" v-if="referredByProfile && hasSuggestedFriends">
             <h4>People you may know</h4>
             <friend-add
                 v-bind:member="member"
@@ -11,7 +8,7 @@
                 v-bind:key="referredByProfile.memberId"
             />
         </section>
-        <section class="friendRequests" v-if="receivedFriendRequests.length > 0 || sentFriendRequests.length > 0">
+        <section class="friendRequests" v-if="hasFriendRequests">
             <h4>Friend Requests</h4>
             <friend-request
                 v-for="(connection, index) in receivedFriendRequests"
@@ -136,6 +133,21 @@
                             return true;
                         }
                     }
+                }
+                return false;
+            },
+            hasSuggestedFriends: function(): boolean {
+                if (this.referredByProfile &&
+                    !this.isConnection(this.referredByProfile.cactusMemberId) &&
+                    !this.isSentRequest(this.referredByProfile.cactusMemberId) &&
+                    !this.isReceivedRequest(this.referredByProfile.cactusMemberId)) {
+                    return true;
+                }
+                return false;
+            },
+            hasFriendRequests: function(): boolean {
+                if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
+                    return true;
                 }
                 return false;
             }
