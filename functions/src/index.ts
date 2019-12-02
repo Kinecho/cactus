@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import mailchimpApp from "@api/endpoints/mailchimpEndpoints";
 import inboundApp from "@api/endpoints/inboundApp";
 import checkoutApp from "@api/endpoints/checkoutApp";
+import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
 import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
@@ -32,6 +33,7 @@ export const cloudFunctions = {
     slack: functions.https.onRequest(slackEndpoints),
     signup: functions.https.onRequest(signupEndpoints),
     test: functions.https.onRequest(testApp),
+    notificationPreferences: functions.https.onRequest(manageNotificationApp),
 
     //PubSub topics
     bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
