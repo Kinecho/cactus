@@ -2,9 +2,9 @@
     <div class="socialFindFriends">
         <h1>Friends</h1>
 
-        <!-- suggested friends -->
-        <div class="socialFriendList">
-            <friend-list v-bind:member="member" />
+        <!-- suggested friends / friend requests -->
+        <div class="socialFriendNotifications">
+            <friend-notifications v-bind:member="member" />
         </div>
 
         <div class="loading" v-if="loading">
@@ -88,6 +88,12 @@
                 </template>
             </div>
         </div>
+
+        <!-- Friend List -->
+        <div class="socialFriendList">
+            <friend-list v-bind:member="member" />
+        </div>
+
     </div>
 </template>
 
@@ -106,6 +112,7 @@
     import {PageRoute} from '@shared/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -114,7 +121,8 @@
         components: {
             Spinner,
             SocialImportedContact,
-            FriendList: SocialFriendList
+            FriendList: SocialFriendList,
+            FriendNotifications: SocialFriendNotifications
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -227,7 +235,7 @@
         }
     }
 
-    .socialFriendList {
+    .socialFriendList, .socialFriendNotifications {
         @include r(600) {
             grid-area: side;
         }
