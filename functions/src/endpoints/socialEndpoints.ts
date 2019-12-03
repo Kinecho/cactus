@@ -23,8 +23,14 @@ const app = express();
 app.use(cors({origin: true}));
 
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: SocialInviteRequest = req.body;
+    const payload: SocialInviteRequest|undefined|null = req.body;
     console.log("socialEndpoints.send-invite", payload);
+
+    if (!payload) {
+        console.log("No payload was included");
+        resp.sendStatus(500);
+        return
+    }
 
     const requestUser = await getAuthUser(req);
     if (!requestUser || !requestUser.email) {
@@ -106,8 +112,14 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
 
 
 app.post("/notify-friend-request", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: SocialConnectionRequestNotification = req.body;
+    const payload: SocialConnectionRequestNotification|undefined|null = req.body;
     console.log("socialEndpoints.notify-friend-request", payload);
+
+    if (!payload) {
+        console.log("No payload was included");
+        resp.sendStatus(500);
+        return
+    }
 
     const requestUser = await getAuthUser(req);
     if (!requestUser || !requestUser.email) {
