@@ -32,7 +32,7 @@
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                         <div v-if="nativeShareEnabled" class="sharing">
-                            <button class="btn secondary" @click="shareNatively()"><img class="icon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
+                            <button class="btn secondary" @click="shareNatively()"><img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
                         </div>
                     </div>
                     <button v-else class="button primary getLink"
@@ -1018,6 +1018,7 @@
         justify-content: center;
 
         button {
+            align-items: center;
             display: flex;
             flex-grow: 0;
             justify-content: center;
@@ -1029,8 +1030,10 @@
             }
         }
 
-        img {
+        .shareIcon {
+            height: 1.6rem;
             margin-right: .8rem;
+            width: 1.6rem;
         }
     }
 
