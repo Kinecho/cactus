@@ -25,6 +25,16 @@ jest.mock("@web/firebase", () => {
     };
 });
 
+jest.mock("@web/services/CactusMemberService", () => {
+    return {
+        sharedInstance: {
+            observeCurrentMember: () => {
+                console.log("mocked observe method")
+            }
+        },
+    }
+});
+
 describe("NavBar.vue test", () => {
     test("header is visible after mounting", () => {
         const props = {

@@ -223,6 +223,11 @@
         min-height: 6rem;
         padding: 1.6rem;
         width: 100%;
+
+        &:focus {
+            box-shadow: 0 0 3px 2pt $darkGreen;
+            outline: none;
+        }
     }
 
     .buttonContainer {
