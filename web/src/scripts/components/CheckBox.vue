@@ -35,11 +35,11 @@
             // Also can use camelCase here, but hyphen-separating the attribute name
             // when using the component will still work
             trueValue: {
-                type: Boolean,
+                type: [Boolean, String],
                 default: true,
             },
             falseValue: {
-                type: Boolean,
+                type: [Boolean, String],
                 default: false,
             },
         },
