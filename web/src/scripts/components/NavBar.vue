@@ -68,7 +68,6 @@
         hidden: boolean,
     }
 
-
     export default Vue.extend({
         directives: {
             'click-outside': clickOutsideDirective(),
@@ -131,7 +130,7 @@
                 return links;
             },
             displayName(): string | undefined | null {
-                return this.user ? this.user.displayName || this.user.email : null;
+                return this.user ? this.user.displayName : null;
             },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
