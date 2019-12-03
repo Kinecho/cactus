@@ -49,8 +49,10 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
     if (!currentUser || !toMember?.email || !socialConnectionRequest.id) {
         return {
             success: false,
-            message: "Data is missing to notify the friend."
+            message: "Something was missing. Refresh the website and try again."
         }
+        console.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.')
+        
     } else {
         const requestOptions: SocialConnectionRequestNotification = {
             toEmail: toMember.email,
