@@ -57,12 +57,17 @@
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import {getRandomAvatar} from '@web/AvatarUtil'
     import {getQueryParam} from '@web/util'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import CactusMember from "@shared/models/CactusMember"
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
 
     const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
         authUnsubscribe: (() => void) | undefined,
         user: FirebaseUser | undefined | null,
+        member: CactusMember | undefined,
+        memberUnsubscriber: ListenerUnsubscriber | undefined,
         authLoaded: boolean,
         copy: LocalizedCopy,
         hidden: boolean,
@@ -80,6 +85,12 @@
                 this.user = user;
                 this.authLoaded = true;
             })
+
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.member = member;
+                }
+            });
         },
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
@@ -88,9 +99,8 @@
             }
         },
         destroyed() {
-            if (this.authUnsubscribe) {
-                this.authUnsubscribe();
-            }
+            this.authUnsubscribe?.();
+            this.memberUnsubscriber?.();
         },
         props: {
             showSignup: {type: Boolean, default: false},
@@ -110,6 +120,8 @@
                 authUnsubscribe: undefined,
                 authLoaded: false,
                 hidden: false,
+                member: undefined,
+                memberUnsubscriber: undefined
             }
         },
         computed: {
@@ -130,7 +142,7 @@
                 return links;
             },
             displayName(): string | undefined | null {
-                return this.user ? this.user.displayName : null;
+                return this.member ? this.member.getFullName() : null;
             },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
