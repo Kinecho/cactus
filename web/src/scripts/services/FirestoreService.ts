@@ -126,6 +126,9 @@ export default class FirestoreService {
                 doc = collectionRef.doc(model.id);
             } else {
                 model.id = doc.id;
+            }
+
+            if (!model.createdAt) {
                 model.createdAt = new Date();
             }
 
