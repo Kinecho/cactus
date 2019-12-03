@@ -72,7 +72,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         });
 
     try {
-        await AdminSendgridService.getSharedInstance().sendInvitation({
+        const sentSuccess = await AdminSendgridService.getSharedInstance().sendInvitation({
             toEmail: toContact.email,
             fromEmail: requestUser.email,
             fromName: member ? member.getFullName() : undefined,
@@ -80,10 +80,12 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
             link: referralLink
         });
 
-        if (response.success) {
+        if (sentSuccess) {
             // update the SocialInvite record with the sentAt date
             socialInvite.sentAt = new Date();
             await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+        } else {
+            console.error('Unable to send invite for SocialConnectionRequest ' + socialInvite.id + 'via email.');
         }
 
         resp.send(response);
