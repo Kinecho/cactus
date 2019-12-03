@@ -31,7 +31,7 @@
                     <span class="navLabel">Friends</span>
                     <!--span class="badge">3</span-->
                 </a>
-                <dropdown-menu :items="links" v-if="loggedIn">
+                <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
                         <img v-if="profileImageUrl" :alt="(displayName || email) + `'s Profile Image`" :src="profileImageUrl"/>
@@ -57,17 +57,21 @@
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import {getRandomAvatar} from '@web/AvatarUtil'
     import {getQueryParam} from '@web/util'
+    import CactusMemberService from '@web/services/CactusMemberService'
+    import CactusMember from "@shared/models/CactusMember"
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
 
     const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
         authUnsubscribe: (() => void) | undefined,
         user: FirebaseUser | undefined | null,
+        member: CactusMember | undefined,
+        memberUnsubscriber: ListenerUnsubscriber | undefined,
         authLoaded: boolean,
         copy: LocalizedCopy,
         hidden: boolean,
     }
-
 
     export default Vue.extend({
         directives: {
@@ -81,6 +85,12 @@
                 this.user = user;
                 this.authLoaded = true;
             })
+
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    this.member = member;
+                }
+            });
         },
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
@@ -89,9 +99,8 @@
             }
         },
         destroyed() {
-            if (this.authUnsubscribe) {
-                this.authUnsubscribe();
-            }
+            this.authUnsubscribe?.();
+            this.memberUnsubscriber?.();
         },
         props: {
             showSignup: {type: Boolean, default: false},
@@ -111,6 +120,8 @@
                 authUnsubscribe: undefined,
                 authLoaded: false,
                 hidden: false,
+                member: undefined,
+                memberUnsubscriber: undefined
             }
         },
         computed: {
@@ -128,17 +139,10 @@
                     }
                 }];
 
-                if (this.user && this.user.email) {
-                    links.unshift({
-                        static: true,
-                        title: this.user.email,
-                    })
-                }
-
                 return links;
             },
             displayName(): string | undefined | null {
-                return this.user ? this.user.displayName || this.user.email : null;
+                return this.member ? this.member.getFullName() : null;
             },
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
