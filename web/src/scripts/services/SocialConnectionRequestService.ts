@@ -66,7 +66,6 @@ export default class SocialConnectionRequestService {
             /* use generated doc ids in lew of having unique index constraints */
             const memberConnection = new SocialConnection();
                   memberConnection.id = connectionRequest.memberId + connectionRequest.friendMemberId;
-                  memberConnection.createdAt = new Date();
                   memberConnection.memberId = connectionRequest.memberId;
                   memberConnection.friendMemberId = connectionRequest.friendMemberId;
 
@@ -74,7 +73,6 @@ export default class SocialConnectionRequestService {
 
             const friendConnection = new SocialConnection();
                   friendConnection.id = connectionRequest.friendMemberId + connectionRequest.memberId;
-                  memberConnection.createdAt = new Date();
                   friendConnection.memberId = connectionRequest.friendMemberId;
                   friendConnection.friendMemberId = connectionRequest.memberId;
 
