@@ -68,9 +68,6 @@
                 return this.connectionRequest.friendMemberId == this.member.id;
             }
         },
-        watch: {
-
-        },
         methods: {
             avatarNumber(email: string): number {
                 return getIntegerFromStringBetween(email, 4) + 1;
@@ -89,8 +86,6 @@
             getFriendMemberId(): string {
                 return this.received ? this.connectionRequest.memberId : this.connectionRequest.friendMemberId
             },
-
-
         }
     })
 </script>
