@@ -63,23 +63,25 @@ export default class SocialConnectionRequestService {
 
     async confirmRequest(connectionRequest: SocialConnectionRequest): Promise<SocialConnectionRequest | undefined> {
         try {
-            return await FirestoreService.sharedInstance.firestore.runTransaction(async transaction => {
-                connectionRequest.confirmedAt = new Date();
+            /* use generated doc ids in lew of having unique index constraints */
+            const memberConnection = new SocialConnection();
+                  memberConnection.id = connectionRequest.memberId + connectionRequest.friendMemberId;
+                  memberConnection.createdAt = new Date();
+                  memberConnection.memberId = connectionRequest.memberId;
+                  memberConnection.friendMemberId = connectionRequest.friendMemberId;
 
-                const memberConnection = new SocialConnection();
-                      memberConnection.memberId = connectionRequest.memberId;
-                      memberConnection.friendMemberId = connectionRequest.friendMemberId;
+            const resultMember = await SocialConnectionService.sharedInstance.save(memberConnection);
 
-                const resultMember = await SocialConnectionService.sharedInstance.save(memberConnection);
+            const friendConnection = new SocialConnection();
+                  friendConnection.id = connectionRequest.friendMemberId + connectionRequest.memberId;
+                  memberConnection.createdAt = new Date();
+                  friendConnection.memberId = connectionRequest.friendMemberId;
+                  friendConnection.friendMemberId = connectionRequest.memberId;
 
-                const friendConnection = new SocialConnection();
-                      friendConnection.memberId = connectionRequest.friendMemberId;
-                      friendConnection.friendMemberId = connectionRequest.memberId;
+            const resultFriend = await SocialConnectionService.sharedInstance.save(friendConnection);
 
-                const resultFriend = await SocialConnectionService.sharedInstance.save(friendConnection);
-
-                return await this.save(connectionRequest);
-            });
+            connectionRequest.confirmedAt = new Date();
+            return await this.save(connectionRequest);
         } catch (error) {
             console.error("Failed to create connections", error);
             return;
