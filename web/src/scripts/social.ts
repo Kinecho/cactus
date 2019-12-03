@@ -61,6 +61,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
             const headers = await getAuthHeaders();
             return await request.post(Endpoint.notifyFriendRequest, requestOptions, {headers});
         } catch (e) {
+            console.error(e);
             return {
                 success: false,
                 error: e
