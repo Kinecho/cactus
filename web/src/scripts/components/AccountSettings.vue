@@ -196,7 +196,7 @@
                 return this.member ? formatDate(this.member.signupConfirmedAt, 'LLLL dd, yyyy') : undefined;
             },
             displayName(): string {
-                return this.member ? `${this.member.firstName || ""} ${this.member.lastName || ""}`.trim() : '';
+                return this.member ? this.member.getFullName() : '';
             },
 
             providers(): Provider[] {
