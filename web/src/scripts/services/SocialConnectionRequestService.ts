@@ -65,14 +65,14 @@ export default class SocialConnectionRequestService {
         try {
             /* use generated doc ids in lew of having unique index constraints */
             const memberConnection = new SocialConnection();
-                  memberConnection.id = connectionRequest.memberId + connectionRequest.friendMemberId;
+                  memberConnection.id = this.generateDocId(connectionRequest.memberId, connectionRequest.friendMemberId);
                   memberConnection.memberId = connectionRequest.memberId;
                   memberConnection.friendMemberId = connectionRequest.friendMemberId;
 
             const resultMember = await SocialConnectionService.sharedInstance.save(memberConnection);
 
             const friendConnection = new SocialConnection();
-                  friendConnection.id = connectionRequest.friendMemberId + connectionRequest.memberId;
+                  friendConnection.id = this.generateDocId(connectionRequest.friendMemberId, connectionRequest.memberId);
                   friendConnection.memberId = connectionRequest.friendMemberId;
                   friendConnection.friendMemberId = connectionRequest.memberId;
 
@@ -84,5 +84,9 @@ export default class SocialConnectionRequestService {
             console.error("Failed to create connections", error);
             return;
         }
+    }
+
+    generateDocId(id1: string, id2: string): string {
+        return id1 + '_' + id2;
     }
 }
