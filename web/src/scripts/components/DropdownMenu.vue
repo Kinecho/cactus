@@ -15,8 +15,11 @@
 
         <transition name="fade-down">
             <nav class="moreMenu" v-show="menuOpen">
+                <div class="static" v-if="displayName || email">
+                    <div class="displayName" v-if="displayName">{{displayName}}</div>
+                    <div class="email" v-if="email">{{email}}</div>
+                </div>
                 <a v-for="(link, index) in links"
-
                         :href="link.href"
                         v-on:[link.event]="link.onClick"
                         :key="`link_${index}`"
@@ -49,6 +52,12 @@
             makeTextNonBreaking: {
                 type: Boolean,
                 default: true,
+            },
+            email: {
+                type: String
+            },
+            displayName: {
+                type: String
             }
         },
         data(): {
@@ -105,14 +114,6 @@
 </script>
 
 
-<style lang="scss">
-    @import "common";
-    @import "mixins";
-    @import "variables";
-
-
-</style>
-
 <style lang="scss" scoped>
     @import "common";
     @import "mixins";
@@ -155,10 +156,14 @@
             }
         }
 
-
         .secondary {
             margin-right: .8rem;
             transition: all .2s ease;
+
+            &:focus {
+                box-shadow: 0 0 3px 2pt $darkGreen;
+                outline: none;
+            }
 
             &.open {
                 transform: rotate(90deg);
@@ -179,12 +184,10 @@
         .wiggle:hover svg {
             animation: wiggle .5s forwards;
         }
-
-
     }
 
     .moreMenu {
-        background-color: $lightPink;
+        background-color: $darkestGreen;
         border-radius: 6px;
         right: 0;
         padding: .8rem 0;
@@ -194,34 +197,39 @@
 
         a, span {
             background-color: transparent;
-            color: $darkestPink;
+            color: $white;
             display: block;
             font-size: 1.6rem;
-            opacity: .8;
             padding: .8rem 2.4rem;
             text-decoration: none;
-            transition: opacity .2s ease-in-out, background-color .2s ease-in-out;
-
-
-            &.static {
-                border-bottom: 1px solid darken($pink, 5%);
-                color: $darkText;
-                margin-bottom: .8rem;
-                padding-bottom: 1.6rem;
-            }
+            transition: background-color .2s ease-in-out;
 
             &:hover {
-                background-color: lighten($lightPink, 2%);
-                opacity: 1;
+                background-color: lighten($darkestGreen, 5%);
                 cursor: pointer;
             }
 
             &.nonBreaking {
                 white-space: nowrap;
-                /*line-break: ;*/
             }
         }
     }
 
+    .static {
+        border-bottom: 1px solid lighten($darkestGreen, 5%);
+        color: $lightGreen;
+        font-size: 1.6rem;
+        margin-bottom: .8rem;
+        padding: .8rem 2.4rem 1.6rem;
 
+        .displayName {
+            color: $white;
+            opacity: .9;
+            white-space: nowrap;
+        }
+
+        &:empty {
+            display: none;
+        }
+    }
 </style>

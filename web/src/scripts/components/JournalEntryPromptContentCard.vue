@@ -285,8 +285,7 @@
         flex-direction: column;
         align-items: center;
 
-        background: url(/assets/images/yellowNeedles.svg) $yellow;
-        background-size: 80%;
+        background-color: $darkerGreen;
         justify-content: center;
         padding: 3.2rem;
         position: relative;
@@ -299,7 +298,7 @@
         }
 
         &.note {
-            background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/250px;
+            background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
             padding: 2.4rem 0;
             text-align: center;
         }

@@ -1059,8 +1059,7 @@
         }
 
         &.back {
-            background: url(/assets/images/yellowNeedles.svg) $yellow;
-            background-size: 80%;
+            background-color: $darkerGreen;
             display: flex;
             flex-direction: column;
             justify-content: space-between;

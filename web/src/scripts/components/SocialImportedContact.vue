@@ -154,7 +154,7 @@
                 this.inputNameModalVisible = false;
                 this.readyToInvite = true;
             },
-        },     
+        },
     })
 </script>
 
@@ -246,7 +246,7 @@
         font-size: 1.6rem;
         padding: 0 1.2rem;
         &.error {
-            color: red;
+            color: $red;
         }
     }
 

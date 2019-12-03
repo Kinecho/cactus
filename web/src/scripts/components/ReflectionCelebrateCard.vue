@@ -336,7 +336,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             tradeNote() {
                 if (this.member && !this.member.getFullName() && !this.sawInputNameModal) {
                     this.showInputNameModal();
-                } else { 
+                } else {
                     this.showTradeNote = true;
                     this.flipped = true;
                 }
@@ -354,12 +354,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             async updateResponseMemberName() {
                 if (this.reflectionResponse && this.member) {
-                    await ReflectionResponseService.sharedInstance.updateResponseMemberName(this.reflectionResponse, this.member);  
-                } 
+                    await ReflectionResponseService.sharedInstance.updateResponseMemberName(this.reflectionResponse, this.member);
+                }
             },
             transitionToTradeNote() {
-                this.updateResponseMemberName(); 
-                this.hideInputNameModal(); 
+                this.updateResponseMemberName();
+                this.hideInputNameModal();
                 this.tradeNote();
             }
         }
@@ -418,7 +418,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     h2 {
-        color: $darkestPink;
+        color: $magenta;
         margin-bottom: 2.4rem;
 
         @include r(600) {
@@ -449,7 +449,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .lowerContainer {
-        background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+        background: $darkerGreen url(assets/images/grainy.png);
         padding: 6.4rem 4rem 4rem;
     }
 
@@ -560,7 +560,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
 
             &.front {
-                background-color: lighten($lightPink, 3%);
+                background-color: $beige;
+                box-shadow:
+                    0 11px 15px -7px rgba(0,0,0,.16),
+                    0 24px 38px 3px rgba(0,0,0,.1),
+                    0 9px 46px 8px rgba(0,0,0,.08);
                 height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
@@ -571,8 +575,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
 
             &.back {
-                background: url(assets/images/yellowNeedles.svg) $yellow;
-                background-size: 80%;
+                background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
                 transform: rotateY(180deg);
 
                 @include r(600) {
@@ -658,15 +661,20 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
         .backBtn {
             align-items: center;
+            color: $white;
             display: flex;
             justify-content: center;
 
             svg {
-                fill: $darkGreen;
+                fill: $white;
                 height: 1.4rem;
                 margin-right: .8rem;
                 transform: scale(-1);
                 width: 1.4rem;
+            }
+
+            &:hover {
+                background: transparent;
             }
         }
     }

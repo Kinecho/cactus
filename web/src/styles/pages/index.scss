@@ -3,18 +3,6 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-body {
-  background-image: url(assets/images/yellowBlob.svg), url(assets/images/yellowNeedleBlob.svg);
-  background-position: center 365px, center 285px;
-  background-size: 745px, 740px;
-
-  @include r(768) {
-    background-position: left 56vw top -300px, left 67vw top -110px;
-    background-size: 720px, 740px;
-  }
-}
-
-
 //This is the target for the sign-up jump button
 #sign-up {
   position: relative;
@@ -22,12 +10,6 @@ body {
   height: 0;
   width: 100%;
   grid-area: target;
-}
-
-h1, h2 {
-    @include r(960) {
-      font-size: 5.6rem;
-    }
 }
 
 .subtext {
@@ -81,7 +63,7 @@ h1, h2 {
     margin: .8rem 2.4rem .4rem;
 
     @include r(768) {
-      margin: 0 2.4rem 1.6rem 0;
+      margin: 0 2.4rem .4rem 0;
       max-width: 65rem;
     }
   }
@@ -90,7 +72,7 @@ h1, h2 {
     margin: 0 2.4rem;
 
     @include r(768) {
-      margin: 0 2.4rem 2.4rem 0;
+      margin: 0 2.4rem 3.2rem 0;
     }
   }
 
@@ -339,7 +321,7 @@ h1, h2 {
     }
 }
 
-.private {
+section.private {
     align-items: center;
     background: $beige url(assets/images/pinkBlobNeedleBg.png) no-repeat center top 16rem/36rem;
     display: flex;
@@ -504,7 +486,7 @@ h1, h2 {
   }
 }
 
-.email {
+section.email {
   background-color: $beige;
   padding: 5.6rem 0 .8rem;
   position: relative;

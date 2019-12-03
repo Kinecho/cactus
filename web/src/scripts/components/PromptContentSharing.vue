@@ -231,7 +231,12 @@
         }
 
         .info {
+            color: $white;
             margin: 2.4rem 0;
+
+            p {
+                opacity: .8;
+            }
         }
 
         .referral-link {
