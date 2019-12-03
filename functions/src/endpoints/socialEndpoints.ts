@@ -23,19 +23,19 @@ const app = express();
 app.use(cors({origin: true}));
 
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const requestUser = await getAuthUser(req);
+    if (!requestUser || !requestUser.email) {
+        console.log("No auth user was found on the request");
+        resp.sendStatus(401);
+        return
+    }
+
     const payload: SocialInviteRequest|undefined|null = req.body;
     console.log("socialEndpoints.send-invite", payload);
 
     if (!payload) {
         console.log("No payload was included");
         resp.sendStatus(500);
-        return
-    }
-
-    const requestUser = await getAuthUser(req);
-    if (!requestUser || !requestUser.email) {
-        console.log("No auth user was found on the request");
-        resp.sendStatus(401);
         return
     }
 
@@ -112,6 +112,13 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
 
 
 app.post("/notify-friend-request", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const requestUser = await getAuthUser(req);
+    if (!requestUser || !requestUser.email) {
+        console.log("No auth user was found on the request");
+        resp.sendStatus(401);
+        return
+    }
+
     const payload: SocialConnectionRequestNotification|undefined|null = req.body;
     console.log("socialEndpoints.notify-friend-request", payload);
 
@@ -120,14 +127,7 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
         resp.sendStatus(500);
         return
     }
-
-    const requestUser = await getAuthUser(req);
-    if (!requestUser || !requestUser.email) {
-        console.log("No auth user was found on the request");
-        resp.sendStatus(401);
-        return
-    }
-
+    
     const { toEmail } = payload;
 
     if (!toEmail) {
