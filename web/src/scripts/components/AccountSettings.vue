@@ -310,7 +310,7 @@
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
 
                         if (result.error && result.error.title === "Member In Compliance State") {
-                            errorMessage = "Cactus is unable to subscribe you to receive email notifications because you  previously unsubscribed. Please email help@cactus.app to resolve this issue."
+                            errorMessage = "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. Please email help@cactus.app to resolve this issue."
                         }
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
