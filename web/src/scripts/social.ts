@@ -42,13 +42,14 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
     }
 }
 
-export async function notifyFriendRequest(socialConnectionRequest: SocialConnectionRequest): Promise<SocialConnectionRequestNotificationResult> {
+export async function notifyFriendRequest(socialConnectionRequest: SocialConnectionRequest): Promise<any> {
     const currentUser = getAuth().currentUser;
     const toMember = await MemberProfileService.sharedInstance.getByMemberId(socialConnectionRequest.friendMemberId);
 
     if (!currentUser || !toMember?.email || !socialConnectionRequest.id) {
         return {
             success: false,
+            socialConnectionRequest: socialConnectionRequest.id,
             message: "Something was missing. Refresh the website and try again."
         }
         console.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.')
@@ -66,6 +67,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
             console.error(e);
             return {
                 success: false,
+                socialConnectionRequest: socialConnectionRequest.id,
                 error: e
             }
         }
