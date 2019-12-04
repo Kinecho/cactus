@@ -49,13 +49,6 @@
                             <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                         </div>
 
-                        <div class="item">
-                            <label class="label">
-                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
-                            </label>
-                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
-                        </div>
-
                         <div class="saveCancel" v-if="changesToSave === true">
                             <button @click="save">Save Changes</button>
                             <button @click="reloadPage" class="secondary">Cancel</button>
@@ -66,6 +59,13 @@
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
                             <CheckBox label="Receive an email when a new prompt is ready" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
+                            </label>
+                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
                         </div>
                     </div>
 

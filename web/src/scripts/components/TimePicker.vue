@@ -131,4 +131,9 @@
         display: flex;
         flex-direction: row;
     }
+
+    .multiselect {
+        margin: .4rem 1.6rem 0 0;
+        width: auto;
+    }
 </style>

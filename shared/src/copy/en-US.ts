@@ -19,7 +19,7 @@ export default class EnglishCopy extends LocalizedCopy {
     };
 
     account: AccountCopy = {
-        PREFERRED_NOTIFICATION_TIME: "Notification Time"
+        PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?"
     };
 
     common: CommonCopy = {
