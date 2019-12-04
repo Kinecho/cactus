@@ -72,14 +72,6 @@
         },
         async beforeMount() {
             await this.setupQueries(this.member);
-
-            try {
-                let otherFriend = await SocialConnectionRequestService.sharedInstance.getByMemberId("neil");
-                console.log("Fetched other friend that doesn't belong to me", otherFriend);
-            } catch (error) {
-                console.error("Failed to get social connection by memberid that doesn't belong", error);
-            }
-
         },
         watch: {
             async member(newMember: CactusMember, oldMember?: CactusMember) {
