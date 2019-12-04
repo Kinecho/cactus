@@ -132,7 +132,12 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
 
     if (!toEmail) {
         console.error("socialEndpoints.notify-friend-request: Email to send to was not provided in payload");
-        const errorResponse: SocialConnectionRequestNotificationResult = {success: false, error: "No 'to' email provided"};
+        const errorResponse: SocialConnectionRequestNotificationResult = {
+            success: false, 
+            toEmail: '',
+            fromEmail: requestUser.email,
+            error: "No 'to' email provided"
+        };
         resp.send(errorResponse);
         return;
     }
@@ -167,11 +172,14 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
         Sentry.captureException(error);
         console.error(error);
 
-        resp.status(500).send({
+        const errorResponse: SocialConnectionRequestNotificationResult = {
             toEmail: toEmail,
-            sendSuccess: false,
+            fromEmail: requestUser.email,
+            success: false,
             error: error,
-        });
+        }
+
+        resp.status(500).send(errorResponse);
     }
 
     return;
