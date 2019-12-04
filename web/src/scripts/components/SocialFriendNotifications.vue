@@ -118,7 +118,6 @@
                             this.friends = socialConnections;
                         }
                     });
-
                 }
                 if (member.referredByEmail && member.referredByEmail !== oldMember?.referredByEmail) {
                     this.referredByUnsubscriber?.();
