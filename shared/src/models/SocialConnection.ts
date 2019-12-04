@@ -19,16 +19,9 @@ export class SocialConnectionRequest extends BaseModel {
     static Fields = SocialConnectionRequestFields;
     memberId!: string;
     friendMemberId!: string;
-    confirmedAt: Date | null;
-    rejectedAt: Date | null;
-    sentAt: Date;
-
-    constructor() {
-        super();
-        this.confirmedAt = null;
-        this.rejectedAt = null;
-        this.sentAt = new Date();
-    }
+    confirmedAt: Date | null = null;
+    rejectedAt: Date | null = null;
+    sentAt: Date = new Date();
 }
 
 export default class SocialConnection extends BaseModel {
