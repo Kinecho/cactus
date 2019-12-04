@@ -70,6 +70,31 @@
                 referredByProfile: undefined
             }
         },
+        async beforeMount() {
+            if (this.member.id) {
+                this.receivedFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(this.member.id, {
+                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                            this.receivedFriendRequests = socialConnectionRequests;
+                        }
+                    });
+
+                this.sentFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeSentConnectionRequests(this.member.id, {
+                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                            this.sentFriendRequests = socialConnectionRequests;
+                        }
+                    });
+
+                this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                        onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                            this.friends = socialConnections;
+                        }
+                    });
+
+                if (this.member.referredByEmail) {
+                    this.referredByProfile = await MemberProfileService.sharedInstance.getByEmail(this.member.referredByEmail);
+                }
+            }
+        },
         computed: {
             hasSuggestedFriends: function(): boolean {
                 if (this.referredByProfile &&
@@ -85,33 +110,6 @@
                     return true;
                 }
                 return false;
-            }
-        },
-        watch: {
-            member: async function() {
-                if (this.member.id) {
-                    this.receivedFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(this.member.id, {
-                            onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
-                                this.receivedFriendRequests = socialConnectionRequests;
-                            }
-                        });
-
-                    this.sentFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeSentConnectionRequests(this.member.id, {
-                            onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
-                                this.sentFriendRequests = socialConnectionRequests;
-                            }
-                        });
-
-                    this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
-                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
-                                this.friends = socialConnections;
-                            }
-                        });
-
-                    if (this.member.referredByEmail) {
-                        this.referredByProfile = await MemberProfileService.sharedInstance.getByEmail(this.member.referredByEmail);
-                    }
-                }
             }
         },
         methods: {

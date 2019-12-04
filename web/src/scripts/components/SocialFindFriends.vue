@@ -3,7 +3,7 @@
 
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications">
-            <friend-notifications v-bind:member="member" />
+            <friend-notifications v-bind:member="member" v-if="member" />
         </div>
 
         <div class="loading" v-if="loading">
