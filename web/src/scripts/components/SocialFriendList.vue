@@ -47,11 +47,6 @@
                 friendsUnsubscriber: undefined,
             }
         },
-        watch: {
-            // member: async function() {
-            //
-            // }
-        },
         destroyed() {
             this.friendsUnsubscriber?.();
         }

@@ -11,7 +11,7 @@
             <h2>Invite friends to reflect</h2>
             <p class="subtext">Share your unique link.</p>
             <div class="referral-link">
-                <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
+                <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true"/>
                 <button class="copy" v-clipboard:copy="referralLink"
                         v-clipboard:success="handleCopySuccess"
                         v-clipboard:error="handleCopyError">

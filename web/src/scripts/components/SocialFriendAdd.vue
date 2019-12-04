@@ -62,7 +62,7 @@
 
                         const notifyResult = await notifyFriendRequest(connectionRequest);
 
-                        return (result ? true : false);
+                        return !!result;
                     } catch(e) {
                         return false;
                     }
