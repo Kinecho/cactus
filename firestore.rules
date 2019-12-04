@@ -1,3 +1,9 @@
+// ************************************************
+// *                                              *
+// *  RULES SHOULD BE EDITED IN SOURCE CONTROL,   *
+// *       NOT IN THE FIREBASE CONSOLE UI         *
+// *                                              *
+// ************************************************
 service cloud.firestore {
   match /databases/{database}/documents {
     function resourceBelongsToUser() {
@@ -17,23 +23,131 @@ service cloud.firestore {
     }
 
     function belongsToMember(){
-    	return resourceBelongsToUser() || getMemberId() == resource.data.cactusMemberId || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
+    	return resourceBelongsToUser() || getMemberId() == resource.data.memberId || getMemberId() == resource.data.cactusMemberId || getCurrentMember().data.mailchimpListMember.id == resource.data.mailchimpMemberId;
     }
 
-    match /reflectionPrompt/{document=**} {
+  	function isAdmin(){
+    		return request.auth.token.admin == true
+    }
+
+
+  	//FLAMELINK PERMISSIONS REQUIRE ADMIN USER TO WRITE
+  	//FLAMELINK TABLES ALLOW ANYONE TO READ
+  	match /fl_backups/{document=**} {
     	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_content/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_environments/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_files/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_folders/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_locales/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_navigation/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_permissions/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_schemas/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+  	match /fl_settings/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_users/{document=**} {
+    	 allow read: if true;
+       allow write: if isAdmin()
+    }
+
+    match /fl_webhooks/{document} {
+      allow read: if true
+      allow write: if isAdmin()
+    }
+
+    match /fl_webhooks/{document}/activityLog/{log} {
+      allow read: if true
+      allow write: if isAdmin()
+    }
+
+    match /fl_workflows/{document} {
+      allow read: if true
+      allow write: if isAdmin()
+    }
+		//END FLAMELINK
+
+
+    //CUSTOM AUTH
+    match /reflectionPrompt/{document=**} {
+    	allow read: if true;
     }
     match /members/{document=**} {
-    	 allow read,write: if resourceBelongsToUser()
+      allow read,write: if resourceBelongsToUser()
     }
+
+    match /users/{document=**} {
+      allow read,write: if request.auth.uid != null && resource.id == request.auth.uid;
+    }
+
+    match /memberProfiles/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /reflectionResponses/{document=**} {
-    	allow read: if belongsToMember();
-      allow update: if belongsToMember();
-      allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
+      allow read: if belongsToMember() || resource.data.shared == true;
+      allow update: if belongsToMember() || resource.data.anonymous == true;
+      // allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
+      allow create: if true;
     }
     match /sentPrompts/{document=**} {
-    	allow read,update: if getMemberId() == resource.data.cactusMemberId;
+      allow read,update: if getMemberId() == resource.data.cactusMemberId;
     }
+
+    match /friendships/{document=**} {
+      allow create: if true;
+      allow read,update: if resource.data.memberIds.indexOf(getMemberId()) > -1;
+    }
+
+    match /socialConnectionRequests/{document=**} {
+      allow create: if request.resource.data.memberId == getMemberId();
+      allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
+    }
+
+	  match /socialConnections/{document=**} {
+      allow create: if request.resource.data.memberId == getMemberId() || request.resource.data.friendMemberId == getMemberId()
+      allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
+    }
+
+    //disable all other reads by default
     match /{document=**} {
       allow read, write: if false;
     }

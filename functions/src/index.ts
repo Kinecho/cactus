@@ -22,6 +22,7 @@ import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
+import socialEndpoints from "@api/endpoints/socialEndpoints";
 import {updateMemberProfileTrigger} from "@api/triggers/MemberTriggers";
 
 export const cloudFunctions = {
@@ -32,6 +33,7 @@ export const cloudFunctions = {
     mailchimp: functions.https.onRequest(mailchimpApp),
     slack: functions.https.onRequest(slackEndpoints),
     signup: functions.https.onRequest(signupEndpoints),
+    social: functions.https.onRequest(socialEndpoints),
     test: functions.https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
 

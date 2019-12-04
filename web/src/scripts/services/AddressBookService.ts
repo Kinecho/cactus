@@ -8,12 +8,12 @@ class AddressBookService {
   start(callback?: object) {
     if (!document.getElementById('cloudsponge-' + Config.cloudSpongeKey)) {
       const cloudSpongeScript = document.createElement('script');
-          cloudSpongeScript.type = 'text/javascript';
-          cloudSpongeScript.async = true;
-          cloudSpongeScript.onload = this.initCloudsponge;
-          cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
-          cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
-          document.head.appendChild(cloudSpongeScript);
+      cloudSpongeScript.type = 'text/javascript';
+      cloudSpongeScript.async = true;
+      cloudSpongeScript.onload = this.initCloudsponge;
+      cloudSpongeScript.id = 'cloudsponge-' + Config.cloudSpongeKey;
+      cloudSpongeScript.src = 'https://api.cloudsponge.com/widget/' + Config.cloudSpongeKey + '.js';
+      document.head.appendChild(cloudSpongeScript);
     }
   }
 

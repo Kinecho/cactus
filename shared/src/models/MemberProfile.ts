@@ -47,6 +47,6 @@ export default class MemberProfile extends BaseModel {
     }
 
     getFullName(): string {
-        return `${this.firstName} ${this.lastName}`.trim()
+        return `${this.firstName ? this.firstName : ''} ${this.lastName ? this.lastName : ''}`.trim()
     }
 }

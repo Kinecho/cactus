@@ -78,7 +78,8 @@ export interface CactusConfig {
         template_ids: {
             magic_link: string,
             magic_link_new_user: string,
-            invitation: string
+            invitation: string,
+            friend_request: string
         }
     },
     sheets: {
