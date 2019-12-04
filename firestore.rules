@@ -142,7 +142,7 @@ service cloud.firestore {
       allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
     }
 
-	match /socialConnections/{document=**} {
+	  match /socialConnections/{document=**} {
       allow create: if request.resource.data.memberId == getMemberId() || request.resource.data.friendMemberId == getMemberId()
       allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
     }
