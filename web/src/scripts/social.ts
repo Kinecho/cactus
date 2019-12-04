@@ -47,13 +47,12 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
     const toMember = await MemberProfileService.sharedInstance.getByMemberId(socialConnectionRequest.friendMemberId);
 
     if (!currentUser || !toMember?.email || !socialConnectionRequest.id) {
+        console.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.');
         return {
             success: false,
             socialConnectionRequest: socialConnectionRequest.id,
             message: "Something was missing. Refresh the website and try again."
         }
-        console.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.')
-        
     } else {
         const requestOptions: SocialConnectionRequestNotification = {
             toEmail: toMember.email,
@@ -64,7 +63,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
             const headers = await getAuthHeaders();
             return await request.post(Endpoint.notifyFriendRequest, requestOptions, {headers});
         } catch (e) {
-            console.error(e);
+            console.error("Failed to notify friend request. The API call threw an error", e);
             return {
                 success: false,
                 socialConnectionRequest: socialConnectionRequest.id,

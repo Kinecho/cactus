@@ -64,6 +64,7 @@
 
                         return !!result;
                     } catch(e) {
+                        console.error("Failed to notify friend request", e);
                         return false;
                     }
                 } else {
