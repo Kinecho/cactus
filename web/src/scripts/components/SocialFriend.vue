@@ -50,7 +50,7 @@
                 if (this.friendProfile?.avatarUrl) {
                     return this.friendProfile.avatarUrl
                 }
-                return `/assets/images/avatars/avatar/${this.avatarNumber(this.email)}.png`
+                return `/assets/images/avatars/avatar${this.avatarNumber(this.email)}.png`
             }
         },
         watch: {
