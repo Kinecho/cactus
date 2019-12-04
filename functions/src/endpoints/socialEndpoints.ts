@@ -140,7 +140,9 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestUser.email);
     
     const response: SocialConnectionRequestNotificationResult = {
-        success: true
+        success: true,
+        toEmail: toEmail,
+        fromEmail: requestUser.email
     };
 
     try {
