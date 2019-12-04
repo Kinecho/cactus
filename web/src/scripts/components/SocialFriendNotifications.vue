@@ -28,7 +28,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import CopyService from '@shared/copy/CopyService';
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
@@ -43,8 +42,6 @@
                               SocialConnectionFields} from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
-    const copy = CopyService.getSharedInstance().copy;
-
     export default Vue.extend({
         components: {
             friend: SocialFriend,
@@ -53,8 +50,6 @@
         },
         props: {
             member: {type: Object as () => CactusMember},
-        },
-        created() {
         },
         data(): {
             receivedFriendRequests: Array<SocialConnectionRequest>,
@@ -152,15 +147,9 @@
             },
         },
         destroyed() {
-            if (this.friendsUnsubscriber) {
-                this.friendsUnsubscriber();
-            }
-            if (this.receivedFriendRequestsUnsubscriber) {
-                this.receivedFriendRequestsUnsubscriber();
-            }
-            if (this.sentFriendRequestsUnsubscriber) {
-                this.sentFriendRequestsUnsubscriber();
-            }
+            this.friendsUnsubscriber?.();
+            this.receivedFriendRequestsUnsubscriber?.();
+            this.sentFriendRequestsUnsubscriber?.();
         }
     })
 </script>
