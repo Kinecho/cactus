@@ -12,15 +12,11 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import CopyService from '@shared/copy/CopyService';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import SocialConnection from "@shared/models/SocialConnection";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import MemberProfileService from '@web/services/MemberProfileService';
-
-
-    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
