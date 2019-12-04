@@ -27,11 +27,12 @@
     import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
-    import SocialConnection, {SocialConnectionRequest} from "@shared/models/SocialConnection";
+    import SocialConnection from "@shared/models/SocialConnection";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import MemberProfileService from '@web/services/MemberProfileService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
 
 
     const copy = CopyService.getSharedInstance().copy;

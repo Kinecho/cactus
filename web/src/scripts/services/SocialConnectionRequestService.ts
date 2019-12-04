@@ -1,10 +1,10 @@
-import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions, Transaction} from "@web/services/FirestoreService";
-import SocialConnection, {SocialConnectionRequest, SocialConnectionRequestFields} from "@shared/models/SocialConnection";
+import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
+import SocialConnection from "@shared/models/SocialConnection";
 import {Collection} from "@shared/FirestoreBaseModels";
-import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
+import {Unsubscribe} from "@web/firebase";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import CactusMemberService from "@web/services/CactusMemberService";
 import SocialConnectionService from "@web/services/SocialConnectionService";
+import {SocialConnectionRequest, SocialConnectionRequestFields} from "@shared/models/SocialConnectionRequest";
 
 
 export default class SocialConnectionRequestService {

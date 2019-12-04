@@ -20,10 +20,10 @@
     import Vue from "vue";
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
-    import {SocialConnectionRequest} from "@shared/models/SocialConnection";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import {notifyFriendRequest} from '@web/social';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
 
     export default Vue.extend({
         props: {

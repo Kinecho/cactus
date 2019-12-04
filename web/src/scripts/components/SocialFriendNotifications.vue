@@ -36,8 +36,9 @@
     import SocialFriendAdd from "@components/SocialFriendAdd.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
-    import SocialConnection, {SocialConnectionRequest} from "@shared/models/SocialConnection";
+    import SocialConnection from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
 
     export default Vue.extend({
         components: {

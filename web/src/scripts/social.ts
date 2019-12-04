@@ -6,7 +6,7 @@ import {SocialConnectionRequestNotification,
 import {getAuth} from "@web/firebase";
 import MemberProfile from "@shared/models/MemberProfile";
 import MemberProfileService from '@web/services/MemberProfileService';
-import {SocialConnectionRequest} from "@shared/models/SocialConnection";
+import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;

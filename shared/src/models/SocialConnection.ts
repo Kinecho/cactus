@@ -6,24 +6,6 @@ export enum SocialConnectionFields {
     createdAt = "createdAt"
 }
 
-export enum SocialConnectionRequestFields {
-    memberId = "memberId",
-    friendMemberId = "friendMemberId",
-    confirmedAt = "confirmedAt",
-    rejectedAt = "rejectedAt",
-    sentAt = "sentAt"
-}
-
-export class SocialConnectionRequest extends BaseModel {
-    readonly collection = Collection.socialConnectionRequests;
-    static Fields = SocialConnectionRequestFields;
-    memberId!: string;
-    friendMemberId!: string;
-    confirmedAt: Date | null = null;
-    rejectedAt: Date | null = null;
-    sentAt: Date = new Date();
-}
-
 export default class SocialConnection extends BaseModel {
     readonly collection = Collection.socialConnections;
     static Fields = SocialConnectionFields;
