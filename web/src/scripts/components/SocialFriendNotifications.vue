@@ -3,24 +3,24 @@
         <section class="youMayKnow" v-if="referredByProfile && hasSuggestedFriends">
             <h4>People you may know</h4>
             <friend-add
-                v-bind:member="member"
-                v-bind:friendProfile="referredByProfile"
-                v-bind:key="referredByProfile.memberId"
+                    v-bind:member="member"
+                    v-bind:friendProfile="referredByProfile"
+                    v-bind:key="referredByProfile.memberId"
             />
         </section>
         <section class="friendRequests" v-if="hasFriendRequests">
             <h4>Friend Requests</h4>
             <friend-request
-                v-for="(connection, index) in receivedFriendRequests"
-                v-bind:member="member"
-                v-bind:connectionRequest="connection"
-                v-bind:key="connection.memberId"
+                    v-for="(connection, index) in receivedFriendRequests"
+                    v-bind:member="member"
+                    v-bind:connectionRequest="connection"
+                    v-bind:key="connection.memberId"
             />
             <friend-request
-                v-for="(connection, index) in sentFriendRequests"
-                v-bind:member="member"
-                v-bind:connectionRequest="connection"
-                v-bind:key="connection.friendMemberId"
+                    v-for="(connection, index) in sentFriendRequests"
+                    v-bind:member="member"
+                    v-bind:connectionRequest="connection"
+                    v-bind:key="connection.friendMemberId"
             />
         </section>
     </div>
@@ -28,7 +28,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from "@web/services/MemberProfileService";
@@ -37,9 +36,7 @@
     import SocialFriendAdd from "@components/SocialFriendAdd.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
-    import SocialConnection, {SocialConnectionRequest,
-                              SocialConnectionRequestFields,
-                              SocialConnectionFields} from "@shared/models/SocialConnection";
+    import SocialConnection, {SocialConnectionRequest} from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     export default Vue.extend({
@@ -58,6 +55,7 @@
             receivedFriendRequestsUnsubscriber?: ListenerUnsubscriber,
             sentFriendRequestsUnsubscriber?: ListenerUnsubscriber,
             friendsUnsubscriber?: ListenerUnsubscriber,
+            referredByUnsubscriber?: ListenerUnsubscriber,
             referredByProfile?: MemberProfile
         } {
             return {
@@ -66,37 +64,21 @@
                 friends: [],
                 receivedFriendRequestsUnsubscriber: undefined,
                 sentFriendRequestsUnsubscriber: undefined,
+                referredByUnsubscriber: undefined,
                 friendsUnsubscriber: undefined,
                 referredByProfile: undefined
             }
         },
         async beforeMount() {
-            if (this.member.id) {
-                this.receivedFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(this.member.id, {
-                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
-                            this.receivedFriendRequests = socialConnectionRequests;
-                        }
-                    });
-
-                this.sentFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeSentConnectionRequests(this.member.id, {
-                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
-                            this.sentFriendRequests = socialConnectionRequests;
-                        }
-                    });
-
-                this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
-                        onData: async (socialConnections: SocialConnection[]): Promise<void> => {
-                            this.friends = socialConnections;
-                        }
-                    });
-
-                if (this.member.referredByEmail) {
-                    this.referredByProfile = await MemberProfileService.sharedInstance.getByEmail(this.member.referredByEmail);
-                }
+            await this.setupQueries(this.member)
+        },
+        watch: {
+            async member(newMember: CactusMember, oldMember?: CactusMember) {
+                await this.setupQueries(newMember, oldMember)
             }
         },
         computed: {
-            hasSuggestedFriends: function(): boolean {
+            hasSuggestedFriends: function (): boolean {
                 if (this.referredByProfile &&
                     !this.isConnection(this.referredByProfile.cactusMemberId) &&
                     !this.isSentRequest(this.referredByProfile.cactusMemberId) &&
@@ -105,7 +87,7 @@
                 }
                 return false;
             },
-            hasFriendRequests: function(): boolean {
+            hasFriendRequests: function (): boolean {
                 if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
                     return true;
                 }
@@ -113,9 +95,41 @@
             }
         },
         methods: {
+            async setupQueries(member: CactusMember, oldMember?: CactusMember) {
+                if (member.id && member.id !== oldMember?.id) {
+                    this.receivedFriendRequestsUnsubscriber?.();
+                    this.receivedFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(member.id, {
+                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                            this.receivedFriendRequests = socialConnectionRequests;
+                        }
+                    });
+
+                    this.sentFriendRequestsUnsubscriber?.();
+                    this.sentFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeSentConnectionRequests(member.id, {
+                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                            this.sentFriendRequests = socialConnectionRequests;
+                        }
+                    });
+
+                    this.friendsUnsubscriber?.();
+                    this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(member.id, {
+                        onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                            this.friends = socialConnections;
+                        }
+                    });
+                }
+                if (member.referredByEmail && member.referredByEmail !== oldMember?.referredByEmail) {
+                    this.referredByUnsubscriber?.();
+                    this.referredByUnsubscriber = MemberProfileService.sharedInstance.observeByEmail(member.referredByEmail, {
+                        onData: (profile) => {
+                            this.referredByProfile = profile;
+                        }
+                    })
+                }
+            },
             isConnection(friendId: string): boolean {
                 if (this.friends) {
-                    for(let x=0; x < this.friends.length; x++) {
+                    for (let x = 0; x < this.friends.length; x++) {
                         if (this.friends[x].friendMemberId == friendId) {
                             return true;
                         }
@@ -125,7 +139,7 @@
             },
             isSentRequest(friendId: string): boolean {
                 if (this.sentFriendRequests) {
-                    for(let x=0; x < this.sentFriendRequests.length; x++) {
+                    for (let x = 0; x < this.sentFriendRequests.length; x++) {
                         if (this.sentFriendRequests[x].friendMemberId == friendId) {
                             return true;
                         }
@@ -135,7 +149,7 @@
             },
             isReceivedRequest(friendId: string): boolean {
                 if (this.receivedFriendRequests) {
-                    for(let x=0; x < this.receivedFriendRequests.length; x++) {
+                    for (let x = 0; x < this.receivedFriendRequests.length; x++) {
                         if (this.receivedFriendRequests[x].memberId == friendId) {
                             return true;
                         }
@@ -143,11 +157,15 @@
                 }
                 return false;
             },
+            unsubscribeQueries() {
+                this.friendsUnsubscriber?.();
+                this.receivedFriendRequestsUnsubscriber?.();
+                this.sentFriendRequestsUnsubscriber?.();
+                this.referredByUnsubscriber?.();
+            }
         },
         destroyed() {
-            this.friendsUnsubscriber?.();
-            this.receivedFriendRequestsUnsubscriber?.();
-            this.sentFriendRequestsUnsubscriber?.();
+            this.unsubscribeQueries();
         }
     })
 </script>

@@ -1,10 +1,10 @@
-<template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
+<template>
     <div class="socialHome">
         <NavBar/>
         <div class="centered">
-            <div class="contentContainer">
-                <SocialFindFriends v-if="currentChild == 'findFriends'"/>
-                <SocialActivityFeed v-if="currentChild == 'activityFeed'"/>
+            <div class="contentContainer" v-if="!loading && member">
+                <SocialFindFriends v-if="currentChild === 'findFriends'" :member="member"/>
+                <SocialActivityFeed v-if="currentChild === 'activityFeed'" :member="member"/>
             </div>
 
         </div>
@@ -18,6 +18,11 @@
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialFindFriends from "@components/SocialFindFriends.vue"
+    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import CactusMember from "@shared/models/CactusMember"
+    import CactusMemberService from "@web/services/CactusMemberService"
+    import {PageRoute} from "@shared/PageRoutes"
+    import {QueryParam} from '@shared/util/queryParams'
 
     export default Vue.extend({
         components: {
@@ -27,19 +32,35 @@
             SocialActivityFeed
         },
         data(): {
-            currentChild: string | undefined
+            currentChild: string,
+            loading: boolean,
+            member: CactusMember|undefined,
+            memberUnsubscriber: ListenerUnsubscriber|undefined,
         } {
             return {
-                currentChild: 'findFriends'
+                currentChild: 'findFriends',
+                loading: true,
+                member: undefined,
+                memberUnsubscriber: undefined,
             }
+        },
+        beforeMount() {
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({member}) => {
+                    if (!member) {
+                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`;
+                    }
+                    this.member = member;
+                    this.loading = false;
+                }
+            })
         },
         methods: {
             setVisible(child: string) {
                 this.currentChild = child;
             }
         },
-        computed: {
-        }
+
     })
 </script>
 

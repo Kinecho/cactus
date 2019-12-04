@@ -2,28 +2,20 @@
     <section class="yourFriends" v-if="friends.length > 0">
         <h4>Friends</h4>
         <friend
-            v-for="(connection, index) in friends"
-            v-bind:member="member"
-            v-bind:connection="connection"
-            v-bind:key="connection.friendMemberId"
+                v-for="(connection, index) in friends"
+                v-bind:member="member"
+                v-bind:connection="connection"
+                v-bind:key="connection.friendMemberId"
         />
     </section>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
-    import MemberProfile from "@shared/models/MemberProfile";
-    import MemberProfileService from "@web/services/MemberProfileService";
     import SocialFriend from "@components/SocialFriend.vue";
-    import SocialFriendRequest from "@components/SocialFriendRequest.vue";
-    import SocialFriendAdd from "@components/SocialFriendAdd.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
-    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
-    import SocialConnection, {SocialConnectionRequest,
-                              SocialConnectionRequestFields,
-                              SocialConnectionFields} from "@shared/models/SocialConnection";
+    import SocialConnection from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
 
     export default Vue.extend({
@@ -31,7 +23,20 @@
             friend: SocialFriend,
         },
         props: {
-            member: {type: Object as () => CactusMember},
+            member: {
+                type: Object as () => CactusMember,
+                required: true
+            },
+        },
+        beforeMount() {
+            if (this.member.id) {
+                this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                        onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                            this.friends = socialConnections;
+                        }
+                    }
+                );
+            }
         },
         data(): {
             friends: Array<SocialConnection>,
@@ -43,16 +48,9 @@
             }
         },
         watch: {
-            member: async function() {
-                if (this.member.id) {
-                    this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
-                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
-                                this.friends = socialConnections;
-                            }
-                        }
-                    );
-                }
-            }
+            // member: async function() {
+            //
+            // }
         },
         destroyed() {
             this.friendsUnsubscriber?.();

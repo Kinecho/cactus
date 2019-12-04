@@ -2,12 +2,8 @@
     <div class="socialFindFriends">
 
         <!-- suggested friends / friend requests -->
-        <div class="socialFriendNotifications">
-            <friend-notifications v-bind:member="member" v-if="member" />
-        </div>
-
-        <div class="loading" v-if="loading">
-            <Spinner message="Loading" name="socialFindFriends"/>
+        <div class="socialFriendNotifications" v-if="member">
+            <friend-notifications v-bind:member="member" />
         </div>
 
         <!-- find your friends -->
@@ -105,10 +101,7 @@
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
     import CactusMember from "@shared/models/CactusMember";
-    import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {PageRoute} from '@shared/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
@@ -124,33 +117,20 @@
             FriendNotifications: SocialFriendNotifications
         },
         beforeMount() {
-            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
-                    this.member = member;
-                    this.authLoaded = true;
-
-                    if (!member) {
-                        window.location.href = PageRoute.HOME;
-                    }
-                }
-            })
-        },
-        created() {
             AddressBookService.sharedInstance.start();
         },
         mounted() {
             this.configureCloudsponge();
         },
-        destroyed() {
-            if (this.memberUnsubscriber) {
-                this.memberUnsubscriber();
-            }
+        props: {
+          member: {
+              type: Object as () => CactusMember,
+              required: true,
+          }
         },
         data(): {
             authLoaded: boolean,
             copySucceeded: boolean,
-            member: CactusMember | undefined | null,
-            memberUnsubscriber: ListenerUnsubscriber | undefined,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
         } {
@@ -159,8 +139,6 @@
                 copySucceeded: false,
                 importedContacts: undefined,
                 importedService: undefined,
-                member: undefined,
-                memberUnsubscriber: undefined,
             }
         },
         methods: {
@@ -186,9 +164,9 @@
             }
         },
         computed: {
-            loading(): boolean {
-                return !this.authLoaded;
-            },
+            // loading(): boolean {
+            //     return !this.authLoaded;
+            // },
             referralLink(): string | undefined {
                 if (this.member) {
                     return generateReferralLink({
