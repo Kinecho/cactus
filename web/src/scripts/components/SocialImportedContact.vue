@@ -123,7 +123,6 @@
         align-items: center;
         display: flex;
         max-width: 60rem;
-        padding: 1.6rem 0;
 
         button {
             flex-grow: 0;
