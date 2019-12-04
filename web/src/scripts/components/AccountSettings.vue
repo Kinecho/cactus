@@ -51,7 +51,7 @@
 
                         <div class="item">
                             <label class="label">
-                                {{copy.common.PREFERRED_NOTIFICATION_TIME}}
+                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
                             </label>
                             <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
                         </div>
@@ -328,6 +328,7 @@
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
                         this.error = errorMessage;
+                        this.removeSnackbar(snackId)
                     } else {
                         this.updateSnackbar(snackId, {
                             message: "Email Settings Updated",

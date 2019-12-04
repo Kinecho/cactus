@@ -1,10 +1,9 @@
 <template>
     <div class="time-picker-container">
         <multiselect
-
                 :value="inputHour"
                 :options="hourOptions"
-                placeholder="Select Hour"
+                :placeholder="copy.common.HOUR"
                 :showLabels="false"
                 :hideSelected="false"
                 @input="handleHourChange">
@@ -13,7 +12,7 @@
                 :custom-label="minuteDisplayLabel"
                 :value="minute"
                 :options="minuteOptions"
-                placeholder="Select Minute"
+                :placeholder="copy.common.MINUTE"
                 :showLabels="false"
                 :hideSelected="false"
                 @input="handleMinuteChange">
@@ -33,8 +32,11 @@
 <script lang="ts">
     import Vue from "vue";
     import Multiselect from "vue-multiselect"
-
     import 'vue-multiselect/dist/vue-multiselect.min.css'
+    import CopyService from '@shared/copy/CopyService'
+    import {LocalizedCopy} from '@shared/copy/CopyTypes'
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -44,12 +46,13 @@
             hour: Number,
             minute: Number
         },
-        data(): { hourOptions: number[], minuteOptions: number[], amPmOptions: ["AM", "PM"], amPm: "AM" | "PM" } {
+        data(): { hourOptions: number[], minuteOptions: number[], amPmOptions: ["AM", "PM"], amPm: "AM" | "PM", copy: LocalizedCopy } {
             return {
                 hourOptions: [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                 minuteOptions: [0, 15, 30, 45],
                 amPmOptions: ["AM", "PM"],
-                amPm: this.hour >= 12 ? "PM" : "AM"
+                amPm: this.hour >= 12 ? "PM" : "AM",
+                copy: copy,
             }
         },
         computed: {

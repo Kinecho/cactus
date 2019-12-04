@@ -38,7 +38,9 @@ export interface CommonCopy {
     REMOVE: string,
     LOADING: string,
     FIRST_NAME: string,
-    LAST_NAME: string
+    LAST_NAME: string,
+    HOUR: string,
+    MINUTE: string,
 }
 
 export interface ElementCopy {

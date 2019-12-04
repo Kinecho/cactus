@@ -41,6 +41,8 @@ export default class EnglishCopy extends LocalizedCopy {
         REMOVE: "Remove",
         TIME_ZONE: "Time Zone",
         LOADING: "Loading",
+        HOUR: "Hour",
+        MINUTE: "Minute",
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",
