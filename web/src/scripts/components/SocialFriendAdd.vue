@@ -18,8 +18,6 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import CopyService from '@shared/copy/CopyService';
-    import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import {SocialConnectionRequest} from "@shared/models/SocialConnection";
@@ -27,17 +25,10 @@
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import {notifyFriendRequest} from '@web/social';
 
-    const copy = CopyService.getSharedInstance().copy;
-
     export default Vue.extend({
-        components: {
-        },
         props: {
             member: {type: Object as () => CactusMember},
             friendProfile: {type: Object as () => MemberProfile}
-        },
-        beforeMount() {
-
         },
         data(): {
             sent: boolean
@@ -53,9 +44,6 @@
             email() {
                 return this.friendProfile.email;
             },
-        },
-        watch: {
-
         },
         methods: {
             avatarNumber(email: string): number {
