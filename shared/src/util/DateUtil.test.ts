@@ -4,8 +4,11 @@ import {
     formatDuration,
     formatDurationAsTime,
     getDateAtMidnightDenver,
+    getDateObjectForTimezone,
     getMailchimpDateString,
-    getStreak, isoDateStringToFlamelinkDateString, mailchimpTimeZone,
+    getStreak,
+    isoDateStringToFlamelinkDateString,
+    mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
 } from "@shared/util/DateUtil";
@@ -352,4 +355,48 @@ describe('Get Date at Midnight Denver', function () {
 test("iso date to flamelink string", () => {
     const input = "2019-08-27T02:45:00.000-06:00";
     expect(isoDateStringToFlamelinkDateString(input)).toEqual("2019-08-27T02:45")
+});
+
+
+test("get local datetime for given zone", () => {
+    const dt = DateTime.local();
+    console.log("dt", dt);
+
+    const newYorkDt = DateTime.fromObject({
+        year: 2019,
+        month: 12,
+        day: 3,
+        hour: 14,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+        zone: "America/New_York"
+    }) ;
+
+
+    const denverDt = newYorkDt.setZone('America/Denver');
+
+    const denverDate = denverDt.toJSDate();
+
+
+    // const denverDate = getDateForTimezone('America/Denver', systemDate);
+    // const denverObject =
+    const tz = 'Asia/Bangkok'; //UTC+7 12 hours ahead of New York, 14 from denver
+    const tzDate = getDateObjectForTimezone(denverDate, tz);
+
+
+    console.log("denver", denverDt);
+    console.log("bangkok", tzDate);
+
+    expect(denverDt.day).toEqual(3);
+    expect(denverDt.hour).toEqual(12);
+    expect(denverDt.minute).toEqual(0);
+    expect(denverDt.year).toEqual(2019);
+
+    expect(tzDate.day).toEqual(4);
+    expect(tzDate.hour).toEqual(2);
+    expect(tzDate.month).toEqual(12);
+    expect(tzDate.year).toEqual(2019);
+
+
 });

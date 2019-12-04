@@ -6,7 +6,8 @@ import {
     LocalizedCopy,
     NavigationCopy,
     PromptCopy,
-    ElementCopy
+    ElementCopy,
+    AccountCopy,
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
@@ -16,6 +17,11 @@ export default class EnglishCopy extends LocalizedCopy {
             shortFormat: "L/d/yy",
         }
     };
+
+    account: AccountCopy = {
+        PREFERRED_NOTIFICATION_TIME: "Notification Time"
+    };
+
     common: CommonCopy = {
         LOG_IN: "Log In",
         NEXT: "Next",

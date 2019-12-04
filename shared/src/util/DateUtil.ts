@@ -1,4 +1,4 @@
-import {DateTime, Duration} from "luxon";
+import {DateObject, DateTime, Duration} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
@@ -14,8 +14,12 @@ export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
-export function getDateForTimezone(timeZone: string, date: Date): Date {
-    return DateTime.fromJSDate(date, {zone: timeZone}).toJSDate();
+// export function getDateForTimezone(timeZone: string, date: Date): Date {
+//     return DateTime.fromJSDate(date ).setZone(timeZone, {keepLocalTime: false}).toJSDate();
+// }
+
+export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {
+    return DateTime.fromJSDate(date).setZone(timeZone).toObject()
 }
 
 /**

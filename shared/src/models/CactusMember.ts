@@ -76,6 +76,10 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
     timeZone?: string | null;
+    promptSendTime?: {
+        hour: number,
+        minute: number,
+    } = {hour: 2, minute: 45};
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,

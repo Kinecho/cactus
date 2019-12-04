@@ -13,6 +13,8 @@ import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
+import {getDateObjectForTimezone} from "@shared/util/DateUtil";
+import {DateObject, DateTime} from "luxon";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -83,23 +85,27 @@ app.get("/next-prompt", async (req, res) => {
     memberId = member.id;
 
     console.log("Got member", memberId, member.email);
-
-
     console.log("getting next prompt for member Id", memberId);
 
-    const timeZone = member.timeZone;
-    let userDate = new Date();
+    const userTZ = member.timeZone;
+    // let systemDate = new Date();
     const systemDate = new Date();
-    if (timeZone) {
-        console.log("timezone =", timeZone);
-        userDate = DateUtil.getDateForTimezone(timeZone, systemDate);
-        console.log("user date", userDate.toISOString())
+    const systemDateObject = DateTime.fromJSDate(systemDate).toObject();
+    let userDateObject: DateObject = systemDateObject;
+    if (userTZ) {
+        console.log("timezone =", userTZ);
+        userDateObject = getDateObjectForTimezone(systemDate, userTZ);
+        console.log("user date obj", userDateObject);
+        console.log("user date (locale)", userDateObject.toLocaleString())
     }
 
     res.send({
-        timeZone,
-        userDate: userDate.toISOString(),
-        systemDate: systemDate.toISOString(),
+        timeZone: userTZ,
+        userDateObject: userDateObject,
+        systemDateObject: systemDateObject,
+        promptSentTimePreference: member.promptSendTime,
+        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
+        systemDate: systemDate.toLocaleString(),
         member: member.toJSON()
     });
 });
@@ -107,10 +113,10 @@ app.get("/next-prompt", async (req, res) => {
 app.get("/content", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = getDateAtMidnightDenver();
+    let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
         console.log("date input", qDate);
-        d = localDateFromISOString(qDate) || d
+        d = DateUtil.localDateFromISOString(qDate) || d
     }
 
     console.log("local date ", d);
@@ -121,11 +127,11 @@ app.get("/content", async (req, resp) => {
 app.get("/contentJob", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = getDateAtMidnightDenver();
+    let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
-        d = localDateFromISOString(qDate) || d;
+        d = DateUtil.localDateFromISOString(qDate) || d;
     }
-    console.log("testApi: content Date", getISODate(d));
+    console.log("testApi: content Date", DateUtil.getISODate(d));
     const result = await startSentPromptJob(d, undefined, true);
     return resp.send(result);
 });

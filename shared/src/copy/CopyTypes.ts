@@ -85,6 +85,10 @@ export interface ErrorCopy {
     SORRY_WE_ARE_HAVING_ISSUES_TRY_AGAIN: string,
 }
 
+export interface AccountCopy {
+    PREFERRED_NOTIFICATION_TIME: string,
+}
+
 export abstract class LocalizedCopy {
     abstract prompts: PromptCopy;
     abstract elements: ElementCopy;
@@ -93,6 +97,7 @@ export abstract class LocalizedCopy {
     abstract navigation: NavigationCopy;
     abstract error: ErrorCopy;
     abstract auth: AuthenticationCopy;
+    abstract account: AccountCopy;
 
     abstract exclamation(input?: string): string;
 }

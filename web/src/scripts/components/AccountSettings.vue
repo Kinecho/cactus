@@ -22,17 +22,17 @@
                         </div>
 
                         <div class="item">
-                            <label for="fname" class="label">
+                            <label for="account_fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
-                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname">
+                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname" id="account_fname">
                         </div>
 
                         <div class="item">
-                            <label for="lname" class="label">
+                            <label for="account_lname" class="label">
                                 {{copy.common.LAST_NAME}}
                             </label>
-                            <input v-model="member.lastName" @keyup="changesToSave = true;" type="text" name="lname">
+                            <input v-model="member.lastName" @keyup="changesToSave = true" type="text" name="lname" id="account_lname">
                         </div>
 
                         <div class="item">
@@ -48,7 +48,15 @@
                             </label>
                             <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                         </div>
-                        <div class="saveCancel" v-if="changesToSave == true">
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.PREFERRED_NOTIFICATION_TIME}}
+                            </label>
+                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
+                        </div>
+
+                        <div class="saveCancel" v-if="changesToSave === true">
                             <button @click="save">Save Changes</button>
                             <button @click="reloadPage" class="secondary">Cancel</button>
                         </div>
@@ -119,6 +127,7 @@
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import SnackbarContent from "@components/SnackbarContent.vue";
+    import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -138,6 +147,7 @@
             TimezonePicker,
             ProviderIcon,
             SnackbarContent,
+            TimePicker,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -189,6 +199,9 @@
             }
         },
         computed: {
+            promptSendTime(): {hour: number, minute: number} {
+                return this.member?.promptSendTime || {hour: 0, minute: 0}
+            },
             loading(): boolean {
                 return !this.authLoaded;
             },
@@ -329,6 +342,14 @@
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     this.changesToSave = true;
+                }
+            },
+            async timeSelected(value: {hour: number, minute: number}) {
+                if (this.member) {
+                    this.member.promptSendTime = value;
+                    // this.$set(this.member, this.member);
+
+                    this.changesToSave = true
                 }
             },
             reloadPage() {
