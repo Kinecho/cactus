@@ -69,9 +69,7 @@
         justify-content: space-between;
 
         @include r(600) {
-            @include h(960) {
-                min-height: 100vh;
-            }
+            min-height: 100vh;
         }
 
         header, .centered {
