@@ -24,7 +24,11 @@
                     description="Boost your mood and emotional intelligence in one minute."
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
-                    inline-template>
+                    inline-template
+                    @change="socialSharingChange"
+                    @open="socialSharingOpen"
+                    @close="socialSharingClose"
+            >
                 <div class="btnContainer">
                     <network network="email">
                         <button aria-label="Email" class="secondary btn wiggle">
@@ -105,6 +109,7 @@
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
+    import {socialSharingEvent} from '@web/analytics'
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -161,12 +166,19 @@
                 } else {
                     setTimeout(this.configureCloudsponge, 500);
                 }
+            },
+            socialSharingOpen(network: any, url: string) {
+                socialSharingEvent({type: "open", network, url});
+            },
+            socialSharingClose(network: any, url: string) {
+                socialSharingEvent({type: "close", network, url});
+            },
+            socialSharingChange(network: any, url: string) {
+                socialSharingEvent({type: "change", network, url});
             }
+
         },
         computed: {
-            // loading(): boolean {
-            //     return !this.authLoaded;
-            // },
             referralLink(): string | undefined {
                 if (this.member) {
                     return generateReferralLink({
