@@ -3,7 +3,7 @@
 
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications" v-if="member">
-            <friend-notifications v-bind:member="member" />
+            <friend-notifications v-bind:member="member"/>
         </div>
 
         <!-- find your friends -->
@@ -25,6 +25,7 @@
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
                     inline-template
+                    :networks="customNetworks"
                     @change="socialSharingChange"
                     @open="socialSharingOpen"
                     @close="socialSharingClose"
@@ -82,15 +83,15 @@
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <template v-for="contact in importedContacts">
                     <SocialImportedContact
-                        v-bind:contact="contact"
-                        v-bind:member="member" />
+                            v-bind:contact="contact"
+                            v-bind:member="member"/>
                 </template>
             </div>
         </div>
 
         <!-- Friend List -->
         <div class="socialFriendList">
-            <friend-list v-bind:member="member" />
+            <friend-list v-bind:member="member"/>
         </div>
 
     </div>
@@ -128,22 +129,29 @@
             this.configureCloudsponge();
         },
         props: {
-          member: {
-              type: Object as () => CactusMember,
-              required: true,
-          }
+            member: {
+                type: Object as () => CactusMember,
+                required: true,
+            }
         },
         data(): {
             authLoaded: boolean,
             copySucceeded: boolean,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
+            customNetworks: { [key: string]: { sharer: string, type: "popup" | "direct" } }
         } {
             return {
                 authLoaded: false,
                 copySucceeded: false,
                 importedContacts: undefined,
                 importedService: undefined,
+                customNetworks: {
+                    email: {
+                        "sharer": "mailto:?subject=@title&body=@url%0D%0A%0D%0A@description",
+                        "type": "popup"
+                    }
+                }
             }
         },
         methods: {
