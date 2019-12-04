@@ -1,7 +1,7 @@
 <template>
     <div class="contactCard">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(email) + '.png'" alt="User avatar"/>
+            <img :src="avatarURL" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name" v-if="name">{{name}}</p>
@@ -24,11 +24,8 @@
 <script lang="ts">
     import Vue from "vue";
     import CopyService from '@shared/copy/CopyService';
-    import {ElementCopy} from '@shared/copy/CopyTypes';
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
-    import SocialConnection from "@shared/models/SocialConnection";
-    import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import MemberProfileService from '@web/services/MemberProfileService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
@@ -67,6 +64,12 @@
             },
             received(): boolean {
                 return this.connectionRequest.friendMemberId == this.member.id;
+            },
+            avatarURL(): string {
+                if (this.friendProfile?.avatarUrl) {
+                    return this.friendProfile.avatarUrl
+                }
+                return `/assets/images/avatars/avatar/${this.avatarNumber(this.email)}.png`
             }
         },
         methods: {

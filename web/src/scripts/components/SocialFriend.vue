@@ -1,7 +1,7 @@
 <template>
     <div class="contactCard">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(email) + '.png'" alt="User avatar"/>
+            <img :src="avatarURL" alt="User avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name" v-if="name">{{name}}</p>
@@ -46,6 +46,12 @@
             email(): string {
                 return this.friendProfile?.email || '';
             },
+            avatarURL(): string {
+                if (this.friendProfile?.avatarUrl) {
+                    return this.friendProfile.avatarUrl
+                }
+                return `/assets/images/avatars/avatar/${this.avatarNumber(this.email)}.png`
+            }
         },
         watch: {
 
