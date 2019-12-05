@@ -84,7 +84,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         :response="reflectionResponse"/>
                 <div class="auth-card" v-else>
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
-                    <h2 class="green">Become a better version of yourself</h2>
+                    <h2>Become a better version of yourself</h2>
                     <p class="subtext">
                         Questions to help you become more mindful and reflect on what makes you happy.
                     </p>
@@ -680,6 +680,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .auth-card {
+        color: $white;
         padding: 2.4rem;
 
         @include r(600) {
@@ -687,6 +688,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
 
         h2 {
+            color: $white;
             line-height: 1.1;
         }
     }
