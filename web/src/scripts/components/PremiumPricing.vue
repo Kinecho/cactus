@@ -35,8 +35,8 @@
                     <li>128-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email and push</li>
                     <li><span class="enhance">Personalized prompts</span></li>
-                    <li><span class="enhance">Sync data to other apps</span></li>
                     <li><span class="enhance">Reminder scheduling</span></li>
+                    <li><span class="enhance">Backup to DayOne, Dropbox, more</span></li>
                     <li class="heart"><span class="enhance">Supports Cactus development</span></li>
                 </ul>
                 <div class="flexContainer">
