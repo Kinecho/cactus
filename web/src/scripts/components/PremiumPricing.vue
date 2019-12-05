@@ -15,11 +15,11 @@
             <section id="free" class="tab-panel free-panel">
                 <h3 class="tab-header free-header">Free</h3>
                 <ul>
-                    <li>Available on web</li>
+                    <li>Available on web, iPhone, and iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>128-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email</li>
+                    <li>Notifications via email and push</li>
                 </ul>
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
             </section>
@@ -29,13 +29,11 @@
             <section id="premium" class="tab-panel premium-panel">
                 <h3 class="tab-header premium-header">Premium<span class="newStatus">New</span></h3>
                 <ul>
-                    <li>Available on web</li>
-                    <li><span class="enhance">Available on iPhone and iPad</span></li>
+                    <li>Available on web, iPhone, and iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>128-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email</li>
-                    <li><span class="enhance">Notifications via push</span></li>
+                    <li>Notifications via email and push</li>
                     <li class="heart"><span class="enhance">Supports Cactus development</span></li>
                 </ul>
                 <div class="flexContainer">
