@@ -1,6 +1,6 @@
 <template lang="html">
     <div class="app-store-icon" v-if="showToDevice()">
-        <a :href="appStoreUrl">
+        <a @click.prevent="trackEvent(appStoreUrl); return false;" :href="appStoreUrl">
             <img src="/assets/apple_app_store_badge.svg" />
         </a>
     </div>
@@ -29,7 +29,6 @@
         },
         methods: {
             showToDevice(): boolean {
-                console.log(this.onlyiOS);
                 if (this.onlyiOS && this.isIosDevice()) {
                     return true;
                 } else if (!this.onlyiOS) {
@@ -38,8 +37,18 @@
                 return false;
             },
             isIosDevice(): boolean {
-                console.log('called isios');
                 return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            },
+            trackEvent(url: string) {
+                gtag('event', 'click', {
+                    'event_category': "outbound",
+                    'event_label': url,
+                    'transport_type': 'beacon',
+                    'event_callback': function() { 
+                        // @ts-ignore
+                        document.location = url; 
+                    }
+                });
             }
         }
     })
