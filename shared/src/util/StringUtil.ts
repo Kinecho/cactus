@@ -193,6 +193,8 @@ export function getProviderDisplayName(provider?: string): string {
             return "Facebook";
         case "google.com":
             return "Google";
+        case "apple.com":
+            return "Apple";
         default:
             return provider || "";
     }

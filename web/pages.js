@@ -96,5 +96,10 @@ module.exports = {
         "reflectionPrompt": false,
         "includeInDev": true,
         "name": "unsubscribe_confirmed"
+    },
+    "ios_login_continue": {
+        "title": "iOS Login",
+        "path": "/ios-login-continue",
+        "name": "ios_login_continue"
     }
 }

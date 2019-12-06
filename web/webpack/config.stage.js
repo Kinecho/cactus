@@ -1,5 +1,6 @@
 
 module.exports = {
+    __APP_CUSTOM_SCHEME__: "app.cactus-stage",
     __GOOGLE_ANALYTICS_ID__: 'UA-127159143-6',
     __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
     __FACEBOOK_PIXEL_ID__: '',

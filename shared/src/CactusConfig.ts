@@ -14,7 +14,7 @@ export interface ServiceAccountCredentials {
 export interface CactusConfig {
     isEmulator: boolean,
     app: {
-        environment: string
+        environment: "test"|"dev"|"prod"|"stage"
     },
     mailchimp: {
         api_key: string,

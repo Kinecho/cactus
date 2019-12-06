@@ -1,3 +1,4 @@
+window.__APP_CUSTOM_SCHEME__ = "app.stage-cactus";
 window.__GOOGLE_ANALYTICS_ID__ = 'UA-127159143-6';
 window.__GOOGLE_OPTIMIZE_ID__ = '';
 window.__FACEBOOK_PIXEL_ID__ = '';
