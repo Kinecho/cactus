@@ -15,6 +15,7 @@ import * as path from "path";
 import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {exec} from "child_process";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
 interface UserInput {
     email: string
@@ -107,6 +108,23 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
         const sentPromptsTask = AdminSentPromptService.getSharedInstance().getAllForCactusMemberId(memberId);
 
         const [responses, sentPrompts] = await Promise.all([responseTask, sentPromptsTask]);
+        const promptContentTask: Promise<PromptContent|undefined>[] = [];
+        sentPrompts.forEach(sp => {
+            if (!sp.promptId) {
+                promptContentTask.push(AdminPromptContentService.getSharedInstance().getByPromptId(sp.promptId))
+            }
+        });
+
+        const promptContents = await Promise.all(promptContentTask);
+        const contentByPromptId: {[promptId: string]: PromptContent} = {};
+        promptContents.reduce((map, promptContent) => {
+            if (!promptContent || !promptContent.promptId) {
+                return map;
+            }
+            map[promptContent.promptId] = promptContent;
+            return map;
+
+        }, contentByPromptId);
 
         const initialResponseMap: { [promptId: string]: ReflectionResponse[] } = {};
         const responsesByPromptId: { [promptId: string]: ReflectionResponse[] } = responses.reduce((previous, response) => {
@@ -129,10 +147,12 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
         sentPrompts.forEach(sentPrompt => {
             const promptId = sentPrompt.promptId;
             const journalResponses = promptId ? responsesByPromptId[promptId] : undefined;
+            const promptContent = promptId ? contentByPromptId[promptId] : undefined;
             const entry: JournalEntry = {
                 date: sentPrompt.firstSentAt,
                 sentPrompt: sentPrompt,
-                reflectionResponses: journalResponses
+                reflectionResponses: journalResponses,
+                promptContent,
             };
             feed.push(entry);
 
