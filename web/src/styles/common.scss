@@ -182,6 +182,17 @@ footer {
     padding: 8rem 2.4rem 3.2rem;
   }
 
+  .app-store-icon {
+    display: block;
+    margin-top: 2rem;
+
+    @include r(600) {
+      display: inline-block;
+        margin-left: 1rem;
+        margin-top: 0;
+    }
+  }
+
   .centered {
     @include r(600) {
       align-items: center;
