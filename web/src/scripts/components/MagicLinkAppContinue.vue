@@ -1,25 +1,45 @@
 <template>
-    <div>
-        <h1>Click below to login</h1>
-        <a :href="deepLink">Log in on App</a>
+    <div class="page-container">
+        <NavBar/>
+        <div class="centered">
+            <section class="hasApp">
+                <h2>Continue on the app</h2>
+                <div class="actions">
+                    <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
+                </div>
+            </section>
+            <section class="needsApp">
+                <h2>Get the Cactus app</h2>
+                <a :href="appStoreUrl" target="_blank" style="display:inline-block;overflow:hidden;background:url(/assets/apple_app_store_badge.svg) no-repeat;width:135px;height:40px;"></a>
+            </section>
+
+        </div>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from '@web/config'
-    import {getAllQueryParams} from '@web/util'
-    import {appendQueryParams} from '@shared/util/StringUtil'
+    import {Config} from '@web/config';
+    import {getAllQueryParams} from '@web/util';
+    import {appendQueryParams} from '@shared/util/StringUtil';
+    import NavBar from "@components/NavBar.vue";
 
     export default Vue.extend({
+        components: {
+            NavBar,
+        },
         created() {
             console.log("magic link app continue");
         },
         props: {
             link: {type: String, required: true}
         },
-        data(): {} {
-            return {}
+        data(): {
+            appStoreUrl: string,
+        } {
+            return {
+                appStoreUrl: "https://apps.apple.com/us/app/cactus/id1474513514"
+            }
         },
         computed: {
             deepLink(): string {
@@ -35,5 +55,32 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
+    .page-container {
+        min-height: 100vh;
+
+        .centered {
+            flex-grow: 1;
+            max-width: 70rem;
+            padding: 6.4rem 2.4rem;
+
+            section {
+                margin-bottom: 4rem;
+
+                &.hasApp {
+                    padding: 4rem;
+                    @include shadowbox;
+                    background: $yellow url(assets/images/yellowNeedles.svg) 0 0/320px;
+
+                }
+
+                .actions {
+                    padding: 2rem 0;
+                }
+            }
+
+        }
+    }
+
 
 </style>
