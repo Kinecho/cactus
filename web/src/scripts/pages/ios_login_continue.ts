@@ -1,5 +1,5 @@
 // @ts-ignore
-import $COMPONENT$ from "@components/$COMPONENT$.vue"
+import MagicLinkAppContinue from "@components/MagicLinkAppContinue.vue"
 import Vue from "vue";
 import {commonInit} from "@web/common";
 
@@ -7,9 +7,14 @@ commonInit();
 
 new Vue({
     el: "#app",
-    template: `<$COMPONENT$/>`,
+    template: `<MagicLinkAppContinue :link="link"/>`,
     components: {
-        $COMPONENT$,
+        MagicLinkAppContinue,
+    },
+    data() {
+        return {
+            link: window.location.href
+        }
     }
 });
 

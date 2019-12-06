@@ -10,14 +10,15 @@ import {
     EmailStatusResponse,
     LoginEvent,
     MagicLinkRequest,
-    MagicLinkResponse
+    MagicLinkResponse,
+    SourceApp
 } from "@shared/api/SignupEndpointTypes";
 import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
-import AuthUI = firebaseui.auth.AuthUI;
 import {fireConfirmedSignupEvent} from "@web/analytics";
+import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
 let authUi: AuthUI;
@@ -187,7 +188,15 @@ export function createAuthModal(): string {
 }
 
 export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSignupResult> {
+    const appSource = getQueryParam(QueryParam.SOURCE_APP) as SourceApp;
     const isSignIn = firebase.auth().isSignInWithEmailLink(window.location.href);
+
+    if (isSignIn && appSource === SourceApp.ios) {
+        console.log("Source App is ios and is magic link");
+        window.location.replace(`${PageRoute.IOS_MAGIC_LINK_LOGIN}`);
+
+    }
+
     if (!isSignIn) {
         console.log("isSignIn is false");
         return {success: true};
