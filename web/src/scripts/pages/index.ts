@@ -5,7 +5,7 @@ import {initializeFirebase} from "@web/firebase";
 import {PageRoute} from "@shared/PageRoutes";
 import {setupNavigation} from "@web/NavigationUtil";
 import PremiumPricing from "@components/PremiumPricing.vue";
-
+import AppStoreIcon from "@components/AppStoreIcon.vue";
 
 import {commonInit} from "@web/common";
 
@@ -45,6 +45,18 @@ new Vue({
     el: "#premium-pricing",
     template: `<PremiumPricing/>`,
     components: {PremiumPricing: PremiumPricing}
+});
+
+new Vue({
+    el: "#app-store",
+    template: `<AppStoreIcon/>`,
+    components: {AppStoreIcon}
+});
+
+new Vue({
+    el: "#app-store-top",
+    template: `<AppStoreIcon/>`,
+    components: {AppStoreIcon}
 });
 
 //enables hot reload
