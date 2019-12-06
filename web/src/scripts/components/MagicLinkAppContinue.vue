@@ -4,11 +4,12 @@
         <div class="centered">
             <section class="hasApp">
                 <h2>Continue on the app</h2>
+                <p>Finish logging in your your device</p>
                 <div class="actions">
                     <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
                 </div>
             </section>
-            <section class="needsApp">
+            <section class="needsApp" v-if="false">
                 <h2>Get the Cactus app</h2>
                 <a :href="appStoreUrl" target="_blank" style="display:inline-block;overflow:hidden;background:url(/assets/apple_app_store_badge.svg) no-repeat;width:135px;height:40px;"></a>
             </section>
@@ -70,7 +71,8 @@
                 &.hasApp {
                     padding: 4rem;
                     @include shadowbox;
-                    background: $yellow url(assets/images/yellowNeedles.svg) 0 0/320px;
+                    color: $white;
+                    background: $darkestGreen url(/assets/images/darkGreenNeedles.svg) 0 0/320px;
 
                 }
 
