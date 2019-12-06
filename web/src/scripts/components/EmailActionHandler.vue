@@ -1,3 +1,4 @@
+import {SourceApp} from '@shared/api/SignupEndpointTypes'
 <template>
     <div class="root centered">
         <NavBar/>
@@ -50,19 +51,20 @@
 <script lang="ts">
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue"
-    import {getQueryParam} from '@web/util'
+    import {getAllQueryParams, getQueryParam} from '@web/util'
     import {QueryParam} from "@shared/util/queryParams"
     import {EmailActionMode, getAuth} from '@web/firebase'
     import {PageRoute} from '@shared/PageRoutes'
     import {appendQueryParams} from '@shared/util/StringUtil'
     import Spinner from "@components/Spinner.vue"
+    import {SourceApp} from "@shared/api/SignupEndpointTypes"
 
     export default Vue.extend({
         components: {
             NavBar: NavBar,
             Spinner,
         },
-        async created(): Promise<void> {
+        async beforeMount(): Promise<void> {
             const mode: EmailActionMode | null | undefined = getQueryParam(QueryParam.MODE) as EmailActionMode | undefined | null;
             const actionCode = getQueryParam(QueryParam.OOB_CODE);
             const continueUrl = getQueryParam(QueryParam.CONTINUE_URL);
@@ -72,6 +74,9 @@
             this.actionCode = actionCode;
             this.continueUrl = continueUrl || PageRoute.JOURNAL_HOME;
             this.lang = lang;
+
+
+            debugger;
 
 
             switch (mode) {
@@ -88,6 +93,17 @@
                     this.loading = false;
                     break;
                 case EmailActionMode.signIn:
+                    const sourceApp = getQueryParam(QueryParam.SOURCE_APP) as SourceApp;
+                    console.log("app source", sourceApp);
+                    const isSignIn = getAuth().isSignInWithEmailLink(window.location.href);
+
+                    if (sourceApp === SourceApp.ios && isSignIn) {
+                        let appUrl = `${PageRoute.IOS_MAGIC_LINK_LOGIN}`;
+                        appUrl = appendQueryParams(appUrl, getAllQueryParams());
+                        window.location.assign(appUrl);
+                        return;
+                    }
+
                     const continueUrl = getQueryParam(QueryParam.CONTINUE_URL) || PageRoute.LOGIN;
                     let url = appendQueryParams(continueUrl, {
                         [QueryParam.MODE]: mode,

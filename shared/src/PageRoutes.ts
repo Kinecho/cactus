@@ -10,5 +10,6 @@ export enum PageRoute {
     SHARED_REFLECTION = "/reflection",
     SOCIAL = "/friends",
     ACCOUNT = "/account",
-    UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed"
+    UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
+    IOS_MAGIC_LINK_LOGIN = "/ios-login-continue"
 }

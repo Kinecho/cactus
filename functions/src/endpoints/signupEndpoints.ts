@@ -13,7 +13,7 @@ import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} f
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import {appendDomain, getProviderDisplayName} from "@shared/util/StringUtil";
+import {appendDomain, appendQueryParams, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
@@ -24,6 +24,7 @@ import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {getISODateTime} from "@shared/util/DateUtil";
+import {QueryParam} from "@shared/util/queryParams";
 
 const Config = getConfig();
 
@@ -34,7 +35,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
     const payload: EmailStatusRequest = req.body;
     console.log("signupEndpoints.email-status", payload);
-    let response:EmailStatusResponse|undefined = undefined;
+    let response: EmailStatusResponse | undefined = undefined;
     const email = payload.email;
     let exists = false;
 
@@ -178,7 +179,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     });
 
     const url = appendDomain(payload.continuePath, Config.web.domain);
-
+    const sourceApp = payload.sourceApp || "web";
     const actionCodeSettings: ActionCodeSettings = {
         handleCodeInApp: true,
         url,
@@ -186,21 +187,21 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
     console.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
-        const link = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
-
-        console.log(`Generated signing link for ${email}: ${link}`);
+        let magicLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
+        magicLink = appendQueryParams(magicLink, {[QueryParam.SOURCE_APP]: sourceApp});
+        console.log(`Generated signing link for ${email}: ${magicLink}`);
 
         if (userExists || memberExists) {
             await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
-                link: link
+                link: magicLink
             });
         } else {
             await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
-                link: link
+                link: magicLink
             });
         }
 

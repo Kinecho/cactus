@@ -93,6 +93,10 @@
         ],
         "rewrites": [
             {
+                "source": "/ios-login-continue",
+                "destination": "/ios_login_continue.html"
+            },
+            {
                 "source": "/pricing",
                 "destination": "/pricing.html"
             },

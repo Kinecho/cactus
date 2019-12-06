@@ -1,5 +1,5 @@
 // @ts-ignore
-import $COMPONENT$ from "@components/$COMPONENT$"
+import $COMPONENT$ from "@components/$COMPONENT$.vue"
 import Vue from "vue";
 import {commonInit} from "@web/common";
 

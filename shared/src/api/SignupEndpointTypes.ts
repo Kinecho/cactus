@@ -11,12 +11,18 @@ export interface EmailStatusResponse extends ApiResponse {
     message?: string,
 }
 
+export enum SourceApp {
+    web = "web",
+    ios = "ios",
+}
+
 export interface MagicLinkRequest {
     email: string,
     continuePath: string,
     referredBy?: string | undefined,
     reflectionResponseIds?: string[],
-    queryParams?: { [id: string]: string }
+    queryParams?: { [id: string]: string },
+    sourceApp?: SourceApp
 }
 
 export interface MagicLinkResponse extends ApiResponse {

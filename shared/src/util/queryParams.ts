@@ -21,7 +21,8 @@ export enum QueryParam {
     NO_NAV = "no_nav",
     SOCIAL_INVITE_ID = "inviteId",
     UNSUBSCRIBE_SUCCESS = "unsub_success",
-    PREMIUM_DEFAULT = 'prem'
+    PREMIUM_DEFAULT = 'prem',
+    SOURCE_APP = "source-app",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {
