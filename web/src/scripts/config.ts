@@ -33,6 +33,7 @@ declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_ENV_ID__: string;
 declare var __FIRST_PROMPT_ID__: string;
 declare var __CLOUDSPONGE_KEY__: string;
+declare var __APP_STORE_URL__: string;
 
 declare var __API_DOMAIN__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
@@ -52,6 +53,7 @@ export const Config = {
     flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
     firstPromptId: __FIRST_PROMPT_ID__,
     cloudSpongeKey: __CLOUDSPONGE_KEY__,
+    appStoreUrl: __APP_STORE_URL__,
     apiDomain: __API_DOMAIN__,
     stripe: __STRIPE_CONFIG__,
     domain: __PUBLIC_DOMAIN__,
