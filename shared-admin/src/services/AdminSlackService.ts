@@ -274,6 +274,8 @@ export default class AdminSlackService {
 
     static getProviderEmoji(provider?: string): string | undefined {
         switch (provider) {
+            case "apple.com":
+                return ":ios:";
             case "password":
                 return ":link:";
             case "twitter.com":
