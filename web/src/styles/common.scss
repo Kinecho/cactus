@@ -195,9 +195,11 @@ footer {
 
   .centered {
     @include r(600) {
-      align-items: center;
       display: flex;
       justify-content: space-between;
+    }
+    @include r(1200) {
+      padding: 0 1.6rem;
     }
   }
 
@@ -220,9 +222,10 @@ footer {
   margin-bottom: 1.6rem;
 
   @include r(600) {
-    flex-flow: row nowrap;
-    margin-bottom: 0;
-    text-align: left;
+      align-items: flex-start;
+      flex-flow: row nowrap;
+      margin-bottom: 0;
+      text-align: left;
   }
 
   .logomark {
@@ -231,7 +234,9 @@ footer {
     width: 2.4rem;
 
     @include r(600) {
-      margin: 0 .8rem 0 0;
+        height: 5.6rem;
+        margin: 0 1.6rem 0 0;
+        width: 2.6rem;
     }
   }
 
@@ -244,14 +249,16 @@ footer {
   align-items: center;
   display: flex;
   justify-content: center;
+
   @include r(600) {
     justify-content: flex-end;
+    margin-left: -.8rem;
   }
 
   .link {
     display: flex;
     opacity: .5;
-    padding: 1.2rem;
+    padding: .8rem;
     transition: opacity .3s ease-in-out;
 
     &:hover {
