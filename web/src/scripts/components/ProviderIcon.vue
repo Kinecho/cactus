@@ -11,6 +11,7 @@
             switch (this.providerId) {
                 case "apple.com":
                     this.imageUrl = "/assets/icons/apple.svg";
+                    break;
                 case "google.com":
                     this.imageUrl = "/assets/icons/google_g.svg";
                     break;
