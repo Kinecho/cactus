@@ -5,7 +5,8 @@ import helpers from "@scripts/helpers";
 import * as simplegit from 'simple-git/promise';
 import {CactusConfig} from "@shared/CactusConfig";
 import {getAppSiteConfig} from "@scripts/appleAppSiteAssociation";
-import {writeFileSync} from "fs";
+import {writeFileSync, copyFileSync} from "fs";
+import * as path from "path";
 
 const git = simplegit();
 
@@ -25,7 +26,8 @@ const git = simplegit();
     const config = await getCactusConfig(isProd ? Project.PROD : Project.STAGE);
 
 
-    createAppAssociationFile(config);
+    createAppAppSiteAssociationFile(config);
+    createAppleDeveloperDomainAssociationFile(config);
 
     let resourceName = resource;
     if (resource.toLowerCase().trim() === "hosting") {
@@ -64,9 +66,15 @@ const git = simplegit();
 
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));
 
-function createAppAssociationFile(config: CactusConfig) {
+function createAppAppSiteAssociationFile(config: CactusConfig) {
     const appAssociation = getAppSiteConfig(config);
 
     const fileContents = JSON.stringify(appAssociation);
     writeFileSync(helpers.appAssociationFile, fileContents);
+}
+
+function createAppleDeveloperDomainAssociationFile(config: CactusConfig) {
+    const inputPath = path.join(helpers.webHelpers.webRoot, `apple-developer-domain-association.${config.app.environment === "prod" ? "prod" : "stage"}.txt`);
+    const outputPath = path.join(helpers.webHelpers.webRoot, "apple-developer-domain-association.txt");
+    copyFileSync(inputPath, outputPath)
 }
