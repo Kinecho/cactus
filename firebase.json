@@ -39,8 +39,8 @@
             "cp ./apple-app-site-association ./web/public/.well-known/",
             "cp ./apple-app-site-association ./web/public/",
             "cp web/apple-developer-merchantid-domain-association web/public/.well-known",
-            "cp web/apple-developer-domain-association web/public/",
-            "cp web/apple-developer-domain-association web/public/.well-known",
+            "cp web/apple-developer-domain-association.txt web/public/",
+            "cp web/apple-developer-domain-association.txt web/public/.well-known",
             "bash ./sentry-web-upload.sh"
         ],
         "postdeploy": [
