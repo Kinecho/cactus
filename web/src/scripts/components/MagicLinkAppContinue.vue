@@ -4,7 +4,7 @@
         <div class="centered">
             <section class="hasApp">
                 <h2>Continue on the app</h2>
-                <p>Finish logging in your your device</p>
+                <p>Finish logging in to your device</p>
                 <div class="actions">
                     <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
                 </div>
@@ -68,6 +68,10 @@
             section {
                 margin-bottom: 4rem;
 
+                p {
+                    opacity: .8;
+                }
+
                 &.hasApp {
                     padding: 4rem;
                     @include shadowbox;
@@ -77,7 +81,7 @@
                 }
 
                 .actions {
-                    padding: 2rem 0;
+                    padding: 4rem 0;
                 }
             }
 
