@@ -30,7 +30,10 @@ import {
     ListMember,
     ListMemberListResponse,
     ListMemberStatus,
-    ListResponse, MailchimpApiError, MemberActivityListResponse, MemberUnsubscribeReport,
+    ListResponse,
+    MailchimpApiError,
+    MemberActivityListResponse,
+    MemberUnsubscribeReport,
     MergeField,
     PaginationParameters,
     SearchMembersOptions,
@@ -474,9 +477,9 @@ export default class MailchimpService {
             },);
 
 
-            const member:ListMember = response.data ;
+            const listMember:ListMember = response.data ;
 
-            return {success: true, listMember: member};
+            return {success: true, listMember: listMember};
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {

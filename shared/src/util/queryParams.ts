@@ -21,6 +21,7 @@ export enum QueryParam {
     NO_NAV = "no_nav",
     SOCIAL_INVITE_ID = "inviteId",
     UNSUBSCRIBE_SUCCESS = "unsub_success",
+    ALREADY_UNSUBSCRIBED = "is_unsubbed",
     PREMIUM_DEFAULT = 'prem',
     SOURCE_APP = "source-app",
 }

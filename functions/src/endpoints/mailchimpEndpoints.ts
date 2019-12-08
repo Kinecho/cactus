@@ -31,9 +31,9 @@ import AdminSlackService, {
     SlackMessage
 } from "@admin/services/AdminSlackService";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import CactusMember from "@shared/models/CactusMember";
+import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
-import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
+import {UnsubscribeRequest, UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {getAuthUser} from "@api/util/RequestUtil";
 
 
@@ -178,12 +178,63 @@ app.post("/", async (req: express.Request, res: express.Response) => {
     }
 });
 
+/**
+ * Unsubscribe by mailchimp unique id & email
+ */
+app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Response) => {
+    const payload = req.body as UnsubscribeRequest;
+    const {email, mcuid} = payload;
+
+    console.log(`handing unsubscribe confirm email: ${email}, mcuid: ${mcuid}`);
+
+    const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mcuid);
+
+    if (!mailchimpMember) {
+        res.status(404).send({error: "No member was found for the given ID.", success: false});
+        return;
+    }
+
+    if (mailchimpMember?.email_address !== email) {
+        res.status(409).send({error: "Invalid request. The member ID and email address did not match.", success: false});
+        return;
+    }
+    let member = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mcuid);
+    if (!member) {
+        //try to find by email
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    }
+    if (!member) {
+        res.status(404).send({success: false, error: "No member found"});
+        return;
+    }
+
+    const statusRequest: UpdateStatusRequest = {email: email, status: ListMemberStatus.unsubscribed};
+    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
+
+    if (response.success) {
+        member.unsubscribedAt = new Date();
+        member.notificationSettings.email = NotificationStatus.INACTIVE;
+    } else {
+        console.error("The unsubscribe request was not successful");
+    }
+
+    if (response.listMember) {
+        console.log("Updating the cactus member with the new mailchimp member");
+        member.mailchimpListMember = response.listMember;
+    } else {
+        console.log(`No mailchimp list member found. Can't update the cactus member. email = ${email}. mcuid = ${mcuid}`);
+    }
+
+    await AdminCactusMemberService.getSharedInstance().save(member);
+
+
+    res.send({success: response.success, error: response.error})
+
+});
+
 app.put("/status", async (req: express.Request, res: express.Response) => {
     const statusRequest = req.body as UpdateStatusRequest;
-
-
-    // return res.sendStatus(500)
-
+    const isUnsubscribe = statusRequest.status === ListMemberStatus.unsubscribed;
     const user = await getAuthUser(req);
     if (!user) {
         res.sendStatus(401);
@@ -199,9 +250,14 @@ app.put("/status", async (req: express.Request, res: express.Response) => {
     let cactusMember: CactusMember | undefined = undefined;
     if (response.listMember) {
         cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
-        console.log("updated member after changing the status", cactusMember);
+        if (cactusMember) {
+            cactusMember.mailchimpListMember = response.listMember;
+            cactusMember.unsubscribedAt = isUnsubscribe ? new Date() : undefined;
+            cactusMember.notificationSettings.email = isUnsubscribe ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
+            await AdminCactusMemberService.getSharedInstance().save(cactusMember);
+            console.log("updated member after changing the status", cactusMember);
+        }
     }
-
 
     const attachments: SlackAttachment[] = [];
     const fields: SlackAttachmentField[] = [
