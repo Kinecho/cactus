@@ -12,6 +12,7 @@ export enum Endpoint {
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
     updateSubscriberStatus = "mailchimp/status",
+    unsubscribeConfirm = "mailchimp/unsubscribe/confirm",
     loginEvent = "signup/login-event",
     sendInvite = "social/send-invite",
     notifyFriendRequest = "social/notify-friend-request"

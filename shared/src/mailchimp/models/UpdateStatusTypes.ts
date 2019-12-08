@@ -11,3 +11,13 @@ export interface UpdateStatusResponse extends ApiResponse {
     listMember?:ListMember
     error?: any,
 }
+
+export interface UnsubscribeRequest {
+    email: string,
+    mcuid: string,
+}
+
+export interface UnsubscribeResponse {
+    success: boolean,
+    error?: string,
+}
