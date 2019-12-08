@@ -18,7 +18,7 @@
                     <li>Available on web, iPhone, and&nbsp;iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on&nbsp;notes</li>
+                    <li>256-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email and&nbsp;push</li>
                 </ul>
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
@@ -32,7 +32,7 @@
                     <li>Available on web, iPhone, and&nbsp;iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
-                    <li>128-bit encryption on&nbsp;notes</li>
+                    <li>256-bit encryption on&nbsp;notes</li>
                     <li>Notifications via email and push</li>
                     <li><span class="enhance">Personalized prompts</span></li>
                     <li><span class="enhance">Reminder scheduling</span></li>
