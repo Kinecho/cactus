@@ -8,7 +8,12 @@ import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
 import {isValidEmail} from "@shared/util/StringUtil";
 import {NotificationStatus} from "@shared/models/CactusMember";
-import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
+import {
+    UnsubscribeRequest,
+    UnsubscribeResponse,
+    UpdateStatusRequest,
+    UpdateStatusResponse
+} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {LocalStorageKey} from "@web/services/StorageService";
 
@@ -351,6 +356,10 @@ export function setupJumpToForm(buttonClass: string = "jump-to-form") {
             }
         })
     })
+}
+
+export async function confirmUnsubscribe(options: UnsubscribeRequest): Promise<UnsubscribeResponse> {
+    return (await request.post(Endpoint.unsubscribeConfirm, options)).data as UnsubscribeResponse;
 }
 
 export async function updateSubscriptionStatus(status: NotificationStatus, email: string): Promise<UpdateStatusResponse> {
