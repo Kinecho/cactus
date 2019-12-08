@@ -371,7 +371,12 @@ export async function sendLoginEvent(args: {
 
                         /* Note: This may move to the backend later when we have time to 
                            implement the Facebook Ads API */
+                        if (event.isNewUser && event.providerId) {
+                            // new user who did not previous enter their email address
+                            fireSignupEvent();
+                        }
                         if (event.isNewUser) {
+                            // all new users
                             fireConfirmedSignupEvent();
                         }
                     } catch (error) {
