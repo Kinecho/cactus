@@ -227,6 +227,7 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
 
     await AdminCactusMemberService.getSharedInstance().save(member);
 
+    await sendSlackUserUnsubscribedEmail({cactusMember: member, email: statusRequest.email, status: statusRequest.status});
 
     res.send({success: response.success, error: response.error})
 
@@ -259,16 +260,24 @@ app.put("/status", async (req: express.Request, res: express.Response) => {
         }
     }
 
+    await sendSlackUserUnsubscribedEmail({cactusMember, email: statusRequest.email, status: statusRequest.status});
+
+    res.send(response);
+
+});
+
+async function sendSlackUserUnsubscribedEmail(options: {email: string, status: ListMemberStatus, cactusMember?: CactusMember}){
+    const {cactusMember, email, status} = options;
     const attachments: SlackAttachment[] = [];
     const fields: SlackAttachmentField[] = [
         {
             title: "Email",
-            value: statusRequest.email,
+            value: email,
             short: false,
         },
         {
             title: "Reason Code",
-            value: `Manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"} from the App`,
+            value: `Manually ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"} from the App`,
             short: false,
         },
 
@@ -284,22 +293,18 @@ app.put("/status", async (req: express.Request, res: express.Response) => {
     ];
 
     attachments.push({
-        title: `${statusRequest.email} ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        title: `${email} ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
         fields: fields
     });
 
     const message = {
-        text: `User Has manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
+        text: `User Has manually ${status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
         attachments
     };
 
     await AdminSlackService.getSharedInstance().sendActivityMessage(message);
 
-
-    res.send(response);
-
-});
-
+}
 
 export async function handleCampaignEvent(campaignData: CampaignEventData): Promise<void> {
     const mailchimpService = MailchimpService.getSharedInstance();
