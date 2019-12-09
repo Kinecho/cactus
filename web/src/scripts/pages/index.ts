@@ -62,7 +62,7 @@ new Vue({
 
 new Vue({
     el: "#footer",
-    template: `<StandardFooter class="lifted"/>`,
+    template: `<StandardFooter :lifted="true"/>`,
     components: {StandardFooter}
 });
 

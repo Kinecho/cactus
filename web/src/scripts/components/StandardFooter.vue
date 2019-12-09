@@ -1,5 +1,5 @@
 <template>
-    <footer>
+    <footer :class={lifted}>
         <div class="centered">
             <div class="footerInfo">
                 <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
@@ -29,6 +29,9 @@
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
 
     export default Vue.extend({
+        props: {
+            lifted: {type: Boolean, required: false, default: false}
+        },
         components: {
             AppStoreIcon
         }
