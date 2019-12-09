@@ -53,7 +53,6 @@
                 </div>
                 <button v-bind:disabled="isProcessing" @click="puchaseSelectedPlan">Upgrade &mdash; ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}</button>
             </section>
-
         </div>
       </div>
   </section>

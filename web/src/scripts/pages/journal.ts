@@ -6,8 +6,12 @@ import 'animation.gsap';
 // @ts-ignore
 import {ScrollToPlugin} from 'gsap/all';
 import {commonInit} from "@web/common";
+import Footer from "@components/StandardFooter.vue"
 
 commonInit();
+
+
+new Footer({el: "#footer"});
 
 const controller = new ScrollMagic.Controller();
 

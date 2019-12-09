@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= htmlWebpackPlugin.options.title %></title>
@@ -33,150 +33,173 @@
 
     <meta name="theme-color" content="#33CCAB">
 
-    <style>html { transition:all .1s; } .optimize-loading { opacity: 0 !important} </style>
-    <script>(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
-h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
-(a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
-})(window,document.documentElement,'optimize-loading','dataLayer',1500,
-{'GTM-KFBRFFG':true});</script>
+    <style>html {
+        transition: all .1s;
+    }
+
+    .optimize-loading {
+        opacity: 0 !important
+    } </style>
+    <script>(function (a, s, y, n, c, h, i, d, e) {
+        s.className += ' ' + y
+        h.start = 1 * new Date
+        h.end = i = function () {
+            s.className = s.className.replace(RegExp(' ?' + y), '')
+        };
+        (a[n] = a[n] || []).hide = h
+        setTimeout(function () {
+            i()
+            h.end = null
+        }, c)
+        h.timeout = c
+    })(window, document.documentElement, 'optimize-loading', 'dataLayer', 1500,
+        {'GTM-KFBRFFG': true})</script>
 
     <!--note CSS is included via webpack-->
     <script async src="https://www.googletagmanager.com/gtag/js"></script>
     <!-- Load Stripe.js on your website. -->
     <script src="https://js.stripe.com/v3"></script>
 
-  </head>
+</head>
 
 <body>
-  <header>
-<!--    <img class="logo" src="assets/images/logo.svg" alt="Cactus logo" />-->
-<!--    <a class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign Up Free</a>-->
-  </header>
-  <div class="centered">
+<header>
+    <!--    <img class="logo" src="assets/images/logo.svg" alt="Cactus logo" />-->
+    <!--    <a class="jump-to-form button" data-scroll-to="signupAnchor" data-focus-form="sign-up-top" type="button">Sign Up Free</a>-->
+</header>
+<div class="centered">
     <section class="hero">
-      <div class="heroText">
-        <h1>Boost your mental&nbsp;clarity</h1>
-        <p class="subtext">Research-backed questions to sharpen memory and strengthen&nbsp;health</p>
-        <div id="app-store-top"></div>
-      </div>
-      <aside class="graphicContainer">
-          <p class="sampleQuestion">What helps you unwind and recuperate?</p>
-          <p class="sampleQuestion">When did you first fall in love?</p>
-          <div class="promptDemo">
-              <div class="progressBar"></div>
-              <img class="demoCactus" src="/assets/images/cacti/experienceGrow.svg" alt="Meaning cactus icon" />
-              <h4 class="demoTheme">Experience</h4>
-              <p class="demoText">Today you’ll reflect on your favorite thing to do on a sunny&nbsp;day.</p>
-          </div>
-      </aside>
-      <div id="signupAnchor"></div>
-      <form class="heroForm" id="sign-up-top">
-        <div class="alert error hidden">Sorry, looks like we have issues.</div>
-        <input type="email" name="email" placeholder="Enter your email address">
-        <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
-        <div id="app-store"></div>
-      </form>
+        <div class="heroText">
+            <h1>Boost your mental&nbsp;clarity</h1>
+            <p class="subtext">Research-backed questions to sharpen memory and strengthen&nbsp;health</p>
+            <div id="app-store-top"></div>
+        </div>
+        <aside class="graphicContainer">
+            <p class="sampleQuestion">What helps you unwind and recuperate?</p>
+            <p class="sampleQuestion">When did you first fall in love?</p>
+            <div class="promptDemo">
+                <div class="progressBar"></div>
+                <img class="demoCactus" src="/assets/images/cacti/experienceGrow.svg" alt="Meaning cactus icon"/>
+                <h4 class="demoTheme">Experience</h4>
+                <p class="demoText">Today you’ll reflect on your favorite thing to do on a sunny&nbsp;day.</p>
+            </div>
+        </aside>
+        <div id="signupAnchor"></div>
+        <form class="heroForm" id="sign-up-top">
+            <div class="alert error hidden">Sorry, looks like we have issues.</div>
+            <input type="email" name="email" placeholder="Enter your email address">
+            <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
+            <div id="app-store"></div>
+        </form>
     </section>
-  </div>
-  <section class="why">
+</div>
+<section class="why">
     <div class="centered">
         <h2>Proven to make you&nbsp;smile</h2>
         <p class="subtext">Cactus provides a minute of mindfulness via guided&nbsp;reflection.</p>
-      <div class="flexContainer">
-        <div class="benefit">
-          <img src="/assets/images/benefit1.png" alt="Focus image" class="illustration" />
-          <h5>Focus</h5>
-          <p class="text">A daily question helps you focus on the positives in your&nbsp;life.</p>
+        <div class="flexContainer">
+            <div class="benefit">
+                <img src="/assets/images/benefit1.png" alt="Focus image" class="illustration"/>
+                <h5>Focus</h5>
+                <p class="text">A daily question helps you focus on the positives in your&nbsp;life.</p>
+            </div>
+            <div class="benefit">
+                <img src="assets/images/benefit2.png" alt="Self-discovery image" class="illustration"/>
+                <h5>Self-Discovery</h5>
+                <p class="text">Exercises are designed to help your journey of&nbsp;self-discovery.</p>
+            </div>
+            <div class="benefit">
+                <img src="/assets/images/benefit3.png" alt="Privacy image" class="illustration"/>
+                <h5>Privacy</h5>
+                <p class="text">Privately record your thoughts through text, speech, and&nbsp;photos.</p>
+            </div>
+            <div class="benefit">
+                <img src="assets/images/benefit4.png" alt="Growth image" class="illustration"/>
+                <h5>Growth</h5>
+                <p class="text">Celebrate your mindful practice and personal&nbsp;growth.</p>
+            </div>
         </div>
-        <div class="benefit">
-          <img src="assets/images/benefit2.png" alt="Self-discovery image" class="illustration" />
-          <h5>Self-Discovery</h5>
-          <p class="text">Exercises are designed to help your journey of&nbsp;self-discovery.</p>
-        </div>
-        <div class="benefit">
-          <img src="/assets/images/benefit3.png" alt="Privacy image" class="illustration" />
-          <h5>Privacy</h5>
-          <p class="text">Privately record your thoughts through text, speech, and&nbsp;photos.</p>
-        </div>
-        <div class="benefit">
-          <img src="assets/images/benefit4.png" alt="Growth image" class="illustration" />
-          <h5>Growth</h5>
-          <p class="text">Celebrate your mindful practice and personal&nbsp;growth.</p>
-        </div>
-      </div>
     </div>
-  </section>
-  <div class="split">
+</section>
+<div class="split">
     <section class="fortify">
-      <h2>Fortify your EQ</h2>
-      <p class="subtext">Cactus helps make you more optimistic, generous to yourself and others, and&nbsp;healthier.</p>
-      <img src="assets/images/fortify.png" alt="Fortify image" class="sectionImg" />
+        <h2>Fortify your EQ</h2>
+        <p class="subtext">Cactus helps make you more optimistic, generous to yourself and others,
+            and&nbsp;healthier.</p>
+        <img src="assets/images/fortify.png" alt="Fortify image" class="sectionImg"/>
     </section>
     <section class="private">
         <h2 class="magenta">Private and secure</h2>
-        <p class="subtext">Your Cactus reflections are transmitted and stored using <em>128-bit&nbsp;encryption</em>.</p>
+        <p class="subtext">Your Cactus reflections are transmitted and stored using <em>128-bit&nbsp;encryption</em>.
+        </p>
         <div class="reflection">
             <div class="flexContainer">
                 <p class="date">Nov 12, 2019</p>
-                <button class="secondary icon"><img src="assets/images/dots.svg" alt="" class="iconImg" /></button>
+                <button class="secondary icon"><img src="assets/images/dots.svg" alt="" class="iconImg"/></button>
             </div>
             <p class="question">What experiences or activities make you lose track of&nbsp;time?</p>
             <div class="reply"></div>
         </div>
     </section>
-  </div>
+</div>
 
-  <div id="premium-pricing"></div>
+<div id="premium-pricing"></div>
 
-  <section class="testimonials list">
+<section class="testimonials list">
     <div class="centered">
-      <h2>What people are saying</h2>
-      <p class="subtext">The Cactus community reflect on their&nbsp;experiences</p>
-      <div class="flexContainer">
-        <div class="quote">
-          <div class="avatar">
-            <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar3.png" alt="Samantha" />
-            <p class="name">Samantha W</p>
-          </div>
-          <p class="quoteText">“I needed motivation and guidance to think about what I want in life. Cactus reinforces positive thinking and <strong>keeps me accountable</strong> to reflect on what brings me joy.”</p>
+        <h2>What people are saying</h2>
+        <p class="subtext">The Cactus community reflect on their&nbsp;experiences</p>
+        <div class="flexContainer">
+            <div class="quote">
+                <div class="avatar">
+                    <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar3.png" alt="Samantha"/>
+                    <p class="name">Samantha W</p>
+                </div>
+                <p class="quoteText">“I needed motivation and guidance to think about what I want in life. Cactus
+                    reinforces positive thinking and <strong>keeps me accountable</strong> to reflect on what brings me
+                    joy.”</p>
+            </div>
+            <div class="quote">
+                <div class="avatar">
+                    <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar1.png" alt="Thom"/>
+                    <p class="name">Thom M</p>
+                </div>
+                <p class="quoteText">“I was hoping to practice daily gratitude, but I needed a little help getting
+                    started. Cactus provided an opportunity to <strong>reflect in an approachable way</strong>, and I
+                    find myself in higher spirits after using it.”</p>
+            </div>
+            <div class="quote">
+                <div class="avatar">
+                    <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar2.png" alt="Mike P"/>
+                    <p class="name">Mike P</p>
+                </div>
+                <p class="quoteText">“I wanted to try a <strong>different kind of mindfulness</strong>. Cactus is
+                    surprisingly enjoyable and helped me find clarity, and now I’m more open to consider new things.”
+                </p>
+            </div>
+            <div class="quote">
+                <div class="avatar">
+                    <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar4.png" alt="Nicole"/>
+                    <p class="name">Nicole P</p>
+                </div>
+                <p class="quoteText">“First thing in the morning, in the midst of checking work emails and feeling the
+                    anxiety of the day creep, the Cactus emails <strong>help me pause</strong>, reset my attitude, and
+                    begin the day on a positive note before I even get out of bed.”</p>
+            </div>
         </div>
-        <div class="quote">
-          <div class="avatar">
-            <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar1.png" alt="Thom" />
-            <p class="name">Thom M</p>
-          </div>
-          <p class="quoteText">“I was hoping to practice daily gratitude, but I needed a little help getting started. Cactus provided an opportunity to <strong>reflect in an approachable way</strong>, and I find myself in higher spirits after using it.”</p>
-        </div>
-        <div class="quote">
-          <div class="avatar">
-            <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar2.png" alt="Mike P" />
-            <p class="name">Mike P</p>
-          </div>
-          <p class="quoteText">“I wanted to try a <strong>different kind of mindfulness</strong>. Cactus is surprisingly enjoyable and helped me find clarity, and now I’m more open to consider new things.”</p>
-        </div>
-        <div class="quote">
-          <div class="avatar">
-            <img class="avatarImg" src="/assets/images/avatars/testimonialAvatar4.png" alt="Nicole" />
-            <p class="name">Nicole P</p>
-          </div>
-          <p class="quoteText">“First thing in the morning, in the midst of checking work emails and feeling the anxiety of the day creep, the Cactus emails <strong>help me pause</strong>, reset my attitude, and begin the day on a positive note before I even get out of bed.”</p>
-        </div>
-      </div>
     </div>
-  </section>
-  <div class="centered">
+</section>
+<div class="centered">
     <section class="email">
-      <h2 class="emailHeader">A reflection a day…</h2>
-      <p class="subtext">Cactus is a different kind of mindfulness.</p>
-      <form id="email-form-bottom" class="lowerForm">
-        <div class="alert error hidden">Sorry, looks like we have issues.</div>
-        <input type="email" name="email" placeholder="Enter your email address">
-        <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
-      </form>
+        <h2 class="emailHeader">A reflection a day…</h2>
+        <p class="subtext">Cactus is a different kind of mindfulness.</p>
+        <form id="email-form-bottom" class="lowerForm">
+            <div class="alert error hidden">Sorry, looks like we have issues.</div>
+            <input type="email" name="email" placeholder="Enter your email address">
+            <button type="submit" name="submit" class="email-submit-button">Sign Up Free</button>
+        </form>
     </section>
-  </div>
-  <footer class="lifted">
-    <div id="footer"></div>
-  </footer>
-  </body>
+</div>
+<div class="lifted" id="footer"></div>
+</body>
 </html>
