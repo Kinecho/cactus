@@ -1,6 +1,8 @@
 import * as queryString from "query-string";
 import * as camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import PromptContent from "@shared/models/PromptContent";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -170,8 +172,20 @@ export function getIntegerFromStringBetween(input: string, max: number): number 
         hash = Math.abs(input.charCodeAt(i) + ((hash << 5) - hash));
     }
     return hash % max;
+}
 
-
+/**
+ * Get the question from a variety of optional sources and return the trimmed string or undefined
+ * @param {{prompt?: ReflectionPrompt; promptContent?: PromptContent; response?: ReflectionResponse}} args
+ * @return {string | undefined}
+ */
+export function getPromptQuestion(args: { prompt?: ReflectionPrompt, promptContent?: PromptContent, response?: ReflectionResponse }): string | undefined {
+    const {prompt, promptContent, response} = args;
+    const question = promptContent?.getQuestion() || prompt?.question || response?.promptQuestion || undefined;
+    if (question && !isBlank(question)) {
+        return question.trim();
+    }
+    return;
 }
 
 export function isBlank(input: string | null | undefined): boolean {

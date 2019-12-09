@@ -95,6 +95,29 @@ export default class FlamelinkService {
         });
     }
 
+    async getByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
+        const {name, value, Type} = args;
+
+        const type = new Type();
+        const schema = type.schema;
+
+        try {
+            const data: { [entryId: string]: any } = await this.content.getByField({
+                field: name,
+                value,
+                schemaKey: schema
+            });
+            let entry: any | undefined = undefined;
+            if (data) {
+                entry = Object.values(data).find(d => d[name] === value);
+                return fromFlamelinkData(entry, Type);
+            }
+        } catch (error) {
+            console.error("Error fetching data from flamelink content", error);
+        }
+        return;
+    }
+
     observeByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
         const {name, value, Type} = args;
 
@@ -105,9 +128,9 @@ export default class FlamelinkService {
             schemaKey: schema,
             populate: options.populate,
             filters: [[name, "==", value]],
-            callback: (error: any, data: {[entryId: string]: any}) => {
-                let entry: any|undefined = undefined;
-                if (data){
+            callback: (error: any, data: { [entryId: string]: any }) => {
+                let entry: any | undefined = undefined;
+                if (data) {
                     entry = Object.values(data).find(d => d[name] === value);
                 }
 

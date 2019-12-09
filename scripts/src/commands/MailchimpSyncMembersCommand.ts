@@ -56,7 +56,6 @@ export default class MailchimpSyncMembersCommand extends FirebaseCommand {
                                 };
                                 console.log(chalk.cyan(`Creating unsub report manually for ${listMember.email_address}\n${JSON.stringify(unsubReport, null, 2)}`))
                             }
-
                         }
                     }
 

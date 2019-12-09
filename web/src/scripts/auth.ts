@@ -17,7 +17,7 @@ import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {fireConfirmedSignupEvent} from "@web/analytics";
+import {fireSignupEvent, fireConfirmedSignupEvent} from "@web/analytics";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
@@ -371,7 +371,12 @@ export async function sendLoginEvent(args: {
 
                         /* Note: This may move to the backend later when we have time to 
                            implement the Facebook Ads API */
+                        if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
+                            // new user who did not previous enter their email address
+                            fireSignupEvent();
+                        }
                         if (event.isNewUser) {
+                            // all new users
                             fireConfirmedSignupEvent();
                         }
                     } catch (error) {
@@ -393,4 +398,13 @@ export async function sendLoginEvent(args: {
 
 
     });
+}
+
+export function isThirdPartySignIn(provider: string | undefined): boolean {
+    switch (provider) {
+        case "password":
+            return false;
+        default:
+            return true;
+    }
 }
