@@ -1,16 +1,22 @@
-import Footer from "@components/StandardFooter.vue";
+import StandardFooter from "@components/StandardFooter.vue";
 import NavBar from "@components/NavBar.vue";
 import {commonInit} from "@web/common";
 import PremiumPricing from "@components/PremiumPricing.vue";
+import Vue from "vue"
 
 commonInit();
 
-new PremiumPricing({
-    el: "#premium-pricing"
-});
-
-new NavBar({el: "header"});
-
-new Footer({
-    el: "#footer"
+new Vue({
+    el: "#app",
+    components: {
+        NavBar,
+        StandardFooter,
+        PremiumPricing,
+    },
+    template: `
+        <div>
+            <NavBar/>
+            <PremiumPricing/>
+            <footer></footer><StandardFooter/>
+        </div>`
 });

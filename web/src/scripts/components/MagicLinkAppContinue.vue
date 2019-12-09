@@ -9,9 +9,9 @@
                     <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
                 </div>
             </section>
-            <section class="needsApp" v-if="false">
-                <h2>Get the Cactus app</h2>
-                <a :href="appStoreUrl" target="_blank" style="display:inline-block;overflow:hidden;background:url(/assets/apple_app_store_badge.svg) no-repeat;width:135px;height:40px;"></a>
+            <section class="needsApp" v-if="true">
+                <h4>Need to install Cactus?</h4>
+                <AppStoreIcon />
             </section>
 
         </div>
@@ -24,23 +24,18 @@
     import {getAllQueryParams} from '@web/util';
     import {appendQueryParams} from '@shared/util/StringUtil';
     import NavBar from "@components/NavBar.vue";
+    import AppStoreIcon from "@components/AppStoreIcon.vue";
 
     export default Vue.extend({
         components: {
             NavBar,
+            AppStoreIcon
         },
         created() {
             console.log("magic link app continue");
         },
         props: {
             link: {type: String, required: true}
-        },
-        data(): {
-            appStoreUrl: string,
-        } {
-            return {
-                appStoreUrl: "https://apps.apple.com/us/app/cactus/id1474513514"
-            }
         },
         computed: {
             deepLink(): string {
@@ -83,6 +78,9 @@
                 .actions {
                     padding: 4rem 0;
                 }
+            }
+            .app-store-icon {
+                margin-top: 1rem;
             }
 
         }

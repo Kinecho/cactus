@@ -29,6 +29,7 @@ window.__SENTRY__ = {
     dsn: 'https://d41561516bba4e04b0d10a1526c83c27@sentry.io/1490133',
 };
 window.__SENTRY_VERSION__ = 'test';
+window.__APP_STORE_URL__ = "https://apple.com/test"
 
 
 window.__FLAMELINK_FIREBASE_CONFIG__ = window.__FIREBASE_CONFIG__;
