@@ -18,7 +18,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can
                     start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
                 <h3>Interested in Push Notifications instead?</h3>
-                <p>Learn about <a href="/pricing">Cactus Premium</a></p>
+                <p>Learn about <a :href="appStoreUrl">Cactus for iOS</a>.</p>
                 <h3>Have feedback or questions?</h3>
                 <p>Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
             </div>
@@ -37,6 +37,7 @@ import {QueryParam} from '@shared/util/queryParams'
     import {confirmUnsubscribe} from '@web/mailchimp'
     import {AxiosError} from "axios"
     import {UnsubscribeResponse} from '@shared/mailchimp/models/UpdateStatusTypes'
+    import {Config} from "@web/config";
 
     export default Vue.extend({
         components: {
@@ -107,6 +108,11 @@ import {QueryParam} from '@shared/util/queryParams'
                         this.serverMessage = errorBody?.error || null
                     }
                 }
+            }
+        },
+        computed: {
+            appStoreUrl() {
+                return Config.appStoreUrl;
             }
         }
     })
