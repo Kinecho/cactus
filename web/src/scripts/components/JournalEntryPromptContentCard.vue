@@ -278,21 +278,19 @@
     @import "transitions";
 
     .sharing-card {
-        @include shadowbox;
-        max-width: 100vw;
-        max-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
         background-color: $darkerGreen;
-        justify-content: center;
+        max-width: 100vw;
+        min-height: 100vh;
         padding: 3.2rem;
         position: relative;
 
         @include r(600) {
+            align-items: center;
             border-radius: 12px;
             box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             min-height: 66rem;
             max-width: 48rem;
         }

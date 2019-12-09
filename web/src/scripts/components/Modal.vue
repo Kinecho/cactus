@@ -148,12 +148,17 @@
     @import "mixins";
 
     .modal-mask {
-        position: fixed;
-        z-index: 9998;
-        top: 0;
-        left: 0;
-        width: 100%;
+        align-items: center;
+        display: flex;
         height: 100%;
+        justify-content: center;
+        left: 0;
+        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        transition: opacity .3s ease;
+        width: 100%;
+        z-index: 9998;
 
         &.light {
             background-color: rgba(255, 255, 255, .6);
@@ -171,38 +176,33 @@
             }
         }
 
-
-        transition: opacity .3s ease;
-        overflow-y: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
         .modal-wrapper {
             .modal-container {
-                &.relative {
-                    position: relative;
-                }
-
                 margin: 0 auto;
                 border-radius: 2px;
                 transition: all .3s ease;
 
+                &.relative {
+                    position: relative;
+                }
+
                 .modal-close {
+                    position: fixed;
+                    top: .8rem;
+                    right: .8rem;
+                    z-index: 100;
+                    height: 4.8rem;
+                    width: 4.8rem;
+
+                    @include r(600) {
+                        position: absolute;
+                    }
+
                     &.mobileHidden {
                         @include maxW(600) {
                             display: none;
                         }
                     }
-
-                    position: absolute;
-                    top: .8rem;
-                    right: .8rem;
-
-                    z-index: 100;
-                    height: 4.8rem;
-                    width: 4.8rem;
-
 
                     svg {
                         height: 1.8rem;
@@ -210,18 +210,10 @@
                     }
                 }
 
-
-                .modal-header {
-
-
-                }
-
                 .modal-body {
                     margin: 0 0;
                     position: relative;
                 }
-
-
             }
         }
     }
