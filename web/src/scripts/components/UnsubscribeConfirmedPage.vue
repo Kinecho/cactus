@@ -1,19 +1,26 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="wrapper">
         <NavBar/>
         <div class="centered">
-            <div class="leftAlign" v-if="unsubscribeSuccess">
-                <h2>Notification Settings Updated</h2>
-                <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
-                <h3>Interested in Push Notifications instead?</h3>
-                <p>Learn about <a href="/pricing">Cactus Premium</a></p>
-                <h3>Have feedback or questions?</h3>
-                <p>Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
-            </div>
-            <div v-else>
+            <div v-if="error">
                 <h2>Sorry, we were unable to process your request.</h2>
                 <p>{{serverMessage}}</p>
                 You can always manage your notification preferences in your <a :href="accountPath">settings</a>.
+            </div>
+            <div class="leftAlign" v-else-if="!unsubscribeSuccess">
+                <h2>Unsubscribe</h2>
+                <p>Are you sure you want to unsubscribe {{email}} from Cactus reflection prompt email notifications?</p>
+                <button class="primary" @click="confirmUnsubscribe" :disabled="submitting">Yes, Unsubscribe Me</button>
+            </div>
+            <div class="leftAlign" v-else-if="unsubscribeSuccess">
+                <h2>Notification Settings Updated</h2>
+                <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can
+                    start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
+                <h3>Interested in Push Notifications instead?</h3>
+                <p>Learn about <a :href="appStoreUrl">Cactus for iOS</a>.</p>
+                <h3>Have feedback or questions?</h3>
+                <p>Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
             </div>
         </div>
 
@@ -27,33 +34,85 @@
     import {QueryParam} from "@shared/util/queryParams"
     import {PageRoute} from '@shared/PageRoutes'
     import NavBar from "@components/NavBar.vue";
+    import {confirmUnsubscribe} from '@web/mailchimp'
+    import {AxiosError} from "axios"
+    import {UnsubscribeResponse} from '@shared/mailchimp/models/UpdateStatusTypes'
+    import {Config} from "@web/config";
 
     export default Vue.extend({
         components: {
             NavBar,
         },
-        created(){
+        created() {
 
         },
         beforeMount() {
             this.email = getQueryParam(QueryParam.EMAIL);
             this.serverMessage = getQueryParam(QueryParam.MESSAGE);
-            this.unsubscribeSuccess = getQueryParam(QueryParam.UNSUBSCRIBE_SUCCESS) === "true"
+            this.mailchimpUniqueEmailId = getQueryParam(QueryParam.MAILCHIMP_EMAIL_ID);
+            if (getQueryParam(QueryParam.ALREADY_UNSUBSCRIBED) === "true") {
+                this.unsubscribeSuccess = true;
+            }
+            // let unsubSuccess = getQueryParam(QueryParam.UNSUBSCRIBE_SUCCESS) === "true"
+            if (getQueryParam(QueryParam.UNSUBSCRIBE_SUCCESS) === "false") {
+                this.error = true;
+            }
         },
-        props: {
-
-        },
-        data():{
-            email: string|null,
-            serverMessage: string|null,
+        props: {},
+        data(): {
+            email: string | null,
+            mailchimpUniqueEmailId: string | null,
+            serverMessage: string | null,
             unsubscribeSuccess: boolean,
-            accountPath: string
-        }{
+            accountPath: string,
+            error: boolean,
+            submitting: boolean,
+        } {
             return {
                 email: null,
+                mailchimpUniqueEmailId: null,
                 serverMessage: null,
-                unsubscribeSuccess: true,
-                accountPath: PageRoute.ACCOUNT
+                unsubscribeSuccess: false,
+                accountPath: PageRoute.ACCOUNT,
+                error: false,
+                submitting: false,
+            }
+        },
+        methods: {
+            async confirmUnsubscribe() {
+
+                let email = this.email;
+                let mcuid = this.mailchimpUniqueEmailId;
+                if (!email || !mcuid) {
+                    this.error = true;
+                    this.serverMessage = null;
+                    return;
+                }
+
+                this.submitting = true;
+
+                try {
+                    let response = await confirmUnsubscribe({email: email, mcuid: mcuid});
+                    console.log("Unsubscribe response", response);
+                    this.submitting = false;
+                    this.unsubscribeSuccess = response.success;
+                    this.error = false;
+                    this.serverMessage = null;
+                } catch (error) {
+                    this.submitting = false;
+                    this.unsubscribeSuccess = false;
+                    this.error = error = true;
+                    if (error.isAxiosError) {
+                        let axiosError = error as AxiosError;
+                        let errorBody = axiosError.response?.data as UnsubscribeResponse;
+                        this.serverMessage = errorBody?.error || null
+                    }
+                }
+            }
+        },
+        computed: {
+            appStoreUrl() {
+                return Config.appStoreUrl;
             }
         }
     })

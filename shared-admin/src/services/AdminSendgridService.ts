@@ -1,6 +1,8 @@
 import {CactusConfig} from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
-import {MagicLinkEmail, InvitationEmail} from "@admin/services/SendgridServiceTypes";
+import {MagicLinkEmail, 
+        InvitationEmail, 
+        FriendRequestEmail} from "@admin/services/SendgridServiceTypes";
 
 // declare type MailService = sgMail.MailService;
 
@@ -108,6 +110,39 @@ export default class AdminSendgridService {
                     email: options.fromEmail,
                     link: options.link,
                     message: options.message
+                }
+            };
+
+            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+
+            await sgMail.send(mailParams);
+
+            console.log("Sendgrid email sent successfully");
+            return true;
+
+        } catch (error) {
+            if (error.response && error.response.body) {
+                console.error("Failed to send Invitation email", error.response.body);
+            } else {
+                console.error("Failed to send Invitation email", error);
+            }
+            return false;
+        }
+
+    }
+
+    async sendFriendRequest(options: FriendRequestEmail): Promise<boolean> {
+
+        try {
+            const mailParams = {
+                to: options.toEmail,
+                from: {name: "Cactus", email: "help@cactus.app"},
+                templateId: this.config.sendgrid.template_ids.friend_request,
+                categories: ["FriendRequest"],
+                dynamicTemplateData: {
+                    name: options.fromName,
+                    email: options.fromEmail,
+                    link: options.link
                 }
             };
 

@@ -24,6 +24,7 @@ export interface SentryConfig {
 }
 
 //these variables come from the webpack Define plugin
+declare var __APP_CUSTOM_SCHEME__: string;
 declare var __GOOGLE_ANALYTICS_ID__: string;
 declare var __GOOGLE_OPTIMIZE_ID__: string;
 declare var __FACEBOOK_PIXEL_ID__: string;
@@ -32,6 +33,7 @@ declare var __FLAMELINK_FIREBASE_CONFIG__: FirebaseConfig;
 declare var __FLAMELINK_ENV_ID__: string;
 declare var __FIRST_PROMPT_ID__: string;
 declare var __CLOUDSPONGE_KEY__: string;
+declare var __APP_STORE_URL__: string;
 
 declare var __API_DOMAIN__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
@@ -42,6 +44,7 @@ declare var __SENTRY_VERSION__: string | undefined;
 
 declare var __BUILD_ENV__: string;
 export const Config = {
+    appCustomScheme: __APP_CUSTOM_SCHEME__,
     googleAnalyticsID: __GOOGLE_ANALYTICS_ID__,
     googleOptimizeID: __GOOGLE_OPTIMIZE_ID__,
     facebookPixelID: __FACEBOOK_PIXEL_ID__,
@@ -50,6 +53,7 @@ export const Config = {
     flamelinkEnvironmentId: __FLAMELINK_ENV_ID__,
     firstPromptId: __FIRST_PROMPT_ID__,
     cloudSpongeKey: __CLOUDSPONGE_KEY__,
+    appStoreUrl: __APP_STORE_URL__,
     apiDomain: __API_DOMAIN__,
     stripe: __STRIPE_CONFIG__,
     domain: __PUBLIC_DOMAIN__,

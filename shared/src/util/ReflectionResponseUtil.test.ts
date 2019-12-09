@@ -1,6 +1,7 @@
-import {calculateStreak} from "@shared/util/ReflectionResponseUtil";
+import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import {minusDays, minusHours, plusDays, plusHours} from "@shared/util/DateUtil";
+import {CactusElement} from "@shared/models/CactusElement";
 
 describe("calculate streak", () => {
     test("no reflections", () => {
@@ -163,4 +164,46 @@ describe("calculate streak", () => {
         const streak = calculateStreak([r1, r2], current);
         expect(streak).toEqual(7);
     });
+});
+
+describe("Get Element Accumulation Counts", () => {
+    test("valid counts", () => {
+
+        const r1 = new ReflectionResponse();
+        r1.cactusElement = CactusElement.energy;
+
+        const r2 = new ReflectionResponse();
+        r2.cactusElement = CactusElement.meaning;
+
+        const reflections: ReflectionResponse[] = [r1, r2];
+        const result = getElementAccumulationCounts(reflections);
+
+        expect(result).toEqual({
+            [CactusElement.meaning]: 1,
+            [CactusElement.energy]: 1,
+            [CactusElement.emotions]: 0,
+            [CactusElement.experience]: 0,
+            [CactusElement.relationships]: 0,
+        });
+    })
+
+    test("forced invalid count", () => {
+
+        const r1 = new ReflectionResponse();
+        r1.cactusElement = CactusElement.energy;
+
+        const r2 = new ReflectionResponse();
+        r2.cactusElement = "4" as CactusElement; //force
+
+        const reflections: ReflectionResponse[] = [r1, r2];
+        const result = getElementAccumulationCounts(reflections);
+
+        expect(result).toEqual({
+            [CactusElement.meaning]: 0,
+            [CactusElement.energy]: 1,
+            [CactusElement.emotions]: 0,
+            [CactusElement.experience]: 0,
+            [CactusElement.relationships]: 0,
+        });
+    })
 });

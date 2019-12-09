@@ -8,16 +8,12 @@ import {
     LoginEvent,
     MagicLinkRequest,
     MagicLinkResponse,
-    InvitationResponse
 } from "@shared/api/SignupEndpointTypes";
-import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import SocialInvite from "@shared/models/SocialInvite";
-import {generateReferralLink} from '@shared/util/SocialInviteUtil'
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
 import {getConfig} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import {appendDomain, getProviderDisplayName} from "@shared/util/StringUtil";
+import {appendDomain, appendQueryParams, getProviderDisplayName} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
@@ -28,6 +24,7 @@ import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {getISODateTime} from "@shared/util/DateUtil";
+import {QueryParam} from "@shared/util/queryParams";
 
 const Config = getConfig();
 
@@ -38,7 +35,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
     const payload: EmailStatusRequest = req.body;
     console.log("signupEndpoints.email-status", payload);
-    let response:EmailStatusResponse|undefined = undefined;
+    let response: EmailStatusResponse | undefined = undefined;
     const email = payload.email;
     let exists = false;
 
@@ -182,7 +179,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     });
 
     const url = appendDomain(payload.continuePath, Config.web.domain);
-
+    const sourceApp = payload.sourceApp || "web";
     const actionCodeSettings: ActionCodeSettings = {
         handleCodeInApp: true,
         url,
@@ -190,21 +187,21 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
     console.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
-        const link = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
-
-        console.log(`Generated signing link for ${email}: ${link}`);
+        let magicLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
+        magicLink = appendQueryParams(magicLink, {[QueryParam.SOURCE_APP]: sourceApp});
+        console.log(`Generated signing link for ${email}: ${magicLink}`);
 
         if (userExists || memberExists) {
             await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
-                link: link
+                link: magicLink
             });
         } else {
             await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
-                link: link
+                link: magicLink
             });
         }
 
@@ -366,86 +363,5 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
     }
 
 });
-
-app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload: SocialInviteRequest = req.body;
-    console.log("signupEndpoints.send-invite", payload);
-
-    const requestUser = await getAuthUser(req);
-    if (!requestUser || !requestUser.email) {
-        console.log("No auth user was found on the request");
-        resp.sendStatus(401);
-        return
-    }
-
-    const { toContact, message } = payload;
-
-    if (!toContact) {
-        console.error("signupEndpoints.send-invite: Email to send to was not provided in payload");
-        const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmail: ""};
-        resp.send(errorResponse);
-        return;
-    }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestUser.email);
-    
-    const response: InvitationResponse = {
-        success: true,
-        toEmail: toContact.email,
-        fromEmail: requestUser.email,
-        message: message
-    };
-    
-    const domain = Config.web.domain;
-    const protocol = Config.web.protocol;
-
-    const socialInvite = new SocialInvite();
-    if (member) {
-        socialInvite.senderMemberId = member.id;
-    }
-    socialInvite.recipientEmail = toContact.email;
-    await AdminSocialInviteService.getSharedInstance().save(socialInvite);
-    console.log(socialInvite.id);
-
-    const referralLink: string = 
-        generateReferralLink({ 
-            member: member, 
-            utm_source: 'cactus.app', 
-            utm_medium: 'invite-contact', 
-            domain: `${protocol}://${domain}`,
-            social_invite_id: (socialInvite ? socialInvite.id : undefined)
-        });
-
-    try {
-        await AdminSendgridService.getSharedInstance().sendInvitation({
-            toEmail: toContact.email,
-            fromEmail: requestUser.email,
-            fromName: member ? member.getFullName() : undefined,
-            message: message,
-            link: referralLink
-        });
-
-        if (response.success) {
-            // update the SocialInvite record with the sentAt date
-            socialInvite.sentAt = new Date();
-            await AdminSocialInviteService.getSharedInstance().save(socialInvite);
-        }
-
-        resp.send(response);
-    } catch (error) {
-        Sentry.captureException(error);
-        console.error(error);
-
-        resp.status(500).send({
-            toEmail: toContact.email,
-            sendSuccess: false,
-            error: error,
-        });
-    }
-
-
-    return;
-});
-
 
 export default app;

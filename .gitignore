@@ -9,6 +9,7 @@ scripts/output/
 
 # This is generated at deploy time
 apple-app-site-association
+apple-developer-domain-association.txt
 
 tmp/
 

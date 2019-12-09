@@ -1,14 +1,17 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="SocialFindFriends">
-        <div class="loading" v-if="loading">
-            <Spinner message="Loading" name="socialFindFriends"/>
+    <div class="socialFindFriends">
+
+        <!-- suggested friends / friend requests -->
+        <div class="socialFriendNotifications" v-if="member">
+            <friend-notifications v-bind:member="member"/>
         </div>
+
         <!-- find your friends -->
         <div class="find-friends">
-            <h1>Invite friends to reflect</h1>
+            <h2>Invite friends to reflect</h2>
             <p class="subtext">Share your unique link.</p>
             <div class="referral-link">
-                <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true">
+                <input type="text" class="link-input" name="referral-link" :value="referralLink" disabled="true"/>
                 <button class="copy" v-clipboard:copy="referralLink"
                         v-clipboard:success="handleCopySuccess"
                         v-clipboard:error="handleCopyError">
@@ -21,7 +24,12 @@
                     description="Boost your mood and emotional intelligence in one minute."
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
-                    inline-template>
+                    inline-template
+                    :networks="customNetworks"
+                    @change="socialSharingChange"
+                    @open="socialSharingOpen"
+                    @close="socialSharingClose"
+            >
                 <div class="btnContainer">
                     <network network="email">
                         <button aria-label="Email" class="secondary btn wiggle">
@@ -74,12 +82,18 @@
             <div class="results" v-if="importedContacts">
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <template v-for="contact in importedContacts">
-                    <SocialImportedContact 
-                        v-bind:contact="contact" 
-                        v-bind:member="member" />
+                    <SocialImportedContact
+                            v-bind:contact="contact"
+                            v-bind:member="member"/>
                 </template>
             </div>
         </div>
+
+        <!-- Friend List -->
+        <div class="socialFriendList">
+            <friend-list v-bind:member="member"/>
+        </div>
+
     </div>
 </template>
 
@@ -92,11 +106,11 @@
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
     import CactusMember from "@shared/models/CactusMember";
-    import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {PageRoute} from '@shared/PageRoutes';
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
+    import SocialFriendList from "@components/SocialFriendList.vue";
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
+    import {socialSharingEvent} from '@web/analytics'
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -104,46 +118,40 @@
     export default Vue.extend({
         components: {
             Spinner,
-            SocialImportedContact
+            SocialImportedContact,
+            FriendList: SocialFriendList,
+            FriendNotifications: SocialFriendNotifications
         },
         beforeMount() {
-            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
-                    this.member = member;
-                    this.authLoaded = true;
-
-                    if (!member) {
-                        window.location.href = PageRoute.HOME;
-                    }
-                }
-            })
-        },
-        created() {
             AddressBookService.sharedInstance.start();
         },
         mounted() {
             this.configureCloudsponge();
         },
-        destroyed() {
-            if (this.memberUnsubscriber) {
-                this.memberUnsubscriber();
+        props: {
+            member: {
+                type: Object as () => CactusMember,
+                required: true,
             }
         },
         data(): {
             authLoaded: boolean,
             copySucceeded: boolean,
-            member: CactusMember | undefined | null,
-            memberUnsubscriber: ListenerUnsubscriber | undefined,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
+            customNetworks: { [key: string]: { sharer: string, type: "popup" | "direct" } }
         } {
             return {
                 authLoaded: false,
                 copySucceeded: false,
                 importedContacts: undefined,
                 importedService: undefined,
-                member: undefined,
-                memberUnsubscriber: undefined,
+                customNetworks: {
+                    email: {
+                        "sharer": "mailto:?subject=@title&body=@url%0D%0A%0D%0A@description",
+                        "type": "popup"
+                    }
+                }
             }
         },
         methods: {
@@ -166,12 +174,19 @@
                 } else {
                     setTimeout(this.configureCloudsponge, 500);
                 }
+            },
+            socialSharingOpen(network: any, url: string) {
+                socialSharingEvent({type: "open", network, url});
+            },
+            socialSharingClose(network: any, url: string) {
+                socialSharingEvent({type: "close", network, url});
+            },
+            socialSharingChange(network: any, url: string) {
+                socialSharingEvent({type: "change", network, url});
             }
+
         },
         computed: {
-            loading(): boolean {
-                return !this.authLoaded;
-            },
             referralLink(): string | undefined {
                 if (this.member) {
                     return generateReferralLink({
@@ -185,21 +200,39 @@
         }
     })
 </script>
-<style lang="scss">
+
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
     @import "forms";
-    @import "social";
     @import "transitions";
 
-    .content {
-        flex-grow: 1;
-        padding: 2.4rem;
+    h1 {
+        margin-bottom: 4rem;
+    }
+
+    .socialFindFriends {
+        margin: 0 auto;
+        max-width: 60rem;
+
+        @include r(960) {
+            display: grid;
+            grid-column-gap: 6.4rem;
+            grid-template-columns: 1fr minmax(38rem, 33%);
+            margin: 0;
+            max-width: none;
+        }
     }
 
     .find-friends {
-        max-width: 70rem;
+        margin-bottom: 4.8rem;
+
+        @include r(600) {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            margin-bottom: 6.4rem;
+        }
     }
 
     .subtext {
@@ -209,6 +242,7 @@
 
     .referral-link {
         margin-bottom: 3.2rem;
+        max-width: 60rem;
         position: relative;
     }
 
@@ -256,41 +290,12 @@
         }
     }
 
-    .btnContainer {
-        display: flex;
-        flex-flow: column nowrap;
-        justify-content: center;
-
-        @include r(600) {
-            flex-flow: row wrap;
-            justify-content: flex-start;
-            margin-left: -.6rem;
-        }
-
-        .btn {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-            margin-bottom: .8rem;
-            width: 100%;
-
-            @include r(600) {
-                flex-grow: 0;
-                margin: 0 .4rem;
-                width: auto;
-            }
-        }
-
-        .icon {
-            height: 2rem;
-            margin-right: .8rem;
-            width: 2rem;
-        }
-    }
-
     .results h2 {
         margin: 4.8rem 0 .8rem;
-    }
 
+        @include r(600) {
+            margin: 6.4rem 0 .8rem;
+        }
+    }
 
 </style>

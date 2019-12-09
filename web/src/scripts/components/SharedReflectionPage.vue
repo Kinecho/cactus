@@ -4,7 +4,7 @@
         <div class="content">
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
-                <card :response="reflectionResponse" class="full" />
+                <card :response="reflectionResponse" class="full"/>
 
             </div>
             <sign-up-footer/>
@@ -25,6 +25,11 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import SignUpFooter from "@components/SignUpFooter.vue";
     import {formatDate} from '@shared/util/DateUtil'
+    import PromptContent from "@shared/models/PromptContent"
+    import ReflectionPrompt from "@shared/models/ReflectionPrompt"
+    import PromptContentService from '@web/services/PromptContentService'
+    import ReflectionPromptService from '@web/services/ReflectionPromptService'
+    import {getPromptQuestion, isBlank} from '@shared/util/StringUtil'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -55,7 +60,7 @@
             this.reflectionResponseId = responseId;
 
             this.responseUnsubscriber = ReflectionResponseService.sharedInstance.observeSharedReflection(responseId, {
-                onData: (reflectionResponse, error) => {
+                onData: async (reflectionResponse, error) => {
                     if (error || !reflectionResponse) {
                         this.error = "This reflection does not exist or you do not have permission to view it";
                         this.reflectionResponse = undefined;
@@ -63,6 +68,17 @@
                     }
                     this.error = undefined;
                     this.reflectionResponse = reflectionResponse;
+
+                    if (reflectionResponse?.promptId) {
+                        const [promptContent, prompt] = await Promise.all([
+                            PromptContentService.sharedInstance.getByPromptId(reflectionResponse.promptId),
+                            ReflectionPromptService.sharedInstance.getById(reflectionResponse.promptId)
+                        ]);
+
+                        this.promptContent = promptContent;
+                        this.prompt = prompt;
+                    }
+
                     this.updateDocumentMeta();
                 }
             })
@@ -81,16 +97,22 @@
 
                 if (this.reflectionResponse) {
                     let identifier = this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
-                    let question = this.reflectionResponse.promptQuestion;
+                    let question = getPromptQuestion({
+                        promptContent: this.promptContent,
+                        response: this.reflectionResponse,
+                        prompt: this.prompt
+                    });
                     let shareDate = formatDate(this.reflectionResponse.sharedAt, copy.settings.dates.longFormat);
 
-                    if (question) { question = question.trim(); }
+                    let title = `Read ${identifier}'s private note`;
+                    if (question) {
+                        title = `Read ${identifier}'s private note on '${question}'`;
+                    }
 
-                    let title = `Read ${identifier}'s private note on '${question}'`;
                     let description = `This reflection note was shared on ${shareDate}.`;
 
                     if (ogTitleTag && ogDescriptionTag) {
-                        document.title = title
+                        document.title = title;
                         ogTitleTag.setAttribute("content", `${title}`);
                         ogDescriptionTag.setAttribute("content", `${description}`);
 
@@ -107,12 +129,16 @@
             error: string | undefined,
             responseUnsubscriber: ListenerUnsubscriber | undefined,
             reflectionResponse: ReflectionResponse | undefined,
+            promptContent: PromptContent | undefined,
+            prompt: ReflectionPrompt | undefined,
         } {
             return {
                 reflectionResponseId: undefined,
                 error: undefined,
                 responseUnsubscriber: undefined,
                 reflectionResponse: undefined,
+                prompt: undefined,
+                promptContent: undefined,
             }
         }
     })
@@ -154,7 +180,7 @@
         width: 100%;
 
         @include r(768) {
-          border-radius: 6px;
+            border-radius: 6px;
         }
     }
 

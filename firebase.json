@@ -35,7 +35,12 @@
             "bash ./sentry-web-start.sh",
             "npm --prefix ./web run config:get",
             "npm --prefix ./web run build:firebase",
-            "mkdir web/public/.well-known/; cp ./apple-app-site-association ./web/public/.well-known/; cp ./apple-app-site-association ./web/public/ ; cp web/apple-developer-merchantid-domain-association web/public/.well-known",
+            "mkdir web/public/.well-known/",
+            "cp ./apple-app-site-association ./web/public/.well-known/",
+            "cp ./apple-app-site-association ./web/public/",
+            "cp web/apple-developer-merchantid-domain-association web/public/.well-known",
+            "cp web/apple-developer-domain-association.txt web/public/",
+            "cp web/apple-developer-domain-association.txt web/public/.well-known",
             "bash ./sentry-web-upload.sh"
         ],
         "postdeploy": [
@@ -87,6 +92,10 @@
             }
         ],
         "rewrites": [
+            {
+                "source": "/ios-login-continue",
+                "destination": "/ios_login_continue.html"
+            },
             {
                 "source": "/pricing",
                 "destination": "/pricing.html"

@@ -11,3 +11,10 @@ export interface InvitationEmail {
     link: string,
     message?: string,
 }
+
+export interface FriendRequestEmail {
+    toEmail: string,
+    fromEmail: string,
+    fromName: string | undefined,
+    link: string
+}

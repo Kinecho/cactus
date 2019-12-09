@@ -1,6 +1,7 @@
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import {getStreak} from "@shared/util/DateUtil";
 import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
+import {CactusElement} from "@shared/models/CactusElement";
 
 
 export function calculateStreak(reflections: ReflectionResponse[], start?: Date | undefined): number {
@@ -33,7 +34,7 @@ export function getElementAccumulationCounts(reflections: ReflectionResponse[]):
 
     // const reflections = await this.getAllReflections();
     return reflections.reduce((current, reflection) => {
-        if (reflection.cactusElement) {
+        if (reflection.cactusElement && reflection.cactusElement in CactusElement) {
             current[reflection.cactusElement] += 1
         }
 

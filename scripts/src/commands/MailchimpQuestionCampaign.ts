@@ -4,6 +4,7 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {
     CampaignContentRequest,
     CampaignContent,
+    CampaignTracking,
     CreateCampaignRequest,
     CreateCampaignRequestRecipients,
     SegmentCondition, SegmentConditionOption,
@@ -362,6 +363,11 @@ export default class MailchimpQuestionCampaign implements Command {
             },)
         }
 
+        const campaignTracking: CampaignTracking = {
+           html_clicks: false,
+           text_clicks: false 
+        };
+
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: campaignRecipients,
@@ -371,7 +377,8 @@ export default class MailchimpQuestionCampaign implements Command {
                 subject_line: reminderConfig.subjectLine,
                 from_name: reminderConfig.fromName,
                 preview_text: reminderConfig.previewText,
-            }
+            },
+            tracking: campaignTracking
         };
 
         const confirmResponses = await prompts([{
@@ -625,6 +632,11 @@ export default class MailchimpQuestionCampaign implements Command {
             }
         }
 
+        const campaignTracking: CampaignTracking = {
+           html_clicks: false,
+           text_clicks: false 
+        };
+
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: campaignRecipients,
@@ -635,6 +647,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 from_name: contentResponse.fromName,
                 preview_text: contentResponse.previewText,
             },
+            tracking: campaignTracking
         };
 
         const confirmResponses = await prompts([{

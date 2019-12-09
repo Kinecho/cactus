@@ -13,6 +13,7 @@ import {
 } from "@shared/types/FirestoreTypes";
 import {fromDocumentSnapshot, fromQueryDocumentSnapshot, fromQuerySnapshot} from "@shared/util/FirestoreUtil";
 import {addModal, handleDatabaseError, showModal} from "@web/util";
+export import Transaction = firebaseClient.firestore.Transaction;
 import CollectionReference = firebaseClient.firestore.CollectionReference;
 import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
@@ -125,6 +126,9 @@ export default class FirestoreService {
                 doc = collectionRef.doc(model.id);
             } else {
                 model.id = doc.id;
+            }
+
+            if (!model.createdAt) {
                 model.createdAt = new Date();
             }
 

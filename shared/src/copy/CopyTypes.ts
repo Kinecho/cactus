@@ -62,7 +62,6 @@ export interface AuthenticationCopy {
     CONNECTED_ACCOUNTS: string,
     AN_ANONYMOUS_USER: string,
     SIGN_UP_FREE: string,
-
     magicLinkSuccess(email: string): string;
 
 }

@@ -206,7 +206,7 @@
     })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";

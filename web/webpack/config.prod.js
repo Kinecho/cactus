@@ -1,4 +1,5 @@
 module.exports = {
+    __APP_CUSTOM_SCHEME__: "app.cactus",
     __GOOGLE_ANALYTICS_ID__: 'UA-127159143-5',
     __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
     __FACEBOOK_PIXEL_ID__: '1422468787913495',
@@ -37,5 +38,6 @@ module.exports = {
     __SENTRY__: {
         dsn: 'https://d41561516bba4e04b0d10a1526c83c27@sentry.io/1490133',
     },
-    __CLOUDSPONGE_KEY__: "PwpSNjcoLLh9EdPmpKxXVw"
+    __CLOUDSPONGE_KEY__: "PwpSNjcoLLh9EdPmpKxXVw",
+    __APP_STORE_URL__: "https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514?ls=1"
 }

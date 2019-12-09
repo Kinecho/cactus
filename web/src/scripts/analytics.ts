@@ -136,7 +136,10 @@ export function setUser(user?: User | null) {
 export function fireConfirmedSignupEvent() {
     /* Facebook */
     if (window.fbq) {
-        window.fbq('track','CompleteRegistration');
+        window.fbq('track','CompleteRegistration', {
+            value: 0.00,
+            currency: 'USD'
+        });
     }
 }
 
@@ -145,6 +148,13 @@ export function fireSignupEvent() {
     if (window.fbq) {
         window.fbq('track','Lead');
     }
+}
+
+export function socialSharingEvent(options: {type: "open"|"close"|"change", network?: string, url?: string}) {
+    gtag('event', options.type, {
+        event_category: "social_share",
+        event_label: options.network
+    });
 }
 
 function createGTag() {

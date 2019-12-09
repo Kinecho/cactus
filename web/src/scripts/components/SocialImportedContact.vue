@@ -29,57 +29,13 @@
             :showModal="inputNameModalVisible"
             @close="hideInputNameModal"/>
     </div>
-    <!--
-    <div class="contactCard">
-        <div class="avatar">
-            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-        </div>
-        <div class="contactInfo">
-            <p class="name">James Brown</p>
-            <p class="email">james@brown.com</p>
-        </div>
-        <button class="secondary small">Add Friend</button>
-    </div>
-    <div class="contactCard">
-        <div class="avatar">
-            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-        </div>
-        <div class="contactInfo">
-            <p class="name">James Brown</p>
-            <p class="email">james@brown.com</p>
-        </div>
-        <button class="secondary small">Requested</button>
-    </div>
-    <div class="contactCard">
-        <div class="avatar">
-            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-        </div>
-        <div class="contactInfo">
-            <p class="name">James Brown</p>
-            <p class="email">james@brown.com</p>
-        </div>
-        <p class="friendsStatus">
-            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#FDBCA3" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-            Friends
-        </p>
-    </div>
-    <div class="contactCard">
-        <div class="avatar">
-            <img src="https://placekitten.com/44/44" alt="User avatar"/>
-        </div>
-        <div class="contactInfo">
-            <p class="name">James Brown</p>
-            <p class="email">james@brown.com</p>
-        </div>
-        <button class="secondary small">Invited</button>
-    </div>-->
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
     import {InviteResult} from "@shared/types/SocialInviteTypes";
-    import {sendInvite} from '@web/invite';
+    import {sendInvite} from '@web/social';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
@@ -167,7 +123,6 @@
         align-items: center;
         display: flex;
         max-width: 60rem;
-        padding: 1.6rem 0;
 
         button {
             flex-grow: 0;
@@ -255,5 +210,4 @@
         margin-right: .8rem;
         width: 1.6rem;
     }
-
 </style>

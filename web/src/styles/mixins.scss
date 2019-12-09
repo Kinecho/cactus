@@ -310,7 +310,7 @@ $widthDesktop: $widthXL;
 @mixin smallButton() {
   box-shadow: none;
   font: 1.6rem $font-stack;
-  padding: 1rem 1.6rem;
+  padding: .8rem 1.6rem;
 }
 
 @mixin iconButton() {

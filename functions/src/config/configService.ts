@@ -137,7 +137,8 @@ const defaultTestConfig: CactusConfig = {
         template_ids: {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
-            invitation: '1234invite'
+            invitation: '1234invite',
+            friend_request: '1234fr'
         }
     },
     sheets: {

@@ -11,9 +11,11 @@ export enum Endpoint {
     checkoutSessions = "checkout/sessions",
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
-    sendInvite = "signup/send-invite",
     updateSubscriberStatus = "mailchimp/status",
+    unsubscribeConfirm = "mailchimp/unsubscribe/confirm",
     loginEvent = "signup/login-event",
+    sendInvite = "social/send-invite",
+    notifyFriendRequest = "social/notify-friend-request"
 }
 
 export function initializeAxios(): AxiosInstance {

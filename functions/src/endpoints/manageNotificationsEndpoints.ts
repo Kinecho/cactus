@@ -5,106 +5,66 @@ import {PageRoute} from "@shared/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
-import {UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
-import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
-import chalk from "chalk";
-import CactusMember from "@shared/models/CactusMember";
-import AdminSlackService, {SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
-import {getISODate} from "@shared/util/DateUtil";
+import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 
 const app = express();
-
+// const config = getConfig();
 // Automatically allow cross-origin requests
 app.use(cors({origin: true}));
 
 
 app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, res: express.Response) => {
-    const mailchimpId = req.query.mcuid;
-    let email: string|undefined;
+    const mailchimpUniqueId = req.query.mcuid;
+    let email: string | undefined;
+    let mailchimpFullId: string | undefined;
+    let listMember: ListMember | undefined;
+    // const audienceId = config.mailchimp.audience_id;
+    // const mailchimpAccountId = '676af7cc149986aaec398daa7';
+    // const mailchimpUrl = `https://app.us20.list-manage.com/unsubscribe?u=${mailchimpAccountId}&id=${audienceId}`;
+    // res.status(301).redirect(mailchimpUrl);
+    // return;
 
-    if (!mailchimpId){
+    if (!mailchimpUniqueId) {
         const errorMessage = "The link you clicked was invalid or may have expired. Please try again.";
         res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
         return
     }
 
     //first, get via our system.
-    if (mailchimpId) {
-        const mailchimpMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpId);
-        email = mailchimpMember?.email;
+    if (mailchimpUniqueId) {
+        const cactusMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpUniqueId);
+        email = cactusMember?.email;
+        mailchimpFullId = cactusMember?.mailchimpListMember?.id;
     }
 
     //if we don't have an email still, try to fetch from mailchimp
-    if (!email){
-        const mailchimpListMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mailchimpId);
-        email = mailchimpListMember?.email_address;
+    if (!email || !mailchimpFullId) {
+        listMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mailchimpUniqueId);
+        email = listMember?.email_address;
+        mailchimpFullId = listMember?.id
     }
 
-    if (!email){
+
+    console.log("mailchimpFullId", mailchimpFullId);
+    console.log("mailchimp unique id", mailchimpUniqueId);
+
+
+    if (!email) {
         const errorMessage = "We were unable to find a member associated with the link you clicked.";
         res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
         return
     }
 
-    console.log(`unsubscribing ${email} from mailchimp`);
-    const statusRequest: UpdateStatusRequest = {
-        status: ListMemberStatus.unsubscribed,
-        email,
-    };
-    console.log(chalk.yellow("sending status request"), JSON.stringify(statusRequest, null, 2));
-    // MailchimpService.getSharedInstance()
-    const response = await MailchimpService.getSharedInstance().updateMemberStatus(statusRequest);
-    let cactusMember: CactusMember | undefined = undefined;
-    if (response.listMember) {
-        cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(response.listMember);
-        console.log("updated member after changing the status", cactusMember);
+    if (!listMember) {
+        listMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mailchimpUniqueId);
     }
 
-    const attachments: SlackAttachment[] = [];
-    const fields: SlackAttachmentField[] = [
-        {
-            title: "Email",
-            value: statusRequest.email,
-            short: false,
-        },
-        {
-            title: "Reason Code",
-            value: `Unsubscribed from an email`,
-            short: false,
-        },
+    console.log("list member status", listMember?.status);
 
-        {
-            title: "Cactus Member ID",
-            value: (cactusMember ? cactusMember.id : "") || "not found",
-            short: false,
-        },
-        {
-            title: "Sign Up Date",
-            value: (cactusMember && cactusMember.signupConfirmedAt) ? getISODate(cactusMember.signupConfirmedAt) : "Unknown"
-        }
-    ];
+    const isUnsubscribed = listMember?.status === ListMemberStatus.unsubscribed;
 
-    attachments.push({
-        title: `${statusRequest.email} ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
-        fields: fields
-    });
-
-    const slackMessage = {
-        text: `User Has manually ${statusRequest.status === ListMemberStatus.unsubscribed ? "Unsubscribed" : "Re-Subscribed"}`,
-        attachments
-    };
-
-    await AdminSlackService.getSharedInstance().sendActivityMessage(slackMessage);
-
-
-    if (response.success){
-        res.status(302);
-        const successMessage = "You have successfully unsubscribed";
-        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(successMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=true`)
-    } else {
-        const errorMessage = `Something went wrong while unsubscribing you from our emails. \n${response.error?.message ? response.error.message : response.error}`.trim();
-        res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.MESSAGE}=${encodeURIComponent(errorMessage)}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.UNSUBSCRIBE_SUCCESS}=false`)
-    }
+    res.redirect(`${getHostname()}${PageRoute.UNSUBSCRIBE_SUCCESS}?${QueryParam.ALREADY_UNSUBSCRIBED}=${isUnsubscribed}&${QueryParam.EMAIL}=${encodeURIComponent(email)}&${QueryParam.MAILCHIMP_EMAIL_ID}=${encodeURIComponent(mailchimpUniqueId)}`)
+    return;
 });
 
 export default app

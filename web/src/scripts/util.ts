@@ -203,9 +203,9 @@ export function addModal(modalId: string, options: {
     return document.body.appendChild(modal);
 }
 
-export function getAllQueryParams(): { [name: string]: string } | undefined {
+export function getAllQueryParams(url: string = window.location.search): { [name: string]: string } | undefined {
     try {
-        return qs.parse(window.location.search, {
+        return qs.parse(url, {
             ignoreQueryPrefix: true
         });
     } catch (e) {
