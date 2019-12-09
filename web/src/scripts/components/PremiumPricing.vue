@@ -15,29 +15,32 @@
             <section id="free" class="tab-panel free-panel">
                 <h3 class="tab-header free-header">Free</h3>
                 <ul>
-                    <li>Available on web, iPhone, and&nbsp;iPad</li>
+                    <li>Available on web, iPhone, &amp;&nbsp;iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>256-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email and&nbsp;push</li>
+                    <li>Notifications via email &amp;&nbsp;push</li>
                 </ul>
                 <button class="secondary" @click="goToSignup">Sign Up Free</button>
             </section>
 
             <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
-            <label class="tab-label premium-tab" for="tab2">Premium<span class="newStatus">New</span></label>
+            <label class="tab-label premium-tab" for="tab2">Premium</label>
             <section id="premium" class="tab-panel premium-panel">
-                <h3 class="tab-header premium-header">Premium<span class="newStatus">Coming Soon</span></h3>
+                <h3 class="tab-header premium-header">Premium</h3>
                 <ul>
-                    <li>Available on web, iPhone, and&nbsp;iPad</li>
+                    <li>Available on web, iPhone, &amp;&nbsp;iPad</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>256-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email and push</li>
-                    <li><span class="enhance">Personalized prompts</span></li>
-                    <li><span class="enhance">Reminder scheduling</span></li>
-                    <li><span class="enhance">Backup to DayOne, Dropbox,&nbsp;more</span></li>
-                    <li class="heart"><span class="enhance">Supports Cactus development</span></li>
+                    <li>Notifications via email &amp; push</li>
+                    <li class="heart">Supports Cactus development</li>
+                </ul>
+                <h4>Coming Soon</h4>
+                <ul>
+                    <li>Personalized prompts</li>
+                    <li>Reminder scheduling</li>
+                    <li>Backup to DayOne, Dropbox, &amp;&nbsp;more</li>
                 </ul>
                 <div class="flexContainer">
                 <template v-for="plan in plans">
@@ -245,9 +248,8 @@
                   width: 109%;
               }
               @include r(960) {
-                  left: 3%;
                   top: 3rem;
-                  width: 75%;
+                  width: 90%;
               }
           }
       }
@@ -259,7 +261,7 @@
           grid-template-areas:
               "tab1 tab2"
               "tabpanel tabpanel";
-          grid-template-columns: 48% 52%;
+          grid-template-columns: 50%;
           position: relative;
           text-align: left;
 
@@ -377,6 +379,13 @@
                   border-radius: 1.8rem 1.8rem 0 0;
                   grid-area: tabpanel2;
               }
+          }
+          @include r(1140) {
+              white-space: nowrap;
+          }
+
+          h4 {
+              margin-bottom: 1.6rem;
           }
 
           ul {
