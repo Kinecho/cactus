@@ -17,7 +17,7 @@ import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {fireConfirmedSignupEvent} from "@web/analytics";
+import {fireSignupEvent, fireConfirmedSignupEvent} from "@web/analytics";
 import AuthUI = firebaseui.auth.AuthUI;
 
 const firebase = initializeFirebase();
