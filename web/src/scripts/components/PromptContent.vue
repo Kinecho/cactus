@@ -20,7 +20,7 @@
                     <button aria-label="Back" class="share tertiary back" @click="showSharing = false" v-show="showSharing">
                         <div class="arrow-wrapper">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
-                                <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                                <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                             </svg>
                         </div>
                         <span class="buttonText">Back</span>
@@ -943,6 +943,14 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
+        svg {
+            fill: $white;
+
+            @include r(600) {
+                fill: $darkGreen;
+            }
+        }
     }
 
     .wiggle:hover svg {
