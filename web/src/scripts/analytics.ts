@@ -136,7 +136,10 @@ export function setUser(user?: User | null) {
 export function fireConfirmedSignupEvent() {
     /* Facebook */
     if (window.fbq) {
-        window.fbq('track','CompleteRegistration');
+        window.fbq('track','CompleteRegistration', {
+            value: 0.00,
+            currency: 'USD'
+        });
     }
 }
 
