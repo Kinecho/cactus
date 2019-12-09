@@ -326,7 +326,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 console.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
-                this.flipped = true;
+                window.location.href = PageRoute.SIGNUP;
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
@@ -632,7 +632,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
         }
 
-        @include r(374) {
+        @include r(600) {
             flex-direction: row;
 
             .authBtn {
