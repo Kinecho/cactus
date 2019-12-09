@@ -371,7 +371,7 @@ export async function sendLoginEvent(args: {
 
                         /* Note: This may move to the backend later when we have time to 
                            implement the Facebook Ads API */
-                        if (event.isNewUser && event.providerId) {
+                        if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
                             // new user who did not previous enter their email address
                             fireSignupEvent();
                         }
@@ -398,4 +398,13 @@ export async function sendLoginEvent(args: {
 
 
     });
+}
+
+export function isThirdPartySignIn(provider: string | undefined): boolean {
+    switch (provider) {
+        case "password":
+            return false;
+        default:
+            return true;
+    }
 }
