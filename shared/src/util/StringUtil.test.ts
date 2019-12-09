@@ -1,11 +1,19 @@
 import {
     appendDomain,
     appendQueryParams,
-    destructureDisplayName, getCharacterCount,
-    getFilenameFromInput, getIntegerFromStringBetween,
-    getUrlFromInput, getWordCount, isBlank,
+    destructureDisplayName,
+    getCharacterCount,
+    getFilenameFromInput,
+    getIntegerFromStringBetween,
+    getPromptQuestion,
+    getUrlFromInput,
+    getWordCount,
+    isBlank,
     stripQueryParams
 } from "@shared/util/StringUtil";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import ReflectionResponse from "@shared/models/ReflectionResponse";
+import PromptContent, {ContentType} from "@shared/models/PromptContent";
 
 describe("get filename from input", () => {
     test("all lowercase, valid", () => {
@@ -264,4 +272,44 @@ test("isBlank", () => {
     expect(isBlank(undefined)).toBeTruthy();
     expect(isBlank("n")).toBeFalsy();
     expect(isBlank("  akdljafs ")).toBeFalsy();
+});
+
+describe("Get question text", () => {
+    test("only prompt", () => {
+        const prompt = new ReflectionPrompt();
+        prompt.question = "test question";
+        expect(getPromptQuestion({prompt})).toEqual("test question");
+    });
+
+    test("only prompt - trims spaces", () => {
+        const prompt = new ReflectionPrompt();
+        prompt.question = "  test question  ";
+        expect(getPromptQuestion({prompt})).toEqual("test question");
+    });
+
+    test("prompt & response", () => {
+        const response = new ReflectionResponse();
+        response.promptQuestion = "response question";
+
+        const prompt = new ReflectionPrompt();
+        prompt.question = "test question";
+        expect(getPromptQuestion({prompt, response})).toEqual("test question");
+    });
+
+    test("prompt & response & content", () => {
+        const response = new ReflectionResponse();
+        response.promptQuestion = "response question";
+
+        const promptContent = new PromptContent();
+        promptContent.content = [{contentType: ContentType.reflect, text: "Content Question"}];
+
+        const prompt = new ReflectionPrompt();
+        prompt.question = "test question";
+        expect(getPromptQuestion({prompt, response, promptContent})).toEqual("Content Question");
+    });
+
+
+    test("no arguments", () => {
+        expect(getPromptQuestion({})).toBeUndefined();
+    });
 });
