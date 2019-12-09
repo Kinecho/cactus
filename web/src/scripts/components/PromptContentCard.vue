@@ -616,6 +616,7 @@
 
     .element-container {
         cursor: pointer;
+        text-align: center;
     }
 
     .text {
