@@ -41,7 +41,7 @@ module.exports = {
         dsn: 'https://d41561516bba4e04b0d10a1526c83c27@sentry.io/1490133',
     },
     __CLOUDSPONGE_KEY__: "PwpSNjcoLLh9EdPmpKxXVw",
-    __APP_STORE_URL__: "https://apps.apple.com/us/app/cactus/id1474513514"
+    __APP_STORE_URL__: "https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514?ls=1"
 }
 
 
