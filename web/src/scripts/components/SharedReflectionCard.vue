@@ -32,20 +32,24 @@
     export default Vue.extend({
         async beforeMount() {
             if (!this.memberProfile && this.response?.cactusMemberId) {
-                this.memberProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
+                this.fetchedProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
+            } else if (this.memberProfile) {
+                this.fetchedProfile = this.memberProfile;
             }
         },
         props: {
-            response: ReflectionResponse,
-            memberProfile: MemberProfile
+            response: Object as () => ReflectionResponse,
+            memberProfile: Object as () => MemberProfile
         },
         data(): {
             resizeListener: any | undefined,
-            deviceWidth: number
+            deviceWidth: number,
+            fetchedProfile: MemberProfile | undefined
         } {
             return {
                 resizeListener: undefined,
-                deviceWidth: 0
+                deviceWidth: 0,
+                fetchedProfile: undefined
             }
         },
         destroyed() {
@@ -63,13 +67,13 @@
             memberName(): string | undefined {
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.memberProfile) {
-                    return this.memberProfile.getFullName();
+                } else if (this.fetchedProfile) {
+                    return this.fetchedProfile.getFullName();
                 }
             },
             memberEmail(): string | undefined {
-                if (this.memberProfile?.email) {
-                    return this.memberProfile.email;
+                if (this.fetchedProfile?.email) {
+                    return this.fetchedProfile.email;
                 } else {
                     return this.response.memberEmail;
                 }
@@ -79,7 +83,7 @@
                 return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
             },
             avatarUrl(): string {
-                return this.memberProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
+                return this.fetchedProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
             }
         }
     })
