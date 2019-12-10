@@ -36,22 +36,21 @@
             FlamelinkImage,
         },
         async beforeMount() {
-            if (this.response?.cactusMemberId) {
+            if (!this.memberProfile && this.response?.cactusMemberId) {
                 this.memberProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
             }
         },
         props: {
             response: ReflectionResponse
+            memberProfile: MemberProfile
         },
         data(): {
             resizeListener: any | undefined,
-            deviceWidth: number,
-            memberProfile: undefined | MemberProfile
+            deviceWidth: number
         } {
             return {
                 resizeListener: undefined,
-                deviceWidth: 0,
-                memberProfile: undefined
+                deviceWidth: 0
             }
         },
         destroyed() {
