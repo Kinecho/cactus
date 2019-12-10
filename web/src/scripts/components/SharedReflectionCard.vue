@@ -5,7 +5,7 @@
                 <img :src="avatarUrl" alt="User Avatar" />
             </div>
             <div class="info">
-                <p class="name">{{memberName}}</p>
+                <p class="name" v-if="memberName">{{memberName}}</p>
                 <p class="email" v-if="!memberName">{{memberEmail}}</p>
                 <p class="date">{{shareDate}}</p>
             </div>
@@ -23,8 +23,6 @@
     import {formatDate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
-    import FlamelinkImage from '@components/FlamelinkImage.vue'
-    import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
@@ -32,16 +30,13 @@
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
-        components: {
-            FlamelinkImage,
-        },
         async beforeMount() {
             if (!this.memberProfile && this.response?.cactusMemberId) {
                 this.memberProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
             }
         },
         props: {
-            response: ReflectionResponse
+            response: ReflectionResponse,
             memberProfile: MemberProfile
         },
         data(): {
@@ -73,7 +68,7 @@
                 }
             },
             memberEmail(): string | undefined {
-                if (this.memberProfile) {
+                if (this.memberProfile?.email) {
                     return this.memberProfile.email;
                 } else {
                     return this.response.memberEmail;
