@@ -93,6 +93,7 @@
         }
 
         .element-icon {
+            text-align: center;
             text-decoration: none;
             transition: transform .3s;
 
