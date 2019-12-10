@@ -556,6 +556,7 @@
             background: transparent;
             box-shadow: none;
             color: $white;
+            min-height: 0;
             padding-top: 4rem;
 
             .tight {
