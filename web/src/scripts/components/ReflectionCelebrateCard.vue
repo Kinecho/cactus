@@ -327,6 +327,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             showLogin() {
                 window.location.href = PageRoute.SIGNUP;
+                window.location.href = PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going.")
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
