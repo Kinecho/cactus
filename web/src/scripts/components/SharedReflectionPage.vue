@@ -4,8 +4,7 @@
         <div class="content">
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
-                <card :response="reflectionResponse" class="full"/>
-
+                <card :response="reflectionResponse" class="full" v-if="reflectionResponse"/>
             </div>
             <sign-up-footer/>
         </div>

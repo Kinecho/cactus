@@ -2,7 +2,7 @@
     <div class="shared-reflection-card">
         <div class="profile">
             <div class="avatar">
-                <flamelink-image :image="avatarData.image" alt="User Avatar"/>
+                <img :src="avatarUrl" alt="User Avatar" />
             </div>
             <div class="info">
                 <p class="name">{{memberName}}</p>
@@ -26,6 +26,8 @@
     import FlamelinkImage from '@components/FlamelinkImage.vue'
     import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from '@web/services/MemberProfileService';
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -33,8 +35,10 @@
         components: {
             FlamelinkImage,
         },
-        created() {
-
+        async beforeMount() {
+            if (this.response?.cactusMemberId) {
+                this.memberProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
+            }
         },
         props: {
             response: ReflectionResponse
@@ -42,10 +46,12 @@
         data(): {
             resizeListener: any | undefined,
             deviceWidth: number,
+            memberProfile: undefined | MemberProfile
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
+                memberProfile: undefined
             }
         },
         destroyed() {
@@ -63,27 +69,23 @@
             memberName(): string | undefined {
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.response && this.response.getMemberFullName()) {
-                    return this.response.getMemberFullName();
+                } else if (this.memberProfile) {
+                    return this.memberProfile.getFullName();
                 }
             },
             memberEmail(): string | undefined {
-                return this.response.memberEmail;
+                if (this.memberProfile) {
+                    return this.memberProfile.email;
+                } else {
+                    return this.response.memberEmail;
+                }
             },
             shareDate(): string | undefined {
                 const format = this.deviceWidth > MOBILE_BREAKPOINT_PX ? copy.settings.dates.longFormat : copy.settings.dates.shortFormat;
                 return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
             },
-            avatarData(): {
-                image: any | Image,
-            } {
-                const image: Image = {
-                    url: getRandomAvatar(this.response.memberEmail),
-                };
-
-                return {
-                    image,
-                }
+            avatarUrl(): string {
+                return this.memberProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
             }
         }
     })
@@ -158,6 +160,7 @@
                 img {
                     width: 100%;
                     height: 100%;
+                    border-radius: 50%;
                 }
             }
 
