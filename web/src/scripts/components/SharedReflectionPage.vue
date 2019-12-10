@@ -72,8 +72,8 @@
 
                     if (this.reflectionResponse?.promptId) {
                         const [promptContent, prompt] = await Promise.all([
-                            PromptContentService.sharedInstance.getByPromptId(reflectionResponse.promptId),
-                            ReflectionPromptService.sharedInstance.getById(reflectionResponse.promptId)
+                            PromptContentService.sharedInstance.getByPromptId(this.reflectionResponse.promptId),
+                            ReflectionPromptService.sharedInstance.getById(this.reflectionResponse.promptId)
                         ]);
 
                         this.promptContent = promptContent;
