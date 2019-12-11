@@ -2,10 +2,10 @@
     <div class="shared-reflection-card">
         <div class="profile">
             <div class="avatar">
-                <flamelink-image :image="avatarData.image" alt="User Avatar"/>
+                <img :src="avatarUrl" alt="User Avatar" />
             </div>
             <div class="info">
-                <p class="name">{{memberName}}</p>
+                <p class="name" v-if="memberName">{{memberName}}</p>
                 <p class="email" v-if="!memberName">{{memberEmail}}</p>
                 <p class="date">{{shareDate}}</p>
             </div>
@@ -23,30 +23,32 @@
     import {formatDate} from '@shared/util/DateUtil'
     import CopyService from "@shared/copy/CopyService"
     import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from "@web/DeviceUtil"
-    import FlamelinkImage from '@components/FlamelinkImage.vue'
-    import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from '@web/services/MemberProfileService';
     import {preventOrphanedWords} from "@shared/util/StringUtil"
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
-        components: {
-            FlamelinkImage,
-        },
-        created() {
-
+        async beforeMount() {
+            if (!this.fetchedProfile && this.response?.cactusMemberId) {
+                this.fetchedProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
+            }
         },
         props: {
-            response: ReflectionResponse
+            response: Object as () => ReflectionResponse,
+            memberProfile: Object as () => MemberProfile
         },
         data(): {
             resizeListener: any | undefined,
             deviceWidth: number,
+            fetchedProfile: MemberProfile | undefined
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
+                fetchedProfile: this.memberProfile
             }
         },
         destroyed() {
@@ -64,27 +66,23 @@
             memberName(): string | undefined {
                 if (this.response && this.response.anonymous) {
                     return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.response && this.response.getMemberFullName()) {
-                    return this.response.getMemberFullName();
+                } else if (this.fetchedProfile) {
+                    return this.fetchedProfile.getFullName();
                 }
             },
             memberEmail(): string | undefined {
-                return this.response.memberEmail;
+                if (this.fetchedProfile?.email) {
+                    return this.fetchedProfile.email;
+                } else {
+                    return this.response.memberEmail;
+                }
             },
             shareDate(): string | undefined {
                 const format = this.deviceWidth > MOBILE_BREAKPOINT_PX ? copy.settings.dates.longFormat : copy.settings.dates.shortFormat;
                 return this.response && this.response.sharedAt && `Shared on ${formatDate(this.response.sharedAt, format)}` || undefined;
             },
-            avatarData(): {
-                image: any | Image,
-            } {
-                const image: Image = {
-                    url: getRandomAvatar(this.response.memberEmail),
-                };
-
-                return {
-                    image,
-                }
+            avatarUrl(): string {
+                return this.fetchedProfile?.avatarUrl || getRandomAvatar(this.response.memberEmail);
             }
         },
         methods: {
@@ -164,6 +162,7 @@
                 img {
                     width: 100%;
                     height: 100%;
+                    border-radius: 50%;
                 }
             }
 
