@@ -11,8 +11,8 @@
             </div>
         </div>
         <div class="note">
-            <h3 class="noteQuestion">{{response.promptQuestion}}</h3>
-            <p class="note-text">{{response.content.text}}</p>
+            <h3 class="noteQuestion">{{preventOrphan(response.promptQuestion)}}</h3>
+            <p class="note-text">{{preventOrphan(response.content.text)}}</p>
         </div>
     </div>
 </template>
@@ -26,6 +26,7 @@
     import FlamelinkImage from '@components/FlamelinkImage.vue'
     import {Image} from '@shared/models/PromptContent'
     import {getRandomAvatar} from '@web/AvatarUtil'
+    import {preventOrphanedWords} from "@shared/util/StringUtil"
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -85,6 +86,11 @@
                     image,
                 }
             }
+        },
+        methods: {
+            preventOrphan(input?: string): string|undefined {
+                return preventOrphanedWords(input)
+            },
         }
     })
 </script>
