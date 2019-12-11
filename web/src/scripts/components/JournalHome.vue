@@ -30,7 +30,7 @@
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
                             <entry
-                                    class="journalListItem"
+                                    :class="['journalListItem', {even: index%2}]"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
