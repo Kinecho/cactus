@@ -95,9 +95,7 @@
     @import "variables";
 
     .shared-reflection-card {
-        background-color: $white;
-        border-radius: 12px;
-        box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
+        @include shadowbox;
         color: $darkestGreen;
         margin-bottom: 3.2rem;
         padding: 1.6rem 2.4rem;
@@ -110,7 +108,7 @@
         @include r(600) {
             margin: 0 auto 4.8rem;
             max-width: 64rem;
-            padding: 2.4rem;
+            padding: 2.4rem 3.2rem;
         }
 
         .noteQuestion {
