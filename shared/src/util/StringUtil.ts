@@ -21,6 +21,18 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
+export function preventOrphanedWords<T>(input?: string, escapeCode: string = "\xa0"): string | undefined {
+    // noinspection SuspiciousTypeOfGuard
+    if (!input || typeof input !== "string") {
+        return input;
+    }
+    const lastIndex = input.lastIndexOf(" ");
+    if (lastIndex > 0) {
+        return input.substr(0, lastIndex) + escapeCode + input.substr(lastIndex + 1);
+    }
+    return input
+}
+
 export function stripQueryParams(url: string): { url: string, query?: any } {
     const query = queryString.parseUrl(url);
 

@@ -8,7 +8,7 @@ import {
     getPromptQuestion,
     getUrlFromInput,
     getWordCount,
-    isBlank,
+    isBlank, preventOrphanedWords,
     stripQueryParams
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
@@ -313,3 +313,15 @@ describe("Get question text", () => {
         expect(getPromptQuestion({})).toBeUndefined();
     });
 });
+
+describe("prevent orphaned words", () => {
+    test("various input values", () => {
+        expect(preventOrphanedWords("")).toEqual("");
+        expect(preventOrphanedWords(undefined)).toBeUndefined();
+        expect(preventOrphanedWords("hello")).toEqual("hello");
+        expect(preventOrphanedWords("hello world")).toEqual("hello\xa0world");
+        expect(preventOrphanedWords("hello world and people")).toEqual("hello world and\xa0people");
+        expect(preventOrphanedWords("hello world and people")).not.toEqual("hello world and people");
+        expect(preventOrphanedWords("hello world and people", "nbsp;")).toEqual("hello world andnbsp;people");
+    })
+})
