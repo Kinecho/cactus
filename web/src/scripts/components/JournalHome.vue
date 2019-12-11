@@ -261,7 +261,13 @@
             }
 
             .journalListItem {
+                position: relative;
                 transition: all .3s;
+                z-index: 0;
+
+                @include r(374) {
+                    padding: 0 2.4rem;
+                }
 
                 &.out {
                     transform: translateY(-30px);
