@@ -41,8 +41,12 @@
 @mixin shadowbox {
   background-color: white;
   border-radius: 12px;
-  box-shadow: rgba(122, 56, 20, 0.18) 0 11px 28px -8px;
-}
+  box-shadow:
+      0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+      0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+      0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+      0 24px 63px -24px rgba(0, 0, 0, 0.15);
+  }
 
 $widthXxs: 374;
 $widthXs: 600;
