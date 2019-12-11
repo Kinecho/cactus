@@ -13,13 +13,13 @@
             </p>
         </div>
         <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && !completed">
-            <h3 class="topic" v-show="topicText">{{topicText}}</h3>
-            <p class="subtext" v-show="subText">{{subText}}</p>
+            <h3 class="topic" v-show="topicText">{{preventOrphan(topicText)}}</h3>
+            <p class="subtext" v-show="subText">{{preventOrphan(subText)}}</p>
         </div>
         <div :class="{textContainer: !canReflectInline && hasBackgroundImage}" v-if="entry.promptContent && completed">
-            <h3 class="question" v-show="questionText">{{questionText}}</h3>
+            <h3 class="question" v-show="questionText">{{preventOrphan(questionText)}}</h3>
         </div>
-        <div class="entry" v-if="!canReflectInline">{{responseText}}</div>
+        <div class="entry" v-if="!canReflectInline">{{preventOrphan(responseText)}}</div>
         <edit-reflection
                 :show="canReflectInline"
                 :responses="entry.responses"
@@ -33,37 +33,37 @@
             <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>
 
-            <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
-                <a :href="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</a>
-                <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
-                    <img src="assets/images/pen.svg" alt=""/>
-                    {{promptCopy.ADD_A_NOTE}}
-                </button>
-            </nav>
-            <modal :show="showContent"
+        <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
+            <a :href="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</a>
+            <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
+                <img src="assets/images/pen.svg" alt=""/>
+                {{promptCopy.ADD_A_NOTE}}
+            </button>
+        </nav>
+        <modal :show="showContent"
+                v-on:close="showContent = false"
+                :showCloseButton="true"
+                :hideCloseButtonOnMobile="true"
+        >
+            <PromptContent slot="body"
+                    v-bind:promptContentEntryId="entryId"
+                    v-bind:isModal="true"
                     v-on:close="showContent = false"
-                    :showCloseButton="true"
-                    :hideCloseButtonOnMobile="true"
-            >
-                <PromptContent slot="body"
-                        v-bind:promptContentEntryId="entryId"
-                        v-bind:isModal="true"
-                        v-on:close="showContent = false"
-                        :initialIndex="initialIndex"
-                />
-            </modal>
-            <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
-                <div class="sharing-card" slot="body">
-                    <PromptSharing :promptContent="entry.promptContent"/>
-                </div>
-            </modal>
-            <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
-                <div class="sharing-card note" slot="body">
-                    <prompt-content-card
-                            :content="shareNote.content"
-                            :response="shareNote.response"/>
-                </div>
-            </modal>
+                    :initialIndex="initialIndex"
+            />
+        </modal>
+        <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true">
+            <div class="sharing-card" slot="body">
+                <PromptSharing :promptContent="entry.promptContent"/>
+            </div>
+        </modal>
+        <modal :show="showShareNote" v-on:close="showShareNote = false" :showCloseButton="true" v-if="!!shareNote">
+            <div class="sharing-card note" slot="body">
+                <prompt-content-card
+                        :content="shareNote.content"
+                        :response="shareNote.response"/>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -74,7 +74,7 @@
     import PromptContentVue from "@components/PromptContent.vue"
     import {formatDate} from "@shared/util/DateUtil"
     import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
-    import {getIntegerFromStringBetween, getResponseText, isBlank} from "@shared/util/StringUtil"
+    import {getIntegerFromStringBetween, getResponseText, isBlank, preventOrphanedWords} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
@@ -137,8 +137,8 @@
             }
         },
         computed: {
-            shareNote():{content: Content, response: ReflectionResponse}|undefined {
-                if (!this.entry.promptContent || !this.entry.responses || this.entry.responses.length === 0){
+            shareNote(): { content: Content, response: ReflectionResponse } | undefined {
+                if (!this.entry.promptContent || !this.entry.responses || this.entry.responses.length === 0) {
                     return;
                 }
                 let shareReflectionCopy = isBlank(this.entry.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.entry.promptContent.shareReflectionCopy_md;
@@ -149,7 +149,7 @@
                 };
 
                 const [response] = this.entry.responses;
-                if (response){
+                if (response) {
                     return {content: sharingCard, response: response}
                 } else {
                     return
@@ -159,7 +159,7 @@
             allLoaded(): boolean {
                 return !this.loading && this.entry.responsesLoaded;
             },
-            backgroundClasses(): { [name: string]: string|boolean } {
+            backgroundClasses(): { [name: string]: string | boolean } {
                 const [first]: Content[] = (this.entry.promptContent && this.entry.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
                 const id = this.entry.sentPrompt.promptId || "";
@@ -176,7 +176,7 @@
                 let contentList = this.entry.promptContent?.content || [];
                 if (contentList) {
                     const reflectCard = contentList.find(c => c.contentType === ContentType.reflect);
-                    return reflectCard && reflectCard.text;
+                    return reflectCard && preventOrphanedWords(reflectCard.text);
                 }
                 return
                 // return this.promptContent && this.promptContent.getQuestion();
@@ -266,7 +266,11 @@
                 }
             }
         },
-        methods: {}
+        methods: {
+            preventOrphan(input?: string): string | undefined {
+                return preventOrphanedWords(input)
+            },
+        }
     })
 </script>
 
