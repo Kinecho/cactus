@@ -31,10 +31,8 @@
 
     export default Vue.extend({
         async beforeMount() {
-            if (!this.memberProfile && this.response?.cactusMemberId) {
+            if (!this.fetchedProfile && this.response?.cactusMemberId) {
                 this.fetchedProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
-            } else if (this.memberProfile) {
-                this.fetchedProfile = this.memberProfile;
             }
         },
         props: {
@@ -49,7 +47,7 @@
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
-                fetchedProfile: undefined
+                fetchedProfile: this.memberProfile
             }
         },
         destroyed() {
