@@ -33,7 +33,7 @@
             <div v-else class="random-placeholder" :class="backgroundClasses"></div>
         </div>
 
-        <nav v-show="!canReflectInline" class="buttonContainer">
+        <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
             <a :href="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</a>
             <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
                 <img src="assets/images/pen.svg" alt=""/>
