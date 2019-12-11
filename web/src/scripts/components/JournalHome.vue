@@ -1,5 +1,5 @@
 <template>
-    <div class="bgBlobs">
+    <div>
         <NavBar :show-signup="false" :isSticky="false"/>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
@@ -222,15 +222,6 @@
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";
-
-    .bgBlobs {
-        @include r(768) {
-            background-image: url(/assets/images/leftBlobBg.svg), url(/assets/images/rightBlobBg.svg);
-            background-repeat: repeat-y;
-            background-size: 525px 6130px;
-            background-position: -100px 0, right -80px top;
-        }
-    }
 
     .container {
         min-height: 100vh;
