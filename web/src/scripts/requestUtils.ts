@@ -15,7 +15,8 @@ export enum Endpoint {
     unsubscribeConfirm = "mailchimp/unsubscribe/confirm",
     loginEvent = "signup/login-event",
     sendInvite = "social/send-invite",
-    notifyFriendRequest = "social/notify-friend-request"
+    notifyFriendRequest = "social/notify-friend-request",
+    activityFeed = "social/activity-feed"
 }
 
 export function initializeAxios(): AxiosInstance {
