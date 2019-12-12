@@ -46,7 +46,8 @@ export enum Field {
     lastJournalEntryAt = "lastJournalEntryAt",
     unsubscribedAt = "unsubscribedAt",
     stats = "stats",
-    stats_reflections = "reflections"
+    stats_reflections = "reflections",
+    activityStatus = "activityStatus"
 }
 
 export default class CactusMember extends BaseModel {
@@ -85,6 +86,10 @@ export default class CactusMember extends BaseModel {
 
     stats: {
         reflections?: ReflectionStats
+    } = {};
+
+    activityStatus?: {
+        lastSeenOccurredAt?: Date
     } = {};
 
     prepareForFirestore(): any {
