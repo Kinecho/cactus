@@ -4,7 +4,7 @@
         <div class="centered">
             <div class="contentContainer" v-if="!loading && member">
                 <SocialFindFriends v-if="currentChild === 'findFriends'" :member="member"/>
-                <SocialActivityFeed v-if="currentChild === 'activityFeed'" :member="member"/>
+                <SocialActivityFeed :member="member" v-if="member"/>
             </div>
 
         </div>
