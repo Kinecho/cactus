@@ -1,0 +1,108 @@
+import CactusMember from "@shared/models/CactusMember";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import * as admin from "firebase-admin";
+import AdminPromptContentService from "@admin/services/AdminPromptContentService";
+import * as Sentry from "@sentry/node";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import PromptContent from "@shared/models/PromptContent";
+
+export interface PromptNotificationResult {
+    result?: {
+        numSuccess: number,
+        numError: number,
+    },
+    attempted: boolean,
+    error?: string,
+}
+
+export interface SendPushResult {
+    success: boolean,
+    token: string,
+    error?: string,
+}
+
+export default class PushNotificationService {
+    static sharedInstance = new PushNotificationService();
+    private messaging = admin.messaging();
+
+    async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<PromptNotificationResult> {
+        const {member, prompt} = options;
+        let {promptContent} = options;
+        if (!member.fcmTokens || !member.fcmTokens.length) {
+            console.log("Member doesn't have any device tokens. Returning");
+            return {attempted: false, error: "Member doesn't have any device tokens"}
+        }
+
+        if (!prompt && !promptContent) {
+            return {attempted: false, error: "No prompt or prompt content provided. Can not process message."};
+        }
+
+        const promptContentEntryId = prompt?.promptContentEntryId;
+        if (!promptContent && promptContentEntryId) {
+            promptContent = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContentEntryId);
+        }
+
+        if (!promptContent) {
+            console.warn("No prompt content found, can't send push");
+            return {attempted: false, error: "Unable to find the prompt content. Can not process message"};
+        }
+
+        const data: admin.messaging.DataMessagePayload = {};
+
+        let title = `Today's Prompt`;
+        let body = `${prompt?.question || ""}`;
+        // let imageUrl: string | undefined = undefined;
+        title = promptContent.subjectLine || title;
+
+        const firstContent = promptContent.content && promptContent.content.length > 0 && promptContent.content[0];
+        if (firstContent && firstContent.text) {
+            body = firstContent.text
+        }
+
+        if (promptContentEntryId) {
+            data.promptContentEntryId = promptContentEntryId
+        }
+
+        const promptId = prompt?.id || promptContent?.promptId;
+        if (promptId) {
+            data.promptId = promptId;
+        }
+
+        const payload: admin.messaging.MessagingPayload = {
+            notification: {
+                title: title,
+                body: body,
+                badge: "1",
+            },
+            data
+        };
+
+        const tokens = member.fcmTokens;
+        const tasks: Promise<SendPushResult>[] = tokens.map(token => this.sendPush({token, payload, member}));
+
+        const results = await Promise.all(tasks);
+        console.log(`SendPushNotification for prompt Got ${results.length} results`);
+        return {
+            attempted: true,
+            result: {
+                numSuccess: results.filter(r => r.success).length,
+                numError: results.filter(r => r.error).length,
+            }
+        };
+    }
+
+    async sendPush(options: { token: string, payload: admin.messaging.MessagingPayload, member?: CactusMember }): Promise<SendPushResult> {
+        const {token, payload, member} = options;
+        try {
+            const result = await this.messaging.sendToDevice(token, payload);
+            console.log("Send Message Result", result);
+            return {token, success: true};
+
+        } catch (error) {
+            console.error("Failed ot send push", error);
+            Sentry.captureException(error);
+            await AdminSlackService.getSharedInstance().sendDataLogMessage(`:ios: Failed to send push notification to member ${member?.email} ${member?.id}`);
+            return {success: false, token, error: `Failed to send the push notification: ${error} `}
+        }
+    }
+}

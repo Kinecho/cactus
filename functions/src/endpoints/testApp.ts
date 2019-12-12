@@ -14,7 +14,8 @@ import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-
+import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
+import {CustomNotificationJobResult, MemberResult} from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -69,6 +70,7 @@ app.get('/bq', async (req, resp) => {
 app.get("/next-prompt", async (req, res) => {
     let memberId = req.query.memberId;
     const email = req.query.email;
+    const runJob: boolean = !!req.query.run;
     let member: CactusMember | undefined;
     if (!memberId && email) {
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
@@ -109,6 +111,16 @@ app.get("/next-prompt", async (req, res) => {
 
 
     const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: userDateObject});
+
+
+    let jobResult: CustomNotificationJobResult | undefined;
+    let memberResult: MemberResult | undefined;
+    if (runJob) {
+        const job = {dryRun: false};
+        // jobResult = await CustomSentPromptNotificationsJob.runJob({dryRun: false});
+        memberResult = await CustomSentPromptNotificationsJob.processMember({job, member});
+    }
+
     res.send({
         timeZone: userTZ,
         userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
@@ -118,7 +130,9 @@ app.get("/next-prompt", async (req, res) => {
         userDateObject: userDateObject,
         systemDateObject: systemDateObject,
         promptSentTimePreference: member.promptSendTime,
-        promptContent: promptContent?.toJSON() || "none",
+        jobResult,
+        memberResult: {...memberResult, promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null},
+        promptContent: promptContent?.toJSON(["_fl_meta_"]) || null,
         member: member.toJSON()
     });
 });
@@ -133,7 +147,7 @@ app.get("/content", async (req, resp) => {
     }
 
     console.log("local date ", d);
-    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate(d);
+    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: d});
     return resp.send((content && content.toJSON()) || "none")
 });
 

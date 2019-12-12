@@ -16,6 +16,7 @@ import {
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
+import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
 import {onDelete, transactionalOnCreate} from "@api/triggers/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
@@ -46,6 +47,8 @@ export const cloudFunctions = {
     slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
     unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
     memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
+    customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
+
 
     //auth triggers
     userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),

@@ -1,6 +1,8 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
+import {DateObject} from "luxon";
+import * as DateUtil from "@shared/util/DateUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -125,5 +127,12 @@ export default class CactusMember extends BaseModel {
 
     getFullName(): string {
         return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+    }
+
+    getLocaleDateObject(): DateObject | undefined {
+        if (this.timeZone) {
+            return DateUtil.getDateObjectForTimezone(new Date(), this.timeZone);
+        }
+        return;
     }
 }
