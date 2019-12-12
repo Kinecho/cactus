@@ -185,6 +185,37 @@ export function formatDurationAsTime(duration: number): string {
 
 }
 
+export function formatAsTimeAgo(date: Date) {
+  const now = DateTime.local();
+  const past = DateTime.fromJSDate(date);
+  const secondsAgo = now.diff(past, 'seconds').seconds;
+  let unit: 'seconds' |
+            'minutes' | 
+            'hours' | 
+            'days' |
+            'weeks' = 'seconds';
+
+  console.log(secondsAgo);
+
+  if(secondsAgo < 60) {
+      unit = 'seconds';
+  } else if (secondsAgo >= 60 && secondsAgo < 3600) {
+      unit = 'minutes';
+  } else if (secondsAgo >= 3600 && secondsAgo < 86400) {
+      unit = 'hours';
+  } else if (secondsAgo >= 86400 && secondsAgo < 604800) {
+      unit = 'days';
+  } else {
+      unit = 'weeks';
+  }
+
+  console.log(unit);
+
+  const diff = now.diff(past, unit);
+
+  return `${Math.floor(diff[unit])} ${unit} ago`;
+}
+
 export function millisecondsToMinutes(duration: number, decimals: number = 1): string {
     const seconds = duration / 1000;
     const minutes = seconds / 60;
