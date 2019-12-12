@@ -7,14 +7,14 @@ import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsServi
 import {getConfig} from "@api/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
+import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 // import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import {getDateObjectForTimezone} from "@shared/util/DateUtil";
-import {DateObject, DateTime} from "luxon";
+
 
 const app = express();
 app.use(cors({origin: true}));
@@ -94,18 +94,31 @@ app.get("/next-prompt", async (req, res) => {
     let userDateObject: DateObject = systemDateObject;
     if (userTZ) {
         console.log("timezone =", userTZ);
-        userDateObject = getDateObjectForTimezone(systemDate, userTZ);
+        userDateObject = DateUtil.getDateObjectForTimezone(systemDate, userTZ);
         console.log("user date obj", userDateObject);
         console.log("user date (locale)", userDateObject.toLocaleString())
     }
 
+
+    const userStartDate = DateUtil.dateObjectToISODate(userDateObject);
+    userDateObject.hour = 0;
+    userDateObject.minute = 0;
+    userDateObject.millisecond = 0;
+    const endObject = {...userDateObject, day: userDateObject.day! + 1};
+    const userEndDate = DateUtil.dateObjectToISODate(endObject);
+
+
+    const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: userDateObject});
     res.send({
         timeZone: userTZ,
+        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
+        systemDate: systemDate.toLocaleString(),
+        userStartDate,
+        userEndDate,
         userDateObject: userDateObject,
         systemDateObject: systemDateObject,
         promptSentTimePreference: member.promptSendTime,
-        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
-        systemDate: systemDate.toLocaleString(),
+        promptContent: promptContent?.toJSON() || "none",
         member: member.toJSON()
     });
 });

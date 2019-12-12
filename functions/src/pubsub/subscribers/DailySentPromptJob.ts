@@ -62,7 +62,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
         const start = new Date();
         console.log("Starting DailySentPromptJob Processing job ");
 
-        const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate(contentDate);
+        const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: contentDate});
         console.log("got prompt content", content);
 
         if (!content) {

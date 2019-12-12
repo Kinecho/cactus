@@ -22,6 +22,10 @@ export function getDateObjectForTimezone(date: Date, timeZone: string): DateObje
     return DateTime.fromJSDate(date).setZone(timeZone).toObject()
 }
 
+export function dateObjectToISODate(date: DateObject): string {
+    return DateTime.fromObject(date).toISODate()
+}
+
 /**
  *
  * @param {Date} start

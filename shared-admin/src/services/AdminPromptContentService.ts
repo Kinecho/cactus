@@ -2,8 +2,9 @@ import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import PromptContent from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
-import {getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
+import {dateObjectToISODate, getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
+import {DateObject} from "luxon";
 
 
 export default class AdminPromptContentService {
@@ -60,15 +61,31 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
-    async getPromptContentForDate(date: Date = new Date()): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject }): Promise<PromptContent | undefined> {
         try {
+            const {systemDate, dateObject} = options;
             // const midnightDenver = getDateAtMidnightDenver(date);
-            const midnightDenver = date;
-            midnightDenver.setHours(0);
-            const nextDate = plusDays(1, midnightDenver);
-            nextDate.setHours(0);
-            const startDateString = getFlamelinkDateString(nextDate);
-            const endDateString = getFlamelinkDateString(midnightDenver);
+            let startDateString = "";
+            let endDateString = "";
+            if (dateObject) {
+                dateObject.hour = 0;
+                dateObject.minute = 0;
+                dateObject.millisecond = 0;
+                endDateString = dateObjectToISODate(dateObject);
+                const startObject = {...dateObject, day: dateObject.day! + 1};
+                startDateString = dateObjectToISODate(startObject);
+            } else if (systemDate) {
+                const midnightDenver = systemDate;
+                midnightDenver.setHours(0);
+                const nextDate = plusDays(1, midnightDenver);
+                nextDate.setHours(0);
+                startDateString = getFlamelinkDateString(nextDate);
+                endDateString = getFlamelinkDateString(midnightDenver);
+
+            } else {
+                console.error("No valid date passed into getPromptContentForDate method");
+                return;
+            }
 
             console.log("start date", startDateString);
             console.log("end date", endDateString);
