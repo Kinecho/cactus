@@ -1,4 +1,5 @@
-import AdminFirestoreService, {QueryOptions} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import SocialConnection from "@shared/models/SocialConnection";
 import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
@@ -34,10 +35,12 @@ export default class AdminSocialActivityService {
 
     }
 
-    async getActivityFeedForMember(memberId: string, options?: QueryOptions): Promise<SocialActivityFeedEvent[]> {
+    async getActivityFeedForMember(memberId: string): Promise<SocialActivityFeedEvent[]> {
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
 
-        const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', this.friendIds(socialConnections));
+        const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', this.friendIds(socialConnections))
+                                                               .limit(20)
+                                                               .orderBy('createdAt', QuerySortDirection.desc);
         const reflectionResponses = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return this.feedEventsFor(reflectionResponses.results);
