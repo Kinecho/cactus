@@ -127,16 +127,17 @@
     .dropdown-menu {
         button, a.button {
             align-items: center;
+            border: 0;
             display: inline-flex;
             flex-grow: 0;
             margin-right: .8rem;
 
             svg {
-                fill: $darkGreen;
-                height: 3.2rem;
+                fill: $darkestGreen;
+                height: 3.6rem;
                 margin-right: .8rem;
-                padding: 5px;
-                width: 3.2rem;
+                padding: .4rem;
+                width: 3.6rem;
             }
 
             &.icon {

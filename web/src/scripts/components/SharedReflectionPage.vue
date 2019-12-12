@@ -4,8 +4,7 @@
         <div class="content">
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
-                <card :response="reflectionResponse" class="full"/>
-
+                <card :response="reflectionResponse" :memberProfile="memberProfile" class="full" v-if="reflectionResponse"/>
             </div>
             <sign-up-footer/>
         </div>
@@ -30,6 +29,8 @@
     import PromptContentService from '@web/services/PromptContentService'
     import ReflectionPromptService from '@web/services/ReflectionPromptService'
     import {getPromptQuestion, isBlank} from '@shared/util/StringUtil'
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from '@web/services/MemberProfileService';
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -69,14 +70,18 @@
                     this.error = undefined;
                     this.reflectionResponse = reflectionResponse;
 
-                    if (reflectionResponse?.promptId) {
+                    if (this.reflectionResponse?.promptId) {
                         const [promptContent, prompt] = await Promise.all([
-                            PromptContentService.sharedInstance.getByPromptId(reflectionResponse.promptId),
-                            ReflectionPromptService.sharedInstance.getById(reflectionResponse.promptId)
+                            PromptContentService.sharedInstance.getByPromptId(this.reflectionResponse.promptId),
+                            ReflectionPromptService.sharedInstance.getById(this.reflectionResponse.promptId)
                         ]);
 
                         this.promptContent = promptContent;
                         this.prompt = prompt;
+                    }
+
+                    if (this.reflectionResponse?.cactusMemberId) {
+                        this.memberProfile = await MemberProfileService.sharedInstance.getByMemberId(this.reflectionResponse.cactusMemberId);
                     }
 
                     this.updateDocumentMeta();
@@ -96,7 +101,7 @@
                 let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
 
                 if (this.reflectionResponse) {
-                    let identifier = this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
+                    let identifier = this.memberProfile?.getFullName() || this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
                     let question = getPromptQuestion({
                         promptContent: this.promptContent,
                         response: this.reflectionResponse,
@@ -131,6 +136,7 @@
             reflectionResponse: ReflectionResponse | undefined,
             promptContent: PromptContent | undefined,
             prompt: ReflectionPrompt | undefined,
+            memberProfile: MemberProfile | undefined
         } {
             return {
                 reflectionResponseId: undefined,
@@ -139,6 +145,7 @@
                 reflectionResponse: undefined,
                 prompt: undefined,
                 promptContent: undefined,
+                memberProfile: undefined
             }
         }
     })

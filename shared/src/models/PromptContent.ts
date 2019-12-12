@@ -2,6 +2,7 @@ import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
 import {CactusElement} from "@shared/models/CactusElement";
+import {preventOrphanedWords} from "@shared/util/StringUtil";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -144,9 +145,14 @@ export function processContent(content: Content): Content {
             break;
         default:
             console.warn("UNHANDLED CONTENT TYPE", content.contentType);
-
     }
 
+    processed.title = preventOrphanedWords(processed.title);
+    processed.text = preventOrphanedWords(processed.text);
+    processed.text_md = preventOrphanedWords(processed.text_md);
+    if (processed.quote && processed.quote.text) {
+        processed.quote.text = preventOrphanedWords(processed.quote.text)!;
+    }
     return processed;
 }
 

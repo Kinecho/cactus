@@ -254,7 +254,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 type: "text",
                 name: "previewText",
                 message: "Preview Text",
-                initial: (prev: string, values: ContentQuestionResponse) => values.question,
+                initial: (prev: string, values: ContentQuestionResponse) => this.introText,
             },
             {
                 type: "text",
@@ -377,6 +377,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 subject_line: reminderConfig.subjectLine,
                 from_name: reminderConfig.fromName,
                 preview_text: reminderConfig.previewText,
+                to_name: '*|FNAME|* *|LNAME|*'
             },
             tracking: campaignTracking
         };
@@ -646,6 +647,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 subject_line: contentResponse.subjectLine,
                 from_name: contentResponse.fromName,
                 preview_text: contentResponse.previewText,
+                to_name: '*|FNAME|* *|LNAME|*'
             },
             tracking: campaignTracking
         };

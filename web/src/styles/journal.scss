@@ -1,74 +1,62 @@
 @import "variables";
 @import "mixins";
 
-//.centered {
-//  text-align: left;
-//}
-
 .journalEntry {
   @include shadowbox;
-  margin: 0 1.6rem 3.2rem;
+  margin: 0 auto 3.2rem;
   overflow: hidden;
   padding: 1.6rem 1.6rem 2.4rem;
   position: relative;
   text-align: left;
 
   @include r(600) {
-    padding: 3.2rem 2.4rem;
+      max-width: 64rem;
+      padding: 3.2rem 2.4rem;
   }
 
   @include r(768) {
-    margin: 0 auto 4.8rem;
-    max-width: 64rem;
+    margin-bottom: 4.8rem;
     padding: 3.2rem;
-  }
-
-  &.hasNote {
-    overflow: visible;
   }
 }
 
+.hasNote {
+    overflow: visible;
+
+    .backgroundImage {
+        bottom: -1.6rem;
+        left: auto;
+        margin: 0;
+        position: absolute;
+        right: -1.6rem;
+        top: auto;
+        z-index: -1;
+
+        @include r(600) {
+            height: 23.5rem;
+        }
+    }
+}
+
+.even .hasNote .backgroundImage {
+    left: -1.6rem;
+    right: auto;
+}
+
 .backgroundImage {
-  background: url(assets/images/pinkBlob4.svg) center top 1.6rem no-repeat;
-  background-size: 138%;
-  height: 100%;
-  margin: 0 -2.4rem -12rem;
-  min-height: 25rem;
+  height: 23rem;
+  margin: 0 0 -14rem;
   overflow: hidden;
   position: relative;
   right: 0;
   z-index: 0;
 
   @include r(600) {
-    background-position: left 1.6rem center;
-    background-size: 154%;
-    bottom: auto;
     height: 100%;
-    left: 63%;
     margin: 0;
-    min-height: 25rem;
     position: absolute;
-    right: 0;
-    top: 0;
-    width: 28rem;
-  }
-
-  .hasNote & {
-    display: none;
-
-    @include r(600) {
-      background-position: center top;
-      background-size: 100%;
-      bottom: auto;
-      display: block;
-      height: 10rem;
-      left: 68%;
-      margin: 0;
-      min-height: 0;
-      position: absolute;
-      top: 7rem;
-      width: 14rem;
-    }
+    right: -4.4rem;
+    top: 7.2rem;
   }
 
   img {
@@ -88,9 +76,13 @@
   position: relative;
   z-index: 1;
 
-  @include r(600) {
-    max-width: 66%;
-  }
+    @include r(600) {
+        max-width: 66%;
+
+        .hasNote & {
+            max-width: none;
+        }
+    }
 }
 
 .question,
@@ -111,9 +103,13 @@
 }
 
 .menuParent {
-  position: absolute;
-  right: .8rem;
-  top: 2.4rem;
+    position: absolute;
+    right: .8rem;
+    top: 1.4rem;
+
+    @include r(600) {
+        top: 2.8rem;
+    }
 }
 
 .entry {
@@ -230,7 +226,7 @@ button, a.button {
   font-size: 1.4rem;
   font-weight: bold;
   letter-spacing: 1px;
-  margin: .8rem 0;
+  margin-bottom: .8rem;
   padding: 0 .8rem;
   text-transform: uppercase;
 }

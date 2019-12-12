@@ -1,5 +1,5 @@
 <template>
-    <div class="bgBlobs">
+    <div>
         <NavBar :show-signup="false" :isSticky="false"/>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
@@ -30,7 +30,7 @@
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
                             <entry
-                                    class="journalListItem"
+                                    :class="['journalListItem', {even: index%2}]"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
@@ -223,15 +223,6 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    .bgBlobs {
-        @include r(768) {
-            background-image: url(/assets/images/leftBlobBg.svg), url(/assets/images/rightBlobBg.svg);
-            background-repeat: repeat-y;
-            background-size: 525px 6130px;
-            background-position: -100px 0, right -80px top;
-        }
-    }
-
     .container {
         min-height: 100vh;
         padding: 2.4rem 0;
@@ -270,7 +261,13 @@
             }
 
             .journalListItem {
+                position: relative;
                 transition: all .3s;
+                z-index: 0;
+
+                @include r(374) {
+                    padding: 0 2.4rem;
+                }
 
                 &.out {
                     transform: translateY(-30px);

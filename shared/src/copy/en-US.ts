@@ -65,7 +65,7 @@ export default class EnglishCopy extends LocalizedCopy {
         MINUTES: "Minutes",
         DAY_STREAK: "Day Streak",
         GO_HOME: "Go Home",
-        SIGN_UP_MESSAGE: "Sign Up to Save Your Progress",
+        SIGN_UP_MESSAGE: "Sign Up to Keep it Going",
         SHARE_YOUR_NOTE: "Share Your Note",
         SHARE_NOTE: "Share Note",
         SHARE_PROMPT_COPY_MD: "Become more courageous and **build trust and connection** with others.",
