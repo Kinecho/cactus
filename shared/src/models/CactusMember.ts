@@ -76,6 +76,7 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
     timeZone?: string | null;
+    locale?: string | null | undefined;
     promptSendTime?: {
         hour: number,
         minute: number,

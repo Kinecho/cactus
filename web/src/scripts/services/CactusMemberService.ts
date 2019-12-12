@@ -2,6 +2,7 @@ import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} fro
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
+import {getDeviceLocale, getDeviceTimeZone} from "@web/DeviceUtil";
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -20,10 +21,11 @@ export default class CactusMemberService {
 
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
-                    onData: member => {
+                    onData: async member => {
                         console.log("********* Got current cactus member", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
+                        await this.updateMemberSettingsIfNeeded(member)
                     }
                 })
             } else {
@@ -33,6 +35,35 @@ export default class CactusMemberService {
         });
     }
 
+    /**
+     * Update things like timezone if needed
+     * @return {Promise<void>}
+     */
+    async updateMemberSettingsIfNeeded(member?: CactusMember): Promise<CactusMember | undefined> {
+        if (!member) {
+            return;
+        }
+        const zoneName = getDeviceTimeZone();
+        const localeName = getDeviceLocale();
+        let doSave = false;
+        //Only update timezone if the member doesn't have one set
+        if (zoneName && !member.timeZone) {
+            member.timeZone = zoneName;
+            doSave = true
+        }
+
+        //only update locale if no locale is present
+        if (localeName && !member.locale) {
+            member.locale = localeName;
+            doSave = true
+        }
+
+        if (doSave) {
+            console.log("Updating member settings");
+            await this.save(member)
+        }
+
+    }
 
     getCurrentCactusMember(): CactusMember | undefined {
         return this.currentMember;

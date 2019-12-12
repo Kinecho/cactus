@@ -46,6 +46,16 @@
                             <label class="label">
                                 {{copy.common.TIME_ZONE}}
                             </label>
+                            <div class="tz-alert" v-if="differentTimezone && !tzAlertDismissed">
+                                <p>It looks like your current timezone has changed.<br/>Do you want to update to <b>{{deviceTimezoneName}}</b>?
+                                </p>
+                                <div class="tz-actions">
+                                    <button class="button small" @click="setToDeviceZone">Yes, update it</button>
+                                    <button class="button small secondary" @click="tzAlertDismissed = true">No, don't
+                                        update
+                                    </button>
+                                </div>
+                            </div>
                             <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                         </div>
 
@@ -76,7 +86,7 @@
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
                                 <span class="provider-name">{{provider.displayName}}</span>
                                 <button class="red tertiary remove">
-                                    <img src="assets/images/trash.svg" alt="" />
+                                    <img src="assets/images/trash.svg" alt=""/>
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
@@ -118,7 +128,7 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {ZoneInfo} from '@web/timezones'
+    import {findByZoneName, ZoneInfo} from '@web/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
     import {PageRoute} from '@shared/PageRoutes'
     import {FirebaseUser} from '@web/firebase'
@@ -129,6 +139,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
+    import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -180,7 +191,10 @@
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
             },
-            changesToSave: boolean
+            changesToSave: boolean,
+            deviceTimezone: string | undefined,
+            deviceLocale: string | undefined,
+            tzAlertDismissed: boolean,
         } {
             return {
                 authLoaded: false,
@@ -195,11 +209,14 @@
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
                 },
-                changesToSave: false
+                changesToSave: false,
+                deviceTimezone: getDeviceTimeZone(),
+                deviceLocale: getDeviceLocale(),
+                tzAlertDismissed: false,
             }
         },
         computed: {
-            promptSendTime(): {hour: number, minute: number} {
+            promptSendTime(): { hour: number, minute: number } {
                 return this.member?.promptSendTime || {hour: 0, minute: 0}
             },
             loading(): boolean {
@@ -211,7 +228,32 @@
             displayName(): string {
                 return this.member ? this.member.getFullName() : '';
             },
+            differentTimezone(): boolean {
+                if (this.member?.timeZone) {
+                    const d = new Date();
+                    const localeTimeParts = d.toLocaleTimeString('en-us', {timeZoneName: 'short'}).split(' ');
+                    const memberTimeParts = d.toLocaleTimeString('en-us', {
+                        timeZoneName: 'short',
+                        timeZone: this.member.timeZone
+                    }).split(' ');
 
+                    return localeTimeParts[0] !== memberTimeParts[0] || localeTimeParts[1] !== memberTimeParts[1];
+                }
+
+                return !!(this.deviceTimezone && this.member?.timeZone && this.deviceTimezone !== this.member?.timeZone);
+            },
+            deviceTimezoneName(): string | undefined {
+                if (this.deviceTimezone) {
+                    const zoneInfo = findByZoneName(this.deviceTimezone);
+                    if (zoneInfo) {
+                        return zoneInfo.displayName;
+                    } else {
+                        const locale = this.deviceLocale;
+                        return new Date().toLocaleTimeString(locale, {timeZoneName: 'long'}).split(' ')[2];
+                    }
+                }
+                return;
+            },
             providers(): Provider[] {
                 let providerData = this.user && this.user.providerData;
 
@@ -339,13 +381,19 @@
                     }
                 }
             },
+            async setToDeviceZone() {
+                if (this.member) {
+                    this.member.timeZone = this.deviceTimezone;
+                    await this.save()
+                }
+            },
             async tzSelected(value: ZoneInfo | null | undefined) {
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     this.changesToSave = true;
                 }
             },
-            async timeSelected(value: {hour: number, minute: number}) {
+            async timeSelected(value: { hour: number, minute: number }) {
                 if (this.member) {
                     this.member.promptSendTime = value;
                     // this.$set(this.member, this.member);
@@ -494,6 +542,16 @@
         100% {
             transform: translateX(-200px);
             opacity: 0;
+        }
+    }
+
+    .tz-alert {
+        padding: 2rem;
+        border: 1px solid black;
+        margin-bottom: 1rem;
+
+        .tz-actions {
+            padding: 1rem 0 0 0;
         }
     }
 
