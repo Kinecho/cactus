@@ -4,6 +4,7 @@ export interface SocialActivityFeedRequest {
 
 export interface SocialActivityFeedResponse {
   success: boolean,
+  message?: string,
   results?: SocialActivityFeedEvent[],
   error?: any
 }
