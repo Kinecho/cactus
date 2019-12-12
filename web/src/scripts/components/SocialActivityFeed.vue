@@ -1,20 +1,25 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <!-- if has friends -->
     <div class="socialActivityFeed">
-        <div class="flexContainer">
-            <h1>Friend Activity</h1>
+        
+        <!-- suggested friends / friend requests -->
+        <div class="socialFriendNotifications" v-if="member">
+            <social-friend-notifications v-bind:member="member"/>
         </div>
 
         <div class="activityContainer">
-
-            <!-- if has friends but no activity yet -->
-            <!-- <p class="subtext">No activity from friends just yet....so....yeah...</p> -->
-            <!-- end -->
-
+            <a class="primary button add-friends" :href="friendsPath">Add Friends</a>
+            <h2>Friend Activity</h2>
             <Spinner v-if="isLoading"/>
+            <p class="subtext" v-if="!isLoading && activityFeedEvents.length < 1">Nothing to see (yet).</p>
             <template v-for="event in activityFeedEvents">
                 <SocialActivityEvent :event="event"/>
             </template>
+        </div>
+
+        <!-- Friend List -->
+        <div class="socialFriendList">
+            <friend-list v-bind:member="member"/>
         </div>
     </div>
 </template>
@@ -24,7 +29,6 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
-    import SocialFindFriends from "@components/SocialFindFriends.vue"
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import CactusMember from "@shared/models/CactusMember";
     import {Config} from "@web/config";
@@ -34,6 +38,9 @@
     import {appendQueryParams} from '@shared/util/StringUtil'
     import {getSocialActivity} from '@web/social';
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
+    import {PageRoute} from "@shared/PageRoutes";
+    import SocialFriendList from "@components/SocialFriendList.vue";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -44,8 +51,9 @@
             NavBar,
             Footer,
             Spinner,
-            SocialFindFriends,
-            SocialActivityEvent
+            SocialActivityEvent,
+            SocialFriendNotifications,
+            FriendList: SocialFriendList
         },
         async created() {
             if (this.member?.id) {
@@ -90,17 +98,8 @@
             }
         },
         computed: {
-            referralLink(): string | undefined {
-                const url = `${Config.domain}`;
-                const params: { [key: string]: string } = {
-                    [QueryParam.UTM_SOURCE]: "cactus.app",
-                    [QueryParam.UTM_MEDIUM]: "invite-friends"
-                };
-                if (this.member && this.member.email) {
-                    params[QueryParam.REFERRED_BY_EMAIL] = this.member.email;
-                }
-
-                return appendQueryParams(url, params);
+            friendsPath() {
+                return PageRoute.FRIENDS;
             }
         }
     })
@@ -114,9 +113,31 @@
     @import "transitions";
 
     .socialActivityFeed {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+        margin: 0 auto;
+        max-width: 60rem;
+        position: relative;
+
+        @include r(960) {
+            display: grid;
+            grid-column-gap: 6.4rem;
+            grid-template-columns: 1fr minmax(38rem, 33%);
+            margin: 0;
+            max-width: none;
+        }
+
+        .activityContainer {
+            margin-bottom: 4.8rem;
+
+            @include r(600) {
+                grid-column: 1;
+                grid-row: 1 / 3;
+                margin-bottom: 6.4rem;
+            }
+        }
+
+        a.add-friends {
+            float: right;
+        }
     }
     
     header {

@@ -114,7 +114,7 @@
         }
     
         @include r(600) {
-            margin: 0 auto 3.2rem;
+            margin: 0 0 3.2rem;
             max-width: 64rem;
             padding: 2.4rem;
     

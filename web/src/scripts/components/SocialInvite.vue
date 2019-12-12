@@ -1,10 +1,11 @@
 <template>
-    <div class="socialHome">
+    <div class="socialInvite">
         <NavBar/>
         <div class="centered">
             <div class="contentContainer" v-if="!loading && member">
-                <SocialActivityFeed :member="member" v-if="member"/>
+                <SocialFindFriends v-if="currentChild === 'findFriends'" :member="member"/>
             </div>
+
         </div>
         <Footer/>
     </div>
@@ -15,6 +16,7 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
+    import SocialFindFriends from "@components/SocialFindFriends.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
@@ -25,7 +27,7 @@
         components: {
             NavBar,
             Footer,
-            SocialActivityFeed
+            SocialFindFriends,
         },
         data(): {
             currentChild: string,
@@ -50,13 +52,7 @@
                     this.loading = false;
                 }
             })
-        },
-        methods: {
-            setVisible(child: string) {
-                this.currentChild = child;
-            }
-        },
-
+        }
     })
 </script>
 
@@ -68,7 +64,7 @@
     @import "social";
     @import "transitions";
 
-    .socialHome {
+    .socialInvite {
         display: flex;
         flex-flow: column nowrap;
         justify-content: space-between;

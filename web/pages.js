@@ -55,8 +55,13 @@ module.exports = {
     },
     "social_home": {
         "title": "Friends & Activity | Cactus",
-        "path": "/friends",
+        "path": "/activity",
         "name": "social_home"
+    },
+    "social_invite": {
+        "title": "Invite Friends | Cactus",
+        "path": "/friends",
+        "name": "social_invite"
     },
     "prompt": {
         "title": "Cactus Mindful Moment",
