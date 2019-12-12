@@ -2,8 +2,12 @@
     <div class="socialHome">
         <NavBar/>
         <div class="centered">
-            <div class="contentContainer" v-if="!loading && member">
+            <div class="contentContainer" v-if="!loading && member && friends.length > 0">
                 <SocialActivityFeed :member="member" v-if="member"/>
+            </div>
+            <div class="no-friends emptyState" v-if="!loading && friends.length == 0">
+                You have no friends on Cactus.
+                <a class="primary button" :href="friendsPath">Add Friends</a>
             </div>
         </div>
         <Footer/>
@@ -20,6 +24,8 @@
     import CactusMemberService from "@web/services/CactusMemberService"
     import {PageRoute} from "@shared/PageRoutes"
     import {QueryParam} from '@shared/util/queryParams'
+    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import SocialConnection from "@shared/models/SocialConnection";
 
     export default Vue.extend({
         components: {
@@ -32,12 +38,16 @@
             loading: boolean,
             member: CactusMember|undefined,
             memberUnsubscriber: ListenerUnsubscriber|undefined,
+            friends: Array<SocialConnection>,
+            friendsUnsubscriber?: ListenerUnsubscriber|undefined,
         } {
             return {
                 currentChild: 'findFriends',
                 loading: true,
                 member: undefined,
                 memberUnsubscriber: undefined,
+                friendsUnsubscriber: undefined,
+                friends: []
             }
         },
         beforeMount() {
@@ -48,6 +58,14 @@
                     }
                     this.member = member;
                     this.loading = false;
+
+                    if (this.member?.id) {
+                        this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                                this.friends = socialConnections;
+                            }
+                        });
+                    }
                 }
             })
         },
@@ -56,6 +74,11 @@
                 this.currentChild = child;
             }
         },
+        computed: {
+            friendsPath() {
+                return PageRoute.FRIENDS;
+            }
+        }
 
     })
 </script>

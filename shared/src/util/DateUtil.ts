@@ -195,8 +195,6 @@ export function formatAsTimeAgo(date: Date) {
             'days' |
             'weeks' = 'seconds';
 
-  console.log(secondsAgo);
-
   if(secondsAgo < 60) {
       unit = 'seconds';
   } else if (secondsAgo >= 60 && secondsAgo < 3600) {
@@ -208,8 +206,6 @@ export function formatAsTimeAgo(date: Date) {
   } else {
       unit = 'weeks';
   }
-
-  console.log(unit);
 
   const diff = now.diff(past, unit);
 
