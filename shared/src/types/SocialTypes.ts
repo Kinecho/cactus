@@ -2,6 +2,12 @@ export interface SocialActivityFeedRequest {
   memberId: string
 }
 
+export interface SocialActivityFeedResponse {
+  success: boolean,
+  results?: SocialActivityFeedEvent[],
+  error?: any
+}
+
 export interface SocialActivityFeedEvent {
   eventType?: string,
   eventId?: string,

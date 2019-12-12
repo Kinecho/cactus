@@ -3,7 +3,7 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {InvitationResponse} from "@shared/api/SignupEndpointTypes";
 import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import {SocialActivityFeedRequest} from "@shared/types/SocialTypes";
+import {SocialActivityFeedRequest, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
 import {SocialConnectionRequestNotification, 
         SocialConnectionRequestNotificationResult} from "@shared/types/SocialConnectionRequestTypes";
 import SocialInvite from "@shared/models/SocialInvite";
@@ -205,9 +205,28 @@ app.post("/activity-feed", async (req: functions.https.Request | any, resp: func
     }
     
     const { memberId } = payload;
-    const response = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);
+    
+    try {
+        const feedEvents = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);
+        
+        const successResponse: SocialActivityFeedResponse = {
+            success: true,
+            results: feedEvents
+        }
 
-    resp.send(response);
+        resp.status(200).send(successResponse);
+
+    } catch (error) {
+        Sentry.captureException(error);
+        console.error(error);
+
+        const errorResponse: SocialActivityFeedResponse = {
+            success: false,
+            error: error,
+        }
+
+        resp.status(500).send(errorResponse);
+    }
 
     return;
 });
