@@ -15,7 +15,6 @@ import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPro
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import {CustomNotificationJobResult, MemberResult} from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -113,8 +112,8 @@ app.get("/next-prompt", async (req, res) => {
     const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: userDateObject});
 
 
-    let jobResult: CustomNotificationJobResult | undefined;
-    let memberResult: MemberResult | undefined;
+    let jobResult: CustomSentPromptNotificationsJob.CustomNotificationJobResult | undefined;
+    let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
     if (runJob) {
         const job = {dryRun: false};
         // jobResult = await CustomSentPromptNotificationsJob.runJob({dryRun: false});
