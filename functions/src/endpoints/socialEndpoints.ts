@@ -3,6 +3,7 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {InvitationResponse} from "@shared/api/SignupEndpointTypes";
 import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import {SocialActivityFeedRequest} from "@shared/types/SocialTypes";
 import {SocialConnectionRequestNotification, 
         SocialConnectionRequestNotificationResult} from "@shared/types/SocialConnectionRequestTypes";
 import SocialInvite from "@shared/models/SocialInvite";
@@ -11,6 +12,7 @@ import {getConfig, getHostname} from "@api/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import {generateReferralLink} from '@shared/util/SocialInviteUtil';
@@ -184,5 +186,31 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
 
     return;
 });
+
+app.post("/activity-feed", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const requestUser = await getAuthUser(req);
+    if (!requestUser || !requestUser.email) {
+        console.log("No auth user was found on the request");
+        resp.sendStatus(401);
+        return
+    }
+
+    const payload: SocialActivityFeedRequest|undefined|null = req.body;
+    console.log("socialEndpoints.activity-feed", payload);
+
+    if (!payload) {
+        console.log("No payload was included");
+        resp.sendStatus(500);
+        return
+    }
+    
+    const { memberId } = payload;
+    const response = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);
+
+    resp.send(response);
+
+    return;
+});
+
 
 export default app;
