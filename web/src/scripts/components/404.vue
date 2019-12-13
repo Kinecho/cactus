@@ -33,15 +33,6 @@
     html, body, body.error {
         background: $lightPink;
     }
-
-    body {
-        @include h(768) {
-            align-items: center;
-            display: flex;
-            height: 100vh;
-            justify-content: center;
-        }
-    }
 </style>
 
 <style lang="scss" scoped>
