@@ -5,7 +5,7 @@
             <div class="contentContainer" v-if="!loading && member && friends.length > 0">
                 <SocialActivityFeed :member="member"/>
             </div>
-            <div class="no-friends emptyState" v-if="!loading && friends.length == 0">
+            <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
                 <h1>No activity yet</h1>
                 <p>See what your friends are up to.</p>
                 <img class="graphic" src="assets/images/twoFriends.png" alt="Two friends welcoming you"/>
@@ -63,12 +63,12 @@
                     } else {
                         if (this.member?.id != member.id) { // only update instance if switching users
                             this.member = member;
-                            this.loading = false;
 
                             if (this.member?.id) {
                                 this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
                                     onData: async (socialConnections: SocialConnection[]): Promise<void> => {
                                         this.friends = socialConnections;
+                                        this.loading = false;
                                     }
                                 });
                             }
