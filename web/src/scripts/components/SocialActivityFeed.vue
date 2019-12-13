@@ -1,15 +1,17 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <!-- if has friends -->
     <div class="socialActivityFeed">
-        
+
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications" v-if="member">
             <social-friend-notifications v-bind:member="member"/>
         </div>
 
         <div class="activityContainer">
-            <a class="primary button add-friends" :href="friendsPath">Add Friends</a>
-            <h2>Friend Activity</h2>
+            <div class="flexContainer">
+                <h2>Activity</h2>
+                <a class="primary button add-friends" :href="friendsPath">Add Friends</a>
+            </div>
             <Spinner v-if="isLoading"/>
             <p class="subtext" v-if="!isLoading && activityFeedEvents.length < 1">Nothing to see (yet).</p>
             <template v-for="event in activityFeedEvents">
@@ -124,88 +126,95 @@
             margin: 0;
             max-width: none;
         }
+    }
 
-        .activityContainer {
-            margin-bottom: 4.8rem;
+    .activityContainer {
+        margin-bottom: 4.8rem;
 
-            @include r(600) {
-                grid-column: 1;
-                grid-row: 1 / 3;
-                margin-bottom: 6.4rem;
-            }
+        @include r(600) {
+            grid-column: 1;
+            grid-row: 1 / 3;
+            margin-bottom: 6.4rem;
         }
 
-        a.add-friends {
-            float: right;
+        h2 {
+            margin-bottom: 1.6rem;
         }
     }
-    
-    header {
-        width: 100%;
-    }
-    
-    .centered {
-        flex-grow: 1;
-        width: 100%;
-    }
-    
+
+    // header {
+    //     width: 100%;
+    // }
+    //
+    // .centered {
+    //     flex-grow: 1;
+    //     width: 100%;
+    // }
+
     .loading {
         display: flex;
         justify-content: center;
     }
-    
-    .subtext {
-        opacity: .8;
-    }
-    
-    .brandNew .subtext {
-        margin: 0 auto 3.2rem;
-        max-width: 48rem;
-    }
-    
-    .getStarted {
-        margin-bottom: 6.4rem;
-        max-width: 24rem;
-        width: 100%;
-    
-        @include r(600) {
-            width: auto;
-        }
-    }
-    
+
+    // .subtext {
+    //     opacity: .8;
+    // }
+
+    // .brandNew .subtext {
+    //     margin: 0 auto 3.2rem;
+    //     max-width: 48rem;
+    // }
+
+    // .getStarted {
+    //     margin-bottom: 6.4rem;
+    //     max-width: 24rem;
+    //     width: 100%;
+    //
+    //     @include r(600) {
+    //         width: auto;
+    //     }
+    // }
+
     .findFriends {
         margin: 0 auto 6.4rem;
         max-width: 960px;
         text-align: left;
-    
+
         .subtext {
             margin: 0 0 2.4rem;
             max-width: 60rem;
         }
-    
+
         h2 {
             margin-top: 6.4rem;
         }
-    
+
         .btnContainer {
             display: flex;
-    
+
             button {
                 flex-grow: 0;
                 margin-right: .8rem;
             }
         }
     }
-    
+
     .flexContainer {
         align-items: center;
         display: flex;
         justify-content: space-between;
-        margin: 0 auto 3.2rem;
-        max-width: 960px;
-    
-        .secondary {
+        max-width: 64rem;
+
+        .button {
             flex-grow: 0;
+        }
+    }
+
+    .socialFriendList {
+        display: none;
+
+        @include r(768) {
+            display: block;
         }
     }
 
