@@ -1,14 +1,14 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
-            <div class="centered" v-if="loading || !responsesLoaded">
+            <div v-if="!loading && !promptContent || error" class="centered">
+                <div class="alert error">
+                    {{error}}
+                </div>
+            </div>
+            <div class="centered" v-else-if="loading || !responsesLoaded">
                 <spinner message="Loading..." :delay="1000"/>
             </div>
-
-            <div v-else-if="!loading && !promptContent">
-                No prompt found for id
-            </div>
-
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
                     <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
@@ -226,7 +226,13 @@
                     if (error || !data) {
                         this.promptContent = undefined;
                         this.loading = false;
-                        return console.error("Failed to load prompts", error)
+                        if (!error) {
+                            this.error = "This prompt does not exist";
+                        } else {
+                            this.error = "Oops! We were unable to load the prompt. Please try again later."
+                        }
+                        console.error("Failed to load prompts", error);
+                        return;
                     }
                     console.log("raw promptContent data", data);
 
@@ -274,6 +280,7 @@
         },
         data(): {
             promptContent: PromptContent | undefined,
+            error: string | undefined,
             loading: boolean,
             activeIndex: number,
             transitionName: string,
@@ -299,6 +306,7 @@
             pendingActiveIndex: number | undefined,
         } {
             return {
+                error: undefined,
                 promptContent: undefined,
                 loading: true,
                 activeIndex: 0,
@@ -501,7 +509,8 @@
                     let pngUrl = getCloudinaryUrlFromStorageUrl({
                         storageUrl: openGraphImage.storageUrl,
                         width: 1200,
-                        transforms: ["w_1200","h_630","f_png","c_lpad"]});
+                        transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
+                    });
                     ogImageTag.setAttribute("content", `${pngUrl}`);
 
                     if (twitterImageTag) {
@@ -641,13 +650,16 @@
                 }
             },
 
-            async save(options: {updateReflectionLog: boolean} = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
+            async save(options: { updateReflectionLog: boolean } = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
-                    this.reflectionResponse.reflectionDurationMs= this.reflectionDuration;
+                    this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
-                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true, updateReflectionLog: options.updateReflectionLog});
+                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {
+                        saveIfAnonymous: true,
+                        updateReflectionLog: options.updateReflectionLog
+                    });
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {
                         console.log("Member is not logged in, saving to localstorage");
@@ -841,6 +853,7 @@
                     left: .8rem;
                     padding: 2rem 2rem 2rem 0;
                 }
+
                 &.next {
                     padding: 2rem 0 2rem 2rem;
                     right: .8rem;
