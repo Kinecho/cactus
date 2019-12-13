@@ -97,12 +97,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
             });
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: async ({member}) => {
                     const oldMember = this.member;
                     this.member = member;
-
                     if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
-                        this.updateActivityCount();
+                        await this.updateActivityCount();
                     }
                 }
             });

@@ -9,12 +9,13 @@
         <div class="activityContainer">
             <div class="flexContainer">
                 <h2>Activity</h2>
-                <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt="" />Add Friends</a>
+                <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt=""/>Add
+                    Friends</a>
             </div>
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
-                <skeleton-event />
+                <skeleton-event/>
             </template>
-            <p class="subtext" v-if="!isLoading && activityFeedEvents.length < 1">Nothing to see (yet).</p>
+            <p class="subtext" v-if="!isLoading && hasActivity">Nothing to see (yet).</p>
             <template v-for="event in activityFeedEvents">
                 <SocialActivityEvent :event="event"/>
             </template>
@@ -35,11 +36,8 @@
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {Config} from "@web/config";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
-    import {QueryParam} from '@shared/util/queryParams'
-    import {appendQueryParams} from '@shared/util/StringUtil'
     import {getSocialActivity} from '@web/social';
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
@@ -113,7 +111,10 @@
             },
         },
         computed: {
-            friendsPath() {
+            hasActivity(): boolean {
+                return this.activityFeedEvents && this.activityFeedEvents.length > 0 || false
+            },
+            friendsPath(): PageRoute {
                 return PageRoute.FRIENDS;
             },
             latestActivity(): SocialActivityFeedEvent | undefined {
