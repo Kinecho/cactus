@@ -1,7 +1,6 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <!-- if has friends -->
     <div class="socialActivityFeed">
-
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications" v-if="member">
             <social-friend-notifications v-bind:member="member"/>
@@ -10,9 +9,6 @@
         <div class="activityContainer">
             <div class="flexContainer">
                 <h2>Activity</h2>
-                <template v-if="isLoading">
-                    <Spinner/>
-                </template>
                 <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt="" />Add Friends</a>
             </div>
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">

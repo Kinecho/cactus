@@ -1,8 +1,10 @@
-import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
-            <div v-if="!loading && !promptContent || error" class="centered">
+            <div v-if="show404">
+                <FourOhFour/>
+            </div>
+            <div v-else-if="!loading && !promptContent || error" class="centered">
                 <div class="alert error">
                     {{error}}
                 </div>
@@ -121,6 +123,7 @@ import {QueryParam} from '@shared/util/queryParams'
     import {isBlank} from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
     import PromptContentService from "@web/services/PromptContentService";
+    import FourOhFour from "@components/404.vue"
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -134,6 +137,7 @@ import {QueryParam} from '@shared/util/queryParams'
             Spinner,
             Celebrate,
             PromptContentSharing,
+            FourOhFour
         },
         props: {
             initialIndex: Number,
@@ -226,6 +230,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         this.error = "This prompt does not exist";
                         this.loading = false;
                         this.promptContent = undefined;
+                        this.show404 = true;
                         return;
                     }
 
@@ -233,6 +238,7 @@ import {QueryParam} from '@shared/util/queryParams'
                         this.promptContent = undefined;
                         this.loading = false;
                         this.error = "Oops! We were unable to load the prompt. Please try again later.";
+                        this.show404 = false;
                         console.error("Failed to load prompts", error);
                         return;
                     }
@@ -318,6 +324,7 @@ import {QueryParam} from '@shared/util/queryParams'
             responsesLoaded: boolean,
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
+            show404: boolean,
         } {
             return {
                 error: undefined,
@@ -346,6 +353,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 navigationDisabled: false,
                 pendingActiveIndex: undefined,
                 usePromptId: false,
+                show404: false,
             };
         },
         computed: {

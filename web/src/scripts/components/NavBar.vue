@@ -257,6 +257,12 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
+    body.error {
+        header {
+            background: $white;
+        }
+    }
+
     .login {
         font-size: 1.6rem;
         text-decoration: none;
