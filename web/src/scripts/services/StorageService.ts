@@ -10,7 +10,8 @@ export enum LocalStorageKey {
     landingQueryParams = "landingQueryParams",
     flamelinkEnvironmentOverride = "flamelinkEnvironmentOverride",
     memberStatsEnabled = "memberStatsEnabled",
-    contactsImportEnabled = "contactsImportEnabled"
+    contactsImportEnabled = "contactsImportEnabled",
+    activityBadgeCount = "activityBadgeCount",
 }
 
 export default class StorageService {
@@ -58,6 +59,27 @@ export default class StorageService {
         }
 
         return storedValue === "true" || false
+    }
+
+    static saveNumber(key: LocalStorageKey, value: number) {
+        localStorage.setItem(key, `${value}`);
+    }
+
+    static getNumber(key: LocalStorageKey, defaultValue?: number): number | undefined {
+        const storedValue = this.getItem(key);
+        if (storedValue === undefined || storedValue === null || storedValue.trim() === "") {
+            return defaultValue
+        }
+
+        try {
+            const num = Number(storedValue);
+            if (!isNaN(num)) {
+                return num
+            }
+        } catch (error) {
+            console.error("An error occurred while parsing to number for value: ", storedValue)
+        }
+        return defaultValue
     }
 
     static saveJSON(key: LocalStorageKey, object: any) {

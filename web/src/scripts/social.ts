@@ -1,20 +1,17 @@
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {InviteResult, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import {
-    SocialConnectionRequestNotification,
-    SocialConnectionRequestNotificationResult
-} from "@shared/types/SocialConnectionRequestTypes";
+import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
 import {
     SocialActivityFeedEvent,
     SocialActivityFeedRequest,
     SocialActivityFeedResponse
 } from "@shared/types/SocialTypes";
 import {getAuth} from "@web/firebase";
-import MemberProfile from "@shared/models/MemberProfile";
 import MemberProfileService from '@web/services/MemberProfileService';
 import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;
@@ -98,7 +95,8 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
         try {
             const headers = await getAuthHeaders();
             const apiResponse = await request.post(Endpoint.activityFeed, requestOptions, {headers});
-            return apiResponse.data;
+            const feed: SocialActivityFeedResponse = apiResponse.data;
+            return feed;
         } catch (e) {
             console.error("Failed get activity feed. The API call threw an error", e);
             return {
@@ -108,4 +106,40 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
             };
         }
     }
+}
+
+export function getActivityBadgeCount(options: { member: CactusMember, events: SocialActivityFeedEvent[], cacheResult?: boolean }): number {
+    const {member, events, cacheResult = true} = options;
+
+    const lastSeenOccurredAt = member.activityStatus?.lastSeenOccurredAt;
+
+    let count = 0;
+    if (!lastSeenOccurredAt) {
+        // never looked at activity
+        count = events?.length || 0;
+    } else if (lastSeenOccurredAt && events) {
+        const lastSeenMs = lastSeenOccurredAt.getTime();
+        // count how many new events there are
+
+        // if the events are already sorted, we can just look for the index of the
+        // first entry where the date is before the last seen date
+        // this prevents us from looping through an potentially very long list for no reason.
+        //
+        // Example:
+        // const index = events.findIndex(event => {
+        //     return event.occurredAt && event.occurredAt.getTime() <= lastSeenMs
+        // });
+        // console.log(`Found last activity index of ${index}`);
+        // this.activityBadgeCount = index;
+
+        count = events.filter((event: SocialActivityFeedEvent) => {
+            return event.occurredAt && event.occurredAt.getTime() > lastSeenMs
+        }).length;
+    }
+
+    if (cacheResult) {
+        StorageService.saveNumber(LocalStorageKey.activityBadgeCount, count);
+    }
+
+    return count;
 }

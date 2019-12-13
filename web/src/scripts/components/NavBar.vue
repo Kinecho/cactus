@@ -1,3 +1,4 @@
+import {LocalStorageKey} from '@web/services/StorageService'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
@@ -65,8 +66,9 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {getSocialActivity} from '@web/social';
+    import {getActivityBadgeCount, getSocialActivity} from '@web/social';
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -96,7 +98,12 @@
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
+                    const oldMember = this.member;
                     this.member = member;
+
+                    if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
+                        this.updateActivityCount();
+                    }
                 }
             });
         },
@@ -130,7 +137,7 @@
                 hidden: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
-                activityBadgeCount: 0
+                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!
             }
         },
         computed: {
@@ -210,43 +217,22 @@
                 const content = document.getElementById(scrollToId);
                 gtag("event", "scroll_to", {formId: this.signupFormAnchorId});
                 if (content) content.scrollIntoView();
-            }
-        },
-        watch: {
-            async member() {
-                if (this.member) {
-                    const feedResponse = await getSocialActivity(this.member);
-                    const lastSeenOccurredAt = this.member.activityStatus?.lastSeenOccurredAt;
-
-                    if (!feedResponse.success) {
-                        console.error(`Unable to fetch feed for member ${this.member?.id}`, feedResponse.error);
-                        return;
-                    }
-
-                    const events = feedResponse.results;
-                    if (!lastSeenOccurredAt) {
-                        // never looked at activity
-                        this.activityBadgeCount = events?.length || 0;
-                    } else if (lastSeenOccurredAt && events) {
-                        const lastSeenMs = lastSeenOccurredAt.getTime();
-                        // count how many new events there are
-
-                        // if the events are already sorted, we can just look for the index of the
-                        // first entry where the date is before the last seen date
-                        // this prevents us from looping through an potentially very long list for no reason.
-                        //
-                        // Example:
-                        // const index = events.findIndex(event => {
-                        //     return event.occurredAt && event.occurredAt.getTime() <= lastSeenMs
-                        // });
-                        // console.log(`Found last activity index of ${index}`);
-                        // this.activityBadgeCount = index;
-
-                        this.activityBadgeCount = events.filter((event: SocialActivityFeedEvent) => {
-                            return event.occurredAt && event.occurredAt.getTime() > lastSeenMs
-                        }).length;
-                    }
+            },
+            async updateActivityCount() {
+                console.log("Refreshing activity count");
+                const member = this.member;
+                if (!member) {
+                    return;
                 }
+                const feedResponse = await getSocialActivity(member);
+
+                if (!feedResponse.success) {
+                    console.error(`Unable to fetch feed for member ${this.member?.id}`, feedResponse.error);
+                    return;
+                }
+
+                const events = feedResponse.results || [];
+                this.activityBadgeCount = getActivityBadgeCount({member, events, cacheResult: true});
             }
         }
     })
