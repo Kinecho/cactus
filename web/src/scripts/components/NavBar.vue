@@ -30,8 +30,8 @@
                     <span class="navLabel">Home</span>
                 </a>
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><title>Activity</title>
-                        <path fill="#07454C" d="M13 12a5 5 0 0 1 4.995 4.783L18 17v2a1 1 0 0 1-1.993.117L16 19v-2a3 3 0 0 0-2.824-2.995L13 14H5a3 3 0 0 0-2.995 2.824L2 17v2a1 1 0 0 1-1.993.117L0 19v-2a5 5 0 0 1 4.783-4.995L5 12h8zm7.25.162a5 5 0 0 1 3.745 4.611L24 17v2a1 1 0 0 1-1.993.117L22 19v-2a3 3 0 0 0-2.25-2.902 1 1 0 1 1 .5-1.936zM9 0a5 5 0 1 1 0 10A5 5 0 0 1 9 0zm6.031.882a1 1 0 0 1 1.217-.72 5 5 0 0 1 0 9.687 1 1 0 0 1-.496-1.938 3 3 0 0 0 0-5.812 1 1 0 0 1-.72-1.217zM9 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
+                        <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
                     <span class="navLabel">Activity</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
