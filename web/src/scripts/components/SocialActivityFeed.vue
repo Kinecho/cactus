@@ -65,11 +65,11 @@
             FriendList: SocialFriendList,
             SkeletonEvent
         },
-        async created() {
+        async beforeMount() {
             if (this.member?.id) {
                 const feedResponse = await getSocialActivity(this.member);
-                if (feedResponse.data.success) {
-                    this.activityFeedEvents = feedResponse.data.results;
+                if (feedResponse.success) {
+                    this.activityFeedEvents = feedResponse.results;
                     this.updateLastSeen();
                 }
                 this.isLoading = false;
