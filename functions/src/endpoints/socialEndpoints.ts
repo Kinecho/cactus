@@ -212,7 +212,7 @@ app.post("/activity-feed", async (req: functions.https.Request | any, resp: func
         const successResponse: SocialActivityFeedResponse = {
             success: true,
             results: feedEvents
-        }
+        };
 
         resp.status(200).send(successResponse);
 

@@ -1,6 +1,7 @@
 import axios, {AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
+import {deserializeJson} from "@shared/util/ApiUtil";
 
 let _request: AxiosInstance;
 
@@ -25,12 +26,16 @@ export function initializeAxios(): AxiosInstance {
     axios.defaults.baseURL = baseURL;
 
     _request = axios.create({
-        baseURL: Config.apiDomain
+        baseURL: Config.apiDomain,
+        transformResponse: [(data: string) => {
+            return deserializeJson(data)
+        }]
     });
 
     return _request
 
 }
+
 
 export async function getAuthHeaders(): Promise<{ Authorization: string } | undefined> {
     const user = getAuth().currentUser;
