@@ -3,7 +3,7 @@
 
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications" v-if="member">
-            <friend-notifications v-bind:member="member"/>
+            <social-friend-notifications v-bind:member="member"/>
         </div>
 
         <!-- find your friends -->
@@ -110,6 +110,7 @@
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
     import {socialSharingEvent} from '@web/analytics'
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -118,7 +119,8 @@
         components: {
             Spinner,
             SocialImportedContact,
-            FriendList: SocialFriendList
+            FriendList: SocialFriendList,
+            SocialFriendNotifications
         },
         beforeMount() {
             AddressBookService.sharedInstance.start();
