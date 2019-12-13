@@ -103,7 +103,7 @@
                     this.member.activityStatus = {
                         lastSeenOccurredAt: new Date(this.latestActivity.occurredAt)
                     };
-                    //CactusMemberService.sharedInstance.save(this.member);
+                    CactusMemberService.sharedInstance.save(this.member);
                 }
             },
         },
