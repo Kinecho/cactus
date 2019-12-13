@@ -37,7 +37,9 @@ export default class AdminSocialActivityService {
 
     async getActivityFeedForMember(memberId: string): Promise<SocialActivityFeedEvent[]> {
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
-
+        if (!socialConnections || socialConnections.length === 0) {
+            return [];
+        }
         const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', this.friendIds(socialConnections))
             .limit(20)
             .orderBy('createdAt', QuerySortDirection.desc);
