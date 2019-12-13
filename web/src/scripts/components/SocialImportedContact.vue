@@ -25,9 +25,13 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
-        <button class="secondary small" v-if="isExistingMember" @click="addFriend">
+        <button class="secondary small" v-if="isExistingMember && !sendingInvite && !error && !wasFriended" @click="sendFriendRequest">
             <span>Add Friend</span>
         </button>
+        <div class="status" v-if="wasFriended">
+            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            Request Sent
+        </div>
         <input-name-modal
             :showModal="inputNameModalVisible"
             @close="hideInputNameModal"/>
@@ -44,6 +48,9 @@
     import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from "@web/services/MemberProfileService";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import {notifyFriendRequest} from '@web/social';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
 
     export default Vue.extend({
         props: {
@@ -56,7 +63,7 @@
         async created() {
             if (this.contact?.email) {
                 const contactMember = await MemberProfileService.sharedInstance.getByEmail(this.contact.email);
-                if (contactMember) {
+                if (contactMember?.id) {
                     this.contactMemberProfile = contactMember;
                 }
             }
@@ -69,6 +76,7 @@
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
+            wasFriended: boolean,
             error: string | undefined,
             inputNameModalVisible: boolean
         } {
@@ -78,13 +86,9 @@
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
+              wasFriended: false,
               error: undefined,
               inputNameModalVisible: false
-            }
-        },
-        computed: {
-            isExistingMember(): boolean {
-                return this.contactMemberProfile ? true : false;
             }
         },
         methods: {
@@ -107,6 +111,30 @@
                     return;
                 }
             },
+            async sendFriendRequest() {
+                if (this.member?.id && this.contactMemberProfile?.cactusMemberId) {
+                    try {
+                        this.sendingInvite = true;
+                        let connectionRequest = new SocialConnectionRequest();
+                            connectionRequest.memberId = this.member.id;
+                            connectionRequest.friendMemberId = this.contactMemberProfile.cactusMemberId;
+                            connectionRequest.sentAt = new Date();
+                        
+                        const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
+                        this.wasFriended = true;
+
+                        const notifyResult = await notifyFriendRequest(connectionRequest);
+
+                        return !!result;
+                    } catch(e) {
+                        console.error("Failed to send friend request", e);
+                        this.error = 'Something went wrong';
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            },
             avatarNumber(email: string): number {
                 return getIntegerFromStringBetween(email, 4) + 1;
             },
@@ -124,7 +152,13 @@
                 this.inputNameModalVisible = false;
                 this.readyToInvite = true;
             },
+            
         },
+        computed: {
+            isExistingMember(): boolean {
+                return (this.contactMemberProfile ? true : false);
+            }
+        }
     })
 </script>
 
