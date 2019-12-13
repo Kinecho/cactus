@@ -207,18 +207,19 @@ export function formatAsTimeAgo(date: Date) {
       unit = 'weeks';
   }
 
-  const singularUnits = {
-      seconds: 'second',
-      minutes: 'minute',
-      days: 'day',
-      weeks: 'week'
+  enum SingularDates {
+      seconds = 'second',
+      minutes = 'minute',
+      hours = 'hour',
+      days = 'day',
+      weeks = 'week'
   }
 
   const diff = now.diff(past, unit);
-  let label = unit;
+  let label: string = unit;
 
   if (Math.floor(diff[unit]) == 1) {
-      label = singularUnits[unit];    
+      label = SingularDates[unit];    
   }
   return `${Math.floor(diff[unit])} ${label} ago`;
 }
