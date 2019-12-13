@@ -141,7 +141,7 @@
             display: grid;
             grid-column-gap: 6.4rem;
             grid-template-columns: 1fr minmax(38rem, 33%);
-            grid-template-rows: max-content;
+            grid-template-rows: max-content 1fr;
             margin: 0;
             max-width: none;
         }
