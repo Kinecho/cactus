@@ -1,23 +1,27 @@
 export interface SocialActivityFeedRequest {
-  memberId: string
+    memberId: string
 }
 
 export interface SocialActivityFeedResponse {
-  success: boolean,
-  message?: string,
-  results?: SocialActivityFeedEvent[],
-  error?: any
+    success: boolean,
+    message?: string,
+    results?: SocialActivityFeedEvent[],
+    error?: any
+}
+
+export enum SocialActivityType {
+    ReflectionResponse = "ReflectionResponse"
 }
 
 export interface SocialActivityFeedEvent {
-  eventType?: string,
-  eventId?: string,
-  occurredAt?: Date,
-  memberId?: string
-  payload?: ReflectionResponsePayload
+    eventType?: SocialActivityType,
+    eventId?: string,
+    occurredAt?: Date,
+    memberId?: string
+    payload?: ReflectionResponsePayload
 }
 
 export interface ReflectionResponsePayload {
-  promptId?: string,
-  promptQuestion?: string
+    promptId?: string,
+    promptQuestion?: string
 }

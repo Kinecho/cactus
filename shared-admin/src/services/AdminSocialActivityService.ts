@@ -2,7 +2,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import SocialConnection from "@shared/models/SocialConnection";
-import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+import {SocialActivityFeedEvent, SocialActivityType} from "@shared/types/SocialTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 
@@ -39,34 +39,33 @@ export default class AdminSocialActivityService {
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
 
         const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', this.friendIds(socialConnections))
-                                                               .limit(20)
-                                                               .orderBy('createdAt', QuerySortDirection.desc);
+            .limit(20)
+            .orderBy('createdAt', QuerySortDirection.desc);
         const reflectionResponses = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return this.feedEventsFor(reflectionResponses.results);
     }
 
     friendIds(socialConnections: SocialConnection[]): Array<string> {
-        return socialConnections.map(function(s: SocialConnection) { return s.friendMemberId })
+        return socialConnections.map(function (s: SocialConnection) {
+            return s.friendMemberId
+        })
     }
 
     feedEventsFor(reflectionResponses: ReflectionResponse[]): SocialActivityFeedEvent[] {
-        const feedEvents = reflectionResponses.map(function(reflectionResponse: ReflectionResponse) {
-                               const feedEvent: SocialActivityFeedEvent = {
-                                   eventType: 'ReflectionResponse',
-                                   eventId: reflectionResponse.id,
-                                   occurredAt: reflectionResponse.createdAt,
-                                   memberId: reflectionResponse.cactusMemberId,
-                                   payload: {
-                                       promptId: reflectionResponse.promptId,
-                                       promptQuestion: reflectionResponse.promptQuestion
-                                   }
-                               }
-                               return feedEvent;
-                           });
-
-        return feedEvents;
+        return reflectionResponses.map((reflectionResponse: ReflectionResponse) => AdminSocialActivityService.reflectionResponseToEvent(reflectionResponse));
     }
 
-    
+    static reflectionResponseToEvent(reflectionResponse: ReflectionResponse): SocialActivityFeedEvent {
+        return {
+            eventType: SocialActivityType.ReflectionResponse,
+            eventId: reflectionResponse.id,
+            occurredAt: reflectionResponse.createdAt,
+            memberId: reflectionResponse.cactusMemberId,
+            payload: {
+                promptId: reflectionResponse.promptId,
+                promptQuestion: reflectionResponse.promptQuestion
+            }
+        };
+    }
 }
