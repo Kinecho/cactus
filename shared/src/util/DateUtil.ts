@@ -207,9 +207,20 @@ export function formatAsTimeAgo(date: Date) {
       unit = 'weeks';
   }
 
-  const diff = now.diff(past, unit);
+  const singularUnits = {
+      seconds: 'second',
+      minutes: 'minute',
+      days: 'day',
+      weeks: 'week'
+  }
 
-  return `${Math.floor(diff[unit])} ${unit} ago`;
+  const diff = now.diff(past, unit);
+  let label = unit;
+
+  if (Math.floor(diff[unit]) == 1) {
+      label = singularUnits[unit];    
+  }
+  return `${Math.floor(diff[unit])} ${label} ago`;
 }
 
 export function millisecondsToMinutes(duration: number, decimals: number = 1): string {
