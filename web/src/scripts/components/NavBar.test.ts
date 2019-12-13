@@ -2,7 +2,7 @@ import {shallowMount} from "@vue/test-utils";
 import NavBar from "@components/NavBar.vue";
 import {mockauth, mockFirebase} from "@test/jestsetup";
 import CactusMember from "@shared/models/CactusMember";
-import {SocialActivityFeedEvent, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
+import {SocialActivityFeedEvent, SocialActivityFeedResponse, SocialActivityType} from "@shared/types/SocialTypes";
 
 const jest = require("jest");
 
@@ -31,7 +31,7 @@ jest.mock("@web/social", () => {
     return {
         getSocialActivity: async (member: CactusMember): Promise<SocialActivityFeedResponse> => {
             const event1: SocialActivityFeedEvent = {
-                eventType: "any",
+                eventType: SocialActivityType.ReflectionResponse,
                 occurredAt: new Date(),
                 eventId: "123",
             };
