@@ -193,12 +193,17 @@ export default class AdminFirestoreService {
 
 
     async getFirst<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<T | undefined> {
-        const response = await this.executeQuery(query, Type, options);
+        const startTime = new Date().getTime();
+
+        const response = await this.executeQuery(query.limit(1), Type, options);
+        const endTime = new Date().getTime();
+        console.log(`getFirst query finished after ${endTime - startTime}ms`);
         const [first] = response.results;
         return first;
     }
 
     async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
+        const startTime = new Date().getTime();
         try {
             let query = originalQuery;
             if (!options.includeDeleted) {
@@ -224,10 +229,12 @@ export default class AdminFirestoreService {
             let snapshot;
             if (options.transaction) {
                 snapshot = await options.transaction.get(query)
+
             } else {
                 snapshot = await query.get();
             }
-
+            const queryEndTime = new Date().getTime();
+            console.log(`Query execution took ${queryEndTime - startTime}`);
             const size = snapshot.size;
             const results: T[] = fromQuerySnapshot(snapshot, Type);
             const queryResult: QueryResult<T> = {results, size};

@@ -1,8 +1,10 @@
 import {shallowMount} from "@vue/test-utils";
+import NavBar from "@components/NavBar.vue";
+import {mockauth, mockFirebase} from "@test/jestsetup";
+import CactusMember from "@shared/models/CactusMember";
+import {SocialActivityFeedEvent, SocialActivityFeedResponse, SocialActivityType} from "@shared/types/SocialTypes";
 
 const jest = require("jest");
-import NavBar from "@components/NavBar.vue";
-import {mockFirebase, mockauth} from "@test/jestsetup";
 
 jest.mock("@web/auth", () => {
     return {
@@ -25,11 +27,24 @@ jest.mock("@web/firebase", () => {
     };
 });
 
+jest.mock("@web/social", () => {
+    return {
+        getSocialActivity: async (member: CactusMember): Promise<SocialActivityFeedResponse> => {
+            const event1: SocialActivityFeedEvent = {
+                eventType: SocialActivityType.ReflectionResponse,
+                occurredAt: new Date(),
+                eventId: "123",
+            };
+            return {success: true, results: [event1]}
+        }
+    }
+});
+
 jest.mock("@web/services/CactusMemberService", () => {
     return {
         sharedInstance: {
             observeCurrentMember: () => {
-                console.log("mocked observe method")
+                return;
             }
         },
     }
@@ -67,6 +82,28 @@ describe("NavBar.vue test", () => {
         const signupButton = wrapper.find("[data-test='signup-button']");
         console.log("signup button", signupButton);
         expect(signupButton.isVisible()).toBeTruthy();
+    });
+
+    test("badge count is visible", () => {
+
+        mockFirebase.auth().changeAuthState({});
+        // mockFirebase.auth().changeAuthState(null);
+        const props = {
+            showSignup: true,
+        };
+        const wrapper = shallowMount(NavBar, {
+            propsData: props,
+        });
+
+        wrapper.setData({...wrapper.vm.$data, activityBadgeCount: 1});
+
+        mockFirebase.auth().flush();
+
+        const signupButton = wrapper.find("[data-test='signup-button']");
+        const badge = wrapper.find("[data-test='badge']");
+        console.log("signup button", signupButton);
+        expect(signupButton.exists()).toBeFalsy();
+        expect(badge.exists()).toBeTruthy();
     });
 });
 

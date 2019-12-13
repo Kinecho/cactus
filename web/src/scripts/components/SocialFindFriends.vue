@@ -109,7 +109,6 @@
     import {Config} from "@web/config";
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
-    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import {socialSharingEvent} from '@web/analytics'
 
     Vue.use(VueClipboard);
@@ -119,8 +118,7 @@
         components: {
             Spinner,
             SocialImportedContact,
-            FriendList: SocialFriendList,
-            FriendNotifications: SocialFriendNotifications
+            FriendList: SocialFriendList
         },
         beforeMount() {
             AddressBookService.sharedInstance.start();

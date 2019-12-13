@@ -1,14 +1,17 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
-            <div class="centered" v-if="loading || !responsesLoaded">
+            <div v-if="show404">
+                <FourOhFour/>
+            </div>
+            <div v-else-if="!loading && !promptContent || error" class="centered">
+                <div class="alert error">
+                    {{error}}
+                </div>
+            </div>
+            <div class="centered" v-else-if="loading || !responsesLoaded">
                 <spinner message="Loading..." :delay="1000"/>
             </div>
-
-            <div v-else-if="!loading && !promptContent">
-                No prompt found for id
-            </div>
-
             <section class="content-container centered" v-else-if="!loading && promptContent && responsesLoaded">
                 <div class="shareContainer" v-if="!completed">
                     <button aria-label="Share Today's Prompt" class="share tertiary wiggle" @click="showSharing = true" v-show="!showSharing && sharePromptEnabled">
@@ -119,6 +122,8 @@
     import {gtag} from "@web/analytics"
     import {isBlank} from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
+    import PromptContentService from "@web/services/PromptContentService";
+    import FourOhFour from "@components/404.vue"
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -132,6 +137,7 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
+            FourOhFour
         },
         props: {
             initialIndex: Number,
@@ -145,6 +151,9 @@
             }
         },
         async beforeMount(): Promise<void> {
+
+            this.usePromptId = !!getQueryParam(QueryParam.USE_PROMPT_ID);
+
             this.keyboardListener = (evt: KeyboardEvent) => {
                 if (this.navigationDisabled) {
                     return;
@@ -214,23 +223,28 @@
                 slideNumber = 0;
             }
 
-            //TODO: use a promptContentService
-            this.promptsUnsubscriber = await flamelink.content.subscribe({
-                entryId: promptContentId,
-                schemaKey: "promptContent",
-                populate: [{
-                    field: 'content',
-                    subFields: [{field: 'backgroundImage', subFields: "imageIds"}]
-                }],
-                callback: (error: any, data: Partial<PromptContent>) => {
-                    if (error || !data) {
+
+            const flamelinkOptions = {
+                onData: async (promptContent?: PromptContent | undefined, error?: any) => {
+                    if (!promptContent) {
+                        this.error = "This prompt does not exist";
+                        this.loading = false;
+                        this.promptContent = undefined;
+                        this.show404 = true;
+                        return;
+                    }
+
+                    if (error) {
                         this.promptContent = undefined;
                         this.loading = false;
-                        return console.error("Failed to load prompts", error)
+                        this.error = "Oops! We were unable to load the prompt. Please try again later.";
+                        this.show404 = false;
+                        console.error("Failed to load prompts", error);
+                        return;
                     }
-                    console.log("raw promptContent data", data);
+                    // console.log("raw promptContent data", data);
 
-                    const promptContent = new PromptContent(data);
+                    // const promptContent = new PromptContent(data);
                     this.promptContent = promptContent;
                     console.log("on load - promptContentLength", promptContent.content && promptContent.content.length);
                     if (isShare) {
@@ -253,7 +267,18 @@
                     this.updateDocumentMeta();
 
                 }
-            });
+            };
+
+            if (this.usePromptId) {
+                //this is to handle a case where we didn't know the prompt ID ahead of time
+                this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByPromptId(promptContentId, flamelinkOptions)
+            } else {
+                //this is the default behavior
+                this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(promptContentId, flamelinkOptions)
+            }
+
+            //TODO: use a promptContentService
+            // this.promptsUnsubscriber = await flamelink.content.subscribe(flamelinkOptions);
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
@@ -274,6 +299,7 @@
         },
         data(): {
             promptContent: PromptContent | undefined,
+            error: string | undefined,
             loading: boolean,
             activeIndex: number,
             transitionName: string,
@@ -297,8 +323,11 @@
             navigationDisabled: boolean,
             responsesLoaded: boolean,
             pendingActiveIndex: number | undefined,
+            usePromptId: boolean,
+            show404: boolean,
         } {
             return {
+                error: undefined,
                 promptContent: undefined,
                 loading: true,
                 activeIndex: 0,
@@ -323,6 +352,8 @@
                 keyboardListener: undefined,
                 navigationDisabled: false,
                 pendingActiveIndex: undefined,
+                usePromptId: false,
+                show404: false,
             };
         },
         computed: {
@@ -501,7 +532,8 @@
                     let pngUrl = getCloudinaryUrlFromStorageUrl({
                         storageUrl: openGraphImage.storageUrl,
                         width: 1200,
-                        transforms: ["w_1200","h_630","f_png","c_lpad"]});
+                        transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
+                    });
                     ogImageTag.setAttribute("content", `${pngUrl}`);
 
                     if (twitterImageTag) {
@@ -641,13 +673,16 @@
                 }
             },
 
-            async save(options: {updateReflectionLog: boolean} = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
+            async save(options: { updateReflectionLog: boolean } = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
-                    this.reflectionResponse.reflectionDurationMs= this.reflectionDuration;
+                    this.reflectionResponse.reflectionDurationMs = this.reflectionDuration;
                     this.reflectionResponse.cactusElement = this.promptContent && this.promptContent.cactusElement || null;
-                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {saveIfAnonymous: true, updateReflectionLog: options.updateReflectionLog});
+                    const saved = await ReflectionResponseService.sharedInstance.save(this.reflectionResponse, {
+                        saveIfAnonymous: true,
+                        updateReflectionLog: options.updateReflectionLog
+                    });
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {
                         console.log("Member is not logged in, saving to localstorage");
@@ -841,6 +876,7 @@
                     left: .8rem;
                     padding: 2rem 2rem 2rem 0;
                 }
+
                 &.next {
                     padding: 2rem 0 2rem 2rem;
                     right: .8rem;
