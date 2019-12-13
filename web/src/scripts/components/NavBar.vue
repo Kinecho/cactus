@@ -23,13 +23,18 @@
             </div>
             <div class="navContainer" v-if="loggedIn">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My Journal</title><path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/></svg>
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
+                        Journal</title>
+                        <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
+                    </svg>
                     <span class="navLabel">Home</span>
                 </a>
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><title>Activity</title><path fill="#07454C" d="M13 12a5 5 0 0 1 4.995 4.783L18 17v2a1 1 0 0 1-1.993.117L16 19v-2a3 3 0 0 0-2.824-2.995L13 14H5a3 3 0 0 0-2.995 2.824L2 17v2a1 1 0 0 1-1.993.117L0 19v-2a5 5 0 0 1 4.783-4.995L5 12h8zm7.25.162a5 5 0 0 1 3.745 4.611L24 17v2a1 1 0 0 1-1.993.117L22 19v-2a3 3 0 0 0-2.25-2.902 1 1 0 1 1 .5-1.936zM9 0a5 5 0 1 1 0 10A5 5 0 0 1 9 0zm6.031.882a1 1 0 0 1 1.217-.72 5 5 0 0 1 0 9.687 1 1 0 0 1-.496-1.938 3 3 0 0 0 0-5.812 1 1 0 0 1-.72-1.217zM9 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><title>Activity</title>
+                        <path fill="#07454C" d="M13 12a5 5 0 0 1 4.995 4.783L18 17v2a1 1 0 0 1-1.993.117L16 19v-2a3 3 0 0 0-2.824-2.995L13 14H5a3 3 0 0 0-2.995 2.824L2 17v2a1 1 0 0 1-1.993.117L0 19v-2a5 5 0 0 1 4.783-4.995L5 12h8zm7.25.162a5 5 0 0 1 3.745 4.611L24 17v2a1 1 0 0 1-1.993.117L22 19v-2a3 3 0 0 0-2.25-2.902 1 1 0 1 1 .5-1.936zM9 0a5 5 0 1 1 0 10A5 5 0 0 1 9 0zm6.031.882a1 1 0 0 1 1.217-.72 5 5 0 0 1 0 9.687 1 1 0 0 1-.496-1.938 3 3 0 0 0 0-5.812 1 1 0 0 1-.72-1.217zM9 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                    </svg>
                     <span class="navLabel">Activity</span>
-                    <span class="badge" v-if="activityBadgeCount > 0">{{activityBadgeCount}}</span>
+                    <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -87,7 +92,7 @@
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
                 this.user = user;
                 this.authLoaded = true;
-            })
+            });
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
@@ -212,19 +217,34 @@
                 if (this.member) {
                     const feedResponse = await getSocialActivity(this.member);
                     const lastSeenOccurredAt = this.member.activityStatus?.lastSeenOccurredAt;
-                    
-                    if (feedResponse.data.success) {
-                        const events = feedResponse.data.results;  
-                        if (events && !lastSeenOccurredAt) {
-                            // never looked at activity
-                            this.activityBadgeCount = events.length;
-                        
-                        } else if (lastSeenOccurredAt && events) {
-                            // count how many new events there are 
-                            this.activityBadgeCount = events.filter(function(event: SocialActivityFeedEvent) {
-                                return event.occurredAt && new Date(event.occurredAt) > new Date(lastSeenOccurredAt)
-                            }).length;
-                        }
+
+                    if (!feedResponse.success) {
+                        console.error(`Unable to fetch feed for member ${this.member?.id}`, feedResponse.error);
+                        return;
+                    }
+
+                    const events = feedResponse.results;
+                    if (!lastSeenOccurredAt) {
+                        // never looked at activity
+                        this.activityBadgeCount = events?.length || 0;
+                    } else if (lastSeenOccurredAt && events) {
+                        const lastSeenMs = lastSeenOccurredAt.getTime();
+                        // count how many new events there are
+
+                        // if the events are already sorted, we can just look for the index of the
+                        // first entry where the date is before the last seen date
+                        // this prevents us from looping through an potentially very long list for no reason.
+                        //
+                        // Example:
+                        // const index = events.findIndex(event => {
+                        //     return event.occurredAt && event.occurredAt.getTime() <= lastSeenMs
+                        // });
+                        // console.log(`Found last activity index of ${index}`);
+                        // this.activityBadgeCount = index;
+
+                        this.activityBadgeCount = events.filter((event: SocialActivityFeedEvent) => {
+                            return event.occurredAt && event.occurredAt.getTime() > lastSeenMs
+                        }).length;
                     }
                 }
             }
@@ -232,7 +252,7 @@
     })
 </script>
 
-<style lang="scss" >
+<style lang="scss">
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";

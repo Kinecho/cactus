@@ -15,13 +15,12 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import CactusMember from "@shared/models/CactusMember";
     import MemberProfile from "@shared/models/MemberProfile";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import MemberProfileService from '@web/services/MemberProfileService';
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
     import {PageRoute} from "@shared/PageRoutes";
-    import {formatAsTimeAgo,getISODate} from "@shared/util/DateUtil";
+    import {formatAsTimeAgo} from "@shared/util/DateUtil";
 
     export default Vue.extend({
         props: {
