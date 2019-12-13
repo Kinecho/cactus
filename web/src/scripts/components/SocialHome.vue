@@ -10,7 +10,9 @@
                 <p>See what your friends are up to.</p>
                 <img class="graphic" src="assets/images/twoFriends.png" alt="Two friends welcoming you"/>
                 <a class="button primary wiggle" :href="friendsPath">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
+                    </svg>
                     Add Friends
                 </a>
             </div>
@@ -41,10 +43,10 @@
         data(): {
             currentChild: string,
             loading: boolean,
-            member: CactusMember|undefined,
-            memberUnsubscriber: ListenerUnsubscriber|undefined,
+            member: CactusMember | undefined,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
             friends: Array<SocialConnection>,
-            friendsUnsubscriber?: ListenerUnsubscriber|undefined,
+            friendsUnsubscriber?: ListenerUnsubscriber | undefined,
         } {
             return {
                 currentChild: 'findFriends',
@@ -65,8 +67,9 @@
                             this.member = member;
 
                             if (this.member?.id) {
+                                this.friendsUnsubscriber?.();
                                 this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
-                                    onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                                    onData: (socialConnections: SocialConnection[]) => {
                                         this.friends = socialConnections;
                                         this.loading = false;
                                     }
