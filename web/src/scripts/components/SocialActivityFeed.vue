@@ -165,38 +165,10 @@
         }
     }
 
-    // header {
-    //     width: 100%;
-    // }
-    //
-    // .centered {
-    //     flex-grow: 1;
-    //     width: 100%;
-    // }
-
     .loading {
         display: flex;
         justify-content: center;
     }
-
-    // .subtext {
-    //     opacity: .8;
-    // }
-
-    // .brandNew .subtext {
-    //     margin: 0 auto 3.2rem;
-    //     max-width: 48rem;
-    // }
-
-    // .getStarted {
-    //     margin-bottom: 6.4rem;
-    //     max-width: 24rem;
-    //     width: 100%;
-    //
-    //     @include r(600) {
-    //         width: auto;
-    //     }
-    // }
 
     .findFriends {
         margin: 0 auto 6.4rem;
