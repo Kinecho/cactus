@@ -3,7 +3,7 @@
         <NavBar/>
         <div class="centered">
             <div class="contentContainer" v-if="!loading && member && friends.length > 0">
-                <SocialActivityFeed :member="member" v-if="member"/>
+                <SocialActivityFeed :member="member"/>
             </div>
             <div class="no-friends emptyState" v-if="!loading && friends.length == 0">
                 You have no friends on Cactus.
@@ -55,16 +55,19 @@
                 onData: ({member}) => {
                     if (!member) {
                         window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`;
-                    }
-                    this.member = member;
-                    this.loading = false;
+                    } else {
+                        if (this.member?.id != member.id) { // only update instance if switching users
+                            this.member = member;
+                            this.loading = false;
 
-                    if (this.member?.id) {
-                        this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
-                            onData: async (socialConnections: SocialConnection[]): Promise<void> => {
-                                this.friends = socialConnections;
+                            if (this.member?.id) {
+                                this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                                    onData: async (socialConnections: SocialConnection[]): Promise<void> => {
+                                        this.friends = socialConnections;
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
                 }
             })
@@ -78,7 +81,11 @@
             friendsPath() {
                 return PageRoute.FRIENDS;
             }
-        }
+        },
+        destroyed() {
+            this.memberUnsubscriber?.();
+            this.friendsUnsubscriber?.();
+        },
 
     })
 </script>

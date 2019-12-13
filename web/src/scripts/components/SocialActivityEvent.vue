@@ -77,7 +77,6 @@
             },
             occurredDate(): string | undefined {
                 if (this.event?.occurredAt) {
-                    console.log(this.event.occurredAt);
                     return formatAsTimeAgo(new Date(this.event.occurredAt));
                 }
                 return undefined;
