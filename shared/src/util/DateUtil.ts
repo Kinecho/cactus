@@ -207,9 +207,21 @@ export function formatAsTimeAgo(date: Date) {
       unit = 'weeks';
   }
 
-  const diff = now.diff(past, unit);
+  enum SingularDates {
+      seconds = 'second',
+      minutes = 'minute',
+      hours = 'hour',
+      days = 'day',
+      weeks = 'week'
+  }
 
-  return `${Math.floor(diff[unit])} ${unit} ago`;
+  const diff = now.diff(past, unit);
+  let label: string = unit;
+
+  if (Math.floor(diff[unit]) == 1) {
+      label = SingularDates[unit];    
+  }
+  return `${Math.floor(diff[unit])} ${label} ago`;
 }
 
 export function millisecondsToMinutes(duration: number, decimals: number = 1): string {

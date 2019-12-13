@@ -29,7 +29,7 @@
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><title>Activity</title><path fill="#07454C" d="M13 12a5 5 0 0 1 4.995 4.783L18 17v2a1 1 0 0 1-1.993.117L16 19v-2a3 3 0 0 0-2.824-2.995L13 14H5a3 3 0 0 0-2.995 2.824L2 17v2a1 1 0 0 1-1.993.117L0 19v-2a5 5 0 0 1 4.783-4.995L5 12h8zm7.25.162a5 5 0 0 1 3.745 4.611L24 17v2a1 1 0 0 1-1.993.117L22 19v-2a3 3 0 0 0-2.25-2.902 1 1 0 1 1 .5-1.936zM9 0a5 5 0 1 1 0 10A5 5 0 0 1 9 0zm6.031.882a1 1 0 0 1 1.217-.72 5 5 0 0 1 0 9.687 1 1 0 0 1-.496-1.938 3 3 0 0 0 0-5.812 1 1 0 0 1-.72-1.217zM9 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
                     <span class="navLabel">Activity</span>
-                    <!--span class="badge">3</span-->
+                    <span class="badge" v-if="activityBadgeCount > 0">{{activityBadgeCount}}</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -60,6 +60,8 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
+    import {getSocialActivity} from '@web/social';
+    import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -71,6 +73,7 @@
         authLoaded: boolean,
         copy: LocalizedCopy,
         hidden: boolean,
+        activityBadgeCount: number
     }
 
     export default Vue.extend({
@@ -121,7 +124,8 @@
                 authLoaded: false,
                 hidden: false,
                 member: undefined,
-                memberUnsubscriber: undefined
+                memberUnsubscriber: undefined,
+                activityBadgeCount: 0
             }
         },
         computed: {
@@ -203,6 +207,28 @@
                 if (content) content.scrollIntoView();
             }
         },
+        watch: {
+            async member() {
+                if (this.member) {
+                    const feedResponse = await getSocialActivity(this.member);
+                    const lastSeenOccurredAt = this.member.activityStatus?.lastSeenOccurredAt;
+                    
+                    if (feedResponse.data.success) {
+                        const events = feedResponse.data.results;  
+                        if (events && !lastSeenOccurredAt) {
+                            // never looked at activity
+                            this.activityBadgeCount = events.length;
+                        
+                        } else if (lastSeenOccurredAt && events) {
+                            // count how many new events there are 
+                            this.activityBadgeCount = events.filter(function(event: SocialActivityFeedEvent) {
+                                return event.occurredAt && new Date(event.occurredAt) > new Date(lastSeenOccurredAt)
+                            }).length;
+                        }
+                    }
+                }
+            }
+        }
     })
 </script>
 
@@ -334,13 +360,17 @@
     .badge {
         background-color: $green;
         border-radius: 50%;
-        color: $green;
-        height: .8rem;
+        color: $white;
+        font-size: 60%;
+        height: 2rem;
         overflow: hidden;
         position: absolute;
-        right: -.4rem;
-        top: -.4rem;
-        width: .8rem;
+        right: -1.8rem;
+        top: -0.5rem;
+        width: 2rem;
+        line-height: 180%;
+        text-align: center;
+        font-weight: bold;
     }
 
     .navbar-avatar-container {

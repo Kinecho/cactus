@@ -38,6 +38,7 @@
     import Spinner from "@components/Spinner.vue";
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import CactusMember from "@shared/models/CactusMember";
+    import CactusMemberService from '@web/services/CactusMemberService';
     import {Config} from "@web/config";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
@@ -69,6 +70,7 @@
                 const feedResponse = await getSocialActivity(this.member);
                 if (feedResponse.data.success) {
                     this.activityFeedEvents = feedResponse.data.results;
+                    this.updateLastSeen();
                 }
                 this.isLoading = false;
             }
@@ -104,13 +106,27 @@
             },
             setVisible(child: string) {
                 this.currentChild = child;
-            }
+            },
+            updateLastSeen() {
+                if (this.latestActivity?.occurredAt && this.member) {
+                    this.member.activityStatus = {
+                        lastSeenOccurredAt: new Date(this.latestActivity.occurredAt)
+                    };
+                    CactusMemberService.sharedInstance.save(this.member);
+                }
+            },
         },
         computed: {
             friendsPath() {
                 return PageRoute.FRIENDS;
+            },
+            latestActivity(): SocialActivityFeedEvent | undefined {
+                if (this.activityFeedEvents && this.activityFeedEvents[0]) {
+                    return this.activityFeedEvents[0];
+                }
+                return undefined;
             }
-        }
+        },
     })
 </script>
 
