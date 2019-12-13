@@ -3,11 +3,7 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {InvitationResponse} from "@shared/api/SignupEndpointTypes";
 import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import {
-    ActivitySummaryResponse,
-    SocialActivityFeedRequest,
-    SocialActivityFeedResponse
-} from "@shared/types/SocialTypes";
+import {ActivitySummaryResponse, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
 import {
     SocialConnectionRequestNotification,
     SocialConnectionRequestNotificationResult
@@ -19,7 +15,7 @@ import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
-import {getAuthUser} from "@api/util/RequestUtil";
+import {getAuthUser, getAuthUserId} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import {generateReferralLink} from '@shared/util/SocialInviteUtil';
 import {PageRoute} from "@shared/PageRoutes";
@@ -115,7 +111,6 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         });
     }
 
-
     return;
 });
 
@@ -195,17 +190,22 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
 });
 
 app.get("/activity-feed-summary", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const requestUser = await getAuthUser(req);
-    if (!requestUser) {
+    const startDate = new Date();
+    const requestUserId = await getAuthUserId(req);
+    const authDate = new Date();
+    console.log(`Got the auth user after ${authDate.getTime() - startDate.getTime()}`);
+    if (!requestUserId) {
         console.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUser.uid);
+    const memberStart = new Date().getTime();
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
+    const memberEnd = new Date().getTime();
+    console.log(`Get member duration ${memberEnd - memberStart}ms`);
     const memberId = member?.id;
     if (!member || !memberId) {
-        console.error("No member or memberId found for userId", requestUser.uid);
+        console.error("No member or memberId found for userId", requestUserId);
         resp.sendStatus(404);
         return;
     }
@@ -218,28 +218,28 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
         unseenCount,
         lastFriendActivityDate
     };
+    const endDate = new Date();
+    console.log(`activity feed summary endpoint processed in ${endDate.getTime() - startDate.getTime()}ms`);
+
     resp.status(200).send(response);
     return;
 });
 
-app.post("/activity-feed", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const requestUser = await getAuthUser(req);
-    if (!requestUser || !requestUser.email) {
+app.get("/activity-feed", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const requestUserId = await getAuthUserId(req);
+    if (!requestUserId) {
         console.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
 
-    const payload: SocialActivityFeedRequest | undefined | null = req.body;
-    console.log("socialEndpoints.activity-feed", payload);
-
-    if (!payload) {
-        console.log("No payload was included");
-        resp.sendStatus(500);
-        return
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        console.warn("No member was found for the request user id", requestUserId);
+        resp.sendStatus(404);
+        return;
     }
-
-    const {memberId} = payload;
 
     try {
         const feedEvents = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);

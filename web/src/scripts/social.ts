@@ -91,15 +91,12 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
             message: "You must be logged in to make this request."
         };
     } else {
-        const requestOptions: SocialActivityFeedRequest = {
-            memberId: member.id
-        };
+
 
         try {
             const headers = await getAuthHeaders();
-            const apiResponse = await request.post(Endpoint.activityFeed, requestOptions, {headers});
-            const feed: SocialActivityFeedResponse = apiResponse.data;
-            return feed;
+            const apiResponse = await request.get(Endpoint.activityFeed, {headers});
+            return apiResponse.data;
         } catch (e) {
             console.error("Failed get activity feed. The API call threw an error", e);
             return {

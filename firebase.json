@@ -93,6 +93,10 @@
         ],
         "rewrites": [
             {
+                "source": "/activity",
+                "destination": "/social_home.html"
+            },
+            {
                 "source": "/ios-login-continue",
                 "destination": "/ios_login_continue.html"
             },
