@@ -10,9 +10,14 @@
         <div class="activityContainer">
             <div class="flexContainer">
                 <h2>Activity</h2>
+                <template v-if="isLoading">
+                    <Spinner/>
+                </template>
                 <a class="primary button add-friends" :href="friendsPath">Add Friends</a>
             </div>
-            <Spinner v-if="isLoading"/>
+            <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
+                <skeleton-event />
+            </template>
             <p class="subtext" v-if="!isLoading && activityFeedEvents.length < 1">Nothing to see (yet).</p>
             <template v-for="event in activityFeedEvents">
                 <SocialActivityEvent :event="event"/>
@@ -43,6 +48,7 @@
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import {PageRoute} from "@shared/PageRoutes";
     import SocialFriendList from "@components/SocialFriendList.vue";
+    import SkeletonEvent from "@components/SocialActivityEventSkeleton.vue";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -55,7 +61,8 @@
             Spinner,
             SocialActivityEvent,
             SocialFriendNotifications,
-            FriendList: SocialFriendList
+            FriendList: SocialFriendList,
+            SkeletonEvent
         },
         async created() {
             if (this.member?.id) {
