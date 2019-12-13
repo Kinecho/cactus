@@ -1,4 +1,5 @@
 import {LocalStorageKey} from '@web/services/StorageService'
+import {LocalStorageKey} from '@web/services/StorageService'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
@@ -66,8 +67,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {getActivityBadgeCount, getSocialActivity} from '@web/social';
-    import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+    import {fetchActivityFeedSummary} from '@web/social';
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -224,15 +224,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 if (!member) {
                     return;
                 }
-                const feedResponse = await getSocialActivity(member);
 
-                if (!feedResponse.success) {
-                    console.error(`Unable to fetch feed for member ${this.member?.id}`, feedResponse.error);
+                const activitySummary = await fetchActivityFeedSummary();
+                if (!activitySummary) {
+                    console.error("Failed to fetch activity summary");
+                    this.activityBadgeCount = 0;
                     return;
                 }
-
-                const events = feedResponse.results || [];
-                this.activityBadgeCount = getActivityBadgeCount({member, events, cacheResult: true});
+                this.activityBadgeCount = activitySummary.unseenCount;
+                StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
             }
         }
     })

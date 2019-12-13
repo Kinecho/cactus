@@ -17,7 +17,8 @@ export enum Endpoint {
     loginEvent = "signup/login-event",
     sendInvite = "social/send-invite",
     notifyFriendRequest = "social/notify-friend-request",
-    activityFeed = "social/activity-feed"
+    activityFeed = "social/activity-feed",
+    activityFeedSummary = "social/activity-feed-summary",
 }
 
 export function initializeAxios(): AxiosInstance {

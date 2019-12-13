@@ -3,6 +3,7 @@ import {EmailContact} from "@shared/types/EmailContactTypes";
 import {InviteResult, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
 import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
 import {
+    ActivitySummaryResponse,
     SocialActivityFeedEvent,
     SocialActivityFeedRequest,
     SocialActivityFeedResponse
@@ -12,6 +13,8 @@ import MemberProfileService from '@web/services/MemberProfileService';
 import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import {unseenActivityCount} from "@shared/util/SocialUtil";
+import {AxiosError} from "axios";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;
@@ -108,38 +111,16 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
     }
 }
 
-export function getActivityBadgeCount(options: { member: CactusMember, events: SocialActivityFeedEvent[], cacheResult?: boolean }): number {
-    const {member, events, cacheResult = true} = options;
-
-    const lastSeenOccurredAt = member.activityStatus?.lastSeenOccurredAt;
-
-    let count = 0;
-    if (!lastSeenOccurredAt) {
-        // never looked at activity
-        count = events?.length || 0;
-    } else if (lastSeenOccurredAt && events) {
-        const lastSeenMs = lastSeenOccurredAt.getTime();
-        // count how many new events there are
-
-        // if the events are already sorted, we can just look for the index of the
-        // first entry where the date is before the last seen date
-        // this prevents us from looping through an potentially very long list for no reason.
-        //
-        // Example:
-        // const index = events.findIndex(event => {
-        //     return event.occurredAt && event.occurredAt.getTime() <= lastSeenMs
-        // });
-        // console.log(`Found last activity index of ${index}`);
-        // this.activityBadgeCount = index;
-
-        count = events.filter((event: SocialActivityFeedEvent) => {
-            return event.occurredAt && event.occurredAt.getTime() > lastSeenMs
-        }).length;
+export async function fetchActivityFeedSummary(): Promise<ActivitySummaryResponse | undefined> {
+    try {
+        const response = await request.get(Endpoint.activityFeedSummary, {headers: await getAuthHeaders()});
+        return response.data;
+    } catch (error) {
+        if (error.isAxiosError) {
+            console.error("Failed to fetch activity summary", (error as AxiosError).response?.data)
+        } else {
+            console.log("Failed to fetch activity summary", error);
+        }
+        return;
     }
-
-    if (cacheResult) {
-        StorageService.saveNumber(LocalStorageKey.activityBadgeCount, count);
-    }
-
-    return count;
 }

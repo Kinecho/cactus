@@ -25,3 +25,8 @@ export interface ReflectionResponsePayload {
     promptId?: string,
     promptQuestion?: string
 }
+
+export interface ActivitySummaryResponse {
+    unseenCount: number,
+    lastFriendActivityDate?: Date,
+}
