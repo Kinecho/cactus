@@ -218,7 +218,7 @@ export function formatAsTimeAgo(date: Date) {
   const diff = now.diff(past, unit);
   let label: string = unit;
 
-  if (Math.floor(diff[unit]) == 1) {
+  if (Math.floor(diff[unit]) === 1) {
       label = SingularDates[unit];    
   }
   return `${Math.floor(diff[unit])} ${label} ago`;
