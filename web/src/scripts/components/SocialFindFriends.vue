@@ -60,8 +60,8 @@
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Invite your contacts</h2>
-                <p class="subtext">You'll choose which of your contacts to invite.</p>
+                <h2>Find Friends</h2>
+                <p class="subtext">Invite your contacts and connect on Cactus.</p>
                 <div class="btnContainer">
                     <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

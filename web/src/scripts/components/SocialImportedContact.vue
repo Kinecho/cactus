@@ -12,7 +12,7 @@
                 <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
         </div>
-        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click="beginInvite">
+        <button class="secondary small" v-if="!readyToInvite && !wasInvited && !isExistingMember" @click="beginInvite">
             <span>Invite...</span>
         </button>
         <div class="status" v-if="sendingInvite">
@@ -25,6 +25,9 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
+        <button class="secondary small" v-if="isExistingMember" @click="addFriend">
+            <span>Add Friend</span>
+        </button>
         <input-name-modal
             :showModal="inputNameModalVisible"
             @close="hideInputNameModal"/>
@@ -39,6 +42,8 @@
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from "@web/services/MemberProfileService";
 
     export default Vue.extend({
         props: {
@@ -48,15 +53,19 @@
         components: {
             InputNameModal
         },
-        created() {
-        },
-        mounted() {
+        async created() {
+            if (this.contact?.email) {
+                const contactMember = await MemberProfileService.sharedInstance.getByEmail(this.contact.email);
+                if (contactMember) {
+                    this.contactMemberProfile = contactMember;
+                }
+            }
         },
         destroyed() {
         },
-
         data(): {
             message: string,
+            contactMemberProfile: MemberProfile | undefined,
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
@@ -65,6 +74,7 @@
         } {
             return {
               message: '',
+              contactMemberProfile: undefined,
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
@@ -72,7 +82,11 @@
               inputNameModalVisible: false
             }
         },
-
+        computed: {
+            isExistingMember(): boolean {
+                return this.contactMemberProfile ? true : false;
+            }
+        },
         methods: {
             async sendInvite(): Promise<void> {
                 this.sendingInvite = true;
