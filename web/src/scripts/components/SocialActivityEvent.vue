@@ -21,6 +21,7 @@
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
     import {PageRoute} from "@shared/PageRoutes";
     import {formatAsTimeAgo} from "@shared/util/DateUtil";
+    import {QueryParam} from "@shared/util/queryParams";
 
     export default Vue.extend({
         props: {
@@ -64,7 +65,7 @@
             },
             promptContentPath(): string | undefined {
                 if (this.promptId) {
-                    return `${PageRoute.PROMPTS_ROOT}/${this.promptId}`
+                    return `${PageRoute.PROMPTS_ROOT}/${this.promptId}?${QueryParam.USE_PROMPT_ID}=true`
                 }
                 return undefined;
             },

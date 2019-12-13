@@ -223,7 +223,7 @@ app.post("/activity-feed", async (req: functions.https.Request | any, resp: func
         const errorResponse: SocialActivityFeedResponse = {
             success: false,
             error: error,
-        }
+        };
 
         resp.status(500).send(errorResponse);
     }

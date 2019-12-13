@@ -30,9 +30,13 @@ export default class AdminSocialConnectionService {
     }
 
     async getConnectionsForMember(memberId: string): Promise<SocialConnection[]> {
-        const query = this.getCollectionRef().where(SocialConnectionFields.memberId, '==', memberId);
-        const results = await this.firestoreService.executeQuery(query, SocialConnection);
-
-        return results.results
+        try {
+            const query = this.getCollectionRef().where(SocialConnectionFields.memberId, '==', memberId);
+            const results = await this.firestoreService.executeQuery(query, SocialConnection);
+            return results.results
+        } catch (error) {
+            console.error("Failed to fetch social connections for member", memberId);
+            return [];
+        }
     }
 }

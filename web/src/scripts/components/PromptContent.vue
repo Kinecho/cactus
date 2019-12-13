@@ -1,3 +1,4 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -119,6 +120,7 @@
     import {gtag} from "@web/analytics"
     import {isBlank} from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
+    import PromptContentService from "@web/services/PromptContentService";
 
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
@@ -145,6 +147,9 @@
             }
         },
         async beforeMount(): Promise<void> {
+
+            this.usePromptId = !!getQueryParam(QueryParam.USE_PROMPT_ID);
+
             this.keyboardListener = (evt: KeyboardEvent) => {
                 if (this.navigationDisabled) {
                     return;
@@ -214,29 +219,26 @@
                 slideNumber = 0;
             }
 
-            //TODO: use a promptContentService
-            this.promptsUnsubscriber = await flamelink.content.subscribe({
-                entryId: promptContentId,
-                schemaKey: "promptContent",
-                populate: [{
-                    field: 'content',
-                    subFields: [{field: 'backgroundImage', subFields: "imageIds"}]
-                }],
-                callback: (error: any, data: Partial<PromptContent>) => {
-                    if (error || !data) {
+
+            const flamelinkOptions = {
+                onData: async (promptContent?: PromptContent | undefined, error?: any) => {
+                    if (!promptContent) {
+                        this.error = "This prompt does not exist";
+                        this.loading = false;
+                        this.promptContent = undefined;
+                        return;
+                    }
+
+                    if (error) {
                         this.promptContent = undefined;
                         this.loading = false;
-                        if (!error) {
-                            this.error = "This prompt does not exist";
-                        } else {
-                            this.error = "Oops! We were unable to load the prompt. Please try again later."
-                        }
+                        this.error = "Oops! We were unable to load the prompt. Please try again later.";
                         console.error("Failed to load prompts", error);
                         return;
                     }
-                    console.log("raw promptContent data", data);
+                    // console.log("raw promptContent data", data);
 
-                    const promptContent = new PromptContent(data);
+                    // const promptContent = new PromptContent(data);
                     this.promptContent = promptContent;
                     console.log("on load - promptContentLength", promptContent.content && promptContent.content.length);
                     if (isShare) {
@@ -259,7 +261,18 @@
                     this.updateDocumentMeta();
 
                 }
-            });
+            };
+
+            if (this.usePromptId) {
+                //this is to handle a case where we didn't know the prompt ID ahead of time
+                this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByPromptId(promptContentId, flamelinkOptions)
+            } else {
+                //this is the default behavior
+                this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(promptContentId, flamelinkOptions)
+            }
+
+            //TODO: use a promptContentService
+            // this.promptsUnsubscriber = await flamelink.content.subscribe(flamelinkOptions);
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
@@ -304,6 +317,7 @@
             navigationDisabled: boolean,
             responsesLoaded: boolean,
             pendingActiveIndex: number | undefined,
+            usePromptId: boolean,
         } {
             return {
                 error: undefined,
@@ -331,6 +345,7 @@
                 keyboardListener: undefined,
                 navigationDisabled: false,
                 pendingActiveIndex: undefined,
+                usePromptId: false,
             };
         },
         computed: {
