@@ -168,7 +168,7 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
             toEmail: toEmail,
             fromEmail: requestUser.email,
             fromName: member ? member.getFullName() : undefined,
-            link: `${getHostname()}${PageRoute.SOCIAL}`
+            link: `${getHostname()}${PageRoute.FRIENDS}`
         });
 
         resp.send(response);
