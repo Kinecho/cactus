@@ -13,7 +13,7 @@
                 <template v-if="isLoading">
                     <Spinner/>
                 </template>
-                <a class="primary button add-friends" :href="friendsPath">Add Friends</a>
+                <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt="" />Add Friends</a>
             </div>
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
                 <skeleton-event />
@@ -159,10 +159,6 @@
             grid-row: 1 / 3;
             margin-bottom: 6.4rem;
         }
-
-        h2 {
-            margin-bottom: 1.6rem;
-        }
     }
 
     .loading {
@@ -170,46 +166,27 @@
         justify-content: center;
     }
 
-    .findFriends {
-        margin: 0 auto 6.4rem;
-        max-width: 960px;
-        text-align: left;
-
-        .subtext {
-            margin: 0 0 2.4rem;
-            max-width: 60rem;
-        }
-
-        h2 {
-            margin-top: 6.4rem;
-        }
-
-        .btnContainer {
-            display: flex;
-
-            button {
-                flex-grow: 0;
-                margin-right: .8rem;
-            }
-        }
-    }
-
     .flexContainer {
         align-items: center;
         display: flex;
         justify-content: space-between;
+        margin-bottom: 2.4rem;
         max-width: 64rem;
 
-        .button {
+        a.button.secondary {
+            @include smallButton;
+            display: flex;
             flex-grow: 0;
-        }
-    }
 
-    .socialFriendList {
-        display: none;
+            @include r(374) {
+                @include secondaryButton;
+            }
 
-        @include r(768) {
-            display: block;
+            img {
+                height: 2rem;
+                margin-right: .8rem;
+                width: 2rem;
+            }
         }
     }
 
