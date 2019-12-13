@@ -150,7 +150,7 @@
             },
             {
                 "source": "/invite",
-                "destination": "/social_home.html"
+                "destination": "/social_invite.html"
             },
             {
                 "source": "/solo-proxy-auth",
@@ -158,7 +158,7 @@
             },
             {
                 "source": "/friends",
-                "destination": "/social_home.html"
+                "destination": "/social_invite.html"
             },
             {
                 "source": "/home",
