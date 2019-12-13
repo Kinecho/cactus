@@ -101,7 +101,7 @@
             updateLastSeen() {
                 if (this.latestActivity?.occurredAt && this.member) {
                     this.member.activityStatus = {
-                        lastSeenOccurredAt: this.latestActivity.occurredAt
+                        lastSeenOccurredAt: new Date(this.latestActivity.occurredAt)
                     };
                     //CactusMemberService.sharedInstance.save(this.member);
                 }
