@@ -15,10 +15,12 @@
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
                 <skeleton-event/>
             </template>
-            <p class="subtext" v-if="!isLoading && hasActivity">Nothing to see (yet).</p>
             <template v-for="event in activityFeedEvents">
                 <SocialActivityEvent :event="event"/>
             </template>
+            <p class="subtext" v-if="!isLoading && !hasActivity">
+                Nothing to see (yet).
+            </p>
         </div>
 
         <!-- Friend List -->
