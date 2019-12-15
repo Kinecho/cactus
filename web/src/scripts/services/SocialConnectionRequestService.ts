@@ -48,6 +48,13 @@ export default class SocialConnectionRequestService {
         return await this.getResults(query);
     }
 
+    async getByMemberAndFriendIds(memberId: string, friendMemberId: string): Promise<SocialConnectionRequest | undefined> {
+        const query = this.getCollectionRef()
+            .where(SocialConnectionRequestFields.memberId, "==", memberId)
+            .where(SocialConnectionRequestFields.friendMemberId, "==", friendMemberId);
+        return await this.getFirst(query);
+    }
+
     async getSentByMemberId(memberId: string) {
         const query = this.getCollectionRef()
             .where(SocialConnectionRequest.Fields.memberId, "==", memberId)

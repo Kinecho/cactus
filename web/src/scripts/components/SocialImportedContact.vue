@@ -120,18 +120,24 @@
                 if (this.member?.id && this.contactMemberProfile?.cactusMemberId) {
                     try {
                         this.sendingInvite = true;
-                        let connectionRequest = new SocialConnectionRequest();
-                            connectionRequest.memberId = this.member.id;
-                            connectionRequest.friendMemberId = this.contactMemberProfile.cactusMemberId;
-                            connectionRequest.sentAt = new Date();
                         
-                        const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
-                        this.wasFriended = true;
-                        this.sendingInvite = false;
+                        const existingRequest = await SocialConnectionRequestService.sharedInstance.getByMemberAndFriendIds(this.member.id, this.contactMemberProfile.cactusMemberId);
 
-                        const notifyResult = await notifyFriendRequest(connectionRequest);
+                        if (!existingRequest) {
+                            let connectionRequest = new SocialConnectionRequest();
+                                connectionRequest.memberId = this.member.id;
+                                connectionRequest.friendMemberId = this.contactMemberProfile.cactusMemberId;
+                                connectionRequest.sentAt = new Date();
+                            
+                            const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
+                            this.wasFriended = true;
+                            this.sendingInvite = false;
 
-                        return !!result;
+                            const notifyResult = await notifyFriendRequest(connectionRequest);
+
+                            return !!result;
+                        } 
+                        return true;
                     } catch(e) {
                         console.error("Failed to send friend request", e);
                         this.error = 'Something went wrong';
