@@ -25,18 +25,36 @@ export default class SocialConnectionRequestService {
         return this.firestoreService.getFirst(query, SocialConnectionRequest);
     }
 
+    async getResults(query: Query): Promise<SocialConnectionRequest[] | undefined> {
+        try {
+            const queryResult = await this.executeQuery(query);
+            return queryResult.results;
+        } catch(e) {
+            return [];
+        }
+    }
+
     async save(model: SocialConnectionRequest): Promise<SocialConnectionRequest | undefined> {
         return this.firestoreService.save(model);
     }
 
-    async getByMemberId(memberId: string): Promise<SocialConnectionRequest | undefined> {
+    async getByMemberId(memberId: string): Promise<SocialConnectionRequest[] | undefined> {
         const query = this.getCollectionRef().where(SocialConnectionRequestFields.memberId, "==", memberId);
-        return await this.getFirst(query);
+        return await this.getResults(query);
     }
 
-    async getByFriendId(friendMemberId: string): Promise<SocialConnectionRequest | undefined> {
+    async getByFriendId(friendMemberId: string): Promise<SocialConnectionRequest[] | undefined> {
         const query = this.getCollectionRef().where(SocialConnectionRequestFields.friendMemberId, "==", friendMemberId);
-        return await this.getFirst(query);
+        return await this.getResults(query);
+    }
+
+    async getSentByMemberId(memberId: string) {
+        const query = this.getCollectionRef()
+            .where(SocialConnectionRequest.Fields.memberId, "==", memberId)
+            .where(SocialConnectionRequest.Fields.confirmedAt, "==", null)
+            .where(SocialConnectionRequest.Fields.rejectedAt, "==", null)
+            .orderBy(SocialConnectionRequest.Fields.sentAt, QuerySortDirection.desc);
+        return await this.getResults(query);
     }
 
     observeSentConnectionRequests(memberId: string, options: QueryObserverOptions<SocialConnectionRequest>): ListenerUnsubscriber {

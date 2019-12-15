@@ -25,12 +25,15 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
-        <button class="secondary small" v-if="isExistingMember && !sendingInvite && !error && !wasFriended" @click="sendFriendRequest">
+        <button class="secondary small" v-if="isExistingMember && !sendingInvite && !error && !wasFriended && !isFriend && !isPendingFriend" @click="sendFriendRequest">
             <span>Add Friend</span>
         </button>
-        <div class="status" v-if="wasFriended">
+        <div class="status" v-if="wasFriended || isPendingFriend">
+            Requested
+        </div>
+        <div class="status" v-if="isFriend">
             <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
-            Request Sent
+            Friends
         </div>
         <input-name-modal
             :showModal="inputNameModalVisible"
@@ -55,7 +58,9 @@
     export default Vue.extend({
         props: {
             contact: {type: Object as () => EmailContact},
-            member: {type: Object as () => CactusMember}
+            member: {type: Object as () => CactusMember},
+            friendMemberIds: {type: Object as () => Array<String>},
+            sentFriendMemberIds: {type: Object as () => Array<String>}
         },
         components: {
             InputNameModal
@@ -122,6 +127,7 @@
                         
                         const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
                         this.wasFriended = true;
+                        this.sendingInvite = false;
 
                         const notifyResult = await notifyFriendRequest(connectionRequest);
 
@@ -129,6 +135,7 @@
                     } catch(e) {
                         console.error("Failed to send friend request", e);
                         this.error = 'Something went wrong';
+                        this.sendingInvite = false;
                         return false;
                     }
                 } else {
@@ -157,6 +164,12 @@
         computed: {
             isExistingMember(): boolean {
                 return (this.contactMemberProfile ? true : false);
+            },
+            isFriend(): boolean {
+                return this.contactMemberProfile && this.friendMemberIds ? (this.friendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+            },
+            isPendingFriend(): boolean {
+                return this.contactMemberProfile && this.sentFriendMemberIds ? (this.sentFriendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false; 
             }
         }
     })

@@ -83,8 +83,10 @@
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <template v-for="contact in importedContacts">
                     <SocialImportedContact
-                            v-bind:contact="contact"
-                            v-bind:member="member"/>
+                            :contact="contact"
+                            :member="member"
+                            :friendMemberIds="friendMemberIds"
+                            :sentFriendMemberIds="sentFriendMemberIds" />
                 </template>
             </div>
         </div>
@@ -111,6 +113,10 @@
     import SocialFriendList from "@components/SocialFriendList.vue";
     import {socialSharingEvent} from '@web/analytics'
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
+    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import SocialConnection from "@shared/models/SocialConnection";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -136,6 +142,8 @@
         },
         data(): {
             authLoaded: boolean,
+            friendMemberIds: Array<string | undefined>,
+            sentFriendMemberIds: Array<string | undefined>,
             copySucceeded: boolean,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
@@ -143,6 +151,8 @@
         } {
             return {
                 authLoaded: false,
+                friendMemberIds: [],
+                sentFriendMemberIds: [],
                 copySucceeded: false,
                 importedContacts: undefined,
                 importedService: undefined,
@@ -152,6 +162,21 @@
                         "type": "popup"
                     }
                 }
+            }
+        },
+        async created() {
+            if (this.member?.id) {
+                const friends = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id);
+                const sentRequests = await SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id);
+                
+                if (friends) {
+                    this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
+                    console.log(this.friendMemberIds);
+                }
+                if (sentRequests) {
+                    this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
+                }
+                
             }
         },
         methods: {

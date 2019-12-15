@@ -23,18 +23,27 @@ export default class SocialConnectionService {
         return this.firestoreService.getFirst(query, SocialConnection);
     }
 
+    async getResults(query: Query): Promise<SocialConnection[] | undefined> {
+        try {
+            const queryResult = await this.executeQuery(query);
+            return queryResult.results;
+        } catch(e) {
+            return [];
+        }
+    }
+
     async save(model: SocialConnection): Promise<SocialConnection | undefined> {
         return this.firestoreService.save(model);
     }
 
-    async getByMemberId(memberId: string): Promise<SocialConnection | undefined> {
+    async getByMemberId(memberId: string): Promise<SocialConnection[] | undefined> {
         const query = this.getCollectionRef().where(SocialConnectionFields.memberId, "==", memberId);
-        return await this.getFirst(query);
+        return await this.getResults(query);
     }
 
-    async getByFriendId(friendMemberId: string): Promise<SocialConnection | undefined> {
+    async getByFriendId(friendMemberId: string): Promise<SocialConnection[] | undefined> {
         const query = this.getCollectionRef().where(SocialConnectionFields.friendMemberId, "==", friendMemberId);
-        return await this.getFirst(query);
+        return await this.getResults(query);
     }
 
     observeConnections(memberId: string, options: QueryObserverOptions<SocialConnection>): ListenerUnsubscriber {
