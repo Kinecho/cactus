@@ -59,8 +59,8 @@
         props: {
             contact: {type: Object as () => EmailContact},
             member: {type: Object as () => CactusMember},
-            friendMemberIds: {type: Object as () => Array<String>},
-            sentFriendMemberIds: {type: Object as () => Array<String>}
+            friendMemberIds: {type: Array},
+            sentFriendMemberIds: {type: Array}
         },
         components: {
             InputNameModal
