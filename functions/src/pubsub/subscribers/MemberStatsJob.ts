@@ -34,9 +34,13 @@ async function handleMember(member: CactusMember) {
     if (!memberId) {
         return;
     }
+    const timeZone = member.timeZone || undefined;
     await AdminFirestoreService.getSharedInstance().runTransaction(async t => {
         try {
-            const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId}, {transaction: t});
+            const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+                memberId,
+                timeZone
+            }, {transaction: t});
 
             if (stats) {
                 await AdminCactusMemberService.getSharedInstance().setReflectionStats({

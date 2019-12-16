@@ -50,7 +50,11 @@ export default class MemberStatsCommand extends FirebaseCommand {
             return;
         }
 
-        const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId});
+        const timeZone = member.timeZone || undefined;
+        const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+            memberId,
+            timeZone
+        });
 
         console.log(chalk.blue(`Stats for ${response.email}:\n ${JSON.stringify(stats, null, 2)}`));
 

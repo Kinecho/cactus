@@ -220,13 +220,24 @@ describe("numDaysAgo", () => {
 
         expect(numDaysAgoFromMidnights(y, t)).toEqual(2);
     });
+
+
+    test("Get diff with timezone", () => {
+        const d1 = new Date(1576520560489); // 2019-12-16 13:22:40.489902 local time
+        const d2 = new Date(1576468965682); // 2019-12-15 23:02:45.682170
+
+        const timeZone = 'America/Indiana/Indianapolis';
+
+        expect(numDaysAgoFromMidnights(d2, d1, timeZone)).toEqual(1);
+
+    })
 });
 
 describe("get streak", () => {
     test("empty list", () => {
         const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
         const dates: Date[] = [];
-        expect(getStreak(dates, startTime)).toEqual(0);
+        expect(getStreak({dates, start: startTime})).toEqual(0);
     });
 
     test("with today", () => {
@@ -234,7 +245,7 @@ describe("get streak", () => {
         const dates: Date[] = [
             new Date(),
         ];
-        expect(getStreak(dates, startTime)).toEqual(1);
+        expect(getStreak({dates, start: startTime})).toEqual(1);
     });
 
     test("2 days in streak, 2 dates", () => {
@@ -244,7 +255,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             // DateTime.local().minus({days: 5}).toJSDate(),
         ];
-        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
 
@@ -255,7 +266,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             startTime.minus({hours: 36, minutes: 0}).toJSDate(),
         ];
-        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
     test("3 days in streak, 3 dates", () => {
@@ -265,7 +276,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             startTime.minus({hours: 36, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak(dates, startTime.toJSDate())).toEqual(3);
+        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(3);
     });
 
     test("broken streak after 2 days, 4 dates", () => {
@@ -276,7 +287,7 @@ describe("get streak", () => {
             startTime.minus({hours: 90}).toJSDate(),
             startTime.minus({hours: 100, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak(dates, startTime.toJSDate())).toEqual(2);
+        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
     test("broken streak after 3 days, 4 dates", () => {
@@ -287,8 +298,64 @@ describe("get streak", () => {
             startTime.minus({hours: 37}).toJSDate(),
             startTime.minus({hours: 100, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak(dates, startTime.toJSDate())).toEqual(3);
+        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(3);
     });
+
+    test("streak with timezone, real data for Eastern timezone", () => {
+        const timeZone = 'America/Indiana/Indianapolis';
+        const timestamps = [
+            1576520560489,
+            1576468965682,
+            1576363212643,
+            1576292283141,
+            1576193061765,
+            1576192961578,
+            1576097296788,
+            1576007416334,
+            1565707372701,
+            1565707354956,
+            1565525573711,
+            1565525544646,
+            1565525523582,
+            1565525498802,
+            1565192452432,
+            1565107421255,
+            1565107377164,
+            1564623345024,
+            1563828405541,
+            1563717692487,
+            1563591096497,
+            1563510729012,
+            1563374426411,
+            1563297322264,
+            1563202071036,
+            1563060613445,
+            1562867322967,
+            1562814611544,
+            1562686873083,
+            1562606244685,
+            1562518563032,
+            1562467117095,
+            1562368980145,
+            1562246101550,
+            1562157528224,
+            1562114544815,
+            1562014669798,
+            1561951395839,
+            1561858805949,
+            1561778928623,
+            1561741842984,
+            1561689955165,
+            1561565280764,
+        ];
+
+        const dates = timestamps.map(ts => new Date(ts));
+        const start = new Date(1576520560489);
+        const streak = getStreak({dates, start, timeZone});
+        console.log("found streak to be", streak);
+
+        expect(streak).toEqual(7);
+    })
 
 });
 
@@ -353,3 +420,5 @@ test("iso date to flamelink string", () => {
     const input = "2019-08-27T02:45:00.000-06:00";
     expect(isoDateStringToFlamelinkDateString(input)).toEqual("2019-08-27T02:45")
 });
+
+
