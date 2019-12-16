@@ -19,7 +19,7 @@
             Sending...
         </div>
         <div class="status" v-if="wasInvited">
-            <svg class="statusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            <img class="statusIcon" src="assets/images/check.svg" alt="" />
             Invited
         </div>
         <div class="status error" v-if="error">
@@ -32,11 +32,11 @@
             You!
         </div>
         <div class="status" v-if="wasFriended || isPendingFriend">
-            <svg class="statusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#29A389" d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1zm0 2a9 9 0 100 18 9 9 0 000-18zm0 2a1 1 0 011 1v5.382l3.447 1.724a1 1 0 01-.894 1.788l-4-2A1 1 0 0111 12V6a1 1 0 011-1z"/></svg>
+            <img class="statusIcon" src="assets/images/clock.svg" alt="" />
             Requested
         </div>
         <div class="status" v-if="isFriend">
-            <svg class="statusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            <img class="statusIcon" src="assets/images/check.svg" alt="" />
             Friends
         </div>
         <input-name-modal
@@ -173,7 +173,7 @@
                 if (this.contactMemberProfile?.avatarUrl) {
                     return this.contactMemberProfile.avatarUrl;
                 } else {
-                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png'; 
+                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
                 }
             }
 
