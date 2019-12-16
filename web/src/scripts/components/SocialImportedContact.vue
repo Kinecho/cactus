@@ -125,7 +125,7 @@
                     return;
                 }
             },
-            async sendFriendRequest() {
+            async sendFriendRequest(): Promise<boolean> {
                 if (this.member?.id && this.contactMemberProfile?.cactusMemberId) {
                     try {
                         this.sendingInvite = true;
