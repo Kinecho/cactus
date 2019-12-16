@@ -210,6 +210,66 @@ describe("Get Element Accumulation Counts", () => {
 
 describe("calculate streak with timezone", () => {
     test("data from user in 'America/Indiana/Indianapolis'", () => {
-        expect(true).toBeTruthy();
+        const timeZone = 'America/Indiana/Indianapolis';
+        const timestamps = [
+            1576520560489,
+            1576468965682,
+            1576363212643,
+            1576292283141,
+            1576193061765,
+            1576192961578,
+            1576097296788,
+            1576007416334,
+            1565707372701,
+            1565707354956,
+            1565525573711,
+            1565525544646,
+            1565525523582,
+            1565525498802,
+            1565192452432,
+            1565107421255,
+            1565107377164,
+            1564623345024,
+            1563828405541,
+            1563717692487,
+            1563591096497,
+            1563510729012,
+            1563374426411,
+            1563297322264,
+            1563202071036,
+            1563060613445,
+            1562867322967,
+            1562814611544,
+            1562686873083,
+            1562606244685,
+            1562518563032,
+            1562467117095,
+            1562368980145,
+            1562246101550,
+            1562157528224,
+            1562114544815,
+            1562014669798,
+            1561951395839,
+            1561858805949,
+            1561778928623,
+            1561741842984,
+            1561689955165,
+            1561565280764,
+        ];
+
+        const dates = timestamps.map(ts => new Date(ts));
+        const reflections = dates.map(d => {
+            const r = new ReflectionResponse();
+            r.createdAt = d;
+            r.updatedAt = d;
+            r.addReflectionLog(d);
+            r.content.text = "Test";
+            return r;
+        });
+        const start = new Date(1576520560489);
+
+        const streak = calculateStreak(reflections, {start: start, timeZone});
+        expect(streak).toEqual(7);
+
     });
 });
