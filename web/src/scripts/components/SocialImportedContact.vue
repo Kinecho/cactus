@@ -1,5 +1,5 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="contactCard" :class="{inviting: readyToInvite}">
+    <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
         <div class="avatar">
             <img :src="'assets/images/avatars/avatar' + avatarNumber(contact.email) + '.png'" alt="User avatar"/>
         </div>
@@ -12,7 +12,7 @@
                 <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
         </div>
-        <button class="secondary small" v-if="!readyToInvite && !wasInvited && !isExistingMember" @click="beginInvite">
+        <button class="secondary small" v-if="canInviteContact" @click="beginInvite">
             <span>Invite...</span>
         </button>
         <div class="status" v-if="sendingInvite">
@@ -25,7 +25,7 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
-        <button class="secondary small" v-if="isExistingMember && !sendingInvite && !error && !wasFriended && !isFriend && !isPendingFriend" @click="sendFriendRequest">
+        <button class="secondary small" v-if="canAddFriend" @click="sendFriendRequest">
             <span>Add Friend</span>
         </button>
         <div class="status" v-if="wasFriended || isPendingFriend">
@@ -60,8 +60,8 @@
         props: {
             contact: {type: Object as () => EmailContact},
             member: {type: Object as () => CactusMember},
-            friendMemberIds: {type: Object as () => Array<String>},
-            sentFriendMemberIds: {type: Object as () => Array<String>}
+            friendMemberIds: {type: Array},
+            sentFriendMemberIds: {type: Array}
         },
         components: {
             InputNameModal
@@ -177,6 +177,19 @@
             },
             isPendingFriend(): boolean {
                 return this.contactMemberProfile && this.sentFriendMemberIds ? (this.sentFriendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+            },
+            canAddFriend(): boolean {
+                return (this.isExistingMember &&
+                        !this.sendingInvite &&
+                        !this.error &&
+                        !this.wasFriended &&
+                        !this.isFriend &&
+                        !this.isPendingFriend);
+            },
+            canInviteContact(): boolean {
+                return (!this.readyToInvite &&
+                        !this.wasInvited &&
+                        !this.isExistingMember);
             }
         }
     })
