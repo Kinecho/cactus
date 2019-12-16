@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(contact.email) + '.png'" alt="User avatar"/>
+            <img :src="avatarUrl()" alt="Avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
@@ -169,6 +169,13 @@
                 this.inputNameModalVisible = false;
                 this.readyToInvite = true;
             },
+            avatarUrl(): string {
+                if (this.contactMemberProfile?.avatarUrl) {
+                    return this.contactMemberProfile.avatarUrl;
+                } else {
+                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png'; 
+                }
+            }
 
         },
         computed: {
