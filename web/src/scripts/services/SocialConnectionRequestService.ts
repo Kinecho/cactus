@@ -55,7 +55,7 @@ export default class SocialConnectionRequestService {
         return await this.getFirst(query);
     }
 
-    async getSentByMemberId(memberId: string) {
+    async getSentByMemberId(memberId: string): Promise<SocialConnectionRequest[] | undefined> {
         const query = this.getCollectionRef()
             .where(SocialConnectionRequest.Fields.memberId, "==", memberId)
             .where(SocialConnectionRequest.Fields.confirmedAt, "==", null)
