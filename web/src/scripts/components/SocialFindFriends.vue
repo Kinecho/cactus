@@ -171,7 +171,6 @@
                 
                 if (friends) {
                     this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
-                    console.log(this.friendMemberIds);
                 }
                 if (sentRequests) {
                     this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
