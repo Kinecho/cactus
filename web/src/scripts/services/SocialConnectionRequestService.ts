@@ -26,12 +26,8 @@ export default class SocialConnectionRequestService {
     }
 
     async getResults(query: Query): Promise<SocialConnectionRequest[] | undefined> {
-        try {
-            const queryResult = await this.executeQuery(query);
-            return queryResult.results;
-        } catch(e) {
-            return [];
-        }
+        const queryResult = await this.executeQuery(query);
+        return queryResult.results || [];
     }
 
     async save(model: SocialConnectionRequest): Promise<SocialConnectionRequest | undefined> {
