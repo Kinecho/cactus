@@ -263,7 +263,7 @@ export default class ReflectionResponseService {
         return totalDuration;
     }
 
-    static getCurrentStreak(reflections: ReflectionResponse[]): number {
-        return calculateStreak(reflections)
+    static getCurrentStreak(reflections: ReflectionResponse[], member?: CactusMember): number {
+        return calculateStreak(reflections, {timeZone: member?.timeZone || undefined})
     }
 }

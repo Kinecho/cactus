@@ -267,7 +267,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
         },
         methods: {
             async calculateStats() {
-                // const member = this.member;
+                const member = this.member;
                 const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
                 console.log("all reflections", reflections);
                 if (reflections.length === 0 && this.reflectionResponse) {
@@ -285,7 +285,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections);
+                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections, member);
 
                 // this.elementAccumulations = anonymousAccumulations;
             },
@@ -562,10 +562,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
             &.front {
                 background-color: $beige;
-                box-shadow:
-                    0 11px 15px -7px rgba(0,0,0,.16),
-                    0 24px 38px 3px rgba(0,0,0,.1),
-                    0 9px 46px 8px rgba(0,0,0,.08);
+                box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
+                0 24px 38px 3px rgba(0, 0, 0, .1),
+                0 9px 46px 8px rgba(0, 0, 0, .08);
                 height: 100%;
                 transform: rotateY(0);
                 z-index: 2;
