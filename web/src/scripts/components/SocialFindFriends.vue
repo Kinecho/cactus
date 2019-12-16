@@ -130,8 +130,10 @@
         },
         async beforeMount() {
             if (this.member?.id) {
-                const friends = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id);
-                const sentRequests = await SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id);
+                const [friends, sentRequests] = await Promise.all([
+                    SocialConnectionService.sharedInstance.getByMemberId(this.member.id), 
+                    SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id)
+                ]);
 
                 if (friends) {
                     this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
