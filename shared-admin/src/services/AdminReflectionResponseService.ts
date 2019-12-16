@@ -184,16 +184,23 @@ export default class AdminReflectionResponseService {
         return result.results
     }
 
-    async calculateStatsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
+    async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
         try {
             const {memberId} = options;
+            let timeZone = options.timeZone;
             if (!memberId) {
                 console.error("No memberId provided to calculate stats.");
                 return
             }
 
+            if (!timeZone) {
+                console.log("AdminReflectionResponseService.calculateStatsForMember: No timezone provided, attempting to get it from the member");
+                const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+                timeZone = member?.timeZone || undefined;
+            }
+
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
-            const streak = calculateStreak(reflections);
+            const streak = calculateStreak(reflections, {timeZone});
             const duration = calculateDurationMs(reflections);
 
             const elementAccumulation = getElementAccumulationCounts(reflections);

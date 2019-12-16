@@ -36,7 +36,7 @@ describe("calculate streak", () => {
         const d1 = plusHours(1, created);
         r1.reflectionDates.push(d1);
 
-        const streak = calculateStreak([r1], current);
+        const streak = calculateStreak([r1], {start: current});
         expect(streak).toEqual(1);
     });
 
@@ -57,7 +57,7 @@ describe("calculate streak", () => {
         const d1 = plusDays(1, created);
         r1.reflectionDates.push(d1);
 
-        const streak = calculateStreak([r1], current);
+        const streak = calculateStreak([r1], {start: current});
         expect(streak).toEqual(2);
     });
 
@@ -83,7 +83,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d4);
 
-        const streak = calculateStreak([r1], current);
+        const streak = calculateStreak([r1], {start: current});
         expect(streak).toEqual(5);
     });
 
@@ -107,7 +107,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d4);
 
-        const streak = calculateStreak([r1], current);
+        const streak = calculateStreak([r1], {start: current});
         expect(streak).toEqual(6);
     });
 
@@ -130,10 +130,10 @@ describe("calculate streak", () => {
         r1.reflectionDates.push(d1, d2a, d2b, d4);
 
         //current date is d4, there is only one preceeding
-        expect(calculateStreak([r1], plusHours(4, d4))).toEqual(1);
+        expect(calculateStreak([r1], {start: plusHours(4, d4)})).toEqual(1);
 
         //current date is the created date
-        expect(calculateStreak([r1], created)).toEqual(2);
+        expect(calculateStreak([r1], {start: created})).toEqual(2);
     });
 
     test("multiple reflections with various dates", () => {
@@ -161,7 +161,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d7);
 
-        const streak = calculateStreak([r1, r2], current);
+        const streak = calculateStreak([r1, r2], {start: current});
         expect(streak).toEqual(7);
     });
 });
@@ -206,4 +206,10 @@ describe("Get Element Accumulation Counts", () => {
             [CactusElement.relationships]: 0,
         });
     })
+});
+
+describe("calculate streak with timezone", () => {
+    test("data from user in 'America/Indiana/Indianapolis'", () => {
+        expect(true).toBeTruthy();
+    });
 });

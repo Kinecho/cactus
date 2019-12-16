@@ -186,42 +186,42 @@ export function formatDurationAsTime(duration: number): string {
 }
 
 export function formatAsTimeAgo(date: Date) {
-  const now = DateTime.local();
-  const past = DateTime.fromJSDate(date);
-  const secondsAgo = now.diff(past, 'seconds').seconds;
-  let unit: 'seconds' |
-            'minutes' | 
-            'hours' | 
-            'days' |
-            'weeks' = 'seconds';
+    const now = DateTime.local();
+    const past = DateTime.fromJSDate(date);
+    const secondsAgo = now.diff(past, 'seconds').seconds;
+    let unit: 'seconds' |
+        'minutes' |
+        'hours' |
+        'days' |
+        'weeks' = 'seconds';
 
-  if(secondsAgo < 60) {
-      unit = 'seconds';
-  } else if (secondsAgo >= 60 && secondsAgo < 3600) {
-      unit = 'minutes';
-  } else if (secondsAgo >= 3600 && secondsAgo < 86400) {
-      unit = 'hours';
-  } else if (secondsAgo >= 86400 && secondsAgo < 604800) {
-      unit = 'days';
-  } else {
-      unit = 'weeks';
-  }
+    if (secondsAgo < 60) {
+        unit = 'seconds';
+    } else if (secondsAgo >= 60 && secondsAgo < 3600) {
+        unit = 'minutes';
+    } else if (secondsAgo >= 3600 && secondsAgo < 86400) {
+        unit = 'hours';
+    } else if (secondsAgo >= 86400 && secondsAgo < 604800) {
+        unit = 'days';
+    } else {
+        unit = 'weeks';
+    }
 
-  enum SingularDates {
-      seconds = 'second',
-      minutes = 'minute',
-      hours = 'hour',
-      days = 'day',
-      weeks = 'week'
-  }
+    enum SingularDates {
+        seconds = 'second',
+        minutes = 'minute',
+        hours = 'hour',
+        days = 'day',
+        weeks = 'week'
+    }
 
-  const diff = now.diff(past, unit);
-  let label: string = unit;
+    const diff = now.diff(past, unit);
+    let label: string = unit;
 
-  if (Math.floor(diff[unit]) === 1) {
-      label = SingularDates[unit];    
-  }
-  return `${Math.floor(diff[unit])} ${label} ago`;
+    if (Math.floor(diff[unit]) === 1) {
+        label = SingularDates[unit];
+    }
+    return `${Math.floor(diff[unit])} ${label} ago`;
 }
 
 export function millisecondsToMinutes(duration: number, decimals: number = 1): string {
@@ -230,9 +230,15 @@ export function millisecondsToMinutes(duration: number, decimals: number = 1): s
     return minutes.toFixed(decimals);
 }
 
-export function numDaysAgoFromMidnights(date: Date, today: Date = new Date()): number {
-    const dt = DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0});
-    const t = DateTime.fromJSDate(today).set({hour: 0, minute: 0, millisecond: 0, second: 0});
+export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), timeZone?: string): number {
+    let dt = DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0});
+
+    let t = DateTime.fromJSDate(today).set({hour: 0, minute: 0, millisecond: 0, second: 0});
+
+    if (timeZone) {
+        dt = dt.setZone(timeZone);
+        t = t.setZone(timeZone);
+    }
 
     return Math.round(t.diff(dt).as("day"))
 }
@@ -242,39 +248,41 @@ export function atMidnight(date: Date): Date {
 }
 
 /**
- * Assumes ordered by date DESC already
- * @param {Date[]} d
- * @param {Date} start
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
  */
-export function getStreak(d: Date[], start: Date = new Date()) {
-    let dates = d;
-    if (dates.length === 0) {
+export function getStreak(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    const {dates = [], start = new Date(), timeZone} = options;
+    console.log('calculating streak for timezone', timeZone);
+    let _dates = dates;
+    if (_dates.length === 0) {
         return 0;
     }
     //find the index where the date is before the start date
 
-    const startIndex = dates.findIndex(date => date.getTime() <= start.getTime())
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
     console.log("Starting the date index at ", startIndex);
-    dates = dates.slice(startIndex);
+    _dates = _dates.slice(startIndex);
 
-    if (dates.length === 0) {
+    if (_dates.length === 0) {
         return 0;
     }
 
     let streak = 0;
     let currentDate = start;
-    let next = dates[0];
+    let next = _dates[0];
     let i = 1;
-    let diff = numDaysAgoFromMidnights(next, currentDate);
+    let diff = numDaysAgoFromMidnights(next, currentDate, timeZone);
 
     if (diff >= 0 && diff < 2) {
         streak = 1;
     }
 
-    while (i < dates.length && diff < 2) {
+    while (i < _dates.length && diff < 2) {
         currentDate = next;
-        next = dates[i];
-        diff = numDaysAgoFromMidnights(next, currentDate);
+        next = _dates[i];
+        diff = numDaysAgoFromMidnights(next, currentDate, timeZone);
         if (diff > 0 && diff < 2) {
             streak++;
         }
