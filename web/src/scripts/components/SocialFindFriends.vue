@@ -128,7 +128,20 @@
             FriendList: SocialFriendList,
             SocialFriendNotifications
         },
-        beforeMount() {
+        async beforeMount() {
+            if (this.member?.id) {
+                const friends = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id);
+                const sentRequests = await SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id);
+
+                if (friends) {
+                    this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
+                }
+                if (sentRequests) {
+                    this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
+                }
+
+            }
+            
             AddressBookService.sharedInstance.start();
         },
         mounted() {
@@ -162,20 +175,6 @@
                         "type": "popup"
                     }
                 }
-            }
-        },
-        async created() {
-            if (this.member?.id) {
-                const friends = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id);
-                const sentRequests = await SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id);
-
-                if (friends) {
-                    this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
-                }
-                if (sentRequests) {
-                    this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
-                }
-
             }
         },
         methods: {

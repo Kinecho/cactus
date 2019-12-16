@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
         <div class="avatar">
-            <img :src="avatarUrl()" alt="Avatar"/>
+            <img :src="avatarUrl" alt="Avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
@@ -15,6 +15,9 @@
         <button class="secondary small" v-if="canInviteContact" @click="beginInvite">
             <span>Invite...</span>
         </button>
+        <div class="status" v-if="isLoading">
+            Importing...
+        </div>
         <div class="status" v-if="sendingInvite">
             Sending...
         </div>
@@ -69,15 +72,15 @@
         components: {
             InputNameModal
         },
-        async created() {
+        async beforeMount() {
+            this.isLoading = true;
             if (this.contact?.email) {
                 const contactMember = await MemberProfileService.sharedInstance.getByEmail(this.contact.email);
                 if (contactMember?.id) {
                     this.contactMemberProfile = contactMember;
                 }
             }
-        },
-        destroyed() {
+            this.isLoading = false;
         },
         data(): {
             message: string,
@@ -87,7 +90,8 @@
             wasInvited: boolean,
             wasFriended: boolean,
             error: string | undefined,
-            inputNameModalVisible: boolean
+            inputNameModalVisible: boolean,
+            isLoading: boolean,
         } {
             return {
               message: '',
@@ -97,7 +101,8 @@
               wasInvited: false,
               wasFriended: false,
               error: undefined,
-              inputNameModalVisible: false
+              inputNameModalVisible: false,
+              isLoading: false
             }
         },
         methods: {
@@ -169,14 +174,6 @@
                 this.inputNameModalVisible = false;
                 this.readyToInvite = true;
             },
-            avatarUrl(): string {
-                if (this.contactMemberProfile?.avatarUrl) {
-                    return this.contactMemberProfile.avatarUrl;
-                } else {
-                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
-                }
-            }
-
         },
         computed: {
             isExistingMember(): boolean {
@@ -190,6 +187,7 @@
             },
             canAddFriend(): boolean {
                 return (this.isExistingMember &&
+                        !this.isLoading &&
                         !this.sendingInvite &&
                         !this.error &&
                         !this.wasFriended &&
@@ -198,13 +196,21 @@
                         !this.isYou);
             },
             canInviteContact(): boolean {
-                return (!this.readyToInvite &&
+                return (!this.isLoading &&
+                        !this.readyToInvite &&
                         !this.wasInvited &&
                         !this.isExistingMember &&
                         !this.isYou);
             },
             isYou(): boolean {
                 return (this.contact.email == this.member?.email);
+            },
+            avatarUrl(): string {
+                if (this.contactMemberProfile?.avatarUrl) {
+                    return this.contactMemberProfile.avatarUrl;
+                } else {
+                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
+                }
             }
         }
     })
