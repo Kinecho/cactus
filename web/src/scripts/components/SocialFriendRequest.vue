@@ -16,6 +16,7 @@
             </button> -->
         </div>
         <div class="status" v-if="!received">
+            <svg class="statusIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#29A389" d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1zm0 2a9 9 0 100 18 9 9 0 000-18zm0 2a1 1 0 011 1v5.382l3.447 1.724a1 1 0 01-.894 1.788l-4-2A1 1 0 0111 12V6a1 1 0 011-1z"/></svg>
             Requested
         </div>
     </div>
