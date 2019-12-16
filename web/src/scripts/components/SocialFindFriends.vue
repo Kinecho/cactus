@@ -168,14 +168,14 @@
             if (this.member?.id) {
                 const friends = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id);
                 const sentRequests = await SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id);
-                
+
                 if (friends) {
                     this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
                 }
                 if (sentRequests) {
                     this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
                 }
-                
+
             }
         },
         methods: {
@@ -315,11 +315,16 @@
         }
     }
 
-    .results h2 {
-        margin: 4.8rem 0 .8rem;
+    .results {
+        display: flex;
+        flex-direction: column;
 
-        @include r(600) {
-            margin: 6.4rem 0 .8rem;
+        h2 {
+            margin: 4.8rem 0 .8rem;
+
+            @include r(600) {
+                margin: 6.4rem 0 .8rem;
+            }
         }
     }
 

@@ -205,4 +205,17 @@
         align-items: flex-start;
     }
 
+    .canAddFriend {
+        order: 1;
+    }
+    .canInvite {
+        order: 2;
+    }
+    .isPendingFriend {
+        order: 3;
+    }
+    .isFriend {
+        order: 4;
+    }
+
 </style>
