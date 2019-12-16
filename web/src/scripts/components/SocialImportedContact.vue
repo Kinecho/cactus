@@ -1,7 +1,7 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="contactCard" :class="{inviting: readyToInvite}">
+    <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
         <div class="avatar">
-            <img :src="'assets/images/avatars/avatar' + avatarNumber(contact.email) + '.png'" alt="User avatar"/>
+            <img :src="avatarUrl" alt="Avatar"/>
         </div>
         <div class="contactInfo">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
@@ -12,18 +12,35 @@
                 <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
         </div>
-        <button class="secondary small" v-if="!readyToInvite && !wasInvited" @click="beginInvite">
+        <button class="secondary small" v-if="canInviteContact" @click="beginInvite">
             <span>Invite...</span>
         </button>
+        <div class="status" v-if="isLoading">
+            Importing...
+        </div>
         <div class="status" v-if="sendingInvite">
             Sending...
         </div>
         <div class="status" v-if="wasInvited">
-            <svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13"><path fill="#29A389" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/></svg>
+            <img class="statusIcon" src="assets/images/check.svg" alt="" />
             Invited
         </div>
         <div class="status error" v-if="error">
             Not Sent
+        </div>
+        <button class="secondary small addFriend" v-if="canAddFriend" @click="sendFriendRequest">
+            Add <span>Friend</span>
+        </button>
+        <div class="status" v-if="isYou">
+            You!
+        </div>
+        <div class="status" v-if="wasFriended || isPendingFriend">
+            <img class="statusIcon" src="assets/images/clock.svg" alt="" />
+            Requested
+        </div>
+        <div class="status" v-if="isFriend">
+            <img class="statusIcon" src="assets/images/check.svg" alt="" />
+            Friends
         </div>
         <input-name-modal
             :showModal="inputNameModalVisible"
@@ -39,40 +56,55 @@
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
+    import MemberProfile from "@shared/models/MemberProfile";
+    import MemberProfileService from "@web/services/MemberProfileService";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import {notifyFriendRequest} from '@web/social';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
 
     export default Vue.extend({
         props: {
             contact: {type: Object as () => EmailContact},
-            member: {type: Object as () => CactusMember}
+            member: {type: Object as () => CactusMember},
+            friendMemberIds: {type: Array},
+            sentFriendMemberIds: {type: Array}
         },
         components: {
             InputNameModal
         },
-        created() {
+        async beforeMount() {
+            this.isLoading = true;
+            if (this.contact?.email) {
+                const contactMember = await MemberProfileService.sharedInstance.getByEmail(this.contact.email);
+                if (contactMember?.id) {
+                    this.contactMemberProfile = contactMember;
+                }
+            }
+            this.isLoading = false;
         },
-        mounted() {
-        },
-        destroyed() {
-        },
-
         data(): {
             message: string,
+            contactMemberProfile: MemberProfile | undefined,
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
+            wasFriended: boolean,
             error: string | undefined,
-            inputNameModalVisible: boolean
+            inputNameModalVisible: boolean,
+            isLoading: boolean,
         } {
             return {
               message: '',
+              contactMemberProfile: undefined,
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
+              wasFriended: false,
               error: undefined,
-              inputNameModalVisible: false
+              inputNameModalVisible: false,
+              isLoading: false
             }
         },
-
         methods: {
             async sendInvite(): Promise<void> {
                 this.sendingInvite = true;
@@ -93,6 +125,38 @@
                     return;
                 }
             },
+            async sendFriendRequest(): Promise<boolean> {
+                if (this.member?.id && this.contactMemberProfile?.cactusMemberId) {
+                    try {
+                        this.sendingInvite = true;
+
+                        const existingRequest = await SocialConnectionRequestService.sharedInstance.getByMemberAndFriendIds(this.member.id, this.contactMemberProfile.cactusMemberId);
+
+                        if (!existingRequest) {
+                            let connectionRequest = new SocialConnectionRequest();
+                                connectionRequest.memberId = this.member.id;
+                                connectionRequest.friendMemberId = this.contactMemberProfile.cactusMemberId;
+                                connectionRequest.sentAt = new Date();
+
+                            const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
+                            this.wasFriended = true;
+                            this.sendingInvite = false;
+
+                            const notifyResult = await notifyFriendRequest(connectionRequest);
+
+                            return !!result;
+                        }
+                        return true;
+                    } catch(e) {
+                        console.error("Failed to send friend request", e);
+                        this.error = 'Something went wrong';
+                        this.sendingInvite = false;
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            },
             avatarNumber(email: string): number {
                 return getIntegerFromStringBetween(email, 4) + 1;
             },
@@ -111,6 +175,44 @@
                 this.readyToInvite = true;
             },
         },
+        computed: {
+            isExistingMember(): boolean {
+                return (this.contactMemberProfile ? true : false);
+            },
+            isFriend(): boolean {
+                return this.contactMemberProfile && this.friendMemberIds ? (this.friendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+            },
+            isPendingFriend(): boolean {
+                return this.contactMemberProfile && this.sentFriendMemberIds ? (this.sentFriendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+            },
+            canAddFriend(): boolean {
+                return (this.isExistingMember &&
+                        !this.isLoading &&
+                        !this.sendingInvite &&
+                        !this.error &&
+                        !this.wasFriended &&
+                        !this.isFriend &&
+                        !this.isPendingFriend &&
+                        !this.isYou);
+            },
+            canInviteContact(): boolean {
+                return (!this.isLoading &&
+                        !this.readyToInvite &&
+                        !this.wasInvited &&
+                        !this.isExistingMember &&
+                        !this.isYou);
+            },
+            isYou(): boolean {
+                return (this.contact.email == this.member?.email);
+            },
+            avatarUrl(): string {
+                if (this.contactMemberProfile?.avatarUrl) {
+                    return this.contactMemberProfile.avatarUrl;
+                } else {
+                    return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
+                }
+            }
+        }
     })
 </script>
 
@@ -118,14 +220,13 @@
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";
+    @import "~styles/social";
 
     .contactCard {
-        align-items: center;
-        display: flex;
-        max-width: 60rem;
+        grid-template-columns: 5.2rem 1fr max-content;
 
-        button {
-            flex-grow: 0;
+        @include r(600) {
+            grid-template-columns: 5.2rem 1fr 12rem;
         }
 
         &.inviting {
@@ -133,81 +234,30 @@
         }
     }
 
-    .contactInfo {
-        flex-grow: 1;
-    }
-
-    .email {
-        font-size: 1.4rem;
-        max-width: 12.3rem;
-        opacity: .8;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    .addFriend span,
+    .statusIcon {
+        display: none;
 
         @include r(374) {
-            max-width: 17.3rem;
-        }
-        @include r(600) {
-            max-width: none;
+            display: inline;
         }
     }
 
-    .avatar {
-        $avatarDiameter: 4.4rem;
-        border-radius: 50%;
-        flex-shrink: 0;
-        height: $avatarDiameter;
-        margin-right: .8rem;
-        overflow: hidden;
-        width: $avatarDiameter;
-
-        @include r(600) {
-            margin-right: 1.6rem;
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-        }
+    .secondary {
+        white-space: nowrap;
     }
 
-    .friendsStatus {
-        align-items: center;
-        color: $darkestPink;
-        display: flex;
-
-        .check {
-            height: 1.8rem;
-            margin-right: .8rem;
-            width: 1.8rem;
-        }
+    .canAddFriend {
+        order: 1;
+    }
+    .canInvite {
+        order: 2;
+    }
+    .isPendingFriend {
+        order: 3;
+    }
+    .isFriend {
+        order: 4;
     }
 
-    .invite {
-        textarea {
-            border: 1px solid $green;
-            border-radius: .4rem;
-            font-size: 1.6rem;
-            margin: .8rem 0;
-            padding: 0.8rem;
-            width: 100%;
-        }
-    }
-
-    .status {
-        align-items: center;
-        display: flex;
-        font-size: 1.6rem;
-        padding: 0 1.2rem;
-        &.error {
-            color: $red;
-        }
-    }
-
-    .check {
-        height: 1.6rem;
-        margin-right: .8rem;
-        width: 1.6rem;
-    }
 </style>
