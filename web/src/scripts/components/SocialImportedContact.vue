@@ -25,6 +25,9 @@
         <div class="status error" v-if="error">
             Not Sent
         </div>
+        <div class="status" v-if="isYou">
+            You!
+        </div>
         <button class="secondary small" v-if="canAddFriend" @click="sendFriendRequest">
             <span>Add Friend</span>
         </button>
@@ -184,12 +187,17 @@
                         !this.error &&
                         !this.wasFriended &&
                         !this.isFriend &&
-                        !this.isPendingFriend);
+                        !this.isPendingFriend &&
+                        !this.isYou);
             },
             canInviteContact(): boolean {
                 return (!this.readyToInvite &&
                         !this.wasInvited &&
-                        !this.isExistingMember);
+                        !this.isExistingMember &&
+                        !this.isYou);
+            },
+            isYou(): boolean {
+                return (this.contact.email == this.member?.email);
             }
         }
     })
