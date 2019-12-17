@@ -1,9 +1,9 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
     <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
-        <div class="avatar">
+        <div class="avatar" v-if="avatarUrl">
             <img :src="avatarUrl" alt="Avatar"/>
         </div>
-        <div class="contactInfo">
+        <div class="contactInfo" v-if="contact">
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
             <p class="email">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
@@ -61,28 +61,22 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import {notifyFriendRequest} from '@web/social';
     import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
+    import {ImportedContact, ContactStatus} from "@shared/types/ImportedContactTypes";
 
     export default Vue.extend({
         props: {
-            contact: {type: Object as () => EmailContact},
-            member: {type: Object as () => CactusMember},
-            friendMemberIds: {type: Array},
-            sentFriendMemberIds: {type: Array}
+            imported_contact: {
+                type: Object as () => ImportedContact, required: true
+            },
+            member: {
+                type: Object as () => CactusMember, required: true
+            },
         },
         components: {
             InputNameModal
         },
-        async beforeMount() {
-            this.isLoading = true;
-            if (this.contact?.email) {
-                const contactMember = await MemberProfileService.sharedInstance.getByEmail(this.contact.email);
-                if (contactMember?.id) {
-                    this.contactMemberProfile = contactMember;
-                }
-            }
-            this.isLoading = false;
-        },
         data(): {
+            contact: EmailContact | undefined,
             message: string,
             contactMemberProfile: MemberProfile | undefined,
             readyToInvite: boolean,
@@ -94,6 +88,7 @@
             isLoading: boolean,
         } {
             return {
+              contact: this.imported_contact?.email_contact,
               message: '',
               contactMemberProfile: undefined,
               readyToInvite: false,
@@ -107,22 +102,24 @@
         },
         methods: {
             async sendInvite(): Promise<void> {
-                this.sendingInvite = true;
+                if (this.contact) {
+                    this.sendingInvite = true;
 
-                const sendInviteResult = await sendInvite(this.contact, this.message);
+                    const sendInviteResult = await sendInvite(this.contact, this.message);
 
-                if (sendInviteResult.data && sendInviteResult.data.success) {
-                    this.sendingInvite = false;
-                    this.wasInvited = true;
-                    this.readyToInvite = false;
-                    this.error = undefined;
-                    return;
-                } else {
-                    this.sendingInvite = false;
-                    this.wasInvited = false;
-                    this.readyToInvite = true;
-                    this.error = sendInviteResult.message;
-                    return;
+                    if (sendInviteResult.data && sendInviteResult.data.success) {
+                        this.sendingInvite = false;
+                        this.wasInvited = true;
+                        this.readyToInvite = false;
+                        this.error = undefined;
+                        return;
+                    } else {
+                        this.sendingInvite = false;
+                        this.wasInvited = false;
+                        this.readyToInvite = true;
+                        this.error = sendInviteResult.message;
+                        return;
+                    }
                 }
             },
             async sendFriendRequest(): Promise<boolean> {
@@ -177,13 +174,13 @@
         },
         computed: {
             isExistingMember(): boolean {
-                return (this.contactMemberProfile ? true : false);
+                return this.imported_contact?.statuses?.isMember ? true : false
             },
             isFriend(): boolean {
-                return this.contactMemberProfile && this.friendMemberIds ? (this.friendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+                return this.imported_contact?.statuses?.isFriend ? true : false
             },
             isPendingFriend(): boolean {
-                return this.contactMemberProfile && this.sentFriendMemberIds ? (this.sentFriendMemberIds.includes(this.contactMemberProfile.cactusMemberId)) : false;
+                return this.imported_contact?.statuses?.isRequested ? true : false
             },
             canAddFriend(): boolean {
                 return (this.isExistingMember &&
@@ -203,14 +200,15 @@
                         !this.isYou);
             },
             isYou(): boolean {
-                return (this.contact.email == this.member?.email);
+                return ((this.contact && this.contact.email == this.member?.email) ? true : false);
             },
-            avatarUrl(): string {
-                if (this.contactMemberProfile?.avatarUrl) {
-                    return this.contactMemberProfile.avatarUrl;
-                } else {
+            avatarUrl(): string | undefined {
+                if (this.imported_contact?.avatarUrl) {
+                    return this.imported_contact.avatarUrl;
+                } else if (this.contact) {
                     return 'assets/images/avatars/avatar' + this.avatarNumber(this.contact.email) + '.png';
                 }
+                return;
             }
         }
     })

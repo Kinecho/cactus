@@ -81,12 +81,10 @@
 
             <div class="results" v-if="importedContacts">
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
-                <template v-for="contact in importedContacts">
+                <template v-for="importedContact in importedContacts">
                     <SocialImportedContact
-                            :contact="contact"
-                            :member="member"
-                            :friendMemberIds="friendMemberIds"
-                            :sentFriendMemberIds="sentFriendMemberIds" />
+                            :imported_contact="importedContact"
+                            :member="member" />
                 </template>
             </div>
         </div>
@@ -105,6 +103,7 @@
     import AddressBookService from '@web/services/AddressBookService'
     import SocialImportedContact from "@components/SocialImportedContact.vue"
     import {EmailService} from "@shared/types/EmailContactTypes";
+    import {ImportedContact} from "@shared/types/ImportedContactTypes";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
     import CactusMember from "@shared/models/CactusMember";
@@ -116,6 +115,7 @@
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import ImportedContactService from '@web/services/ImportedContactService';
     import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 
     Vue.use(VueClipboard);
@@ -188,7 +188,13 @@
                 setTimeout(() => this.copySucceeded = false, 2000);
             },
             importContacts: function (contacts: Array<any>, source: string) {
-                this.importedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
+                const formattedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
+                this.importedContacts = ImportedContactService.sharedInstance.prepareImportedContacts(
+                    formattedContacts, 
+                    this.friendMemberIds, 
+                    this.sentFriendMemberIds, 
+                );
+                console.log(this.importedContacts);
                 this.importedService = EmailService[source as keyof typeof EmailService];
             },
             configureCloudsponge: function () {
