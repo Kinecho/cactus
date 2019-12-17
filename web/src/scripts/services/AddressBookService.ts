@@ -32,7 +32,10 @@ class AddressBookService {
       })
     });
 
-    return formattedContacts;
+    // remove duplicates
+    const result = Array.from(new Set(formattedContacts));
+
+    return result;
   }
 
 }
