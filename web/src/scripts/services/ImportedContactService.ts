@@ -41,59 +41,51 @@ class ImportedContactService {
        Contacts Pending Requested
        Contacts who are Friends
     */
-
-    const mapped = contacts.map((contact: ImportedContact, i: number) => {
-      return { index: i, sortOrder: this.getSortOrder(contact) };
-    });
     
     // sorting the mapped array containing the reduced values
-    mapped.sort(function(a, b) {
-      if (a.sortOrder > b.sortOrder) {
+    contacts.sort(function(a: ImportedContact, b: ImportedContact) {
+      const sortOrderA = getSortOrder(a);
+      const sortOrderB = getSortOrder(b);
+
+      if (sortOrderA > sortOrderB) {
         return 1;
       }
-      if (a.sortOrder < b.sortOrder) {
+      if (sortOrderA < sortOrderB) {
         return -1;
       }
       return 0;
     });
 
-    const result = mapped.map(function(el){
-      return contacts[el.index];
-    });
-
-    return result;
+    return contacts;
   }
-
-  getSortOrder(contact: ImportedContact) {
-    // contacts to add
-    if (contact.statuses.isMember && 
-        !contact.statuses.isFriend && 
-        !contact.statuses.isRequested) {
-      return 0;
-    }
-
-    // contacts to invite
-    if (!contact.statuses.isMember && 
-        !contact.statuses.isFriend && 
-        !contact.statuses.isRequested) {
-      return 1;
-    }
-
-    // contacts pending
-    if (contact.statuses.isRequested) {
-      return 2;
-    }
-
-    // contacts friends
-    if (contact.statuses.isFriend) {
-      return 3;
-    }
-
-    return -1;
-  }
-
 }
 
+export function getSortOrder(contact: ImportedContact) {
+  // contacts to add
+  if (contact.statuses.isMember && 
+      !contact.statuses.isFriend && 
+      !contact.statuses.isRequested) {
+    return 0;
+  }
 
+  // contacts to invite
+  if (!contact.statuses.isMember && 
+      !contact.statuses.isFriend && 
+      !contact.statuses.isRequested) {
+    return 1;
+  }
+
+  // contacts pending
+  if (contact.statuses.isRequested) {
+    return 2;
+  }
+
+  // contacts friends
+  if (contact.statuses.isFriend) {
+    return 3;
+  }
+
+  return -1;
+}
 
 export default ImportedContactService
