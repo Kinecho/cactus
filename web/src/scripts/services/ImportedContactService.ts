@@ -42,31 +42,54 @@ class ImportedContactService {
        Contacts who are Friends
     */
 
-    // contacts to add
-    const canFriend = contacts.filter(function(contact: ImportedContact) {
-      return (contact.statuses.isMember && 
-              !contact.statuses.isFriend && 
-              !contact.statuses.isRequested);
+    const mapped = contacts.map((contact: ImportedContact, i: number) => {
+      return { index: i, sortOrder: this.getSortOrder(contact) };
     });
+    
+    // sorting the mapped array containing the reduced values
+    mapped.sort(function(a, b) {
+      if (a.sortOrder > b.sortOrder) {
+        return 1;
+      }
+      if (a.sortOrder < b.sortOrder) {
+        return -1;
+      }
+      return 0;
+    });
+
+    const result = mapped.map(function(el){
+      return contacts[el.index];
+    });
+
+    return result;
+  }
+
+  getSortOrder(contact: ImportedContact) {
+    // contacts to add
+    if (contact.statuses.isMember && 
+        !contact.statuses.isFriend && 
+        !contact.statuses.isRequested) {
+      return 0;
+    }
 
     // contacts to invite
-    const canInvite = contacts.filter(function(contact: ImportedContact) {
-      return (!contact.statuses.isMember && 
-              !contact.statuses.isFriend && 
-              !contact.statuses.isRequested);
-    });
+    if (!contact.statuses.isMember && 
+        !contact.statuses.isFriend && 
+        !contact.statuses.isRequested) {
+      return 1;
+    }
 
     // contacts pending
-    const isPending = contacts.filter(function(contact: ImportedContact) {
-      return contact.statuses.isRequested;
-    });
+    if (contact.statuses.isRequested) {
+      return 2;
+    }
 
     // contacts friends
-    const isFriend = contacts.filter(function(contact: ImportedContact) {
-      return contact.statuses.isFriend;
-    });
+    if (contact.statuses.isFriend) {
+      return 3;
+    }
 
-    return canFriend.concat(canInvite).concat(isPending).concat(isFriend);
+    return -1;
   }
 
 }
