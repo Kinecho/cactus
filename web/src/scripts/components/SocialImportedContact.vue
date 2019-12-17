@@ -76,7 +76,7 @@
             InputNameModal
         },
         data(): {
-            contact: EmailContact | undefined,
+            contact: EmailContact,
             message: string,
             readyToInvite: boolean,
             sendingInvite: boolean,
@@ -87,7 +87,7 @@
             isLoading: boolean,
         } {
             return {
-              contact: this.imported_contact?.email_contact,
+              contact: this.imported_contact.email_contact,
               message: '',
               readyToInvite: false,
               sendingInvite: false,
