@@ -7,12 +7,12 @@ import MemberProfileService from "@web/services/MemberProfileService";
 class ImportedContactService {
   public static sharedInstance =new ImportedContactService();
 
-  prepareImportedContacts(emailContacts: Array<EmailContact>,
-                          friendIds?: Array<string | undefined>, 
-                          requestedFriendIds?: Array<string | undefined>): ImportedContact[] {
+  async prepareImportedContacts(emailContacts: Array<EmailContact>,
+                                friendIds?: Array<string | undefined>, 
+                                requestedFriendIds?: Array<string | undefined>): Promise<ImportedContact[]> {
     const preparedContacts: Array<ImportedContact> = [];
 
-    emailContacts.forEach(async function(contact: EmailContact) {
+    for (const contact of emailContacts) {
       const memberProfile = await MemberProfileService.sharedInstance.getByEmail(contact.email);
 
       const statuses: ContactStatus = {
@@ -29,9 +29,44 @@ class ImportedContactService {
       }
 
       preparedContacts.push(preparedContact);
+    };
+
+    return this.sortContacts(preparedContacts);
+  }
+
+  sortContacts(contacts: ImportedContact[]): ImportedContact[] {
+    /* We sort them in the following order:
+       Contacts to Add
+       Contacts to Invite
+       Contacts Pending Requested
+       Contacts who are Friends
+    */
+
+    // contacts to add
+    const canFriend = contacts.filter(function(contact: ImportedContact) {
+      return (contact.statuses.isMember && 
+              !contact.statuses.isFriend && 
+              !contact.statuses.isRequested);
     });
 
-    return preparedContacts;
+    // contacts to invite
+    const canInvite = contacts.filter(function(contact: ImportedContact) {
+      return (!contact.statuses.isMember && 
+              !contact.statuses.isFriend && 
+              !contact.statuses.isRequested);
+    });
+
+    // contacts pending
+    const isPending = contacts.filter(function(contact: ImportedContact) {
+      return contact.statuses.isRequested;
+    });
+
+    // contacts friends
+    const isFriend = contacts.filter(function(contact: ImportedContact) {
+      return contact.statuses.isFriend;
+    });
+
+    return canFriend.concat(canInvite).concat(isPending).concat(isFriend);
   }
 
 }

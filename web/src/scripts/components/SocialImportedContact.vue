@@ -78,7 +78,6 @@
         data(): {
             contact: EmailContact | undefined,
             message: string,
-            contactMemberProfile: MemberProfile | undefined,
             readyToInvite: boolean,
             sendingInvite: boolean,
             wasInvited: boolean,
@@ -90,7 +89,6 @@
             return {
               contact: this.imported_contact?.email_contact,
               message: '',
-              contactMemberProfile: undefined,
               readyToInvite: false,
               sendingInvite: false,
               wasInvited: false,
@@ -123,16 +121,16 @@
                 }
             },
             async sendFriendRequest(): Promise<boolean> {
-                if (this.member?.id && this.contactMemberProfile?.cactusMemberId) {
+                if (this.member?.id && this.imported_contact?.memberId) {
                     try {
                         this.sendingInvite = true;
 
-                        const existingRequest = await SocialConnectionRequestService.sharedInstance.getByMemberAndFriendIds(this.member.id, this.contactMemberProfile.cactusMemberId);
+                        const existingRequest = await SocialConnectionRequestService.sharedInstance.getByMemberAndFriendIds(this.member.id, this.imported_contact.memberId);
 
                         if (!existingRequest) {
                             let connectionRequest = new SocialConnectionRequest();
                                 connectionRequest.memberId = this.member.id;
-                                connectionRequest.friendMemberId = this.contactMemberProfile.cactusMemberId;
+                                connectionRequest.friendMemberId = this.imported_contact.memberId;
                                 connectionRequest.sentAt = new Date();
 
                             const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
