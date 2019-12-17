@@ -1,6 +1,6 @@
 <template>
     <div class="addNewFriends" v-if="hasSuggestedFriends || hasFriendRequests">
-        <section class="youMayKnow" v-if="referredByProfile && hasSuggestedFriends">
+        <section class="youMayKnow" v-if="hasSuggestedFriends">
             <h4>People you may know</h4>
             <friend-add
                     v-bind:member="member"
@@ -15,12 +15,6 @@
                     v-bind:member="member"
                     v-bind:connectionRequest="connection"
                     v-bind:key="connection.memberId"
-            />
-            <friend-request
-                    v-for="(connection, index) in sentFriendRequests"
-                    v-bind:member="member"
-                    v-bind:connectionRequest="connection"
-                    v-bind:key="connection.friendMemberId"
             />
         </section>
     </div>
@@ -89,7 +83,7 @@
                 return false;
             },
             hasFriendRequests: function (): boolean {
-                if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
+                if (this.receivedFriendRequests.length > 0) {
                     return true;
                 }
                 return false;
