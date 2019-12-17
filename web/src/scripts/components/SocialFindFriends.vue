@@ -159,10 +159,10 @@
         },
         data(): {
             authLoaded: boolean,
-            friendMemberIds: Array<string | undefined>,
-            sentFriendMemberIds: Array<string | undefined>,
+            friendMemberIds: string[],
+            sentFriendMemberIds: string[],
             copySucceeded: boolean,
-            importedContacts: Array<ImportedContact> | undefined,
+            importedContacts: ImportedContact[] | undefined,
             importedService: string | undefined,
             customNetworks: { [key: string]: { sharer: string, type: "popup" | "direct" } },
             isImporting: boolean
