@@ -21,7 +21,7 @@ class AddressBookService {
     this.cloudsponge = window.cloudsponge;
   }
 
-  formatContacts(rawContactData: Array<any>): Array<EmailContact> {
+  formatContacts(rawContactData: Array<CloudspongeContact>): Array<EmailContact> {
     const formattedContacts: Array<EmailContact> = [];
 
     rawContactData.forEach(function(contact: CloudspongeContact, index: number) {

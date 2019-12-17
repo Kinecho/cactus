@@ -104,7 +104,7 @@
     import Spinner from "@components/Spinner.vue";
     import AddressBookService from '@web/services/AddressBookService'
     import SocialImportedContact from "@components/SocialImportedContact.vue"
-    import {EmailService} from "@shared/types/EmailContactTypes";
+    import {EmailService, CloudspongeContact} from "@shared/types/EmailContactTypes";
     import {ImportedContact} from "@shared/types/ImportedContactTypes";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
@@ -191,7 +191,7 @@
                 this.copySucceeded = true;
                 setTimeout(() => this.copySucceeded = false, 2000);
             },
-            async importContacts(contacts: Array<any>, source: string) {
+            async importContacts(contacts: Array<CloudspongeContact>, source: string) {
                 this.isImporting = true;
                 const formattedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
                 this.importedContacts = await ImportedContactService.sharedInstance.prepareImportedContacts(
