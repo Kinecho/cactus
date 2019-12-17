@@ -51,7 +51,7 @@ export function resetTestConfig() {
 
 export function isNonPromptCampaignId(campaignId: string): boolean {
     const idString = getConfig().mailchimp.non_prompt_campaign_ids;
-    return idString.split(",").includes(campaignId);
+    return idString.split(",").map(id => id.trim()).includes(campaignId);
 }
 
 const defaultTestConfig: CactusConfig = {
