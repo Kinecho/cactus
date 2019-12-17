@@ -16,6 +16,12 @@
                     v-bind:connectionRequest="connection"
                     v-bind:key="connection.memberId"
             />
+            <friend-request
+                    v-for="(connection, index) in sentFriendRequests"
+                    v-bind:member="member"
+                    v-bind:connectionRequest="connection"
+                    v-bind:key="connection.friendMemberId"
+            />
         </section>
     </div>
 </template>
@@ -45,16 +51,20 @@
         },
         data(): {
             receivedFriendRequests: Array<SocialConnectionRequest>,
+            sentFriendRequests: Array<SocialConnectionRequest>,
             friends: Array<SocialConnection>,
             receivedFriendRequestsUnsubscriber?: ListenerUnsubscriber,
+            sentFriendRequestsUnsubscriber?: ListenerUnsubscriber,
             friendsUnsubscriber?: ListenerUnsubscriber,
             referredByUnsubscriber?: ListenerUnsubscriber,
             referredByProfile?: MemberProfile
         } {
             return {
                 receivedFriendRequests: [],
+                sentFriendRequests: [],
                 friends: [],
                 receivedFriendRequestsUnsubscriber: undefined,
+                sentFriendRequestsUnsubscriber: undefined,
                 referredByUnsubscriber: undefined,
                 friendsUnsubscriber: undefined,
                 referredByProfile: undefined
@@ -72,13 +82,14 @@
             hasSuggestedFriends: function (): boolean {
                 if (this.referredByProfile &&
                     !this.isConnection(this.referredByProfile.cactusMemberId) &&
+                    !this.isSentRequest(this.referredByProfile.cactusMemberId) &&
                     !this.isReceivedRequest(this.referredByProfile.cactusMemberId)) {
                     return true;
                 }
                 return false;
             },
             hasFriendRequests: function (): boolean {
-                if (this.receivedFriendRequests.length > 0) {
+                if (this.receivedFriendRequests.length > 0 || this.sentFriendRequests.length > 0) {
                     return true;
                 }
                 return false;
@@ -91,6 +102,13 @@
                     this.receivedFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeReceivedConnectionRequests(member.id, {
                         onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
                             this.receivedFriendRequests = socialConnectionRequests;
+                        }
+                    });
+
+                    this.sentFriendRequestsUnsubscriber?.();
+                    this.sentFriendRequestsUnsubscriber = SocialConnectionRequestService.sharedInstance.observeSentConnectionRequests(member.id, {
+                        onData: async (socialConnectionRequests: SocialConnectionRequest[]): Promise<void> => {
+                            this.sentFriendRequests = socialConnectionRequests;
                         }
                     });
 
@@ -120,6 +138,16 @@
                 }
                 return false;
             },
+            isSentRequest(friendId: string): boolean {
+                if (this.sentFriendRequests) {
+                    for (let x = 0; x < this.sentFriendRequests.length; x++) {
+                        if (this.sentFriendRequests[x].friendMemberId == friendId) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            },
             isReceivedRequest(friendId: string): boolean {
                 if (this.receivedFriendRequests) {
                     for (let x = 0; x < this.receivedFriendRequests.length; x++) {
@@ -133,6 +161,7 @@
             unsubscribeQueries() {
                 this.friendsUnsubscriber?.();
                 this.receivedFriendRequestsUnsubscriber?.();
+                this.sentFriendRequestsUnsubscriber?.();
                 this.referredByUnsubscriber?.();
             }
         },
