@@ -7,18 +7,18 @@ import MemberProfileService from "@web/services/MemberProfileService";
 class ImportedContactService {
   public static sharedInstance =new ImportedContactService();
 
-  async prepareImportedContacts(emailContacts: Array<EmailContact>,
-                                friendIds?: Array<string | undefined>, 
-                                requestedFriendIds?: Array<string | undefined>): Promise<ImportedContact[]> {
-    const preparedContacts: Array<ImportedContact> = [];
+  async prepareImportedContacts(emailContacts: EmailContact[],
+                                friendIds?: string[], 
+                                requestedFriendIds?: string[]): Promise<ImportedContact[]> {
+    const preparedContacts: ImportedContact[] = [];
 
     for (const contact of emailContacts) {
       const memberProfile = await MemberProfileService.sharedInstance.getByEmail(contact.email);
 
       const statuses: ContactStatus = {
         isMember: (memberProfile ? true : false),
-        isFriend: (friendIds?.includes(memberProfile?.cactusMemberId) ? true : false),
-        isRequested: (requestedFriendIds?.includes(memberProfile?.cactusMemberId) ? true : false)
+        isFriend: (memberProfile && friendIds?.includes(memberProfile.cactusMemberId) ? true : false),
+        isRequested: (memberProfile && requestedFriendIds?.includes(memberProfile.cactusMemberId) ? true : false)
       }
 
       const preparedContact: ImportedContact = {
