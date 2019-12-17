@@ -8,8 +8,8 @@ class ImportedContactService {
   public static sharedInstance =new ImportedContactService();
 
   async prepareImportedContacts(emailContacts: EmailContact[],
-                                friendIds?: string[], 
-                                requestedFriendIds?: string[]): Promise<ImportedContact[]> {
+                                friendIds: string[], 
+                                requestedFriendIds: string[]): Promise<ImportedContact[]> {
     const preparedContacts: ImportedContact[] = [];
 
     for (const contact of emailContacts) {
@@ -17,8 +17,8 @@ class ImportedContactService {
 
       const statuses: ContactStatus = {
         isMember: (memberProfile ? true : false),
-        isFriend: (memberProfile && friendIds?.includes(memberProfile.cactusMemberId) ? true : false),
-        isRequested: (memberProfile && requestedFriendIds?.includes(memberProfile.cactusMemberId) ? true : false)
+        isFriend: (memberProfile && friendIds.includes(memberProfile.cactusMemberId) ? true : false),
+        isRequested: (memberProfile && requestedFriendIds.includes(memberProfile.cactusMemberId) ? true : false)
       }
 
       const preparedContact: ImportedContact = {
