@@ -34,6 +34,7 @@ declare interface Operation {
 }
 
 declare interface IGetOptions {
+    queryName?: string,
     includeDeleted?: false,
     onlyDeleted?: false,
 }

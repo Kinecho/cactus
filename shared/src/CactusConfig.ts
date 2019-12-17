@@ -20,6 +20,7 @@ export interface CactusConfig {
         api_key: string,
         audience_id: string,
         bridge_to_monday_segment_id: number,
+        non_prompt_campaign_ids: string //this is a comma separated string
     },
     sentry: {
         api_token: string,

@@ -1,5 +1,5 @@
 import AdminFirestoreService, {
-    CollectionReference,
+    CollectionReference, DefaultGetOptions,
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
@@ -50,7 +50,7 @@ export default class AdminCactusMemberService {
 
     async setReflectionStats(options: { memberId: string, stats: ReflectionStats }, queryOptions?: SaveOptions): Promise<void> {
         const {memberId, stats} = options;
-        const doc:DocumentReference = this.getCollectionRef().doc(memberId);
+        const doc: DocumentReference = this.getCollectionRef().doc(memberId);
         const data: Partial<CactusMember> = {
             stats: {
                 reflections: stats
@@ -219,9 +219,9 @@ export default class AdminCactusMemberService {
         return await firestoreService.getFirst(query, CactusMember, options);
     }
 
-    async findCactusMember(options: {email?: string, userId?: string, cactusMemberId?: string}, getOptions?: GetOptions): Promise<CactusMember|undefined> {
+    async findCactusMember(options: { email?: string, userId?: string, cactusMemberId?: string }, getOptions?: GetOptions): Promise<CactusMember | undefined> {
         const {email, userId, cactusMemberId} = options;
-        let member: CactusMember|undefined = undefined;
+        let member: CactusMember | undefined = undefined;
         if (cactusMemberId) {
             member = await this.getById(cactusMemberId, getOptions)
         }
@@ -237,13 +237,21 @@ export default class AdminCactusMemberService {
         return member
     }
 
-    async getMemberByEmail(emailInput?: string | null, options?: GetOptions): Promise<CactusMember | undefined> {
+    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
         if (!emailInput) {
             return undefined;
         }
         const email = emailInput.toLowerCase().trim();
         const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
+        options.queryName = `AdminCactusMemberService.getMemberByEmail(${email})`;
         const result = await firestoreService.executeQuery(query, CactusMember, options);
+
+        if (result.error && options?.throwOnError) {
+            const error = result.error instanceof Error ? result.error : new Error(`${result.error}`);
+            error.name = error.name || "getMemberByEmail failed";
+            throw error;
+        }
+
         if (result.size > 0) {
             const [member] = result.results;
             if (result.size > 1) {
@@ -251,6 +259,7 @@ export default class AdminCactusMemberService {
             }
             return member;
         }
+
         return;
     }
 
