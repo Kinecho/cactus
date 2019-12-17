@@ -1,5 +1,5 @@
 <template xmlns:v-clipboard="http://www.w3.org/1999/xhtml">
-    <div class="contactCard" :class="{inviting: readyToInvite, isFriend: isFriend, canAddFriend: canAddFriend, canInvite: canInviteContact, isPendingFriend: (wasFriended || isPendingFriend) }">
+    <div class="contactCard" :class="{inviting: readyToInvite}">
         <div class="avatar" v-if="avatarUrl">
             <img :src="avatarUrl" alt="Avatar"/>
         </div>
@@ -243,19 +243,6 @@
 
     .secondary {
         white-space: nowrap;
-    }
-
-    .canAddFriend {
-        order: 1;
-    }
-    .canInvite {
-        order: 2;
-    }
-    .isPendingFriend {
-        order: 3;
-    }
-    .isFriend {
-        order: 4;
     }
 
 </style>
