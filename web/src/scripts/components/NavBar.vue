@@ -121,8 +121,6 @@
                     }
                 }
             });
-
-
         },
         destroyed() {
             this.authUnsubscribe?.();
@@ -149,7 +147,7 @@
                 hidden: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
-                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!
+                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
             }
@@ -220,7 +218,6 @@
             goToSignup() {
                 window.location.href = this.signupHref;
             },
-
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
                     return;
