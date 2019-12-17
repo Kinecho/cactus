@@ -3,7 +3,7 @@
 
         <!-- suggested friends / friend requests -->
         <div class="socialFriendNotifications" v-if="member">
-            <friend-notifications v-bind:member="member"/>
+            <social-friend-notifications v-bind:member="member"/>
         </div>
 
         <!-- find your friends -->
@@ -60,8 +60,8 @@
 
             <!-- if not imported -->
             <div class="results" v-if="!importedContacts">
-                <h2>Invite your contacts</h2>
-                <p class="subtext">You'll choose which of your contacts to invite.</p>
+                <h2>Find Friends</h2>
+                <p class="subtext">Invite your contacts and connect on Cactus.</p>
                 <div class="btnContainer">
                     <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -83,8 +83,10 @@
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
                 <template v-for="contact in importedContacts">
                     <SocialImportedContact
-                            v-bind:contact="contact"
-                            v-bind:member="member"/>
+                            :contact="contact"
+                            :member="member"
+                            :friendMemberIds="friendMemberIds"
+                            :sentFriendMemberIds="sentFriendMemberIds" />
                 </template>
             </div>
         </div>
@@ -109,8 +111,12 @@
     import {Config} from "@web/config";
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
-    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import {socialSharingEvent} from '@web/analytics'
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
+    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import SocialConnection from "@shared/models/SocialConnection";
+    import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -120,9 +126,24 @@
             Spinner,
             SocialImportedContact,
             FriendList: SocialFriendList,
-            FriendNotifications: SocialFriendNotifications
+            SocialFriendNotifications
         },
-        beforeMount() {
+        async beforeMount() {
+            if (this.member?.id) {
+                const [friends, sentRequests] = await Promise.all([
+                    SocialConnectionService.sharedInstance.getByMemberId(this.member.id), 
+                    SocialConnectionRequestService.sharedInstance.getSentByMemberId(this.member.id)
+                ]);
+
+                if (friends) {
+                    this.friendMemberIds = friends.map((sc: SocialConnection) => { return sc.friendMemberId });
+                }
+                if (sentRequests) {
+                    this.sentFriendMemberIds = sentRequests.map((scr: SocialConnectionRequest) => { return scr.friendMemberId });
+                }
+
+            }
+            
             AddressBookService.sharedInstance.start();
         },
         mounted() {
@@ -136,6 +157,8 @@
         },
         data(): {
             authLoaded: boolean,
+            friendMemberIds: Array<string | undefined>,
+            sentFriendMemberIds: Array<string | undefined>,
             copySucceeded: boolean,
             importedContacts: Array<any> | undefined,
             importedService: string | undefined,
@@ -143,6 +166,8 @@
         } {
             return {
                 authLoaded: false,
+                friendMemberIds: [],
+                sentFriendMemberIds: [],
                 copySucceeded: false,
                 importedContacts: undefined,
                 importedService: undefined,
@@ -220,6 +245,7 @@
             display: grid;
             grid-column-gap: 6.4rem;
             grid-template-columns: 1fr minmax(38rem, 33%);
+            grid-template-rows: max-content 1fr;
             margin: 0;
             max-width: none;
         }
@@ -290,11 +316,16 @@
         }
     }
 
-    .results h2 {
-        margin: 4.8rem 0 .8rem;
+    .results {
+        display: flex;
+        flex-direction: column;
 
-        @include r(600) {
-            margin: 6.4rem 0 .8rem;
+        h2 {
+            margin: 4.8rem 0 .8rem;
+
+            @include r(600) {
+                margin: 6.4rem 0 .8rem;
+            }
         }
     }
 

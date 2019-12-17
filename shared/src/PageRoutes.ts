@@ -6,9 +6,9 @@ export enum PageRoute {
     CHECKOUT = "/checkout",
     JOURNAL_HOME = "/home",
     PROMPTS_ROOT = "/prompts",
-    REFERRAL_PROGRAM = "/friends",
+    FRIENDS = "/friends",
     SHARED_REFLECTION = "/reflection",
-    SOCIAL = "/friends",
+    SOCIAL = "/activity",
     ACCOUNT = "/account",
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     IOS_MAGIC_LINK_LOGIN = "/ios-login-continue"

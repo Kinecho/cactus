@@ -1,7 +1,7 @@
 <template lang="html">
     <div class="app-store-icon" v-if="showToDevice()">
         <a @click.prevent="trackEvent(appStoreUrl); return false;" :href="appStoreUrl">
-            <img src="/assets/apple_app_store_badge.svg" />
+            <img class="appleBadge" src="/assets/apple_app_store_badge.svg" alt="Download on the App Store" />
         </a>
     </div>
 </template>
@@ -19,7 +19,7 @@
                 default: false
             }
         },
-        data(): 
+        data():
         {
             appStoreUrl: String | undefined,
         } {
@@ -33,7 +33,7 @@
                     return true;
                 } else if (!this.onlyiOS) {
                     return true;
-                } 
+                }
                 return false;
             },
             isIosDevice(): boolean {
@@ -44,9 +44,9 @@
                     'event_category': "outbound",
                     'event_label': url,
                     'transport_type': 'beacon',
-                    'event_callback': function() { 
+                    'event_callback': function() {
                         // @ts-ignore
-                        document.location = url; 
+                        document.location = url;
                     }
                 });
             }
@@ -59,7 +59,12 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    a { 
+    a {
         text-align: left;
     }
+
+    .appleBadge {
+        height: 5rem;
+    }
+
 </style>

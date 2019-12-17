@@ -2,11 +2,20 @@
     <div class="socialHome">
         <NavBar/>
         <div class="centered">
-            <div class="contentContainer" v-if="!loading && member">
-                <SocialFindFriends v-if="currentChild === 'findFriends'" :member="member"/>
-                <SocialActivityFeed v-if="currentChild === 'activityFeed'" :member="member"/>
+            <div class="contentContainer" v-if="!loading && member && friends.length > 0">
+                <SocialActivityFeed :member="member"/>
             </div>
-
+            <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
+                <h1>No activity yet</h1>
+                <p>See what your friends are up to.</p>
+                <img class="graphic" src="assets/images/twoFriends.png" alt="Two friends welcoming you"/>
+                <a class="button primary wiggle" :href="friendsPath">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
+                    </svg>
+                    Add Friends
+                </a>
+            </div>
         </div>
         <Footer/>
     </div>
@@ -17,31 +26,35 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
-    import SocialFindFriends from "@components/SocialFindFriends.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
     import {PageRoute} from "@shared/PageRoutes"
     import {QueryParam} from '@shared/util/queryParams'
+    import SocialConnectionService from '@web/services/SocialConnectionService';
+    import SocialConnection from "@shared/models/SocialConnection";
 
     export default Vue.extend({
         components: {
             NavBar,
             Footer,
-            SocialFindFriends,
             SocialActivityFeed
         },
         data(): {
             currentChild: string,
             loading: boolean,
-            member: CactusMember|undefined,
-            memberUnsubscriber: ListenerUnsubscriber|undefined,
+            member: CactusMember | undefined,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
+            friends: Array<SocialConnection>,
+            friendsUnsubscriber?: ListenerUnsubscriber | undefined,
         } {
             return {
                 currentChild: 'findFriends',
                 loading: true,
                 member: undefined,
                 memberUnsubscriber: undefined,
+                friendsUnsubscriber: undefined,
+                friends: []
             }
         },
         beforeMount() {
@@ -49,9 +62,21 @@
                 onData: ({member}) => {
                     if (!member) {
                         window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`;
+                    } else {
+                        if (this.member?.id != member.id) { // only update instance if switching users
+                            this.member = member;
+
+                            if (this.member?.id) {
+                                this.friendsUnsubscriber?.();
+                                this.friendsUnsubscriber = SocialConnectionService.sharedInstance.observeConnections(this.member.id, {
+                                    onData: (socialConnections: SocialConnection[]) => {
+                                        this.friends = socialConnections;
+                                        this.loading = false;
+                                    }
+                                });
+                            }
+                        }
                     }
-                    this.member = member;
-                    this.loading = false;
                 }
             })
         },
@@ -59,6 +84,15 @@
             setVisible(child: string) {
                 this.currentChild = child;
             }
+        },
+        computed: {
+            friendsPath() {
+                return PageRoute.FRIENDS;
+            }
+        },
+        destroyed() {
+            this.memberUnsubscriber?.();
+            this.friendsUnsubscriber?.();
         },
 
     })
@@ -115,117 +149,44 @@
         }
     }
 
-    // .brandNew .subtext {
-    //     margin: 0 auto 3.2rem;
-    //     max-width: 48rem;
-    // }
+    .no-friends {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        padding: 6.4rem 2.4rem;
 
-    // .getStarted {
-    //     margin-bottom: 6.4rem;
-    //     max-width: 24rem;
-    //     width: 100%;
-    //
-    //     @include r(600) {
-    //         width: auto;
-    //     }
-    // }
+        h1 {
+            line-height: 1.2;
+            margin-bottom: .4rem;
+        }
 
-    // .findFriends {
-    //     margin: 0 auto 6.4rem;
-    //     max-width: 960px;
-    //     text-align: left;
-    //
-    //     .subtext {
-    //         margin: 0 0 2.4rem;
-    //         max-width: 60rem;
-    //     }
-    //
-    //     h2 {
-    //         margin-top: 6.4rem;
-    //     }
-    //
-    //     .btnContainer {
-    //         display: flex;
-    //
-    //         button {
-    //             flex-grow: 0;
-    //             margin-right: .8rem;
-    //         }
-    //     }
-    // }
+        p {
+            margin: 0 auto 2.4rem;
+            max-width: 60rem;
+            opacity: .8;
 
-    // .flexContainer {
-    //     align-items: center;
-    //     display: flex;
-    //     justify-content: space-between;
-    //     margin: 0 auto 3.2rem;
-    //     max-width: 960px;
-    //
-    //     .secondary {
-    //         flex-grow: 0;
-    //     }
-    // }
+            @include r(768) {
+                margin-bottom: 1.6rem;
+            }
+        }
 
-    // .activityCard {
-    //     background-color: $white;
-    //     border-radius: 12px;
-    //     box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
-    //     display: flex;
-    //     margin: 0 -.8rem 3.2rem;
-    //     padding: 1.6rem;
-    //     text-align: left;
-    //
-    //     @include r(374) {
-    //         margin: 0 .8rem 3.2rem;
-    //         padding: 1.6rem 2.4rem;
-    //     }
-    //
-    //     @include r(600) {
-    //         margin: 0 auto 3.2rem;
-    //         max-width: 64rem;
-    //         padding: 2.4rem;
-    //
-    //         &.demo {
-    //             max-width: 48rem;
-    //         }
-    //     }
-    //
-    //     a {
-    //         text-decoration: none;
-    //
-    //         &:hover {
-    //             color: $darkestGreen;
-    //         }
-    //     }
-    //
-    //     .bold {
-    //         font-weight: bold;
-    //     }
-    // }
+        .graphic {
+            margin-bottom: 3.2rem;
+            max-width: 48rem;
+            width: 90%;
+        }
 
-    // .email,
-    // .date {
-    //     font-size: 1.4rem;
-    //     opacity: .8;
-    // }
+        .button {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            min-width: 22rem;
 
-    // .avatar {
-    //     $avatarDiameter: 6.4rem;
-    //     border-radius: 50%;
-    //     flex-shrink: 0;
-    //     height: $avatarDiameter;
-    //     margin-right: 1.6rem;
-    //     overflow: hidden;
-    //     width: $avatarDiameter;
-    //
-    //     img {
-    //         width: 100%;
-    //         height: 100%;
-    //     }
-    // }
-
-    // .info button {
-    //     margin-top: 1.6rem;
-    // }
-
+            svg {
+                height: 2rem;
+                margin-right: .8rem;
+                width: 2rem;
+            }
+        }
+    }
 </style>

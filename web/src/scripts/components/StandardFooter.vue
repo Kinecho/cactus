@@ -47,10 +47,10 @@
         background-color: $darkestGreen;
         color: white;
         font-size: 1.4rem;
+        overflow-x: hidden;
         padding: 3.2rem 2.4rem 3.2rem;
         position: relative;
         z-index: 0;
-        overflow-x: hidden;
 
         &.lifted {
             margin-top: -4.8rem;
@@ -60,6 +60,7 @@
         .app-store-icon {
             display: block;
             margin-top: 2rem;
+            text-align: center;
 
             @include r(600) {
                 display: inline-block;
@@ -95,6 +96,7 @@
         flex-flow: column nowrap;
         justify-content: center;
         margin-bottom: 1.6rem;
+        text-align: center;
 
         @include r(600) {
             align-items: flex-start;

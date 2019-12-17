@@ -7,15 +7,11 @@
             <p class="name" v-if="name">{{name}}</p>
             <p class="email">{{email}}</p>
         </div>
-        <div class="btnContainer" v-if="received">
-            <button class="small secondary" @click="confirmRequest">
-                Confirm
-            </button>
-            <!-- <button class="small secondary" @click="ignoreRequest">
-                Hide
-            </button> -->
-        </div>
+        <button class="small secondary" @click="confirmRequest">
+            Confirm
+        </button>
         <div class="status" v-if="!received">
+            <img class="statusIcon" src="assets/images/clock.svg" alt="" />
             Requested
         </div>
     </div>
@@ -98,10 +94,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
-    .contactInfo {
-        margin-right: .8rem;
-    }
 
     .btnContainer {
         flex-direction: row;

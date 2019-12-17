@@ -45,7 +45,9 @@ export const updateReflectionStatsTrigger = functions.firestore
             return;
         }
 
-        const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId});
+        const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+            memberId,
+        });
         if (reflectionStats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
         }

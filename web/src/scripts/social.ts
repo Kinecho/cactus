@@ -1,12 +1,20 @@
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {InviteResult, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
-import {SocialConnectionRequestNotification,
-        SocialConnectionRequestNotificationResult} from "@shared/types/SocialConnectionRequestTypes";
+import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
+import {
+    ActivitySummaryResponse,
+    SocialActivityFeedEvent,
+    SocialActivityFeedRequest,
+    SocialActivityFeedResponse
+} from "@shared/types/SocialTypes";
 import {getAuth} from "@web/firebase";
-import MemberProfile from "@shared/models/MemberProfile";
 import MemberProfileService from '@web/services/MemberProfileService';
 import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
+import CactusMember from "@shared/models/CactusMember";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import {unseenActivityCount} from "@shared/util/SocialUtil";
+import {AxiosError} from "axios";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;
@@ -70,5 +78,46 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
                 error: e
             }
         }
+    }
+}
+
+export async function getSocialActivity(member: CactusMember): Promise<SocialActivityFeedResponse> {
+    const currentUser = getAuth().currentUser;
+
+    if (!currentUser || !member?.id) {
+        console.error('No user found for getSocialActivity request');
+        return {
+            success: false,
+            message: "You must be logged in to make this request."
+        };
+    } else {
+
+
+        try {
+            const headers = await getAuthHeaders();
+            const apiResponse = await request.get(Endpoint.activityFeed, {headers});
+            return apiResponse.data;
+        } catch (e) {
+            console.error("Failed get activity feed. The API call threw an error", e);
+            return {
+                success: false,
+                message: "Unexpected error",
+                error: e
+            };
+        }
+    }
+}
+
+export async function fetchActivityFeedSummary(): Promise<ActivitySummaryResponse | undefined> {
+    try {
+        const response = await request.get(Endpoint.activityFeedSummary, {headers: await getAuthHeaders()});
+        return response.data;
+    } catch (error) {
+        if (error.isAxiosError) {
+            console.error("Failed to fetch activity summary", (error as AxiosError).response?.data)
+        } else {
+            console.log("Failed to fetch activity summary", error);
+        }
+        return;
     }
 }

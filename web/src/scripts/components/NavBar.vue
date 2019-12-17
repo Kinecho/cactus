@@ -30,11 +30,11 @@
                     <span class="navLabel">Home</span>
                 </a>
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 20"><title>Friends</title>
-                        <path fill="#07454C" d="M13 12a5 5 0 0 1 4.995 4.783L18 17v2a1 1 0 0 1-1.993.117L16 19v-2a3 3 0 0 0-2.824-2.995L13 14H5a3 3 0 0 0-2.995 2.824L2 17v2a1 1 0 0 1-1.993.117L0 19v-2a5 5 0 0 1 4.783-4.995L5 12h8zm7.25.162a5 5 0 0 1 3.745 4.611L24 17v2a1 1 0 0 1-1.993.117L22 19v-2a3 3 0 0 0-2.25-2.902 1 1 0 1 1 .5-1.936zM9 0a5 5 0 1 1 0 10A5 5 0 0 1 9 0zm6.031.882a1 1 0 0 1 1.217-.72 5 5 0 0 1 0 9.687 1 1 0 0 1-.496-1.938 3 3 0 0 0 0-5.812 1 1 0 0 1-.72-1.217zM9 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
+                        <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
-                    <span class="navLabel">Friends</span>
-                    <!--span class="badge">3</span-->
+                    <span class="navLabel">Activity</span>
+                    <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -65,6 +65,8 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
+    import {fetchActivityFeedSummary} from '@web/social';
+    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
 
@@ -80,6 +82,7 @@
         hidden: boolean,
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
+        activityBadgeCount: number
     }
 
     export default Vue.extend({
@@ -101,7 +104,7 @@
             });
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: async ({member}) => {
                     if (member?.id && member?.id !== this.member?.id) {
                         this.memberProfileUnsubscriber?.();
                         this.memberProfileUnsubscriber = MemberProfileService.sharedInstance.observeByMemberId(member?.id, {
@@ -110,7 +113,12 @@
                             }
                         })
                     }
+
+                    const oldMember = this.member;
                     this.member = member;
+                    if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
+                        await this.updateActivityCount();
+                    }
                 }
             });
 
@@ -141,6 +149,7 @@
                 hidden: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
+                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
             }
@@ -222,8 +231,24 @@
                 const content = document.getElementById(scrollToId);
                 gtag("event", "scroll_to", {formId: this.signupFormAnchorId});
                 if (content) content.scrollIntoView();
+            },
+            async updateActivityCount() {
+                console.log("Refreshing activity count");
+                const member = this.member;
+                if (!member) {
+                    return;
+                }
+
+                const activitySummary = await fetchActivityFeedSummary();
+                if (!activitySummary) {
+                    console.error("Failed to fetch activity summary");
+                    this.activityBadgeCount = 0;
+                    return;
+                }
+                this.activityBadgeCount = activitySummary.unseenCount;
+                StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
             }
-        },
+        }
     })
 </script>
 
@@ -231,6 +256,12 @@
     @import "~styles/common";
     @import "~styles/mixins";
     @import "~styles/transitions";
+
+    body.error {
+        header {
+            background: $white;
+        }
+    }
 
     .login {
         font-size: 1.6rem;
@@ -355,13 +386,17 @@
     .badge {
         background-color: $green;
         border-radius: 50%;
-        color: $green;
-        height: .8rem;
+        color: $white;
+        font-size: 60%;
+        height: 2rem;
         overflow: hidden;
         position: absolute;
-        right: -.4rem;
-        top: -.4rem;
-        width: .8rem;
+        right: -1.8rem;
+        top: -0.5rem;
+        width: 2rem;
+        line-height: 180%;
+        text-align: center;
+        font-weight: bold;
     }
 
     .navbar-avatar-container {

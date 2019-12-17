@@ -4,7 +4,8 @@ import {createElementAccumulation, ElementAccumulation} from "@shared/models/Ele
 import {CactusElement} from "@shared/models/CactusElement";
 
 
-export function calculateStreak(reflections: ReflectionResponse[], start?: Date | undefined): number {
+export function calculateStreak(reflections: ReflectionResponse[], options: { start?: Date | undefined, timeZone?: string } = {}): number {
+    const {start, timeZone} = options;
     const unsortedDates: Date[] = [];
     // const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
 
@@ -20,7 +21,7 @@ export function calculateStreak(reflections: ReflectionResponse[], start?: Date 
 
     const dates = unsortedDates.sort((a, b) => b.getTime() - a.getTime());
 
-    return getStreak(dates, start);
+    return getStreak({dates, start, timeZone});
 }
 
 export function calculateDurationMs(reflections: ReflectionResponse[]): number {

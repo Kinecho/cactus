@@ -156,6 +156,7 @@ jobs:
           at: /tmp/workspace
       - run:
           name: "Deploy to Modules Firebase"
+          no_output_timeout: 20m
           command: |
             echo "The current build output is"
             echo "Deploy Modules: $(cat /tmp/workspace/modules_to_deploy.txt)"
@@ -169,7 +170,6 @@ jobs:
               firebase deploy --only $MODULES -P stage
             fi
       - notify-on-failure
-
   install-all:
     executor: cactus-web
     resource_class: small
@@ -362,7 +362,7 @@ jobs:
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-            npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
+            npx firebase deploy -P << parameters.project >> -f
       - notify-on-failure
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
@@ -508,7 +508,6 @@ workflows:
       - firebase-deploy:
           name: &branch_deploy_name "Deploy Branch to Stage"
           project: "stage"
-          modules: "functions,hosting"
           requires:
             - *stage_approval_name
       - branch-deploy-finished:
@@ -576,6 +575,5 @@ workflows:
       - firebase-deploy:
           name: "Prod: Deploy All"
           project: "prod"
-          modules: "functions,hosting"
           requires:
             - *prod_approval_name
