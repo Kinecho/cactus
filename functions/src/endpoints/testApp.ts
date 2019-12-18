@@ -9,7 +9,6 @@ import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
 import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-// import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -121,7 +120,7 @@ app.get("/next-prompt", async (req, res) => {
     }
 
     res.send({
-        timeZone: userTZ,
+        memberTimeZone: userTZ,
         userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
         systemDate: systemDate.toLocaleString(),
         userStartDate,
@@ -130,7 +129,7 @@ app.get("/next-prompt", async (req, res) => {
         systemDateObject: systemDateObject,
         promptSentTimePreference: member.promptSendTime,
         jobResult,
-        memberResult: {...memberResult, promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null},
+        memberResult: memberResult ? {...memberResult, promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null} : "NOT PROCSSED",
         promptContent: promptContent?.toJSON(["_fl_meta_"]) || null,
         member: member.toJSON()
     });

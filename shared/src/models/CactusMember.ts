@@ -52,6 +52,13 @@ export enum Field {
     activityStatus = "activityStatus"
 }
 
+export interface PromptSendTime {
+    hour: number,
+    minute: 0 | 15 | 30 | 45,
+}
+
+export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
@@ -80,10 +87,7 @@ export default class CactusMember extends BaseModel {
     };
     timeZone?: string | null;
     locale?: string | null | undefined;
-    promptSendTime?: {
-        hour: number,
-        minute: number,
-    } = {hour: 2, minute: 45};
+    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,
@@ -134,7 +138,7 @@ export default class CactusMember extends BaseModel {
         return `${this.firstName || ""} ${this.lastName || ""}`.trim();
     }
 
-    getLocaleDateObject(): DateObject | undefined {
+    getCurrentLocaleDateObject(): DateObject | undefined {
         if (this.timeZone) {
             return DateUtil.getDateObjectForTimezone(new Date(), this.timeZone);
         }

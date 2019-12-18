@@ -7,6 +7,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import PromptContent from "@shared/models/PromptContent";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import PushNotificationService, {PromptNotificationResult} from "@api/services/PushNotificationService";
+import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 
 export interface CustomNotificationJobResult {
     success: boolean,
@@ -94,7 +95,7 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     console.log("timezone =", userTZ);
     console.log("preferredSendTime", userPromptSendTime);
 
-    const userDateObject = member.getLocaleDateObject();
+    const userDateObject = member.getCurrentLocaleDateObject();
     result.memberDate = userDateObject;
     console.log("user date obj", userDateObject);
     console.log("user date (locale)", userDateObject?.toLocaleString());
@@ -104,9 +105,7 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         return result;
     }
 
-    const isSendTime = userDateObject.hour === userPromptSendTime.hour &&
-        (userDateObject.minute || 0) >= userPromptSendTime.minute &&
-        (userDateObject.minute || 0) < userPromptSendTime.minute + 15;
+    const isSendTime = isSendTimeWindow({currentDate: userDateObject, sendTime: userPromptSendTime});
 
     console.log("is send time", isSendTime);
     result.isSendTime = isSendTime;
