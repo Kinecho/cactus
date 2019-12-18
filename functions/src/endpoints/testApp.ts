@@ -100,7 +100,7 @@ app.get("/next-prompt", async (req, res) => {
     }
 
 
-    let jobResult: CustomSentPromptNotificationsJob.CustomNotificationJobResult | undefined;
+    const jobResult: CustomSentPromptNotificationsJob.CustomNotificationJobResult | undefined;
     let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
     if (runJob) {
         const job = {dryRun: false};

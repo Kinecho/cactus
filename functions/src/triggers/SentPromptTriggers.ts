@@ -63,7 +63,7 @@ async function sendPush(options: { member: CactusMember, prompt: ReflectionPromp
                 usedMemberCustomTime: true,
             });
         }
-        AdminSentPromptService.getSharedInstance().save(sentPrompt);
+        await AdminSentPromptService.getSharedInstance().save(sentPrompt);
         return pushResult;
     }
     return undefined;

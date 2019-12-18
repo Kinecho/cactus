@@ -132,7 +132,13 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
 
     const memberId = member.id;
     const promptId = promptContent?.promptId;
-    if (!memberId || !promptId) {
+    if (!memberId) {
+        errors.push("No member ID could be found for the given inputs");
+        return result;
+    }
+
+    if (!promptId) {
+        errors.push("No promptID was found on the prompt content");
         return result;
     }
 
