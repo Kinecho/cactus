@@ -1,6 +1,6 @@
 import {BigQuery} from "@google-cloud/bigquery";
 import {buildActiveUsersQuery, processActiveUsersResults} from "@api/analytics/queries/activeUsers";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 
 const config = getConfig();
 

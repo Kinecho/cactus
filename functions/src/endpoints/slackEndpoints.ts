@@ -3,7 +3,7 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import chalk from "chalk";
 import * as crypto from "crypto";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import AdminSlackService, {SlackAttachment, SlackResponseType} from "@admin/services/AdminSlackService";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";

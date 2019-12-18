@@ -2,7 +2,7 @@ import {promisify} from "util";
 
 const path = require("path");
 const fs = require("fs-extra");
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import * as admin from "firebase-admin";
 /**
  * write data to a file

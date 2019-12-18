@@ -3,7 +3,7 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import * as crypto from "crypto";
 import chalk from "chalk";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import {differenceInMinutes} from "@shared/util/DateUtil";
 import {handleWebhookEvent} from "@api/flamelink/WebhookHandler";
 

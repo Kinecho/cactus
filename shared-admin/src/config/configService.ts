@@ -1,5 +1,5 @@
 import * as functions from "firebase-functions"
-import {Environment, getEnvironment} from "@api/config/environmentManager";
+import {Environment, getEnvironment} from "@admin/config/environmentManager";
 import {CactusConfig} from "@shared/CactusConfig";
 
 let _config: CactusConfig;

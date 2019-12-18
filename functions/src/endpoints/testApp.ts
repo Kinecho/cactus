@@ -4,7 +4,7 @@ import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
 import {getOperation,} from "@api/endpoints/DataExportJob";
 import * as Sentry from "@sentry/node";
 import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
 import {DateObject, DateTime} from "luxon";
@@ -90,7 +90,7 @@ app.get("/next-prompt", async (req, res) => {
     const userTZ = member.timeZone;
     // let systemDate = new Date();
     const systemDate = new Date();
-    const systemDateObject = DateTime.fromJSDate(systemDate).toObject();
+    const systemDateObject = DateTime.local().toObject();
     let userDateObject: DateObject = systemDateObject;
     if (userTZ) {
         console.log("timezone =", userTZ);
@@ -98,17 +98,6 @@ app.get("/next-prompt", async (req, res) => {
         console.log("user date obj", userDateObject);
         console.log("user date (locale)", userDateObject.toLocaleString())
     }
-
-
-    const userStartDate = DateUtil.dateObjectToISODate(userDateObject);
-    userDateObject.hour = 0;
-    userDateObject.minute = 0;
-    userDateObject.millisecond = 0;
-    const endObject = {...userDateObject, day: userDateObject.day! + 1};
-    const userEndDate = DateUtil.dateObjectToISODate(endObject);
-
-
-    const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: userDateObject});
 
 
     let jobResult: CustomSentPromptNotificationsJob.CustomNotificationJobResult | undefined;
@@ -123,14 +112,14 @@ app.get("/next-prompt", async (req, res) => {
         memberTimeZone: userTZ,
         userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
         systemDate: systemDate.toLocaleString(),
-        userStartDate,
-        userEndDate,
         userDateObject: userDateObject,
         systemDateObject: systemDateObject,
         promptSentTimePreference: member.promptSendTime,
         jobResult,
-        memberResult: memberResult ? {...memberResult, promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null} : "NOT PROCSSED",
-        promptContent: promptContent?.toJSON(["_fl_meta_"]) || null,
+        memberJobResult: memberResult ? {
+            ...memberResult,
+            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null
+        } : "NOT PROCSSED",
         member: member.toJSON()
     });
 });

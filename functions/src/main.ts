@@ -2,7 +2,7 @@ require("module-alias/register");
 import {initializeServices} from "@admin/services/AdminServiceConfig";
 
 import * as admin from "firebase-admin";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@api/../../shared-admin/src/config/configService";
 
 admin.initializeApp();
 const app = admin.app();

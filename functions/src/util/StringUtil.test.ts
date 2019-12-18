@@ -1,6 +1,6 @@
 import {buildPromptContentURL, splitOnFirst} from '@api/util/StringUtil'
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import {resetTestConfig, setTestConfig} from "@api/config/configService";
+import {resetTestConfig, setTestConfig} from "@admin/config/configService";
 
 beforeEach(() => {
     resetTestConfig();

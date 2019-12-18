@@ -195,11 +195,7 @@ export default class AdminFirestoreService {
 
 
     async getFirst<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<T | undefined> {
-        const startTime = new Date().getTime();
-
         const response = await this.executeQuery(query.limit(1), Type, options);
-        const endTime = new Date().getTime();
-        console.log(`getFirst query finished after ${endTime - startTime}ms`);
         const [first] = response.results;
         return first;
     }

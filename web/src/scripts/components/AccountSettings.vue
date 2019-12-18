@@ -122,7 +122,11 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
-    import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
+    import CactusMember, {
+        DEFAULT_PROMPT_SEND_TIME,
+        NotificationStatus,
+        PromptSendTime
+    } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
@@ -216,8 +220,8 @@
             }
         },
         computed: {
-            promptSendTime(): { hour: number, minute: number } {
-                return this.member?.promptSendTime || {hour: 0, minute: 0}
+            promptSendTime(): PromptSendTime {
+                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -393,7 +397,7 @@
                     this.changesToSave = true;
                 }
             },
-            async timeSelected(value: { hour: number, minute: number }) {
+            async timeSelected(value: PromptSendTime) {
                 if (this.member) {
                     this.member.promptSendTime = value;
                     // this.$set(this.member, this.member);

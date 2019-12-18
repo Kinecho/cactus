@@ -1,13 +1,14 @@
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
 import CactusMember from "@shared/models/CactusMember";
-import SentPrompt from "@shared/models/SentPrompt";
+import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContent from "@shared/models/PromptContent";
-import AdminSentPromptService from "@admin/services/AdminSentPromptService";
-import PushNotificationService, {PromptNotificationResult} from "@api/services/PushNotificationService";
+import AdminSentPromptService, {CreateSentPromptResult} from "@admin/services/AdminSentPromptService";
+import PushNotificationService from "@api/services/PushNotificationService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
+import {PromptNotificationResult} from "@admin/PushNotificationTypes";
 
 export interface CustomNotificationJobResult {
     success: boolean,
@@ -37,6 +38,7 @@ export interface MemberResult {
     memberEmail?: string,
     memberDate?: DateObject,
     errors?: string[],
+    message?: string,
     pushResult?: PromptNotificationResult
 
 }
@@ -98,7 +100,6 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     const userDateObject = member.getCurrentLocaleDateObject();
     result.memberDate = userDateObject;
     console.log("user date obj", userDateObject);
-    console.log("user date (locale)", userDateObject?.toLocaleString());
 
     if (!userDateObject) {
         console.warn("Unable to get user's locale date");
@@ -112,12 +113,19 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
 
     if (!isSendTime) {
         console.log("not the time to send notifications, returning");
+        result.success = true;
         return result;
     }
 
     const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: userDateObject});
 
     console.log("Fetched prompt content for member", promptContent?.subjectLine, promptContent?.scheduledSendAt);
+
+    if (!promptContent) {
+        result.success = false;
+        errors.push(`No PromptContent Found For Date`);
+        return result;
+    }
 
     result.promptContent = promptContent;
 
@@ -128,37 +136,74 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         return result;
     }
 
-
     const [existingSentPrompt] = await Promise.all([
         AdminSentPromptService.getSharedInstance().getSentPromptForCactusMemberId({cactusMemberId: memberId, promptId}),
     ]);
 
-    if (promptContent) {
+    if (existingSentPrompt) {
+        console.log("The sent prompt existed... not doing anything");
+        result.sentPromptExisted = true;
+        result.sentPrompt = existingSentPrompt;
+        result.pushResult = await sendAndSavePushIfNeeded({
+            sentPrompt: existingSentPrompt,
+            promptContent,
+            isCustomTime: true,
+            member
+        });
+        result.sentPush = result.pushResult?.atLeastOneSuccess || false;
+        return result;
+    } else {
+        console.log("The sent prompt did not exist. Creating it now");
+        result.sentPromptExisted = false;
+        const createSentPromptResult: CreateSentPromptResult = AdminSentPromptService.createSentPrompt({
+            member,
+            promptContent,
+            promptId,
+            medium: PromptSendMedium.PUSH,
+            createHistoryItem: false,
+        });
+        const sentPrompt = createSentPromptResult.sentPrompt;
+
+        if (createSentPromptResult.error || !sentPrompt) {
+            errors.push(createSentPromptResult.error || "unable to create sent prompt");
+            result.createdSentPrompt = false;
+            return result;
+        }
+
         try {
-            const pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({
-                member,
-                promptContent
-            });
-            console.log("Push result", pushResult);
-            result.sentPush = true;
-            result.pushResult = pushResult;
+            const savedSentPrompt = await AdminSentPromptService.getSharedInstance().save(sentPrompt)
+            console.log("Saved sent prompt", savedSentPrompt.id);
+            result.sentPrompt = savedSentPrompt;
+            result.createdSentPrompt = true;
+            result.pushResult = await sendAndSavePushIfNeeded({member, promptContent, sentPrompt, isCustomTime: true});
+            result.sentPush = result.pushResult?.atLeastOneSuccess || false;
         } catch (error) {
-            console.error("Failed to send push message", error);
-            result.sentPush = false;
-            errors.push("Failed to sent push notification");
+            const errorMessage = `Failed to save new sent prompt for member.id=${memberId} | promptId = ${promptId}`;
+            console.error(errorMessage, error);
+            errors.push(errorMessage);
+            if (error.message) {
+                errors.push(error.message);
+            }
+            return result;
         }
     }
 
-
-    if (existingSentPrompt) {
-        result.sentPromptExisted = true;
-        result.sentPrompt = existingSentPrompt;
-        //TODO: do we need to do the push?
-        return result;
-    } else {
-        result.sentPromptExisted = false;
-    }
-
-
     return result;
+}
+
+async function sendAndSavePushIfNeeded(options: { sentPrompt: SentPrompt, promptContent: PromptContent, member: CactusMember, isCustomTime: boolean }): Promise<PromptNotificationResult | undefined> {
+    const {sentPrompt, promptContent, member, isCustomTime} = options;
+    if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
+        const pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({
+            member,
+            promptContent
+        });
+        await AdminSentPromptService.getSharedInstance().updateForPushResult({
+            sentPrompt,
+            usedCustomTime: isCustomTime,
+            pushResult,
+        });
+        return pushResult;
+    }
+    return;
 }

@@ -2,7 +2,7 @@ import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import AdminSlackService, {
     AttachmentColor,
     ChatMessage,

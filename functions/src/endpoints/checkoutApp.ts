@@ -1,7 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as Stripe from "stripe";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import chalk from "chalk";
 import {QueryParam} from "@shared/util/queryParams";
