@@ -238,8 +238,8 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
         t = t.setZone(timeZone);
     }
 
-    dt.set({hour: 0, minute: 0, millisecond: 0, second: 0});
-    t.set({hour: 0, minute: 0, millisecond: 0, second: 0});
+    dt = dt.set({hour: 0, minute: 0, millisecond: 0, second: 0});
+    t = t.set({hour: 0, minute: 0, millisecond: 0, second: 0});
 
     return Math.round(t.diff(dt).as("day"))
 }
