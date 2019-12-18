@@ -100,11 +100,9 @@ app.get("/next-prompt", async (req, res) => {
     }
 
 
-    const jobResult: CustomSentPromptNotificationsJob.CustomNotificationJobResult | undefined;
     let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
     if (runJob) {
         const job = {dryRun: false};
-        // jobResult = await CustomSentPromptNotificationsJob.runJob({dryRun: false});
         memberResult = await CustomSentPromptNotificationsJob.processMember({job, member});
     }
 
@@ -115,12 +113,11 @@ app.get("/next-prompt", async (req, res) => {
         userDateObject: userDateObject,
         systemDateObject: systemDateObject,
         promptSentTimePreference: member.promptSendTime,
-        jobResult,
         memberJobResult: memberResult ? {
             ...memberResult,
             promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null,
             sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
-        } : "NOT PROCSSED",
+        } : "NOT PROCESSED",
     });
 });
 
