@@ -1,3 +1,7 @@
+export interface PronounCopy {
+    YOU: string
+}
+
 export interface PromptCopy {
     ADD_A_NOTE: string
     EDIT_NOTE: string
@@ -85,6 +89,7 @@ export interface ErrorCopy {
 }
 
 export abstract class LocalizedCopy {
+    abstract pronouns: PronounCopy;
     abstract prompts: PromptCopy;
     abstract elements: ElementCopy;
     abstract settings: LocaleSettings;
