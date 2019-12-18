@@ -118,9 +118,9 @@ app.get("/next-prompt", async (req, res) => {
         jobResult,
         memberJobResult: memberResult ? {
             ...memberResult,
-            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null
+            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null,
+            sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
         } : "NOT PROCSSED",
-        member: member.toJSON()
     });
 });
 
