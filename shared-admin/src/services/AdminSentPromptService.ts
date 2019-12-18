@@ -15,7 +15,6 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as Sentry from '@sentry/node';
 import {isNonPromptCampaignId} from "@admin/config/configService";
 import PromptContent from "@shared/models/PromptContent";
-import {PromptNotificationResult} from "@admin/PushNotificationTypes";
 
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
@@ -67,25 +66,6 @@ export default class AdminSentPromptService {
 
     async save(model: SentPrompt): Promise<SentPrompt> {
         return firestoreService.save(model);
-    }
-
-    /**
-     * @Deprecated
-     * @param {{sentPrompt: SentPrompt; pushResult: PromptNotificationResult; usedCustomTime: boolean}} options
-     * @return {Promise<SentPrompt>}
-     */
-    async updateForPushResult(options: { sentPrompt: SentPrompt, pushResult: PromptNotificationResult, usedCustomTime: boolean, }): Promise<SentPrompt> {
-        const {sentPrompt, pushResult, usedCustomTime} = options;
-
-        if (pushResult.atLeastOneSuccess) {
-            sentPrompt.sendHistory.push({
-                medium: PromptSendMedium.PUSH,
-                sendDate: new Date(),
-                usedMemberCustomTime: usedCustomTime,
-            });
-            return await this.save(sentPrompt)
-        }
-        return sentPrompt;
     }
 
     async getById(id: string): Promise<SentPrompt | undefined> {
