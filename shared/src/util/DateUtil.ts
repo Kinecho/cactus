@@ -231,14 +231,15 @@ export function millisecondsToMinutes(duration: number, decimals: number = 1): s
 }
 
 export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), timeZone?: string): number {
-    let dt = DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0});
-
-    let t = DateTime.fromJSDate(today).set({hour: 0, minute: 0, millisecond: 0, second: 0});
-
+    let dt = DateTime.fromJSDate(date);
+    let t = DateTime.fromJSDate(today);
     if (timeZone) {
         dt = dt.setZone(timeZone);
         t = t.setZone(timeZone);
     }
+
+    dt.set({hour: 0, minute: 0, millisecond: 0, second: 0});
+    t.set({hour: 0, minute: 0, millisecond: 0, second: 0});
 
     return Math.round(t.diff(dt).as("day"))
 }
@@ -262,7 +263,6 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
     //find the index where the date is before the start date
 
     const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
-    console.log("Starting the date index at ", startIndex);
     _dates = _dates.slice(startIndex);
 
     if (_dates.length === 0) {
