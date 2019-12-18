@@ -2,10 +2,7 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {Project} from "@scripts/config";
-import MailchimpService from "@admin/services/MailchimpService";
-import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import AdminSentPromptService, {CampaignSentPromptProcessingResult} from "@admin/services/AdminSentPromptService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 
 const prompts = require("prompts");
 
@@ -19,7 +16,7 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
         console.log("Using project", project);
 
         console.log("attempting to initalize mailchimp service");
-        const mailchimpService = MailchimpService.getSharedInstance();
+        // const mailchimpService = MailchimpService.getSharedInstance();
 
         const campaignResponse: { campaignId: string } = await prompts({
             name: "campaignId",
@@ -27,33 +24,47 @@ export default class MailchimpSyncCampaignRecipients extends FirebaseCommand {
             type: "text",
         });
 
+        const campaignId = campaignResponse.campaignId;
+        // const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(campaignResponse.campaignId);
+        // console.log("Got prompt", prompt ? `${prompt.id} | ${prompt.question}` : 'undefined');
 
-        const prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(campaignResponse.campaignId);
-        console.log("Got prompt", prompt ? `${prompt.id} | ${prompt.question}` : 'undefined');
+        const results = await AdminSentPromptService.getSharedInstance().processSentMailchimpCampaign({campaignId});
 
-        const tasks: Promise<CampaignSentPromptProcessingResult>[] = [];
-        const handleBatch = async (recipients: SentToRecipient[]) => {
-            recipients.forEach(recipient => {
-                console.log(`${recipient.email_address} | email_id = ${recipient.email_id} | status=${recipient.status} | lastOpen=${recipient.last_open} | openCount=${recipient.open_count}`)
-                if (prompt) {
-                    tasks.push(new Promise<CampaignSentPromptProcessingResult>(async resolve => {
-                        const sentPrompt = await AdminSentPromptService.getSharedInstance().processMailchimpRecipient(recipient, prompt);
-                        console.log("processed SentPrompt", sentPrompt);
-                        resolve({sentPrompt, recipient});
-                    }))
-                }
+        // const tasks: Promise<CampaignSentPromptProcessingResult>[] = [];
+        // const handleBatch = async (recipients: SentToRecipient[]) => {
+        //     recipients.forEach(recipient => {
+        //         console.log(`${recipient.email_address} | email_id = ${recipient.email_id} | status=${recipient.status} | lastOpen=${recipient.last_open} | openCount=${recipient.open_count}`)
+        //         if (prompt) {
+        //             tasks.push(new Promise<CampaignSentPromptProcessingResult>(async resolve => {
+        //                 try {
+        //                     const sentPrompt = await AdminSentPromptService.getSharedInstance().processMailchimpRecipient(recipient, prompt);
+        //                     console.log("processed SentPrompt", sentPrompt);
+        //                     resolve({sentPrompt, recipient});
+        //                 } catch (error) {
+        //                     resolve({
+        //                         error: {
+        //                             message: `Failed to process recipient ${recipient.email_address}`,
+        //                             error: error,
+        //                             campaignId,
+        //                         }
+        //                     })
+        //                 }
+        //
+        //             }))
+        //         }
+        //
+        //
+        //     })
+        // };
+        // const responses = await mailchimpService.getAllSentTo(campaignResponse.campaignId, {
+        //     onPage: handleBatch
+        // });
 
 
-            })
-        };
-        const responses = await mailchimpService.getAllSentTo(campaignResponse.campaignId, {
-            onPage: handleBatch
-        });
-
-
-        console.log("got all recipients. There were", responses.length);
-        const taskResults = await Promise.all(tasks);
-        console.log("Task results finished", taskResults.length);
+        console.log("got sync results. There were", results.length);
+        // const taskResults = await Promise.all(tasks);
+        // console.log("Task results finished", taskResults.length);
+        console.log(JSON.stringify(results, null, 2));
         return;
     }
 

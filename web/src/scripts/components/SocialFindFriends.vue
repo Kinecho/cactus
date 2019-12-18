@@ -62,7 +62,7 @@
             <div class="results" v-if="!importedContacts">
                 <h2>Find Friends</h2>
                 <p class="subtext">Invite your contacts and connect on Cactus.</p>
-                <div class="btnContainer">
+                <div class="btnContainer" v-if="!isImporting">
                     <button class="secondary wiggle btn cloudsponge-launch" data-cloudsponge-source="gmail">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path fill="#D44638" d="M22 6.25v12.5c0 .708-.542 1.25-1.25 1.25H19.5V8.656L12 14.042 4.5 8.656V20H3.25C2.54 20 2 19.458 2 18.75V6.25c0-.354.135-.667.36-.89.223-.227.537-.36.89-.36h.417L12 11.042 20.333 5h.417c.354 0 .667.135.89.36.226.223.36.536.36.89z"/>
@@ -76,17 +76,17 @@
                         Yahoo
                     </button>
                 </div>
+                <div v-if="isImporting">
+                    <Spinner />
+                </div>
                 <!-- end -->
             </div>
-
             <div class="results" v-if="importedContacts">
                 <h2>{{importedService}} Contacts <span class="resultCount">({{importedContacts.length}})</span></h2>
-                <template v-for="contact in importedContacts">
+                <template v-for="importedContact in importedContacts">
                     <SocialImportedContact
-                            :contact="contact"
-                            :member="member"
-                            :friendMemberIds="friendMemberIds"
-                            :sentFriendMemberIds="sentFriendMemberIds" />
+                            :imported_contact="importedContact"
+                            :member="member" />
                 </template>
             </div>
         </div>
@@ -104,7 +104,8 @@
     import Spinner from "@components/Spinner.vue";
     import AddressBookService from '@web/services/AddressBookService'
     import SocialImportedContact from "@components/SocialImportedContact.vue"
-    import {EmailService} from "@shared/types/EmailContactTypes";
+    import {EmailService, CloudspongeContact} from "@shared/types/EmailContactTypes";
+    import {ImportedContact} from "@shared/types/ImportedContactTypes";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
     import CactusMember from "@shared/models/CactusMember";
@@ -116,6 +117,7 @@
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
+    import ImportedContactService from '@web/services/ImportedContactService';
     import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
 
     Vue.use(VueClipboard);
@@ -157,12 +159,13 @@
         },
         data(): {
             authLoaded: boolean,
-            friendMemberIds: Array<string | undefined>,
-            sentFriendMemberIds: Array<string | undefined>,
+            friendMemberIds: string[],
+            sentFriendMemberIds: string[],
             copySucceeded: boolean,
-            importedContacts: Array<any> | undefined,
+            importedContacts: ImportedContact[] | undefined,
             importedService: string | undefined,
-            customNetworks: { [key: string]: { sharer: string, type: "popup" | "direct" } }
+            customNetworks: { [key: string]: { sharer: string, type: "popup" | "direct" } },
+            isImporting: boolean
         } {
             return {
                 authLoaded: false,
@@ -176,7 +179,8 @@
                         "sharer": "mailto:?subject=@title&body=@url%0D%0A%0D%0A@description",
                         "type": "popup"
                     }
-                }
+                },
+                isImporting: false
             }
         },
         methods: {
@@ -187,9 +191,16 @@
                 this.copySucceeded = true;
                 setTimeout(() => this.copySucceeded = false, 2000);
             },
-            importContacts: function (contacts: Array<any>, source: string) {
-                this.importedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
+            async importContacts(contacts: Array<CloudspongeContact>, source: string) {
+                this.isImporting = true;
+                const formattedContacts = AddressBookService.sharedInstance.formatContacts(contacts);
+                this.importedContacts = await ImportedContactService.sharedInstance.prepareImportedContacts(
+                    formattedContacts, 
+                    this.friendMemberIds, 
+                    this.sentFriendMemberIds, 
+                );
                 this.importedService = EmailService[source as keyof typeof EmailService];
+                this.isImporting = false;
             },
             configureCloudsponge: function () {
                 if (window.cloudsponge) {

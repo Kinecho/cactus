@@ -49,12 +49,18 @@ export function resetTestConfig() {
     _testConfigOverrides = {};
 }
 
+export function isNonPromptCampaignId(campaignId: string): boolean {
+    const idString = getConfig().mailchimp.non_prompt_campaign_ids;
+    return idString.split(",").map(id => id.trim()).includes(campaignId);
+}
+
 const defaultTestConfig: CactusConfig = {
     isEmulator: true,
     mailchimp: {
         api_key: "fake_key-us20",
         audience_id: "testing",
-        bridge_to_monday_segment_id: 1234
+        bridge_to_monday_segment_id: 1234,
+        non_prompt_campaign_ids: "507974de98",
     },
     app: {
         environment: "test"

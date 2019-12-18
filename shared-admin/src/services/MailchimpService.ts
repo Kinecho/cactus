@@ -162,8 +162,8 @@ export default class MailchimpService {
             });
 
             return response.data;
-        } catch (e){
-            if (e.isAxiosError){
+        } catch (e) {
+            if (e.isAxiosError) {
                 const err = e as AxiosError;
                 return err.response && err.response.data
             }
@@ -182,8 +182,8 @@ export default class MailchimpService {
             });
 
             return response.data || "success";
-        } catch (e){
-            if (e.isAxiosError){
+        } catch (e) {
+            if (e.isAxiosError) {
                 const err = e as AxiosError;
                 return err.response && err.response.data
             }
@@ -367,7 +367,7 @@ export default class MailchimpService {
     async getAllSentTo(campaignId: string, options: {
         pageSize?: number,
         delayMs?: number,
-        onPage?: (values: SentToRecipient[]) => Promise<void>
+        onPage?: (values: SentToRecipient[], pageNumber?: number) => Promise<void>
     } = {}): Promise<SentToRecipient[]> {
 
         const pageSize = options.pageSize || defaultPageSize;
@@ -477,7 +477,7 @@ export default class MailchimpService {
             },);
 
 
-            const listMember:ListMember = response.data ;
+            const listMember: ListMember = response.data;
 
             return {success: true, listMember: listMember};
         } catch (error) {
@@ -487,7 +487,7 @@ export default class MailchimpService {
                 return {success: false, error: error.response.data}
             } else {
                 console.error("Unknown error while updating member status", error);
-                return {success: false,  error: error};
+                return {success: false, error: error};
             }
         }
     }
@@ -748,18 +748,19 @@ export default class MailchimpService {
                                                             getValues: (val: R) => T[],
                                                             pageSize = defaultPageSize,
                                                             pageDelay = 0,
-                                                            onPageResults?: (values: T[]) => Promise<void>): Promise<T[]> {
+                                                            onPageResults?: (values: T[], pageNumber: number) => Promise<void>): Promise<T[]> {
         const results: T[] = [];
         let currentOffset = 0;
         let fetchCount = 0;
         let listResponse: R | null = null;
+        let pageNumber = 0;
         while (!listResponse || listResponse.total_items > (currentOffset)) {
             listResponse = await method({offset: currentOffset, count: pageSize});
             fetchCount++;
             const values = getValues(listResponse);
 
             if (onPageResults) {
-                await onPageResults(values);
+                await onPageResults(values, pageNumber);
             }
 
             results.push(...values);
@@ -774,7 +775,7 @@ export default class MailchimpService {
                     }, pageDelay)
                 })
             }
-
+            pageNumber += 1;
         }
 
         return results;
@@ -818,7 +819,12 @@ export default class MailchimpService {
             });
             return response.data;
         } catch (error) {
-            console.warn("Failed to get list member for email", email);
+            if (error.isAxiosError) {
+                const axiosError = error as AxiosError;
+                console.error(`MailchimpService.getmeMemberByEmail | Failed to get list member for email ${email}`, axiosError.response);
+            } else {
+                console.error(`Failed to get list member for email ${email}`, error);
+            }
             return undefined;
         }
     }
@@ -919,7 +925,10 @@ export default class MailchimpService {
             return response.data;
         } catch (e) {
             const error = e as AxiosError;
-            console.error(`Unable to get member activity for ${email}`, error.response ? {config: error.config, data: error.response.data} : error);
+            console.error(`Unable to get member activity for ${email}`, error.response ? {
+                config: error.config,
+                data: error.response.data
+            } : error);
             return undefined;
         }
     }

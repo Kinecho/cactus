@@ -12,7 +12,8 @@ import CactusMember from "@shared/models/CactusMember";
 import User from "@shared/models/User";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-
+import * as Sentry from '@sentry/node';
+import {isNonPromptCampaignId} from "../../../functions/src/config/configService";
 
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
@@ -80,75 +81,89 @@ export default class AdminSentPromptService {
         return results.results;
     }
 
-    // async getByCampaignId
+    /**
+     *
+     * @param {SentToRecipient} recipient
+     * @param {ReflectionPrompt} prompt
+     * @return {Promise<SentPrompt | undefined>}
+     * @throws if something goes wrong
+     */
     async processMailchimpRecipient(recipient: SentToRecipient, prompt: ReflectionPrompt): Promise<SentPrompt | undefined> {
         console.log("processing recipient", recipient.email_address);
-        let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address);
-
-        if (!prompt || !prompt.id) {
-            console.log("no prompt id was provided to processMailchimpRecipient");
-            return;
-        }
-
-        if (!member) {
-            console.warn(`Unable to find an existing cactus member for the provided email ${recipient.email_address}... creating them now`);
-            const profileMember = await this.mailchimpService.getMemberByEmail(recipient.email_address);
-            if (!profileMember) {
-                console.error("Couldn't get a profile member from mailchimp for email", recipient.email_address);
+        try {
+            if (!prompt || !prompt.id) {
+                console.log("no prompt id was provided to processMailchimpRecipient");
                 return;
-            } else {
-                member = await this.cactusMemberService.updateFromMailchimpListMember(profileMember);
-                console.log("got cactus member after calling updateFromMailchimpListMember", member);
             }
 
-        } else {
-            console.log("found cactus member for email", recipient.email_address, "cactus_member_id", member.id);
-        }
+            let member = await this.cactusMemberService.getMemberByEmail(recipient.email_address, {throwOnError: true});
+            if (!member) {
+                console.warn(`Unable to find an existing cactus member for the provided email ${recipient.email_address}... Attempting to upsert them from mailchimp data now.`);
+                const profileMember = await this.mailchimpService.getMemberByEmail(recipient.email_address);
+                if (!profileMember) {
+                    console.error("Couldn't get a profile member from mailchimp for email", recipient.email_address);
+                    return;
+                } else {
+                    member = await this.cactusMemberService.updateFromMailchimpListMember(profileMember);
+                    console.log("got cactus member after calling updateFromMailchimpListMember", member);
+                }
 
-        if (!member || !member.id) {
-            console.warn("Still unable to get cactus member. Can't process email recipient for " + recipient.email_address);
-            return;
-        }
+            } else {
+                console.log("found cactus member for email", recipient.email_address, "cactus_member_id", member.id);
+            }
+
+            if (!member || !member.id) {
+                console.warn("Still unable to get cactus member. Can't process email recipient for " + recipient.email_address);
+                return;
+            }
 
 
-        let sentPrompt = await this.getSentPromptForCactusMemberId({cactusMemberId: member.id, promptId: prompt.id});
-        const campaign = prompt.campaign;
-        const reminderCampaign = prompt.reminderCampaign;
-
-        if (sentPrompt) {
-            console.log("Found existing SentPrompt", sentPrompt, "for user email", recipient.email_address);
-            // we don't want to push more events to this user,
-            // because of automation processing we can have lots of duplicates.
-            // If we can find a solution to figuring out if a sent was already logged, handling for the automation case,
-            // we can push history to these objects
-            // API Docs: https://developer.mailchimp.com/documentation/mailchimp/reference/reports/sent-to/#read-get_reports_campaign_id_sent_to
-        } else {
-            sentPrompt = new SentPrompt();
-            sentPrompt.createdAt = new Date();
-            sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
-            sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
-            sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
-            sentPrompt.sendHistory.push({
-                sendDate: new Date(),
-                email: recipient.email_address,
-                medium: PromptSendMedium.EMAIL_MAILCHIMP,
-                mailchimpCampaignId: recipient.campaign_id,
-                mailchimpEmailStatus: recipient.status
+            let sentPrompt = await this.getSentPromptForCactusMemberId({
+                cactusMemberId: member.id,
+                promptId: prompt.id
             });
+            const campaign = prompt.campaign;
+            const reminderCampaign = prompt.reminderCampaign;
+
+            if (sentPrompt) {
+                console.log("Found existing SentPrompt", sentPrompt, "for user email", recipient.email_address);
+                // we don't want to push more events to this user,
+                // because of automation processing we can have lots of duplicates.
+                // If we can find a solution to figuring out if a sent was already logged, handling for the automation case,
+                // we can push history to these objects
+                // API Docs: https://developer.mailchimp.com/documentation/mailchimp/reference/reports/sent-to/#read-get_reports_campaign_id_sent_to
+            } else {
+                sentPrompt = new SentPrompt();
+                sentPrompt.createdAt = new Date();
+                sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
+                sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
+                sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
+                sentPrompt.sendHistory.push({
+                    sendDate: new Date(),
+                    email: recipient.email_address,
+                    medium: PromptSendMedium.EMAIL_MAILCHIMP,
+                    mailchimpCampaignId: recipient.campaign_id,
+                    mailchimpEmailStatus: recipient.status
+                });
+            }
+
+            //only update the sendDate if it's not an automation
+            if (campaign && campaign.type !== 'automation') {
+                sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
+                sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
+            }
+
+            sentPrompt.promptId = prompt.id;
+            sentPrompt.cactusMemberId = member.id;
+            sentPrompt.userId = member.userId;
+            sentPrompt.memberEmail = member.email;
+
+            return await this.save(sentPrompt);
+        } catch (error) {
+            console.error("Failed to process mailchimp recipient", error);
+            Sentry.captureException(error);
+            throw error;
         }
-
-        //only update the sendDate if it's not an automation
-        if (campaign && campaign.type !== 'automation') {
-            sentPrompt.firstSentAt = campaign ? getDateFromISOString(campaign.send_time) : prompt.sendDate;
-            sentPrompt.lastSentAt = reminderCampaign ? getDateFromISOString(reminderCampaign.send_time) : prompt.sendDate;
-        }
-
-        sentPrompt.promptId = prompt.id;
-        sentPrompt.cactusMemberId = member.id;
-        sentPrompt.userId = member.userId;
-        sentPrompt.memberEmail = member.email;
-
-        return await this.save(sentPrompt);
     }
 
 
@@ -224,6 +239,13 @@ export default class AdminSentPromptService {
         let promptId = options.promptId;
         const campaignId = options.campaignId;
         let prompt: ReflectionPrompt | undefined;
+
+
+        if (isNonPromptCampaignId(campaignId)) {
+            console.log(`Campaign ID ${campaignId} is a known non-prompt. not processing recipients.`);
+            return [];
+        }
+
         //try to get the prompt id by campaign;
         if (!promptId) {
             prompt = await this.reflectionPromptService.getPromptForCampaignId(options.campaignId);
@@ -244,7 +266,6 @@ export default class AdminSentPromptService {
         //we have a prompt id but no prompt. Go get it.
         if (!prompt && promptId) {
             prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
-
         }
         if (!prompt) {
             console.warn(`No prompt object found for the given promptId (${promptId}). Can not process campaign to update SentPrompt record.`);
@@ -256,26 +277,43 @@ export default class AdminSentPromptService {
                 }
             }];
         }
-        const recipients = await this.mailchimpService.getAllSentTo(campaignId);
-        const tasks: Promise<CampaignSentPromptProcessingResult>[] = recipients.map(recipient => {
-            return new Promise<CampaignSentPromptProcessingResult>(async resolve => {
-                try {
-                    const sentPrompt = await this.processMailchimpRecipient(recipient, prompt as ReflectionPrompt);
-                    resolve({sentPrompt, recipient});
-                } catch (error) {
-                    resolve({
-                        recipient,
-                        error: {
-                            error,
-                            campaignId,
-                            message: `Unable to process mailchimp recipient for promptId=${promptId} email=${recipient.email_address}`
-                        }
-                    });
-                }
-            })
-        });
+        const allResults: CampaignSentPromptProcessingResult[] = [];
+        await this.mailchimpService.getAllSentTo(campaignId, {
+            onPage: async (recipients, pageNumber) => {
+                console.log(`Processing mailchimp recipient page #${pageNumber}`);
+                const tasks = this.createMailchimpRecipientPageTasks({
+                    promptId: prompt!.id!,
+                    prompt: prompt!,
+                    campaignId,
+                    recipients
+                });
 
-        return await Promise.all(tasks);
+                const results = await Promise.all(tasks);
+                allResults.push(...results);
+            }
+        });
+        console.log("All Recipients finished. allRecipients size = ", allResults.length);
+        console.log(`Finished getting all recipient for mailchimp_campaign_id ${campaignId}. PromptId = ${prompt.id}`);
+        return allResults;
+    }
+
+    createMailchimpRecipientPageTasks(options: { promptId: string, campaignId: string, prompt: ReflectionPrompt, recipients: SentToRecipient[] }): Promise<CampaignSentPromptProcessingResult>[] {
+        const {recipients, promptId, campaignId, prompt} = options;
+        return recipients.map(recipient => new Promise<CampaignSentPromptProcessingResult>(async resolve => {
+            try {
+                const sentPrompt = await this.processMailchimpRecipient(recipient, prompt);
+                resolve({sentPrompt, recipient});
+            } catch (error) {
+                resolve({
+                    recipient,
+                    error: {
+                        error,
+                        campaignId,
+                        message: `Unable to process mailchimp recipient for promptId=${promptId} email=${recipient.email_address}`
+                    }
+                });
+            }
+        }));
     }
 
     async createSentPromptsFromReflectionResponseIds(options: { reflectionResponseIds: string[], member: CactusMember, userId?: string }): Promise<void> {
@@ -390,7 +428,7 @@ export default class AdminSentPromptService {
         onData: (sentPrompts: SentPrompt[], batchNumber: number) => Promise<void>
     }) {
         console.log("Getting batched result 1 for all members");
-        let query:FirebaseFirestore.Query = this.getCollectionRef();
+        let query: FirebaseFirestore.Query = this.getCollectionRef();
 
         if (options.excludeCompleted === true) {
             query = query.where(SentPromptField.completed, "==", false);

@@ -19,6 +19,7 @@ export interface QueryOptions extends IQueryOptions<QueryCursor> {
 
 export interface GetOptions extends IGetOptions {
     transaction?: Transaction
+    throwOnError?: boolean,
 }
 
 export const DefaultQueryOptions: QueryOptions = {
@@ -30,7 +31,8 @@ export const DefaultQueryOptions: QueryOptions = {
 export const DefaultGetOptions: GetOptions = {
     includeDeleted: false,
     onlyDeleted: false,
-    transaction: undefined
+    transaction: undefined,
+    throwOnError: false,
 };
 
 
@@ -203,7 +205,6 @@ export default class AdminFirestoreService {
     }
 
     async executeQuery<T extends BaseModel>(originalQuery: FirebaseFirestore.Query, Type: { new(): T }, options: QueryOptions = DefaultQueryOptions): Promise<QueryResult<T>> {
-        const startTime = new Date().getTime();
         try {
             let query = originalQuery;
             if (!options.includeDeleted) {
@@ -233,8 +234,6 @@ export default class AdminFirestoreService {
             } else {
                 snapshot = await query.get();
             }
-            const queryEndTime = new Date().getTime();
-            console.log(`Query execution took ${queryEndTime - startTime}`);
             const size = snapshot.size;
             const results: T[] = fromQuerySnapshot(snapshot, Type);
             const queryResult: QueryResult<T> = {results, size};
@@ -244,9 +243,9 @@ export default class AdminFirestoreService {
 
             return queryResult;
         } catch (e) {
-            console.error("Failed to execute query", e);
+            console.error(`Failed to execute query ${options.queryName || ""}`.trim(), e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${JSON.stringify(e, null, 2)}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${e}\`\`\``);
             return {size: 0, results: [], error: e};
         }
 

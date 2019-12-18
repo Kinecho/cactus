@@ -21,18 +21,20 @@ class AddressBookService {
     this.cloudsponge = window.cloudsponge;
   }
 
-  formatContacts(rawContactData: Array<any>): Array<any> {
-    const formattedContacts: Array<EmailContact> = [];
+  formatContacts(rawContactData: Array<CloudspongeContact>): Array<EmailContact> {
+    const contactsByEmail:{[email: string]: EmailContact} = {};
 
     rawContactData.forEach(function(contact: CloudspongeContact, index: number) {
-      formattedContacts.push({
+      const formattedContact: EmailContact = {
         first_name: contact.first_name,
         last_name: contact.last_name,
         email: contact.selectedEmail()
-      })
+      };
+
+      contactsByEmail[formattedContact.email] = formattedContact;
     });
 
-    return formattedContacts;
+    return Object.values(contactsByEmail);
   }
 
 }
