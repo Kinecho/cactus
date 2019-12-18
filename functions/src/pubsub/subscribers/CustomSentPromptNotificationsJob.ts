@@ -40,6 +40,7 @@ export interface MemberResult {
     errors?: string[],
     message?: string,
     pushResult?: PromptNotificationResult
+    alreadyPushed?: boolean
 
 }
 
@@ -92,8 +93,8 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     if (!userTZ || !userPromptSendTime) {
         console.log(`Member ${member.email} does not have a preferred send time. Not processing`);
         return result;
-
     }
+
     console.log("timezone =", userTZ);
     console.log("preferredSendTime", userPromptSendTime);
 
@@ -132,7 +133,6 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     const memberId = member.id;
     const promptId = promptContent?.promptId;
     if (!memberId || !promptId) {
-
         return result;
     }
 
@@ -144,17 +144,28 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         console.log("The sent prompt existed... not doing anything");
         result.sentPromptExisted = true;
         result.sentPrompt = existingSentPrompt;
-        result.pushResult = await sendAndSavePushIfNeeded({
+        result.alreadyPushed = existingSentPrompt.containsMedium(PromptSendMedium.PUSH);
+        const pushResult = await PushNotificationService.sharedInstance.sendPushIfNeeded({
             sentPrompt: existingSentPrompt,
             promptContent,
-            isCustomTime: true,
             member
         });
-        result.sentPush = result.pushResult?.atLeastOneSuccess || false;
+        result.pushResult = pushResult;
+        result.sentPush = pushResult?.atLeastOneSuccess || false;
+
+        if (pushResult?.atLeastOneSuccess) {
+            existingSentPrompt.sendHistory.push({
+                medium: PromptSendMedium.PUSH,
+                sendDate: new Date(),
+                usedMemberCustomTime: true,
+            });
+        }
+        result.sentPrompt = await AdminSentPromptService.getSharedInstance().save(existingSentPrompt);
         return result;
     } else {
         console.log("The sent prompt did not exist. Creating it now");
         result.sentPromptExisted = false;
+        result.alreadyPushed = false;
         const createSentPromptResult: CreateSentPromptResult = AdminSentPromptService.createSentPrompt({
             member,
             promptContent,
@@ -162,7 +173,7 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
             medium: PromptSendMedium.PUSH,
             createHistoryItem: false,
         });
-        const sentPrompt = createSentPromptResult.sentPrompt;
+        let sentPrompt = createSentPromptResult.sentPrompt;
 
         if (createSentPromptResult.error || !sentPrompt) {
             errors.push(createSentPromptResult.error || "unable to create sent prompt");
@@ -171,12 +182,24 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         }
 
         try {
-            const savedSentPrompt = await AdminSentPromptService.getSharedInstance().save(sentPrompt)
-            console.log("Saved sent prompt", savedSentPrompt.id);
-            result.sentPrompt = savedSentPrompt;
             result.createdSentPrompt = true;
-            result.pushResult = await sendAndSavePushIfNeeded({member, promptContent, sentPrompt, isCustomTime: true});
+            const pushResult = await PushNotificationService.sharedInstance.sendPushIfNeeded({
+                member,
+                promptContent,
+                sentPrompt,
+            });
+            result.pushResult = pushResult;
             result.sentPush = result.pushResult?.atLeastOneSuccess || false;
+            if (pushResult?.atLeastOneSuccess) {
+                sentPrompt.sendHistory.push({
+                    medium: PromptSendMedium.PUSH,
+                    sendDate: new Date(),
+                    usedMemberCustomTime: true,
+                });
+            }
+            sentPrompt = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
+            console.log("Saved sent prompt", sentPrompt.id);
+            result.sentPrompt = sentPrompt;
         } catch (error) {
             const errorMessage = `Failed to save new sent prompt for member.id=${memberId} | promptId = ${promptId}`;
             console.error(errorMessage, error);
@@ -189,21 +212,4 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     }
 
     return result;
-}
-
-async function sendAndSavePushIfNeeded(options: { sentPrompt: SentPrompt, promptContent: PromptContent, member: CactusMember, isCustomTime: boolean }): Promise<PromptNotificationResult | undefined> {
-    const {sentPrompt, promptContent, member, isCustomTime} = options;
-    if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
-        const pushResult = await PushNotificationService.sharedInstance.sendPromptNotification({
-            member,
-            promptContent
-        });
-        await AdminSentPromptService.getSharedInstance().updateForPushResult({
-            sentPrompt,
-            usedCustomTime: isCustomTime,
-            pushResult,
-        });
-        return pushResult;
-    }
-    return;
 }

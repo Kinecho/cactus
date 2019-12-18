@@ -69,6 +69,11 @@ export default class AdminSentPromptService {
         return firestoreService.save(model);
     }
 
+    /**
+     * @Deprecated
+     * @param {{sentPrompt: SentPrompt; pushResult: PromptNotificationResult; usedCustomTime: boolean}} options
+     * @return {Promise<SentPrompt>}
+     */
     async updateForPushResult(options: { sentPrompt: SentPrompt, pushResult: PromptNotificationResult, usedCustomTime: boolean, }): Promise<SentPrompt> {
         const {sentPrompt, pushResult, usedCustomTime} = options;
 

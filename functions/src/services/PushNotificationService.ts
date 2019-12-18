@@ -6,10 +6,29 @@ import * as Sentry from "@sentry/node";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import PromptContent from "@shared/models/PromptContent";
 import {PromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
+import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 
 export default class PushNotificationService {
     static sharedInstance = new PushNotificationService();
     private messaging = admin.messaging();
+
+
+    async sendPushIfNeeded(options: {
+        sentPrompt: SentPrompt,
+        promptContent?: PromptContent,
+        prompt?: ReflectionPrompt,
+        member: CactusMember,
+    }): Promise<PromptNotificationResult | undefined> {
+        const {sentPrompt, prompt, promptContent, member} = options;
+        if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
+            return await this.sendPromptNotification({
+                member,
+                prompt,
+                promptContent
+            });
+        }
+        return;
+    }
 
     async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<PromptNotificationResult> {
         let attempted = false;
