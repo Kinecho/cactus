@@ -6,7 +6,7 @@ import AdminMemberProfileService from "@admin/services/AdminMemberProfileService
 import * as admin from "firebase-admin";
 import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
-import {getSendTimeUTC} from "@shared/util/DateUtil";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 
 export const updatePromptSendTimeTrigger = functions.firestore
@@ -24,20 +24,8 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
-        const beforeUTC = memberAfter.promptSendTimeUTC ? {...memberAfter.promptSendTimeUTC} : undefined;
-        const afterUTC = getSendTimeUTC({
-            forDate: new Date(),
-            timeZone: memberAfter.timeZone,
-            sendTime: memberAfter.promptSendTime
-        });
-
-        if (afterUTC && afterUTC !== beforeUTC) {
-            console.log("Member has changes, saving them");
-            await afterSnapshot.ref.update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
-            console.log("saved changes.")
-        } else {
-            console.log("No changes, not saving");
-        }
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
+        console.log(JSON.stringify(result, null, 2));
     });
 
 
