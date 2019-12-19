@@ -476,6 +476,11 @@
         display: flex;
         padding: .4rem 1.6rem;
         width: 100%;
+
+        &:hover {
+            background-color: $lightestGreen;
+            cursor: pointer;
+        }
     }
 
     .provider-icon {
@@ -579,7 +584,6 @@
                     }
                 }
             }
-
         }
     }
 
