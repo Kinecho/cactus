@@ -24,6 +24,7 @@ export default class EnglishCopy extends LocalizedCopy {
         UPDATE_TIMEZONE_TO: "Update your time zone to",
         CANCEL_UPDATE_TIMEZONE: "No, don't update",
         CONFIRM_UPDATE_TIMEZONE: "Yes, update timezone",
+        EMAIL_NOTIFICATION_CHECKBOX_LABEL: "Receive an email when a new prompt is ready",
     };
 
     common: CommonCopy = {

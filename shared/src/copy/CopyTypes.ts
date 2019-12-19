@@ -92,6 +92,7 @@ export interface AccountCopy {
     UPDATE_TIMEZONE_TO: string,
     CONFIRM_UPDATE_TIMEZONE: string,
     CANCEL_UPDATE_TIMEZONE: string,
+    EMAIL_NOTIFICATION_CHECKBOX_LABEL: string,
 }
 
 export abstract class LocalizedCopy {
