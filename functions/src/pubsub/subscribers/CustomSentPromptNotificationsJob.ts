@@ -14,10 +14,6 @@ export interface CustomNotificationJobResult {
     success: boolean,
 }
 
-interface JobMessage {
-    dryRun: boolean,
-}
-
 export interface CustomNotificationJob {
     dryRun: boolean,
 }
@@ -45,12 +41,11 @@ export interface MemberResult {
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    let job: CustomNotificationJob = {dryRun: false};
-
-    if (message.json) {
-        const jobMessage = message.json as JobMessage;
-        job = {dryRun: jobMessage.dryRun};
+    if (!message.json) {
+        console.error("No message json found");
+        return;
     }
+    const job: CustomNotificationJob = message.json;
 
     // const {dryRun} = job;
     // const contentDate = getDateFromISOString(job.contentDate) || getDateAtMidnightDenver();

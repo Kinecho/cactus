@@ -49,7 +49,8 @@ export enum Field {
     unsubscribedAt = "unsubscribedAt",
     stats = "stats",
     stats_reflections = "reflections",
-    activityStatus = "activityStatus"
+    activityStatus = "activityStatus",
+    promptSendTimeUTC = "promptSendTimeUTC",
 }
 
 export interface PromptSendTime {
@@ -88,6 +89,7 @@ export default class CactusMember extends BaseModel {
     timeZone?: string | null;
     locale?: string | null | undefined;
     promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
+    readonly promptSendTimeUTC?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,

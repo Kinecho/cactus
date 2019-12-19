@@ -24,7 +24,7 @@ import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
-import {updateMemberProfileTrigger} from "@api/triggers/MemberTriggers";
+import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -60,4 +60,5 @@ export const cloudFunctions = {
     updateReflectionStatsTrigger: updateReflectionStatsTrigger,
     updateMemberProfileTrigger: updateMemberProfileTrigger,
     updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
+    updatePromptSendTimeTrigger: updatePromptSendTimeTrigger
 };

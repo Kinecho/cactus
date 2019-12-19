@@ -5,7 +5,7 @@ import {
     formatDurationAsTime,
     getDateAtMidnightDenver,
     getDateObjectForTimezone,
-    getMailchimpDateString,
+    getMailchimpDateString, getSendTimeUTC,
     getStreak,
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
@@ -438,7 +438,7 @@ test("get local datetime for given zone", () => {
         second: 0,
         millisecond: 0,
         zone: "America/New_York"
-    }) ;
+    });
 
 
     const denverDt = newYorkDt.setZone('America/Denver');
@@ -469,3 +469,43 @@ test("get local datetime for given zone", () => {
 });
 
 
+describe("get prompt send time utc", () => {
+    test("no values present", () => {
+        expect(getSendTimeUTC({timeZone: undefined, sendTime: undefined})).toBeUndefined();
+        expect(getSendTimeUTC({timeZone: 'America/Denver', sendTime: undefined})).toBeUndefined();
+        expect(getSendTimeUTC({timeZone: undefined, sendTime: {hour: 1, minute: 0}})).toBeUndefined();
+    });
+
+    test("convert different timezones to UTC, for 2019-12-18 (standard time)", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+        expect(getSendTimeUTC({timeZone: "America/Denver", sendTime: {hour: 0, minute: 0}, forDate: date,})).toEqual({
+            hour: 7,
+            minute: 0
+        });
+        expect(getSendTimeUTC({timeZone: "America/New_York", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 5,
+            minute: 45
+        });
+        expect(getSendTimeUTC({timeZone: "UTC", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 0,
+            minute: 45
+        });
+    });
+
+    test("convert different timezones to UTC, for 2019-06-18 (daylight time)", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+        date.setMonth(7); //set it to July, when it's daylight savings in USA
+        expect(getSendTimeUTC({timeZone: "America/Denver", sendTime: {hour: 0, minute: 0}, forDate: date,})).toEqual({
+            hour: 6,
+            minute: 0
+        });
+        expect(getSendTimeUTC({timeZone: "America/New_York", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 4,
+            minute: 45
+        });
+        expect(getSendTimeUTC({timeZone: "UTC", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 0,
+            minute: 45
+        });
+    });
+});
