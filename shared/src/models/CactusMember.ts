@@ -51,12 +51,16 @@ export enum Field {
     stats_reflections = "reflections",
     activityStatus = "activityStatus",
     promptSendTimeUTC = "promptSendTimeUTC",
+    promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
+    promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
 }
 
 export interface PromptSendTime {
     hour: number,
     minute: 0 | 15 | 30 | 45,
 }
+
+export type QuarterHour = 0 | 15 | 30 | 45;
 
 export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
 
@@ -140,9 +144,9 @@ export default class CactusMember extends BaseModel {
         return `${this.firstName || ""} ${this.lastName || ""}`.trim();
     }
 
-    getCurrentLocaleDateObject(): DateObject {
+    getCurrentLocaleDateObject(date: Date = new Date()): DateObject {
         if (this.timeZone) {
-            return DateUtil.getDateObjectForTimezone(new Date(), this.timeZone);
+            return DateUtil.getDateObjectForTimezone(date, this.timeZone);
         }
         return DateTime.local().toObject();
     }

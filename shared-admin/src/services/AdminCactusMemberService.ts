@@ -3,7 +3,13 @@ import AdminFirestoreService, {
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
-import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";
+import CactusMember, {
+    Field,
+    JournalStatus,
+    NotificationStatus,
+    PromptSendTime,
+    ReflectionStats
+} from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
@@ -354,4 +360,11 @@ export default class AdminCactusMemberService {
         }
     }
 
+    async getMembersForUTCSendPromptTime(sendTime: PromptSendTime, options?: GetOptions): Promise<CactusMember[]> {
+        const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
+            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+
+        const results = await firestoreService.executeQuery(query, CactusMember);
+        return results.results;
+    }
 }

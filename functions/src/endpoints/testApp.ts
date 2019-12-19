@@ -10,10 +10,12 @@ import * as admin from "firebase-admin"
 import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
+import {getQuarterHourFromMinute} from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import CactusMember from "@shared/models/CactusMember";
+import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
+import {runCustomNotificationJob} from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -63,6 +65,33 @@ app.get('/bq', async (req, resp) => {
     const results = await getActiveUserCountForTrailingDays(1);
 
     return resp.send({results: results});
+});
+
+app.get("/send-time", async (req, res) => {
+    const hour = req.query.h || undefined;
+    const minute = req.query.m || undefined;
+    const currentDate = new Date();
+    const day = req.query.date || currentDate.getDate();
+    const month = req.query.month || currentDate.getMonth();
+    const year = req.query.y || currentDate.getFullYear();
+    console.log(`found hour=${hour} and minute=${minute}`);
+    let sendTime: PromptSendTime | undefined = undefined;
+
+    const systemDateObject = DateTime.local().setZone("utc").toObject();
+
+    if (hour && minute) {
+        sendTime = {hour: Number(hour), minute: getQuarterHourFromMinute(Number(minute))};
+
+        systemDateObject.day = Number(day);
+        systemDateObject.year = Number(year);
+        systemDateObject.month = Number(month);
+        systemDateObject.minute = Number(minute);
+        systemDateObject.hour = Number(hour);
+    }
+    const result = await runCustomNotificationJob({sendTimeUTC: sendTime, dryRun: true, systemDateObject: systemDateObject});
+    console.log("result", result);
+
+    res.send(result)
 });
 
 app.get("/next-prompt", async (req, res) => {

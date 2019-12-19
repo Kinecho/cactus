@@ -2,10 +2,10 @@ import {
     differenceInMinutes,
     formatDateTime,
     formatDuration,
-    formatDurationAsTime,
+    formatDurationAsTime, getCurrentQuarterHour,
     getDateAtMidnightDenver,
     getDateObjectForTimezone,
-    getMailchimpDateString, getSendTimeUTC,
+    getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
     getStreak,
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
@@ -508,4 +508,59 @@ describe("get prompt send time utc", () => {
             minute: 45
         });
     });
+});
+
+describe("Get current quarter hour", () => {
+    test("various times", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+
+        date.setMinutes(0);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(14);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(15);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(16);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(29);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(30);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(31);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(34);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(44);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(45);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+        date.setMinutes(46);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+
+        date.setMinutes(59);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+        date.setMinutes(60);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(65);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+    });
+
+    test("get from minutes", () => {
+        expect(getQuarterHourFromMinute(70)).toEqual(0);
+        expect(getQuarterHourFromMinute(33)).toEqual(30);
+        expect(getQuarterHourFromMinute(90)).toEqual(30);
+    })
 });

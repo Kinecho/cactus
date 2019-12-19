@@ -186,10 +186,10 @@ export default class AdminSentPromptService {
         promptContent?: PromptContent,
         medium?: PromptSendMedium,
         prompt?: ReflectionPrompt
-        createHistoryItem: boolean,
+        createHistoryItem?: boolean,
     }): CreateSentPromptResult {
         const result: CreateSentPromptResult = {};
-        const {member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem} = options;
+        const {member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem=false} = options;
         let {promptId} = options;
         promptId = promptId || promptContent?.promptId || prompt?.id;
         if (!promptId) {

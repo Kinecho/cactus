@@ -2,7 +2,7 @@ import {DateObject, DateTime, Duration} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
-import {PromptSendTime} from "@shared/models/CactusMember";
+import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -322,4 +322,37 @@ export function getSendTimeUTC(options: { timeZone?: string | undefined | null, 
         return {hour, minute} as PromptSendTime;
     }
     return undefined;
+}
+
+export function getCurrentQuarterHour(date: Date = new Date()): QuarterHour {
+    const m = date.getMinutes();
+    return getQuarterHourFromMinute(m);
+}
+
+export function getQuarterHourFromMinute(input: number): QuarterHour {
+    const m = input % 60;
+    if (m < 15) {
+        return 0;
+    }
+    if (m < 30) {
+        return 15;
+    }
+
+    if (m < 45) {
+        return 30
+    }
+
+    if (m < 60) {
+        return 45;
+    }
+
+    return 45;
+}
+
+export function convertDateToSendTimeUTC(date: Date = new Date()): PromptSendTime {
+    const hour = date.getUTCHours();
+    const minute = date.getUTCMinutes();
+    const quarterHour = getQuarterHourFromMinute(minute);
+
+    return {hour: hour, minute: quarterHour}
 }

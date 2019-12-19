@@ -32,7 +32,6 @@ export const updatePromptSendTimeTrigger = functions.firestore
         });
 
         if (afterUTC && afterUTC !== beforeUTC) {
-            memberAfter.promptSendTimeUTC = afterUTC;
             console.log("Member has changes, saving them");
             await afterSnapshot.ref.update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
             console.log("saved changes.")
