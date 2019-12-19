@@ -225,3 +225,13 @@ export function getProviderDisplayName(provider?: string): string {
             return provider || "";
     }
 }
+
+export function titleCase(str: string | undefined): string {
+  if (str && str.length > 0) {
+      return str.toLowerCase().split(' ').map(function(word) {
+        return word.replace(word[0], word[0].toUpperCase());
+      }).join(' ');
+  } else { 
+      return '';
+  }
+}

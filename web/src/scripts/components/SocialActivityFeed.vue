@@ -16,7 +16,7 @@
                 <skeleton-event/>
             </template>
             <template v-for="event in activityFeedEvents">
-                <SocialActivityEvent :event="event"/>
+                <SocialActivityEvent :event="event" :viewer="member"/>
             </template>
             <p class="subtext" v-if="!isLoading && !hasActivity">
                 Nothing to see (yet).

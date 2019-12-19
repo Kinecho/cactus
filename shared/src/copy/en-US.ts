@@ -6,7 +6,8 @@ import {
     LocalizedCopy,
     NavigationCopy,
     PromptCopy,
-    ElementCopy
+    ElementCopy,
+    PronounCopy
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
@@ -16,6 +17,9 @@ export default class EnglishCopy extends LocalizedCopy {
             shortFormat: "L/d/yy",
         }
     };
+    pronouns: PronounCopy = {
+        YOU: "you"
+    }
     common: CommonCopy = {
         LOG_IN: "Log In",
         NEXT: "Next",
@@ -34,7 +38,7 @@ export default class EnglishCopy extends LocalizedCopy {
         NOTIFICATIONS: "Notifications",
         REMOVE: "Remove",
         TIME_ZONE: "Time Zone",
-        LOADING: "Loading",
+        LOADING: "Loading"
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",

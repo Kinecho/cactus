@@ -16,12 +16,17 @@
 <script lang="ts">
     import Vue from "vue";
     import MemberProfile from "@shared/models/MemberProfile";
+    import CactusMember from "@shared/models/CactusMember";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import MemberProfileService from '@web/services/MemberProfileService';
     import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
     import {PageRoute} from "@shared/PageRoutes";
     import {formatAsTimeAgo} from "@shared/util/DateUtil";
     import {QueryParam} from "@shared/util/queryParams";
+    import CopyService from '@shared/copy/CopyService';
+    import {titleCase} from "@shared/util/StringUtil";
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         props: {
@@ -29,6 +34,10 @@
                 type: Object as () => SocialActivityFeedEvent,
                 required: true
             },
+            viewer: {
+                type: Object as () => CactusMember,
+                required: true
+            }
         },
         async created() {
             if (this.event?.memberId) {
@@ -44,7 +53,9 @@
         },
         computed: {
             memberName(): string|undefined {
-                if (this.memberProfile?.getFullName()) {
+                if (this.memberProfile?.cactusMemberId == this.viewer.id) {
+                    return titleCase(copy.pronouns.YOU);
+                } else if (this.memberProfile?.getFullName()) {
                     return this.memberProfile.getFullName();
                 }
             },
@@ -80,6 +91,9 @@
                     return formatAsTimeAgo(new Date(this.event.occurredAt));
                 }
                 return undefined;
+            },
+            viewerId(): string {
+                return this.viewer?.id ? this.viewer.id : '';
             }
         },
         watch: {
