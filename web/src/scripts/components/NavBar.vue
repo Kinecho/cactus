@@ -316,12 +316,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
     .navbarLink {
         align-items: center;
         display: flex;
-        margin-left: 3.2rem;
+        padding: 0 1.6rem;
         position: relative;
         text-decoration: none;
 
         @include r(600) {
-            margin-left: 4.4rem;
+            padding: 0 2.4rem;
 
             &:after {
                 background-color: $green;
@@ -376,7 +376,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
         height: 2rem;
         overflow: hidden;
         position: absolute;
-        right: -1.8rem;
+        right: 0;
         top: -0.5rem;
         width: 2rem;
         line-height: 180%;
@@ -385,29 +385,26 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .navbar-avatar-container {
-        border-radius: 50%;
         cursor: pointer;
         height: 3.2rem;
-        margin-left: 3.2rem;
         overflow: hidden;
+        padding-left: 1.6rem;
         transition: transform .2s ease-in-out;
-        width: 3.2rem;
 
         @include r(600) {
-            height: 4rem;
-            margin-left: 4.4rem;
-            width: 4rem;
+            margin-right: -2.4rem;
+            padding: 0 2.4rem;
 
             &:after {
                 background-color: $green;
-                bottom: -26px;
+                bottom: -30px;
                 content: "";
                 height: 1px;
-                right: 0;
+                right: -1.2rem;
                 position: absolute;
                 transform: scaleX(0);
                 transition: transform .2s ease-in-out;
-                width: 4rem;
+                width: 5.6rem;
             }
 
             &:hover:after {
@@ -430,8 +427,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
 
         img {
-            height: 100%;
-            width: 100%;
+            border-radius: 50%;
+            height: 3.2rem;
+            width: 3.2rem;
         }
     }
 
