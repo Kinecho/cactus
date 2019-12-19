@@ -352,6 +352,7 @@
                     await CactusMemberService.sharedInstance.save(this.member);
                     console.log("Save success");
                     this.addSnackbar({message: "Changes Saved", color: "success"});
+                    this.changesToSave = false;
                 }
             },
             async saveEmailStatus(status: NotificationStatus) {
@@ -391,7 +392,7 @@
             async setToDeviceZone() {
                 if (this.member) {
                     this.member.timeZone = this.deviceTimezone;
-                    await this.save()
+                    await this.save();
                 }
             },
             async tzSelected(value: ZoneInfo | null | undefined) {
