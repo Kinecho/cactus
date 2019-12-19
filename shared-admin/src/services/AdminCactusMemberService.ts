@@ -374,8 +374,11 @@ export default class AdminCactusMemberService {
         return results.results;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {useDefault: false}): Promise<UpdateSendPromptUTCResult> {
-        const {useDefault} = options;
+    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, forceUpdate: boolean } = {
+        useDefault: false,
+        forceUpdate: false,
+    }): Promise<UpdateSendPromptUTCResult> {
+        const {useDefault, forceUpdate} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
@@ -390,9 +393,8 @@ export default class AdminCactusMemberService {
         const {minute: afterMin, hour: afterHour} = afterUTC || {};
         const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
 
-        if (afterUTC && afterMin !== beforeMinute && afterHour !== beforeHour) {
+        if (afterUTC && forceUpdate || (afterMin !== beforeMinute && afterHour !== beforeHour)) {
             console.log("Member has changes, saving them");
-
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
             console.log("saved changes.");
             return {updated: true, promptSendTimeUTC: afterUTC};

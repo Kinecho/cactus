@@ -112,7 +112,10 @@ export default class MemberSendTimeBackfill extends FirebaseCommand {
 
     async updateMemberJob(member: CactusMember) {
         console.log(`updating ${member.email}`);
-        return await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(member, {useDefault: true});
+        return await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(member, {
+            useDefault: true,
+            forceUpdate: false
+        });
     }
 
 }
