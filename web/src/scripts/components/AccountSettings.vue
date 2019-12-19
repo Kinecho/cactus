@@ -47,7 +47,7 @@
                                 {{copy.common.TIME_ZONE}}
                             </label>
                             <div class="tz-alert" v-if="differentTimezone && !tzAlertDismissed">
-                                <p>It looks like your current timezone has changed.<br/>Do you want to update to <b>{{deviceTimezoneName}}</b>?
+                                <p>Your selected time zone does not match your computer's time zone.<br/>Update your time zone to <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
                                     <button class="button small" @click="setToDeviceZone">Yes, update it</button>
@@ -551,9 +551,10 @@
 
     .tz-alert {
         padding: 2rem;
-        border: 1px solid black;
+        /*border: 1px solid black;*/
         margin-bottom: 1rem;
-
+        border-radius: 6px;
+        background: $lightestGreen;
         .tz-actions {
             padding: 1rem 0 0 0;
         }

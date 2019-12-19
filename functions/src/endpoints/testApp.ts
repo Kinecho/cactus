@@ -10,12 +10,10 @@ import * as admin from "firebase-admin"
 import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
-import {getQuarterHourFromMinute} from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import {runCustomNotificationJob} from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -80,7 +78,7 @@ app.get("/send-time", async (req, res) => {
     const systemDateObject = DateTime.local().setZone("utc").toObject();
 
     if (hour && minute) {
-        sendTime = {hour: Number(hour), minute: getQuarterHourFromMinute(Number(minute))};
+        sendTime = {hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute))};
 
         systemDateObject.day = Number(day);
         systemDateObject.year = Number(year);
@@ -88,7 +86,11 @@ app.get("/send-time", async (req, res) => {
         systemDateObject.minute = Number(minute);
         systemDateObject.hour = Number(hour);
     }
-    const result = await runCustomNotificationJob({sendTimeUTC: sendTime, dryRun: true, systemDateObject: systemDateObject});
+    const result = await CustomSentPromptNotificationsJob.runCustomNotificationJob({
+        sendTimeUTC: sendTime,
+        dryRun: true,
+        systemDateObject: systemDateObject
+    });
     console.log("result", result);
 
     res.send(result)
