@@ -14,8 +14,16 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 
 export interface CustomNotificationJobResult {
     success: boolean,
+    numSuccess?: number,
+    numError?: number,
+    numMembersFound?: number,
+    numSentPromptsCreated?: number,
+    numPushesSent?: number,
+    systemDateObject?: DateObject,
     memberResults?: MemberResult[];
     error?: string,
+    allErrors?: string[]
+    emailsProcessed?: string[]
 }
 
 export interface CustomNotificationJob {
@@ -61,13 +69,43 @@ export async function onPublish(message: Message, context: functions.EventContex
 }
 
 export async function runCustomNotificationJob(job: CustomNotificationJob): Promise<CustomNotificationJobResult> {
-    const result: CustomNotificationJobResult = {success: false};
-
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
+    const result: CustomNotificationJobResult = {success: false, systemDateObject: job.systemDateObject};
+
     console.log("Looking for members where UTC send time is", JSON.stringify(sendTimeUTC));
     const members = await AdminCactusMemberService.getSharedInstance().getMembersForUTCSendPromptTime(sendTimeUTC);
+    result.numMembersFound = members.length;
+
     console.log("Got members", members.length);
+
+    const allErrors: string[] = [];
     const memberResults: MemberResult[] = await Promise.all(members.map(member => processMember({job, member})));
+    const emailsProcessed: string[] = [];
+    memberResults.forEach(r => {
+        if (r.sentPush) {
+            result.numPushesSent = (result.numPushesSent || 0) + 1;
+        }
+        if (r.errors) {
+            allErrors.push(...r.errors);
+        }
+
+        if (r.createdSentPrompt) {
+            result.numSentPromptsCreated = (result.numSentPromptsCreated || 0) + 1;
+        }
+
+        if (r.success) {
+            result.numSuccess = (result.numSuccess || 0) + 1;
+        } else {
+            result.numError = (result.numError || 0) + 1;
+        }
+
+        if (r.memberEmail) {
+            emailsProcessed.push(r.memberEmail);
+        }
+    });
+    result.success = true;
+    result.allErrors = allErrors;
+    result.emailsProcessed = emailsProcessed;
 
     console.log("member results.length = ", memberResults.length);
     console.log(memberResults);
@@ -231,6 +269,7 @@ async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: 
     result.sentPush = result.pushResult?.atLeastOneSuccess || false;
     result.alreadyPushed = sentPrompt.containsMedium(PromptSendMedium.PUSH);
     if (pushResult?.atLeastOneSuccess) {
+        result.success = true;
         sentPrompt.sendHistory.push({
             medium: PromptSendMedium.PUSH,
             sendDate: new Date(),
