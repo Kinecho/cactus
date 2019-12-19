@@ -65,7 +65,6 @@
                             <div class="tz-alert" v-if="differentTimezone && !tzAlertDismissed">
                                 <p>
                                     {{copy.account.SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE}}
-                                    <br/><br/>
                                     {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
@@ -558,34 +557,20 @@
     }
 
     .tz-alert {
-        padding: 2rem;
-        /*border: 1px solid black;*/
-        margin-bottom: 1rem;
-        border-radius: 6px;
-        background: $lightestGreen;
-        display: flex;
-        flex-direction: column;
-        .tz-actions {
-            padding: 1rem 0 0 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            @include r(600) {
-                flex-direction: row;
-            }
+        background-color: lighten($yellow, 15%);
+        border: 1px solid $yellow;
+        border-radius: 1.2rem;
+        box-shadow: 0 5px 11px -3px rgba(0, 0, 0, 0.08);
+        color: $darkText;
+        margin: .8rem 0 1.6rem;
+        padding: 2rem 2.4rem;
 
-            button {
-                flex-grow: 1;
-                &:not(:last-child) {
-                    margin: 0 0 1rem 0;
-                }
+        p {
+            margin-bottom: 1.6rem;
+        }
 
-                @include r(600) {
-                    &:not(:last-child) {
-                        margin: 0 1rem 0 0;
-                    }
-                }
-            }
+        button {
+            margin: 0 .8rem .8rem 0;
         }
     }
 
