@@ -1,4 +1,4 @@
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 
 /**
  * Split a string based on a delimiter, discarding the delimited string

@@ -1,7 +1,8 @@
-import {DateTime, Duration} from "luxon";
+import {DateObject, DateTime, Duration} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
+import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -12,6 +13,18 @@ export const mailchimpTimeZone = "America/Denver";
  */
 export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
+}
+
+// export function getDateForTimezone(timeZone: string, date: Date): Date {
+//     return DateTime.fromJSDate(date ).setZone(timeZone, {keepLocalTime: false}).toJSDate();
+// }
+
+export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {
+    return DateTime.fromJSDate(date).setZone(timeZone).toObject()
+}
+
+export function dateObjectToISODate(date: DateObject): string {
+    return DateTime.fromObject(date).toISODate()
 }
 
 /**
@@ -291,4 +304,55 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
 
     return streak;
 
+}
+
+
+export function getSendTimeUTC(options: { timeZone?: string | undefined | null, sendTime?: PromptSendTime | undefined, forDate?: Date }): PromptSendTime | undefined {
+    const timeZone = options.timeZone;
+    if (!timeZone) {
+        return;
+    }
+    const timePref = options.sendTime;
+    if (!timePref) {
+        return;
+    }
+
+    const {hour, minute} = DateTime.fromJSDate(options.forDate || new Date()).setZone(timeZone).set(timePref).setZone("utc").toObject();
+    if (hour !== undefined && minute !== undefined) {
+        return {hour, minute} as PromptSendTime;
+    }
+    return undefined;
+}
+
+export function getCurrentQuarterHour(date: Date = new Date()): QuarterHour {
+    const m = date.getMinutes();
+    return getQuarterHourFromMinute(m);
+}
+
+export function getQuarterHourFromMinute(input: number): QuarterHour {
+    const m = input % 60;
+    if (m < 15) {
+        return 0;
+    }
+    if (m < 30) {
+        return 15;
+    }
+
+    if (m < 45) {
+        return 30
+    }
+
+    if (m < 60) {
+        return 45;
+    }
+
+    return 45;
+}
+
+export function convertDateToSendTimeUTC(date: Date = new Date()): PromptSendTime {
+    const hour = date.getUTCHours();
+    const minute = date.getUTCMinutes();
+    const quarterHour = getQuarterHourFromMinute(minute);
+
+    return {hour: hour, minute: quarterHour}
 }

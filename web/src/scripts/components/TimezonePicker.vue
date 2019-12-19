@@ -13,7 +13,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Multiselect from "vue-multiselect"
-    import {timezoneInfoList, ZoneInfo, zonesByName} from '@web/timezones'
+    import {findByZoneName, timezoneInfoList, ZoneInfo, zonesByName} from '@web/timezones'
     import 'vue-multiselect/dist/vue-multiselect.min.css'
     export default Vue.extend({
         components: {
@@ -39,7 +39,7 @@
         },
         computed: {
             zoneValue():ZoneInfo|undefined{
-                return zonesByName[this.value];
+                return findByZoneName(this.value)
             }
         }
     })

@@ -20,6 +20,8 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
+import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
+import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     console.log(chalk.green("initializing all services"));
@@ -41,6 +43,8 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminEmailReplyService.initialize();
     AdminSocialInviteService.initialize();
     AdminMemberProfileService.initialize();
+    AdminSocialActivityService.initialize();
+    AdminSocialConnectionService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

@@ -9,5 +9,6 @@ module.exports = {
     moduleNameMapper: {
         '^@api/(.*)$': '<rootDir>/src/$1',
         '^@shared/(.*)$': '<rootDir>/../shared/src/$1',
+        '^@admin/(.*)$': '<rootDir>/../shared-admin/src/$1',
     },
 }

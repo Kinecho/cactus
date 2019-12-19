@@ -1,5 +1,3 @@
-import {LocalStorageKey} from '@web/services/StorageService'
-import {LocalStorageKey} from '@web/services/StorageService'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
@@ -69,6 +67,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {fetchActivityFeedSummary} from '@web/social';
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import MemberProfile from "@shared/models/MemberProfile"
+    import MemberProfileService from '@web/services/MemberProfileService'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -80,6 +80,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
         authLoaded: boolean,
         copy: LocalizedCopy,
         hidden: boolean,
+        memberProfile: MemberProfile | undefined,
+        memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number
     }
 
@@ -90,7 +92,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
         components: {
             DropdownMenu,
         },
-        created() {
+        beforeMount() {
+            let NO_NAV = getQueryParam(QueryParam.NO_NAV);
+            if (NO_NAV !== undefined) {
+                this.hidden = true;
+            }
+
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
                 this.user = user;
                 this.authLoaded = true;
@@ -98,6 +105,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member}) => {
+                    if (member?.id && member?.id !== this.member?.id) {
+                        this.memberProfileUnsubscriber?.();
+                        this.memberProfileUnsubscriber = MemberProfileService.sharedInstance.observeByMemberId(member?.id, {
+                            onData: profile => {
+                                this.memberProfile = profile;
+                            }
+                        })
+                    }
+
                     const oldMember = this.member;
                     this.member = member;
                     if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
@@ -106,15 +122,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 }
             });
         },
-        beforeMount() {
-            let NO_NAV = getQueryParam(QueryParam.NO_NAV);
-            if (NO_NAV !== undefined) {
-                this.hidden = true;
-            }
-        },
         destroyed() {
             this.authUnsubscribe?.();
             this.memberUnsubscriber?.();
+            this.memberProfileUnsubscriber?.();
         },
         props: {
             showSignup: {type: Boolean, default: false},
@@ -136,7 +147,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 hidden: false,
                 member: undefined,
                 memberUnsubscriber: undefined,
-                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!
+                activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
+                memberProfileUnsubscriber: undefined,
+                memberProfile: undefined,
             }
         },
         computed: {
@@ -163,7 +176,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 return this.user ? this.user.email : null;
             },
             profileImageUrl(): string | undefined | null {
-                return (this.user && this.user.photoURL) ? this.user.photoURL : getRandomAvatar(this.user && this.user.uid || undefined);
+                return (this.memberProfile?.avatarUrl) ? this.memberProfile.avatarUrl : getRandomAvatar(this.member?.id);
             },
             displaySignupButton(): boolean {
                 const show = this.showSignup && this.authLoaded && !this.user;
@@ -205,7 +218,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
             goToSignup() {
                 window.location.href = this.signupHref;
             },
-
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
                     return;

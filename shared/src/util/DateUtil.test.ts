@@ -2,10 +2,13 @@ import {
     differenceInMinutes,
     formatDateTime,
     formatDuration,
-    formatDurationAsTime,
+    formatDurationAsTime, getCurrentQuarterHour,
     getDateAtMidnightDenver,
-    getMailchimpDateString,
-    getStreak, isoDateStringToFlamelinkDateString, mailchimpTimeZone,
+    getDateObjectForTimezone,
+    getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
+    getStreak,
+    isoDateStringToFlamelinkDateString,
+    mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
 } from "@shared/util/DateUtil";
@@ -422,3 +425,142 @@ test("iso date to flamelink string", () => {
 });
 
 
+test("get local datetime for given zone", () => {
+    const dt = DateTime.local();
+    console.log("dt", dt);
+
+    const newYorkDt = DateTime.fromObject({
+        year: 2019,
+        month: 12,
+        day: 3,
+        hour: 14,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+        zone: "America/New_York"
+    });
+
+
+    const denverDt = newYorkDt.setZone('America/Denver');
+
+    const denverDate = denverDt.toJSDate();
+
+
+    // const denverDate = getDateForTimezone('America/Denver', systemDate);
+    // const denverObject =
+    const tz = 'Asia/Bangkok'; //UTC+7 12 hours ahead of New York, 14 from denver
+    const tzDate = getDateObjectForTimezone(denverDate, tz);
+
+
+    console.log("denver", denverDt);
+    console.log("bangkok", tzDate);
+
+    expect(denverDt.day).toEqual(3);
+    expect(denverDt.hour).toEqual(12);
+    expect(denverDt.minute).toEqual(0);
+    expect(denverDt.year).toEqual(2019);
+
+    expect(tzDate.day).toEqual(4);
+    expect(tzDate.hour).toEqual(2);
+    expect(tzDate.month).toEqual(12);
+    expect(tzDate.year).toEqual(2019);
+
+
+});
+
+
+describe("get prompt send time utc", () => {
+    test("no values present", () => {
+        expect(getSendTimeUTC({timeZone: undefined, sendTime: undefined})).toBeUndefined();
+        expect(getSendTimeUTC({timeZone: 'America/Denver', sendTime: undefined})).toBeUndefined();
+        expect(getSendTimeUTC({timeZone: undefined, sendTime: {hour: 1, minute: 0}})).toBeUndefined();
+    });
+
+    test("convert different timezones to UTC, for 2019-12-18 (standard time)", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+        expect(getSendTimeUTC({timeZone: "America/Denver", sendTime: {hour: 0, minute: 0}, forDate: date,})).toEqual({
+            hour: 7,
+            minute: 0
+        });
+        expect(getSendTimeUTC({timeZone: "America/New_York", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 5,
+            minute: 45
+        });
+        expect(getSendTimeUTC({timeZone: "UTC", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 0,
+            minute: 45
+        });
+    });
+
+    test("convert different timezones to UTC, for 2019-06-18 (daylight time)", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+        date.setMonth(7); //set it to July, when it's daylight savings in USA
+        expect(getSendTimeUTC({timeZone: "America/Denver", sendTime: {hour: 0, minute: 0}, forDate: date,})).toEqual({
+            hour: 6,
+            minute: 0
+        });
+        expect(getSendTimeUTC({timeZone: "America/New_York", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 4,
+            minute: 45
+        });
+        expect(getSendTimeUTC({timeZone: "UTC", sendTime: {hour: 0, minute: 45}, forDate: date})).toEqual({
+            hour: 0,
+            minute: 45
+        });
+    });
+});
+
+describe("Get current quarter hour", () => {
+    test("various times", () => {
+        const date = new Date(1576713600000); //2019-12-18 @ 5:01pm Mountain Time
+
+        date.setMinutes(0);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(14);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(15);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(16);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(29);
+        expect(getCurrentQuarterHour(date)).toEqual(15);
+
+        date.setMinutes(30);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(31);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(34);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(44);
+        expect(getCurrentQuarterHour(date)).toEqual(30);
+
+        date.setMinutes(45);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+        date.setMinutes(46);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+
+        date.setMinutes(59);
+        expect(getCurrentQuarterHour(date)).toEqual(45);
+
+        date.setMinutes(60);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+
+        date.setMinutes(65);
+        expect(getCurrentQuarterHour(date)).toEqual(0);
+    });
+
+    test("get from minutes", () => {
+        expect(getQuarterHourFromMinute(70)).toEqual(0);
+        expect(getQuarterHourFromMinute(33)).toEqual(30);
+        expect(getQuarterHourFromMinute(90)).toEqual(30);
+    })
+});

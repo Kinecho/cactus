@@ -7,7 +7,8 @@ import {
     NavigationCopy,
     PromptCopy,
     ElementCopy,
-    PronounCopy
+    PronounCopy,
+    AccountCopy,
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
@@ -20,6 +21,16 @@ export default class EnglishCopy extends LocalizedCopy {
     pronouns: PronounCopy = {
         YOU: "you"
     }
+
+    account: AccountCopy = {
+        PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",
+        SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE: "Your device's time zone doesn't match your selected time zone.",
+        UPDATE_TIMEZONE_TO: "Would you like to update your time zone to",
+        CANCEL_UPDATE_TIMEZONE: "No, don't update",
+        CONFIRM_UPDATE_TIMEZONE: "Yes, update timezone",
+        EMAIL_NOTIFICATION_CHECKBOX_LABEL: "Receive an email when a new prompt is ready",
+    };
+
     common: CommonCopy = {
         LOG_IN: "Log In",
         NEXT: "Next",
@@ -38,7 +49,9 @@ export default class EnglishCopy extends LocalizedCopy {
         NOTIFICATIONS: "Notifications",
         REMOVE: "Remove",
         TIME_ZONE: "Time Zone",
-        LOADING: "Loading"
+        LOADING: "Loading",
+        HOUR: "Hour",
+        MINUTE: "Minute",
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",

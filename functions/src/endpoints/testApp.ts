@@ -4,12 +4,16 @@ import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
 import {getOperation,} from "@api/endpoints/DataExportJob";
 import * as Sentry from "@sentry/node";
 import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
+import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
-import {getDateAtMidnightDenver, getISODate, localDateFromISOString} from "@shared/util/DateUtil";
+import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
+import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -61,28 +65,115 @@ app.get('/bq', async (req, resp) => {
     return resp.send({results: results});
 });
 
+app.get("/send-time", async (req, res) => {
+    const hour = req.query.h || undefined;
+    const minute = req.query.m || undefined;
+    const currentDate = new Date();
+    const day = req.query.date || currentDate.getDate();
+    const month = req.query.month || currentDate.getMonth();
+    const year = req.query.y || currentDate.getFullYear();
+    console.log(`found hour=${hour} and minute=${minute}`);
+    let sendTime: PromptSendTime | undefined = undefined;
+
+    const systemDateObject = DateTime.local().setZone("utc").toObject();
+
+    if (hour && minute) {
+        sendTime = {hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute))};
+
+        systemDateObject.day = Number(day);
+        systemDateObject.year = Number(year);
+        systemDateObject.month = Number(month);
+        systemDateObject.minute = Number(minute);
+        systemDateObject.hour = Number(hour);
+    }
+    const result = await CustomSentPromptNotificationsJob.runCustomNotificationJob({
+        sendTimeUTC: sendTime,
+        dryRun: true,
+        systemDateObject: systemDateObject
+    });
+    console.log("result", result);
+
+    res.send(result)
+});
+
+app.get("/next-prompt", async (req, res) => {
+    let memberId = req.query.memberId;
+    const email = req.query.email;
+    const runJob: boolean = !!req.query.run;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member) {
+        res.status(404);
+        res.send("No member found");
+        return;
+    }
+
+    memberId = member.id;
+
+    console.log("Got member", memberId, member.email);
+    console.log("getting next prompt for member Id", memberId);
+
+    const userTZ = member.timeZone;
+    // let systemDate = new Date();
+    const systemDate = new Date();
+    const systemDateObject = DateTime.local().toObject();
+    let userDateObject: DateObject = systemDateObject;
+    if (userTZ) {
+        console.log("timezone =", userTZ);
+        userDateObject = DateUtil.getDateObjectForTimezone(systemDate, userTZ);
+        console.log("user date obj", userDateObject);
+        console.log("user date (locale)", userDateObject.toLocaleString())
+    }
+
+
+    let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
+    if (runJob) {
+        const job = {dryRun: false};
+        memberResult = await CustomSentPromptNotificationsJob.processMember({job, member});
+    }
+
+    res.send({
+        memberTimeZone: userTZ,
+        userDate: DateTime.fromObject(userDateObject).toJSDate().toLocaleString(),
+        systemDate: systemDate.toLocaleString(),
+        userDateObject: userDateObject,
+        systemDateObject: systemDateObject,
+        promptSentTimePreference: member.promptSendTime,
+        memberJobResult: memberResult ? {
+            ...memberResult,
+            promptContent: memberResult?.promptContent?.toJSON(["_fl_meta_"]) || null,
+            sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
+        } : "NOT PROCESSED",
+    });
+});
+
 app.get("/content", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = getDateAtMidnightDenver();
+    let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
         console.log("date input", qDate);
-        d = localDateFromISOString(qDate) || d
+        d = DateUtil.localDateFromISOString(qDate) || d
     }
 
     console.log("local date ", d);
-    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate(d);
+    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: d});
     return resp.send((content && content.toJSON()) || "none")
 });
 
 app.get("/contentJob", async (req, resp) => {
     console.log("Trying to fetch content");
     const qDate = req.query.d;
-    let d = getDateAtMidnightDenver();
+    let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
-        d = localDateFromISOString(qDate) || d;
+        d = DateUtil.localDateFromISOString(qDate) || d;
     }
-    console.log("testApi: content Date", getISODate(d));
+    console.log("testApi: content Date", DateUtil.getISODate(d));
     const result = await startSentPromptJob(d, undefined, true);
     return resp.send(result);
 });

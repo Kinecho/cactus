@@ -42,7 +42,9 @@ export interface CommonCopy {
     REMOVE: string,
     LOADING: string,
     FIRST_NAME: string,
-    LAST_NAME: string
+    LAST_NAME: string,
+    HOUR: string,
+    MINUTE: string,
 }
 
 export interface ElementCopy {
@@ -88,6 +90,15 @@ export interface ErrorCopy {
     SORRY_WE_ARE_HAVING_ISSUES_TRY_AGAIN: string,
 }
 
+export interface AccountCopy {
+    PREFERRED_NOTIFICATION_TIME: string,
+    SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE: string,
+    UPDATE_TIMEZONE_TO: string,
+    CONFIRM_UPDATE_TIMEZONE: string,
+    CANCEL_UPDATE_TIMEZONE: string,
+    EMAIL_NOTIFICATION_CHECKBOX_LABEL: string,
+}
+
 export abstract class LocalizedCopy {
     abstract pronouns: PronounCopy;
     abstract prompts: PromptCopy;
@@ -97,6 +108,7 @@ export abstract class LocalizedCopy {
     abstract navigation: NavigationCopy;
     abstract error: ErrorCopy;
     abstract auth: AuthenticationCopy;
+    abstract account: AccountCopy;
 
     abstract exclamation(input?: string): string;
 }

@@ -10,7 +10,7 @@ import {
 } from "@shared/types/SocialConnectionRequestTypes";
 import SocialInvite from "@shared/models/SocialInvite";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {getConfig, getHostname} from "@api/config/configService";
+import {getConfig, getHostname} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";

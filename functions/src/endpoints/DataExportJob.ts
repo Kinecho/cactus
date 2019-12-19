@@ -1,4 +1,4 @@
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import {JWT} from "google-auth-library";
 import axios, {AxiosError} from "axios";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
