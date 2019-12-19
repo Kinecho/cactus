@@ -7,6 +7,7 @@ import {
     NavigationCopy,
     PromptCopy,
     ElementCopy,
+    PronounCopy,
     AccountCopy,
 } from "@shared/copy/CopyTypes";
 
@@ -17,6 +18,9 @@ export default class EnglishCopy extends LocalizedCopy {
             shortFormat: "L/d/yy",
         }
     };
+    pronouns: PronounCopy = {
+        YOU: "you"
+    }
 
     account: AccountCopy = {
         PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",
