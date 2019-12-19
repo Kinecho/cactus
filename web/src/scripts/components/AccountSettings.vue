@@ -589,4 +589,30 @@
         }
     }
 
+    .stickyButtons {
+        background-color: $white;
+        bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        margin: 0 -.4rem;
+        padding: 1.6rem 0;
+        position: sticky;
+        z-index: 1;
+
+        @include r(600) {
+            justify-content: flex-start;
+        }
+
+        button {
+            flex-basis: 50%;
+            margin: 0 .4rem;
+            white-space: nowrap;
+
+            @include r(600) {
+                flex-basis: auto;
+                flex-grow: 0;
+            }
+        }
+    }
+
 </style>
