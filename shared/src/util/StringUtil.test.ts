@@ -9,7 +9,8 @@ import {
     getUrlFromInput,
     getWordCount,
     isBlank, preventOrphanedWords,
-    stripQueryParams
+    stripQueryParams,
+    titleCase
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -323,5 +324,15 @@ describe("prevent orphaned words", () => {
         expect(preventOrphanedWords("hello world and people")).toEqual("hello world and\xa0people");
         expect(preventOrphanedWords("hello world and people")).not.toEqual("hello world and people");
         expect(preventOrphanedWords("hello world and people", "nbsp;")).toEqual("hello world andnbsp;people");
+    })
+})
+
+describe("captialize first letters words in a sentence", () => {
+    test("various input values", () => {
+        expect(titleCase("")).toEqual("");
+        expect(titleCase(undefined)).toEqual("");
+        expect(titleCase("hello")).toEqual("Hello");
+        expect(titleCase("hello world")).toEqual("Hello World");
+        expect(titleCase("hello world, city, and people")).toEqual("Hello World, City, And People");
     })
 })
