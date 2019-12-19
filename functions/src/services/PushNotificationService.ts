@@ -3,7 +3,6 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import * as admin from "firebase-admin";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as Sentry from "@sentry/node";
-import AdminSlackService from "@admin/services/AdminSlackService";
 import PromptContent from "@shared/models/PromptContent";
 import {PromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
@@ -118,10 +117,13 @@ export default class PushNotificationService {
             return {token, success: true};
 
         } catch (error) {
-            console.error("Failed ot send push", error);
+            console.error(`Failed to send the push notification to ${member?.id} ${member?.email}:`, error.code ? error.code : error);
             Sentry.captureException(error);
-            await AdminSlackService.getSharedInstance().sendDataLogMessage(`:ios: Failed to send push notification to member ${member?.email} ${member?.id}`);
-            return {success: false, token, error: `Failed to send the push notification: ${error} `}
+            return {
+                success: false,
+                token,
+                error: `Failed to send the push notification to ${member?.id} ${member?.email}: ${error.code ? error.code : error} `
+            }
         }
     }
 }

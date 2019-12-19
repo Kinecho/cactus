@@ -11,6 +11,7 @@ import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 import {PromptNotificationResult} from "@admin/PushNotificationTypes";
 import {convertDateToSendTimeUTC, getSendTimeUTC} from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 export interface CustomNotificationJobResult {
     success: boolean,
@@ -111,6 +112,9 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
     console.log(memberResults);
     result.memberResults = memberResults;
     console.log("Job result", result);
+    const trimmedResult = {...result};
+    delete trimmedResult.memberResults;
+    await AdminSlackService.getSharedInstance().sendDataLogMessage(`:calling: Custom Sent Prompt Notification Job results \n\`\`\`${JSON.stringify(trimmedResult, null, 2)}\`\`\``);
     return result;
 }
 
@@ -278,7 +282,7 @@ async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: 
     } else if (!pushResult?.attempted) {
         result.success = true
     } else if ((pushResult?.result?.numError || 0) > 0) {
-        errors.push("Failed to send any push notifications");
+        errors.push(`Failed to send any push notifications to ${sentPrompt.memberEmail}`);
         result.success = false
     }
 }
