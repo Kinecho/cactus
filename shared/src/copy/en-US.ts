@@ -7,7 +7,7 @@ import {
     NavigationCopy,
     PromptCopy,
     ElementCopy,
-    PronounCopy
+    PronounCopy,
     AccountCopy,
 } from "@shared/copy/CopyTypes";
 
