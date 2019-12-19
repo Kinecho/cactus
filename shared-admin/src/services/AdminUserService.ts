@@ -3,6 +3,9 @@ import User, {Field} from "@shared/models/User";
 import * as admin from "firebase-admin";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {CactusConfig} from "@shared/CactusConfig";
+import CactusMember from "@shared/models/CactusMember";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import UserRecord = admin.auth.UserRecord;
 
 export interface SubscriberSignupResult {
     success: boolean,
@@ -21,6 +24,25 @@ export interface SendMagicLinkResult {
 
 export interface SendMagicLinkOptions {
     successPath?: string,
+}
+
+export interface DeleteUserResult {
+    email: string,
+    userRecord?: UserRecord,
+    users?: User[],
+    members?: CactusMember[],
+    documentsDeleted?: {
+        sentPrompts: number,
+        reflectionResponses: number,
+        members: number,
+        emailReplies: number,
+        users: number,
+        pendingUsers: number,
+        memberProfiles: number,
+        socialConnections: number,
+        socialConnectionRequests: number,
+        socialInvites: number,
+    }
 }
 
 const DefaultSendMagicLinkOptions = {
@@ -91,6 +113,18 @@ export default class AdminUserService {
         return foundUser;
     }
 
+    async getAllMatchingEmail(email: string): Promise<User[]> {
+        let searchEmail = email;
+        if (email && email.trim()) {
+            searchEmail = email.trim().toLowerCase();
+        }
+
+        const query = firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail);
+        const result = await firestoreService.executeQuery(query, User);
+
+        return result.results;
+    }
+
     async getById(id?: string | undefined, options?: GetOptions): Promise<User | undefined> {
         if (!id) {
             return undefined;
@@ -127,4 +161,35 @@ export default class AdminUserService {
 
     }
 
+    async deleteAllDataPermanently(options: { email: string, userRecord?: UserRecord }): Promise<DeleteUserResult> {
+        const startTime = new Date().getTime();
+        const {email, userRecord} = options;
+        const results: DeleteUserResult = {email};
+
+        const [members, users, firebaseUser] = await Promise.all([
+            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
+            await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
+            await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
+                if (userRecord) {
+                    resolve(userRecord);
+                    return;
+                }
+                try {
+                    const u = await (admin.auth().getUserByEmail(email));
+                    resolve(u);
+                } catch (e) {
+                    resolve(undefined);
+                }
+            })
+        ]);
+
+        results.members = members;
+        results.userRecord = firebaseUser;
+        results.users = users;
+
+        const endTime = new Date().getTime();
+        console.log(`Delete user task took ${endTime - startTime}ms`);
+
+        return results;
+    }
 }

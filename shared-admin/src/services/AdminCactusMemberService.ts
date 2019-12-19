@@ -237,6 +237,18 @@ export default class AdminCactusMemberService {
         return member
     }
 
+    async geAllMemberMatchingEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
+        if (!emailInput) {
+            return [];
+        }
+        const email = emailInput.toLowerCase().trim();
+        const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
+        options.queryName = `AdminCactusMemberService.getMemberByEmail(${email})`;
+        const result = await firestoreService.executeQuery(query, CactusMember, options);
+
+        return result.results;
+    }
+
     async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
         if (!emailInput) {
             return undefined;

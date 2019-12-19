@@ -14,6 +14,7 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 export default class DeleteUserData extends FirebaseCommand {
     name = "Delete User Data";
@@ -46,12 +47,19 @@ export default class DeleteUserData extends FirebaseCommand {
         }
         const email = answers.email;
 
-        const [member, user, firebaseUser] = await Promise.all([
-            await AdminCactusMemberService.getSharedInstance().getMemberByEmail(answers.email),
-            await AdminUserService.getSharedInstance().getByEmail(answers.email),
+        const results = await AdminUserService.getSharedInstance().deleteAllDataPermanently({email});
+        console.log(stringifyJSON(results, 2));
+
+        // await oldWay(email)
+    }
+
+    async oldWay(email: string) {
+        const [members, users, firebaseUser] = await Promise.all([
+            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
+            await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
             await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
                 try {
-                    const u = await (admin.auth().getUserByEmail(answers.email));
+                    const u = await (admin.auth().getUserByEmail(email));
                     resolve(u);
                 } catch (e) {
                     resolve(undefined);
@@ -61,22 +69,29 @@ export default class DeleteUserData extends FirebaseCommand {
 
         const deleteTasks: Promise<any>[] = [];
 
-        if (member) {
-            console.log("Cactus Member ID", member.id);
-            deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(member));
+        if (members) {
+            members.forEach(member => {
+                console.log("Cactus Member ID", member.id);
+                deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(member));
+                deleteTasks.push(AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member || {email}));
+                deleteTasks.push(AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email}));
+            })
+
         } else {
-            console.log(chalk.yellow("No member found for email:", answers.email));
+            console.log(chalk.yellow("No member found for email:", email));
+            deleteTasks.push(AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember({email}));
+            deleteTasks.push(AdminSentPromptService.getSharedInstance().deletePermanentlyForMember({email}));
         }
 
-        deleteTasks.push(AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member || {email}));
-        deleteTasks.push(AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email}));
         deleteTasks.push(AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email));
 
         const deletePendingUserTask = AdminPendingUserService.getSharedInstance().deleteForEmail(email);
 
-        if (user) {
+        if (users) {
             console.log("Cactus User found");
-            deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(user))
+            users.forEach(user => {
+                deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(user))
+            });
         } else {
             console.log("No cactus user found");
         }
