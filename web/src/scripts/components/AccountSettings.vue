@@ -71,7 +71,7 @@
                     <div class="settings-group notifications">
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
-                            <CheckBox label="{{copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL}}" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                            <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         </div>
 
                         <div class="item">
