@@ -88,6 +88,10 @@ export interface ErrorCopy {
 
 export interface AccountCopy {
     PREFERRED_NOTIFICATION_TIME: string,
+    SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE: string,
+    UPDATE_TIMEZONE_TO: string,
+    CONFIRM_UPDATE_TIMEZONE: string,
+    CANCEL_UPDATE_TIMEZONE: string,
 }
 
 export abstract class LocalizedCopy {

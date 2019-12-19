@@ -19,7 +19,11 @@ export default class EnglishCopy extends LocalizedCopy {
     };
 
     account: AccountCopy = {
-        PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?"
+        PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",
+        SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE: "Your device's time zone does not match your selected time zone.",
+        UPDATE_TIMEZONE_TO: "Update your time zone to",
+        CANCEL_UPDATE_TIMEZONE: "No, don't update",
+        CONFIRM_UPDATE_TIMEZONE: "Yes, update timezone",
     };
 
     common: CommonCopy = {

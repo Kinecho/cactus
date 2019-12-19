@@ -47,12 +47,15 @@
                                 {{copy.common.TIME_ZONE}}
                             </label>
                             <div class="tz-alert" v-if="differentTimezone && !tzAlertDismissed">
-                                <p>Your selected time zone does not match your computer's time zone.<br/>Update your time zone to <b>{{deviceTimezoneName}}</b>?
+                                <p>
+                                    {{copy.account.SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE}}
+                                    <br/><br/>
+                                    {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
-                                    <button class="button small" @click="setToDeviceZone">Yes, update it</button>
-                                    <button class="button small secondary" @click="tzAlertDismissed = true">No, don't
-                                        update
+                                    <button class="button small" @click="setToDeviceZone">{{copy.account.CONFIRM_UPDATE_TIMEZONE}}</button>
+                                    <button class="button small secondary" @click="tzAlertDismissed = true">
+                                        {{copy.account.CANCEL_UPDATE_TIMEZONE}}
                                     </button>
                                 </div>
                             </div>
@@ -285,8 +288,6 @@
                 if (!user) {
                     return false;
                 }
-
-                // return true;
 
                 return user.providerData.filter(provider => provider &&
                     provider.providerId !== "password" &&
@@ -555,8 +556,30 @@
         margin-bottom: 1rem;
         border-radius: 6px;
         background: $lightestGreen;
+        display: flex;
+        flex-direction: column;
         .tz-actions {
             padding: 1rem 0 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            @include r(600) {
+                flex-direction: row;
+            }
+
+            button {
+                flex-grow: 1;
+                &:not(:last-child) {
+                    margin: 0 0 1rem 0;
+                }
+
+                @include r(600) {
+                    &:not(:last-child) {
+                        margin: 0 1rem 0 0;
+                    }
+                }
+            }
+
         }
     }
 
