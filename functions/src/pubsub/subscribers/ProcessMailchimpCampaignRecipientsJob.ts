@@ -4,6 +4,7 @@ import {CampaignRecipientJobPayload, PubSubTopic} from "@shared/types/PubSubType
 import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/services/AdminSlackService";
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import {PubSub} from "@google-cloud/pubsub";
+import {isNonPromptCampaignId} from "@admin/config/configService";
 
 export async function submitJob(payload: CampaignRecipientJobPayload): Promise<string> {
     const pubsub = new PubSub();
@@ -19,6 +20,12 @@ export async function onPublish(message: Message, context: functions.EventContex
     const sentPromptService = AdminSentPromptService.getSharedInstance();
     const payload: CampaignRecipientJobPayload = message.json;
     try {
+
+        if (payload.campaignId && isNonPromptCampaignId(payload.campaignId)) {
+            console.log("skipping campaign ID as it is not a prompt email");
+            return;
+        }
+
         const results = await sentPromptService.processSentMailchimpCampaign({
             campaignId: payload.campaignId,
             promptId: payload.reflectionPromptId

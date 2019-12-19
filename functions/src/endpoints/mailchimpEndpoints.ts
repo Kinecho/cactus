@@ -35,6 +35,7 @@ import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
 import {UnsubscribeRequest, UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {getAuthUser} from "@api/util/RequestUtil";
+import {isNonPromptCampaignId} from "@admin/config/configService";
 
 
 const app = express();
@@ -195,7 +196,10 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
     }
 
     if (mailchimpMember?.email_address !== email) {
-        res.status(409).send({error: "Invalid request. The member ID and email address did not match.", success: false});
+        res.status(409).send({
+            error: "Invalid request. The member ID and email address did not match.",
+            success: false
+        });
         return;
     }
     let member = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mcuid);
@@ -227,7 +231,11 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
 
     await AdminCactusMemberService.getSharedInstance().save(member);
 
-    await sendSlackUserUnsubscribedEmail({cactusMember: member, email: statusRequest.email, status: statusRequest.status});
+    await sendSlackUserUnsubscribedEmail({
+        cactusMember: member,
+        email: statusRequest.email,
+        status: statusRequest.status
+    });
 
     res.send({success: response.success, error: response.error})
 
@@ -266,7 +274,7 @@ app.put("/status", async (req: express.Request, res: express.Response) => {
 
 });
 
-async function sendSlackUserUnsubscribedEmail(options: {email: string, status: ListMemberStatus, cactusMember?: CactusMember}){
+async function sendSlackUserUnsubscribedEmail(options: { email: string, status: ListMemberStatus, cactusMember?: CactusMember }) {
     const {cactusMember, email, status} = options;
     const attachments: SlackAttachment[] = [];
     const fields: SlackAttachmentField[] = [
@@ -308,8 +316,13 @@ async function sendSlackUserUnsubscribedEmail(options: {email: string, status: L
 
 export async function handleCampaignEvent(campaignData: CampaignEventData): Promise<void> {
     const mailchimpService = MailchimpService.getSharedInstance();
+    if (campaignData.id && isNonPromptCampaignId(campaignData.id)) {
+        console.log("Skipping campaign as it is not a prompt email");
+        return;
+    }
     const campaign = await mailchimpService.getCampaign(campaignData.id);
     const content = await mailchimpService.getCampaignContent(campaignData.id);
+
 
     //this will create the link in the reflection prompt;
     const sentCampaign = await saveSentCampaign(campaign, campaignData, content);
