@@ -42,6 +42,22 @@
                             <p class="value">{{member.email}}</p>
                         </div>
 
+
+                    </div>
+
+                    <div class="settings-group notifications">
+                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
+                        <div class="item">
+                            <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
+                            </label>
+                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
+                        </div>
+
                         <div class="item">
                             <label class="label">
                                 {{copy.common.TIME_ZONE}}
@@ -61,25 +77,6 @@
                             </div>
                             <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                         </div>
-
-                        <div class="saveCancel" v-if="changesToSave === true">
-                            <button @click="save">Save Changes</button>
-                            <button @click="reloadPage" class="secondary">Cancel</button>
-                        </div>
-                    </div>
-
-                    <div class="settings-group notifications">
-                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
-                        <div class="item">
-                            <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
-                        </div>
-
-                        <div class="item">
-                            <label class="label">
-                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
-                            </label>
-                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
-                        </div>
                     </div>
 
                     <div class="settings-group profile" v-if="providers.length > 0">
@@ -94,6 +91,11 @@
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="stickyButtons" v-if="changesToSave === true">
+                        <button @click="save">Save Changes</button>
+                        <button @click="reloadPage" class="secondary">Cancel</button>
                     </div>
 
                 </div>
@@ -583,6 +585,32 @@
                         margin: 0 1rem 0 0;
                     }
                 }
+            }
+        }
+    }
+
+    .stickyButtons {
+        background-color: $white;
+        bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        margin: 0 -.4rem;
+        padding: 1.6rem 0;
+        position: sticky;
+        z-index: 1;
+
+        @include r(600) {
+            justify-content: flex-start;
+        }
+
+        button {
+            flex-basis: 50%;
+            margin: 0 .4rem;
+            white-space: nowrap;
+
+            @include r(600) {
+                flex-basis: auto;
+                flex-grow: 0;
             }
         }
     }
