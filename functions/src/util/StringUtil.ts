@@ -34,6 +34,4 @@ export function buildPromptContentURL(prompt?: ReflectionPrompt): string | undef
 
     const path = prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath;
     return `${protocol}://${domain}${path}`;
-
-
 }
