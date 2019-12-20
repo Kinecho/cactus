@@ -4,7 +4,14 @@ import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
 export function unseenActivityCount(options: { member: CactusMember, events: SocialActivityFeedEvent[] }): number {
     try {
         const {member, events} = options;
-        const lastSeenOccurredAt = member.activityStatus?.lastSeenOccurredAt;
+        let lastSeenOccurredAt = member.activityStatus?.lastSeenOccurredAt as Date | undefined | number;
+
+        // TODO: this is a "hack" to deal with some malformed data that we
+        // haven't figured out where it's coming from yet.
+        // This will at least let us use the dates if they're stored as numbers
+        if (lastSeenOccurredAt &&  lastSeenOccurredAt === "number") {
+            lastSeenOccurredAt = new Date(lastSeenOccurredAt);
+        }
 
         let count = 0;
 
