@@ -1,5 +1,6 @@
 import AdminFirestoreService, {
-    CollectionReference, DefaultGetOptions,
+    CollectionReference,
+    DefaultGetOptions,
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
@@ -407,7 +408,8 @@ export default class AdminCactusMemberService {
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
             return {updated: true, promptSendTimeUTC: denverUTCDefault};
         } else if (useDefault && !denverUTCDefault) {
-            console.error("No default value was created.")
+            console.error("No default value was created.");
+            return {updated: false, promptSendTimeUTC: beforeUTC}
         } else {
             console.log("No changes, not saving");
             return {updated: false, promptSendTimeUTC: beforeUTC}
