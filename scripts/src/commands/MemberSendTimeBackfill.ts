@@ -5,10 +5,7 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import * as prompts from "prompts";
 import {isValidEmail} from "@shared/util/StringUtil";
-import MemberProfile from "@shared/models/MemberProfile";
-import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
-import UserRecord = admin.auth.UserRecord;
+import AdminCactusMemberService, {UpdateSendPromptUTCResult} from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 
 interface UserInput {
@@ -19,9 +16,9 @@ interface TypeInput {
     type: "single" | "all"
 }
 
-export default class MemberProfileBackfillCommand extends FirebaseCommand {
-    name = "Member Profile Backfill Command";
-    description = "Create member profiles for every member";
+export default class MemberSendTimeBackfill extends FirebaseCommand {
+    name = "Member Send Time";
+    description = "Ensure every member has the default values for the sent time fields";
     showInList = true;
     useAdmin = true;
     userInput!: UserInput;
@@ -53,6 +50,8 @@ export default class MemberProfileBackfillCommand extends FirebaseCommand {
         console.log("Backfilling all ");
 
         let totalProcessed = 0;
+        let totalUpdated = 0;
+        let totalSkipped = 0;
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize: 100,
             onData: async members => {
@@ -60,12 +59,17 @@ export default class MemberProfileBackfillCommand extends FirebaseCommand {
                 const results = await Promise.all(tasks);
                 console.log(`Got ${results.length} results`);
                 totalProcessed += members.length;
+                results.forEach(r => {
+                    totalUpdated += r.updated ? 1 : 0;
+                    totalSkipped += r.updated ? 0 : 1;
+                });
                 return;
             }
         });
 
         console.log(`Processed ${totalProcessed} members`);
-
+        console.log(`Updated ${totalUpdated} members`);
+        console.log(`Skipped ${totalSkipped} members`);
         return;
     }
 
@@ -81,8 +85,7 @@ export default class MemberProfileBackfillCommand extends FirebaseCommand {
         console.log("Got user input", userInput);
         this.userInput = userInput;
 
-
-        const profile = await this.updateMemberProfile(userInput.email);
+        const profile = await this.updateMemberTimezone(userInput.email);
         console.log("Updated profile is", profile);
 
 
@@ -99,7 +102,7 @@ export default class MemberProfileBackfillCommand extends FirebaseCommand {
         }
     }
 
-    async updateMemberProfile(email: string): Promise<MemberProfile | undefined> {
+    async updateMemberTimezone(email: string): Promise<UpdateSendPromptUTCResult | undefined> {
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
         if (!member) {
             return;
@@ -107,14 +110,12 @@ export default class MemberProfileBackfillCommand extends FirebaseCommand {
         return await this.updateMemberJob(member)
     }
 
-    async updateMemberJob(member: CactusMember): Promise<MemberProfile | undefined> {
-        const userId = member.userId;
-        let userRecord: UserRecord | undefined = undefined;
-        if (userId) {
-            userRecord = await this.app.auth().getUser(userId)
-        }
+    async updateMemberJob(member: CactusMember) {
         console.log(`updating ${member.email}`);
-        return await AdminMemberProfileService.getSharedInstance().upsertMember({member, userRecord})
+        return await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(member, {
+            useDefault: true,
+            forceUpdate: false
+        });
     }
 
 }

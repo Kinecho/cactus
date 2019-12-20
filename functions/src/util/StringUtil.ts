@@ -1,4 +1,4 @@
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 
 /**
  * Split a string based on a delimiter, discarding the delimited string
@@ -34,6 +34,4 @@ export function buildPromptContentURL(prompt?: ReflectionPrompt): string | undef
 
     const path = prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath;
     return `${protocol}://${domain}${path}`;
-
-
 }

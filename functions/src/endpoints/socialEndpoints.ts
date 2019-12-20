@@ -10,7 +10,7 @@ import {
 } from "@shared/types/SocialConnectionRequestTypes";
 import SocialInvite from "@shared/models/SocialInvite";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {getConfig, getHostname} from "@api/config/configService";
+import {getConfig, getHostname} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -194,6 +194,7 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
     const requestUserId = await getAuthUserId(req);
     const authDate = new Date();
     console.log(`Got the auth user after ${authDate.getTime() - startDate.getTime()}`);
+    console.log("request user id is", requestUserId);
     if (!requestUserId) {
         console.log("No auth user was found on the request");
         resp.sendStatus(401);

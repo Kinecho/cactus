@@ -50,6 +50,17 @@ jest.mock("@web/services/CactusMemberService", () => {
     }
 });
 
+
+jest.mock("@web/services/MemberProfileService", () => {
+    return {
+        sharedInstance: {
+            observeByMemberId: (memberId?: string) => {
+                console.log("mocked observe method", memberId)
+            }
+        },
+    }
+});
+
 describe("NavBar.vue test", () => {
     test("header is visible after mounting", () => {
         const props = {

@@ -22,17 +22,17 @@
                         </div>
 
                         <div class="item">
-                            <label for="fname" class="label">
+                            <label for="account_fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
-                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname">
+                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname" id="account_fname">
                         </div>
 
                         <div class="item">
-                            <label for="lname" class="label">
+                            <label for="account_lname" class="label">
                                 {{copy.common.LAST_NAME}}
                             </label>
-                            <input v-model="member.lastName" @keyup="changesToSave = true;" type="text" name="lname">
+                            <input v-model="member.lastName" @keyup="changesToSave = true" type="text" name="lname" id="account_lname">
                         </div>
 
                         <div class="item">
@@ -42,22 +42,39 @@
                             <p class="value">{{member.email}}</p>
                         </div>
 
-                        <div class="item">
-                            <label class="label">
-                                {{copy.common.TIME_ZONE}}
-                            </label>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
-                        </div>
-                        <div class="saveCancel" v-if="changesToSave == true">
-                            <button @click="save">Save Changes</button>
-                            <button @click="reloadPage" class="secondary">Cancel</button>
-                        </div>
+
                     </div>
 
                     <div class="settings-group notifications">
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
-                            <CheckBox label="Receive an email when a new prompt is ready" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                            <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.account.PREFERRED_NOTIFICATION_TIME}}
+                            </label>
+                            <time-picker @change="timeSelected" :hour="promptSendTime.hour || 0" :minute="promptSendTime.minute || 0"/>
+                        </div>
+
+                        <div class="item">
+                            <label class="label">
+                                {{copy.common.TIME_ZONE}}
+                            </label>
+                            <div class="tz-alert" v-if="differentTimezone && !tzAlertDismissed">
+                                <p>
+                                    {{copy.account.SELECTED_TIMEZONE_DIFFERS_FROM_DEVICE}}
+                                    {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
+                                </p>
+                                <div class="tz-actions">
+                                    <button class="button small" @click="setToDeviceZone">{{copy.account.CONFIRM_UPDATE_TIMEZONE}}</button>
+                                    <button class="button small secondary" @click="tzAlertDismissed = true">
+                                        {{copy.account.CANCEL_UPDATE_TIMEZONE}}
+                                    </button>
+                                </div>
+                            </div>
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
                         </div>
                     </div>
 
@@ -68,11 +85,16 @@
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
                                 <span class="provider-name">{{provider.displayName}}</span>
                                 <button class="red tertiary remove">
-                                    <img src="assets/images/trash.svg" alt="" />
+                                    <img src="assets/images/trash.svg" alt=""/>
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="stickyButtons" v-if="changesToSave === true">
+                        <button @click="save">Save Changes</button>
+                        <button @click="reloadPage" class="secondary">Cancel</button>
                     </div>
 
                 </div>
@@ -104,13 +126,17 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
-    import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
+    import CactusMember, {
+        DEFAULT_PROMPT_SEND_TIME,
+        NotificationStatus,
+        PromptSendTime
+    } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {ZoneInfo} from '@web/timezones'
+    import {findByZoneName, ZoneInfo} from '@web/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
     import {PageRoute} from '@shared/PageRoutes'
     import {FirebaseUser} from '@web/firebase'
@@ -119,7 +145,9 @@
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import SnackbarContent from "@components/SnackbarContent.vue";
+    import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
+    import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -138,6 +166,7 @@
             TimezonePicker,
             ProviderIcon,
             SnackbarContent,
+            TimePicker,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -170,7 +199,10 @@
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
             },
-            changesToSave: boolean
+            changesToSave: boolean,
+            deviceTimezone: string | undefined,
+            deviceLocale: string | undefined,
+            tzAlertDismissed: boolean,
         } {
             return {
                 authLoaded: false,
@@ -185,10 +217,16 @@
                     TRUE: NotificationStatus.ACTIVE,
                     FALSE: NotificationStatus.INACTIVE,
                 },
-                changesToSave: false
+                changesToSave: false,
+                deviceTimezone: getDeviceTimeZone(),
+                deviceLocale: getDeviceLocale(),
+                tzAlertDismissed: false,
             }
         },
         computed: {
+            promptSendTime(): PromptSendTime {
+                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME
+            },
             loading(): boolean {
                 return !this.authLoaded;
             },
@@ -198,7 +236,32 @@
             displayName(): string {
                 return this.member ? this.member.getFullName() : '';
             },
+            differentTimezone(): boolean {
+                if (this.member?.timeZone) {
+                    const d = new Date();
+                    const localeTimeParts = d.toLocaleTimeString('en-us', {timeZoneName: 'short'}).split(' ');
+                    const memberTimeParts = d.toLocaleTimeString('en-us', {
+                        timeZoneName: 'short',
+                        timeZone: this.member.timeZone
+                    }).split(' ');
 
+                    return localeTimeParts[0] !== memberTimeParts[0] || localeTimeParts[1] !== memberTimeParts[1];
+                }
+
+                return !!(this.deviceTimezone && this.member?.timeZone && this.deviceTimezone !== this.member?.timeZone);
+            },
+            deviceTimezoneName(): string | undefined {
+                if (this.deviceTimezone) {
+                    const zoneInfo = findByZoneName(this.deviceTimezone);
+                    if (zoneInfo) {
+                        return zoneInfo.displayName;
+                    } else {
+                        const locale = this.deviceLocale;
+                        return new Date().toLocaleTimeString(locale, {timeZoneName: 'long'}).split(' ')[2];
+                    }
+                }
+                return;
+            },
             providers(): Provider[] {
                 let providerData = this.user && this.user.providerData;
 
@@ -226,8 +289,6 @@
                 if (!user) {
                     return false;
                 }
-
-                // return true;
 
                 return user.providerData.filter(provider => provider &&
                     provider.providerId !== "password" &&
@@ -290,6 +351,7 @@
                     await CactusMemberService.sharedInstance.save(this.member);
                     console.log("Save success");
                     this.addSnackbar({message: "Changes Saved", color: "success"});
+                    this.changesToSave = false;
                 }
             },
             async saveEmailStatus(status: NotificationStatus) {
@@ -315,6 +377,7 @@
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
                         this.error = errorMessage;
+                        this.removeSnackbar(snackId)
                     } else {
                         this.updateSnackbar(snackId, {
                             message: "Email Settings Updated",
@@ -325,10 +388,24 @@
                     }
                 }
             },
+            async setToDeviceZone() {
+                if (this.member) {
+                    this.member.timeZone = this.deviceTimezone;
+                    await this.save();
+                }
+            },
             async tzSelected(value: ZoneInfo | null | undefined) {
                 if (this.member) {
                     this.member.timeZone = value ? value.zoneName : null;
                     this.changesToSave = true;
+                }
+            },
+            async timeSelected(value: PromptSendTime) {
+                if (this.member) {
+                    this.member.promptSendTime = value;
+                    // this.$set(this.member, this.member);
+
+                    this.changesToSave = true
                 }
             },
             reloadPage() {
@@ -401,6 +478,11 @@
         display: flex;
         padding: .4rem 1.6rem;
         width: 100%;
+
+        &:hover {
+            background-color: $lightestGreen;
+            cursor: pointer;
+        }
     }
 
     .provider-icon {
@@ -472,6 +554,50 @@
         100% {
             transform: translateX(-200px);
             opacity: 0;
+        }
+    }
+
+    .tz-alert {
+        background-color: lighten($yellow, 15%);
+        border: 1px solid $yellow;
+        border-radius: 1.2rem;
+        box-shadow: 0 5px 11px -3px rgba(0, 0, 0, 0.08);
+        color: $darkText;
+        margin: .8rem 0 1.6rem;
+        padding: 2rem 2.4rem;
+
+        p {
+            margin-bottom: 1.6rem;
+        }
+
+        button {
+            margin: 0 .8rem .8rem 0;
+        }
+    }
+
+    .stickyButtons {
+        background-color: $white;
+        bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        margin: 0 -.4rem;
+        padding: 1.6rem 0;
+        position: sticky;
+        z-index: 1;
+
+        @include r(600) {
+            justify-content: flex-start;
+        }
+
+        button {
+            flex-basis: 50%;
+            margin: 0 .4rem;
+            white-space: nowrap;
+
+            @include r(600) {
+                flex-basis: auto;
+                flex-grow: 0;
+            }
         }
     }
 

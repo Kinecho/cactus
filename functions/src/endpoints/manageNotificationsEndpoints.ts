@@ -1,6 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
-import {getHostname} from "@api/config/configService";
+import {getHostname} from "@admin/config/configService";
 import {PageRoute} from "@shared/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";

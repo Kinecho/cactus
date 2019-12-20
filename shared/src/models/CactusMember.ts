@@ -1,6 +1,8 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
+import {DateObject, DateTime} from "luxon";
+import * as DateUtil from "@shared/util/DateUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -47,8 +49,20 @@ export enum Field {
     unsubscribedAt = "unsubscribedAt",
     stats = "stats",
     stats_reflections = "reflections",
-    activityStatus = "activityStatus"
+    activityStatus = "activityStatus",
+    promptSendTimeUTC = "promptSendTimeUTC",
+    promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
+    promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
 }
+
+export interface PromptSendTime {
+    hour: number,
+    minute: 0 | 15 | 30 | 45,
+}
+
+export type QuarterHour = 0 | 15 | 30 | 45;
+
+export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
@@ -77,6 +91,9 @@ export default class CactusMember extends BaseModel {
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
     timeZone?: string | null;
+    locale?: string | null | undefined;
+    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
+    readonly promptSendTimeUTC?: PromptSendTime;
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,
@@ -125,5 +142,12 @@ export default class CactusMember extends BaseModel {
 
     getFullName(): string {
         return `${this.firstName || ""} ${this.lastName || ""}`.trim();
+    }
+
+    getCurrentLocaleDateObject(date: Date = new Date()): DateObject {
+        if (this.timeZone) {
+            return DateUtil.getDateObjectForTimezone(date, this.timeZone);
+        }
+        return DateTime.local().toObject();
     }
 }

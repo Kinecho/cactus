@@ -4,7 +4,8 @@ import {CampaignMemberSendStatus} from "@shared/mailchimp/models/MailchimpTypes"
 export enum PromptSendMedium {
     EMAIL_MAILCHIMP = "EMAIL_MAILCHIMP",
     PROMPT_CONTENT = "PROMPT_CONTENT",
-    CRON_JOB = "CRON_JOB"
+    CRON_JOB = "CRON_JOB",
+    PUSH = "PUSH",
 }
 
 export enum SentPromptField {
@@ -23,6 +24,7 @@ export enum SentPromptField {
 export interface SentPromptHistoryItem {
     medium: PromptSendMedium,
     sendDate: Date,
+    usedMemberCustomTime?: boolean,
     mailchimpCampaignId?: string,
     email?: string,
     phoneNumber?: string,
@@ -37,9 +39,14 @@ export default class SentPrompt extends BaseModel {
     lastSentAt?: Date;
     firstSentAt?: Date;
     promptId?: string;
-    memberEmail?:string;
+    memberEmail?: string;
     sendHistory: SentPromptHistoryItem[] = [];
-    promptContentEntryId?:string;
+    promptContentEntryId?: string;
     completed: boolean = false;
     completedAt?: Date;
+
+    containsMedium(medium: PromptSendMedium): boolean {
+        return !!this.sendHistory.find(history => history.medium === medium);
+    }
+
 }

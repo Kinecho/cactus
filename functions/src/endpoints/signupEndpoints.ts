@@ -10,7 +10,7 @@ import {
     MagicLinkResponse,
 } from "@shared/api/SignupEndpointTypes";
 import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {appendDomain, appendQueryParams, getProviderDisplayName} from "@shared/util/StringUtil";

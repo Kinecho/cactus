@@ -9,7 +9,7 @@ import {
     TagStatus,
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
-import {getConfig} from "@api/config/configService";
+import {getConfig} from "@admin/config/configService";
 import {getDateFromISOString} from "@shared/util/DateUtil";
 
 const config = getConfig();

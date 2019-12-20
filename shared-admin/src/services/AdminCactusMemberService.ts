@@ -3,9 +3,16 @@ import AdminFirestoreService, {
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
-import CactusMember, {Field, JournalStatus, NotificationStatus, ReflectionStats} from "@shared/models/CactusMember";
+import CactusMember, {
+    DEFAULT_PROMPT_SEND_TIME,
+    Field,
+    JournalStatus,
+    NotificationStatus,
+    PromptSendTime,
+    ReflectionStats
+} from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
-import {getDateAtMidnightDenver, getDateFromISOString} from "@shared/util/DateUtil";
+import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
@@ -13,6 +20,11 @@ import DocumentReference = admin.firestore.DocumentReference;
 
 let firestoreService: AdminFirestoreService;
 const DEFAULT_BATCH_SIZE = 500;
+
+export interface UpdateSendPromptUTCResult {
+    updated: boolean,
+    promptSendTimeUTC?: PromptSendTime
+}
 
 export default class AdminCactusMemberService {
     protected static sharedInstance: AdminCactusMemberService;
@@ -366,4 +378,50 @@ export default class AdminCactusMemberService {
         }
     }
 
+    async getMembersForUTCSendPromptTime(sendTime: PromptSendTime, options?: GetOptions): Promise<CactusMember[]> {
+        const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
+            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+
+        const results = await firestoreService.executeQuery(query, CactusMember);
+        return results.results;
+    }
+
+    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, forceUpdate: boolean } = {
+        useDefault: false,
+        forceUpdate: false,
+    }): Promise<UpdateSendPromptUTCResult> {
+        const {useDefault, forceUpdate} = options;
+        const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
+        const afterUTC = getSendTimeUTC({
+            forDate: new Date(),
+            timeZone: member.timeZone,
+            sendTime: member.promptSendTime
+        });
+
+        console.log("before", JSON.stringify(beforeUTC));
+        console.log("afterUTC", JSON.stringify(afterUTC));
+
+
+        const {minute: afterMin, hour: afterHour} = afterUTC || {};
+        const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
+
+        if (afterUTC && forceUpdate || (afterMin !== beforeMinute && afterHour !== beforeHour)) {
+            console.log("Member has changes, saving them");
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
+            console.log("saved changes.");
+            return {updated: true, promptSendTimeUTC: afterUTC};
+        } else if (useDefault && !afterUTC) {
+            console.log("No sendPromptTime for UTC found. using the default value");
+            const denverUTC = getSendTimeUTC({
+                forDate: new Date(),
+                timeZone: 'America/Denver',
+                sendTime: DEFAULT_PROMPT_SEND_TIME,
+            });
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTC});
+            return {updated: true, promptSendTimeUTC: denverUTC};
+        } else {
+            console.log("No changes, not saving");
+            return {updated: false, promptSendTimeUTC: beforeUTC}
+        }
+    }
 }

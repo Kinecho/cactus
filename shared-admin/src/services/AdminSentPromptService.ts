@@ -13,7 +13,8 @@ import User from "@shared/models/User";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as Sentry from '@sentry/node';
-import {isNonPromptCampaignId} from "../../../functions/src/config/configService";
+import {isNonPromptCampaignId} from "@admin/config/configService";
+import PromptContent from "@shared/models/PromptContent";
 
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
@@ -26,6 +27,11 @@ export interface CampaignSentPromptProcessingResult {
 export interface UpsertSentPromptResult {
     sentPrompt?: SentPrompt | undefined,
     existed?: boolean,
+    error?: any
+}
+
+export interface CreateSentPromptResult {
+    sentPrompt?: SentPrompt | undefined,
     error?: any
 }
 
@@ -166,6 +172,59 @@ export default class AdminSentPromptService {
         }
     }
 
+    /**
+     * Creates a sent prompt object. This *DOES NOT* save it.
+     * @param {{member: CactusMember,
+     *  promptId?: string, promptContent?: PromptContent,
+     *  medium?: PromptSendMedium,
+     *  prompt?: ReflectionPrompt}} options
+     * @return {CreateSentPromptResult}
+     */
+    static createSentPrompt(options: {
+        member: CactusMember,
+        promptId?: string,
+        promptContent?: PromptContent,
+        medium?: PromptSendMedium,
+        prompt?: ReflectionPrompt
+        createHistoryItem?: boolean,
+    }): CreateSentPromptResult {
+        const result: CreateSentPromptResult = {};
+        const {member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem=false} = options;
+        let {promptId} = options;
+        promptId = promptId || promptContent?.promptId || prompt?.id;
+        if (!promptId) {
+            result.error = "No prompt ID provided";
+            return result;
+        }
+
+        if (!member.id) {
+            result.error = "No member ID could be found";
+            return result;
+        }
+
+        const memberId = member.id;
+        const email = member.email;
+        const currentDate = new Date();
+
+        const sentPrompt = new SentPrompt();
+        sentPrompt.createdAt = currentDate;
+        sentPrompt.id = `${memberId}_${promptId}`; //should be deterministic in the case we have a race condition
+        sentPrompt.firstSentAt = currentDate;
+        sentPrompt.promptId = promptId;
+        sentPrompt.cactusMemberId = member.id;
+        sentPrompt.userId = member.userId;
+        sentPrompt.memberEmail = member.email;
+        if (createHistoryItem) {
+            sentPrompt.sendHistory.push({
+                sendDate: currentDate,
+                email,
+                medium,
+            });
+        }
+
+        result.sentPrompt = sentPrompt;
+        return result;
+    }
 
     //Mostly copied from the mailchimp recipient job above.
     async upsertForCactusMember(member: CactusMember, prompt: ReflectionPrompt, sendDate?: Date, dryRun: boolean = false): Promise<UpsertSentPromptResult> {

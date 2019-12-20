@@ -36,16 +36,19 @@ export default class AdminSocialActivityService {
     }
 
     async getActivityFeedForMember(memberId: string): Promise<SocialActivityFeedEvent[]> {
+        console.log("Fetching activity feed events for ", memberId);
         const startDate = new Date();
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
 
         //as of 2019-12-13, firestore "in" queries only support 10 items in teh array
-        const friendIds = this.friendIds(socialConnections).slice(0, 10);
+        const friendIds = this.friendIds(socialConnections).slice(0, 9);
         if (friendIds.length === 0) {
             return [];
         }
 
-        const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', friendIds)
+        // include the member viewing in the feed
+        const feedMemberIds = friendIds.concat([memberId]);
+        const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', feedMemberIds)
             .limit(20)
             .orderBy('createdAt', QuerySortDirection.desc);
         const reflectionResponses = await this.firestoreService.executeQuery(query, ReflectionResponse);

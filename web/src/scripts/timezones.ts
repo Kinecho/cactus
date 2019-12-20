@@ -191,9 +191,46 @@ export const timezoneInfoList: ZoneInfo[] = luxonValidTimezones.map((zoneName) =
     return z2.offsetMinutes - z1.offsetMinutes
 });
 
-export const zonesByName:{[zoneName:string]: ZoneInfo} = timezoneInfoList.reduce((map: {[name: string]: ZoneInfo}, zone:ZoneInfo) => {
+export const zonesByName: { [zoneName: string]: ZoneInfo } = timezoneInfoList.reduce((map: { [name: string]: ZoneInfo }, zone: ZoneInfo) => {
     map[zone.zoneName] = zone;
     return map;
 }, {});
 
 
+export function findByZoneName(zoneName?: string): ZoneInfo | undefined {
+    if (!zoneName) {
+        return;
+    }
+    let zoneInfo = zonesByName[zoneName];
+    if (zoneInfo) {
+        return zoneInfo;
+    }
+
+    const region = zoneName.split("/")[0];
+
+    const zoneNamesByRegion = timezones.filter(z => z.startsWith(region));
+    console.log("zone options", zoneNamesByRegion);
+    const matchedTimeZone = zoneNamesByRegion.find(zone => isZoneSameTime(zone, zoneName));
+    console.log("matched timezone: ", matchedTimeZone)
+
+    if (matchedTimeZone) {
+        return zonesByName[matchedTimeZone];
+    }
+
+    return;
+}
+
+export function isZoneSameTime(zone1: string, zone2: string): boolean {
+    const d = new Date();
+    const zone1Parts = d.toLocaleTimeString('en-us', {
+        timeZone: zone1,
+        timeZoneName: 'short'
+    }).split(' ');
+
+    const zone2Parts = d.toLocaleTimeString('en-us', {
+        timeZoneName: 'short',
+        timeZone: zone2
+    }).split(' ');
+
+    return zone1Parts[0] === zone2Parts[0] && zone1Parts[1] === zone2Parts[1];
+}

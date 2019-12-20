@@ -6,7 +6,27 @@ import AdminMemberProfileService from "@admin/services/AdminMemberProfileService
 import * as admin from "firebase-admin";
 import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
+
+export const updatePromptSendTimeTrigger = functions.firestore
+    .document(`${Collection.members}/{memberId}`)
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+        console.log("Starting update prompt send time trigger");
+        const afterSnapshot = change.after;
+        if (!afterSnapshot) {
+            console.warn("No data found on the 'after' snapshot. Not updating.");
+            return;
+        }
+        const memberAfter = fromDocumentSnapshot(afterSnapshot, CactusMember);
+        if (!memberAfter) {
+            console.error("There was no updated member. It was deleted. Nothing to process");
+            return;
+        }
+
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
+        console.log(JSON.stringify(result, null, 2));
+    });
 
 
 export const updateMemberProfileTrigger = functions.firestore
@@ -22,7 +42,7 @@ export const updateMemberProfileTrigger = functions.firestore
         const member = fromDocumentSnapshot(snapshot, CactusMember);
 
         if (!member) {
-            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null,  2));
+            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null, 2));
             return;
         }
 
@@ -46,7 +66,7 @@ export const updateMemberProfileTrigger = functions.firestore
             //update mailchimp
             const mailchimpMember = member.mailchimpListMember;
             const email = member.email || mailchimpMember?.email_address;
-            if (!email){
+            if (!email) {
                 return;
             }
             if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
