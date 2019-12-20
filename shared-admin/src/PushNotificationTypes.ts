@@ -1,4 +1,4 @@
-export interface PromptNotificationResult {
+export interface NewPromptNotificationResult {
     result?: {
         numSuccess: number,
         numError: number,
@@ -6,6 +6,7 @@ export interface PromptNotificationResult {
     atLeastOneSuccess?: boolean,
     attempted: boolean,
     error?: string,
+    alreadyAnswered?: boolean,
 }
 
 export interface SendPushResult {

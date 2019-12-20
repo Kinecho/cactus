@@ -8,7 +8,7 @@ import PromptContent from "@shared/models/PromptContent";
 import AdminSentPromptService, {CreateSentPromptResult} from "@admin/services/AdminSentPromptService";
 import PushNotificationService from "@api/services/PushNotificationService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
-import {PromptNotificationResult} from "@admin/PushNotificationTypes";
+import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import {convertDateToSendTimeUTC, getSendTimeUTC} from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSlackService from "@admin/services/AdminSlackService";
@@ -16,6 +16,7 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 export interface CustomNotificationJobResult {
     success: boolean,
     numSuccess?: number,
+    numAlreadyReflected?: number,
     numError?: number,
     numMembersFound?: number,
     numSentPromptsCreated?: number,
@@ -38,6 +39,7 @@ export interface MemberResult {
     isSendTime?: boolean,
     sentPush?: boolean,
     sentEmail?: boolean,
+    alreadyReflected?: boolean,
     createdSentPrompt?: boolean,
     sentPromptExisted?: boolean,
     systemDate: DateObject,
@@ -49,7 +51,7 @@ export interface MemberResult {
     memberDate?: DateObject,
     errors?: string[],
     message?: string,
-    pushResult?: PromptNotificationResult
+    pushResult?: NewPromptNotificationResult
     alreadyPushed?: boolean
     memberSendTimeUTC?: PromptSendTime
     memberSendTimeLocal?: PromptSendTime
@@ -81,6 +83,7 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
 
     const allErrors: string[] = [];
     const memberResults: MemberResult[] = await Promise.all(members.map(member => processMember({job, member})));
+    console.log(`processed all ${memberResults.length} members`);
     const emailsProcessed: string[] = [];
     memberResults.forEach(r => {
         if (r.sentPush) {
@@ -102,6 +105,10 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
 
         if (r.memberEmail) {
             emailsProcessed.push(r.memberEmail);
+        }
+
+        if (r.alreadyReflected) {
+            result.numAlreadyReflected = (result.numAlreadyReflected || 0) + 1;
         }
     });
     result.success = true;
@@ -217,7 +224,7 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         return result;
     }
 
-    const pushResult = await PushNotificationService.sharedInstance.sendPushIfNeeded({
+    const pushResult = await PushNotificationService.sharedInstance.sendNewPromptPushIfNeeded({
         sentPrompt,
         promptContent,
         member
@@ -262,16 +269,17 @@ async function getOrCreateSentPrompt(options: { promptContent: PromptContent, pr
 /**
  * Handle the push notification result
  * @param {{sentPrompt: SentPrompt,
- *  pushResult?: PromptNotificationResult,
+ *  pushResult?: NewPromptNotificationResult,
  *  result: MemberResult,
  *  errors: string[]}} options
  * @return {Promise<void>}
  */
-async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: PromptNotificationResult, result: MemberResult, errors: string[] }) {
+async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: NewPromptNotificationResult, result: MemberResult, errors: string[] }) {
     const {result, pushResult, sentPrompt, errors} = options;
     result.pushResult = pushResult;
     result.sentPush = result.pushResult?.atLeastOneSuccess || false;
     result.alreadyPushed = sentPrompt.containsMedium(PromptSendMedium.PUSH);
+    result.alreadyReflected = pushResult?.alreadyAnswered ?? false;
     if (pushResult?.atLeastOneSuccess) {
         result.success = true;
         sentPrompt.sendHistory.push({
@@ -280,7 +288,7 @@ async function handlePushResult(options: { sentPrompt: SentPrompt, pushResult?: 
             usedMemberCustomTime: true,
         });
     } else if (!pushResult?.attempted) {
-        result.success = true
+        result.success = true;
     } else if ((pushResult?.result?.numError || 0) > 0) {
         errors.push(`Failed to send any push notifications to ${sentPrompt.memberEmail}`);
         result.success = false

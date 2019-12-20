@@ -7,7 +7,7 @@ import CactusMember, {DEFAULT_PROMPT_SEND_TIME} from "@shared/models/CactusMembe
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import PushNotificationService from "@api/services/PushNotificationService";
-import {PromptNotificationResult} from "@admin/PushNotificationTypes";
+import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 
@@ -41,7 +41,7 @@ export const sentPromptPushNotificationTrigger = functions.firestore
     });
 
 
-async function sendPush(options: { member: CactusMember, prompt: ReflectionPrompt, sentPrompt: SentPrompt }): Promise<PromptNotificationResult | undefined> {
+async function sendPush(options: { member: CactusMember, prompt: ReflectionPrompt, sentPrompt: SentPrompt }): Promise<NewPromptNotificationResult | undefined> {
     const {member, sentPrompt, prompt} = options;
     const userDateObject = member.getCurrentLocaleDateObject();
     const userPromptSendTime = member.promptSendTime || DEFAULT_PROMPT_SEND_TIME;
@@ -50,7 +50,7 @@ async function sendPush(options: { member: CactusMember, prompt: ReflectionPromp
     if (isSendTime) {
         // return await PushNotificationService.sharedInstance.sendPromptNotification({member, prompt})
 
-        const pushResult = await PushNotificationService.sharedInstance.sendPushIfNeeded({
+        const pushResult = await PushNotificationService.sharedInstance.sendNewPromptPushIfNeeded({
             member,
             prompt,
             sentPrompt,

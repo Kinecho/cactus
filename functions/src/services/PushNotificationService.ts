@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
-import {PromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
+import {NewPromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 
 export default class PushNotificationService {
@@ -12,13 +12,18 @@ export default class PushNotificationService {
     private messaging = admin.messaging();
 
 
-    async sendPushIfNeeded(options: {
+    async sendNewPromptPushIfNeeded(options: {
         sentPrompt: SentPrompt,
         promptContent?: PromptContent,
         prompt?: ReflectionPrompt,
         member: CactusMember,
-    }): Promise<PromptNotificationResult | undefined> {
+    }): Promise<NewPromptNotificationResult | undefined> {
         const {sentPrompt, prompt, promptContent, member} = options;
+
+        if (sentPrompt.completed) {
+            return {attempted: false, alreadyAnswered: true};
+        }
+
         if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
             return await this.sendPromptNotification({
                 member,
@@ -29,7 +34,7 @@ export default class PushNotificationService {
         return;
     }
 
-    async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<PromptNotificationResult> {
+    async sendPromptNotification(options: { member: CactusMember, prompt?: ReflectionPrompt, promptContent?: PromptContent }): Promise<NewPromptNotificationResult> {
         let attempted = false;
         try {
             const {member, prompt} = options;
