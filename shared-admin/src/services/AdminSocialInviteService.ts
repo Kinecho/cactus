@@ -1,5 +1,5 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
-import SocialInvite from "@shared/models/SocialInvite";
+import SocialInvite, {SocialInviteField} from "@shared/models/SocialInvite";
 import {Collection} from "@shared/FirestoreBaseModels";
 import CactusMember from "@shared/models/CactusMember";
 
@@ -40,7 +40,7 @@ export default class AdminSocialInviteService {
             const socialInvite = await firestoreService.getById(member.signupQueryParams.inviteId, SocialInvite);
             if (socialInvite && member) {
                 socialInvite.recipientMemberId = member.id;
-                return firestoreService.save(socialInvite);  
+                return firestoreService.save(socialInvite);
             }
         }
 
@@ -49,11 +49,11 @@ export default class AdminSocialInviteService {
 
     async generateInviteRecord(invitedByMember: CactusMember, memberJoined: CactusMember): Promise<SocialInvite | undefined> {
         const socialInvite = new SocialInvite();
-            socialInvite.senderMemberId = invitedByMember.id;
-            socialInvite.recipientMemberId = memberJoined.id;
-            socialInvite.recipientEmail = memberJoined.email;
-            socialInvite.sentAt = new Date(); 
-            
+        socialInvite.senderMemberId = invitedByMember.id;
+        socialInvite.recipientMemberId = memberJoined.id;
+        socialInvite.recipientEmail = memberJoined.email;
+        socialInvite.sentAt = new Date();
+
         return await AdminSocialInviteService.getSharedInstance().save(socialInvite);
     }
 
@@ -66,11 +66,11 @@ export default class AdminSocialInviteService {
             } catch (e) {
                 console.error("failed to update social invite", e);
             }
-        // create a new invite record if one doesn't exist but they were invited
+            // create a new invite record if one doesn't exist but they were invited
         } else if (invitedByMember) {
             try {
                 await AdminSocialInviteService.getSharedInstance().generateInviteRecord(
-                    invitedByMember, 
+                    invitedByMember,
                     memberJoined
                 );
                 console.log('created new SocialInvite record with recipientMemberId');
@@ -78,5 +78,28 @@ export default class AdminSocialInviteService {
                 console.error("failed to create new social invite", e);
             }
         }
+    }
+
+    async deleteSocialInvitesPermanently(options: { memberIds?: string[], email?: string }): Promise<number> {
+        const {memberIds = [], email} = options;
+        let total = 0;
+        const tasks = memberIds.map(memberId => {
+            new Promise(async resolve => {
+                const senderQuery = this.getCollectionRef().where(SocialInviteField.senderMemberId, "==", memberId);
+                total += (await firestoreService.deleteForQuery(senderQuery, SocialInvite)).filter(Boolean).length;
+
+                const recipientQuery = this.getCollectionRef().where(SocialInviteField.recipientMemberId, "==", memberId);
+                total += (await firestoreService.deleteForQuery(recipientQuery, SocialInvite)).filter(Boolean).length;
+                resolve(total)
+            })
+        });
+        await Promise.all(tasks);
+
+        if (email) {
+            const emailQuery = this.getCollectionRef().where(SocialInviteField.recipientEmail, "==", email);
+            total += (await firestoreService.deleteForQuery(emailQuery, SocialInvite)).filter(Boolean).length;
+        }
+
+        return total;
     }
 }

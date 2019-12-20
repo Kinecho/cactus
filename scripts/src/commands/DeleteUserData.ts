@@ -86,7 +86,7 @@ export default class DeleteUserData extends FirebaseCommand {
 
         deleteTasks.push(AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email));
 
-        const deletePendingUserTask = AdminPendingUserService.getSharedInstance().deleteForEmail(email);
+        const deletePendingUserTask = AdminPendingUserService.getSharedInstance().deletePermanentlyForEmail(email);
 
         if (users) {
             console.log("Cactus User found");

@@ -332,7 +332,7 @@ export default class AdminFirestoreService {
 
         const tasks: Promise<any>[] = snapshot.docs.map(doc => {
             if (options?.transaction) {
-                options?.transaction?.delete(doc.ref)
+                options?.transaction?.delete(doc.ref);
                 return Promise.resolve(1)
             }
             return doc.ref.delete()

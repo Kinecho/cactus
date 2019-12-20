@@ -183,7 +183,7 @@ export default class AdminPendingUserService {
         return;
     }
 
-    async deleteForEmail(email: string): Promise<number> {
+    async deletePermanentlyForEmail(email: string): Promise<number> {
         const query = this.getCollectionRef()
             .where(PendingUser.Field.email, "==", email);
         // let deleteTasks: Promise<PendingUser | undefined>[] = [];

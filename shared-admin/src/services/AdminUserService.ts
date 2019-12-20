@@ -8,7 +8,13 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/services/AdminSlackService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
+import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import UserRecord = admin.auth.UserRecord;
+import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
+import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
+import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 
 export interface SubscriberSignupResult {
     success: boolean,
@@ -201,12 +207,14 @@ export default class AdminUserService {
         const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
+                    console.log("starting generator for collection", collection);
                     const count = (await job);
                     resolve({
                         numDocuments: count,
                         collectionName: collection
                     })
                 } catch (error) {
+                    console.error(`"error in generator for collection ${collection}`, error);
                     resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
                 }
             })
@@ -215,13 +223,15 @@ export default class AdminUserService {
         const singleGenerator = (collection: Collection, job: Promise<BaseModel | undefined>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
+                    console.log("Starting job for collection", collection);
                     const model = (await job);
                     resolve({
                         numDocuments: model ? 1 : 0,
                         collectionName: collection
                     })
                 } catch (error) {
-                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
+                    console.error(`Failed to delete ${collection}`, error);
+                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]});
                 }
             })
         };
@@ -230,14 +240,21 @@ export default class AdminUserService {
             ...(members.map(member => generator(Collection.reflectionResponses, AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member)))),
             ...(members.map(member => generator(Collection.sentPrompts, AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email})))),
             ...(members.map(member => singleGenerator(Collection.members, AdminFirestoreService.getSharedInstance().deletePermanently(member)))),
+            ...(memberIds.map(memberId => generator(Collection.memberProfiles, AdminMemberProfileService.getSharedInstance().deletePermanently(memberId)))),
+            ...(memberIds.map(memberId => generator(Collection.socialConnections, AdminSocialConnectionService.getSharedInstance().deleteConnectionsPermanentlyForMember(memberId)))),
+            ...(memberIds.map(memberId => generator(Collection.socialConnectionRequests, AdminSocialConnectionRequestService.getSharedInstance().deleteConnectionRequestsPermanentlyForMember(memberId)))),
             ...(users.map(user => singleGenerator(Collection.users, AdminFirestoreService.getSharedInstance().deletePermanently(user)))),
+            generator(Collection.pendingUsers, AdminPendingUserService.getSharedInstance().deletePermanentlyForEmail(email)),
+            generator(Collection.emailReply, AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email)),
+            generator(Collection.socialInvites, AdminSocialInviteService.getSharedInstance().deleteSocialInvitesPermanently({
+                memberIds: memberIds,
+                email
+            }))
         ];
 
         const taskResults = await Promise.all(tasks);
+
         console.log("AdminUserService.deleteAllData: task results", taskResults);
-
-        //todo: aggregate results
-
         taskResults.reduce((agg, r) => {
             agg.errors?.concat(r.errors || []);
             agg.documentsDeleted[r.collectionName] = r.numDocuments;
@@ -264,6 +281,7 @@ export default class AdminUserService {
             results.userRecordDeleted = false;
         }
         results.errors = errors;
+        const createdAt = members.find(m => m.createdAt)?.createdAt;
 
         const userIdSet = new Set(users.map(u => u.id).concat(results.userRecord?.uid).filter(Boolean));
         const attachments: SlackAttachment[] = [
@@ -273,6 +291,10 @@ export default class AdminUserService {
                     `UserID(s): ${Array.from(userIdSet).join(", ") || "none"}\n` +
                     `MemberID(s): ${memberIds.join(", ") || "none"}\n` +
                     `Email: ${email}\n` +
+                    `Joined At: ${createdAt ? createdAt.toLocaleString('en-US', {
+                        timeZone: 'America/Denver',
+                        timeZoneName: 'short'
+                    }) : "unknown"}` +
                     "\`\`\`"
             },
             {
@@ -284,6 +306,9 @@ export default class AdminUserService {
                     `${Collection.reflectionResponses}: ${results.documentsDeleted![Collection.reflectionResponses] || 0}\n` +
                     `${Collection.emailReply}: ${results.documentsDeleted![Collection.emailReply] || 0}\n` +
                     `${Collection.pendingUsers}: ${results.documentsDeleted![Collection.pendingUsers] || 0}\n` +
+                    `${Collection.socialInvites}: ${results.documentsDeleted![Collection.socialInvites] || 0}\n` +
+                    `${Collection.socialConnections}: ${results.documentsDeleted![Collection.socialConnections] || 0}\n` +
+                    `${Collection.socialConnectionRequests}: ${results.documentsDeleted![Collection.socialConnectionRequests] || 0}\n` +
                     `\`\`\``
             }
         ];
