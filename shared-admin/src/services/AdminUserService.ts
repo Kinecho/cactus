@@ -285,9 +285,12 @@ export default class AdminUserService {
 
         try {
             const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
+            console.log("mailchimp response", mailchimpResponse);
             if (mailchimpResponse.error) {
                 errors.push(mailchimpResponse.error);
                 results.mailchimpDeleted = false;
+            } else {
+                results.mailchimpDeleted = true;
             }
         } catch (error) {
             results.mailchimpDeleted = false;
@@ -313,7 +316,7 @@ export default class AdminUserService {
             {
                 text: `Deleted Items\n\`\`\`` +
                     `Auth User Deleted: ${results.userRecord ? results.userRecordDeleted ?? false : "No User Record Found"}\n` +
-                    `Mailchimp Member Deleted: ${results.mailchimpDeleted}\n` +
+                    `Mailchimp Member Deleted: ${results.mailchimpDeleted || "false"}\n` +
                     `${Collection.members}: ${results.documentsDeleted[Collection.members] || 0}\n` +
                     `${Collection.users}: ${results.documentsDeleted[Collection.users] || 0}\n` +
                     `${Collection.sentPrompts}: ${results.documentsDeleted[Collection.sentPrompts] || 0}\n` +
