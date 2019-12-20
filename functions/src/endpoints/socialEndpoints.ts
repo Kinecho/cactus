@@ -200,29 +200,42 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
         resp.sendStatus(401);
         return
     }
-    const memberStart = new Date().getTime();
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
-    const memberEnd = new Date().getTime();
-    console.log(`Get member duration ${memberEnd - memberStart}ms`);
-    const memberId = member?.id;
-    if (!member || !memberId) {
-        console.error("No member or memberId found for userId", requestUserId);
-        resp.sendStatus(404);
-        return;
+    
+    try {
+        const memberStart = new Date().getTime();
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
+        const memberEnd = new Date().getTime();
+        console.log(`Get member duration ${memberEnd - memberStart}ms`);
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            console.error("No member or memberId found for userId", requestUserId);
+            resp.sendStatus(404);
+            return;
+        }
+        const feedEvents = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);
+        const unseenCount = unseenActivityCount({member, events: feedEvents});
+
+        const lastFriendActivityDate = feedEvents.length > 0 ? feedEvents[feedEvents.length - 1].occurredAt : undefined;
+        const response: ActivitySummaryResponse = {
+            unseenCount,
+            lastFriendActivityDate
+        };
+        const endDate = new Date();
+        console.log(`activity feed summary endpoint processed in ${endDate.getTime() - startDate.getTime()}ms`);
+
+        resp.status(200).send(response);
+
+    } catch (error) {
+        Sentry.captureException(error);
+        console.error(error);
+
+        const errorResponse: ActivitySummaryResponse = {
+            unseenCount: 0
+        };
+
+        resp.status(500).send(errorResponse);
     }
 
-    const feedEvents = await AdminSocialActivityService.getSharedInstance().getActivityFeedForMember(memberId);
-    const unseenCount = unseenActivityCount({member, events: feedEvents});
-
-    const lastFriendActivityDate = feedEvents.length > 0 ? feedEvents[feedEvents.length - 1].occurredAt : undefined;
-    const response: ActivitySummaryResponse = {
-        unseenCount,
-        lastFriendActivityDate
-    };
-    const endDate = new Date();
-    console.log(`activity feed summary endpoint processed in ${endDate.getTime() - startDate.getTime()}ms`);
-
-    resp.status(200).send(response);
     return;
 });
 
