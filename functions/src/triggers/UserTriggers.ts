@@ -20,9 +20,6 @@ import PendingUser from "@shared/models/PendingUser";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminFirestoreService, {Transaction} from "@admin/services/AdminFirestoreService";
 
-
-const userService = AdminUserService.getSharedInstance();
-const memberService = AdminCactusMemberService.getSharedInstance();
 const mailchimpService = MailchimpService.getSharedInstance();
 const slackService = AdminSlackService.getSharedInstance();
 
@@ -312,77 +309,10 @@ function createSlackMessage(args: SlackMessageInput): SlackMessage {
  * @return {Promise<void>}
  */
 export async function onDelete(user: admin.auth.UserRecord) {
-    const deletedUser = await userService.delete(user.uid);
-    const attachment: SlackAttachment = {
-        text: `:ghost: ${user.email} has been deleted`,
-        color: AttachmentColor.warning
-    };
-
-    attachment.ts = `${(new Date().getTime() / 1000)}`;
-
-    const fields: SlackAttachmentField[] = [
-        {
-            title: "User ID",
-            value: user.uid,
-            short: false,
-        },
-        {
-            title: "Email",
-            value: user.email || '--',
-            short: false,
-        },
-    ];
-
-    if (user.phoneNumber) {
-        fields.push({
-            title: "Phone Number",
-            value: user.phoneNumber,
-            short: false,
-        })
+    const email = user.email;
+    if (!email) {
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${user.toJSON()}\`\`\``);
+        return
     }
-
-    if (user.displayName) {
-        fields.push({
-            title: "Display Name",
-            value: user.displayName,
-            short: false,
-        })
-    }
-
-    fields.push({
-        title: "Sign-in Method(s)",
-        value: user.providerData.map(p => p.providerId).join(", "),
-        short: false
-    });
-
-    if (deletedUser) {
-        let cactusMember: CactusMember | undefined = undefined;
-        if (deletedUser.cactusMemberId) {
-            cactusMember = await memberService.getById(deletedUser.cactusMemberId);
-            await memberService.delete(deletedUser.cactusMemberId);
-        }
-
-        fields.push(
-            {
-                title: "Cactus Member ID",
-                value: deletedUser.cactusMemberId || '--',
-                short: false,
-            });
-
-        let webIdLink: string | undefined;
-        if (cactusMember && cactusMember.mailchimpListMember) {
-            webIdLink = `<https://us20.admin.mailchimp.com/lists/members/view?id=${cactusMember.mailchimpListMember.web_id}|${cactusMember.mailchimpListMember.web_id}>`;
-            fields.push({
-                title: "Mailchimp Web ID",
-                value: webIdLink,
-                short: false,
-            })
-        }
-    } else {
-        attachment.text = `:ghost: No user found in DB. Deleted them from Auth.`;
-    }
-    attachment.fields = fields;
-
-    const message: SlackMessage = {attachments: [attachment]};
-    await slackService.sendActivityNotification(message);
+    await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, userRecord: user});
 }

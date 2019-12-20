@@ -300,15 +300,15 @@ export default class AdminUserService {
             {
                 text: `Deleted Items\n\`\`\`` +
                     `Auth User Deleted: ${results.userRecord ? results.userRecordDeleted ?? false : "No User Record Found"}\n` +
-                    `${Collection.members}: ${results.documentsDeleted![Collection.members] || 0}\n` +
-                    `${Collection.users}: ${results.documentsDeleted![Collection.users] || 0}\n` +
-                    `${Collection.sentPrompts}: ${results.documentsDeleted![Collection.sentPrompts] || 0}\n` +
-                    `${Collection.reflectionResponses}: ${results.documentsDeleted![Collection.reflectionResponses] || 0}\n` +
-                    `${Collection.emailReply}: ${results.documentsDeleted![Collection.emailReply] || 0}\n` +
-                    `${Collection.pendingUsers}: ${results.documentsDeleted![Collection.pendingUsers] || 0}\n` +
-                    `${Collection.socialInvites}: ${results.documentsDeleted![Collection.socialInvites] || 0}\n` +
-                    `${Collection.socialConnections}: ${results.documentsDeleted![Collection.socialConnections] || 0}\n` +
-                    `${Collection.socialConnectionRequests}: ${results.documentsDeleted![Collection.socialConnectionRequests] || 0}\n` +
+                    `${Collection.members}: ${results.documentsDeleted[Collection.members] || 0}\n` +
+                    `${Collection.users}: ${results.documentsDeleted[Collection.users] || 0}\n` +
+                    `${Collection.sentPrompts}: ${results.documentsDeleted[Collection.sentPrompts] || 0}\n` +
+                    `${Collection.reflectionResponses}: ${results.documentsDeleted[Collection.reflectionResponses] || 0}\n` +
+                    `${Collection.emailReply}: ${results.documentsDeleted[Collection.emailReply] || 0}\n` +
+                    `${Collection.pendingUsers}: ${results.documentsDeleted[Collection.pendingUsers] || 0}\n` +
+                    `${Collection.socialInvites}: ${results.documentsDeleted[Collection.socialInvites] || 0}\n` +
+                    `${Collection.socialConnections}: ${results.documentsDeleted[Collection.socialConnections] || 0}\n` +
+                    `${Collection.socialConnectionRequests}: ${results.documentsDeleted[Collection.socialConnectionRequests] || 0}\n` +
                     `\`\`\``
             }
         ];
