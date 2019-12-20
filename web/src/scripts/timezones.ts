@@ -201,7 +201,7 @@ export function findByZoneName(zoneName?: string): ZoneInfo | undefined {
     if (!zoneName) {
         return;
     }
-    let zoneInfo = zonesByName[zoneName];
+    const zoneInfo = zonesByName[zoneName];
     if (zoneInfo) {
         return zoneInfo;
     }
