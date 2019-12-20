@@ -4,7 +4,7 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import {Unsubscribe} from "@web/firebase";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import SocialConnectionService from "@web/services/SocialConnectionService";
-import {SocialConnectionRequest, SocialConnectionRequestFields} from "@shared/models/SocialConnectionRequest";
+import SocialConnectionRequest, {SocialConnectionRequestFields} from "@shared/models/SocialConnectionRequest";
 
 
 export default class SocialConnectionRequestService {
@@ -86,16 +86,16 @@ export default class SocialConnectionRequestService {
         try {
             /* use generated doc ids in lew of having unique index constraints */
             const memberConnection = new SocialConnection();
-                  memberConnection.id = this.generateDocId(connectionRequest.memberId, connectionRequest.friendMemberId);
-                  memberConnection.memberId = connectionRequest.memberId;
-                  memberConnection.friendMemberId = connectionRequest.friendMemberId;
+            memberConnection.id = this.generateDocId(connectionRequest.memberId, connectionRequest.friendMemberId);
+            memberConnection.memberId = connectionRequest.memberId;
+            memberConnection.friendMemberId = connectionRequest.friendMemberId;
 
             const resultMember = await SocialConnectionService.sharedInstance.save(memberConnection);
 
             const friendConnection = new SocialConnection();
-                  friendConnection.id = this.generateDocId(connectionRequest.friendMemberId, connectionRequest.memberId);
-                  friendConnection.memberId = connectionRequest.friendMemberId;
-                  friendConnection.friendMemberId = connectionRequest.memberId;
+            friendConnection.id = this.generateDocId(connectionRequest.friendMemberId, connectionRequest.memberId);
+            friendConnection.memberId = connectionRequest.friendMemberId;
+            friendConnection.friendMemberId = connectionRequest.memberId;
 
             const resultFriend = await SocialConnectionService.sharedInstance.save(friendConnection);
 

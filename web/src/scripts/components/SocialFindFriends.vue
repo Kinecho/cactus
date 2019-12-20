@@ -118,7 +118,7 @@
     import SocialConnection from "@shared/models/SocialConnection";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import ImportedContactService from '@web/services/ImportedContactService';
-    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
+    import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);

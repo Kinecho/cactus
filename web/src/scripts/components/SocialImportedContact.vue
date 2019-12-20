@@ -7,7 +7,7 @@
             <p class="name">{{contact.first_name}} {{contact.last_name}}</p>
             <p class="email">{{contact.email}}</p>
             <div class="invite" v-if="readyToInvite && !sendingInvite && !error">
-                <textarea placeholder="Include an optional note..." v-model="message" />
+                <textarea placeholder="Include an optional note..." v-model="message"/>
                 <button class="primary" @click="sendInvite">Send Invite</button>
                 <button class="tertiary" @click="endInvite">Cancel</button>
             </div>
@@ -22,7 +22,7 @@
             Sending...
         </div>
         <div class="status" v-if="wasInvited">
-            <img class="statusIcon" src="assets/images/check.svg" alt="" />
+            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
             Invited
         </div>
         <div class="status error" v-if="error">
@@ -35,33 +35,29 @@
             You!
         </div>
         <div class="status" v-if="wasFriended || isPendingFriend">
-            <img class="statusIcon" src="assets/images/clock.svg" alt="" />
+            <img class="statusIcon" src="assets/images/clock.svg" alt=""/>
             Requested
         </div>
         <div class="status" v-if="isFriend">
-            <img class="statusIcon" src="assets/images/check.svg" alt="" />
+            <img class="statusIcon" src="assets/images/check.svg" alt=""/>
             Friends
         </div>
         <input-name-modal
-            :showModal="inputNameModalVisible"
-            @close="hideInputNameModal"/>
+                :showModal="inputNameModalVisible"
+                @close="hideInputNameModal"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import {EmailContact} from "@shared/types/EmailContactTypes";
-    import {InviteResult} from "@shared/types/SocialInviteTypes";
-    import {sendInvite} from '@web/social';
+    import {notifyFriendRequest, sendInvite} from '@web/social';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import InputNameModal from "@components/InputNameModal.vue";
     import CactusMember from "@shared/models/CactusMember";
-    import MemberProfile from "@shared/models/MemberProfile";
-    import MemberProfileService from "@web/services/MemberProfileService";
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
-    import {notifyFriendRequest} from '@web/social';
-    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
-    import {ImportedContact, ContactStatus} from "@shared/types/ImportedContactTypes";
+    import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
+    import {ImportedContact} from "@shared/types/ImportedContactTypes";
 
     export default Vue.extend({
         props: {
@@ -87,15 +83,15 @@
             isLoading: boolean,
         } {
             return {
-              contact: this.imported_contact.email_contact,
-              message: '',
-              readyToInvite: false,
-              sendingInvite: false,
-              wasInvited: false,
-              wasFriended: false,
-              error: undefined,
-              inputNameModalVisible: false,
-              isLoading: false
+                contact: this.imported_contact.email_contact,
+                message: '',
+                readyToInvite: false,
+                sendingInvite: false,
+                wasInvited: false,
+                wasFriended: false,
+                error: undefined,
+                inputNameModalVisible: false,
+                isLoading: false
             }
         },
         methods: {
@@ -129,9 +125,9 @@
 
                         if (!existingRequest) {
                             let connectionRequest = new SocialConnectionRequest();
-                                connectionRequest.memberId = this.member.id;
-                                connectionRequest.friendMemberId = this.imported_contact.memberId;
-                                connectionRequest.sentAt = new Date();
+                            connectionRequest.memberId = this.member.id;
+                            connectionRequest.friendMemberId = this.imported_contact.memberId;
+                            connectionRequest.sentAt = new Date();
 
                             const result = await SocialConnectionRequestService.sharedInstance.save(connectionRequest);
                             this.wasFriended = true;
@@ -142,7 +138,7 @@
                             return !!result;
                         }
                         return true;
-                    } catch(e) {
+                    } catch (e) {
                         console.error("Failed to send friend request", e);
                         this.error = 'Something went wrong';
                         this.sendingInvite = false;
@@ -182,20 +178,20 @@
             },
             canAddFriend(): boolean {
                 return (this.isExistingMember &&
-                        !this.isLoading &&
-                        !this.sendingInvite &&
-                        !this.error &&
-                        !this.wasFriended &&
-                        !this.isFriend &&
-                        !this.isPendingFriend &&
-                        !this.isYou);
+                    !this.isLoading &&
+                    !this.sendingInvite &&
+                    !this.error &&
+                    !this.wasFriended &&
+                    !this.isFriend &&
+                    !this.isPendingFriend &&
+                    !this.isYou);
             },
             canInviteContact(): boolean {
                 return (!this.isLoading &&
-                        !this.readyToInvite &&
-                        !this.wasInvited &&
-                        !this.isExistingMember &&
-                        !this.isYou);
+                    !this.readyToInvite &&
+                    !this.wasInvited &&
+                    !this.isExistingMember &&
+                    !this.isYou);
             },
             isYou(): boolean {
                 return ((this.contact && this.contact.email == this.member?.email) ? true : false);

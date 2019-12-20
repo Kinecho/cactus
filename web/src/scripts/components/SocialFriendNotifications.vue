@@ -32,7 +32,7 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import SocialConnection from "@shared/models/SocialConnection";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
+    import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
 
     export default Vue.extend({
         components: {
