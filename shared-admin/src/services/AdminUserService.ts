@@ -45,7 +45,7 @@ export interface DeleteTaskResult {
 export interface DeleteUserResult {
     success: boolean,
     email: string,
-    mailchimpDeleted: boolean,
+    mailchimpDeleted?: boolean,
     userRecord?: UserRecord,
     userRecordDeleted?: boolean,
     users?: User[],
@@ -287,7 +287,7 @@ export default class AdminUserService {
             const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
             if (mailchimpResponse.error) {
                 errors.push(mailchimpResponse.error);
-                result.mailchmpDeleted = false;
+                results.mailchimpDeleted = false;
             }
         } catch (error) {
             results.mailchimpDeleted = false;
