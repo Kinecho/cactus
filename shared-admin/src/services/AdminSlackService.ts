@@ -247,7 +247,7 @@ export default class AdminSlackService {
         }
     }
 
-    async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
+    async  sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.engineering, message);
     }
 

@@ -20,6 +20,7 @@ export default class DeleteUserData extends FirebaseCommand {
     name = "Delete User Data";
     description = "Deletes all data associated with a user from the data base. This action is non-reversable.";
     showInList = true;
+    useAdmin = true;
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         const project = this.project || Project.STAGE;
@@ -47,7 +48,7 @@ export default class DeleteUserData extends FirebaseCommand {
         }
         const email = answers.email;
 
-        const results = await AdminUserService.getSharedInstance().deleteAllDataPermanently({email});
+        const results = await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, adminApp: app});
         console.log(stringifyJSON(results, 2));
 
         // await oldWay(email)

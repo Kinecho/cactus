@@ -22,6 +22,10 @@ export interface GetOptions extends IGetOptions {
     throwOnError?: boolean,
 }
 
+export interface DeleteOptions {
+    transaction?: Transaction
+}
+
 export const DefaultQueryOptions: QueryOptions = {
     includeDeleted: false,
     onlyDeleted: false,
@@ -129,7 +133,7 @@ export default class AdminFirestoreService {
      * @param {{maxAttempts: number | undefined}} options
      * @return {Promise<{}>}
      */
-    async runTransaction(updateFunction: (transaction: Transaction) => Promise<any>, options?: { maxAttempts: number | undefined }): Promise<{}> {
+    async runTransaction(updateFunction: (transaction: Transaction) => Promise<any>, options?: { maxAttempts: number | undefined }): Promise<any> {
         return this.firestore.runTransaction(async t => {
             return await updateFunction(t);
         }, options)
@@ -300,22 +304,37 @@ export default class AdminFirestoreService {
         return model;
     }
 
-    async deletePermanently<T extends BaseModel>(model: T): Promise<T | undefined> {
+    async deletePermanently<T extends BaseModel>(model: T, options?: DeleteOptions): Promise<T | undefined> {
         if (!model.id) {
             return
         }
         const collection = this.getCollectionRefFromModel(model);
 
         const doc = collection.doc(model.id);
-        await doc.delete();
+        if (options?.transaction) {
+            options.transaction.delete(doc);
+        } else {
+            await doc.delete();
+        }
+
         console.log(`Deleted ${model.collection}.${model.id} from the database`);
         return model
     }
 
 
-    async deletePermanentlyForQuery<T extends BaseModel>(query: FirebaseFirestore.Query): Promise<number> {
-        const snapshot = await query.get();
-        const tasks = snapshot.docs.map(doc => {
+    async deletePermanentlyForQuery<T extends BaseModel>(query: FirebaseFirestore.Query, options?: DeleteOptions): Promise<number> {
+        let snapshot;
+        if (options?.transaction) {
+            snapshot = await options.transaction.get(query)
+        } else {
+            snapshot = await query.get();
+        }
+
+        const tasks: Promise<any>[] = snapshot.docs.map(doc => {
+            if (options?.transaction) {
+                options?.transaction?.delete(doc.ref)
+                return Promise.resolve(1)
+            }
             return doc.ref.delete()
         });
 

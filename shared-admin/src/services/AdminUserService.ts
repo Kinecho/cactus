@@ -1,10 +1,13 @@
 import AdminFirestoreService, {GetOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
 import User, {Field} from "@shared/models/User";
 import * as admin from "firebase-admin";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {CactusConfig} from "@shared/CactusConfig";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/services/AdminSlackService";
 import UserRecord = admin.auth.UserRecord;
 
 export interface SubscriberSignupResult {
@@ -26,22 +29,22 @@ export interface SendMagicLinkOptions {
     successPath?: string,
 }
 
+export interface DeleteTaskResult {
+    numDocuments: number,
+    errors?: string[],
+    collectionName: Collection
+}
+
 export interface DeleteUserResult {
+    success: boolean,
     email: string,
     userRecord?: UserRecord,
+    userRecordDeleted?: boolean,
     users?: User[],
     members?: CactusMember[],
-    documentsDeleted?: {
-        sentPrompts: number,
-        reflectionResponses: number,
-        members: number,
-        emailReplies: number,
-        users: number,
-        pendingUsers: number,
-        memberProfiles: number,
-        socialConnections: number,
-        socialConnectionRequests: number,
-        socialInvites: number,
+    errors?: string[],
+    documentsDeleted: {
+        [collection: string]: number,
     }
 }
 
@@ -113,14 +116,14 @@ export default class AdminUserService {
         return foundUser;
     }
 
-    async getAllMatchingEmail(email: string): Promise<User[]> {
+    async getAllMatchingEmail(email: string, options?: GetOptions): Promise<User[]> {
         let searchEmail = email;
         if (email && email.trim()) {
             searchEmail = email.trim().toLowerCase();
         }
 
         const query = firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail);
-        const result = await firestoreService.executeQuery(query, User);
+        const result = await firestoreService.executeQuery(query, User, options);
 
         return result.results;
     }
@@ -161,11 +164,12 @@ export default class AdminUserService {
 
     }
 
-    async deleteAllDataPermanently(options: { email: string, userRecord?: UserRecord }): Promise<DeleteUserResult> {
+    async deleteAllDataPermanently(options: { email: string, userRecord?: UserRecord, dryRun?: boolean, adminApp?: admin.app.App }): Promise<DeleteUserResult> {
         const startTime = new Date().getTime();
-        const {email, userRecord} = options;
-        const results: DeleteUserResult = {email};
+        const {email, userRecord, adminApp = admin} = options;
 
+        const errors: string[] = [];
+        const results: DeleteUserResult = {email, documentsDeleted: {}, success: false};
         const [members, users, firebaseUser] = await Promise.all([
             await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
             await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
@@ -175,20 +179,127 @@ export default class AdminUserService {
                     return;
                 }
                 try {
-                    const u = await (admin.auth().getUserByEmail(email));
+                    const u = await (adminApp.auth().getUserByEmail(email));
+                    console.log("got user from admin", u?.toJSON());
                     resolve(u);
+                    return;
                 } catch (e) {
+                    console.error("Failed to get user from admin");
                     resolve(undefined);
+                    return;
                 }
             })
         ]);
-
+        console.log("Firebase user.uid", firebaseUser?.uid);
         results.members = members;
         results.userRecord = firebaseUser;
         results.users = users;
-
+        const memberIds = members.map(m => m.id).filter(id => !!id) as string[];
         const endTime = new Date().getTime();
         console.log(`Delete user task took ${endTime - startTime}ms`);
+
+        const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
+            return new Promise<DeleteTaskResult>(async resolve => {
+                try {
+                    const count = (await job);
+                    resolve({
+                        numDocuments: count,
+                        collectionName: collection
+                    })
+                } catch (error) {
+                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
+                }
+            })
+        };
+
+        const singleGenerator = (collection: Collection, job: Promise<BaseModel | undefined>): Promise<DeleteTaskResult> => {
+            return new Promise<DeleteTaskResult>(async resolve => {
+                try {
+                    const model = (await job);
+                    resolve({
+                        numDocuments: model ? 1 : 0,
+                        collectionName: collection
+                    })
+                } catch (error) {
+                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
+                }
+            })
+        };
+
+        const tasks: Promise<DeleteTaskResult>[] = [
+            ...(members.map(member => generator(Collection.reflectionResponses, AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member)))),
+            ...(members.map(member => generator(Collection.sentPrompts, AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email})))),
+            ...(members.map(member => singleGenerator(Collection.members, AdminFirestoreService.getSharedInstance().deletePermanently(member)))),
+            ...(users.map(user => singleGenerator(Collection.users, AdminFirestoreService.getSharedInstance().deletePermanently(user)))),
+        ];
+
+        const taskResults = await Promise.all(tasks);
+        console.log("AdminUserService.deleteAllData: task results", taskResults);
+
+        //todo: aggregate results
+
+        taskResults.reduce((agg, r) => {
+            agg.errors?.concat(r.errors || []);
+            agg.documentsDeleted[r.collectionName] = r.numDocuments;
+            return agg;
+        }, results);
+
+        results.success = true;
+
+        try {
+            const adminRecord = results.userRecord || await adminApp.auth().getUserByEmail(email);
+            if (adminRecord) {
+                results.userRecord = adminRecord;
+                await adminApp.auth().deleteUser(adminRecord.uid);
+                results.userRecordDeleted = true;
+            } else {
+                results.userRecordDeleted = false;
+            }
+        } catch (error) {
+
+            if (error.code !== "auth/user-not-found") {
+                console.error("Can't delete user record from auth", error);
+                errors.push(`${error.code} Failed to delete user record ${error}`.trim());
+            }
+            results.userRecordDeleted = false;
+        }
+        results.errors = errors;
+
+        const userIdSet = new Set(users.map(u => u.id).concat(results.userRecord?.uid).filter(Boolean));
+        const attachments: SlackAttachment[] = [
+            {
+                title: `:ghost: Deleted all data for ${email}`,
+                text: `\`\`\`` +
+                    `UserID(s): ${Array.from(userIdSet).join(", ") || "none"}\n` +
+                    `MemberID(s): ${memberIds.join(", ") || "none"}\n` +
+                    `Email: ${email}\n` +
+                    "\`\`\`"
+            },
+            {
+                text: `Deleted Items\n\`\`\`` +
+                    `Auth User Deleted: ${results.userRecord ? results.userRecordDeleted ?? false : "No User Record Found"}\n` +
+                    `${Collection.members}: ${results.documentsDeleted![Collection.members] || 0}\n` +
+                    `${Collection.users}: ${results.documentsDeleted![Collection.users] || 0}\n` +
+                    `${Collection.sentPrompts}: ${results.documentsDeleted![Collection.sentPrompts] || 0}\n` +
+                    `${Collection.reflectionResponses}: ${results.documentsDeleted![Collection.reflectionResponses] || 0}\n` +
+                    `${Collection.emailReply}: ${results.documentsDeleted![Collection.emailReply] || 0}\n` +
+                    `${Collection.pendingUsers}: ${results.documentsDeleted![Collection.pendingUsers] || 0}\n` +
+                    `\`\`\``
+            }
+        ];
+
+        if (errors && errors.length > 0) {
+            attachments.push({
+                title: "Errors",
+                color: AttachmentColor.error,
+                text: errors.join("\n"),
+            })
+        }
+
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+            text: "",
+            attachments,
+        });
 
         return results;
     }
