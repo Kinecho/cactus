@@ -1,5 +1,6 @@
 import AdminFirestoreService, {
-    CollectionReference, DefaultGetOptions,
+    CollectionReference,
+    DefaultGetOptions,
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
@@ -386,11 +387,10 @@ export default class AdminCactusMemberService {
         return results.results;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, forceUpdate: boolean } = {
+    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
         useDefault: false,
-        forceUpdate: false,
     }): Promise<UpdateSendPromptUTCResult> {
-        const {useDefault, forceUpdate} = options;
+        const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
@@ -401,24 +401,27 @@ export default class AdminCactusMemberService {
         console.log("before", JSON.stringify(beforeUTC));
         console.log("afterUTC", JSON.stringify(afterUTC));
 
+        const denverUTCDefault = getSendTimeUTC({
+            forDate: new Date(),
+            timeZone: 'America/Denver',
+            sendTime: DEFAULT_PROMPT_SEND_TIME,
+        });
 
         const {minute: afterMin, hour: afterHour} = afterUTC || {};
         const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
 
-        if (afterUTC && forceUpdate || (afterMin !== beforeMinute && afterHour !== beforeHour)) {
+        if (afterUTC && afterMin !== beforeMinute && afterHour !== beforeHour) {
             console.log("Member has changes, saving them");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
             console.log("saved changes.");
             return {updated: true, promptSendTimeUTC: afterUTC};
-        } else if (useDefault && !afterUTC) {
+        } else if (useDefault && !afterUTC && denverUTCDefault) {
             console.log("No sendPromptTime for UTC found. using the default value");
-            const denverUTC = getSendTimeUTC({
-                forDate: new Date(),
-                timeZone: 'America/Denver',
-                sendTime: DEFAULT_PROMPT_SEND_TIME,
-            });
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTC});
-            return {updated: true, promptSendTimeUTC: denverUTC};
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
+            return {updated: true, promptSendTimeUTC: denverUTCDefault};
+        } else if (useDefault && !denverUTCDefault) {
+            console.error("No default value was created.");
+            return {updated: false, promptSendTimeUTC: beforeUTC}
         } else {
             console.log("No changes, not saving");
             return {updated: false, promptSendTimeUTC: beforeUTC}
