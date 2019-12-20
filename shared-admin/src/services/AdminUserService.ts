@@ -15,6 +15,7 @@ import UserRecord = admin.auth.UserRecord;
 import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
+import MailchimpService from "@admin/services/MailchimpService";
 
 export interface SubscriberSignupResult {
     success: boolean,
@@ -44,6 +45,7 @@ export interface DeleteTaskResult {
 export interface DeleteUserResult {
     success: boolean,
     email: string,
+    mailchimpDeleted: boolean,
     userRecord?: UserRecord,
     userRecordDeleted?: boolean,
     users?: User[],
@@ -280,6 +282,17 @@ export default class AdminUserService {
             }
             results.userRecordDeleted = false;
         }
+
+        try {
+            const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
+            if (mailchimpResponse.error) {
+                errors.push(mailchimpResponse.error);
+                result.mailchmpDeleted = false;
+            }
+        } catch (error) {
+            results.mailchimpDeleted = false;
+        }
+
         results.errors = errors;
         const createdAt = members.find(m => m.createdAt)?.createdAt;
 
@@ -300,6 +313,7 @@ export default class AdminUserService {
             {
                 text: `Deleted Items\n\`\`\`` +
                     `Auth User Deleted: ${results.userRecord ? results.userRecordDeleted ?? false : "No User Record Found"}\n` +
+                    `Mailchimp Member Deleted: ${results.mailchimpDeleted}\n` +
                     `${Collection.members}: ${results.documentsDeleted[Collection.members] || 0}\n` +
                     `${Collection.users}: ${results.documentsDeleted[Collection.users] || 0}\n` +
                     `${Collection.sentPrompts}: ${results.documentsDeleted[Collection.sentPrompts] || 0}\n` +

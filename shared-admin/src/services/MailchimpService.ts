@@ -172,7 +172,7 @@ export default class MailchimpService {
 
     }
 
-    async deleteMemberPermanently(email: string): Promise<any> {
+    async deleteMemberPermanently(email: string): Promise<any|{error:any}> {
         const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/actions/delete-permanent`;
         try {
             const response = await this.request.post(url, {
@@ -185,9 +185,9 @@ export default class MailchimpService {
         } catch (e) {
             if (e.isAxiosError) {
                 const err = e as AxiosError;
-                return err.response && err.response.data
+                return {error: err.response && err.response.data}
             }
-            return "Unable to delete member from mailchimp"
+            return {error: "Unable to delete member from mailchimp"}
         }
 
     }
