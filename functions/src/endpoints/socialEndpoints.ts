@@ -194,6 +194,7 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
     const requestUserId = await getAuthUserId(req);
     const authDate = new Date();
     console.log(`Got the auth user after ${authDate.getTime() - startDate.getTime()}`);
+    console.log("request user id is", requestUserId);
     if (!requestUserId) {
         console.log("No auth user was found on the request");
         resp.sendStatus(401);

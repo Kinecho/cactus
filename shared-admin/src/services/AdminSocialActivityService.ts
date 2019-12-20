@@ -36,6 +36,7 @@ export default class AdminSocialActivityService {
     }
 
     async getActivityFeedForMember(memberId: string): Promise<SocialActivityFeedEvent[]> {
+        console.log("Fetching activity feed events for ", memberId);
         const startDate = new Date();
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
 
@@ -44,7 +45,7 @@ export default class AdminSocialActivityService {
         if (friendIds.length === 0) {
             return [];
         }
-        
+
         // include the member viewing in the feed
         const feedMemberIds = friendIds.concat([memberId]);
         const query = this.getReflectionResponseCollectionRef().where(ReflectionResponseField.cactusMemberId, 'in', feedMemberIds)
