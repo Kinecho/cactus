@@ -10,7 +10,7 @@ export function unseenActivityCount(options: { member: CactusMember, events: Soc
 
         if (!lastSeenOccurredAt) {
             count = events?.length || 0;
-        } else if (lastSeenOccurredAt && events) {
+        } else if (lastSeenOccurredAt && lastSeenOccurredAt?.getTime && events) {
             const lastSeenMs = lastSeenOccurredAt.getTime();
 
             //this assumes the events are ordered
