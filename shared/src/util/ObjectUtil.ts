@@ -1,34 +1,34 @@
-export function isNonEmptyObject(input:any):boolean{
-    if (isNull(input)){
+export function isNonEmptyObject(input: any): boolean {
+    if (isNull(input)) {
         return false;
     }
     return typeof (input) === "object" && !Array.isArray(input) && Object.keys(input).length > 0;
 }
 
-export function isArray(input:any){
-    if (isNull(input)){
+export function isArray(input: any) {
+    if (isNull(input)) {
         return false;
     }
     return Array.isArray(input);
 }
 
-export function isNull(input:any):boolean {
- return input === null || input === undefined;
+export function isNull(input: any): boolean {
+    return input === null || input === undefined;
 }
 
-export function isNotNull(input:any):boolean{
+export function isNotNull(input: any): boolean {
     return !isNull(input);
 }
 
-export function isDate(input:any){
+export function isDate(input: any) {
     return isNotNull(input) && input instanceof Date;
 }
 
-export function isNumber(input:any){
+export function isNumber(input: any) {
     try {
         const number = Number(input);
-        return isNotNull(number) && typeof(input) === "number";
-    } catch (error){
+        return isNotNull(number) && typeof (input) === "number";
+    } catch (error) {
         return false;
     }
 }
@@ -39,9 +39,9 @@ export function isNumber(input:any){
  * @param {(value: any) => Promise<void>} transform
  * @return {Promise<any>}
  */
-export async function transformObjectAsync(input:any, transform:(value:any) => Promise<any>):Promise<any> {
-    if (isArray(input)){
-        const tasks = input.map((entry:any) => transformObjectAsync(entry, transform));
+export async function transformObjectAsync(input: any, transform: (value: any) => Promise<any>): Promise<any> {
+    if (isArray(input)) {
+        const tasks = input.map((entry: any) => transformObjectAsync(entry, transform));
         return await Promise.all(tasks);
         // input.forEach(async (entry:any) => await transformObject(entry, transform))
     }
@@ -49,7 +49,7 @@ export async function transformObjectAsync(input:any, transform:(value:any) => P
     // input = await (transform(input))
     const rootTransform = await transform(input);
 
-    if (rootTransform !== input){
+    if (rootTransform !== input) {
         return rootTransform;
     }
 
@@ -59,13 +59,13 @@ export async function transformObjectAsync(input:any, transform:(value:any) => P
             const transformed = await transform(value);
 
             //if the transformation did something, don't loop through the value
-            if (value === transformed){
+            if (value === transformed) {
                 value = await transformObjectAsync(value, transform);
             } else {
                 value = transformed;
             }
 
-            if (value === undefined){
+            if (value === undefined) {
                 delete input[key]
             } else {
                 input[key] = value;
@@ -85,15 +85,15 @@ export async function transformObjectAsync(input:any, transform:(value:any) => P
  * @param {(value: any) => Promise<void>} transform
  * @return {any}
  */
-export function transformObjectSync(input:any, transform:(value:any) => any):any {
-    if (isArray(input)){
-        return input.map((entry:any) => transformObjectSync(entry, transform));
+export function transformObjectSync(input: any, transform: (value: any) => any): any {
+    if (isArray(input)) {
+        return input.map((entry: any) => transformObjectSync(entry, transform));
     }
 
     // input = await (transform(input))
     const rootTransform = transform(input);
 
-    if (rootTransform !== input){
+    if (rootTransform !== input) {
         return rootTransform;
     }
 
@@ -103,13 +103,13 @@ export function transformObjectSync(input:any, transform:(value:any) => any):any
             const transformed = transform(value);
 
             //if the transformation did something, don't loop through the value
-            if (value === transformed){
+            if (value === transformed) {
                 value = transformObjectSync(value, transform);
             } else {
                 value = transformed;
             }
 
-            if (value === undefined){
+            if (value === undefined) {
                 delete input[key]
             } else {
                 input[key] = value;
@@ -118,4 +118,23 @@ export function transformObjectSync(input:any, transform:(value:any) => any):any
 
     }
     return input;
+}
+
+
+export function stringifyJSON(input: any, space?: number): string {
+    function replacer(key: string, value: any) {
+        if (value && typeof value === "object") {
+            if (value && value.toJSON) {
+                try {
+                    console.log("Calling toJSON on object");
+                    return value.toJSON()
+                } catch (error) {
+                    return value;
+                }
+            }
+        }
+        return value;
+    }
+
+    return JSON.stringify(input, replacer, space);
 }

@@ -1,8 +1,21 @@
 import AdminFirestoreService, {GetOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
 import User, {Field} from "@shared/models/User";
 import * as admin from "firebase-admin";
-import {Collection} from "@shared/FirestoreBaseModels";
+import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {CactusConfig} from "@shared/CactusConfig";
+import CactusMember from "@shared/models/CactusMember";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import AdminSentPromptService from "@admin/services/AdminSentPromptService";
+import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/services/AdminSlackService";
+import AdminPendingUserService from "@admin/services/AdminPendingUserService";
+import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
+import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
+import UserRecord = admin.auth.UserRecord;
+import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
+import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
+import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
+import MailchimpService from "@admin/services/MailchimpService";
 
 export interface SubscriberSignupResult {
     success: boolean,
@@ -21,6 +34,26 @@ export interface SendMagicLinkResult {
 
 export interface SendMagicLinkOptions {
     successPath?: string,
+}
+
+export interface DeleteTaskResult {
+    numDocuments: number,
+    errors?: string[],
+    collectionName: Collection
+}
+
+export interface DeleteUserResult {
+    success: boolean,
+    email: string,
+    mailchimpDeleted?: boolean,
+    userRecord?: UserRecord,
+    userRecordDeleted?: boolean,
+    users?: User[],
+    members?: CactusMember[],
+    errors?: string[],
+    documentsDeleted: {
+        [collection: string]: number,
+    }
 }
 
 const DefaultSendMagicLinkOptions = {
@@ -91,6 +124,18 @@ export default class AdminUserService {
         return foundUser;
     }
 
+    async getAllMatchingEmail(email: string, options?: GetOptions): Promise<User[]> {
+        let searchEmail = email;
+        if (email && email.trim()) {
+            searchEmail = email.trim().toLowerCase();
+        }
+
+        const query = firestoreService.getCollectionRef(Collection.users).where(Field.email, "==", searchEmail);
+        const result = await firestoreService.executeQuery(query, User, options);
+
+        return result.results;
+    }
+
     async getById(id?: string | undefined, options?: GetOptions): Promise<User | undefined> {
         if (!id) {
             return undefined;
@@ -127,4 +172,177 @@ export default class AdminUserService {
 
     }
 
+    async deleteAllDataPermanently(options: { email: string, userRecord?: UserRecord, dryRun?: boolean, adminApp?: admin.app.App }): Promise<DeleteUserResult> {
+        const startTime = new Date().getTime();
+        const {email, userRecord, adminApp = admin} = options;
+
+        const errors: string[] = [];
+        const results: DeleteUserResult = {email, documentsDeleted: {}, success: false};
+        const [members, users, firebaseUser] = await Promise.all([
+            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
+            await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
+            await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
+                if (userRecord) {
+                    resolve(userRecord);
+                    return;
+                }
+                try {
+                    const u = await (adminApp.auth().getUserByEmail(email));
+                    console.log("got user from admin", u?.toJSON());
+                    resolve(u);
+                    return;
+                } catch (e) {
+                    console.error("Failed to get user from admin");
+                    resolve(undefined);
+                    return;
+                }
+            })
+        ]);
+        console.log("Firebase user.uid", firebaseUser?.uid);
+        results.members = members;
+        results.userRecord = firebaseUser;
+        results.users = users;
+        const memberIds = members.map(m => m.id).filter(id => !!id) as string[];
+        const endTime = new Date().getTime();
+        console.log(`Delete user task took ${endTime - startTime}ms`);
+
+        const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
+            return new Promise<DeleteTaskResult>(async resolve => {
+                try {
+                    console.log("starting generator for collection", collection);
+                    const count = (await job);
+                    resolve({
+                        numDocuments: count,
+                        collectionName: collection
+                    })
+                } catch (error) {
+                    console.error(`"error in generator for collection ${collection}`, error);
+                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
+                }
+            })
+        };
+
+        const singleGenerator = (collection: Collection, job: Promise<BaseModel | undefined>): Promise<DeleteTaskResult> => {
+            return new Promise<DeleteTaskResult>(async resolve => {
+                try {
+                    console.log("Starting job for collection", collection);
+                    const model = (await job);
+                    resolve({
+                        numDocuments: model ? 1 : 0,
+                        collectionName: collection
+                    })
+                } catch (error) {
+                    console.error(`Failed to delete ${collection}`, error);
+                    resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]});
+                }
+            })
+        };
+
+        const tasks: Promise<DeleteTaskResult>[] = [
+            ...(members.map(member => generator(Collection.reflectionResponses, AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member)))),
+            ...(members.map(member => generator(Collection.sentPrompts, AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email})))),
+            ...(members.map(member => singleGenerator(Collection.members, AdminFirestoreService.getSharedInstance().deletePermanently(member)))),
+            ...(memberIds.map(memberId => generator(Collection.memberProfiles, AdminMemberProfileService.getSharedInstance().deletePermanently(memberId)))),
+            ...(memberIds.map(memberId => generator(Collection.socialConnections, AdminSocialConnectionService.getSharedInstance().deleteConnectionsPermanentlyForMember(memberId)))),
+            ...(memberIds.map(memberId => generator(Collection.socialConnectionRequests, AdminSocialConnectionRequestService.getSharedInstance().deleteConnectionRequestsPermanentlyForMember(memberId)))),
+            ...(users.map(user => singleGenerator(Collection.users, AdminFirestoreService.getSharedInstance().deletePermanently(user)))),
+            generator(Collection.pendingUsers, AdminPendingUserService.getSharedInstance().deletePermanentlyForEmail(email)),
+            generator(Collection.emailReply, AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email)),
+            generator(Collection.socialInvites, AdminSocialInviteService.getSharedInstance().deleteSocialInvitesPermanently({
+                memberIds: memberIds,
+                email
+            }))
+        ];
+
+        const taskResults = await Promise.all(tasks);
+
+        console.log("AdminUserService.deleteAllData: task results", taskResults);
+        taskResults.reduce((agg, r) => {
+            agg.errors?.concat(r.errors || []);
+            agg.documentsDeleted[r.collectionName] = r.numDocuments;
+            return agg;
+        }, results);
+
+        results.success = true;
+
+        try {
+            const adminRecord = results.userRecord || await adminApp.auth().getUserByEmail(email);
+            if (adminRecord) {
+                results.userRecord = adminRecord;
+                await adminApp.auth().deleteUser(adminRecord.uid);
+                results.userRecordDeleted = true;
+            } else {
+                results.userRecordDeleted = false;
+            }
+        } catch (error) {
+
+            if (error.code !== "auth/user-not-found") {
+                console.error("Can't delete user record from auth", error);
+                errors.push(`${error.code} Failed to delete user record ${error}`.trim());
+            }
+            results.userRecordDeleted = false;
+        }
+
+        try {
+            const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
+            console.log("mailchimp response", mailchimpResponse);
+            if (mailchimpResponse.error) {
+                errors.push(mailchimpResponse.error);
+                results.mailchimpDeleted = false;
+            } else {
+                results.mailchimpDeleted = true;
+            }
+        } catch (error) {
+            results.mailchimpDeleted = false;
+        }
+
+        results.errors = errors;
+        const createdAt = members.find(m => m.createdAt)?.createdAt;
+
+        const userIdSet = new Set(users.map(u => u.id).concat(results.userRecord?.uid).filter(Boolean));
+        const attachments: SlackAttachment[] = [
+            {
+                title: `:ghost: Deleted all data for ${email}`,
+                text: `\`\`\`` +
+                    `UserID(s): ${Array.from(userIdSet).join(", ") || "none"}\n` +
+                    `MemberID(s): ${memberIds.join(", ") || "none"}\n` +
+                    `Email: ${email}\n` +
+                    `Joined At: ${createdAt ? createdAt.toLocaleString('en-US', {
+                        timeZone: 'America/Denver',
+                        timeZoneName: 'short'
+                    }) : "unknown"}` +
+                    "\`\`\`"
+            },
+            {
+                text: `Deleted Items\n\`\`\`` +
+                    `Auth User Deleted: ${results.userRecord ? results.userRecordDeleted ?? false : "No User Record Found"}\n` +
+                    `Mailchimp Member Deleted: ${results.mailchimpDeleted || "false"}\n` +
+                    `${Collection.members}: ${results.documentsDeleted[Collection.members] || 0}\n` +
+                    `${Collection.users}: ${results.documentsDeleted[Collection.users] || 0}\n` +
+                    `${Collection.sentPrompts}: ${results.documentsDeleted[Collection.sentPrompts] || 0}\n` +
+                    `${Collection.reflectionResponses}: ${results.documentsDeleted[Collection.reflectionResponses] || 0}\n` +
+                    `${Collection.emailReply}: ${results.documentsDeleted[Collection.emailReply] || 0}\n` +
+                    `${Collection.pendingUsers}: ${results.documentsDeleted[Collection.pendingUsers] || 0}\n` +
+                    `${Collection.socialInvites}: ${results.documentsDeleted[Collection.socialInvites] || 0}\n` +
+                    `${Collection.socialConnections}: ${results.documentsDeleted[Collection.socialConnections] || 0}\n` +
+                    `${Collection.socialConnectionRequests}: ${results.documentsDeleted[Collection.socialConnectionRequests] || 0}\n` +
+                    `\`\`\``
+            }
+        ];
+
+        if (errors && errors.length > 0) {
+            attachments.push({
+                title: "Errors",
+                color: AttachmentColor.error,
+                text: errors.join("\n"),
+            })
+        }
+
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+            text: "",
+            attachments,
+        });
+
+        return results;
+    }
 }

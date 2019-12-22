@@ -2,18 +2,11 @@ import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {InviteResult, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
 import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
-import {
-    ActivitySummaryResponse,
-    SocialActivityFeedEvent,
-    SocialActivityFeedRequest,
-    SocialActivityFeedResponse
-} from "@shared/types/SocialTypes";
+import {ActivitySummaryResponse, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
 import {getAuth} from "@web/firebase";
 import MemberProfileService from '@web/services/MemberProfileService';
-import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest";
+import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {unseenActivityCount} from "@shared/util/SocialUtil";
 import {AxiosError} from "axios";
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {

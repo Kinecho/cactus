@@ -6,19 +6,14 @@ import {Project} from "@scripts/config"
 import * as prompts from "prompts"
 import {isValidEmail} from "@shared/util/StringUtil";
 import chalk from "chalk";
-import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminUserService from "@admin/services/AdminUserService";
-import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import AdminSlackService from "@admin/services/AdminSlackService";
-import AdminSentPromptService from "@admin/services/AdminSentPromptService";
-import MailchimpService from "@admin/services/MailchimpService";
-import AdminEmailReplyService from "@admin/services/AdminEmailReplyService";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 export default class DeleteUserData extends FirebaseCommand {
     name = "Delete User Data";
     description = "Deletes all data associated with a user from the data base. This action is non-reversable.";
     showInList = true;
+    useAdmin = true;
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         const project = this.project || Project.STAGE;
@@ -46,60 +41,7 @@ export default class DeleteUserData extends FirebaseCommand {
         }
         const email = answers.email;
 
-        const [member, user, firebaseUser] = await Promise.all([
-            await AdminCactusMemberService.getSharedInstance().getMemberByEmail(answers.email),
-            await AdminUserService.getSharedInstance().getByEmail(answers.email),
-            await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
-                try {
-                    const u = await (admin.auth().getUserByEmail(answers.email));
-                    resolve(u);
-                } catch (e) {
-                    resolve(undefined);
-                }
-            })
-        ]);
-
-        const deleteTasks: Promise<any>[] = [];
-
-        if (member) {
-            console.log("Cactus Member ID", member.id);
-            deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(member));
-        } else {
-            console.log(chalk.yellow("No member found for email:", answers.email));
-        }
-
-        deleteTasks.push(AdminReflectionResponseService.getSharedInstance().deletePermanentlyForMember(member || {email}));
-        deleteTasks.push(AdminSentPromptService.getSharedInstance().deletePermanentlyForMember(member || {email}));
-        deleteTasks.push(AdminEmailReplyService.getSharedInstance().deletePermanentlyByEmail(email));
-
-        const deletePendingUserTask = AdminPendingUserService.getSharedInstance().deleteForEmail(email);
-
-        if (user) {
-            console.log("Cactus User found");
-            deleteTasks.push(AdminFirestoreService.getSharedInstance().deletePermanently(user))
-        } else {
-            console.log("No cactus user found");
-        }
-
-        if (firebaseUser) {
-            console.log("Found Firebase Auth User");
-            deleteTasks.push(admin.auth().deleteUser(firebaseUser.uid));
-            console.log("Deleted from auth")
-        } else {
-            console.log("No auth user found");
-        }
-
-        const deleteResults = await Promise.all([deletePendingUserTask, ...deleteTasks]);
-        console.log(`Finished deleted ${deleteResults.length} tasks`);
-
-        const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
-        console.log("delete member mailchimp response", mailchimpResponse);
-
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
-            text: `:ghost: Deleted All Member Data for ${email}`
-        });
-
-        return;
+        const results = await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, adminApp: app});
+        console.log(stringifyJSON(results, 2));
     }
-
 }

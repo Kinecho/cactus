@@ -39,4 +39,14 @@ export default class AdminSocialConnectionService {
             return [];
         }
     }
+
+    async deleteConnectionsPermanentlyForMember(memberId: string): Promise<number> {
+        try {
+            const query = this.getCollectionRef().where(SocialConnectionFields.memberId, "==", memberId)
+            return await this.firestoreService.deletePermanentlyForQuery(query)
+        } catch (error) {
+            console.error("Failed to delete admin connections", error);
+            return 0;
+        }
+    }
 }

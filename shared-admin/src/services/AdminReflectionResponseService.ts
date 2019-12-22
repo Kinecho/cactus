@@ -1,4 +1,4 @@
-import AdminFirestoreService, {QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {DeleteOptions, QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
 import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -218,22 +218,19 @@ export default class AdminReflectionResponseService {
 
     }
 
-    async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
-        const tasks: Promise<number>[] = [];
+    async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }, options?: DeleteOptions): Promise<number> {
+        let totalDeleted = 0;
         if (member.email) {
             const query = this.getCollectionRef().where(ReflectionResponseField.memberEmail, "==", member.email);
-            tasks.push(this.firestoreService.deletePermanentlyForQuery(query))
+            const emailNumber = await this.firestoreService.deletePermanentlyForQuery(query, options);
+            totalDeleted += emailNumber;
         }
 
         if (member.id) {
             const query = this.getCollectionRef().where(ReflectionResponseField.cactusMemberId, "==", member.id);
-            tasks.push(this.firestoreService.deletePermanentlyForQuery(query))
+            const idNumber = await this.firestoreService.deletePermanentlyForQuery(query, options);
+            totalDeleted += idNumber;
         }
-
-        const results: number[] = await Promise.all(tasks);
-        const totalDeleted = results.reduce((total, num) => {
-            return total + num
-        }, 0);
 
         console.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
         return totalDeleted

@@ -1,4 +1,4 @@
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {DeleteOptions} from "@admin/services/AdminFirestoreService";
 import SentPrompt, {PromptSendMedium, SentPromptField} from "@shared/models/SentPrompt";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -83,6 +83,12 @@ export default class AdminSentPromptService {
 
     async getAllForCactusMemberId(cactusMemberId: string): Promise<SentPrompt[]> {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", cactusMemberId).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+        const results = await firestoreService.executeQuery(query, SentPrompt);
+        return results.results;
+    }
+
+    async getAllForCactusMemberIds(cactusMemberIds: string[]): Promise<SentPrompt[]> {
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "in", cactusMemberIds).orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
         const results = await firestoreService.executeQuery(query, SentPrompt);
         return results.results;
     }
@@ -189,7 +195,7 @@ export default class AdminSentPromptService {
         createHistoryItem?: boolean,
     }): CreateSentPromptResult {
         const result: CreateSentPromptResult = {};
-        const {member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem=false} = options;
+        const {member, promptContent, prompt, medium = PromptSendMedium.CRON_JOB, createHistoryItem = false} = options;
         let {promptId} = options;
         promptId = promptId || promptContent?.promptId || prompt?.id;
         if (!promptId) {
@@ -460,22 +466,17 @@ export default class AdminSentPromptService {
         return;
     }
 
-    async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }): Promise<number> {
-        const tasks: Promise<number>[] = [];
+    async deletePermanentlyForMember(member: CactusMember | { email?: string, id?: string }, options?: DeleteOptions): Promise<number> {
+        let totalDeleted = 0;
         if (member.email) {
             const query = this.getCollectionRef().where(SentPrompt.Fields.memberEmail, "==", member.email);
-            tasks.push(AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query))
+            totalDeleted += await AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query, options)
         }
 
         if (member.id) {
             const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", member.id);
-            tasks.push(AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query))
+            totalDeleted += await AdminFirestoreService.getSharedInstance().deletePermanentlyForQuery(query, options)
         }
-
-        const results: number[] = await Promise.all(tasks);
-        const totalDeleted = results.reduce((total, num) => {
-            return total + num
-        }, 0);
 
         console.log(`Permanently deleted ${totalDeleted} sent prompts for member ${member.email || member.id}`);
         return totalDeleted

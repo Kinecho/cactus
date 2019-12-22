@@ -8,7 +8,7 @@ export enum SocialConnectionRequestFields {
     sentAt = "sentAt"
 }
 
-export class SocialConnectionRequest extends BaseModel {
+export default class SocialConnectionRequest extends BaseModel {
     readonly collection = Collection.socialConnectionRequests;
     static Fields = SocialConnectionRequestFields;
     memberId!: string;

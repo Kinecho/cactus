@@ -22,6 +22,7 @@ import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminMemberProfileService from "@admin/services/AdminMemberProfileService";
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
+import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     console.log(chalk.green("initializing all services"));
@@ -45,6 +46,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminMemberProfileService.initialize();
     AdminSocialActivityService.initialize();
     AdminSocialConnectionService.initialize();
+    AdminSocialConnectionRequestService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

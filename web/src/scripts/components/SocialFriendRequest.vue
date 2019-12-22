@@ -25,7 +25,7 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import MemberProfileService from '@web/services/MemberProfileService';
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
-    import {SocialConnectionRequest} from "@shared/models/SocialConnectionRequest"
+    import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
 
 
     const copy = CopyService.getSharedInstance().copy;

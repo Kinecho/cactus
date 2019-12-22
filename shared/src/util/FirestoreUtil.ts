@@ -64,7 +64,9 @@ export interface QuerySnapshot {
     docs: QueryDocumentSnapshot[],
     size: number
     empty: boolean,
+
     forEach(callback: (doc: DocumentSnapshot) => void): void,
+
     isEqual(other: QuerySnapshot): boolean,
 }
 
