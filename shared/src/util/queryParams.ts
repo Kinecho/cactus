@@ -25,7 +25,7 @@ export enum QueryParam {
     PREMIUM_DEFAULT = 'prem',
     SOURCE_APP = "source-app",
     USE_PROMPT_ID = "prompt",
-    OPEN_IN_IOS = "ios-link",
+    SHOW_DEEP_LINK = "show-deep-link",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

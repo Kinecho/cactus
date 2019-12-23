@@ -1,4 +1,5 @@
 import {QueryParam} from '@shared/util/queryParams'
+import {QueryParam} from '@shared/util/queryParams'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
@@ -45,8 +46,8 @@ import {QueryParam} from '@shared/util/queryParams'
                 </dropdown-menu>
             </div>
         </div>
-        <div v-if="showIosLink" class="open-in-app-container">
-            <a :href="iosCustomLink">Open in App</a>
+        <div v-if="showAppLink" class="open-in-app-container">
+            <open-deep-link/>
         </div>
     </header>
 </template>
@@ -54,7 +55,7 @@ import {QueryParam} from '@shared/util/queryParams'
 <script lang="ts">
     import Vue from "vue";
     import {FirebaseUser, getAuth} from '@web/firebase'
-    import {appendQueryParams, getInitials} from '@shared/util/StringUtil'
+    import {getInitials} from '@shared/util/StringUtil'
     import {PageRoute} from '@shared/PageRoutes'
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
@@ -73,7 +74,8 @@ import {QueryParam} from '@shared/util/queryParams'
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
-    import {Config} from "@web/config";
+    import OpenDeepLink from "@components/OpenDeepLink.vue";
+    import {isIOSDevice} from "@web/DeviceUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -88,7 +90,6 @@ import {QueryParam} from '@shared/util/queryParams'
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number,
-        showIosLink: boolean,
     }
 
     export default Vue.extend({
@@ -97,15 +98,12 @@ import {QueryParam} from '@shared/util/queryParams'
         },
         components: {
             DropdownMenu,
+            OpenDeepLink,
         },
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
-            if (NO_NAV !== undefined) {
+            if (NO_NAV !== null) {
                 this.hidden = true;
-            }
-
-            if (getQueryParam(QueryParam.OPEN_IN_IOS) !== undefined) {
-                this.showIosLink = true;
             }
 
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
@@ -160,14 +158,11 @@ import {QueryParam} from '@shared/util/queryParams'
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
-                showIosLink: false,
             }
         },
         computed: {
-            iosCustomLink(): string {
-                const hostPath = window.location.href.split("//")[1];
-                const withParams = appendQueryParams(hostPath, {[QueryParam.OPEN_IN_IOS]: true});
-                return `${Config.appCustomScheme}://${withParams}`
+            showAppLink(): boolean {
+                return isIOSDevice() || !!getQueryParam(QueryParam.SHOW_DEEP_LINK);
             },
             loggedIn(): boolean {
                 return !!this.user;
@@ -505,6 +500,11 @@ import {QueryParam} from '@shared/util/queryParams'
             height: 3.2rem;
             width: 3.2rem;
         }
+    }
+
+    .open-in-app-container {
+        padding: 1rem;
+        margin-top: 2rem;
     }
 
 </style>

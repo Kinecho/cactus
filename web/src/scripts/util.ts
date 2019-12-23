@@ -214,14 +214,14 @@ export function getAllQueryParams(url: string = window.location.search): { [name
     }
 }
 
-export function getQueryParam(name: QueryParam): string | null | undefined {
+export function getQueryParam(name: QueryParam): string | null {
     try {
         const params = qs.parse(window.location.search, {
             ignoreQueryPrefix: true
         });
 
 
-        return params[name];
+        return params[name] ?? null;
         // return params.get(name);
     } catch (e) {
         console.error("browser does not support url params", e);

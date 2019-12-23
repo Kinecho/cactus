@@ -8,6 +8,31 @@ export function getDeviceDimensions(): { height: number, width: number } {
 
 }
 
+export enum DeviceType {
+    IOS,
+    ANDROID,
+    DESKTOP,
+}
+
+export function getDeviceType(): DeviceType {
+    if (isIOSDevice()) {
+        return DeviceType.IOS
+    }
+    if (isAndroidDevice()) {
+        return DeviceType.ANDROID
+    }
+
+    return DeviceType.DESKTOP;
+}
+
+export function isIOSDevice(): boolean {
+    return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+}
+
+export function isAndroidDevice(): boolean {
+    return /(android)/i.test(navigator.userAgent);
+}
+
 export function getDeviceTimeZone(): string | undefined {
     try {
         const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
