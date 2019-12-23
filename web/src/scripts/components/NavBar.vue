@@ -1,5 +1,3 @@
-import {QueryParam} from '@shared/util/queryParams'
-import {QueryParam} from '@shared/util/queryParams'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
