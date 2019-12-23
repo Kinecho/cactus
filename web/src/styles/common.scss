@@ -39,48 +39,6 @@ body {
   }
 }
 
-header {
-    background-color: white;
-    padding: .8rem 1.6rem;
-
-    @include r(374) {
-        padding: 1.6rem 2.4rem;
-    }
-    @include r(600) {
-        border-bottom: 1px solid lighten($lightestGreen, 5%);
-
-        &.noborder {
-            border-bottom: 0;
-        }
-    }
-    @include r(768) {
-        background-color: transparent;
-        padding: 1.6rem;
-        position: relative;
-    }
-
-    &.transparent {
-        background-color: transparent;
-    }
-
-    &.sticky {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-
-        @include r(768) {
-            position: static;
-        }
-    }
-
-    .centered {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        text-align: left;
-        width: 100%;
-    }
-}
 
 .logo {
   height: 5.8rem;

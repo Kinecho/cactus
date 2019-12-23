@@ -214,7 +214,7 @@ export function getAllQueryParams(url: string = window.location.search): { [name
     }
 }
 
-export function getQueryParam(name: QueryParam): string | null {
+export function getQueryParam(name: QueryParam): string | null | undefined {
     try {
         const params = qs.parse(window.location.search, {
             ignoreQueryPrefix: true

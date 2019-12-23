@@ -24,7 +24,8 @@ export enum QueryParam {
     ALREADY_UNSUBSCRIBED = "is_unsubbed",
     PREMIUM_DEFAULT = 'prem',
     SOURCE_APP = "source-app",
-    USE_PROMPT_ID = "prompt"
+    USE_PROMPT_ID = "prompt",
+    OPEN_IN_IOS = "ios-link",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

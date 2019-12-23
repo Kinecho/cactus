@@ -1,3 +1,4 @@
+import {QueryParam} from '@shared/util/queryParams'
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
@@ -44,13 +45,16 @@
                 </dropdown-menu>
             </div>
         </div>
+        <div v-if="showIosLink" class="open-in-app-container">
+            <a :href="iosCustomLink">Open in App</a>
+        </div>
     </header>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import {FirebaseUser, getAuth} from '@web/firebase'
-    import {getInitials} from '@shared/util/StringUtil'
+    import {appendQueryParams, getInitials} from '@shared/util/StringUtil'
     import {PageRoute} from '@shared/PageRoutes'
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
@@ -69,6 +73,7 @@
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
+    import {Config} from "@web/config";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -82,7 +87,8 @@
         hidden: boolean,
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
-        activityBadgeCount: number
+        activityBadgeCount: number,
+        showIosLink: boolean,
     }
 
     export default Vue.extend({
@@ -96,6 +102,10 @@
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
             if (NO_NAV !== undefined) {
                 this.hidden = true;
+            }
+
+            if (getQueryParam(QueryParam.OPEN_IN_IOS) !== undefined) {
+                this.showIosLink = true;
             }
 
             this.authUnsubscribe = getAuth().onAuthStateChanged(user => {
@@ -150,9 +160,15 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
+                showIosLink: false,
             }
         },
         computed: {
+            iosCustomLink(): string {
+                const hostPath = window.location.href.split("//")[1];
+                const withParams = appendQueryParams(hostPath, {[QueryParam.OPEN_IN_IOS]: true});
+                return `${Config.appCustomScheme}://${withParams}`
+            },
             loggedIn(): boolean {
                 return !!this.user;
             },
@@ -294,10 +310,56 @@
         }
     }
 
-    header.loggedIn {
-        display: flex;
-        justify-content: space-between;
+    header {
+        background-color: white;
+        padding: .8rem 1.6rem;
+
+
+        @include r(374) {
+            padding: 1.6rem 2.4rem;
+        }
+        @include r(600) {
+            border-bottom: 1px solid lighten($lightestGreen, 5%);
+
+            &.noborder {
+                border-bottom: 0;
+            }
+        }
+        @include r(768) {
+            background-color: transparent;
+            padding: 1.6rem;
+            position: relative;
+        }
+
+        &.loggedIn {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        &.transparent {
+            background-color: transparent;
+        }
+
+        &.sticky {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+
+            @include r(768) {
+                position: static;
+            }
+        }
+
+        .centered {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            text-align: left;
+            width: 100%;
+        }
     }
+
 
     .nav-logo {
         display: block;
