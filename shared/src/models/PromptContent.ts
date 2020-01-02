@@ -1,4 +1,4 @@
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import FlamelinkModel, {FlamelinkData, SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
 import {preventOrphanedWords} from "@shared/util/StringUtil";
 import {timestampToDate} from "@shared/util/FirestoreUtil";
@@ -221,6 +221,11 @@ export default class PromptContent extends FlamelinkModel {
         }
 
         return data;
+    }
+
+    updateFromData(data: FlamelinkData) {
+        super.updateFromData(data);
+        this.scheduledSendAt = data[PromptContent.Fields.scheduledSendAt] ? new Date(data[PromptContent.Fields.scheduledSendAt]) : undefined;
     }
 
     getQuestion(): string | undefined {

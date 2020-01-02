@@ -4,7 +4,7 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import {
     getDateAtMidnightDenver,
-    getDateFromISOString,
+    getDateFromISOString, getFlamelinkDateString,
     getISODate,
     isoDateStringToFlamelinkDateString
 } from "@shared/util/DateUtil";
@@ -133,7 +133,7 @@ export async function createSentPrompts(content: PromptContent, prompt: Reflecti
         promptQuestion: prompt.question,
         promptContentEntryId: content.entryId,
         promptId: prompt.id,
-        contentDate: content.scheduledSendAt as string,
+        contentDate: content.scheduledSendAt ? getFlamelinkDateString(content.scheduledSendAt) : undefined,
         sendDate: getISODate(sendDate),
         success: true,
         totalProcessed: 0,
