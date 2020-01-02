@@ -25,6 +25,7 @@ import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
 import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
+import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -60,5 +61,6 @@ export const cloudFunctions = {
     updateReflectionStatsTrigger: updateReflectionStatsTrigger,
     updateMemberProfileTrigger: updateMemberProfileTrigger,
     updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
-    updatePromptSendTimeTrigger: updatePromptSendTimeTrigger
+    updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
+    publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
 };

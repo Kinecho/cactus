@@ -1,8 +1,8 @@
-import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
 import {CactusElement} from "@shared/models/CactusElement";
 import {preventOrphanedWords} from "@shared/util/StringUtil";
+import {timestampToDate} from "@shared/util/FirestoreUtil";
+import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -178,6 +178,7 @@ export enum PromptContentFields {
     promptId = "promptId",
     cactusElement = "cactusElement",
     scheduledSendAt = "scheduledSendAt",
+    contentStatus = "contentStatus",
 }
 
 export default class PromptContent extends FlamelinkModel {
@@ -187,8 +188,8 @@ export default class PromptContent extends FlamelinkModel {
     content: Content[] = [];
     subjectLine?: string;
     openGraphImage?: Image;
-    scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
-    cactusElement?: CactusElement; 
+    scheduledSendAt?: Date;
+    cactusElement?: CactusElement;
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
     contentStatus: ContentStatus = ContentStatus.in_progress;
@@ -205,9 +206,21 @@ export default class PromptContent extends FlamelinkModel {
             this.content = data.content || [];
             this.subjectLine = data.subjectLine;
             this.cactusElement = data.cactusElement;
-            this.scheduledSendAt = data.scheduledSendAt
+
+            if (data.scheduledSendAt) {
+                this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
+            }
+        }
+    }
+
+    prepareForFirestore(): any {
+        const data = super.prepareForFirestore();
+
+        if (this.scheduledSendAt) {
+            data[PromptContent.Fields.scheduledSendAt] = getFlamelinkDateStringInDenver(this.scheduledSendAt)
         }
 
+        return data;
     }
 
     getQuestion(): string | undefined {

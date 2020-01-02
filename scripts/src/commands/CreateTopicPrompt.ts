@@ -7,7 +7,7 @@ import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {getDateFromISOString, isoDateStringToFlamelinkDateString} from "@shared/util/DateUtil";
+import {getDateFromISOString} from "@shared/util/DateUtil";
 import PromptContent, {Content, ContentType} from "@shared/models/PromptContent";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
@@ -99,7 +99,7 @@ export default class CreateTopicPrompt extends FirebaseCommand {
 
             const content = new PromptContent();
             content.promptId = promptId;
-            content.scheduledSendAt = this.mailchimpCommand ? isoDateStringToFlamelinkDateString(this.mailchimpCommand.scheduleDateISO) : undefined;
+            content.scheduledSendAt = this.mailchimpCommand ? getDateFromISOString(this.mailchimpCommand.scheduleDateISO) : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
             content.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
             content.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;
@@ -120,7 +120,6 @@ export default class CreateTopicPrompt extends FirebaseCommand {
                 await AdminReflectionPromptService.getSharedInstance().save(savedPrompt);
                 console.log("Updated the admin prompt to have the content id", savedContent.entryId);
             }
-
 
             console.log(chalk.green(`Saved prompt ${promptId} successfully`));
         } else {
