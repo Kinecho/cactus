@@ -123,7 +123,7 @@ export function getFlamelinkDateString(date: Date = new Date()): string {
 
 export function getFlamelinkDateStringInDenver(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({
-        includeOffset: false,
+        includeOffset: true,
         suppressMilliseconds: true,
         suppressSeconds: true
     });
