@@ -315,7 +315,7 @@ export default class MailchimpService {
         }
     }
 
-    async getAudienceSegmentMembers(segmentId: number, pagination = DEFAULT_PAGINATION): Promise<SegmentMemberListResponse> {
+    async getAudienceSegmentMembers(segmentId: string, pagination = DEFAULT_PAGINATION): Promise<SegmentMemberListResponse> {
         const {offset = DEFAULT_PAGINATION.offset, count = DEFAULT_PAGINATION.count} = pagination;
         const url = `/lists/${this.audienceId}/segments/${segmentId}/members`;
         const response = await this.request.get(url, {
@@ -328,7 +328,7 @@ export default class MailchimpService {
         return response.data;
     }
 
-    async getAllAudienceSegmentMembers(segmentId: number, options: {
+    async getAllAudienceSegmentMembers(segmentId: string, options: {
         pageSize?: number,
         delayMs?: number,
         onPage?: (values: ListMember[]) => Promise<void>
