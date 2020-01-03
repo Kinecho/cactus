@@ -122,10 +122,10 @@ export function getFlamelinkDateString(date: Date = new Date()): string {
 }
 
 export function getFlamelinkDateStringInDenver(date: Date = new Date()): string {
-    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISO({
+    return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).set({second: 0}).toISO({
         includeOffset: true,
         suppressMilliseconds: true,
-        suppressSeconds: true
+        suppressSeconds: false
     });
 }
 

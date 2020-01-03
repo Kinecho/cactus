@@ -5,7 +5,7 @@ import {
     formatDuration,
     formatDurationAsTime, getCurrentQuarterHour,
     getDateAtMidnightDenver,
-    getDateObjectForTimezone,
+    getDateObjectForTimezone, getFlamelinkDateStringInDenver,
     getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
     getStreak,
     isoDateStringToFlamelinkDateString,
@@ -579,3 +579,12 @@ describe("Get current quarter hour", () => {
         expect(getQuarterHourFromMinute(90)).toEqual(30);
     })
 });
+
+describe("Flamelink to and from", () => {
+    test("2020-01-10T12:00:00-07:00", () => {
+        const flamelinkIso = "2020-01-10T12:00:00-07:00";
+        const date = new Date(flamelinkIso);
+        expect(getFlamelinkDateStringInDenver(date)).toEqual(flamelinkIso)
+
+    })
+})
