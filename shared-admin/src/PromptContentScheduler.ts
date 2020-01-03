@@ -18,7 +18,7 @@ export class ScheduleResult {
 
 
 export default class PromptContentScheduler {
-    result: ScheduleResult
+    result: ScheduleResult;
     promptContent: PromptContent;
     robotUserId: string;
 
@@ -73,6 +73,8 @@ export default class PromptContentScheduler {
             promptContent.errorMessage = result.errors.join(" | ");
             await this.savePrompt();
             return result;
+        } else {
+            promptContent.errorMessage = ""
         }
 
         promptContent.contentStatus = ContentStatus.published;
@@ -86,7 +88,7 @@ export default class PromptContentScheduler {
 
     async savePrompt(): Promise<void> {
         const promptContent = this.promptContent;
-        AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, {updatedBy: this.robotUserId});
+        await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, {updatedBy: this.robotUserId});
         console.log(chalk.blue(`Saved PromptContent with status ${promptContent.contentStatus}`));
         return;
     }
