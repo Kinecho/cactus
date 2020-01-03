@@ -118,7 +118,29 @@ export default class PromptContentScheduler {
     }
 
     async run(): Promise<ScheduleResult> {
-        const result = await this.executeJob();
+        const result = this.result;
+        const promptContent = this.promptContent;
+        try {
+            await this.processPromptContent();
+
+            if (result.success) {
+                promptContent.contentStatus = ContentStatus.published;
+                promptContent.errorMessage = "";
+                await this.savePromptContent();
+                result.didPublish = true;
+            } else {
+                promptContent.contentStatus = ContentStatus.needs_changes;
+                promptContent.errorMessage = result.errors.join(" | ");
+                await this.savePromptContent();
+            }
+
+        } catch (error) {
+            result.success = false;
+            result.didPublish = false;
+            console.error("Failed to process Prompt Content", error);
+            result.errors.push(`An unexpected error occurred while processing the PromptContent. Please see the function logs for more information.  ${error.message || error}`)
+        }
+
         await this.notifySlack();
         return result;
     }
@@ -144,6 +166,13 @@ export default class PromptContentScheduler {
 
         if (result.promptContent.getQuestion()) {
             fields.push({title: "Prompt Question", value: result.promptContent.getQuestion()!});
+        }
+
+        if (result.mailchimpCampaign?.web_id) {
+            fields.push({
+                title: "Mailchimp",
+                value: `<https://us20.admin.mailchimp.com/campaigns/edit?id=${result.mailchimpCampaign.web_id}|Edit Campaign>`
+            })
         }
 
         if (result.errors.length > 0) {
@@ -216,7 +245,16 @@ export default class PromptContentScheduler {
         };
     }
 
-    async executeJob(): Promise<ScheduleResult> {
+    /**
+     * Schedule the prompt content.
+     * This will validate the fields on the PromptContent,
+     * create/update the associated ReflectionPrompt, and schedule/update mailchimp emails
+     *
+     * This method does not save the final ContentStatus on the PromptContent - that is up to the calling code.
+     *
+     * @return {Promise<ScheduleResult>}
+     */
+    async processPromptContent(): Promise<ScheduleResult> {
         const promptContent = this.promptContent;
         const result = this.result;
 
@@ -229,9 +267,6 @@ export default class PromptContentScheduler {
 
         console.log("validating input...");
         if (!this.validateInput()) {
-            promptContent.contentStatus = ContentStatus.needs_changes;
-            promptContent.errorMessage = result.errors.join(" | ");
-            await this.savePromptContent();
             return result;
         } else {
             promptContent.errorMessage = ""
@@ -258,12 +293,6 @@ export default class PromptContentScheduler {
             result.success = false;
             return result;
         }
-
-        promptContent.contentStatus = ContentStatus.published;
-        await this.savePromptContent();
-
-        result.success = true;
-        result.didPublish = true;
 
         return result;
     }
@@ -492,7 +521,6 @@ export default class PromptContentScheduler {
             }
 
         }
-
     }
 
     async savePromptContent(): Promise<void> {
