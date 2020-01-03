@@ -135,11 +135,11 @@ export default class PromptContentScheduler {
         const fields: SlackAttachmentField[] = [
             {title: "Question", value: this.promptContent.getQuestion() || "not set"},
             {title: "Scheduled Send Date", value: dateString || "not set"},
-            {title: "Failed Prompt Content ID", value: result.promptContent.entryId!}
+            {title: "Prompt Content Entry ID", value: result.promptContent.entryId!}
         ];
 
         if (result.existingPromptContent) {
-            fields.push({title: "Existing Prompt Content ID", value: result.existingPromptContent.entryId!})
+            fields.push({title: "Existing Prompt Content Entry ID", value: result.existingPromptContent.entryId!})
         }
 
         if (result.promptContent.getQuestion()) {
@@ -174,6 +174,16 @@ export default class PromptContentScheduler {
             {
                 title: "Send Date",
                 value: dateString || "",
+                short: false,
+            },
+            {
+                title: "Question",
+                value: this.promptContent.getQuestion() || "not set",
+                short: false,
+            },
+            {
+                title: "Prompt Entry ID",
+                value: this.promptContent.entryId || "not set",
                 short: true,
             },
             {
@@ -183,14 +193,14 @@ export default class PromptContentScheduler {
             },
             {
                 title: "Web Link",
-                value: `${link}`,
+                value: `<${link}|Open in Browser>`,
                 short: true,
             }
         ];
         if (this.result.mailchimpCampaign?.archive_url) {
             fields.push({
                 title: "Mailchimp Email",
-                value: `<${this.result.mailchimpCampaign.archive_url}|View in Browser>`,
+                value: `<${this.result.mailchimpCampaign.archive_url}|View Email>`,
                 short: true,
             })
         }
