@@ -427,13 +427,14 @@ export default class PromptContentScheduler {
             console.log("Attempting to unschedule the campaign so we can reschedule it.");
             const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
             if (unscheduleResponse.success) {
-                console.log("attempting to re-schedule campaign")
+                console.log("attempting to re-schedule campaign");
                 scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
             } else {
+                result.error = unscheduleResponse.errorMessage;
+                result.success = false;
                 this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${unscheduleResponse.errorMessage}`);
+                return result;
             }
-
-
         }
 
         if (!scheduleResponse.success && !scheduleResponse.alreadyScheduled) {
