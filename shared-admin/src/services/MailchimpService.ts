@@ -798,22 +798,32 @@ export default class MailchimpService {
     async scheduleCampaign(campaignId: string, config: CampaignScheduleBody, campaignWebId: string): Promise<{ success: boolean, alreadyScheduled: boolean, error?: any }> {
         const url = `/campaigns/${campaignId}/actions/schedule`;
         try {
+            console.log("attempting to schedule campaign with config", config);
             const response = await this.request.post(url, config);
-            return {success: response.status === 204, alreadyScheduled: false}
+            console.log(`scheduled campaign successfully. Response Status = ${response.status}`);
+            return {success: true, alreadyScheduled: false}
         } catch (e) {
             let alreadyScheduled = false;
             let message = e.message || "Unknown error";
             if (e.isAxiosError) {
                 const apiError = e as AxiosError;
-                alreadyScheduled = (apiError.response?.data?.detail || "").includes("Cannot schedule an already scheduled campaign");
-                message = JSON.stringify(apiError.response?.data.detail) || message;
+                const body = apiError.response?.data || {};
+                console.error("Schedule Campaign Error Data", body);
+                alreadyScheduled = (body.detail || "").includes("Cannot schedule an already scheduled campaign");
+                const mcErrors = body.errors;
+                if (!alreadyScheduled && mcErrors && mcErrors.length > 0) {
+                    message = "\nErrors: \n" + mcErrors.map((e: { field: string, message: string }) => `${e.field}: ${e.message}`).join("\n");
+                } else {
+                    message = JSON.stringify(apiError.response?.data.detail) || message;
+                }
             }
 
             console.error("Failed to schedule campaign", message);
+
             return {
                 success: false,
                 alreadyScheduled: alreadyScheduled,
-                error: `Unable to schedule campaign: ${message}. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaignWebId}`
+                error: `Unable to schedule campaign: ${message}\n\nSchedule Config: ${JSON.stringify(config)}\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaignWebId}`
             };
         }
     }
@@ -821,18 +831,20 @@ export default class MailchimpService {
     async unscheduleCampaign(campaign: Campaign): Promise<{ success: boolean, errorMessage?: string }> {
         const url = `/campaigns/${campaign.id}/actions/unschedule`;
         try {
+            console.log("attempting to unschedule campaign");
             const response = await this.request.post(url);
-            return {success: response.status === 204}
+            console.log("Successfully unscheduled campaign");
+            return {success: true}
         } catch (e) {
             let message = e.message || "Unknown error";
             if (e.isAxiosError) {
                 const apiError = e as AxiosError;
-                message = JSON.stringify(apiError.response?.data?.detail) || message;
+                message = JSON.stringify(apiError.response?.data || message);
             }
             console.error("Failed to un-schedule campaign", message);
             return {
                 success: false,
-                errorMessage: `Unable to un-schedule campaign: ${message}. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`
+                errorMessage: `Unable to un-schedule campaign: ${message}.\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`
             };
         }
     }

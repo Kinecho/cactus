@@ -421,15 +421,17 @@ export default class PromptContentScheduler {
             }).toISO();
         let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
         console.log("schedule campaign success:", scheduleResponse);
-        result.success = scheduleResponse.success || scheduleResponse.alreadyScheduled;
+
 
         if (scheduleResponse.alreadyScheduled) {
             console.log("Attempting to unschedule the campaign so we can reschedule it.");
             const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
             if (unscheduleResponse.success) {
-                console.log("attempting to re-schedule campaign");
+                console.log("Un-scheduling campaign was successful. attempting to re-schedule campaign");
                 scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
+                console.log("re-schedule campaign response: ", JSON.stringify(scheduleResponse))
             } else {
+                console.error("Unschedule campaign failed", unscheduleResponse.errorMessage);
                 result.error = unscheduleResponse.errorMessage;
                 result.success = false;
                 this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${unscheduleResponse.errorMessage}`);
@@ -439,9 +441,11 @@ export default class PromptContentScheduler {
 
         if (!scheduleResponse.success && !scheduleResponse.alreadyScheduled) {
             result.error = scheduleResponse.error || "Unable to schedule the campaign. An API error occurred but it's not clear what it was."
+            console.error("Failed to schedule the campaign", scheduleResponse.error);
             result.success = false;
             this.result.errors.push(result.error!);
         }
+        result.success = scheduleResponse.success;
         return result;
     }
 
