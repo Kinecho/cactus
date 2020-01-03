@@ -833,7 +833,7 @@ export default class MailchimpService {
         try {
             console.log("attempting to unschedule campaign");
             const response = await this.request.post(url);
-            console.log("Successfully unscheduled campaign");
+            console.log(`Successfully unscheduled campaign. Status Code = ${response.status}`);
             return {success: true}
         } catch (e) {
             let message = e.message || "Unknown error";

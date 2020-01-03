@@ -15,7 +15,7 @@ import {formatDate, mailchimpTimeZone} from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {
-    Campaign,
+    Campaign, CampaignSettings,
     CampaignType,
     SendChecklistItem,
     SendChecklistItemType
@@ -25,7 +25,7 @@ import {
     CampaignContentRequest,
     CampaignContentSectionMap,
     CreateCampaignRequest,
-    TemplateSection
+    TemplateSection, UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import MailchimpService from "@admin/services/MailchimpService";
 import {DateTime} from "luxon";
@@ -297,10 +297,13 @@ export default class PromptContentScheduler {
 
         console.log("setting up emails...");
         const emailResult = await this.setupEmails();
+        console.log("Set up email response", JSON.stringify(emailResult));
         if (!emailResult.success) {
             console.error("Failed to setup emails", emailResult.error);
             result.success = false;
             return result;
+        } else {
+            result.success = true;
         }
 
         return result;
@@ -381,7 +384,7 @@ export default class PromptContentScheduler {
 
         console.log("updated campaign content, now scheduling the campaign");
         const scheduleResult = await this.scheduleCampaign(campaign);
-
+        console.log("schedlue campaign result", JSON.stringify(scheduleResult));
         return {
             success: success && scheduleResult.success && contentResponse.success,
             campaign,
@@ -492,15 +495,42 @@ export default class PromptContentScheduler {
 
     async createMailchimpCampaign(): Promise<{ success: boolean, campaign?: Campaign, error?: string }> {
         console.log("Setting up the mailchimp campaign");
-        const prompt = this.result.reflectionPrompt;
-        if (prompt?.campaign?.id) {
-            console.log("The campaign already exists on the ReflectionPrompt so we will use it. Not creating a new one");
-            return {success: true, campaign: prompt.campaign};
-        }
 
         const config = this.config.mailchimp;
         const promptContent = this.promptContent;
         const sendDate = formatDate(promptContent.scheduledSendAt);
+
+        const campaignTitle = `${sendDate} - Daily - ${promptContent.getQuestion()}`;
+
+        const prompt = this.result.reflectionPrompt;
+        const campaignSettings: CampaignSettings = {
+            title: campaignTitle,
+            reply_to: "hello@cactus.app",
+            subject_line: promptContent.subjectLine,
+            from_name: "Cactus",
+            preview_text: promptContent.getPreviewText(),
+            to_name: '*|FNAME|* *|LNAME|*'
+        };
+
+        if (prompt?.campaign?.id) {
+            console.log("The campaign already exists on the ReflectionPrompt so we will update it");
+
+            const updateRequest: UpdateCampaignRequest = {
+                settings: campaignSettings,
+            };
+
+            try {
+                await MailchimpService.getSharedInstance().updateCampaign(prompt.campaign.id, updateRequest);
+                return {success: true, campaign: prompt.campaign};
+            } catch (updateError) {
+                console.error("Update campaign failed.", error);
+                return {
+                    success: false,
+                    campaign: prompt.campaign,
+                    error: `${JSON.stringify(updateError.response?.data || updateError)}`
+                };
+            }
+        }
 
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
@@ -510,14 +540,7 @@ export default class PromptContentScheduler {
                     saved_segment_id: Number(config.segment_id_daily_prompt),
                 }
             },
-            settings: {
-                title: `${sendDate} - Daily - ${promptContent.getQuestion()}`,
-                reply_to: "hello@cactus.app",
-                subject_line: promptContent.subjectLine,
-                from_name: "Cactus",
-                preview_text: promptContent.getPreviewText(),
-                to_name: '*|FNAME|* *|LNAME|*'
-            },
+            settings: campaignSettings,
             tracking: {
                 html_clicks: false,
                 text_clicks: false
