@@ -67,6 +67,7 @@ export default class AdminFlamelinkService {
             return;
         }
         const data = model.toFlamelinkData();
+        console.log(`Saving prompt prompt content raw with scheduledSendAt = ${data.scheduledSendAt}`);
         await this.firestore.runTransaction(async t => {
             const locale = await this.flamelinkApp.settings.getLocale();
             const query = this.firestore.collection(Collection.flamelink_content)

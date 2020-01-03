@@ -345,18 +345,19 @@ export default class PromptContentScheduler {
     }
 
     async checkForExistingScheduledPromptContent(): Promise<PromptContent | undefined> {
-        const scheduledDate = this.promptContent.scheduledSendAt!;
+        const scheduledDate = DateTime.fromJSDate(this.promptContent.scheduledSendAt!).toObject();
         const existingPrompt = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({
-            systemDate: scheduledDate,
+            dateObject: scheduledDate,
             status: ContentStatus.published
         });
-        if (existingPrompt) {
+        if (existingPrompt && existingPrompt.entryId !== this.promptContent.entryId) {
             console.warn("A prompt already exists for this date.");
             this.result.existingPromptContentForDay = true;
             this.result.existingPromptContent = existingPrompt;
             this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this date (${scheduledDate.toLocaleString()})`)
+            return existingPrompt
         }
-        return existingPrompt;
+        return undefined; //only return the existing if it wasn't the current prompt;
     }
 
     async setupEmails(): Promise<EmailResult> {
@@ -419,21 +420,25 @@ export default class PromptContentScheduler {
             result.warnings = warnings;
         }
 
-        const sendDate = DateTime.fromJSDate(this.promptContent.scheduledSendAt!)
-            .setZone(mailchimpTimeZone).set({
+        const scheduledDate = new Date(this.promptContent.scheduledSendAt!);
+
+        const send_time = DateTime.fromJSDate(scheduledDate).setZone(mailchimpTimeZone)
+            .set({
                 hour: 2,
                 minute: 45
             }).toISO();
-        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
-        console.log("schedule campaign success:", scheduleResponse);
+        console.log("Scheduling Mailchimp campaign for promptContent scheduled Date", scheduledDate);
+        console.log("The scheduled date is converted into ISO string for mailchimp at 2:45am: ", send_time);
 
+        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: send_time}, campaign.web_id);
+        console.log("schedule campaign success:", scheduleResponse);
 
         if (scheduleResponse.alreadyScheduled) {
             console.log("Attempting to unschedule the campaign so we can reschedule it.");
             const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
             if (unscheduleResponse.success) {
                 console.log("Un-scheduling campaign was successful. attempting to re-schedule campaign");
-                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
+                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: send_time}, campaign.web_id);
                 console.log("re-schedule campaign response: ", JSON.stringify(scheduleResponse))
             } else {
                 console.error("Unschedule campaign failed", unscheduleResponse.errorMessage);
@@ -501,7 +506,7 @@ export default class PromptContentScheduler {
         const config = this.config.mailchimp;
         const promptContent = this.promptContent;
         const sendDate = formatDate(promptContent.scheduledSendAt);
-
+        console.log(chalk.red(`Mailchimp Send Date is formatted as: ${sendDate}`));
         const campaignTitle = `${sendDate} - Daily - ${promptContent.getQuestion()}`;
 
         const prompt = this.result.reflectionPrompt;

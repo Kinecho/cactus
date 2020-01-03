@@ -48,6 +48,10 @@ export default class SchedulePrompt extends FirebaseCommand {
         console.log(chalk.yellow("Found prompt content in database. Setting up the scheduler"));
         // console.log("Scheduled date is of type date?", promptContent.scheduledSendAt instanceof Date);
         // console.log("Scheduled dated locale string", promptContent.scheduledSendAt?.toLocaleDateString());
+
+        console.log(chalk.cyan(`Warning: Forcing the content status to be submitted. It was originally ${promptContent.contentStatus}`));
+        promptContent.contentStatus = ContentStatus.submitted;
+
         const scheduler = new PromptContentScheduler({promptContent, config: this.config});
         const result = await scheduler.run();
 

@@ -207,7 +207,9 @@ export default class PromptContent extends FlamelinkModel {
             this.cactusElement = data.cactusElement;
 
             if (data.scheduledSendAt) {
+                console.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
                 this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
+                console.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
             }
         }
     }

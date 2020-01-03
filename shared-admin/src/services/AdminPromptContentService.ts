@@ -30,7 +30,10 @@ export default class AdminPromptContentService {
     }
 
     async save(model: PromptContent): Promise<PromptContent | undefined> {
-        return this.flamelinkService.save(model);
+        console.log("[AdminPromptContentService.save] Saving prompt content with scheduledSendAt = ", model.scheduledSendAt);
+        const saved = await this.flamelinkService.save(model);
+        console.log("[AdminPromptContentService.save] Saved prompt content with scheduledSendAt = ", saved?.scheduledSendAt);
+        return saved;
     }
 
     async getByEntryId(id?: string): Promise<PromptContent | undefined> {
@@ -77,7 +80,7 @@ export default class AdminPromptContentService {
                 const startObject = {...dateObject, day: dateObject.day! + 1};
                 startDateString = dateObjectToISODate(startObject);
             } else if (systemDate) {
-                const midnightDenver = systemDate;
+                const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
                 midnightDenver.setHours(0);
                 midnightDenver.setMinutes(0);
                 midnightDenver.setSeconds(0);
