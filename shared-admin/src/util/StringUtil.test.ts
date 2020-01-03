@@ -1,4 +1,4 @@
-import {buildPromptContentURL, splitOnFirst} from '@api/util/StringUtil'
+import {buildPromptURL, splitOnFirst} from '@admin/util/StringUtil'
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {resetTestConfig, setTestConfig} from "@admin/config/configService";
 
@@ -37,7 +37,7 @@ describe("splitOnFirst tests", () => {
 describe("get prompt content url", () => {
     test("no prompt", () => {
         const input = undefined;
-        const output = buildPromptContentURL(input);
+        const output = buildPromptURL(input);
         expect(output).toBeUndefined();
     });
 
@@ -48,7 +48,7 @@ describe("get prompt content url", () => {
         const input = new ReflectionPrompt();
         input.contentPath = "/test";
 
-        const output = buildPromptContentURL(input);
+        const output = buildPromptURL(input);
         expect(output).toEqual("https://mydomain.com/test")
     });
 
@@ -58,7 +58,7 @@ describe("get prompt content url", () => {
         const input = new ReflectionPrompt();
         input.contentPath = "test/path";
 
-        const output = buildPromptContentURL(input);
+        const output = buildPromptURL(input);
         expect(output).toEqual("https://mydomain.com/test/path")
     });
 

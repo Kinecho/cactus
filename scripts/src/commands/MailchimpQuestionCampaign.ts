@@ -57,7 +57,7 @@ interface UseDefaultConfigurationResponse {
     useDefault: boolean;
 }
 
-interface RecipientsConfiguration {
+export interface RecipientsConfiguration {
     audienceId: string,
     useSavedSegment: boolean;
     savedSegmentId?: number;
@@ -233,7 +233,7 @@ export default class MailchimpQuestionCampaign implements Command {
                 format: (value: string) => `${value}`
             },
             {
-                type: [QuestionType.DEFAULT,QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
+                type: [QuestionType.DEFAULT, QuestionType.PROMPT].includes(this.questionType) ? "text" : null,
                 name: "contentLinkText",
                 message: "Content link text",
                 initial: "Reflect"
@@ -364,8 +364,8 @@ export default class MailchimpQuestionCampaign implements Command {
         }
 
         const campaignTracking: CampaignTracking = {
-           html_clicks: false,
-           text_clicks: false 
+            html_clicks: false,
+            text_clicks: false
         };
 
         const campaignRequest: CreateCampaignRequest = {
@@ -634,8 +634,8 @@ export default class MailchimpQuestionCampaign implements Command {
         }
 
         const campaignTracking: CampaignTracking = {
-           html_clicks: false,
-           text_clicks: false 
+            html_clicks: false,
+            text_clicks: false
         };
 
         const campaignRequest: CreateCampaignRequest = {
@@ -1029,10 +1029,10 @@ export default class MailchimpQuestionCampaign implements Command {
         //doing another check because the else block above could have updated the ready status
         let success = false;
         if (isReady) {
-            success = await this.mailchimpService.scheduleCampaign(campaign.id, {schedule_time: sendDate});
+            const result = await this.mailchimpService.scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
+            success = result.success;
             if (success) {
                 console.log(chalk.green(`${campaign.settings.title} scheduled successfully!`));
-
             } else {
                 console.warn(chalk.yellow(`Unable to schedule the campaign. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`));
             }

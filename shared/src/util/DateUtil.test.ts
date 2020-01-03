@@ -1,10 +1,11 @@
 import {
     differenceInMinutes,
+    formatDate,
     formatDateTime,
     formatDuration,
     formatDurationAsTime, getCurrentQuarterHour,
     getDateAtMidnightDenver,
-    getDateObjectForTimezone,
+    getDateObjectForTimezone, getFlamelinkDateStringInDenver,
     getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
     getStreak,
     isoDateStringToFlamelinkDateString,
@@ -28,6 +29,20 @@ describe("getMailchimpCurrentDateString test", () => {
 
         expect(string).toEqual("2019-06-01")
     })
+});
+
+describe("format date", () => {
+    test("no format provided", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDate(date)).toEqual("2019-06-19")
+    });
+
+    test("format with day of week", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDate(date, "cccc, LLLL d, yyyy")).toEqual("Wednesday, June 19, 2019")
+    });
 });
 
 describe("convert timezones, keep time", () => {
@@ -564,3 +579,12 @@ describe("Get current quarter hour", () => {
         expect(getQuarterHourFromMinute(90)).toEqual(30);
     })
 });
+
+describe("Flamelink to and from", () => {
+    test("2020-01-10T12:00:00-07:00", () => {
+        const flamelinkIso = "2020-01-10T12:00:00-07:00";
+        const date = new Date(flamelinkIso);
+        expect(getFlamelinkDateStringInDenver(date)).toEqual(flamelinkIso)
+
+    })
+})

@@ -34,6 +34,7 @@ export abstract class FirebaseCommand implements Command {
     abstract showInList: boolean;
     confirmExecution: boolean = false;
     firestoreService?: AdminFirestoreService;
+    config!: CactusConfig;
 
     protected abstract async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void>;
 
@@ -61,7 +62,7 @@ export abstract class FirebaseCommand implements Command {
         const project = this.project || Project.STAGE;
         console.log("Fetching config for ", project);
         const config = await getCactusConfig(project);
-
+        this.config = config;
         console.log("initializing all services");
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);

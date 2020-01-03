@@ -3,14 +3,17 @@ import * as admin from "firebase-admin";
 import * as flamelink from "flamelink/app";
 import 'flamelink/content'
 import 'flamelink/storage'
+import 'flamelink/settings'
 import FlamelinkModel from "@shared/FlamelinkModel";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+import {Collection} from "@shared/FirestoreBaseModels";
 
 export default class AdminFlamelinkService {
     protected static sharedInstance: AdminFlamelinkService;
-
-    // firebaseApp: admin.app.App;
+    flamelinkEnv: string;
+    firebaseApp: admin.app.App;
+    firestore: admin.firestore.Firestore;
     flamelinkApp: flamelink.app.App;
     content: flamelink.content.Content;
 
@@ -27,22 +30,10 @@ export default class AdminFlamelinkService {
 
     constructor(config: CactusConfig, app: admin.app.App) {
         console.log("setting up flamelink service");
-        // const credential: admin.ServiceAccount = {
-        //     clientEmail: config.flamelink.service_account.client_email,
-        //     privateKey: config.flamelink.service_account.private_key,
-        //     projectId: config.flamelink.service_account.project_id,
-        // };
-        //
-        // const firebaseConfig = {
-        //     credential: admin.credential.cert(credential),
-        //     databaseURL: '<your-database-url>',
-        //     storageBucket: '<your-storage-bucket-code>' // required if you want to use any Storage Bucket functionality
-        // };
 
-        console.log("initializing firebase app for flamelink");
-        // this.firebaseApp = admin.initializeApp(firebaseConfig, "flamelink");
-        // this.firebaseApp = admin.initializeApp();
-
+        this.firebaseApp = app;
+        this.firestore = app.firestore();
+        this.flamelinkEnv = config.flamelink.environment_id;
 
         console.log("starting flamelink app");
         this.flamelinkApp = flamelink({
@@ -53,10 +44,57 @@ export default class AdminFlamelinkService {
             precache: false// optional, default shown. Currently it only precaches "schemas" for better performance
 
         });
-
         console.log("got flamelink app!");
 
         this.content = this.flamelinkApp.content;
+    }
+
+    /**
+     * Update an existing Flamelink entry using the faw Firestore SDK, rather than the Flamelink SDK.
+     * This lets us set values in the _fl_meta_ field, such as the lastUpdatedBy field.
+     * @param {FlamelinkModel} model
+     * @param {{updatedBy?: string}} options
+     * @return {Promise<FlamelinkModel | undefined>}
+     */
+    async updateRaw<T extends FlamelinkModel>(model?: T, options?: { updatedBy?: string }): Promise<T | undefined> {
+        if (!model) {
+            return;
+        }
+        const entryId = model.entryId;
+        const schemaKey = model.schema;
+        if (!entryId) {
+            console.error("No entry ID found on model. Can not perform a raw update");
+            return;
+        }
+        const data = model.toFlamelinkData();
+        console.log(`Saving prompt prompt content raw with scheduledSendAt = ${data.scheduledSendAt}`);
+        await this.firestore.runTransaction(async t => {
+            const locale = await this.flamelinkApp.settings.getLocale();
+            const query = this.firestore.collection(Collection.flamelink_content)
+                .where('_fl_meta_.env', "==", this.flamelinkEnv)
+                .where('_fl_meta_.locale', '==', locale)
+                .where('_fl_meta_.fl_id', "==", entryId)
+                .where('_fl_meta_.schema', '==', schemaKey);
+
+            const snapshot = await t.get(query);
+            const [entryDoc] = snapshot.docs;
+            if (!entryDoc) {
+                console.error(`Unable to perform RawUpdate on flamelink model. No entry found for ${schemaKey} ${entryId}`);
+                return;
+            }
+
+            const ref = entryDoc.ref;
+            const payload = {...data};
+            if (options?.updatedBy) {
+                payload['_fl_meta_.lastModifiedBy'] = options.updatedBy;
+            }
+
+            await t.update(ref, payload);
+            return
+        });
+
+        return model;
+
     }
 
     async save<T extends FlamelinkModel>(model?: T): Promise<T | undefined> {

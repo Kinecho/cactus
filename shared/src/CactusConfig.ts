@@ -11,16 +11,22 @@ export interface ServiceAccountCredentials {
     private_key_id: string
 }
 
+export type EnvironmentType = "test" | "dev" | "prod" | "stage"
+
 export interface CactusConfig {
     isEmulator: boolean,
     app: {
-        environment: "test"|"dev"|"prod"|"stage"
+        environment: EnvironmentType
     },
     mailchimp: {
         api_key: string,
         audience_id: string,
-        bridge_to_monday_segment_id: number,
+        bridge_to_monday_segment_id: string,
         non_prompt_campaign_ids: string //this is a comma separated string
+        segment_id_daily_prompt: string,
+        templates: {
+            prompt_module_morning: string
+        }
     },
     sentry: {
         api_token: string,
@@ -73,6 +79,7 @@ export interface CactusConfig {
         bundle_id: string,
         team_id: string,
         app_id: string,
+        custom_scheme: string,
     },
     sendgrid: {
         api_key: string,

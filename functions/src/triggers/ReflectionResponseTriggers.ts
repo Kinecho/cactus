@@ -18,7 +18,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
-import {buildPromptContentURL} from "@api/util/StringUtil";
+import {buildPromptURL} from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
 import {getWordCount} from "@shared/util/StringUtil";
@@ -214,7 +214,7 @@ export const onReflectionResponseCreated = functions.firestore
             if (prompt && prompt.question) {
                 let contentLink = prompt.question;
 
-                const link = buildPromptContentURL(prompt);
+                const link = buildPromptURL(prompt);
 
                 if (prompt.contentPath) {
                     contentLink = `<${link}|${prompt.question}>`
