@@ -419,11 +419,26 @@ export default class PromptContentScheduler {
                 hour: 2,
                 minute: 45
             }).toISO();
-        const scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
+        let scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
         console.log("schedule campaign success:", scheduleResponse);
         result.success = scheduleResponse.success || scheduleResponse.alreadyScheduled;
+
+        if (scheduleResponse.alreadyScheduled) {
+            console.log("Attempting to unschedule the campaign so we can reschedule it.");
+            const unscheduleResponse = await MailchimpService.getSharedInstance().unscheduleCampaign(campaign);
+            if (unscheduleResponse.success) {
+                console.log("attempting to re-schedule campaign")
+                scheduleResponse = await MailchimpService.getSharedInstance().scheduleCampaign(campaign.id, {schedule_time: sendDate}, campaign.web_id);
+            } else {
+                this.result.errors.push(`The campaign was already scheduled and failed to re-schedule: ${unscheduleResponse.errorMessage}`);
+            }
+
+
+        }
+
         if (!scheduleResponse.success && !scheduleResponse.alreadyScheduled) {
             result.error = scheduleResponse.error || "Unable to schedule the campaign. An API error occurred but it's not clear what it was."
+            result.success = false;
             this.result.errors.push(result.error!);
         }
         return result;

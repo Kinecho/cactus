@@ -801,13 +801,38 @@ export default class MailchimpService {
             const response = await this.request.post(url, config);
             return {success: response.status === 204, alreadyScheduled: false}
         } catch (e) {
-            const message = e.isAxiosError && JSON.stringify((e as AxiosError).response?.data) || e.message || "Unknown error";
-            const alreadyScheduled = ((e.isAxiosError && e.response?.data?.detail) || "").includes("Cannot schedule an already scheduled campaign");
+            let alreadyScheduled = false;
+            let message = e.message || "Unknown error";
+            if (e.isAxiosError) {
+                const apiError = e as AxiosError;
+                alreadyScheduled = (apiError.response?.data?.detail || "").includes("Cannot schedule an already scheduled campaign");
+                message = JSON.stringify(apiError.response?.data.detail) || message;
+            }
+
             console.error("Failed to schedule campaign", message);
             return {
                 success: false,
                 alreadyScheduled: alreadyScheduled,
                 error: `Unable to schedule campaign: ${message}. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaignWebId}`
+            };
+        }
+    }
+
+    async unscheduleCampaign(campaign: Campaign): Promise<{ success: boolean, errorMessage?: string }> {
+        const url = `/campaigns/${campaign.id}/actions/unschedule`;
+        try {
+            const response = await this.request.post(url);
+            return {success: response.status === 204}
+        } catch (e) {
+            let message = e.message || "Unknown error";
+            if (e.isAxiosError) {
+                const apiError = e as AxiosError;
+                message = JSON.stringify(apiError.response?.data?.detail) || message;
+            }
+            console.error("Failed to un-schedule campaign", message);
+            return {
+                success: false,
+                errorMessage: `Unable to un-schedule campaign: ${message}. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`
             };
         }
     }
