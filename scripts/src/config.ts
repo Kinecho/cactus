@@ -1,3 +1,5 @@
+import {buildConfig} from "@admin/config/configService";
+
 const firebaseTools = require("firebase-tools");
 import * as admin from "firebase-admin";
 
@@ -66,6 +68,7 @@ async function getAdminConfig(project: Project, opts: ConfigOptions = DefaultOpt
 }
 
 export async function getCactusConfig(project: Project): Promise<CactusConfig> {
-    return firebaseTools.functions.config.get(undefined, {project}) as CactusConfig;
+    const _config = await firebaseTools.functions.config.get(undefined, {project}) as CactusConfig;
+    return buildConfig(_config);
 }
 

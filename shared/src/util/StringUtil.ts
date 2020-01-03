@@ -206,7 +206,6 @@ export function isBlank(input: string | null | undefined): boolean {
     }
 
     return false;
-
 }
 
 export function getProviderDisplayName(provider?: string): string {

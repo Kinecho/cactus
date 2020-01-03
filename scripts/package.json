@@ -7,6 +7,7 @@
         "test": "jest",
         "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "start": "npm run cmd",
+        "debug": "node -r ts-node/register -r tsconfig-paths/register --inspect src/index.ts",
         "lint": "tslint --project tsconfig.json",
         "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
         "cmd": "ts-node -r tsconfig-paths/register src/index.ts",

@@ -1,8 +1,8 @@
-import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
+import FlamelinkModel, {FlamelinkData, SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
 import {preventOrphanedWords} from "@shared/util/StringUtil";
+import {timestampToDate} from "@shared/util/FirestoreUtil";
+import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -178,6 +178,7 @@ export enum PromptContentFields {
     promptId = "promptId",
     cactusElement = "cactusElement",
     scheduledSendAt = "scheduledSendAt",
+    contentStatus = "contentStatus",
 }
 
 export default class PromptContent extends FlamelinkModel {
@@ -187,15 +188,14 @@ export default class PromptContent extends FlamelinkModel {
     content: Content[] = [];
     subjectLine?: string;
     openGraphImage?: Image;
-    scheduledSendAt?: ISODate | Date | FlamelinkTimestamp;
-    cactusElement?: CactusElement; 
+    scheduledSendAt?: Date;
+    cactusElement?: CactusElement;
     mailchimpCampaignId?: string;
     mailchimpCampaignWebId?: string;
     contentStatus: ContentStatus = ContentStatus.in_progress;
     errorMessage?: string;
     topic?: string;
     shareReflectionCopy_md?: string;
-
 
     constructor(data?: Partial<PromptContent>) {
         super(data);
@@ -205,9 +205,34 @@ export default class PromptContent extends FlamelinkModel {
             this.content = data.content || [];
             this.subjectLine = data.subjectLine;
             this.cactusElement = data.cactusElement;
-            this.scheduledSendAt = data.scheduledSendAt
+
+            if (data.scheduledSendAt) {
+                console.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
+                this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
+                console.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
+            }
+        }
+    }
+
+    prepareForFirestore(): any {
+        const data = super.prepareForFirestore();
+
+        if (this.scheduledSendAt) {
+            data[PromptContent.Fields.scheduledSendAt] = getFlamelinkDateStringInDenver(this.scheduledSendAt)
         }
 
+        return data;
+    }
+
+    updateFromData(data: FlamelinkData) {
+        super.updateFromData(data);
+        const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
+        if (scheduledDateField) {
+            console.log("Setting scheduledSendAt from data value", scheduledDateField);
+            this.scheduledSendAt = new Date(scheduledDateField);
+        } else {
+            this.scheduledSendAt = undefined;
+        }
     }
 
     getQuestion(): string | undefined {
@@ -218,4 +243,8 @@ export default class PromptContent extends FlamelinkModel {
         return;
     }
 
+    getPreviewText(): string|undefined {
+        const [first] = (this.content || []);
+        return first?.text;
+    }
 }

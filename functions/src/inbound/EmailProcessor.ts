@@ -1,7 +1,7 @@
 import EmailReply, {InboundEmail, InboundEmailFiles} from "@shared/models/EmailReply";
 import {inspect} from "util";
 import {InboundAttachmentInfo, InboundEmailAttachments} from "@shared/models/EmailAttachment";
-import {splitOnFirst} from "@api/util/StringUtil";
+import {splitOnFirst} from "@admin/util/StringUtil";
 import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
 import * as Busboy from "busboy";
 

@@ -7,7 +7,7 @@ import * as admin from "firebase-admin";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import {getDateFromISOString, isoDateStringToFlamelinkDateString} from "@shared/util/DateUtil";
+import {getDateFromISOString} from "@shared/util/DateUtil";
 import PromptContent, {Content, ContentType} from "@shared/models/PromptContent";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
@@ -27,7 +27,7 @@ export default class CreatePromptModule extends FirebaseCommand {
     repeatRun = true;
 
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService): Promise<void> {
-        while(this.repeatRun) {
+        while (this.repeatRun) {
             await this.createPrompt(app, firestoreService);
         }
         return;
@@ -103,7 +103,7 @@ export default class CreatePromptModule extends FirebaseCommand {
             console.log("Saved shell Content Prompt record to Flamelink", savedContent.entryId);
             prompt.promptContentEntryId = savedContent.entryId;
             content.entryId = savedContent.entryId;
-        } else { 
+        } else {
             console.error("Could not save shell Flamelink, aborting!");
             return;
         }
@@ -128,7 +128,7 @@ export default class CreatePromptModule extends FirebaseCommand {
             mailchimpCommand.reflectionPromptId = promptId;
             mailchimpCommand.topic = topic;
             mailchimpCommand.introText = introText;
-            if (savedContent) { 
+            if (savedContent) {
                 mailchimpCommand.promptContentId = savedContent.entryId;
             }
             this.mailchimpCommand = mailchimpCommand;
@@ -154,7 +154,7 @@ export default class CreatePromptModule extends FirebaseCommand {
             console.log("saved the prompt successfully. Id", promptId);
 
             savedContent.promptId = promptId;
-            savedContent.scheduledSendAt = this.mailchimpCommand ? isoDateStringToFlamelinkDateString(this.mailchimpCommand.scheduleDateISO) : undefined;
+            savedContent.scheduledSendAt = this.mailchimpCommand ? getDateFromISOString(this.mailchimpCommand.scheduleDateISO) : undefined;
             console.log("scheduledSendAt ", content.scheduledSendAt);
             savedContent.subjectLine = prompt.campaign ? prompt.campaign.settings.subject_line : undefined;
             savedContent.mailchimpCampaignId = prompt.campaign ? prompt.campaign.id : undefined;

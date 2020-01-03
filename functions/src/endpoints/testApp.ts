@@ -248,7 +248,6 @@ app.get("/sheets/process", async (req, resp) => {
             return;
         }
 
-
         const startRange = `'${fromSheet.properties.title}'!A:Z`;
 
         const values = await GoogleSheetsService.getSharedInstance().readSpreadsheet(config.sheets.prompt_content_sheet_id, startRange);

@@ -58,13 +58,13 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
 
         this.entryId = this._fl_meta_ ? this._fl_meta_.fl_id : undefined;
         //this seems to happen when updating after saving the object via Flamelink SDK
-        if (data["_fl_meta_.fl_id"] && !this.entryId){
+        if (data["_fl_meta_.fl_id"] && !this.entryId) {
             this.entryId = data["_fl_meta_.fl_id"]
         }
     }
 
     prepareForFirestore(): any {
-        return this;
+        return {...this};
     }
 
     toFlamelinkData(removeKeys = ["schema", "entryId", "_fl_meta_"]): any {
@@ -90,17 +90,24 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
         return data;
     }
 
-    toJSON(removeKeys = ["schema"]): any {
+    toJSON(removeKeys = ["schema", "_fl_meta_.schemaRef"]): any {
         try {
-            const data = convertDateToJSON(this);
+            const data = convertDateToJSON({...this});
 
-            if (removeKeys && data) {
-                removeKeys.forEach(key => {
+            const keysToRemove = Array.isArray(removeKeys) ? removeKeys : ["schema", "_fl_meta_.schemaRef"];
+            if (keysToRemove && Array.isArray(keysToRemove) && data) {
+                keysToRemove.forEach(key => {
                     delete data[key];
                 });
             }
+
+            if (data.hasOwnProperty("_fl_meta_")) {
+                delete data._fl_meta_.schemaRef;
+            }
+
             return data;
         } catch (error) {
+            console.error(error);
             return {message: "Error processing this model toJSON", error};
         }
     }

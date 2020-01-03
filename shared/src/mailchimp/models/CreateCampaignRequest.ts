@@ -202,7 +202,7 @@ export interface CreateCampaignRequest {
 
 export interface UpdateCampaignRequest {
     recipients?: CreateCampaignRequestRecipients,
-    settings: UpdateCampaignSettings,
+    settings: UpdateCampaignSettings|CreateCampaignSettings,
     variate_settings?: {
         //not used yet
     },
