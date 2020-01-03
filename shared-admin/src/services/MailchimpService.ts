@@ -172,7 +172,7 @@ export default class MailchimpService {
 
     }
 
-    async deleteMemberPermanently(email: string): Promise<any|{error:any}> {
+    async deleteMemberPermanently(email: string): Promise<any | { error: any }> {
         const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/actions/delete-permanent`;
         try {
             const response = await this.request.post(url, {
@@ -792,16 +792,23 @@ export default class MailchimpService {
      * Returns true if the campaign was sent successfully
      * @param {string} campaignId
      * @param {CampaignScheduleBody} config
-     * @return {Promise<boolean>} - false if there was a problem schedulign the campaign
+     * @param campaignWebId
+     * @return {Promise<boolean>} - false if there was a problem scheduling the campaign
      */
-    async scheduleCampaign(campaignId: string, config: CampaignScheduleBody): Promise<boolean> {
+    async scheduleCampaign(campaignId: string, config: CampaignScheduleBody, campaignWebId: string): Promise<{ success: boolean, alreadyScheduled: boolean, error?: any }> {
         const url = `/campaigns/${campaignId}/actions/schedule`;
         try {
             const response = await this.request.post(url, config);
-            return response.status === 204
+            return {success: response.status === 204, alreadyScheduled: false}
         } catch (e) {
-            console.error("Failed to schedule campaign", e);
-            return false;
+            const message = e.isAxiosError && JSON.stringify((e as AxiosError).response?.data) || e.message || "Unknown error";
+            const alreadyScheduled = ((e.isAxiosError && e.response?.data?.detail) || "").includes("Cannot schedule an already scheduled campaign");
+            console.error("Failed to schedule campaign", message);
+            return {
+                success: false,
+                alreadyScheduled: alreadyScheduled,
+                error: `Unable to schedule campaign: ${message}. Please check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaignWebId}`
+            };
         }
     }
 

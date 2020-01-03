@@ -59,8 +59,12 @@ const defaultTestConfig: CactusConfig = {
     mailchimp: {
         api_key: "fake_key-us20",
         audience_id: "testing",
-        bridge_to_monday_segment_id: 1234,
+        bridge_to_monday_segment_id: "1234",
         non_prompt_campaign_ids: "507974de98",
+        segment_id_daily_prompt: "13942",
+        templates: {
+            prompt_module_morning: "12345"
+        }
     },
     app: {
         environment: "test"
@@ -107,6 +111,7 @@ const defaultTestConfig: CactusConfig = {
         bundle_id: "com.cactus.TestApp",
         team_id: "XYZ123",
         app_id: "XYZ123.com.cactus.TestApp",
+        custom_scheme: "app.cactus-stage",
     },
     bigquery_service_account: {
         "type": "service_account",

@@ -1,5 +1,6 @@
 import {
     differenceInMinutes,
+    formatDate,
     formatDateTime,
     formatDuration,
     formatDurationAsTime, getCurrentQuarterHour,
@@ -28,6 +29,20 @@ describe("getMailchimpCurrentDateString test", () => {
 
         expect(string).toEqual("2019-06-01")
     })
+});
+
+describe("format date", () => {
+    test("no format provided", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDate(date)).toEqual("2019-06-19")
+    });
+
+    test("format with day of week", () => {
+        const denverTime = 1560924000000; //2019-06-19 at midnight
+        const date = new Date(denverTime);
+        expect(formatDate(date, "cccc, LLLL d, yyyy")).toEqual("Wednesday, June 19, 2019")
+    });
 });
 
 describe("convert timezones, keep time", () => {

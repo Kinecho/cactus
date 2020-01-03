@@ -53,6 +53,23 @@ export default class AdminReflectionPromptService {
         return prompt;
     }
 
+    async getPromptForPromptContentEntryId(entryId?: string): Promise<ReflectionPrompt | undefined> {
+        if (!entryId) {
+            return undefined;
+        }
+
+        const collection = firestoreService.getCollectionRef(Collection.reflectionPrompt);
+        const query = collection.where(Field.promptContentEntryId, "==", entryId);
+
+        const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
+        if (size > 1) {
+            console.warn("Found more than one question prompt for given campaign id");
+        }
+
+        const [prompt] = results;
+        return prompt;
+    }
+
     async updateCampaign(campaign: Campaign): Promise<ReflectionPrompt | undefined> {
         const reflectionPrompt = await this.getPromptForCampaignId(campaign.id);
 

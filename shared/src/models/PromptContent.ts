@@ -240,4 +240,9 @@ export default class PromptContent extends FlamelinkModel {
         }
         return;
     }
+
+    getPreviewText(): string|undefined {
+        const [first] = (this.content || []);
+        return first?.text;
+    }
 }

@@ -49,6 +49,13 @@ export default class AdminFlamelinkService {
         this.content = this.flamelinkApp.content;
     }
 
+    /**
+     * Update an existing Flamelink entry using the faw Firestore SDK, rather than the Flamelink SDK.
+     * This lets us set values in the _fl_meta_ field, such as the lastUpdatedBy field.
+     * @param {FlamelinkModel} model
+     * @param {{updatedBy?: string}} options
+     * @return {Promise<FlamelinkModel | undefined>}
+     */
     async updateRaw<T extends FlamelinkModel>(model?: T, options?: { updatedBy?: string }): Promise<T | undefined> {
         if (!model) {
             return;

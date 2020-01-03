@@ -1,10 +1,11 @@
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
-import PromptContent from "@shared/models/PromptContent";
+import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
 import {dateObjectToISODate, getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 
 export default class AdminPromptContentService {
@@ -61,15 +62,16 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
-    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject }): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): Promise<PromptContent | undefined> {
         try {
-            const {systemDate, dateObject} = options;
+            const {systemDate, dateObject, status} = options;
             // const midnightDenver = getDateAtMidnightDenver(date);
             let startDateString = "";
             let endDateString = "";
             if (dateObject) {
                 dateObject.hour = 0;
                 dateObject.minute = 0;
+                dateObject.second = 0;
                 dateObject.millisecond = 0;
                 endDateString = dateObjectToISODate(dateObject);
                 const startObject = {...dateObject, day: dateObject.day! + 1};
@@ -77,6 +79,9 @@ export default class AdminPromptContentService {
             } else if (systemDate) {
                 const midnightDenver = systemDate;
                 midnightDenver.setHours(0);
+                midnightDenver.setMinutes(0);
+                midnightDenver.setSeconds(0);
+                midnightDenver.setMilliseconds(0);
                 const nextDate = plusDays(1, midnightDenver);
                 nextDate.setHours(0);
                 startDateString = getFlamelinkDateString(nextDate);
@@ -89,13 +94,24 @@ export default class AdminPromptContentService {
 
             console.log("start date", startDateString);
             console.log("end date", endDateString);
-            const raw = await this.flamelinkService.content.get({
+
+
+            const filters: string[][] = [];
+            if (status) {
+                console.log("adding status filter for status = ", status);
+                filters.push([PromptContent.Fields.contentStatus, "==", status])
+            }
+
+            const getOptions = {
                 schemaKey: SchemaName.promptContent,
                 // field: PromptContent.Fields.scheduledSendAt,
+                filters,
                 orderBy: {field: PromptContent.Fields.scheduledSendAt, order: "desc"},
                 startAt: startDateString,
                 endAt: endDateString,
-            });
+            };
+
+            const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
                 console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
@@ -112,8 +128,8 @@ export default class AdminPromptContentService {
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
             console.error("Failed to fetch content", error);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\``);
             return undefined;
         }
-
     }
 }
