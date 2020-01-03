@@ -78,7 +78,7 @@ export default class PromptContentScheduler {
         this.result = new ScheduleResult(this.promptContent);
     }
 
-    shouldProcess(): boolean {
+    hasValidContentStatus(): boolean {
         return this.promptContent.contentStatus === ContentStatus.submitted
     }
 
@@ -234,6 +234,9 @@ export default class PromptContentScheduler {
             })
         }
 
+        if (this.result.errors.length > 0) {
+            fields.push({title: "Message", value: "```" + this.result.errors.map(e => `- ${e}`).join("\n") + "```"});
+        }
 
         return {
             text: `:white_check_mark: Successfully published prompt content for <${link}|${dateString}: ${result.promptContent.getQuestion()}>`,
@@ -258,7 +261,13 @@ export default class PromptContentScheduler {
         const promptContent = this.promptContent;
         const result = this.result;
 
-        if (!this.shouldProcess()) {
+        if (this.promptContent.contentStatus === ContentStatus.published) {
+            result.errors.push("The prompt was already published. Not doing anything.");
+            result.success = true;
+            return result;
+        }
+
+        if (!this.hasValidContentStatus()) {
             result.errors.push(`Will not process prompts with status of '${promptContent.contentStatus}'. To schedule a prompt it must be in the status of '${ContentStatus.submitted}'`);
             result.success = false;
 
