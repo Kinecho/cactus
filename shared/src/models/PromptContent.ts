@@ -197,7 +197,6 @@ export default class PromptContent extends FlamelinkModel {
     topic?: string;
     shareReflectionCopy_md?: string;
 
-
     constructor(data?: Partial<PromptContent>) {
         super(data);
         if (data) {
@@ -225,7 +224,13 @@ export default class PromptContent extends FlamelinkModel {
 
     updateFromData(data: FlamelinkData) {
         super.updateFromData(data);
-        this.scheduledSendAt = data[PromptContent.Fields.scheduledSendAt] ? new Date(data[PromptContent.Fields.scheduledSendAt]) : undefined;
+        const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
+        if (scheduledDateField) {
+            console.log("Setting scheduledSendAt from data value", scheduledDateField);
+            this.scheduledSendAt = new Date(scheduledDateField);
+        } else {
+            this.scheduledSendAt = undefined;
+        }
     }
 
     getQuestion(): string | undefined {
@@ -235,5 +240,4 @@ export default class PromptContent extends FlamelinkModel {
         }
         return;
     }
-
 }

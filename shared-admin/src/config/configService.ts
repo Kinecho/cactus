@@ -20,14 +20,14 @@ export function getConfig(): CactusConfig {
     return _config
 }
 
-export function getHostname(): string {
-    return `${_config.web.protocol}://${_config.web.domain}`
+export function getHostname(config: CactusConfig = _config): string {
+    return `${config.web.protocol}://${config.web.domain}`
 }
 
-function buildConfig(): CactusConfig {
-    const functionsConfig = functions.config() as CactusConfig;
+export function buildConfig(configInput: CactusConfig = functions.config() as CactusConfig): CactusConfig {
+    // const functionsConfig = functions.config() as CactusConfig;
 
-    const config = {...functionsConfig};
+    const config = {...configInput};
 
     config.isEmulator = process.env.IS_EMULATOR === "true";
     if (config.isEmulator) {
