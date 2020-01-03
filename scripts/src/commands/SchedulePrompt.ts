@@ -67,7 +67,8 @@ export default class SchedulePrompt extends FirebaseCommand {
 
         const againInput = await prompts({type: "confirm", message: "Schedule another prompt?", name: "again"});
         if (againInput.again) {
-            return await this.processUserInput();
+            await this.processUserInput();
+            return;
         }
         return;
     }
