@@ -15,7 +15,7 @@ import {formatDate, mailchimpTimeZone} from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {
-    Campaign, CampaignSettings,
+    Campaign,
     CampaignType,
     SendChecklistItem,
     SendChecklistItemType
@@ -25,7 +25,9 @@ import {
     CampaignContentRequest,
     CampaignContentSectionMap,
     CreateCampaignRequest,
-    TemplateSection, UpdateCampaignRequest
+    CreateCampaignSettings,
+    TemplateSection,
+    UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import MailchimpService from "@admin/services/MailchimpService";
 import {DateTime} from "luxon";
@@ -503,7 +505,7 @@ export default class PromptContentScheduler {
         const campaignTitle = `${sendDate} - Daily - ${promptContent.getQuestion()}`;
 
         const prompt = this.result.reflectionPrompt;
-        const campaignSettings: CampaignSettings = {
+        const campaignSettings: CreateCampaignSettings = {
             title: campaignTitle,
             reply_to: "hello@cactus.app",
             subject_line: promptContent.subjectLine,
@@ -523,7 +525,7 @@ export default class PromptContentScheduler {
                 await MailchimpService.getSharedInstance().updateCampaign(prompt.campaign.id, updateRequest);
                 return {success: true, campaign: prompt.campaign};
             } catch (updateError) {
-                console.error("Update campaign failed.", error);
+                console.error("Update campaign failed.", updateError);
                 return {
                     success: false,
                     campaign: prompt.campaign,
