@@ -387,6 +387,7 @@
                 // }
 
                 if (this.formData.hasChanges) {
+                    this.removeAllSnackbars()
                     this.saving = true;
                     const saveResult = await this.formData.save();
 
