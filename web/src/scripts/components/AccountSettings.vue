@@ -78,7 +78,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
+                            <timezone-picker @change="tzSelected" v-bind:value="formData.current.timeZone"/>
                         </div>
                     </div>
 
@@ -98,8 +98,8 @@
 
                     <transition appear name="slide-up">
                         <div class="stickyButtons" v-if="showSaveActions">
-                            <button @click="save">Save Changes</button>
-                            <button @click="cancelChanges" class="secondary">Cancel</button>
+                            <button @click="save" :disabled="saving" class="no-loading">Save Changes</button>
+                            <button @click="cancelChanges" class="secondary no-loading" :disabled="saving">Cancel</button>
                         </div>
                     </transition>
 
@@ -246,10 +246,10 @@
         },
         computed: {
             showSaveActions(): boolean {
-                return this.changesToSave || this.formData.hasChanges
+                return this.changesToSave || this.formData.hasChanges || this.saving
             },
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
+                return this.formData.current.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -261,18 +261,18 @@
                 return this.member ? this.member.getFullName() : '';
             },
             differentTimezone(): boolean {
-                if (this.member?.timeZone) {
+                if (this.formData.current?.timeZone) {
                     const d = new Date();
                     const localeTimeParts = d.toLocaleTimeString('en-us', {timeZoneName: 'short'}).split(' ');
                     const memberTimeParts = d.toLocaleTimeString('en-us', {
                         timeZoneName: 'short',
-                        timeZone: this.member.timeZone
+                        timeZone: this.formData.current.timeZone
                     }).split(' ');
 
                     return localeTimeParts[0] !== memberTimeParts[0] || localeTimeParts[1] !== memberTimeParts[1];
                 }
 
-                return !!(this.deviceTimezone && this.member?.timeZone && this.deviceTimezone !== this.member?.timeZone);
+                return !!(this.deviceTimezone && this.formData.current?.timeZone && this.deviceTimezone !== this.formData.current?.timeZone);
             },
             deviceTimezoneName(): string | undefined {
                 if (this.deviceTimezone) {
@@ -445,24 +445,29 @@
                 }
             },
             async setToDeviceZone() {
-                if (this.member) {
-                    this.member.timeZone = this.deviceTimezone;
-                    await this.save();
-                }
+                // if (this.member) {
+                //     this.member.timeZone = this.deviceTimezone;
+                //     await this.save();
+                // }
+
+                this.formData.current.timeZone = this.deviceTimezone;
+                await this.save();
             },
             async tzSelected(value: ZoneInfo | null | undefined) {
-                if (this.member) {
-                    this.member.timeZone = value ? value.zoneName : null;
-                    this.changesToSave = true;
-                }
+                // if (this.member) {
+                //     this.member.timeZone = value ? value.zoneName : null;
+                //     this.changesToSave = true;
+                // }
+                this.formData.current.timeZone = value ? value.zoneName : undefined
             },
             async timeSelected(value: PromptSendTime) {
-                if (this.member) {
-                    this.member.promptSendTime = value;
-                    // this.$set(this.member, this.member);
-
-                    this.changesToSave = true
-                }
+                this.formData.current.promptSendTime = value
+                // if (this.member) {
+                //     this.member.promptSendTime = value;
+                //     // this.$set(this.member, this.member);
+                //
+                //     this.changesToSave = true
+                // }
             },
 
             cancelChanges() {
