@@ -35,8 +35,8 @@ declare interface Operation {
 
 declare interface IGetOptions {
     queryName?: string,
-    includeDeleted?: false,
-    onlyDeleted?: false,
+    includeDeleted?: boolean,
+    onlyDeleted?: boolean,
 }
 
 declare interface DocObserverOptions<IModel extends BaseModel> extends IGetOptions {

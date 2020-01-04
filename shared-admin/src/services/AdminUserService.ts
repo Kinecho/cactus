@@ -179,8 +179,8 @@ export default class AdminUserService {
         const errors: string[] = [];
         const results: DeleteUserResult = {email, documentsDeleted: {}, success: false};
         const [members, users, firebaseUser] = await Promise.all([
-            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
-            await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
+            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email, {includeDeleted: true}),
+            await AdminUserService.getSharedInstance().getAllMatchingEmail(email, {includeDeleted: true}),
             await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
                 if (userRecord) {
                     resolve(userRecord);
@@ -203,9 +203,9 @@ export default class AdminUserService {
         results.userRecord = firebaseUser;
         results.users = users;
         const memberIds = members.map(m => m.id).filter(id => !!id) as string[];
-        const endTime = new Date().getTime();
-        console.log(`Delete user task took ${endTime - startTime}ms`);
-
+        const userIds = users.map(u => u.id).filter(id => !!id) as string[];
+        console.log("Found member ids", memberIds.join(", "));
+        console.log("Found userIds", userIds.join(", "));
         const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
@@ -334,7 +334,7 @@ export default class AdminUserService {
             attachments.push({
                 title: "Errors",
                 color: AttachmentColor.error,
-                text: errors.join("\n"),
+                text: "```" + errors.map(e => JSON.stringify(e, null, 2)).join("\n") + "```",
             })
         }
 
@@ -343,6 +343,8 @@ export default class AdminUserService {
             attachments,
         });
 
+        const endTime = new Date().getTime();
+        console.log(`Delete user task took ${endTime - startTime}ms`);
         return results;
     }
 }

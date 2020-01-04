@@ -310,9 +310,17 @@ function createSlackMessage(args: SlackMessageInput): SlackMessage {
  */
 export async function onDelete(user: admin.auth.UserRecord) {
     const email = user.email;
+    console.log("Deleting user ", JSON.stringify(user.toJSON()));
     if (!email) {
+        console.error("No email found on the user, can't delete.");
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${user.toJSON()}\`\`\``);
         return
     }
-    await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, userRecord: user});
+    try {
+        await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, userRecord: user});
+        console.log("finished deleting user with email", email);
+    } catch (error) {
+        console.error("Failed to delete user data", error);
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${e.message}\`\`\``);
+    }
 }
