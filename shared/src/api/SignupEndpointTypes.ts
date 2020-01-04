@@ -5,7 +5,11 @@ export interface ChangeEmailRequest {
 }
 
 export enum ChangeEmailResponseCode {
-    INVALID_EMAIL = "INVALID_EMAIL"
+    INVALID_EMAIL = "INVALID_EMAIL",
+    PENDING = "PENDING",
+    SUCCESS = "SUCCESS",
+    CREDENTIAL_TOO_OLD = "CREDENTIAL_TOO_OLD",
+    UNKNKOWN_ERROR = "UNKNOWN_ERROR",
 }
 
 export interface ChangeEmailResponse {

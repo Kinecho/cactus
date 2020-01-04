@@ -204,7 +204,7 @@ export function getPromptQuestion(args: { prompt?: ReflectionPrompt, promptConte
 }
 
 export function isBlank(input: string | null | undefined): boolean {
-    if (!input || !input.trim()) {
+    if (input === null || input === undefined || input.trim().length === 0) {
         return true;
     }
 

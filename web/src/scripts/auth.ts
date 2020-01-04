@@ -103,6 +103,8 @@ export interface AuthUIConfigOptions {
     signInFailure?: ((error: firebaseui.auth.AuthUIError) => Promise<void>),
     uiShown?: () => void;
     includeEmailLink?: boolean,
+    authFlow?: "redirect" | "popup",
+    modalCallback?: (authResult: FirebaseUserCredential) => void,
 }
 
 
@@ -112,7 +114,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         firebase.auth.FacebookAuthProvider.PROVIDER_ID,
         firebase.auth.TwitterAuthProvider.PROVIDER_ID,
         // getPhoneProviderConfig(),
-        // emailProvider(opts)
+        // emailProvider(opts)>
 
     ];
     if (opts.includeEmailLink) {
@@ -131,6 +133,11 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
                 If the value is provided in the URL, that value will be used instead of the static signInSuccessUrl in config.
                 If the callback returns false or nothing, the page is not automatically redirected.
                  */
+                if (opts.modalCallback) {
+                    opts.modalCallback(authResult);
+                    return false;
+                }
+
                 if (opts.signInSuccess) {
                     return opts.signInSuccess(authResult, redirectUri)
                 } else {
@@ -154,7 +161,7 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         },
 
         signInSuccessUrl: opts.signInSuccessPath,
-        signInFlow: 'redirect',
+        signInFlow: opts.authFlow ?? 'redirect',
         credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
         signInOptions,
         tosUrl: `${Config.domain}/terms-of-service`,
@@ -175,16 +182,24 @@ export function getAuthUI(): firebaseui.auth.AuthUI {
 }
 
 
-export function createAuthModal(): string {
+export function createAuthModal(options?: { title?: string, message?: string }): { modalId: string, loginPromise?: Promise<FirebaseUserCredential> } {
     const modalId = 'auth-modal';
-    addModal(modalId, {});
+    addModal(modalId, {title: options?.title, message: options?.message});
 
-    const ui = getAuthUI();
-    ui.start(`#${modalId} > div`, getAuthUIConfig({
-        signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
-        emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED
-    }));
-    return modalId;
+    const loginPromise = new Promise<FirebaseUserCredential>((resolve, reject) => {
+        const ui = getAuthUI();
+        ui.start(`#${modalId} > div`, getAuthUIConfig({
+            signInSuccessPath: PageRoute.SIGNUP_CONFIRMED,
+            emailLinkSignInPath: PageRoute.SIGNUP_CONFIRMED,
+            authFlow: "popup",
+            modalCallback: (credential) => {
+                resolve(credential)
+            }
+        }));
+    });
+
+
+    return {modalId, loginPromise};
 }
 
 export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSignupResult> {

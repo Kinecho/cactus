@@ -21,28 +21,28 @@
                             <span class="value">{{ memberSince }}</span>
                         </div>
 
-                        <div class="item" :class="[formData.validations.getLevel('firstName')]">
+                        <div class="item" :class="[formData.current.validator.getLevel('firstName')]">
                             <label for="account_fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
-                            <input v-model="formData.current.firstName" type="text" name="fname" id="account_fname">
-                            <span class="message" v-if="formData.validations.getMessage('firstName')">{{formData.validations.getMessage('firstName')}}</span>
+                            <input v-model="formData.current.firstName" type="text" name="fname" id="account_fname" @blur="formData.current.validateField('firstName')">
+                            <span class="message" v-if="formData.current.validator.getMessage('firstName')">{{formData.current.validator.getMessage('firstName')}}</span>
                         </div>
 
-                        <div class="item" :class="[formData.validations.getLevel('lastName')]">
+                        <div class="item" :class="[formData.current.validator.getLevel('lastName')]">
                             <label for="account_lname" class="label">
                                 {{copy.common.LAST_NAME}}
                             </label>
-                            <input v-model="formData.current.lastName" type="text" name="lname" id="account_lname">
-                            <span class="message" v-if="formData.validations.getMessage('lastName')">{{formData.validations.getMessage('lastName')}}</span>
+                            <input v-model="formData.current.lastName" type="text" name="lname" id="account_lname" @blur="formData.current.validateField('lastName')">
+                            <span class="message" v-if="formData.current.validator.getMessage('lastName')">{{formData.current.validator.getMessage('lastName')}}</span>
                         </div>
 
-                        <div class="item" :class="[formData.validations.getLevel('email')]">
+                        <div class="item" :class="[formData.current.validator.getLevel('email')]">
                             <label class="label">
                                 {{copy.common.EMAIL_ADDRESS}}
                             </label>
-                            <input v-model="formData.current.email" type="email"/>
-                            <span class="message" v-if="formData.validations.getMessage('email')">{{formData.validations.getMessage('email')}}</span>
+                            <input v-model="formData.current.email" type="email" @blur="formData.current.validateField('email')" name="email"/>
+                            <span class="message" v-if="formData.current.validator.getMessage('email')">{{formData.current.validator.getMessage('email')}}</span>
                             <p class="value">Original Email: {{formData.original.email}}</p>
                         </div>
                     </div>
@@ -51,8 +51,8 @@
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
-                            <div v-if="complianceStateError" class="alert error">
-                                {{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_ERROR}}&nbsp;<a :href="mailchimpSignupFormUrl" target="_blank">{{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT}}</a>.
+                            <div v-if="complianceStateError" class="alert error compliance">
+                                {{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_ERROR}}&nbsp;<a :href="mailchimpSignupFormUrl" target="_blank" class="link">{{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT}}</a>.
                             </div>
                         </div>
 
@@ -159,7 +159,7 @@
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
-    import AccountSettingsFormData from "@web/datasource/AccountSettingsFormData";
+    import AccountSettingsFormData, {FormValidator, Validations} from "@web/datasource/AccountSettingsFormData";
     import {Config} from "@web/config";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -230,7 +230,9 @@
             formData: AccountSettingsFormData;
             complianceStateError: boolean;
             mailchimpSignupFormUrl: string,
+            validator: FormValidator,
         } {
+            const formData = new AccountSettingsFormData();
             return {
                 authLoaded: false,
                 member: undefined,
@@ -251,8 +253,9 @@
                 tzAlertDismissed: false,
                 saving: false,
                 savingTimeout: undefined,
-                formData: new AccountSettingsFormData(),
-                complianceStateError: false
+                formData: formData,
+                complianceStateError: false,
+                validator: formData.current.validator
             }
         },
         computed: {
@@ -404,7 +407,7 @@
 
                     if (saveResult.success) {
                         this.addSnackbar({message: "Changes Saved", color: "success"});
-                    } else if (saveResult?.validation?.hasErrors) {
+                    } else if (saveResult?.validator.hasErrors) {
                         this.addSnackbar({
                             message: "Please fix any errors and try again.",
                             autoHide: false,
@@ -620,6 +623,14 @@
             height: 1.6rem;
             margin-right: .6rem;
             width: 1.6rem;
+        }
+    }
+
+    .alert.error.compliance {
+        margin-top: 2rem;
+
+        .link {
+            color: $white;
         }
     }
 
