@@ -8,6 +8,7 @@ module.exports = {
     __API_DOMAIN__: 'https://us-central1-cactus-app-stage.cloudfunctions.net',
     __PUBLIC_DOMAIN__: 'https://cactus-app-stage.web.app',
     __BUILD_ENV__: 'stage',
+    __MAILCHIMP_SIGNUP_FORM_URL__: "http://eepurl.com/gsIFBL",
     __FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
         authDomain: 'cactus-app-stage.web.app',

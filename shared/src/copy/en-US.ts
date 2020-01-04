@@ -20,7 +20,7 @@ export default class EnglishCopy extends LocalizedCopy {
     };
     pronouns: PronounCopy = {
         YOU: "you"
-    }
+    };
 
     account: AccountCopy = {
         PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",
@@ -29,6 +29,8 @@ export default class EnglishCopy extends LocalizedCopy {
         CANCEL_UPDATE_TIMEZONE: "No, don't update",
         CONFIRM_UPDATE_TIMEZONE: "Yes, update timezone",
         EMAIL_NOTIFICATION_CHECKBOX_LABEL: "Receive an email when a new prompt is ready",
+        EMAIL_SUBSCRIBE_COMPLIANCE_ERROR: "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. You may resubscribe by signing up again", //no space. A link will be presented after this, with a period after the link.
+        EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT: "here",
     };
 
     common: CommonCopy = {

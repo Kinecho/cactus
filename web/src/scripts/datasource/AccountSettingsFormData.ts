@@ -89,6 +89,7 @@ class FormData {
         this.lastName = member?.lastName;
         this.email = member?.email;
         this.notificationSettings = member?.notificationSettings || DEFAULT_NOTIFICATION_SETTINGS();
+        this.promptSendTime = member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME();
         this.timeZone = member?.timeZone;
     }
 
@@ -147,6 +148,7 @@ export default class AccountSettingsFormData {
             this.initialize()
         } else if (member && user) {
             this.original.setData({member, user});
+            this.current.setData({member, user});
         }
     }
 

@@ -6,6 +6,7 @@ module.exports = {
     __FIRST_PROMPT_ID__: 'nIVmhvgppLNgNMAsWEb0',
     __API_DOMAIN__: 'https://us-central1-cactus-app-prod.cloudfunctions.net',
     __PUBLIC_DOMAIN__: 'https://cactus.app',
+    __MAILCHIMP_SIGNUP_FORM_URL__: "http://eepurl.com/gsdYDf",
     __BUILD_ENV__: 'prod',
     __FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyDu_-z20lelwf58ZtPurwNagHL0UBdMb4U',

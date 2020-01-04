@@ -51,6 +51,9 @@
                         <h3>{{copy.common.NOTIFICATIONS}}</h3>
                         <div class="item">
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
+                            <div v-if="complianceStateError" class="alert error">
+                                {{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_ERROR}}&nbsp;<a :href="mailchimpSignupFormUrl" target="_blank">{{copy.account.EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT}}</a>.
+                            </div>
                         </div>
 
                         <div class="item">
@@ -99,7 +102,8 @@
                     <transition appear name="slide-up">
                         <div class="stickyButtons" v-if="showSaveActions">
                             <button @click="save" :disabled="saving" class="no-loading">Save Changes</button>
-                            <button @click="cancelChanges" class="secondary no-loading" :disabled="saving">Cancel</button>
+                            <button @click="cancelChanges" class="secondary no-loading" :disabled="saving">Cancel
+                            </button>
                         </div>
                     </transition>
 
@@ -156,6 +160,7 @@
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import AccountSettingsFormData from "@web/datasource/AccountSettingsFormData";
+    import {Config} from "@web/config";
 
     const copy = CopyService.getSharedInstance().copy;
     const SAVING_TIMOUT_MS = 2000;
@@ -165,6 +170,8 @@
         displayName: string,
         providerId: string
     }
+
+    const mailchimpSignupFormUrl = Config.mailchimpSignupFormUrl;
 
     export default Vue.extend({
         components: {
@@ -221,6 +228,8 @@
             saving: boolean,
             savingTimeout: number | undefined,
             formData: AccountSettingsFormData;
+            complianceStateError: boolean;
+            mailchimpSignupFormUrl: string,
         } {
             return {
                 authLoaded: false,
@@ -230,6 +239,7 @@
                 error: undefined,
                 removedProviderIds: [],
                 copy,
+                mailchimpSignupFormUrl,
                 snackbars: [],
                 notificationValues: {
                     TRUE: NotificationStatus.ACTIVE,
@@ -242,6 +252,7 @@
                 saving: false,
                 savingTimeout: undefined,
                 formData: new AccountSettingsFormData(),
+                complianceStateError: false
             }
         },
         computed: {
@@ -387,7 +398,7 @@
                 // }
 
                 if (this.formData.hasChanges) {
-                    this.removeAllSnackbars()
+                    this.removeAllSnackbars();
                     this.saving = true;
                     const saveResult = await this.formData.save();
 
@@ -420,6 +431,7 @@
                 });
                 console.log("Saving status...", status);
                 this.error = undefined;
+                this.complianceStateError = false;
                 if (this.member && this.member.email) {
                     const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
@@ -429,11 +441,16 @@
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
 
                         if (result.error && result.error.title === "Member In Compliance State") {
-                            errorMessage = "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. Please email help@cactus.app to resolve this issue."
+                            // errorMessage = "Cactus is unable to subscribe you to receive email notifications because you previously unsubscribed. Please email help@cactus.app to resolve this issue."
+                            this.complianceStateError = true;
+                            this.error = undefined;
+                        } else {
+                            this.complianceStateError = false;
+                            this.error = errorMessage;
                         }
 
                         this.member.notificationSettings.email = status === NotificationStatus.ACTIVE ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
-                        this.error = errorMessage;
+
                         this.removeSnackbar(snackId)
                     } else {
                         this.updateSnackbar(snackId, {

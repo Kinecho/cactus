@@ -34,7 +34,7 @@ declare var __FLAMELINK_ENV_ID__: string;
 declare var __FIRST_PROMPT_ID__: string;
 declare var __CLOUDSPONGE_KEY__: string;
 declare var __APP_STORE_URL__: string;
-
+declare var __MAILCHIMP_SIGNUP_FORM_URL__: string;
 declare var __API_DOMAIN__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
 declare var __PUBLIC_DOMAIN__: string;
@@ -63,5 +63,6 @@ export const Config = {
     isDev: __BUILD_ENV__ === "dev",
     isStage: __BUILD_ENV__ === "stage",
     isProd: __BUILD_ENV__ === "prod",
-    version: __SENTRY_VERSION__
+    version: __SENTRY_VERSION__,
+    mailchimpSignupFormUrl: __MAILCHIMP_SIGNUP_FORM_URL__,
 };

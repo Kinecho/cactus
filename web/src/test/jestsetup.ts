@@ -7,6 +7,7 @@ window.__CLOUDSPONGE_KEY__ = 'localhost';
 window.__API_DOMAIN__ = 'https://us-central1-cactus-app-stage.cloudfunctions.net';
 window.__PUBLIC_DOMAIN__ = 'https://cactus-app-stage.web.app';
 window.__BUILD_ENV__ = 'stage';
+window.___MAILCHIMP_SIGNUP_FORM_URL__ = "http://eepurl.com/gsIFBL";
 window.__FIREBASE_CONFIG__ = {
     apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
     authDomain: 'cactus-app-stage.firebaseapp.com',
