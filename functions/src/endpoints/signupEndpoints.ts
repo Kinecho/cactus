@@ -3,6 +3,9 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
+    ChangeEmailRequest,
+    ChangeEmailResponse,
+    ChangeEmailResponseCode,
     EmailStatusRequest,
     EmailStatusResponse,
     LoginEvent,
@@ -13,23 +16,60 @@ import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} f
 import {getConfig} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
-import {appendDomain, appendQueryParams, getProviderDisplayName} from "@shared/util/StringUtil";
+import {appendDomain, appendQueryParams, getProviderDisplayName, isValidEmail} from "@shared/util/StringUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import AdminUserService from "@admin/services/AdminUserService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {getAuthUser} from "@api/util/RequestUtil";
-import UserRecord = admin.auth.UserRecord;
-import ActionCodeSettings = admin.auth.ActionCodeSettings;
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {getISODateTime} from "@shared/util/DateUtil";
 import {QueryParam} from "@shared/util/queryParams";
+import UserRecord = admin.auth.UserRecord;
+import ActionCodeSettings = admin.auth.ActionCodeSettings;
 
 const Config = getConfig();
 
 const app = express();
 app.use(cors({origin: true}));
+
+app.post("/change-email", async (req: functions.https.Request | any, resp: functions.Response) => {
+    console.log("Starting change-email with request body body", JSON.stringify(req.body));
+    const authUser = await getAuthUser(req);
+
+    if (!authUser) {
+        console.error("the user is not authenticated");
+        resp.sendStatus(401);
+        return;
+    }
+
+    const payload = req.body as ChangeEmailRequest;
+    const {newEmail} = payload;
+    console.log(`Processing email change request for user ${authUser.email} (userId=${authUser.uid}). New email = ${newEmail}`);
+    if (!isValidEmail(newEmail)) {
+        console.warn(`the provided email "${newEmail}" is not a valid email address. Returning 400`);
+        const errorResponse: ChangeEmailResponse = {
+            newEmail,
+            confirmationEmailSent: false,
+            emailAvailable: false,
+            error: new Error(`"${newEmail}" is not a valid email address.`),
+            code: ChangeEmailResponseCode.INVALID_EMAIL
+        };
+        resp.status(400).send(errorResponse);
+        return;
+    }
+
+    const [users] = await Promise.all([
+        AdminUserService.getSharedInstance().getAllMatchingEmail(newEmail),
+
+    ]);
+
+    console.log(`Found ${users.length} users with the email address of ${newEmail}`);
+
+    resp.sendStatus(500);
+    return;
+});
 
 app.post("/email-status", async (req: functions.https.Request | any, resp: functions.Response) => {
 

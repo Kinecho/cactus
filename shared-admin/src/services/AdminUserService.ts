@@ -109,6 +109,30 @@ export default class AdminUserService {
         }
     }
 
+    async getAuthUserByEmail(email: string): Promise<UserRecord | undefined> {
+        try {
+            const user = await admin.auth().getUserByEmail(email);
+            console.log(`Found AuthUser (${user.uid}) for email ${email}`);
+            return user;
+        } catch (error) {
+            console.info(`No AuthUser found for email ${email}`);
+            return;
+        }
+    }
+
+    async getAuthUserById(userId: string): Promise<UserRecord | undefined> {
+        try {
+            const user = await admin.auth().getUser(userId);
+            console.log(`Found AuthUser (${user.uid}) for userId ${userId}`);
+            return user;
+        } catch (error) {
+            console.info(`No AuthUser found for userId ${userId}`);
+            return;
+        }
+    }
+
+    // async getVerifyEmailLink(args: {email: string})
+
     async getByEmail(email: string): Promise<User | undefined> {
         let searchEmail = email;
         if (email && email.trim()) {
@@ -124,6 +148,14 @@ export default class AdminUserService {
         return foundUser;
     }
 
+    /**
+     * Find all users matching the provided email address.
+     * There shouldn't be multiple users with the same email, but is has happened before. This method will find them and return them.
+     *
+     * @param {string} email
+     * @param {GetOptions} options
+     * @return {Promise<User[]>}
+     */
     async getAllMatchingEmail(email: string, options?: GetOptions): Promise<User[]> {
         let searchEmail = email;
         if (email && email.trim()) {

@@ -25,24 +25,23 @@
                             <label for="account_fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
-                            <input v-model="member.firstName" @keyup="changesToSave = true" type="text" name="fname" id="account_fname">
+                            <input v-model="formData.current.firstName" type="text" name="fname" id="account_fname">
                         </div>
 
                         <div class="item">
                             <label for="account_lname" class="label">
                                 {{copy.common.LAST_NAME}}
                             </label>
-                            <input v-model="member.lastName" @keyup="changesToSave = true" type="text" name="lname" id="account_lname">
+                            <input v-model="formData.current.lastName"  type="text" name="lname" id="account_lname">
                         </div>
 
                         <div class="item">
                             <label class="label">
                                 {{copy.common.EMAIL_ADDRESS}}
                             </label>
-                            <p class="value">{{member.email}}</p>
+                            <input v-model="formData.current.email" type="email"/>
+                            <p class="value">Original Email: {{formData.original.email}}</p>
                         </div>
-
-
                     </div>
 
                     <div class="settings-group notifications">
@@ -68,7 +67,9 @@
                                     {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
-                                    <button class="button small" @click="setToDeviceZone">{{copy.account.CONFIRM_UPDATE_TIMEZONE}}</button>
+                                    <button class="button small" @click="setToDeviceZone">
+                                        {{copy.account.CONFIRM_UPDATE_TIMEZONE}}
+                                    </button>
                                     <button class="button small secondary" @click="tzAlertDismissed = true">
                                         {{copy.account.CANCEL_UPDATE_TIMEZONE}}
                                     </button>
@@ -92,10 +93,13 @@
                         </div>
                     </div>
 
-                    <div class="stickyButtons" v-if="changesToSave === true">
-                        <button @click="save">Save Changes</button>
-                        <button @click="reloadPage" class="secondary">Cancel</button>
-                    </div>
+                    <transition appear name="slide-up">
+                        <div class="stickyButtons" v-if="showSaveActions">
+                            <button @click="save">Save Changes</button>
+                            <button @click="cancelChanges" class="secondary">Cancel</button>
+                        </div>
+                    </transition>
+
 
                 </div>
             </transition>
@@ -148,8 +152,10 @@
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
+    import AccountSettingsFormData from "@web/datasource/AccountSettingsFormData";
 
     const copy = CopyService.getSharedInstance().copy;
+    const SAVING_TIMOUT_MS = 2000;
 
     export interface Provider {
         iconName: string,
@@ -168,22 +174,28 @@
             SnackbarContent,
             TimePicker,
         },
-        created() {
+        beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member, user}) => {
+                    if (!member) {
+                        window.location.href = PageRoute.HOME;
+                        return;
+                    }
+
+                    this.formData.update({member, user});
+
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
-
-                    if (!member) {
-                        window.location.href = PageRoute.HOME;
-                    }
                 }
             })
         },
         destroyed() {
             if (this.memberUnsubscriber) {
                 this.memberUnsubscriber();
+            }
+            if (this.savingTimeout) {
+                clearTimeout(this.savingTimeout);
             }
         },
         data(): {
@@ -203,6 +215,9 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
+            saving: boolean,
+            savingTimeout: number | undefined,
+            formData: AccountSettingsFormData;
         } {
             return {
                 authLoaded: false,
@@ -221,11 +236,17 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
+                saving: false,
+                savingTimeout: undefined,
+                formData: new AccountSettingsFormData(),
             }
         },
         computed: {
+            showSaveActions(): boolean {
+                return this.changesToSave || this.formData.hasChanges
+            },
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME
+                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -305,7 +326,7 @@
                     this.removedProviderIds.push(providerId);
                     await this.user.unlink(providerId);
                     this.addSnackbar(`${getProviderDisplayName(providerId)} Removed`);
-                    this.user.reload();
+                    await this.user.reload();
                 }
                 return;
             },
@@ -317,6 +338,7 @@
                 el.style.width = width
                 el.style.height = height
             },
+
             addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
 
                 const id = uuid();
@@ -347,12 +369,31 @@
                 }
             },
             async save() {
-                if (this.member) {
-                    await CactusMemberService.sharedInstance.save(this.member);
-                    console.log("Save success");
-                    this.addSnackbar({message: "Changes Saved", color: "success"});
-                    this.changesToSave = false;
+                // if (this.changesToSave && this.member) {
+                //     this.saving = true;
+                //     await CactusMemberService.sharedInstance.save(this.member);
+                //     this.savingTimeout = window.setTimeout(() => {
+                //         this.saving = false;
+                //     }, SAVING_TIMOUT_MS);
+                //     console.log("Save success");
+                //     this.addSnackbar({message: "Changes Saved", color: "success"});
+                //     this.changesToSave = false;
+                // }
+
+                if (this.formData.hasChanges) {
+                    this.saving = true;
+                    const saveResult = await this.formData.save();
+
+                    if (saveResult.success) {
+                        this.addSnackbar({message: "Changes Saved", color: "success"});
+                    } else if (saveResult) {
+                        this.addSnackbar(saveResult.errors?.join("\n").trim() || "Oops! Unable to save email settings.");
+                    }
                 }
+
+                this.savingTimeout = window.setTimeout(() => {
+                    this.saving = false;
+                }, SAVING_TIMOUT_MS);
             },
             async saveEmailStatus(status: NotificationStatus) {
                 const snackId = this.addSnackbar({
@@ -408,8 +449,10 @@
                     this.changesToSave = true
                 }
             },
-            reloadPage() {
-                window.location.reload();
+            cancelChanges() {
+                // window.location.reload();
+                //TODO: Need to get all fields hooked into data source
+                this.formData.resetAll();
             }
         }
     })
@@ -420,6 +463,7 @@
     @import "mixins";
     @import "variables";
     @import "forms";
+    @import "transitions";
 
     .accountContainer {
         display: flex;

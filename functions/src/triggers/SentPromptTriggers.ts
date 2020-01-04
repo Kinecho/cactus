@@ -44,7 +44,7 @@ export const sentPromptPushNotificationTrigger = functions.firestore
 async function sendPush(options: { member: CactusMember, prompt: ReflectionPrompt, sentPrompt: SentPrompt }): Promise<NewPromptNotificationResult | undefined> {
     const {member, sentPrompt, prompt} = options;
     const userDateObject = member.getCurrentLocaleDateObject();
-    const userPromptSendTime = member.promptSendTime || DEFAULT_PROMPT_SEND_TIME;
+    const userPromptSendTime = member.promptSendTime || DEFAULT_PROMPT_SEND_TIME();
     const isSendTime = isSendTimeWindow({currentDate: userDateObject, sendTime: userPromptSendTime});
 
     if (isSendTime) {

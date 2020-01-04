@@ -404,7 +404,7 @@ export default class AdminCactusMemberService {
         const denverUTCDefault = getSendTimeUTC({
             forDate: new Date(),
             timeZone: 'America/Denver',
-            sendTime: DEFAULT_PROMPT_SEND_TIME,
+            sendTime: DEFAULT_PROMPT_SEND_TIME(),
         });
 
         const {minute: afterMin, hour: afterHour} = afterUTC || {};

@@ -1,5 +1,21 @@
 import {ApiResponse} from "@shared/api/ApiTypes";
 
+export interface ChangeEmailRequest {
+    newEmail: string,
+}
+
+export enum ChangeEmailResponseCode {
+    INVALID_EMAIL = "INVALID_EMAIL"
+}
+
+export interface ChangeEmailResponse {
+    emailAvailable: boolean,
+    newEmail: string,
+    confirmationEmailSent: boolean,
+    code: ChangeEmailResponseCode,
+    error?: Error
+}
+
 export interface EmailStatusRequest {
     email: string,
 }

@@ -106,6 +106,10 @@ $slow: 1.5s;
   transform: translateX(-50px);
 }
 
+@include createTransition("slide-up", $fast) {
+  transform: translateY(100%);
+}
+
 .slide-leave-active,
 .slide-enter-active {
   transition: .2s;
