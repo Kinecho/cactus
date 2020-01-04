@@ -307,6 +307,12 @@ export default class AccountSettingsFormData {
                 const emailResult = await this.changeEmail(email);
                 if (emailResult.code === ChangeEmailResponseCode.SUCCESS) {
                     member.email = email;
+                } else if (emailResult.code === ChangeEmailResponseCode.EMAIL_IN_USE) {
+                    validator.set("email", {
+                        message: "This email is already taken. Please choose a different email.",
+                        level: "error"
+                    });
+                    return {success: false, errors: [`The email \"${email}\" is already in use.`], validator}
                 }
             }
 
@@ -345,6 +351,14 @@ export default class AccountSettingsFormData {
             };
         } catch (error) {
             console.error("Failed to update user's email", error);
+            if (error.code === "auth/email-already-in-use") {
+                return {
+                    confirmationEmailSent: false,
+                    emailAvailable: false,
+                    code: ChangeEmailResponseCode.EMAIL_IN_USE,
+                    newEmail: email
+                }
+            }
             if (error.code === "auth/requires-recent-login") {
                 if (allowRetry) {
                     const {success: reAuthSuccess} = await this.reauthenticateUser();

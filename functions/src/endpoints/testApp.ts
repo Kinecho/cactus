@@ -188,6 +188,23 @@ app.get("/error", async (req, resp) => {
     }
 });
 
+app.get("/user", async (req, resp) => {
+    const email = req.query.email;
+    const config = getConfig();
+    if (config.app.environment === "prod") {
+        resp.sendStatus(403);
+        return
+    }
+    try {
+        console.log("Fetching user with email", email);
+        const user = await admin.auth().getUserByEmail(email);
+        resp.send(user.toJSON());
+    } catch (error) {
+        console.error("Failed to find user", error);
+        resp.sendStatus(404);
+        return
+    }
+});
 
 app.get("/sheets", async (req, resp) => {
     const config = getConfig();

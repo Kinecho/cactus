@@ -38,12 +38,11 @@
                         </div>
 
                         <div class="item" :class="[formData.current.validator.getLevel('email')]">
-                            <label class="label">
+                            <label class="label" for="account_email">
                                 {{copy.common.EMAIL_ADDRESS}}
                             </label>
-                            <input v-model="formData.current.email" type="email" @blur="formData.current.validateField('email')" name="email"/>
+                            <input v-model="formData.current.email" type="email" @blur="formData.current.validateField('email')" name="email" id="account_email"/>
                             <span class="message" v-if="formData.current.validator.getMessage('email')">{{formData.current.validator.getMessage('email')}}</span>
-                            <p class="value">Original Email: {{formData.original.email}}</p>
                         </div>
                     </div>
 
@@ -555,7 +554,7 @@
                 color: $red;
             }
 
-            input {
+            input, input[type=email] {
                 border-color: $red;
                 color: $red;
             }
@@ -570,7 +569,7 @@
                 color: $darkestYellow;
             }
 
-            input {
+            input, input[type=email] {
                 border-color: $darkestYellow;
                 color: $darkestYellow;
             }
@@ -582,9 +581,10 @@
 
     }
 
-    input {
+    input, .item input[type=email] {
         @include textInputAlt;
         width: 100%;
+        max-width: unset;
     }
 
     .settings-group {

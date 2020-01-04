@@ -10,6 +10,7 @@ export enum ChangeEmailResponseCode {
     SUCCESS = "SUCCESS",
     CREDENTIAL_TOO_OLD = "CREDENTIAL_TOO_OLD",
     UNKNKOWN_ERROR = "UNKNOWN_ERROR",
+    EMAIL_IN_USE = "EMAIL_IN_USE",
 }
 
 export interface ChangeEmailResponse {
