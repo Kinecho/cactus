@@ -7,16 +7,65 @@ import CactusMember, {
 } from "@shared/models/CactusMember";
 import {FirebaseUser} from "@web/firebase"
 import CactusMemberService from "@web/services/CactusMemberService";
+import {isBlank, isValidEmail} from "@shared/util/StringUtil";
 
 const DEFAULT_NOTIFICATION_SETTINGS = (): NotificationSettings => ({
     [NotificationChannel.email]: NotificationStatus.NOT_SET,
     [NotificationChannel.push]: NotificationStatus.NOT_SET,
 });
 
+export type ValidationLevel = "error" | "warning"
+
+export interface FieldValidation {
+    message: string,
+    level: ValidationLevel
+}
+
+export interface Validations {
+    [fieldName: string]: FieldValidation
+}
+
 export interface SaveFormResult {
     errors?: string[];
     member?: CactusMember | undefined;
-    success: boolean
+    success: boolean;
+    validation?: FormValidation;
+}
+
+class FormValidation {
+    validations: Validations = {};
+
+    add(field: string, message: string, level: ValidationLevel) {
+        this.validations[field] = {message, level}
+    }
+
+    remove(field: string) {
+        delete this.validations[field];
+    }
+
+    get hasWarnings(): boolean {
+        return !!Object.values(this.validations).find(v => v.level === "warning");
+    }
+
+    get hasErrors(): boolean {
+        return !!Object.values(this.validations).find(v => v.level === "error");
+    }
+
+    isError(field: string): boolean {
+        return this.validations[field]?.level === "error"
+    }
+
+    isWarning(field: string): boolean {
+        return this.validations[field]?.level === "warning"
+    }
+
+    getLevel(field: string): ValidationLevel | undefined {
+        return this.validations[field]?.level;
+    }
+
+    getMessage(field: string): string | undefined {
+        return this.validations[field]?.message;
+    }
 }
 
 class FormData {
@@ -57,6 +106,24 @@ class FormData {
             this.promptSendTime?.minute === other.promptSendTime?.minute &&
             this.timeZone === other.timeZone
     }
+
+    validate(): FormValidation {
+        const validations = new FormValidation();
+
+        if (!isValidEmail(this.email)) {
+            validations.add("email", "Please enter a valid email", "error");
+        }
+
+        if (isBlank(this.lastName)) {
+            validations.add("lastName", "Please enter a Last Name", "warning")
+        }
+
+        if (isBlank(this.firstName)) {
+            validations.add("firstName", "Please enter a First Name", "warning")
+        }
+
+        return validations
+    }
 }
 
 export default class AccountSettingsFormData {
@@ -65,6 +132,7 @@ export default class AccountSettingsFormData {
     original = new FormData();
     current = new FormData();
     private initialized = false;
+    validations = new FormValidation();
 
     update(args: { member?: CactusMember, user?: FirebaseUser }) {
         const {member, user} = args;
@@ -96,6 +164,7 @@ export default class AccountSettingsFormData {
 
     resetAll() {
         this.current = this.original.clone();
+        this.validations = new FormValidation();
     }
 
     async save(): Promise<SaveFormResult> {
@@ -105,6 +174,12 @@ export default class AccountSettingsFormData {
             return {errors: ["No member found. Unable to save the form."], success: false};
         }
         try {
+            const validation = this.current.validate();
+            this.validations = validation;
+            if (validation.hasErrors) {
+                return {validation: validation, success: false}
+            }
+
             const {firstName, lastName, timeZone, notificationSettings, promptSendTime} = this.current;
 
             member.firstName = firstName;
@@ -125,7 +200,6 @@ export default class AccountSettingsFormData {
                 errors: [error.message || "Unable to save the account settings."]
             }
         }
-
     }
 
     get hasChanges(): boolean {

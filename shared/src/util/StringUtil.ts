@@ -101,7 +101,10 @@ export function getUrlFromInput(input: string | null | undefined, domain: string
     return name;
 }
 
-export function isValidEmail(input: string) {
+export function isValidEmail(input?: string): boolean {
+    if (!input) {
+        return false;
+    }
     return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input);
 }
 
@@ -226,11 +229,11 @@ export function getProviderDisplayName(provider?: string): string {
 }
 
 export function titleCase(str: string | undefined): string {
-  if (str && str.length > 0) {
-      return str.toLowerCase().split(' ').map(function(word) {
-        return word.replace(word[0], word[0].toUpperCase());
-      }).join(' ');
-  } else { 
-      return '';
-  }
+    if (str && str.length > 0) {
+        return str.toLowerCase().split(' ').map(function (word) {
+            return word.replace(word[0], word[0].toUpperCase());
+        }).join(' ');
+    } else {
+        return '';
+    }
 }

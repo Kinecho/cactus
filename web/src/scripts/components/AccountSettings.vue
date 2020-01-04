@@ -21,25 +21,28 @@
                             <span class="value">{{ memberSince }}</span>
                         </div>
 
-                        <div class="item">
+                        <div class="item" :class="[formData.validations.getLevel('firstName')]">
                             <label for="account_fname" class="label">
                                 {{copy.common.FIRST_NAME}}
                             </label>
                             <input v-model="formData.current.firstName" type="text" name="fname" id="account_fname">
+                            <span class="message" v-if="formData.validations.getMessage('firstName')">{{formData.validations.getMessage('firstName')}}</span>
                         </div>
 
-                        <div class="item">
+                        <div class="item" :class="[formData.validations.getLevel('lastName')]">
                             <label for="account_lname" class="label">
                                 {{copy.common.LAST_NAME}}
                             </label>
-                            <input v-model="formData.current.lastName"  type="text" name="lname" id="account_lname">
+                            <input v-model="formData.current.lastName" type="text" name="lname" id="account_lname">
+                            <span class="message" v-if="formData.validations.getMessage('lastName')">{{formData.validations.getMessage('lastName')}}</span>
                         </div>
 
-                        <div class="item">
+                        <div class="item" :class="[formData.validations.getLevel('email')]">
                             <label class="label">
                                 {{copy.common.EMAIL_ADDRESS}}
                             </label>
                             <input v-model="formData.current.email" type="email"/>
+                            <span class="message" v-if="formData.validations.getMessage('email')">{{formData.validations.getMessage('email')}}</span>
                             <p class="value">Original Email: {{formData.original.email}}</p>
                         </div>
                     </div>
@@ -354,6 +357,9 @@
                 console.log("removing snackbar", id);
                 this.snackbars = this.snackbars.filter(snack => snack.id !== id);
             },
+            removeAllSnackbars() {
+                this.snackbars = [];
+            },
             updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
                 const snackbar = this.snackbars.find(snack => snack.id === id);
 
@@ -386,8 +392,17 @@
 
                     if (saveResult.success) {
                         this.addSnackbar({message: "Changes Saved", color: "success"});
-                    } else if (saveResult) {
-                        this.addSnackbar(saveResult.errors?.join("\n").trim() || "Oops! Unable to save email settings.");
+                    } else if (saveResult?.validation?.hasErrors) {
+                        this.addSnackbar({
+                            message: "Please fix any errors and try again.",
+                            autoHide: false,
+                            closeable: true,
+                            color: "danger"
+                        });
+                    } else if ((saveResult.errors?.length ?? 0) > 0) {
+                        this.addSnackbar(saveResult.errors?.join("\n").trim() || "Oops! Unable to save settings.");
+                    } else {
+                        this.addSnackbar("Oops! Unable to save settings.");
                     }
                 }
 
@@ -449,10 +464,12 @@
                     this.changesToSave = true
                 }
             },
+
             cancelChanges() {
                 // window.location.reload();
                 //TODO: Need to get all fields hooked into data source
                 this.formData.resetAll();
+                this.removeAllSnackbars();
             }
         }
     })
@@ -504,6 +521,39 @@
 
     .value {
         line-height: 1.5;
+    }
+
+    .item {
+        &.error {
+            label {
+                color: $red;
+            }
+
+            input {
+                border-color: $red;
+                color: $red;
+            }
+
+            .message {
+                color: $red;
+            }
+        }
+
+        &.warning {
+            label {
+                color: $darkestYellow;
+            }
+
+            input {
+                border-color: $darkestYellow;
+                color: $darkestYellow;
+            }
+
+            .message {
+                color: $darkestYellow;
+            }
+        }
+
     }
 
     input {
