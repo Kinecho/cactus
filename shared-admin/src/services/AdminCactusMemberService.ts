@@ -411,7 +411,7 @@ export default class AdminCactusMemberService {
         const {minute: afterMin, hour: afterHour} = afterUTC || {};
         const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
 
-        if (afterUTC && afterMin !== beforeMinute && afterHour !== beforeHour) {
+        if (afterUTC && (afterMin !== beforeMinute || afterHour !== beforeHour)) {
             console.log("Member has changes, saving them");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
             console.log("saved changes.");
