@@ -390,6 +390,7 @@ export default class AdminCactusMemberService {
     async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
+        console.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
         const afterUTC = getSendTimeUTC({

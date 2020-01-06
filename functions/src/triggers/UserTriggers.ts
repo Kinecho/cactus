@@ -321,6 +321,6 @@ export async function onDelete(user: admin.auth.UserRecord) {
         console.log("finished deleting user with email", email);
     } catch (error) {
         console.error("Failed to delete user data", error);
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${e.message}\`\`\``);
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${error.message}\`\`\``);
     }
 }
