@@ -1,7 +1,7 @@
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
-        <p class="date">{{promptDate}}</p>
+        <p class="date">{{dateLabel}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
         </div>
@@ -106,7 +106,7 @@
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
-            },
+            }
         },
         data(): {
             canReflectInline: boolean,
@@ -204,9 +204,19 @@
             promptContentPath(): string {
                 return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
             },
+            isTodaysPrompt(): boolean {
+                return (this.promptDate == formatDate(new Date(), copy.settings.dates.longFormat))
+            },
             promptDate(): string | undefined {
                 return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat)
             },
+            dateLabel(): string | undefined {
+                if (this.isTodaysPrompt) {
+                    return copy.prompts.TODAYS_PROMPT;
+                } else {
+                    return this.promptDate;
+                }
+            }
             responseText(): string | undefined {
                 return getResponseText(this.entry.responses);
             },
