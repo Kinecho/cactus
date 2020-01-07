@@ -216,7 +216,7 @@
                 } else {
                     return this.promptDate;
                 }
-            }
+            },
             responseText(): string | undefined {
                 return getResponseText(this.entry.responses);
             },
