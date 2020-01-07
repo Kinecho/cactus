@@ -1,7 +1,6 @@
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
-        <div class="doneStatus" v-show="entry.responsesLoaded && completed">{{promptCopy.DONE}}</div>
         <p class="date">{{promptDate}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
