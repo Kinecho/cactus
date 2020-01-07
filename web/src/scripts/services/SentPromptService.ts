@@ -10,6 +10,7 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
+import {minusDays} from "@shared/util/DateUtil";
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -122,7 +123,8 @@ export default class SentPromptService {
         const {memberId, beforeOrEqualTo, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
-            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
+            .where(SentPrompt.Fields.completed, "==", true);
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
@@ -141,6 +143,19 @@ export default class SentPromptService {
         }, SentPrompt)
 
     }
+
+    observeToday(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
+        const oneDayAgo = minusDays(1);
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .where(SentPrompt.Fields.completed, "==", false)
+            .where(SentPrompt.Fields.firstSentAt, ">", oneDayAgo)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
+            .limit(1);
+
+        options.queryName = "observeTodaySentPromptsForCactusMemberId=" + memberId;
+        return this.firestoreService.observeQuery(query, SentPrompt, options);
+    }
+
 
     observeForCactusMemberId(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)

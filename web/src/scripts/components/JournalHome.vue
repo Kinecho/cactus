@@ -30,6 +30,12 @@
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
                             <entry
+                                    v-if="todayEntry"
+                                    class="journalListItem"
+                                    :journalEntry="todayEntry"
+                                    v-bind:key="todayEntry.promptId"
+                            ></entry>
+                            <entry
                                     :class="['journalListItem', {even: index%2}]"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
@@ -65,6 +71,8 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
     import Spinner from "@components/Spinner.vue"
+    import SentPromptService from "@web/services/SentPromptService";
+    import SentPrompt from "@shared/models/SentPrompt";
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -76,6 +84,8 @@
         journalEntries: JournalEntry[],
         showPageLoading: boolean,
         dataHasLoaded: boolean,
+        todayUnsubscriber?: ListenerUnsubscriber,
+        todayEntry?: JournalEntry
     }
 
     export default Vue.extend({
@@ -115,8 +125,20 @@
                     }
 
                     if (isFreshLogin) {
-                        // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        // this.sentPromptsLoaded = true;
+                        if (this.cactusMember?.id) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeToday(this.cactusMember?.id, {
+                                onData: async (sentPrompts: SentPrompt[]) => {
+                                    if (sentPrompts && sentPrompts.length > 0) {
+                                        const todayEntry = new JournalEntry(sentPrompts[0]);
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else {
+                                        this.todayEntry = undefined;
+                                    }
+                                }
+                            });
+                        }   
+
                         console.log("[JournalHome] fresh login. Setting up data source");
                         this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: false});
                         this.dataSource.delegate = {
@@ -166,10 +188,13 @@
                 journalEntries: [],
                 showPageLoading: false,
                 dataHasLoaded: false,
+                todayUnsubscriber: undefined,
+                todayEntry: undefined
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
+            this.todayUnsubscriber?.();
             this.dataSource?.stop();
         },
         methods: {
