@@ -59,6 +59,7 @@ export default class EnglishCopy extends LocalizedCopy {
         MY_JOURNAL: "My Journal",
     };
     prompts: PromptCopy = {
+        TODAYS_PROMPT: "Today's Prompt",
         EDIT_NOTE: "Edit Note",
         REFLECT: "Reflect",
         SHARE_PROMPT: "Share Prompt",
