@@ -146,6 +146,21 @@
                     }   
 
                     if (isFreshLogin) {
+                        
+                        if (this.cactusMember?.id) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeToday(this.cactusMember?.id, {
+                                onData: async (sentPrompts: SentPrompt[]) => {
+                                    if (sentPrompts && sentPrompts.length > 0) {
+                                        const todayEntry = new JournalEntry(sentPrompts[0]);
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else {
+                                        this.todayEntry = undefined;
+                                    }
+                                }
+                            });
+                        }   
+
                         console.log("[JournalHome] fresh login. Setting up data source");
                         this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: false});
                         this.dataSource.delegate = {

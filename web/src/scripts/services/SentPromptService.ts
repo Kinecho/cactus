@@ -144,6 +144,19 @@ export default class SentPromptService {
 
     }
 
+    observeToday(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
+        const oneDayAgo = minusDays(1);
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .where(SentPrompt.Fields.completed, "==", false)
+            .where(SentPrompt.Fields.firstSentAt, ">", oneDayAgo)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
+            .limit(1);
+
+        options.queryName = "observeTodaySentPromptsForCactusMemberId=" + memberId;
+        return this.firestoreService.observeQuery(query, SentPrompt, options);
+    }
+
+
     observeForCactusMemberId(memberId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
