@@ -148,8 +148,8 @@ export default class SentPromptService {
         const oneDayAgo = minusDays(1);
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .where(SentPrompt.Fields.completed, "==", false)
-            .where(SentPrompt.Fields.firstSentAt, ">", oneDayAgo)
-            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
+            .where(SentPrompt.Fields.lastSentAt, ">", oneDayAgo)
+            .orderBy(SentPrompt.Fields.lastSentAt, QuerySortDirection.desc)
             .limit(1);
 
         options.queryName = "observeTodaySentPromptsForCactusMemberId=" + memberId;
