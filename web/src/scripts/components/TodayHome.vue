@@ -93,13 +93,19 @@
                                     const todaySentPrompt = sentPrompts[0];
                                     if (todaySentPrompt && todaySentPrompt.completed === false) {
                                         const todayEntry = new JournalEntry(todaySentPrompt);
+                                        todayEntry.delegate = {
+                                            entryUpdated: entry => {
+                                                if (entry.allLoaded) {
+                                                    this.todayLoaded = true;
+                                                    this.tryRedirectToPrompt();
+                                                }
+                                            }
+                                        }
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
                                     } else {
                                         this.todayEntry = undefined;
                                     }
-                                    this.todayLoaded = true;
-                                    this.tryRedirectToPrompt();
                                 }
                             });
                         }
