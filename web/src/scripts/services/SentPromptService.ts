@@ -23,7 +23,7 @@ export interface SentPromptPageListenerOptions {
     memberId: string,
     beforeOrEqualTo?: Date,
     limit?: number,
-    includeCompleted: boolean,
+    onlyCompleted: boolean,
     lastResult?: PageResult<SentPrompt>,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
@@ -33,7 +33,7 @@ export interface FutureSentPromptPageListenerOptions {
     since: Date,
     limit?: number,
     lastResult?: PageResult<SentPrompt>,
-    includeCompleted: boolean,
+    onlyCompleted: boolean,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
 
@@ -100,14 +100,14 @@ export default class SentPromptService {
     }
 
     observeFuturePrompts(options: FutureSentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, since, lastResult, limit, onData, includeCompleted} = options;
+        const {memberId, since, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
             .where(SentPrompt.Fields.firstSentAt, ">", toTimestamp(since));
 
-        if (!includeCompleted) {
-            query = query.where(SentPrompt.Fields.completed, "==", false)
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
         }
 
         return this.firestoreService.observePaginated(query, {
@@ -119,7 +119,7 @@ export default class SentPromptService {
     }
 
     observePage(options: SentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, beforeOrEqualTo, lastResult, limit, onData, includeCompleted} = options;
+        const {memberId, beforeOrEqualTo, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
@@ -130,8 +130,8 @@ export default class SentPromptService {
             query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
         }
 
-        if (!includeCompleted) {
-            query = query.where(SentPrompt.Fields.completed, "==", false)
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
         }
 
         return this.firestoreService.observePaginated(query, {

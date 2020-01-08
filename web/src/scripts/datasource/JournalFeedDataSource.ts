@@ -39,13 +39,14 @@ class JournalFeedDataSource implements JournalEntryDelegate {
 
     journalEntries: JournalEntry[] = [];
 
-    includeCompleted: boolean = true;
+    onlyCompleted: boolean = false;
 
-    constructor(member: CactusMember, options?: { includeCompleted: boolean }) {
+    constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
-        this.includeCompleted = options?.includeCompleted ?? true;
+        const {onlyCompleted = false} = options || {};
+        this.onlyCompleted = onlyCompleted;
     }
 
     start() {
@@ -60,7 +61,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
         futurePage.listener = SentPromptService.sharedInstance.observeFuturePrompts({
             memberId: this.memberId,
             since: this.startDate,
-            includeCompleted: this.includeCompleted,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 futurePage.result = page;
                 this.handlePageResult(page);
@@ -71,7 +72,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             memberId: this.memberId,
             beforeOrEqualTo: this.startDate,
             limit: this.pageSize,
-            includeCompleted: this.includeCompleted,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 console.log("🌵 🥇Got first page results", page);
                 firstPage.result = page;
@@ -190,7 +191,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             memberId: this.memberId,
             limit: this.pageSize,
             lastResult: lastPage.result,
-            includeCompleted: this.includeCompleted,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 console.log("🌵 Got Next page results", page);
                 nextPage.result = page;
