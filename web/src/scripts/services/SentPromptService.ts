@@ -124,7 +124,6 @@ export default class SentPromptService {
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
-            .where(SentPrompt.Fields.completed, "==", true);
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
