@@ -161,8 +161,12 @@
                 "destination": "/social_invite.html"
             },
             {
-                "source": "/home",
+                "source": "/journal",
                 "destination": "/journal_home.html"
+            },
+            {
+                "source": "/today",
+                "destination": "/today_home.html"
             },
             {
                 "source": "/p/**",
@@ -179,10 +183,6 @@
             {
                 "source": "/login",
                 "destination": "/sign_up.html"
-            },
-            {
-                "source": "/journal",
-                "destination": "/journal.html"
             },
             {
                 "source": "/success",
@@ -208,7 +208,14 @@
                 "source": "**",
                 "destination": "/404.html"
             }
-        ]
+        ],
+        "redirects": [ 
+            {
+                "source": "/home",
+                "destination": "/today",
+                "type": 302
+            } 
+        ],
     },
     "storage": {
         "rules": "storage.rules"
