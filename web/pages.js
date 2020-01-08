@@ -33,9 +33,14 @@ module.exports = {
         "path": "/checkout",
         "name": "checkout_redirect"
     },
+    "today_home": {
+        "title": "Today | Home",
+        "path": "/today",
+        "name": "today_home"
+    },
     "journal_home": {
         "title": "Journal | Home",
-        "path": "/home",
+        "path": "/journal",
         "name": "journal_home"
     },
     "values_home": {
