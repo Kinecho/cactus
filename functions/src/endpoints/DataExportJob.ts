@@ -12,6 +12,7 @@ import {snakeCase} from "lodash";
 import bigqueryTypes from "@google-cloud/bigquery/build/src/types";
 import IJob = bigqueryTypes.IJob;
 import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
+import {JobMetadataResponse} from "@google-cloud/bigquery/build/src/table";
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
@@ -171,10 +172,18 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
             const tableId = snakeCase(collectionId);
             console.log("starting the import for fileName ", filename, "into table", tableId);
             // Loads data from a Google Cloud Storage file into the table
-            const job = bigquery
-                .dataset(datasetId)
-                .table(tableId)
-                .load(storage.bucket(bigqueryImportBucketName).file(filename), metadata);
+            const job = new Promise<JobMetadataResponse>(async resolve => {
+                const jobResult = await bigquery
+                    .dataset(datasetId)
+                    .table(tableId)
+                    .load(storage.bucket(bigqueryImportBucketName).file(filename), metadata);
+                console.log(`Finished import task for ${tableId}. Jobs Results:`);
+                jobResult.forEach(r => {
+                    console.log(`[${tableId}] finished job - id=${r.id} | status=${r.status}`);
+                });
+
+                resolve(jobResult);
+            });
 
             importTasks.push(job);
 
@@ -184,13 +193,13 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
     });
 
     const taskResults = await Promise.all(importTasks);
-    taskResults.forEach((jobs, index) => {
-        jobs.forEach(job => {
-            console.log(`finished job #${index} - id=${job.id} | status=${job.status}`);
-        })
-    });
+    // taskResults.forEach((jobs, index) => {
+    //     jobs.forEach(job => {
+    //         console.log(`finished job #${index} - id=${job.id} | status=${job.status}`);
+    //     })
+    // });
 
-    console.log("finished all import tasks");
+    console.log(`finished all ${taskResults.length} import tasks`);
     return taskResults;
 
 }
