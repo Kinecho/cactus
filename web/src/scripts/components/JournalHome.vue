@@ -71,6 +71,7 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
     import Spinner from "@components/Spinner.vue"
+    import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
 
@@ -124,18 +125,24 @@
                         this.loginReady = true;
                     }
 
+                    // Query Flamelink for today's PromptContent and then back into a JournalEntry
                     if (this.cactusMember?.id) {
-                        this.todayUnsubscriber = SentPromptService.sharedInstance.observeToday(this.cactusMember?.id, {
-                            onData: async (sentPrompts: SentPrompt[]) => {
-                                if (sentPrompts && sentPrompts.length > 0) {
-                                    const todayEntry = new JournalEntry(sentPrompts[0]);
-                                    todayEntry.start();
-                                    this.todayEntry = todayEntry;
-                                } else {
-                                    this.todayEntry = undefined;
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
+                        
+                        if (todaysPromptContent?.promptId) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
+                                onData: async (sentPrompts: SentPrompt[]) => {
+                                    const todaySentPrompt = sentPrompts[0];
+                                    if (todaySentPrompt && todaySentPrompt.completed === false) {
+                                        const todayEntry = new JournalEntry(todaySentPrompt);
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else {
+                                        this.todayEntry = undefined;
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }   
 
                     if (isFreshLogin) {
