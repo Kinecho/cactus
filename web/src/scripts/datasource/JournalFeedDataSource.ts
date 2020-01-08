@@ -21,7 +21,7 @@ interface SetupJournalEntryResult {
 
 }
 
-class JournalFeedDataSource implements JournalEntryDelegate{
+class JournalFeedDataSource implements JournalEntryDelegate {
     member: CactusMember;
     pageSize: number = 10;
     delegate?: JournalFeedDataSourceDelegate;
@@ -39,10 +39,14 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
     journalEntries: JournalEntry[] = [];
 
-    constructor(member: CactusMember) {
+    onlyCompleted: boolean = false;
+
+    constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
+        const {onlyCompleted = false} = options || {};
+        this.onlyCompleted = onlyCompleted;
     }
 
     start() {
@@ -57,6 +61,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
         futurePage.listener = SentPromptService.sharedInstance.observeFuturePrompts({
             memberId: this.memberId,
             since: this.startDate,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 futurePage.result = page;
                 this.handlePageResult(page);
@@ -67,6 +72,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             memberId: this.memberId,
             beforeOrEqualTo: this.startDate,
             limit: this.pageSize,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 console.log("🌵 🥇Got first page results", page);
                 firstPage.result = page;
@@ -102,13 +108,13 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             updatedSentPrompts.push(...(page.result?.results || []))
         });
 
-        const journalEntries:JournalEntry[] = [];
+        const journalEntries: JournalEntry[] = [];
         updatedSentPrompts.forEach(sentPrompt => {
             if (sentPrompt.promptId) {
                 updatedPromptIds.push(sentPrompt.promptId);
 
                 const entry = this.journalEntriesByPromptId[sentPrompt.promptId];
-                if (entry){
+                if (entry) {
                     journalEntries.push(entry);
                 }
             }
@@ -154,7 +160,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
      * @return {boolean} True if the next page will be loaded, false if not.
      */
     loadNextPage(): boolean {
-        if (this.loadingPage){
+        if (this.loadingPage) {
             console.log("[JournalFeedDataSource] Page is loading, not doing anything");
             return false;
         }
@@ -185,6 +191,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             memberId: this.memberId,
             limit: this.pageSize,
             lastResult: lastPage.result,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 console.log("🌵 Got Next page results", page);
                 nextPage.result = page;

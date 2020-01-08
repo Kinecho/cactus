@@ -23,6 +23,7 @@ export interface SentPromptPageListenerOptions {
     memberId: string,
     beforeOrEqualTo?: Date,
     limit?: number,
+    onlyCompleted: boolean,
     lastResult?: PageResult<SentPrompt>,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
@@ -32,6 +33,7 @@ export interface FutureSentPromptPageListenerOptions {
     since: Date,
     limit?: number,
     lastResult?: PageResult<SentPrompt>,
+    onlyCompleted: boolean,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
 
@@ -98,13 +100,15 @@ export default class SentPromptService {
     }
 
     observeFuturePrompts(options: FutureSentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, since, lastResult, limit, onData} = options;
+        const {memberId, since, lastResult, limit, onData, onlyCompleted} = options;
 
-        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+        let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
             .where(SentPrompt.Fields.firstSentAt, ">", toTimestamp(since));
 
-
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
+        }
 
         return this.firestoreService.observePaginated(query, {
             limit: limit,
@@ -115,7 +119,7 @@ export default class SentPromptService {
     }
 
     observePage(options: SentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, beforeOrEqualTo, lastResult, limit, onData} = options;
+        const {memberId, beforeOrEqualTo, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
@@ -124,6 +128,10 @@ export default class SentPromptService {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
             console.log("beforeOrEqualTo Timestamp", beforeTimestamp);
             query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
+        }
+
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
         }
 
         return this.firestoreService.observePaginated(query, {

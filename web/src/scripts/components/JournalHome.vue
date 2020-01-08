@@ -118,7 +118,7 @@
                         // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
                         // this.sentPromptsLoaded = true;
                         console.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!);
+                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: false});
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
