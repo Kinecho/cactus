@@ -11,10 +11,13 @@
                 </section>
             </div>
 
-            <div class="section-container" v-if="loggedIn && loginReady">
+            <div class="section-container" v-if="loggedIn && loginReady && dataLoaded">
                 <section class="todayPrompt">
                     Today
                 </section>
+            </div>
+            <div class="section-container" v-if="!dataLoaded">
+                <spinner/>
             </div>
         </div>
     </div>
@@ -44,8 +47,12 @@
         memberUnsubscriber?: ListenerUnsubscriber,
         loginReady: boolean,
         showPageLoading: boolean,
+        sentPromptUnsubscriber?: ListenerUnsubscriber,
         todayUnsubscriber?: ListenerUnsubscriber,
-        todayEntry?: JournalEntry
+        todayEntry?: JournalEntry,
+        isNewMember: boolean
+        sentPromptsLoaded: boolean,
+        todayLoaded: boolean
     }
 
     export default Vue.extend({
@@ -91,9 +98,24 @@
                                     } else {
                                         this.todayEntry = undefined;
                                     }
+                                    this.todayLoaded = true;
+                                    this.tryRedirectToPrompt();
                                 }
                             });
                         }
+
+                        this.sentPromptUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(this.cactusMember.id, {
+                            onData: async (sentPrompts: SentPrompt[]) => {
+                                if (sentPrompts.length > 0) {
+                                    this.isNewMember = false;
+                                } else {
+                                    this.isNewMember = true;
+                                }
+                                this.sentPromptsLoaded = true;
+                                this.tryRedirectToPrompt();
+                            }
+                        });
+
                     }   
                 }
             });
@@ -105,8 +127,12 @@
                 loginReady: false,
                 authUnsubscribe: undefined,
                 showPageLoading: false,
+                sentPromptUnsubscriber: undefined,
                 todayUnsubscriber: undefined,
-                todayEntry: undefined
+                todayEntry: undefined,
+                isNewMember: false,
+                sentPromptsLoaded: false,
+                todayLoaded: false
             };
         },
         destroyed() {
@@ -123,6 +149,19 @@
             isSticky(): boolean {
                 return false;
             },
+            dataLoaded(): boolean {
+                return this.sentPromptsLoaded && 
+                       this.todayLoaded;
+            }
+        },
+        methods: {
+            tryRedirectToPrompt(): void {
+                if (this.dataLoaded) {
+                    if (this.isNewMember) {
+                        window.location.href = PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId;
+                    }
+                }
+            }
         }
     })
 </script>
