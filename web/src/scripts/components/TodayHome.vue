@@ -159,7 +159,14 @@
                 if (this.dataLoaded) {
                     if (this.isNewMember) {
                         window.location.href = PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId;
+                        return;
                     }
+                    if (this.todayEntry?.sentPrompt && 
+                        this.todayEntry.sentPrompt.completed === false &&
+                        this.todayEntry.promptContent?.entryId) {
+                        window.location.href = PageRoute.PROMPTS_ROOT + '/' + this.todayEntry.promptContent.entryId;
+                        return;
+                    } 
                 }
             }
         }
