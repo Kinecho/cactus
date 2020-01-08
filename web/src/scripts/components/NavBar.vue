@@ -201,7 +201,7 @@
                 return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${this.loginRedirectUrl || window.location.href}`;
             },
             logoHref(): string {
-                return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
+                return this.loggedIn ? PageRoute.TODAY_HOME : PageRoute.HOME;
             },
             signupHref(): string {
                 return PageRoute.SIGNUP;
