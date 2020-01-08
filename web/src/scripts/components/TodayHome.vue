@@ -105,6 +105,7 @@
                                         this.todayEntry = todayEntry;
                                     } else {
                                         this.todayEntry = undefined;
+                                        this.todayLoaded = true;
                                     }
                                 }
                             });
