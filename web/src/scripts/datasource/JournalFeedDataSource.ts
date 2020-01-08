@@ -41,11 +41,11 @@ class JournalFeedDataSource implements JournalEntryDelegate {
 
     includeCompleted: boolean = true;
 
-    constructor(member: CactusMember, options: { includeCompleted: boolean }) {
+    constructor(member: CactusMember, options?: { includeCompleted: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
-        this.includeCompleted = options.includeCompleted || true;
+        this.includeCompleted = options?.includeCompleted ?? true;
     }
 
     start() {
