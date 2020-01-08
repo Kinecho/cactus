@@ -13,7 +13,7 @@
 
             <div class="section-container" v-if="loggedIn && loginReady && dataLoaded && todayReflected">
                 <section class="todayPrompt">
-                    Today
+                    Today Recap
                 </section>
             </div>
             <div class="section-container" v-if="!dataLoaded && todayEntry">
@@ -92,7 +92,7 @@
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
                                 onData: async (sentPrompts: SentPrompt[]) => {
                                     const todaySentPrompt = sentPrompts[0];
-                                    if (todaySentPrompt && todaySentPrompt.completed === false) {
+                                    if (todaySentPrompt) {
                                         const todayEntry = new JournalEntry(todaySentPrompt);
                                         todayEntry.delegate = {
                                             entryUpdated: entry => {
@@ -107,6 +107,7 @@
                                     } else {
                                         this.todayEntry = undefined;
                                         this.todayLoaded = true;
+                                        this.redirectToJournal();
                                     }
                                 }
                             });
@@ -176,7 +177,14 @@
                         window.location.href = PageRoute.PROMPTS_ROOT + '/' + this.todayEntry.promptContent.entryId;
                         return;
                     } 
+                    if (this.todayEntry?.sentPrompt?.completed === true) {
+                        this.todayReflected = true;
+                        return;
+                    }
                 }
+            },
+            redirectToJournal() {
+                window.location.href = PageRoute.JOURNAL_HOME;
             }
         }
     })
