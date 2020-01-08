@@ -29,7 +29,9 @@ import {QueryParam} from "@shared/util/queryParams";
 const Config = getConfig();
 
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({
+    origin: Config.allowedOrigins,
+}));
 
 app.post("/email-status", async (req: functions.https.Request | any, resp: functions.Response) => {
 

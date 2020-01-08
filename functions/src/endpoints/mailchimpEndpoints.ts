@@ -2,7 +2,6 @@
 import * as express from "express";
 import * as cors from "cors";
 
-
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
@@ -35,13 +34,13 @@ import CactusMember, {NotificationStatus} from "@shared/models/CactusMember";
 import {getISODate} from "@shared/util/DateUtil";
 import {UnsubscribeRequest, UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {getAuthUser} from "@api/util/RequestUtil";
-import {isNonPromptCampaignId} from "@admin/config/configService";
+import {getConfig, isNonPromptCampaignId} from "@admin/config/configService";
 
 
 const app = express();
-
+const Config = getConfig();
 // Automatically allow cross-origin requests
-app.use(cors({origin: true}));
+app.use(cors({origin: Config.allowedOrigins}));
 
 app.get("/", async (req: express.Request, res: express.Response) => {
     return res.send({success: true, message: "got the get request"})

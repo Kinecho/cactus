@@ -17,11 +17,12 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
+import {getConfig} from "@admin/config/configService";
 
 const app = express();
+const config = getConfig();
 
-
-app.use(cors({origin: true}));
+app.use(cors({origin: config.allowedOrigins}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
 

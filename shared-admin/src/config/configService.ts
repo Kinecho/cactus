@@ -38,6 +38,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
         config.web.protocol = 'https'
     }
 
+    config.allowedOrigins = ["https://cactus.app", "https://cactus-app-stage.web.app", "https://cactus-app-prod.web.app", /localhost:*/];
     return config;
 }
 
@@ -56,6 +57,7 @@ export function isNonPromptCampaignId(campaignId: string): boolean {
 
 const defaultTestConfig: CactusConfig = {
     isEmulator: true,
+    allowedOrigins: ["https://cactus.app", "https://cactus-app-stage.web.app", "https://cactus-app-prod.web.app", /localhost:*/],
     mailchimp: {
         api_key: "fake_key-us20",
         audience_id: "testing",

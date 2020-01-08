@@ -10,6 +10,10 @@ import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTy
 const app = express();
 // const config = getConfig();
 // Automatically allow cross-origin requests
+
+// TODO: This didn't setup the CORS with allowedOrigins because we
+// expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
+// Neil Poulin, 2020-01-08
 app.use(cors({origin: true}));
 
 

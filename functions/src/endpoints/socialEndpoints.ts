@@ -25,7 +25,9 @@ import {unseenActivityCount} from "@shared/util/SocialUtil";
 const Config = getConfig();
 
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({
+    origin: Config.allowedOrigins,
+}));
 
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUser = await getAuthUser(req);
@@ -200,7 +202,7 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
         resp.sendStatus(401);
         return
     }
-    
+
     try {
         const memberStart = new Date().getTime();
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);

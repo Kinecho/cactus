@@ -25,7 +25,7 @@ const stripe = new Stripe(config.stripe.secret_key);
 const app = express();
 
 // Automatically allow cross-origin requests
-app.use(cors({origin: true}));
+app.use(cors({origin: config.allowedOrigins}));
 
 app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
     // const mailchimpService = MailchimpService.getSharedInstance();
