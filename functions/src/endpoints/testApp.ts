@@ -15,9 +15,9 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 
-const config = getConfig();
+const Config = getConfig();
 const app = express();
-app.use(cors({origin: config.allowedOrigins}));
+app.use(cors({origin: Config.allowedOrigins}));
 app.get('/', (req, res) => {
     res.status(200).json({status: 'ok', queryParams: req.query});
 });
