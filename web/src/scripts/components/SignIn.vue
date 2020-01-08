@@ -56,7 +56,7 @@
         mounted() {
             this.firebaseUiLoading = true;
             const ui = getAuthUI();
-            let emailLinkSignInPath = redirectUrlParam || PageRoute.JOURNAL_HOME;
+            let emailLinkSignInPath = redirectUrlParam || PageRoute.TODAY_HOME;
             let includeEmailLink = false;
             if (ui.isPendingRedirect()) {
                 includeEmailLink = true;
@@ -65,7 +65,7 @@
 
             const config = getAuthUIConfig({
                 includeEmailLink,
-                signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+                signInSuccessPath: redirectUrlParam || PageRoute.TODAY_HOME,
                 emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
                     this.isSigningIn = true;
@@ -169,7 +169,7 @@
                     } catch (e) {
                         console.error("failed to log login event", e);
                     } finally {
-                        window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
+                        window.location.href = this.pendingRedirectUrl || PageRoute.TODAY_HOME;
                     }
                 }
             }

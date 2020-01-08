@@ -72,7 +72,7 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
             const apiKey = getQueryParam(QueryParam.API_KEY);
             this.mode = mode;
             this.actionCode = actionCode;
-            this.continueUrl = continueUrl || PageRoute.JOURNAL_HOME;
+            this.continueUrl = continueUrl || PageRoute.TODAY_HOME;
             this.lang = lang;
 
 
