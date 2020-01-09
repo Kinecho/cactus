@@ -132,8 +132,17 @@
                         if (todaysPromptContent?.promptId) {
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
                                 onData: async (todaySentPrompt: SentPrompt | undefined) => {
-                                    if (todaySentPrompt && todaySentPrompt.completed === false) {
-                                        const todayEntry = new JournalEntry(todaySentPrompt);
+                                    let todayEntry = undefined;
+
+                                    if (todaySentPrompt?.promptId && todaySentPrompt.completed === false) {
+                                        todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt);
+                                    } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
+                                        // they don't have a SentPrompt for today's prompt
+                                        // but we show it to them anyway
+                                        todayEntry = new JournalEntry(todaysPromptContent.promptId);
+                                    }
+
+                                    if (todayEntry){
                                         todayEntry.delegate = {
                                             entryUpdated: entry => {
                                                 if (entry.allLoaded) {
@@ -143,10 +152,6 @@
                                         }
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
-                                    } else if (!todaySentPrompt) {
-                                        console.error("No sent prompt found for Today's Prompt for member");
-                                        this.todayEntry = undefined;
-                                        this.todayLoaded = true;
                                     }
                                 }
                             });
