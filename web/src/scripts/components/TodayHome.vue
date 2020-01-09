@@ -13,13 +13,28 @@
 
             <div class="section-container" v-if="loggedIn && loginReady && dataLoaded && todayReflected">
                 <section class="todayPrompt">
-                    Today Recap
+                    <div class="checkmark">
+                        ✅
+                    </div>
+                    <div class="done">
+                        You've reflected.
+                    </div>
+                    <div class="share">
+                        <button @click="sharePrompt">
+                            Share Prompt
+                        </button>
+                    </div>
                 </section>
             </div>
             <div class="section-container" v-if="!dataLoaded && todayEntry">
                 <spinner/>
             </div>
         </div>
+        <modal :show="showSharing" v-on:close="showSharing = false" :showCloseButton="true" v-if="todayEntry && todayReflected">
+            <div class="sharing-card" slot="body">
+                <PromptSharing :promptContent="todayEntry.promptContent"/>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -33,12 +48,14 @@
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import PromptSharing from "@components/PromptContentSharing.vue";
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
     import Spinner from "@components/Spinner.vue"
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
+    import Modal from "@components/Modal.vue"
 
     declare interface TodayHomeData {
         cactusMember?: CactusMember,
@@ -53,13 +70,16 @@
         isNewMember: boolean
         sentPromptsLoaded: boolean,
         todayLoaded: boolean,
-        todayReflected: boolean
+        todayReflected: boolean,
+        showSharing: boolean
     }
 
     export default Vue.extend({
         components: {
             NavBar,
             Spinner,
+            Modal,
+            PromptSharing
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
@@ -142,7 +162,8 @@
                 isNewMember: false,
                 sentPromptsLoaded: false,
                 todayLoaded: false,
-                todayReflected: false
+                todayReflected: false,
+                showSharing: false
             };
         },
         destroyed() {
@@ -185,6 +206,9 @@
             },
             redirectToJournal() {
                 window.location.href = PageRoute.JOURNAL_HOME;
+            },
+            sharePrompt() {
+                this.showSharing = true;
             }
         }
     })
@@ -213,85 +237,43 @@
         text-align: center;
     }
 
-    .today {
+    .todayPrompt {
         text-align: center;
         margin-bottom: 3rem;
+
+        .done {
+            font-size: 200%;
+            margin: 0 0 3rem;
+        }
     }
 
     section .heading {
         text-align: center;
     }
 
-    .section-container {
+    .sharing-card {
+        background-color: $darkerGreen;
+        max-width: 100vw;
+        min-height: 100vh;
+        padding: 3.2rem;
+        position: relative;
 
-        .journalList {
+        @include r(600) {
+            align-items: center;
+            border-radius: 12px;
+            box-shadow: rgba(7, 69, 76, 0.18) 0 11px 28px -8px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            min-height: 66rem;
+            max-width: 48rem;
+        }
 
-            .skeleton {
-                width: 100%;
-            }
-
-            .journalListItem {
-                position: relative;
-                transition: all .3s;
-                z-index: 0;
-
-                @include r(374) {
-                    padding: 0 2.4rem;
-                }
-
-                &.out {
-                    transform: translateY(-30px);
-                    opacity: 0;
-                }
-            }
-
-            &.empty {
-                align-items: center;
-                justify-content: center;
-                padding: 2.4rem;
-                text-align: center;
-
-                h1 {
-                    line-height: 1.2;
-                    margin-bottom: .4rem;
-                }
-
-                p {
-                    margin: 0 auto 2.4rem;
-                    max-width: 60rem;
-                    opacity: .8;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .graphic {
-                    margin-bottom: 2.4rem;
-                    max-width: 56rem;
-                    width: 90%;
-
-                    @include r(768) {
-                        margin-bottom: 1.6rem;
-                    }
-                }
-
-                .button {
-                    min-width: 22rem;
-                }
-            }
-
-            &.loggedOut {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                min-height: 12rem;
-            }
+        &.note {
+            background: $darkerGreen url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
+            padding: 2.4rem 0;
+            text-align: center;
         }
     }
-
 
 </style>
