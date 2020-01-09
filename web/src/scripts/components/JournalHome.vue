@@ -30,6 +30,12 @@
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
                             <entry
+                                    class="journalListItem"
+                                    v-if="todayEntry && todayLoaded"
+                                    :journalEntry="todayEntry"
+                                    v-bind:key="todayEntry.promptId"
+                            ></entry>
+                            <entry
                                     :class="['journalListItem', {even: index%2}]"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
@@ -80,7 +86,8 @@
         showPageLoading: boolean,
         dataHasLoaded: boolean,
         todayUnsubscriber?: ListenerUnsubscriber,
-        todayEntry?: JournalEntry
+        todayEntry?: JournalEntry,
+        todayLoaded: boolean
     }
 
     export default Vue.extend({
@@ -116,6 +123,39 @@
                     this.user = user;
                     if (user && member) {
                         this.loginReady = true;
+                    }
+
+                    // Query Flamelink for today's PromptContent and then back into a JournalEntry
+                    if (this.cactusMember?.id) {
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
+
+                        console.log(todaysPromptContent);
+
+                        if (todaysPromptContent?.promptId) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
+                                onData: async (sentPrompts: SentPrompt[]) => {
+                                    const todaySentPrompt = sentPrompts[0];
+                                    if (todaySentPrompt) {
+                                        const todayEntry = new JournalEntry(todaySentPrompt);
+                                        todayEntry.delegate = {
+                                            entryUpdated: entry => {
+                                                if (entry.allLoaded) {
+                                                    this.todayLoaded = true;
+                                                }
+                                            }
+                                        }
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else {
+                                        console.error("No sent prompt found for Today's Prompt for member");
+                                        this.todayEntry = undefined;
+                                        this.todayLoaded = true;
+                                    }
+                                }
+                            });
+                        } else {
+                            console.error("Today's prompt could not be found for member");
+                        }
                     }
 
                     if (isFreshLogin) {
@@ -161,7 +201,8 @@
                 showPageLoading: false,
                 dataHasLoaded: false,
                 todayUnsubscriber: undefined,
-                todayEntry: undefined
+                todayEntry: undefined,
+                todayLoaded: false
             };
         },
         destroyed() {
