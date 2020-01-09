@@ -212,7 +212,7 @@
             },
             dateLabel(): string | undefined {
                 if (this.isTodaysPrompt) {
-                    return copy.prompts.TODAYS_PROMPT;
+                    return copy.prompts.TODAY;
                 } else {
                     return this.promptDate;
                 }
