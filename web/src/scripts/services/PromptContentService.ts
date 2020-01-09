@@ -84,7 +84,7 @@ export default class PromptContentService {
             const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
-                console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
+                console.warn("PromptContentService.getPromptContentForDate: No objects found for dates given");
                 return
             }
 
