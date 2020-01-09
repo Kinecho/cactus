@@ -111,7 +111,6 @@
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
-                    // const memberChanged =  member && member.id && this.cactusMember?.id === member?.id;
 
                     this.cactusMember = member;
                     this.user = user;
@@ -126,16 +125,8 @@
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
 
-                                // this.$set(this.journalEntries, this.dataSource!.journalEntries);
                                 this.journalEntries = this.dataSource!.journalEntries;
-                                // this.$set(this.$data.journalEntries)
                                 this.dataHasLoaded = true;
-                            },
-                            onAdded: (entry: JournalEntry, index) => {
-                                //not implemented
-                            },
-                            onRemoved: (entry: JournalEntry, removedIndex) => {
-                                //not implemented
                             },
                             updateAll: (entries) => {
                                 console.log("got entries in journal home", entries);
