@@ -11,6 +11,7 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
 import {minusDays} from "@shared/util/DateUtil";
+import {DocObserverOptions} from "@shared/types/FirestoreTypes";
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -151,13 +152,13 @@ export default class SentPromptService {
         return this.firestoreService.observeQuery(query, SentPrompt, options);
     }
 
-    observeByPromptId(memberId: string, promptId: string, options: QueryObserverOptions<SentPrompt>): ListenerUnsubscriber {
+    observeByPromptId(memberId: string, promptId: string, options: DocObserverOptions<SentPrompt>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .where(SentPrompt.Fields.promptId, "==", promptId)
             .orderBy(SentPrompt.Fields.lastSentAt, QuerySortDirection.desc);
 
         options.queryName = "observeByPromptId" + promptId;
-        return this.firestoreService.observeQuery(query, SentPrompt, options);
+        return this.firestoreService.observeFirst(query, SentPrompt, options);
     }
 
     async getPrompts(options: { limit?: number, cursor?: QueryCursor }): Promise<SentPrompt[]> {

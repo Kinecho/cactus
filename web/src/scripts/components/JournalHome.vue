@@ -131,8 +131,7 @@
 
                         if (todaysPromptContent?.promptId) {
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
-                                onData: async (sentPrompts: SentPrompt[]) => {
-                                    const todaySentPrompt = sentPrompts[0];
+                                onData: async (todaySentPrompt: SentPrompt | undefined) => {
                                     if (todaySentPrompt && todaySentPrompt.completed === false) {
                                         const todayEntry = new JournalEntry(todaySentPrompt);
                                         todayEntry.delegate = {
