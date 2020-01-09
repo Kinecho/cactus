@@ -129,13 +129,11 @@
                     if (this.cactusMember?.id) {
                         const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
 
-                        console.log(todaysPromptContent);
-
                         if (todaysPromptContent?.promptId) {
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
                                 onData: async (sentPrompts: SentPrompt[]) => {
                                     const todaySentPrompt = sentPrompts[0];
-                                    if (todaySentPrompt) {
+                                    if (todaySentPrompt && todaySentPrompt.completed === false) {
                                         const todayEntry = new JournalEntry(todaySentPrompt);
                                         todayEntry.delegate = {
                                             entryUpdated: entry => {
@@ -146,7 +144,7 @@
                                         }
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
-                                    } else {
+                                    } else if (!todaySentPrompt) {
                                         console.error("No sent prompt found for Today's Prompt for member");
                                         this.todayEntry = undefined;
                                         this.todayLoaded = true;
