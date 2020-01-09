@@ -125,12 +125,16 @@
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
                                     } else {
+                                        console.error("No sent prompt found for Today's Prompt for member");
                                         this.todayEntry = undefined;
                                         this.todayLoaded = true;
                                         this.redirectToJournal();
                                     }
                                 }
                             });
+                        } else {
+                            console.error("Today's prompt could not be found for member");
+                            this.redirectToJournal();
                         }
 
                         this.sentPromptUnsubscriber = SentPromptService.sharedInstance.observeForCactusMemberId(this.cactusMember.id, {
