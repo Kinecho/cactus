@@ -30,6 +30,12 @@
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
                             <entry
+                                    class="journalListItem"
+                                    v-if="todayEntry && todayLoaded"
+                                    :journalEntry="todayEntry"
+                                    v-bind:key="todayEntry.promptId"
+                            ></entry>
+                            <entry
                                     :class="['journalListItem', {even: index%2}]"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
@@ -65,6 +71,9 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
     import Spinner from "@components/Spinner.vue"
+    import PromptContentService from "@web/services/PromptContentService";
+    import SentPromptService from "@web/services/SentPromptService";
+    import SentPrompt from "@shared/models/SentPrompt";
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -76,6 +85,9 @@
         journalEntries: JournalEntry[],
         showPageLoading: boolean,
         dataHasLoaded: boolean,
+        todayUnsubscriber?: ListenerUnsubscriber,
+        todayEntry?: JournalEntry,
+        todayLoaded: boolean
     }
 
     export default Vue.extend({
@@ -106,7 +118,6 @@
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
-                    // const memberChanged =  member && member.id && this.cactusMember?.id === member?.id;
 
                     this.cactusMember = member;
                     this.user = user;
@@ -114,25 +125,45 @@
                         this.loginReady = true;
                     }
 
+                    // Query Flamelink for today's PromptContent and then back into a JournalEntry
+                    if (this.cactusMember?.id) {
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
+
+                        if (todaysPromptContent?.promptId) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
+                                onData: async (todaySentPrompt: SentPrompt | undefined) => {
+                                    if (todaySentPrompt && todaySentPrompt.completed === false) {
+                                        const todayEntry = new JournalEntry(todaySentPrompt);
+                                        todayEntry.delegate = {
+                                            entryUpdated: entry => {
+                                                if (entry.allLoaded) {
+                                                    this.todayLoaded = true;
+                                                }
+                                            }
+                                        }
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else if (!todaySentPrompt) {
+                                        console.error("No sent prompt found for Today's Prompt for member");
+                                        this.todayEntry = undefined;
+                                        this.todayLoaded = true;
+                                    }
+                                }
+                            });
+                        } else {
+                            console.error("Today's prompt could not be found for member");
+                        }
+                    }
+
                     if (isFreshLogin) {
-                        // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        // this.sentPromptsLoaded = true;
                         console.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: false});
+                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
 
-                                // this.$set(this.journalEntries, this.dataSource!.journalEntries);
                                 this.journalEntries = this.dataSource!.journalEntries;
-                                // this.$set(this.$data.journalEntries)
                                 this.dataHasLoaded = true;
-                            },
-                            onAdded: (entry: JournalEntry, index) => {
-                                //not implemented
-                            },
-                            onRemoved: (entry: JournalEntry, removedIndex) => {
-                                //not implemented
                             },
                             updateAll: (entries) => {
                                 console.log("got entries in journal home", entries);
@@ -166,10 +197,14 @@
                 journalEntries: [],
                 showPageLoading: false,
                 dataHasLoaded: false,
+                todayUnsubscriber: undefined,
+                todayEntry: undefined,
+                todayLoaded: false
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
+            this.todayUnsubscriber?.();
             this.dataSource?.stop();
         },
         methods: {

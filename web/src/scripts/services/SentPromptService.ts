@@ -10,6 +10,8 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
+import {minusDays} from "@shared/util/DateUtil";
+import {DocObserverOptions} from "@shared/types/FirestoreTypes";
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -122,7 +124,7 @@ export default class SentPromptService {
         const {memberId, beforeOrEqualTo, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
-            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
@@ -148,6 +150,15 @@ export default class SentPromptService {
 
         options.queryName = "observeSentPromptsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SentPrompt, options);
+    }
+
+    observeByPromptId(memberId: string, promptId: string, options: DocObserverOptions<SentPrompt>): ListenerUnsubscriber {
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .where(SentPrompt.Fields.promptId, "==", promptId)
+            .orderBy(SentPrompt.Fields.lastSentAt, QuerySortDirection.desc);
+
+        options.queryName = "observeByPromptId" + promptId;
+        return this.firestoreService.observeFirst(query, SentPrompt, options);
     }
 
     async getPrompts(options: { limit?: number, cursor?: QueryCursor }): Promise<SentPrompt[]> {

@@ -181,10 +181,6 @@
                 "destination": "/sign_up.html"
             },
             {
-                "source": "/journal",
-                "destination": "/journal.html"
-            },
-            {
                 "source": "/success",
                 "destination": "/payment_success.html"
             },
