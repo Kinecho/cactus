@@ -75,6 +75,8 @@ export interface NavigationCopy {
     ACCOUNT: string
     MY_JOURNAL: string,
     SOCIAL: string,
+    JOURNAL: string,
+    ACTIVITY: string
 }
 
 export interface LocaleSettings {

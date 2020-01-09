@@ -57,6 +57,8 @@ export default class EnglishCopy extends LocalizedCopy {
         ACCOUNT: "Account",
         SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
+        JOURNAL: "Journal",
+        ACTIVITY: "Activity"
     };
     prompts: PromptCopy = {
         TODAY: "Today",
