@@ -152,6 +152,8 @@
                                         }
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
+                                    } else {
+                                        this.todayEntry = undefined;
                                     }
                                 }
                             });
