@@ -3,7 +3,7 @@ export interface PronounCopy {
 }
 
 export interface PromptCopy {
-    TODAYS_PROMPT: string,
+    TODAY: string,
     ADD_A_NOTE: string,
     EDIT_NOTE: string,
     REFLECT: string,
