@@ -30,7 +30,7 @@ class JournalEntry {
     promptContentUnsubscriber?: ListenerUnsubscriber;
 
     constructor(promptId: string, sentPrompt?: SentPrompt) {
-        this.promptId = promptId!
+        this.promptId = promptId;
 
         if (sentPrompt) {
             this.sentPrompt = sentPrompt;
