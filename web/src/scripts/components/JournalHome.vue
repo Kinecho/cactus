@@ -121,7 +121,7 @@
 
                     if (isFreshLogin) {
                         console.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: false});
+                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 console.log("[JournalHome] didLoad called. Has Data = ", hasData);
