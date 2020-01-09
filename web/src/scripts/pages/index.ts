@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         showSignupButton: true,
         largeLogoOnDesktop: true,
         showLoginButton: true,
-        signUpRedirectUrl: PageRoute.TODAY_HOME
+        signUpRedirectUrl: PageRoute.JOURNAL_HOME
     });
     //TODO: change these to use the new flows, commented out below
     //these are the mailchimp signup flows

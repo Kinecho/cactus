@@ -161,12 +161,8 @@
                 "destination": "/social_invite.html"
             },
             {
-                "source": "/journal",
+                "source": "/home",
                 "destination": "/journal_home.html"
-            },
-            {
-                "source": "/today",
-                "destination": "/today_home.html"
             },
             {
                 "source": "/p/**",
@@ -208,13 +204,6 @@
                 "source": "**",
                 "destination": "/404.html"
             }
-        ],
-        "redirects": [ 
-            {
-                "source": "/home",
-                "destination": "/today",
-                "type": 302
-            } 
         ]
     },
     "storage": {

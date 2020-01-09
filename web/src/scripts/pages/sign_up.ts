@@ -81,8 +81,8 @@ function oldMethod() {
 
     const ui = getAuthUI();
     const config = getAuthUIConfig({
-        signInSuccessPath: redirectUrlParam || PageRoute.TODAY_HOME,
-        emailLinkSignInPath: redirectUrlParam || PageRoute.TODAY_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
+        signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+        emailLinkSignInPath: redirectUrlParam || PageRoute.JOURNAL_HOME, //Note: email link is currently implemented in auth.js and we don't use firebaseUI
         signInSuccess: (authResult, redirectUrl) => {
             console.log("Redirect URL is", redirectUrl);
             console.log("Just returning true");

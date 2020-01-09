@@ -34,7 +34,7 @@ async function handleExistingUserLoginSuccess(user: FirebaseUser) {
     await sendLoginEvent({user});
 
     const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
-    window.location.href = redirectUrl || PageRoute.TODAY_HOME;
+    window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
 }
 
 function showShareButtons() {
@@ -55,7 +55,7 @@ async function handleResponse(response: EmailLinkSignupResult) {
         } finally {
             await sendLoginEvent(response.credential);
             const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
-            window.location.href = redirectUrl || PageRoute.TODAY_HOME;
+            window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
         }
 
 

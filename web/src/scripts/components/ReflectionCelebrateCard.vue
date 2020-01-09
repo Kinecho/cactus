@@ -299,7 +299,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 }
             },
             goToHome() {
-                window.location.href = PageRoute.TODAY_HOME;
+                window.location.href = PageRoute.JOURNAL_HOME;
             },
             back() {
                 this.$emit("back");
