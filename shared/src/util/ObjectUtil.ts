@@ -101,6 +101,12 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
     if (isNonEmptyObject(input)) {
         Object.keys(input).forEach(key => {
             let value = input[key];
+
+            //TODO: find a more robust way to detect if the value is a Firebase.DocumentRef (or other firebase object) and skip processing it.
+            if (key === "_fl_meta_") {
+                return value;
+            }
+
             const transformed = transform(value);
 
             //if the transformation did something, don't loop through the value

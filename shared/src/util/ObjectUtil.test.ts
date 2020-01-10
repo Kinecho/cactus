@@ -456,7 +456,6 @@ describe("transformObjectSync", () => {
 
     test("nested object with undefined is removed", () => {
 
-
         const transform = jest.fn((value: any) => {
             return value;
         });
