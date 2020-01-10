@@ -5,12 +5,11 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import DocumentReference = firebaseAdmin.firestore.DocumentReference;
-import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
-import Timestamp = firebaseAdmin.firestore.Timestamp;
+export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
+export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
+export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
-
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {

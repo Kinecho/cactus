@@ -1,4 +1,4 @@
-import AdminFirestoreService, {DeleteOptions} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {DeleteOptions, Timestamp} from "@admin/services/AdminFirestoreService";
 import SentPrompt, {PromptSendMedium, SentPromptField} from "@shared/models/SentPrompt";
 import {SentToRecipient} from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -15,6 +15,7 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as Sentry from '@sentry/node';
 import {isNonPromptCampaignId} from "@admin/config/configService";
 import PromptContent from "@shared/models/PromptContent";
+import {toTimestamp} from "@shared/util/FirestoreUtil";
 
 export interface CampaignSentPromptProcessingResult {
     sentPrompt?: SentPrompt,
@@ -381,6 +382,53 @@ export default class AdminSentPromptService {
         }));
     }
 
+    /**
+     *
+     * @param {{promptId: string; memberId: string; completed: boolean; completedAt?: Date}} opts
+     * @return {Promise<number>} number of documents updated
+     */
+    async setCompletedStatus(opts: { promptId: string, memberId: string, completed: boolean, completedAt?: Date }): Promise<{ numSuccess: number, numError: number }> {
+        const {promptId, memberId, completed, completedAt} = opts;
+        const query = this.getCollectionRef()
+            .where(SentPromptField.cactusMemberId, "==", memberId)
+            .where(SentPromptField.promptId, "==", promptId);
+
+        const snapshot = await query.get();
+        const tasks = snapshot.docs.map(doc => {
+            return new Promise<boolean>(async resolve => {
+                const ref = doc.ref;
+                try {
+                    const data: { completed: boolean, completedAt?: Timestamp } = {completed};
+                    if (completed && completedAt) {
+                        data.completedAt = toTimestamp(completedAt);
+                    } else if (completed && !completedAt) {
+                        console.error("When marking a sent prompt as completed you must provide the completed date");
+                        resolve(false);
+                        return;
+                    }
+                    await ref.update(data);
+                    return resolve(true);
+                } catch (error) {
+                    console.error(`Failed to update completed status for promptId ${promptId} | memberId ${memberId}`, error.code === "NOT_FOUND" ? "not found" : error);
+                    resolve(false);
+                }
+                return;
+            })
+
+        });
+
+        const taskResults = await Promise.all(tasks);
+        const initial = {numSuccess: 0, numError: 0};
+        return taskResults.reduce((total: { numSuccess: number, numError: number }, r) => {
+            if (r) {
+                total.numSuccess += 1;
+            } else {
+                total.numError += 1;
+            }
+            return total;
+        }, initial)
+    }
+
     async createSentPromptsFromReflectionResponseIds(options: { reflectionResponseIds: string[], member: CactusMember, userId?: string }): Promise<void> {
         const tasks: Promise<any>[] = [];
         const {reflectionResponseIds, member, userId} = options;
@@ -414,6 +462,7 @@ export default class AdminSentPromptService {
 
                             if (!sentPrompt) {
                                 sentPrompt = new SentPrompt();
+                                sentPrompt.id = `${member.id}_${reflectionResponse.promptId}`; //should be deterministic in the case we have a race condition
                                 sentPrompt.promptId = reflectionResponse.promptId;
                                 sentPrompt.cactusMemberId = member.id;
                                 sentPrompt.memberEmail = member.email;
@@ -484,6 +533,7 @@ export default class AdminSentPromptService {
 
     async getAllBatch(options: {
         batchSize?: number,
+        beforeDate: Date,
         excludeCompleted?: boolean
         onData: (sentPrompts: SentPrompt[], batchNumber: number) => Promise<void>
     }) {
@@ -492,6 +542,10 @@ export default class AdminSentPromptService {
 
         if (options.excludeCompleted === true) {
             query = query.where(SentPromptField.completed, "==", false);
+        }
+
+        if (options.beforeDate) {
+            query = query.where(BaseModelField.createdAt, "<", toTimestamp(options.beforeDate))
         }
 
         await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
