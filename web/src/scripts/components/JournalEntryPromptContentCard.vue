@@ -156,12 +156,12 @@
 
             },
             allLoaded(): boolean {
-                return !this.loading && this.entry.responsesLoaded;
+                return !this.loading && this.entry.allLoaded;
             },
             backgroundClasses(): { [name: string]: string | boolean } {
                 const [first]: Content[] = (this.entry.promptContent && this.entry.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
-                const id = this.entry.sentPrompt.promptId || "";
+                const id = this.entry.promptId || "";
 
                 const showRandomBackground = !bgImage;
 
@@ -208,7 +208,11 @@
                 return (this.promptDate == formatDate(new Date(), copy.settings.dates.longFormat))
             },
             promptDate(): string | undefined {
-                return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat)
+                if (this.entry.sentPrompt?.firstSentAt) {
+                    return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat);
+                } else {
+                    return formatDate(new Date(), copy.settings.dates.longFormat);
+                }
             },
             dateLabel(): string | undefined {
                 if (this.isTodaysPrompt) {

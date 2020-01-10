@@ -12,10 +12,10 @@ export interface JournalEntryDelegate {
 }
 
 class JournalEntry {
-    sentPrompt: SentPrompt;
     promptId: string;
 
     delegate?: JournalEntryDelegate = undefined;
+    sentPrompt?: SentPrompt;
 
     responses?: ReflectionResponse[] = undefined;
     responsesLoaded: boolean = false;
@@ -29,9 +29,12 @@ class JournalEntry {
     promptContentLoaded: boolean = false;
     promptContentUnsubscriber?: ListenerUnsubscriber;
 
-    constructor(sentPrompt: SentPrompt) {
-        this.sentPrompt = sentPrompt;
-        this.promptId = sentPrompt.promptId!
+    constructor(promptId: string, sentPrompt?: SentPrompt) {
+        this.promptId = promptId;
+
+        if (sentPrompt) {
+            this.sentPrompt = sentPrompt;
+        }
     }
 
     get allLoaded(): boolean {

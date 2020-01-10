@@ -144,7 +144,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             return {created: false, entry}
         }
 
-        entry = new JournalEntry(sentPrompt);
+        entry = new JournalEntry(promptId, sentPrompt);
         entry.delegate = this;
         entry.start();
         this.journalEntriesByPromptId[promptId] = entry;
