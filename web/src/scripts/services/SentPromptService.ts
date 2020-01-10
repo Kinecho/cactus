@@ -155,7 +155,7 @@ export default class SentPromptService {
     observeByPromptId(memberId: string, promptId: string, options: DocObserverOptions<SentPrompt>): ListenerUnsubscriber {
         const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .where(SentPrompt.Fields.promptId, "==", promptId)
-            .orderBy(SentPrompt.Fields.lastSentAt, QuerySortDirection.desc);
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
 
         options.queryName = "observeByPromptId" + promptId;
         return this.firestoreService.observeFirst(query, SentPrompt, options);
