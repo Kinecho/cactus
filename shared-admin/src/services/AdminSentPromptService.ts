@@ -216,6 +216,7 @@ export default class AdminSentPromptService {
         sentPrompt.createdAt = currentDate;
         sentPrompt.id = `${memberId}_${promptId}`; //should be deterministic in the case we have a race condition
         sentPrompt.firstSentAt = currentDate;
+        sentPrompt.lastSentAt = currentDate;
         sentPrompt.promptId = promptId;
         sentPrompt.cactusMemberId = member.id;
         sentPrompt.userId = member.userId;
@@ -266,6 +267,7 @@ export default class AdminSentPromptService {
                 sentPrompt.createdAt = new Date();
                 sentPrompt.id = `${member.id}_${prompt.id}`; //should be deterministic in the case we have a race condition
                 sentPrompt.firstSentAt = sendDate || prompt.sendDate || new Date();
+                sentPrompt.lastSentAt = sendDate || prompt.sendDate || new Date();
                 sentPrompt.sendHistory.push({
                     sendDate: sentPrompt.firstSentAt,
                     email,
