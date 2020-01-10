@@ -104,6 +104,7 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
 
             //TODO: find a more robust way to detect if the value is a Firebase.DocumentRef (or other firebase object) and skip processing it.
             if (key === "_fl_meta_") {
+                // delete value.schemaRef;
                 return value;
             }
 
