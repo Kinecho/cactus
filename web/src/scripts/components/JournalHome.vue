@@ -15,8 +15,7 @@
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && dataHasLoaded" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the
-                            day.</p>
+                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
                         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                     </section>
