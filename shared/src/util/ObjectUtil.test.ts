@@ -406,7 +406,7 @@ describe("transformObjectSync", () => {
         const input = {key: "value", two: null, nested: {date: date, two: [{three: 3}]}};
 
         const output = {key: "value", two: null, nested: {date: timestamp, two: [{three: 3}]}};
-
+        expect(transformObjectSync(date, (d) => d)).toEqual(date);
         expect(transformObjectSync(input, transform)).toEqual(output);
         expect(transform).toHaveBeenCalledTimes(12)
     });

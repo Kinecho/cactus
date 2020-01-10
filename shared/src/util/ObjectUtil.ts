@@ -85,9 +85,10 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * @param {(value: any) => Promise<void>} transform
  * @return {any}
  */
-export function transformObjectSync(input: any, transform: (value: any) => any): any {
+export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
+    console.debug(`Transform objectSync called with recursion depth ${depth} ${forKey ? "For Key=" + forKey : ""}`);
     if (isArray(input)) {
-        return input.map((entry: any) => transformObjectSync(entry, transform));
+        return input.map((entry: any) => transformObjectSync(entry, transform, depth + 1, forKey || "root-Array"));
     }
 
     // input = await (transform(input))
@@ -103,8 +104,9 @@ export function transformObjectSync(input: any, transform: (value: any) => any):
             const transformed = transform(value);
 
             //if the transformation did something, don't loop through the value
-            if (value === transformed) {
-                value = transformObjectSync(value, transform);
+            if (value === transformed && (isNonEmptyObject(value) || Array.isArray(value))) {
+                console.debug(`Recursive call to transformObjectSync for key = ${key}`);
+                value = transformObjectSync(value, transform, depth + 1, key);
             } else {
                 value = transformed;
             }
