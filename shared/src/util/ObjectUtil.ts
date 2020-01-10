@@ -86,7 +86,10 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * @return {any}
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
-    console.debug(`Transform objectSync called with recursion depth ${depth} ${forKey ? "For Key=" + forKey : ""}`);
+    if (depth >= 10) {
+        console.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
+        return input;
+    }
     if (isArray(input)) {
         return input.map((entry: any) => transformObjectSync(entry, transform, depth + 1, forKey || "root-Array"));
     }
@@ -104,7 +107,6 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
 
             //TODO: find a more robust way to detect if the value is a Firebase.DocumentRef (or other firebase object) and skip processing it.
             if (key === "_fl_meta_") {
-                // delete value.schemaRef;
                 return value;
             }
 
@@ -112,7 +114,6 @@ export function transformObjectSync(input: any, transform: (value: any) => any, 
 
             //if the transformation did something, don't loop through the value
             if (value === transformed && (isNonEmptyObject(value) || Array.isArray(value))) {
-                console.debug(`Recursive call to transformObjectSync for key = ${key}`);
                 value = transformObjectSync(value, transform, depth + 1, key);
             } else {
                 value = transformed;
