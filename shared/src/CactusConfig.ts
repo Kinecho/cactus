@@ -15,6 +15,9 @@ export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 
 export interface CactusConfig {
     isEmulator: boolean,
+    admin: {
+        service_account: ServiceAccountCredentials
+    }
     app: {
         environment: EnvironmentType
     },

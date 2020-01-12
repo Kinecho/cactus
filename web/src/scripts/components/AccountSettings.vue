@@ -225,7 +225,7 @@
         },
         computed: {
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME
+                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
             },
             loading(): boolean {
                 return !this.authLoaded;

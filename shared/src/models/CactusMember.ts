@@ -62,7 +62,7 @@ export interface PromptSendTime {
 
 export type QuarterHour = 0 | 15 | 30 | 45;
 
-export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+export const DEFAULT_PROMPT_SEND_TIME = (): PromptSendTime => ({hour: 2, minute: 45});
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
@@ -85,14 +85,15 @@ export default class CactusMember extends BaseModel {
 
     journalStatus = JournalStatus.NONE;
 
-    fcmTokens?: [string];
+    fcmTokens?: string[];
+    fcmTopicSubscriptions?: string[];
     notificationSettings: NotificationSettings = {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
     timeZone?: string | null;
     locale?: string | null | undefined;
-    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
+    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME();
     readonly promptSendTimeUTC?: PromptSendTime;
     referredByEmail?: string;
     signupQueryParams: {

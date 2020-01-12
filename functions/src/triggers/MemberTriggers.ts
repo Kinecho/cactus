@@ -24,6 +24,8 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
+        // const previousMember = change.before ? fromDocumentSnapshot(change.before, CactusMember) : undefined;
+
         const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
         console.log(JSON.stringify(result, null, 2));
     });

@@ -24,7 +24,7 @@ const DEFAULT_BATCH_SIZE = 500;
 
 export interface UpdateSendPromptUTCResult {
     updated: boolean,
-    promptSendTimeUTC?: PromptSendTime
+    promptSendTimeUTC?: PromptSendTime,
 }
 
 export default class AdminCactusMemberService {
@@ -387,7 +387,7 @@ export default class AdminCactusMemberService {
         return results.results;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
+    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, } = {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
         console.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
@@ -405,7 +405,7 @@ export default class AdminCactusMemberService {
         const denverUTCDefault = getSendTimeUTC({
             forDate: new Date(),
             timeZone: 'America/Denver',
-            sendTime: DEFAULT_PROMPT_SEND_TIME,
+            sendTime: DEFAULT_PROMPT_SEND_TIME(),
         });
 
         const {minute: afterMin, hour: afterHour} = afterUTC || {};
