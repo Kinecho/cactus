@@ -1,4 +1,5 @@
 import {
+    getArrayChanges,
     isArray,
     isDate,
     isNonEmptyObject,
@@ -521,5 +522,49 @@ describe("stringifyJSON", () => {
     test("base firestore model", () => {
         const t = new TestModel();
         expect(stringifyJSON({models: [t]})).toEqual('{"models":[{"deleted":false}]}')
+    })
+});
+
+describe("ArrayChanges", () => {
+    test('numeric arrays - removed all', () => {
+        const current: number[] = [];
+        const previous = [1, 2, 3];
+        expect(getArrayChanges({current, previous})).toEqual({added: [], removed: [1, 2, 3]})
+        //ensure the original arrays aren't changed;
+        expect(previous).toEqual([1, 2, 3]);
+    });
+
+    test('numeric arrays - empty arrays', () => {
+        const current: number[] = [];
+        const previous: number[] = [];
+        expect(getArrayChanges({current, previous})).toEqual({added: [], removed: []})
+    });
+
+    test('numeric arrays - added all', () => {
+        const current: number[] = [1, 2];
+        const previous: number[] = [];
+        expect(getArrayChanges({current, previous})).toEqual({added: [1, 2], removed: []})
+        expect(current).toEqual([1, 2]);
+    });
+
+    test('numeric arrays - mixed', () => {
+        const current: number[] = [1, 2];
+        const previous: number[] = [2, 3];
+        expect(getArrayChanges({current, previous})).toEqual({added: [1], removed: [3]})
+    });
+
+    test('numeric arrays - mixed - more values', () => {
+        const current: number[] = [1, 2, 8, 9, 10];
+        const previous: number[] = [2, 3, 9, 5, 6];
+        expect(getArrayChanges({current, previous})).toEqual({added: [1, 8, 10], removed: [3, 5, 6]})
+    });
+
+    test("hasChanges", () => {
+        expect(getArrayChanges({current: [], previous: []}).hasChanges).toBeFalsy();
+        expect(getArrayChanges({current: [1,2,3], previous: [1,2,3]}).hasChanges).toBeFalsy();
+        expect(getArrayChanges({current: [1,2,3], previous: [2,3]}).hasChanges).toBeTruthy();
+        expect(getArrayChanges({current: [1,2,3], previous: []}).hasChanges).toBeTruthy();
+        expect(getArrayChanges({current: [1], previous: [2]}).hasChanges).toBeTruthy();
+        expect(getArrayChanges({current: [], previous: [2]}).hasChanges).toBeTruthy();
     })
 });

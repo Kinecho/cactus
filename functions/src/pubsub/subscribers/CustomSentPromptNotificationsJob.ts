@@ -6,7 +6,7 @@ import {DateObject, DateTime} from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import PromptContent from "@shared/models/PromptContent";
 import AdminSentPromptService, {CreateSentPromptResult} from "@admin/services/AdminSentPromptService";
-import PushNotificationService from "@api/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import {convertDateToSendTimeUTC, getSendTimeUTC} from "@shared/util/DateUtil";
@@ -224,7 +224,7 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         return result;
     }
 
-    const pushResult = await PushNotificationService.sharedInstance.sendNewPromptPushIfNeeded({
+    const pushResult = await PushNotificationService.getSharedInstance().sendNewPromptPushIfNeeded({
         sentPrompt,
         promptContent,
         member

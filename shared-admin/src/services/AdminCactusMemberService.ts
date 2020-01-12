@@ -2,7 +2,8 @@ import AdminFirestoreService, {
     CollectionReference,
     DefaultGetOptions,
     GetOptions,
-    SaveOptions
+    SaveOptions,
+    Transaction
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -18,6 +19,8 @@ import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@s
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
 import DocumentReference = admin.firestore.DocumentReference;
+import PushNotificationService from "@admin/services/PushNotificationService";
+import {RefreshTopicsResult} from "@admin/PushNotificationTypes";
 
 let firestoreService: AdminFirestoreService;
 const DEFAULT_BATCH_SIZE = 500;
@@ -25,6 +28,13 @@ const DEFAULT_BATCH_SIZE = 500;
 export interface UpdateSendPromptUTCResult {
     updated: boolean,
     promptSendTimeUTC?: PromptSendTime,
+}
+
+export interface UpdateNotificationSettingsResult {
+    sendTimeUTCResult?: UpdateSendPromptUTCResult,
+    refreshTopicResult?: RefreshTopicsResult,
+    updatedMember?: CactusMember,
+    error?: any,
 }
 
 export default class AdminCactusMemberService {
@@ -387,9 +397,13 @@ export default class AdminCactusMemberService {
         return results.results;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, } = {
-        useDefault: false,
-    }): Promise<UpdateSendPromptUTCResult> {
+    /**
+     * Calculate what the latest prompt sent time in UTC is. Does not update the actual member object.
+     * @param {CactusMember} member
+     * @param {{useDefault: boolean}} options
+     * @return {Promise<UpdateSendPromptUTCResult>}
+     */
+    static getMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {useDefault: true}): UpdateSendPromptUTCResult {
         console.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
@@ -413,12 +427,12 @@ export default class AdminCactusMemberService {
 
         if (afterUTC && (afterMin !== beforeMinute || afterHour !== beforeHour)) {
             console.log("Member has changes, saving them");
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
-            console.log("saved changes.");
+            // await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
+            // console.log("saved changes.");
             return {updated: true, promptSendTimeUTC: afterUTC};
         } else if (useDefault && !afterUTC && denverUTCDefault) {
             console.log("No sendPromptTime for UTC found. using the default value");
-            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
+            // await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
             return {updated: true, promptSendTimeUTC: denverUTCDefault};
         } else if (useDefault && !denverUTCDefault) {
             console.error("No default value was created.");
@@ -428,4 +442,62 @@ export default class AdminCactusMemberService {
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
     }
+
+    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean, } = {
+        useDefault: false,
+    }): Promise<void> {
+        const timeResult = AdminCactusMemberService.getMemberUTCSendPromptTime(member, options);
+
+        if (timeResult.updated && timeResult.promptSendTimeUTC) {
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: timeResult.promptSendTimeUTC});
+        }
+    }
+
+    /**
+     * Handle the tasks related to keeping a member's push notification settings in sync with Firebase Cloud Messaging (FCM)
+     *
+     * @param {{member: CactusMember, useDefaultTime: boolean}} options
+     * @return {Promise<UpdateNotificationSettingsResult>}
+     */
+    async refreshMemberNotificationSettings(options: { member: CactusMember, useDefaultTime: boolean, transaction?: Transaction }): Promise<UpdateNotificationSettingsResult> {
+        const {member, transaction} = options;
+        const result: UpdateNotificationSettingsResult = {};
+        try {
+            const timeResult = AdminCactusMemberService.getMemberUTCSendPromptTime(member, {useDefault: options.useDefaultTime});
+            console.log(`Got utc time result for ${member.email}`, timeResult);
+            result.sendTimeUTCResult = timeResult;
+
+            const utcTime = timeResult.promptSendTimeUTC;
+            if (!utcTime) {
+                result.error = new Error(`Unable to determine a UTC send time for the member. Can not continue. Member ${member.email} (${member.id})`)
+                console.error(result.error);
+                return result;
+            }
+
+            const topic = PushNotificationService.getTopicForSendTimeUTC(utcTime);
+            const topicResult = await PushNotificationService.getSharedInstance().refreshPromptTopics({
+                topic,
+                fcmTokens: member.fcmTokens ?? [],
+                currentTopics: member.fcmTopicSubscriptions ?? [],
+                memberId: member.id,
+                email: member.email
+            });
+            console.log(`Got refresh  topic result for ${member.email}`, topicResult);
+            result.refreshTopicResult = topicResult;
+
+            //TODO: Update the member with the new values, if changed
+            member.fcmTopicSubscriptions = topicResult.currentTopics;
+            member.fcmTokens = topicResult.validFcmTokens;
+            result.updatedMember = await this.save(member, {transaction});
+            console.log(`Update member's push settings ${member.email} (${member.id})`);
+        } catch (error) {
+            console.error(`Failed to complete refreshMemberNotificationSettings job for member ${member.email} (${member.id})`, error);
+            result.error = error;
+        }
+
+        console.log(`refreshMemberNotificationSettings for member ${member.email}`, JSON.stringify(result, null, 2));
+
+        return result;
+    }
+
 }

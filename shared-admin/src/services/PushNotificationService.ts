@@ -1,24 +1,44 @@
-import CactusMember, {DEFAULT_PROMPT_SEND_TIME, PromptSendTime} from "@shared/models/CactusMember";
+import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import * as admin from "firebase-admin";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
 import {
-    NewPromptNotificationResult, RefreshTopicsResult, SendPushBatchResult,
+    MessagingErrorCode,
+    NewPromptNotificationResult,
+    RefreshTopicsResult,
+    SendPushBatchResult,
     SendPushResult,
     TopicSubscribeResult,
     TopicUnsubscribeResult
 } from "@admin/PushNotificationTypes";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
-import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 
 export const PROMPT_CUSTOM_NOTIF_TOPIC_PREFIX = "custom_prompt_notif";
 
+/**
+ * See error codes in the [Firebase Documentation](https://firebase.google.com/docs/cloud-messaging/send-message#admin)
+ */
 export default class PushNotificationService {
-    static sharedInstance = new PushNotificationService();
-    private messaging = admin.messaging();
+    protected static sharedInstance: PushNotificationService;
+    private messaging: admin.messaging.Messaging;
 
+    static getSharedInstance(): PushNotificationService {
+        if (!PushNotificationService.sharedInstance) {
+            throw new Error("PushNotificationService has not been initialized. Be sure to initialize before using.")
+        }
+
+        return PushNotificationService.sharedInstance;
+    }
+
+    static initialize() {
+        PushNotificationService.sharedInstance = new PushNotificationService();
+    }
+
+    constructor() {
+        this.messaging = admin.messaging();
+    }
 
     async sendNewPromptPushIfNeeded(options: {
         sentPrompt: SentPrompt,
@@ -158,24 +178,34 @@ export default class PushNotificationService {
 
     /**
      * Unsubscribes every FCM Token on the cactus member from the provided topic
-     * @param {CactusMember} member
-     * @param {String} prefix - the prefix to match the topics to unsubscribe. Uses a "startsWith" match.
+     * @param {String[]} options.topics - the topics to process
+     * @param {String[]} options.tokens - the FCM tokens to process
+     * @param {String} options.prefix - the prefix to match the topics to unsubscribe. Uses a "startsWith" match.
+     * @param {string} options.email - the email of the member, useful for logging purposes
+     * @param {string} options.memberId - the ID of the cactus member that is being proceessed, useful for logging purposes
      * @return {Promise<TopicUnsubscribeResult[]>}
      */
-    async unsubscribeFromTopics(member: CactusMember, prefix: string): Promise<TopicUnsubscribeResult[]> {
+    async unsubscribeFromTopics(options: {
+        topics: string[],
+        tokens: string[],
+        prefix: string,
+        email?: string,
+        memberId?: string
+    }): Promise<TopicUnsubscribeResult[]> {
+        const {topics: inputTopics, tokens, prefix, email, memberId} = options;
         const results: TopicUnsubscribeResult[] = [];
-        let topics = member.fcmTopicSubscriptions || [];
-        topics = topics.filter(t => {
+        // let topics = member.fcmTopicSubscriptions || [];
+        const topics = inputTopics.filter(t => {
             t.startsWith(prefix)
         });
-        const tokens = member.fcmTokens || [];
+        // const tokens = member.fcmTokens || [];
         if (topics.length === 0) {
-            console.log(`member ${member.email} (${member.id}) has no subscribed topics. FCMTokens.length = ${tokens.length}. Not processing`);
+            console.log(`member ${email} (${memberId}) has no subscribed topics. FCMTokens.length = ${tokens.length}. Not processing`);
             return results;
         }
 
         if (tokens.length === 0) {
-            console.log(`member ${member.email} (${member.id}) has no FCK tokens. Topics.length = ${topics.length}. Not processing`);
+            console.log(`member ${email} (${memberId}) has no FCK tokens. Topics.length = ${topics.length}. Not processing`);
             return results;
         }
 
@@ -183,10 +213,10 @@ export default class PushNotificationService {
                 const result = new TopicUnsubscribeResult(topic);
                 try {
                     const serverResponse = await this.messaging.unsubscribeFromTopic(tokens, topic);
-                    console.log(`Unsubscribe server response for ${member.email} (${member.id})`, serverResponse);
+                    console.log(`Unsubscribe server response for ${email} (${memberId})`, serverResponse);
                     result.firebaseResponse = serverResponse;
                 } catch (error) {
-                    console.error(`Failed to unsubscribe ${member.email} (${member.id}) from topic "${topic}"`);
+                    console.error(`Failed to unsubscribe ${email} (${memberId}) from topic "${topic}"`);
                     result.error = error;
                 }
 
@@ -202,24 +232,31 @@ export default class PushNotificationService {
      * This will NOT add the topic to the member's subscription array.
      *
      * @param {{member: CactusMember, topic: string}} opts
+     * @param {string} [opts.memberId] - useful for logging
+     * @param {string} [opts.email] - useful for logging
+     * @param {string[]} opts.tokens - the FCM tokens to subscribe to the new topic
      * @return {Promise<void>}
      */
-    async subscribeToTopic(opts: { member: CactusMember, topic: string }): Promise<TopicSubscribeResult> {
-        const {member, topic} = opts;
+    async subscribeToTopic(opts: {
+        tokens: string[],
+        memberId?: string,
+        email?: string,
+        topic: string
+    }): Promise<TopicSubscribeResult> {
+        const {tokens, memberId, email, topic} = opts;
         const result = new TopicSubscribeResult(topic);
 
-        const tokens = member.fcmTokens || [];
         result.tokens = tokens;
         if (tokens.length === 0) {
-            console.log(`No tokens to subscribe for member ${member.email} (${member.id})`);
+            console.log(`No tokens to subscribe for member ${email} (${memberId})`);
             return result;
         }
         try {
-            console.log(`Subscribing member ${member.email} (${member.id} to topic ${topic}`);
+            console.log(`Subscribing member ${email} (${memberId} to topic ${topic}`);
             result.firebaseResponse = await this.messaging.subscribeToTopic(tokens, topic);
             return result;
         } catch (error) {
-            console.error(`Failed to subscribe ${member.email} (${member.id}) to topic "${topic}"`, error);
+            console.error(`Failed to subscribe ${email} (${memberId}) to topic "${topic}"`, error);
             result.error = error;
             return result
         }
@@ -230,53 +267,80 @@ export default class PushNotificationService {
         return `${PROMPT_CUSTOM_NOTIF_TOPIC_PREFIX}_${hour}_${minute}`;
     }
 
-    async refreshPromptTopics(member: CactusMember): Promise<RefreshTopicsResult> {
-        // const errorCode = "messaging/registration-token-not-registered";
-        const refreshResult = new RefreshTopicsResult(member);
-        try {
-            const unsubscribeResult = await PushNotificationService.sharedInstance.unsubscribeFromTopics(member, PROMPT_CUSTOM_NOTIF_TOPIC_PREFIX);
+    /**
+     * Refreshes the topics and FCM tokesn associated with a member. Does not update the member object.
+     * @param {{topic: String, fcmTokens: string[], memberId: string, email: string, currentTopics: string[]}} options
+     * @return {Promise<RefreshTopicsResult>}
+     */
+    async refreshPromptTopics(options: {
+        topic: string,
+        currentTopics: string[],
+        fcmTokens: string[],
+        memberId?: string,
+        email?: string
+    }): Promise<RefreshTopicsResult> {
+        const {topic, fcmTokens, memberId, email, currentTopics} = options;
 
-            const topicsToRemove: string[] = [];
+        //create a copy of the tokens that were passed in
+        const tokens = [...fcmTokens];
+        const refreshResult = new RefreshTopicsResult({topic, fcmTokens: tokens});
+        try {
+            // Unsubscribe from old Prompt Notification Topics that match the prefix.
+            const unsubscribeResult = await this.unsubscribeFromTopics({
+                tokens,
+                topics: [...currentTopics],
+                memberId,
+                email,
+                prefix: PROMPT_CUSTOM_NOTIF_TOPIC_PREFIX
+            });
+            console.log("unsubscribe result", JSON.stringify(unsubscribeResult, null, 2));
+
+            const unsubscribedTopics: string[] = [];
             unsubscribeResult.forEach(r => {
                 if ((r.firebaseResponse?.successCount ?? 0) > 0) {
-                    topicsToRemove.push(r.topic);
+                    unsubscribedTopics.push(r.topic);
                     refreshResult.removedTopics.push(r.topic);
                 }
             });
-            console.log("unsubscribe result", JSON.stringify(unsubscribeResult, null, 2));
-            const topic = PushNotificationService.getTopicForSendTimeUTC(member.promptSendTimeUTC || DEFAULT_PROMPT_SEND_TIME());
-            const subscribeResult = await PushNotificationService.sharedInstance.subscribeToTopic({member, topic});
 
-            const topics = (member.fcmTopicSubscriptions || []).filter(t => !topicsToRemove.includes(t));
+            // set up a list of the topics the member is currently subscribed to
+            // by removing the ones that successfully unsubscribed
+            const topics = currentTopics.filter(t => !unsubscribedTopics.includes(t));
+
+
+            // Subscribe to the new topic
+            const subscribeResult = await this.subscribeToTopic({
+                tokens,
+                topic
+            });
+            console.log(`Subscribe result to ${topic} for ${email} (${memberId})`, JSON.stringify(subscribeResult));
 
             if ((subscribeResult.firebaseResponse?.successCount ?? 0) > 0) {
                 topics.push(topic);
                 refreshResult.addedTopics.push(topic);
             }
 
-            const tokens = member.fcmTokens || [];
-            const removedTokens: string[] = [];
-            //handle expired/errored tokens
+            // handle expired/errored tokens from the subscribe result
+            const invalidatedTokens: string[] = [];
             subscribeResult.firebaseResponse?.errors.forEach(error => {
                 const tokenIndex = error.index;
-                const code = error.error.code;
+                const code = error.error.code as MessagingErrorCode;
                 switch (code) {
-                    case "messaging/registration-token-not-registered":
+                    case MessagingErrorCode.registration_token_not_registered:
                         const removed = tokens.splice(tokenIndex, 1);
-                        removedTokens.push(...removed);
+                        invalidatedTokens.push(...removed);
                         break;
                     default:
                         break;
                 }
             });
-            refreshResult.removedTokens = removedTokens;
-            member.fcmTokens = Array.from(new Set(tokens));
-            member.fcmTopicSubscriptions = Array.from(new Set(topics));
-            await AdminCactusMemberService.getSharedInstance().save(member);
+            refreshResult.currentTopics = Array.from(new Set(topics));
+            refreshResult.validFcmTokens = Array.from(new Set(tokens));
 
             refreshResult.unsubscribeResults = unsubscribeResult;
+            refreshResult.removedTokens = invalidatedTokens;
             refreshResult.topicSubscribeResult = subscribeResult;
-
+            refreshResult.success = true;
         } catch (error) {
             console.error("Failed to refresh member topics", error);
             refreshResult.error = error;

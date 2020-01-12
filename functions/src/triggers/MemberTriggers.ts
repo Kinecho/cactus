@@ -8,11 +8,13 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
+import {getArrayChanges} from "@shared/util/ObjectUtil";
 
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("Starting update prompt send time trigger");
+        const memberId = context.params.memberId;
+        console.log(`Starting Member.UpdatePromptSendTime trigger for memberId = ${memberId}`);
         const afterSnapshot = change.after;
         if (!afterSnapshot) {
             console.warn("No data found on the 'after' snapshot. Not updating.");
@@ -24,12 +26,67 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
-        // const previousMember = change.before ? fromDocumentSnapshot(change.before, CactusMember) : undefined;
+        try {
+            const beforeMember = change.before ? fromDocumentSnapshot(change.before, CactusMember) : undefined;
 
-        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
-        console.log(JSON.stringify(result, null, 2));
+            const doUpdate = needsNotificationUpdate({member: memberAfter, beforeMember});
+            if (!doUpdate) {
+                console.info("No notification changes are needed, returning.");
+                return;
+            }
+            console.log("About to start the refreshMemberNotificationSettings job");
+            // const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
+            // console.log(JSON.stringify(result, null, 2));
+            AdminCactusMemberService.getSharedInstance().refreshMemberNotificationSettings({
+                member: memberAfter,
+                useDefaultTime: true
+            })
+        } catch (error) {
+            console.error(`[MemberTrigger.onWriate] Unexpected error while running the refresh notification settings job. MemberId=${memberAfter.id}`, error)
+        }
     });
 
+/**
+ * Check if there are any relevant changes to the member document. Checks, in this order:
+ *  - fcmTokens
+ *  - TimeZone
+ *  - sendPromptTime Hour
+ *  - sendPromtTime Minute
+ * @param {{member: CactusMember, beforeMember?: CactusMember}} options
+ * @return {boolean}
+ */
+function needsNotificationUpdate(options: { member: CactusMember, beforeMember?: CactusMember }): boolean {
+    const {member, beforeMember} = options;
+    if (!beforeMember) {
+        return true;
+    }
+    const tokens = member.fcmTokens || [];
+    const oldTokens = beforeMember?.fcmTokens || [];
+
+    const tokenChanges = getArrayChanges({current: tokens, previous: oldTokens});
+    if (tokenChanges.hasChanges) {
+        return true;
+    }
+
+    const beforeTz = member.timeZone;
+    const afterTz = beforeMember?.timeZone;
+    if (beforeTz !== afterTz) {
+        return true;
+    }
+
+    const {hour, minute} = member.promptSendTime || {};
+    const {hour: beforeHour, minute: beforeMinute} = beforeMember?.promptSendTime || {};
+
+    if (hour !== beforeHour) {
+        return true;
+    }
+
+    if (minute !== beforeMinute) {
+        return true;
+    }
+
+    return false;
+}
 
 export const updateMemberProfileTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)

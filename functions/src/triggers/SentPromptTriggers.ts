@@ -6,7 +6,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {DEFAULT_PROMPT_SEND_TIME} from "@shared/models/CactusMember";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
-import PushNotificationService from "@api/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
@@ -50,7 +50,7 @@ async function sendPush(options: { member: CactusMember, prompt: ReflectionPromp
     if (isSendTime) {
         // return await PushNotificationService.sharedInstance.sendPromptNotification({member, prompt})
 
-        const pushResult = await PushNotificationService.sharedInstance.sendNewPromptPushIfNeeded({
+        const pushResult = await PushNotificationService.getSharedInstance().sendNewPromptPushIfNeeded({
             member,
             prompt,
             sentPrompt,

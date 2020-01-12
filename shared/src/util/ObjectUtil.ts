@@ -148,3 +148,34 @@ export function stringifyJSON(input: any, space?: number): string {
 
     return JSON.stringify(input, replacer, space);
 }
+
+export interface ArrayChanges {
+    added: (string | number)[]
+    removed: (string | number)[]
+    hasChanges: boolean
+}
+
+/**
+ * Given two arrays, a current and a previous, find the changes.
+ * @param {{current: (string | number)[], previous: (string | number)[]}} options
+ * @return {ArrayChanges}
+ */
+export function getArrayChanges(options: { current: (string | number)[], previous: (string | number)[] }): ArrayChanges {
+    // make a copy of each array so that they don't get modified in this method.
+    const current = [...options.current];
+    const previous = [...options.previous];
+    const changes: ArrayChanges = {added: [], removed: [], hasChanges: false};
+
+    current.forEach(c => {
+        const foundIndex = previous.indexOf(c);
+        if (foundIndex > -1) {
+            previous.splice(foundIndex, 1);
+        } else {
+            changes.added.push(c);
+        }
+    });
+
+    changes.removed = previous;
+    changes.hasChanges = changes.added.length > 0 || changes.removed.length > 0;
+    return changes;
+}

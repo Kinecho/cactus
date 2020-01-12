@@ -14,7 +14,7 @@ import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPro
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {DEFAULT_PROMPT_SEND_TIME, PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import PushNotificationService, {PROMPT_CUSTOM_NOTIF_TOPIC_PREFIX} from "@api/services/PushNotificationService";
+import PushNotificationService from "@admin/services/PushNotificationService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const app = express();
@@ -342,7 +342,9 @@ app.get("/topics/refresh", async (req, resp) => {
         return
     }
 
-    const refreshResult = await PushNotificationService.sharedInstance.refreshPromptTopics(member);
+    const topic = PushNotificationService.getTopicForSendTimeUTC(member.promptSendTimeUTC || DEFAULT_PROMPT_SEND_TIME());
+
+    const refreshResult = await PushNotificationService.getSharedInstance().refreshPromptTopics({topic});
     console.log(stringifyJSON(refreshResult));
     resp.contentType("application/json").send(stringifyJSON(refreshResult));
 });
