@@ -12,10 +12,8 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import CactusMember, {DEFAULT_PROMPT_SEND_TIME, PromptSendTime} from "@shared/models/CactusMember";
+import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
-import PushNotificationService from "@admin/services/PushNotificationService";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const app = express();
 app.use(cors({origin: true}));
@@ -334,19 +332,19 @@ app.get("/sheets/add", async (req, resp) => {
     }
 });
 
-app.get("/topics/refresh", async (req, resp) => {
-    const email = req.query.email as string;
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
-    if (!member) {
-        resp.sendStatus(404);
-        return
-    }
-
-    const topic = PushNotificationService.getTopicForSendTimeUTC(member.promptSendTimeUTC || DEFAULT_PROMPT_SEND_TIME());
-
-    const refreshResult = await PushNotificationService.getSharedInstance().refreshPromptTopics({topic});
-    console.log(stringifyJSON(refreshResult));
-    resp.contentType("application/json").send(stringifyJSON(refreshResult));
-});
+// app.get("/topics/refresh", async (req, resp) => {
+//     const email = req.query.email as string;
+//     const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
+//     if (!member) {
+//         resp.sendStatus(404);
+//         return
+//     }
+//
+//     const topic = PushNotificationService.getTopicForSendTimeUTC(member.promptSendTimeUTC || DEFAULT_PROMPT_SEND_TIME());
+//
+//     // const refreshResult = await PushNotificationService.getSharedInstance().refreshPromptTopics({topic});
+//     console.log(stringifyJSON(refreshResult));
+//     resp.contentType("application/json").send(stringifyJSON(refreshResult));
+// });
 
 export default app;
