@@ -5,24 +5,26 @@ import AdminSlackService, {AttachmentColor, SlackAttachment} from "@admin/servic
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import {PubSub} from "@google-cloud/pubsub";
 import {isNonPromptCampaignId} from "@admin/config/configService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("ProcessMailchimpCampaignRecipientsJob");
 export async function submitJob(payload: CampaignRecipientJobPayload): Promise<string> {
     const pubsub = new PubSub();
     return pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).publishJSON(payload);
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    console.log("Starting Mailchimp Campaign Recipient Processing Job. eventId =", context.eventId);
+    logger.log("Starting Mailchimp Campaign Recipient Processing Job. eventId =", context.eventId);
     if (!message || !message.json) {
 
-        console.error("PubSub message was not JSON");
+        logger.error("PubSub message was not JSON");
     }
     const sentPromptService = AdminSentPromptService.getSharedInstance();
     const payload: CampaignRecipientJobPayload = message.json;
     try {
 
         if (payload.campaignId && isNonPromptCampaignId(payload.campaignId)) {
-            console.log("skipping campaign ID as it is not a prompt email");
+            logger.log("skipping campaign ID as it is not a prompt email");
             return;
         }
 
@@ -31,14 +33,14 @@ export async function onPublish(message: Message, context: functions.EventContex
             promptId: payload.reflectionPromptId
         });
 
-        console.log(`Got ${results.length} results from the mailchimp campaign processor`);
+        logger.log(`Got ${results.length} results from the mailchimp campaign processor`);
 
         const errors: { campaignId?: string, message?: string, error?: any }[] = [];
         const successes: any = [];
         const warnings: { message?: string, campaignId?: string }[] = [];
         results.forEach(result => {
             if (result.error) {
-                console.log(result.error.message, result.error.error);
+                logger.log(result.error.message, result.error.error);
                 errors.push(result.error)
             } else if (result.warning) {
                 warnings.push(result.warning);
@@ -93,7 +95,7 @@ export async function onPublish(message: Message, context: functions.EventContex
 
 
     } catch (error) {
-        console.error("Failed to process payload", payload, error);
+        logger.error("Failed to process payload", payload, error);
         const msg = {
             text: `:warning: MailchimpCampaignRecipientJob failed`,
             attachments: [

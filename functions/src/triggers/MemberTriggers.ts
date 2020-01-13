@@ -8,41 +8,42 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
-
+import Logger from "@shared/Logger";
+const logger = new Logger("MemberTriggers");
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("Starting update prompt send time trigger");
+        logger.log("Starting update prompt send time trigger");
         const afterSnapshot = change.after;
         if (!afterSnapshot) {
-            console.warn("No data found on the 'after' snapshot. Not updating.");
+            logger.warn("No data found on the 'after' snapshot. Not updating.");
             return;
         }
         const memberAfter = fromDocumentSnapshot(afterSnapshot, CactusMember);
         if (!memberAfter) {
-            console.error("There was no updated member. It was deleted. Nothing to process");
+            logger.error("There was no updated member. It was deleted. Nothing to process");
             return;
         }
 
         const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
-        console.log(JSON.stringify(result, null, 2));
+        logger.log(JSON.stringify(result, null, 2));
     });
 
 
 export const updateMemberProfileTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("Starting member profile update");
+        logger.log("Starting member profile update");
 
         const snapshot = change.after;
         if (!snapshot) {
-            console.warn("No data found on the 'after' snapshot. Not updating.");
+            logger.warn("No data found on the 'after' snapshot. Not updating.");
             return;
         }
         const member = fromDocumentSnapshot(snapshot, CactusMember);
 
         if (!member) {
-            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null, 2));
+            logger.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null, 2));
             return;
         }
 
@@ -56,10 +57,10 @@ export const updateMemberProfileTrigger = functions.firestore
 
 
             const profile = await AdminMemberProfileService.getSharedInstance().upsertMember({member, userRecord});
-            console.log("Updated profile to", profile);
+            logger.log("Updated profile to", profile);
 
         } catch (error) {
-            console.error(`Failed to update the member's public profile. MemberId = ${member.id}`, error);
+            logger.error(`Failed to update the member's public profile. MemberId = ${member.id}`, error);
         }
 
         try {
@@ -77,10 +78,10 @@ export const updateMemberProfileTrigger = functions.firestore
                         [MergeField.LNAME]: member.lastName || "",
                     }
                 });
-                console.log("Update mailchimp merge fields response:", mailchimpResponse);
+                logger.log("Update mailchimp merge fields response:", mailchimpResponse);
             }
         } catch (error) {
-            console.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
+            logger.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
         }
 
         return;

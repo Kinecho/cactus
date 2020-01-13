@@ -11,7 +11,9 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {getConfig} from "@admin/config/configService";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("BridgeToMondayJob");
 const config = getConfig();
 
 const mailchimpBridgeSegmentId = config.mailchimp.bridge_to_monday_segment_id;
@@ -63,9 +65,9 @@ export async function onPublish(message: Message, context: functions.EventContex
             while (status !== OperationStatus.finished || (checkCount * checkInterval) > timeoutLimit) {
                 await new Promise((innerResolve) => {
                     setTimeout(async () => {
-                        console.log("Checking for batch status");
+                        logger.log("Checking for batch status");
                         completedBatch = await MailchimpService.getSharedInstance().getBatchStatus(batchResponse);
-                        console.log("Batch status check returned status", completedBatch.status);
+                        logger.log("Batch status check returned status", completedBatch.status);
                         checkCount++;
                         status = completedBatch.status;
                         innerResolve();
@@ -118,7 +120,7 @@ export async function onPublish(message: Message, context: functions.EventContex
 
         await slackService.sendDataLogMessage(slackMessage);
     } catch (e) {
-        console.error("Unable to execute BridgeToMondayJob", e);
+        logger.error("Unable to execute BridgeToMondayJob", e);
         await AdminSlackService.getSharedInstance().sendDataLogMessage({
             text: "",
             color: "danger",
