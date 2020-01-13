@@ -256,6 +256,8 @@ async function getOrCreateSentPrompt(options: { promptContent: PromptContent, pr
             member,
             promptContent,
             promptId,
+            createHistoryItem: true,
+            medium: PromptSendMedium.CUSTOM_SENT_PROMPT_TIME,
         });
 
         if (createSentPromptResult.error || !createSentPromptResult.sentPrompt) {

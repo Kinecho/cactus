@@ -95,7 +95,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
         }
 
         const result = await createSentPrompts(content, prompt, sendDate, dryRun);
-
+        console.log("Create Sent Prompts Result", JSON.stringify(result, null, 2));
         const end = new Date();
         const duration = end.getTime() - start.getTime();
 
