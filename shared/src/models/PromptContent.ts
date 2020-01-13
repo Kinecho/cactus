@@ -85,6 +85,7 @@ export enum ContentType {
     reflect = "reflect",
     elements = "elements",
     share_reflection = "share_reflection",
+    invite = "invite",
 }
 
 
@@ -143,6 +144,9 @@ export function processContent(content: Content): Content {
             processed.text = content.text_md || content.text;
             processed.title = content.title;
             break;
+        case ContentType.invite:
+            processed.invite = true;
+            break;
         default:
             console.warn("UNHANDLED CONTENT TYPE", content.contentType);
     }
@@ -170,6 +174,7 @@ export interface Content {
     audio?: Audio;
     link?: ContentLink;
     elements?: boolean;
+    invite?: boolean;
     actionButton?: ActionButton;
     showElementIcon?: boolean;
 }
