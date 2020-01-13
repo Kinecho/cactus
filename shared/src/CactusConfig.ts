@@ -16,6 +16,7 @@ export type EnvironmentType = "test" | "dev" | "prod" | "stage"
 export interface CactusConfig {
     isEmulator: boolean,
     app: {
+        serverName: string|undefined
         environment: EnvironmentType
     },
     mailchimp: {
