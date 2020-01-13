@@ -181,23 +181,27 @@ export default class AdminReflectionResponseService {
 
     async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        const queryOptions = options || {};
+        if (queryOptions.queryName) {
+            queryOptions.queryName = queryOptions.queryName  + "_AdminReflectionResponseService.getResponsesForMember";
+        } else {
+            queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
+        }
+
         const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
         return result.results
     }
 
     async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
         try {
-            const {memberId} = options;
-            let timeZone = options.timeZone;
+            const {memberId, timeZone} = options;
             if (!memberId) {
                 console.error("No memberId provided to calculate stats.");
                 return
             }
 
             if (!timeZone) {
-                console.log("AdminReflectionResponseService.calculateStatsForMember: No timezone provided, attempting to get it from the member");
-                const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                timeZone = member?.timeZone || undefined;
+                console.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
             }
 
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
