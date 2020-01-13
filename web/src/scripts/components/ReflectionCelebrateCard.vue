@@ -58,13 +58,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                        <button class="authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
                         <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
                         </button>
-                        <button class="primary authBtn"
+                        <button class="authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
                                 v-if="authLoaded && loggedIn && !isModal"
                                 @click="goToHome">
                             {{promptCopy.GO_HOME}}
