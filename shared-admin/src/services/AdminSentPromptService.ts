@@ -407,7 +407,8 @@ export default class AdminSentPromptService {
                         return;
                     }
                     await ref.update(data);
-                    return resolve(true);
+                    resolve(true);
+                    return;
                 } catch (error) {
                     console.error(`Failed to update completed status for promptId ${promptId} | memberId ${memberId}`, error.code === "NOT_FOUND" ? "not found" : error);
                     resolve(false);

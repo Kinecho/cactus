@@ -242,7 +242,7 @@ export default class AdminReflectionResponseService {
         onData: (sentPrompts: ReflectionResponse[], batchNumber: number) => Promise<void>
     }) {
         console.log("Getting batched result 1 for all members");
-        let query: FirebaseFirestore.Query = this.getCollectionRef();
+        const query: FirebaseFirestore.Query = this.getCollectionRef();
 
         // if (options.excludeCompleted === true) {
         //     query = query.where(SentPromptField.completed, "==", false);
