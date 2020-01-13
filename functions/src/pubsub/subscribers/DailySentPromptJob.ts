@@ -15,7 +15,9 @@ import * as prettyMilliseconds from "pretty-ms";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminSentPromptService, {UpsertSentPromptResult} from "@admin/services/AdminSentPromptService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("DailySentPromptJob");
 
 interface DailySentPromptMessage {
     contentDate?: string,
@@ -60,10 +62,10 @@ export async function onPublish(message: Message, context: functions.EventContex
 export async function runJob(contentDate: Date, sendDate?: Date | undefined, dryRun: boolean = false): Promise<JobResult> {
     try {
         const start = new Date();
-        console.log("Starting DailySentPromptJob Processing job ");
+        logger.log("Starting DailySentPromptJob Processing job ");
 
         const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: contentDate});
-        console.log("got prompt content", content);
+        logger.log("got prompt content", content);
 
         if (!content) {
             await AdminSlackService.getSharedInstance()
@@ -95,7 +97,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
         }
 
         const result = await createSentPrompts(content, prompt, sendDate, dryRun);
-
+        logger.log("Create Sent Prompts Result", JSON.stringify(result, null, 2));
         const end = new Date();
         const duration = end.getTime() - start.getTime();
 
@@ -110,7 +112,7 @@ export async function runJob(contentDate: Date, sendDate?: Date | undefined, dry
         return result;
 
     } catch (error) {
-        console.error("Failed to process Daily Sent Prompt Job", error);
+        logger.error("Failed to process Daily Sent Prompt Job", error);
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: Failed to process \`DailySentPromptJob\`\n\`\`\`${error}\`\`\``);
         return {
             sendDate: getISODate(sendDate),
@@ -147,7 +149,7 @@ export async function createSentPrompts(content: PromptContent, prompt: Reflecti
     try {
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             onData: async (members: CactusMember[]) => {
-                console.log(`Got members for batch${dryRun ? "\nThis was a DRY RUN" : ""}`);
+                logger.log(`Got members for batch${dryRun ? "\nThis was a DRY RUN" : ""}`);
                 result.numBatches! += 1;
                 const sentPromptResults: UpsertSentPromptResult[] = await Promise.all(members.map(member => AdminSentPromptService.getSharedInstance().upsertForCactusMember(member, prompt, sendDate, dryRun)));
                 sentPromptResults.forEach(sp => {
@@ -164,7 +166,7 @@ export async function createSentPrompts(content: PromptContent, prompt: Reflecti
                     }
                 });
                 result.totalProcessed! += members.length;
-                console.log(`processed ${result.totalProcessed} so far ${dryRun ? "\nThis was a DRY RUN" : ""}`);
+                logger.log(`processed ${result.totalProcessed} so far ${dryRun ? "\nThis was a DRY RUN" : ""}`);
             }
         });
         const end = new Date();

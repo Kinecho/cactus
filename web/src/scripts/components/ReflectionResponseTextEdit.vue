@@ -31,7 +31,8 @@
     import ReflectionPrompt from "@shared/models/ReflectionPrompt"
     import {getResponseText} from "@shared/util/StringUtil"
     import ResizableTextarea from "@components/ResizableTextarea.vue"
-
+    import Logger from "@shared/Logger";
+    const logger = new Logger("ReflectionResponseTextEdit.vue");
     export default Vue.extend({
         components: {
             ResizableTextarea,
@@ -110,7 +111,7 @@
                             //saving will trigger a refresh of the data elsewhere, so we shouldn't need to update anything here;
                             await ReflectionResponseService.sharedInstance.save(response);
                         } else {
-                            console.error("There was no response available to save... this shouldn't happen");
+                            logger.error("There was no response available to save... this shouldn't happen");
                         }
                         resolve();
                     })
@@ -140,15 +141,15 @@
                 if (foundChange) {
                     const c = confirm("You have unsaved changes. Are you sure you want to cancel?");
                     if (c) {
-                        console.log("confirmed cancel");
+                        logger.log("confirmed cancel");
                         // this.editedText = this.responseText;
                         // this.doReflect = false;
                         this.close();
                     } else {
-                        console.log("don't cancel");
+                        logger.log("don't cancel");
                     }
                 } else {
-                    console.log("no changes, just closing");
+                    logger.log("no changes, just closing");
                     // this.doReflect = false;
                     this.close();
                 }

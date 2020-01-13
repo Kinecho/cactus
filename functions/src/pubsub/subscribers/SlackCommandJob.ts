@@ -18,7 +18,9 @@ import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("SlackCommandJob");
 const config = getConfig();
 
 export enum JobType {
@@ -40,7 +42,7 @@ export async function onPublish(message: Message, context: functions.EventContex
         const job = message.json as JobRequest;
         await processJob(job);
     } catch (error) {
-        console.error("Failed to process SlackCommand job", error);
+        logger.error("Failed to process SlackCommand job", error);
     }
 }
 
@@ -86,7 +88,7 @@ export async function processJob(job: JobRequest) {
         attachments.push(lastAttachment);
         message.attachments = attachments;
         if (!message.response_type) {
-            console.log("defaulting the response type to ephemeral");
+            logger.log("defaulting the response type to ephemeral");
             message.response_type = SlackResponseType.ephemeral;
         }
 
@@ -97,16 +99,16 @@ export async function processJob(job: JobRequest) {
         }
 
 
-        console.log(`Finished processing SlackCommand ${job.type}`);
+        logger.log(`Finished processing SlackCommand ${job.type}`);
     } else {
-        console.warn("No task was created for job", JSON.stringify(job, null, 2));
+        logger.warn("No task was created for job", JSON.stringify(job, null, 2));
     }
 }
 
 async function processToday(job: JobRequest): Promise<SlashCommandResponse> {
-    console.log("Getting today's stuff");
+    logger.log("Getting today's stuff");
     const todayDate = getDateAtMidnightDenver(new Date());
-    console.log(`Date for today: ${formatDateTime(todayDate)}`);
+    logger.log(`Date for today: ${formatDateTime(todayDate)}`);
 
     const [todayFields, allTimeFields] = await Promise.all([
         getTodayStatFields(todayDate),
@@ -148,7 +150,7 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
     const [allResponses] = await Promise.all(responseTasks);
 
 
-    console.log(`All tasks have completed for Today Stats for ${getISODate(todayDate)}`);
+    logger.log(`All tasks have completed for Today Stats for ${getISODate(todayDate)}`);
 
     const confirmedMemberCount = allMembers.reduce((count, member) => {
         if (!member.signupConfirmedAt) {
@@ -305,7 +307,7 @@ async function processBigQuery(job: JobRequest): Promise<SlashCommandResponse> {
 }
 
 async function getDurumuru(): Promise<{ l30: number, today: number, durumuru: number }> {
-    console.log("fetching duru/muru");
+    logger.log("fetching duru/muru");
     const activeUsersToday = await getActiveUserCountForTrailingDays(1);
     const activeUsersL30 = await getActiveUserCountForTrailingDays(30);
 
@@ -319,7 +321,7 @@ async function processDurumuru(job: JobRequest): Promise<SlashCommandResponse> {
         days = Number(dayArg);
     }
 
-    console.log("getting active users for last ", days);
+    logger.log("getting active users for last ", days);
     const durumuruSummary = await getDurumuru();
     return {
         response_type: SlackResponseType.in_channel,
@@ -340,7 +342,7 @@ async function processActiveUsers(job: JobRequest): Promise<SlashCommandResponse
         days = Number(dayArg);
     }
 
-    console.log("getting active users for last ", days);
+    logger.log("getting active users for last ", days);
     const activeUsers = await getActiveUserCountForTrailingDays(days);
 
     return {

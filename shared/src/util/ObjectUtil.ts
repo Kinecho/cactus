@@ -1,3 +1,7 @@
+import Logger from "@shared/Logger";
+
+const logger = new Logger("ObjectUtil.ts")
+
 export function isNonEmptyObject(input: any): boolean {
     if (isNull(input)) {
         return false;
@@ -85,9 +89,13 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * @param {(value: any) => Promise<void>} transform
  * @return {any}
  */
-export function transformObjectSync(input: any, transform: (value: any) => any): any {
+export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
+    if (depth >= 10) {
+        logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
+        return input;
+    }
     if (isArray(input)) {
-        return input.map((entry: any) => transformObjectSync(entry, transform));
+        return input.map((entry: any) => transformObjectSync(entry, transform, depth + 1, forKey || "root-Array"));
     }
 
     // input = await (transform(input))
@@ -100,11 +108,17 @@ export function transformObjectSync(input: any, transform: (value: any) => any):
     if (isNonEmptyObject(input)) {
         Object.keys(input).forEach(key => {
             let value = input[key];
+
+            //TODO: find a more robust way to detect if the value is a Firebase.DocumentRef (or other firebase object) and skip processing it.
+            if (key === "_fl_meta_") {
+                return value;
+            }
+
             const transformed = transform(value);
 
             //if the transformation did something, don't loop through the value
-            if (value === transformed) {
-                value = transformObjectSync(value, transform);
+            if (value === transformed && (isNonEmptyObject(value) || Array.isArray(value))) {
+                value = transformObjectSync(value, transform, depth + 1, key);
             } else {
                 value = transformed;
             }
@@ -126,7 +140,7 @@ export function stringifyJSON(input: any, space?: number): string {
         if (value && typeof value === "object") {
             if (value && value.toJSON) {
                 try {
-                    console.log("Calling toJSON on object");
+                    logger.log("Calling toJSON on object");
                     return value.toJSON()
                 } catch (error) {
                     return value;

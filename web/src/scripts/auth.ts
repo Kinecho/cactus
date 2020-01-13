@@ -19,7 +19,9 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {fireSignupEvent, fireConfirmedSignupEvent} from "@web/analytics";
 import AuthUI = firebaseui.auth.AuthUI;
+import Logger from "@shared/Logger";
 
+const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
 let authUi: AuthUI;
 
@@ -60,11 +62,11 @@ export const emailProvider = (opts: AuthUIConfigOptions) => ({
     emailLinkSignIn: function () {
         return {
             signInSuccessWithAuthResult: function (authResult: any, redirectUrl: string | undefined) {
-                console.log("signin from auth link success", authResult);
+                logger.log("signin from auth link success", authResult);
 
                 authResult.additionalUserInfo.isNewUser;
                 if (redirectUrl) {
-                    console.log("redirecting to redirect url", redirectUrl);
+                    logger.log("redirecting to redirect url", redirectUrl);
                     // window.location = redirectUrl;
                 }
                 return false;
@@ -134,16 +136,16 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
                 if (opts.signInSuccess) {
                     return opts.signInSuccess(authResult, redirectUri)
                 } else {
-                    console.log("Sign in success. No callback was provided", authResult, redirectUri);
+                    logger.log("Sign in success. No callback was provided", authResult, redirectUri);
                     return true;
                 }
             },
             async signInFailure(error: firebaseui.auth.AuthUIError): Promise<void> {
-                console.error("Sign in failure", error);
+                logger.error("Sign in failure", error);
                 if (opts.signInFailure) {
                     await opts.signInFailure(error);
                 } else {
-                    console.error("No signin failure callback provided")
+                    logger.error("No signin failure callback provided")
                 }
                 return
             },
@@ -192,20 +194,20 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
     const isSignIn = firebase.auth().isSignInWithEmailLink(window.location.href);
 
     if (isSignIn && appSource === SourceApp.ios) {
-        console.log("Source App is ios and is magic link");
+        logger.log("Source App is ios and is magic link");
         window.location.replace(`${PageRoute.IOS_MAGIC_LINK_LOGIN}`);
 
     }
 
     if (!isSignIn) {
-        console.log("isSignIn is false");
+        logger.log("isSignIn is false");
         return {success: true};
     }
 
     let email: string | undefined | null = window.localStorage.getItem(LocalStorageKey.emailForSignIn);
     const currentUser = getAuth().currentUser;
     if (currentUser) {
-        console.log("using current user's email");
+        logger.log("using current user's email");
         email = currentUser.email
     }
 
@@ -229,7 +231,7 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
             };
         }
         email = confirmedEmail;
-        console.log("got confirmed email", email);
+        logger.log("got confirmed email", email);
     }
 
     if (email) {
@@ -240,15 +242,15 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
 
 
             if (resultUser) {
-                console.log("successfully completed sign in ", resultUser.toJSON());
+                logger.log("successfully completed sign in ", resultUser.toJSON());
             }
 
             return {success: true, credential: authResult}
 
         } catch (error) {
-            console.error("failed to login with email", error);
+            logger.error("failed to login with email", error);
             if (error.code === "auth/invalid-email") {
-                console.log("invalid email error, should prompt user to confirm it");
+                logger.log("invalid email error, should prompt user to confirm it");
                 return handleEmailLinkSignIn("The email you entered does not match the email used to sign in.");
             } else if (error.code === "auth/invalid-action-code") {
                 return {
@@ -277,7 +279,7 @@ export async function getEmailStatus(email: string): Promise<EmailStatusResponse
         const emailResponse = await request.post(Endpoint.signupEmailStatus, statusRequest);
         return emailResponse.data;
     } catch (e) {
-        console.error("Failed to get the email status before sending magic link", e);
+        logger.error("Failed to get the email status before sending magic link", e);
         return {
             exists: false,
             email,
@@ -292,7 +294,7 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
         const response = await request.post(Endpoint.sendMagicLink, options);
         return response.data;
     } catch (e) {
-        console.error("Failed to get a success response from magic link endpoint", e);
+        logger.error("Failed to get a success response from magic link endpoint", e);
         return {
             success: false,
             exists: false,
@@ -318,7 +320,7 @@ export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Pr
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
 
-    console.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
+    logger.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
     const statusResponse = await sendMagicLink({
         email: email,
@@ -345,14 +347,14 @@ export async function sendLoginEvent(args: {
             onData: async ({member}) => {
                 if (member) {
                     try {
-                        console.log("Got cactus member, can send login event", member);
+                        logger.log("Got cactus member, can send login event", member);
                         unsubscriber();
                         let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
                         if (!referredByEmail) {
                             try {
                                 referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
                             } catch (e) {
-                                console.error("error trying to get referredByEmail from local storage", e)
+                                logger.error("error trying to get referredByEmail from local storage", e)
                             }
                         }
                         const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
@@ -365,7 +367,7 @@ export async function sendLoginEvent(args: {
                             signupQueryParams: {...getAllQueryParams(), ...landingParams},
                             reflectionResponseIds: getAnonymousReflectionResponseIds(),
                         };
-                        console.log("login-event payload", JSON.stringify(event, null, 2));
+                        logger.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
                         await request.post(Endpoint.loginEvent, event, {headers});
 
@@ -380,12 +382,12 @@ export async function sendLoginEvent(args: {
                             fireConfirmedSignupEvent();
                         }
                     } catch (error) {
-                        console.error("failed to send login event", error);
+                        logger.error("failed to send login event", error);
                     } finally {
                         resolve();
                     }
                 } else {
-                    console.log("No member found while observing for member...still waiting");
+                    logger.log("No member found while observing for member...still waiting");
                 }
             }
         });

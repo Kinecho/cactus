@@ -3,6 +3,8 @@ import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
 import {getDeviceLocale, getDeviceTimeZone} from "@web/DeviceUtil";
+import Logger from "@shared/Logger";
+const logger = new Logger("CactusMemberService");
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -22,14 +24,14 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
-                        console.log("********* Got current cactus member", member);
+                        logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
                         await this.updateMemberSettingsIfNeeded(member)
                     }
                 })
             } else {
-                console.log("***** *unsetting current cactus member");
+                logger.info("unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });
@@ -59,7 +61,7 @@ export default class CactusMemberService {
         }
 
         if (doSave) {
-            console.log("Updating member settings");
+            logger.log("Updating member settings");
             await this.save(member)
         }
 

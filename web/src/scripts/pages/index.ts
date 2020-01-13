@@ -9,19 +9,20 @@ import AppStoreIcon from "@components/AppStoreIcon.vue";
 import StandardFooter from "@components/StandardFooter.vue";
 
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
 
 commonInit();
+const logger = new Logger("index.ts");
 
 const firebase = initializeFirebase();
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("index.js loaded");
+    logger.info("index.js loaded");
     try {
         const features = ['auth', 'database', 'messaging', 'storage', 'functions'].filter(feature => typeof firebase[feature] === 'function');
-        console.log(`Firebase SDK loaded with ${features.join(', ')}`)
+        logger.info(`Firebase SDK loaded with ${features.join(', ')}`)
     } catch (e) {
-        console.error('FAILED TO GET FIREBASE', e);
+        logger.error('FAILED TO GET FIREBASE', e);
     }
-
 
     setupNavigation({
         stickyNav: true,
@@ -44,31 +45,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
 new Vue({
     el: "#premium-pricing",
-    template: `<PremiumPricing/>`,
+    template: `
+        <PremiumPricing/>`,
     components: {PremiumPricing: PremiumPricing}
 });
 
 new Vue({
     el: "#app-store",
-    template: `<AppStoreIcon/>`,
+    template: `
+        <AppStoreIcon/>`,
     components: {AppStoreIcon}
 });
 
 new Vue({
     el: "#app-store-top",
-    template: `<AppStoreIcon/>`,
+    template: `
+        <AppStoreIcon/>`,
     components: {AppStoreIcon}
 });
 
 new Vue({
     el: "#footer",
-    template: `<StandardFooter :lifted="true"/>`,
+    template: `
+        <StandardFooter :lifted="true"/>`,
     components: {StandardFooter}
 });
 
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

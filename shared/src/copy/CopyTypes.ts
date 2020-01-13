@@ -3,10 +3,11 @@ export interface PronounCopy {
 }
 
 export interface PromptCopy {
-    ADD_A_NOTE: string
-    EDIT_NOTE: string
-    REFLECT: string
-    SHARE_PROMPT: string
+    TODAY: string,
+    ADD_A_NOTE: string,
+    EDIT_NOTE: string,
+    REFLECT: string,
+    SHARE_PROMPT: string,
     DONE: string,
     TAP_ANYWHERE: string,
     CLOSE: string,
@@ -74,6 +75,9 @@ export interface NavigationCopy {
     ACCOUNT: string
     MY_JOURNAL: string,
     SOCIAL: string,
+    JOURNAL: string,
+    ACTIVITY: string,
+    HOME: string
 }
 
 export interface LocaleSettings {

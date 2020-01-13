@@ -69,12 +69,16 @@ export default class AdminCactusMemberService {
                 reflections: stats
             }
         };
-
-        if (queryOptions?.transaction) {
-            await queryOptions?.transaction.set(doc, data, {merge: true})
-        } else {
-            await doc.set(data, {merge: true});
+        try {
+            if (queryOptions?.transaction) {
+                await queryOptions?.transaction.set(doc, data, {merge: true})
+            } else {
+                await doc.set(data, {merge: true});
+            }
+        } catch (error) {
+            console.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
         }
+
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {

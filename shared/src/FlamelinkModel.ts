@@ -1,5 +1,8 @@
 import {FlamelinkTimestamp} from "@shared/types/FlamelinkWebhookTypes";
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("FlamelinkModel");
 
 export enum SchemaName {
     promptContent = "promptContent",
@@ -73,7 +76,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
             throw new Error("Unable to prepare for firestore");
         }
         const data = convertDateToTimestamp(prepared);
-        // console.log("data after converting to dates", data);
+        // logger.log("data after converting to dates", data);
 
         if (removeKeys && data) {
             removeKeys.forEach(key => {
@@ -107,7 +110,7 @@ export default abstract class FlamelinkModel implements FlamelinkIdentifiable {
 
             return data;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return {message: "Error processing this model toJSON", error};
         }
     }

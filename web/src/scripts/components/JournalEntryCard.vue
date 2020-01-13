@@ -11,8 +11,9 @@
     import Spinner from "@components/Spinner.vue";
     import SkeletonEntry from "@components/JournalEntrySkeleton.vue";
     import JournalEntry from '@web/datasource/models/JournalEntry'
+    import Logger from "@shared/Logger";
 
-
+    const logger = new Logger("JournalEntryCard");
     export default Vue.extend({
         components: {
             Spinner,
@@ -26,7 +27,7 @@
                 required: true
             }
         },
-        data(): {entry: JournalEntry} {
+        data(): { entry: JournalEntry } {
             return {
                 entry: this.journalEntry
             }
@@ -35,7 +36,7 @@
         computed: {
             bodyComponent(): { name: string, props?: any } | undefined {
                 const entry: JournalEntry = this.entry;
-                console.log("updating body component with journal entry stuffs");
+                logger.log("updating body component with journal entry stuffs");
                 if (!entry.allLoaded) {
                     return {name: "skeleton-entry"};
                 } else if (entry.promptContent) {

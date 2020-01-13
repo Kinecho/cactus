@@ -7,11 +7,11 @@
     import {getFlamelink} from '@web/firebase'
     import {Image as ContentImage} from "@shared/models/PromptContent";
     import {Config} from '@web/config'
-    import {stripQueryParams} from '@shared/util/StringUtil'
-    import {getImageBreakpointWidth, 
-            ImageWidth, 
-            getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
+    import {getCloudinaryUrlFromStorageUrl, getImageBreakpointWidth, ImageWidth} from '@shared/util/ImageUtil'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("FlamelinkImage.vue");
+    
     export default Vue.extend({
         props: {
             image: {
@@ -74,7 +74,7 @@
 
                 if (this.image.fileIds && this.image.fileIds.length > 0) {
                     const [imageId] = this.image.fileIds;
-                    console.log("Fetching image url for ID", imageId);
+                    logger.log("Fetching image url for ID", imageId);
 
                     this.imageUrl = await getFlamelink().storage.getURL({
                         fileId: imageId,

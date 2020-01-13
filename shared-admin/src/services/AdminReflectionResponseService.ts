@@ -16,6 +16,7 @@ import {
 import {ApiResponse} from "@shared/api/ApiTypes";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 
 export interface ResetUserResponse {
@@ -180,23 +181,27 @@ export default class AdminReflectionResponseService {
 
     async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        const queryOptions = options || {};
+        if (queryOptions.queryName) {
+            queryOptions.queryName = queryOptions.queryName  + "_AdminReflectionResponseService.getResponsesForMember";
+        } else {
+            queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
+        }
+
         const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
         return result.results
     }
 
     async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
         try {
-            const {memberId} = options;
-            let timeZone = options.timeZone;
+            const {memberId, timeZone} = options;
             if (!memberId) {
                 console.error("No memberId provided to calculate stats.");
                 return
             }
 
             if (!timeZone) {
-                console.log("AdminReflectionResponseService.calculateStatsForMember: No timezone provided, attempting to get it from the member");
-                const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                timeZone = member?.timeZone || undefined;
+                console.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
             }
 
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
@@ -234,5 +239,30 @@ export default class AdminReflectionResponseService {
 
         console.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
         return totalDeleted
+    }
+
+    async getAllBatch(options: {
+        batchSize?: number,
+        onData: (sentPrompts: ReflectionResponse[], batchNumber: number) => Promise<void>
+    }) {
+        console.log("Getting batched result 1 for all members");
+        const query: FirebaseFirestore.Query = this.getCollectionRef();
+
+        // if (options.excludeCompleted === true) {
+        //     query = query.where(SentPromptField.completed, "==", false);
+        // }
+
+        // if (options.beforeDate) {
+        //     query = query.where(BaseModelField.createdAt, "<", toTimestamp(options.beforeDate))
+        // }
+
+        await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
+            query,
+            type: ReflectionResponse,
+            onData: options.onData,
+            batchSize: options.batchSize,
+            sortDirection: QuerySortDirection.asc,
+            orderBy: BaseModelField.createdAt
+        })
     }
 }

@@ -8,8 +8,9 @@ import AdminSlackService, {SlackAttachment, SlackResponseType} from "@admin/serv
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getSlackHelpText, JobRequest, JobType, processJob} from "@api/pubsub/subscribers/SlackCommandJob";
+import Logger from "@shared/Logger";
 
-
+const logger = new Logger("slackEndpoints");
 const app = express();
 
 const config = getConfig();
@@ -54,7 +55,7 @@ app.use(signatureHandler);
 
 
 app.post("/commands", async (req: functions.https.Request | any, resp: functions.Response) => {
-    console.log("req", chalk.cyan(JSON.stringify(req.body, null, 2)));
+    logger.log("req", chalk.cyan(JSON.stringify(req.body, null, 2)));
 
     const payload: CommandPayload = req.body;
 
@@ -120,18 +121,18 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
         slackResponseURL: payload.response_url,
     };
 
-    console.log("Job built:", JSON.stringify(job, null, 2));
+    logger.log("Job built:", JSON.stringify(job, null, 2));
 
     const slackCmdName = `${commandName} ${rest}`.trim();
     if (!immediate) {
-        console.log("Not immediate - sending to pubsub");
+        logger.log("Not immediate - sending to pubsub");
         const pubsub = new PubSub();
         await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
 
         resp.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\``});
         resp.end();
     } else {
-        console.warn("Processing slack command immediately");
+        logger.warn("Processing slack command immediately");
         try {
             await processJob(job);
         } catch (error) {
@@ -177,7 +178,7 @@ app.post("/actions", async (req: functions.https.Request | any, resp: functions.
     } = JSON.parse(req.body.payload);
 
     const callbackId: string | undefined = payload.callback_id;
-    console.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
+    logger.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
     if (callbackId === 'get_mailchimp_member') {
         await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: "This doesnt do anything useful... yet"});
 

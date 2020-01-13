@@ -18,7 +18,8 @@ import AdminSlackService, {
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
 import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
-
+import Logger from "@shared/Logger";
+const logger = new Logger("checkoutApp");
 const config = getConfig();
 
 const stripe = new Stripe(config.stripe.secret_key);
@@ -37,10 +38,10 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
         // Handle the pre-order use case. This can probably be deleted.
         const paymentIntent = data.payment_intent;
         if (paymentIntent) {
-            console.log("Handing payment intent");
+            logger.log("Handing payment intent");
             const intentResult = await handlePaymentIntent(paymentIntent, data);
             if (intentResult.error) {
-                console.log("error processing payment intent", intentResult.error);
+                logger.log("error processing payment intent", intentResult.error);
             }
             res.sendStatus(intentResult.statusCode)
             return
@@ -74,7 +75,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
         }
 
 
-        console.log(chalk.blue(JSON.stringify(data, null, 2)));
+        logger.log(chalk.blue(JSON.stringify(data, null, 2)));
         return res.sendStatus(204);
     } catch (error) {
         const msg: SlackMessage = {
@@ -130,7 +131,7 @@ async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data:
 
             //Update mailchimp member, if they exist, if not, send scary slack message
             const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(email);
-            console.log("Mailchimp member", mailchimpMember);
+            logger.log("Mailchimp member", mailchimpMember);
             if (email && mailchimpMember) {
                 const tagUpdateResponse = await MailchimpService.getSharedInstance().updateTags({
                     tags: [{
@@ -154,7 +155,7 @@ async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data:
                 await slackService.sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);
             }
 
-            console.log("Update response", JSON.stringify(updateResponse, null, 2));
+            logger.log("Update response", JSON.stringify(updateResponse, null, 2));
 
             return {statusCode: 204, error: undefined}
         } else {
@@ -194,7 +195,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         const sessionRequest = req.body as CreateSessionRequest;
 
 
-        console.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
+        logger.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
 
         // const isPreorder = req.params
         const successUrl = sessionRequest.successUrl || "https://cactus.app/success";
@@ -229,7 +230,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
                 const plan = await stripe.plans.retrieve(planId);
                 chargeAmount = plan.amount;
             } catch (error) {
-                console.error("failed to retrive the plan");
+                logger.error("failed to retrive the plan");
             }
         } else if (preOrder) {
             productId = 'Cactus Journal';
@@ -251,11 +252,11 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${productId}`);
 
 
-        console.log(chalk.blue("success url is", updatedSuccess.toString()))
+        logger.log(chalk.blue("success url is", updatedSuccess.toString()))
         stripeOptions.success_url = updatedSuccess.toString();
 
 
-        console.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
+        logger.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
         // @ts-ignore
         const session = await stripe.checkout.sessions.create(stripeOptions);
 
@@ -267,7 +268,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         };
 
     } catch (error) {
-        console.error("failed to load stripe checkout", error);
+        logger.error("failed to load stripe checkout", error);
         createResponse = {success: false, error: "Unable to load the checkout page"};
     }
     return res.send(createResponse);

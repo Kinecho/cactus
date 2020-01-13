@@ -3,9 +3,10 @@ import Vue from "vue";
 import VueClipboard from 'vue-clipboard2';
 import SocialSharing from 'vue-social-sharing';
 import SocialInvite from "@components/SocialInvite.vue";
-
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("social_invite.ts");
 commonInit();
 
 Vue.use(VueClipboard);
@@ -22,6 +23,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

@@ -6,7 +6,9 @@ import * as Sentry from "@sentry/node";
 import PromptContent from "@shared/models/PromptContent";
 import {NewPromptNotificationResult, SendPushResult} from "@admin/PushNotificationTypes";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("PushNotificationService");
 export default class PushNotificationService {
     static sharedInstance = new PushNotificationService();
     private messaging = admin.messaging();
@@ -40,7 +42,7 @@ export default class PushNotificationService {
             const {member, prompt} = options;
             let {promptContent} = options;
             if (!member.fcmTokens || !member.fcmTokens.length) {
-                console.log("Member doesn't have any device tokens. Returning");
+                logger.log("Member doesn't have any device tokens. Returning");
                 return {attempted: false, error: "Member doesn't have any device tokens"}
             }
 
@@ -54,7 +56,7 @@ export default class PushNotificationService {
             }
 
             if (!promptContent) {
-                console.warn("No prompt content found, can't send push");
+                logger.warn("No prompt content found, can't send push");
                 return {attempted: false, error: "Unable to find the prompt content. Can not process message"};
             }
 
@@ -93,7 +95,7 @@ export default class PushNotificationService {
             const tasks: Promise<SendPushResult>[] = tokens.map(token => this.sendPush({token, payload, member}));
 
             const results = await Promise.all(tasks);
-            console.log(`SendPushNotification for prompt Got ${results.length} results`);
+            logger.log(`SendPushNotification for prompt Got ${results.length} results`);
             const numSuccess = results.filter(r => r.success).length;
             return {
                 attempted,
@@ -104,7 +106,7 @@ export default class PushNotificationService {
                 }
             };
         } catch (error) {
-            console.error("A runtime error occurred while trying to send a push notification", error);
+            logger.error("A runtime error occurred while trying to send a push notification", error);
             Sentry.captureException(error);
             return {
                 attempted,
@@ -118,11 +120,11 @@ export default class PushNotificationService {
         const {token, payload, member} = options;
         try {
             const result = await this.messaging.sendToDevice(token, payload);
-            console.log("Send Message Result", result);
+            logger.log("Send Message Result", result);
             return {token, success: true};
 
         } catch (error) {
-            console.error(`Failed to send the push notification to ${member?.id} ${member?.email}:`, error.code ? error.code : error);
+            logger.error(`Failed to send the push notification to ${member?.id} ${member?.email}:`, error.code ? error.code : error);
             Sentry.captureException(error);
             return {
                 success: false,

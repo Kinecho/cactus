@@ -1,5 +1,8 @@
 import CactusMember from "@shared/models/CactusMember";
 import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("SocialUtil.ts");
 
 export function unseenActivityCount(options: { member: CactusMember, events: SocialActivityFeedEvent[] }): number {
     try {
@@ -28,7 +31,7 @@ export function unseenActivityCount(options: { member: CactusMember, events: Soc
 
         return count;
     } catch (error) {
-        console.error("Failed to process unseen activity count", error);
+        logger.error("Failed to process unseen activity count", error);
         return 0;
     }
 

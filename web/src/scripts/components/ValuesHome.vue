@@ -105,10 +105,12 @@
     import 'animation.gsap';
     // @ts-ignore
     import {ScrollToPlugin} from 'gsap/all';
+    import Logger from "@shared/Logger";
 
 
+    const logger = new Logger("ValuesHome.vue");
     const plugins = [ScrollToPlugin, TweenMax, Power1];
-    console.debug("Logging so plugins dont get treek-shook :( ", plugins);
+    logger.debug("Logging so plugins dont get treek-shook :( ", plugins);
 
     // let emailParam = getQueryParam(QueryParam.EMAIL) || getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
 
@@ -129,7 +131,7 @@
             // }
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member, user}) => {
-                    console.log("Got member");
+                    logger.log("Got member");
                     this.authLoaded = true;
                     this.member = member;
                     this.email = member ? member.email : undefined;
@@ -215,7 +217,7 @@
 
 
     // document.addEventListener('DOMContentLoaded', () => {
-    //     console.log("values loaded");
+    //     logger.log("values loaded");
     //
     //     configureAnimations();
     // });

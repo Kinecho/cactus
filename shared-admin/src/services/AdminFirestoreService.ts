@@ -5,13 +5,15 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import DocumentReference = firebaseAdmin.firestore.DocumentReference;
-import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
-import Timestamp = firebaseAdmin.firestore.Timestamp;
+export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
+export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
+export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
+import {getConfig} from "@admin/config/configService";
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
+const config = getConfig();
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
     transaction?: Transaction
@@ -167,7 +169,7 @@ export default class AdminFirestoreService {
 
             return model;
         } catch (e) {
-            console.error("failed to save firestore document", e);
+            console.error(`[${config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
             throw e;
         }
     }
@@ -243,9 +245,11 @@ export default class AdminFirestoreService {
 
             return queryResult;
         } catch (e) {
-            console.error(`Failed to execute query ${options.queryName || ""}`.trim(), e);
+            // const serverName = config.serv
+            const errorMessage = `[${config.app.serverName}] Failed to execute query ${options.queryName || ""}`.trim() + (options.transaction ? " while using a transaction" : "").trim();
+            console.error(errorMessage, e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${e}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${errorMessage}\n\`\`\`${e}\`\`\``);
             return {size: 0, results: [], error: e};
         }
 

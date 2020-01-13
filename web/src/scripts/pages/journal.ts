@@ -7,9 +7,10 @@ import 'animation.gsap';
 import {ScrollToPlugin} from 'gsap/all';
 import {commonInit} from "@web/common";
 import Footer from "@components/StandardFooter.vue"
+import Logger from "@shared/Logger";
 
 commonInit();
-
+const logger = new Logger("journal.ts"); 
 
 new Footer({el: "#footer"});
 
@@ -17,10 +18,10 @@ const controller = new ScrollMagic.Controller();
 
 //need to reference the plugin here so it doesn't get dropped by webpack during tree shaking
 const plugins = [ScrollToPlugin, TweenMax, Power1];
-console.debug("using plugins", plugins);
+logger.debug("using plugins", plugins);
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("journal loaded");
+    logger.log("journal loaded");
 
     configureLearnMoreScroll();
     configureAnimations();
@@ -110,6 +111,6 @@ function configureAnimations() {
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

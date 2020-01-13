@@ -25,14 +25,16 @@
     import {appendQueryParams} from '@shared/util/StringUtil';
     import NavBar from "@components/NavBar.vue";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("MagicLinkAppContinue.vue");
     export default Vue.extend({
         components: {
             NavBar,
             AppStoreIcon
         },
         created() {
-            console.log("magic link app continue");
+            logger.log("magic link app continue");
         },
         props: {
             link: {type: String, required: true}

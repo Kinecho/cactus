@@ -3,10 +3,12 @@ import {gtag} from "@web/analytics";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
 
 commonInit();
+const logger = new Logger("payment_success.ts");
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("payment success loaded");
+    logger.log("payment success loaded");
 
     const amount = getQueryParam(QueryParam.PURCHASE_AMOUNT);
 
@@ -25,6 +27,6 @@ document.addEventListener('DOMContentLoaded', function() {
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }
