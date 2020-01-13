@@ -5,27 +5,31 @@ import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {CreateSessionRequest} from "@shared/api/CheckoutTypes";
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("checkout_redirect.ts");
+
 commonInit();
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("checkout monthly loaded");
+    logger.log("checkout monthly loaded");
 
 
     const productParam = getQueryParam(QueryParam.SUBSCRIPTION_PLAN);
 
-    let planId:string|undefined = undefined;
+    let planId: string | undefined = undefined;
 
-    if (productParam && productParam.toLowerCase() === "y"){
+    if (productParam && productParam.toLowerCase() === "y") {
         planId = Config.stripe.yearlyPlanId;
-    } else if (productParam && productParam.toLowerCase() === "m"){
+    } else if (productParam && productParam.toLowerCase() === "m") {
         planId = Config.stripe.monthlyPlanId;
-    } else if (productParam){
+    } else if (productParam) {
         planId = productParam;
     }
 
 
-    if (!planId){
-        const request:CreateSessionRequest = {
+    if (!planId) {
+        const request: CreateSessionRequest = {
             successUrl: `${Config.domain}/success`,
             cancelUrl: `${Config.domain}`,
             preOrder: true,
@@ -33,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         setTimeout(async () => {
             const error = await redirectToCheckoutWithSessionId(request);
-            if (error){
+            if (error) {
                 showError("We were unable to send you to the checkout page. Please try again later.");
             }
         }, 1000);
@@ -45,23 +49,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 
-
 });
 
 
-
-
-function showError( message:string) {
+function showError(message: string) {
     const $error = document.getElementById("error-message");
     const $loading = document.getElementById("loading-message");
 
 
-
-    if ($error){
+    if ($error) {
         $error.classList.toggle("hidden");
         $error.getElementsByClassName("message")[0].textContent = message;
     }
-    if ($loading){
+    if ($loading) {
         $loading.classList.toggle("hidden");
     }
 
@@ -70,6 +70,6 @@ function showError( message:string) {
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

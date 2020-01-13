@@ -27,7 +27,8 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import CactusMember from '@shared/models/CactusMember';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-
+    import Logger from "@shared/Logger";
+    const logger = new Logger("InputNameModal.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -68,7 +69,7 @@
             async save() {
                 if (this.member) {
                     await CactusMemberService.sharedInstance.save(this.member);
-                    console.log("Save success");
+                    logger.log("Save success");
                     this.$emit('close');
                 }
             },

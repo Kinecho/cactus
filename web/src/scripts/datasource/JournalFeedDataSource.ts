@@ -4,7 +4,9 @@ import {PageLoader} from "@web/datasource/models/PageLoader";
 import SentPromptService from "@web/services/SentPromptService";
 import {PageResult} from "@web/services/FirestoreService";
 import JournalEntry, {JournalEntryDelegate} from "@web/datasource/models/JournalEntry";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("JournalFeedDataSource");
 
 interface JournalFeedDataSourceDelegate {
     didLoad?: (hasData: boolean) => void
@@ -74,7 +76,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             limit: this.pageSize,
             onlyCompleted: this.onlyCompleted,
             onData: (page) => {
-                console.log("🌵 🥇Got first page results", page);
+                logger.log("🌵 🥇Got first page results", page);
                 firstPage.result = page;
 
                 this.handlePageResult(page);
@@ -161,27 +163,27 @@ class JournalFeedDataSource implements JournalEntryDelegate {
      */
     loadNextPage(): boolean {
         if (this.loadingPage) {
-            console.log("[JournalFeedDataSource] Page is loading, not doing anything");
+            logger.log("[JournalFeedDataSource] Page is loading, not doing anything");
             return false;
         }
         if (!this.hasLoaded) {
-            console.log("[JournalFeedDataSource] Not set up, can't load next page");
+            logger.log("[JournalFeedDataSource] Not set up, can't load next page");
             return false;
         }
 
         if (this.pages.length === 0) {
-            console.log("[JournalFeedDataSource] There are no pages. Can't load next page");
+            logger.log("[JournalFeedDataSource] There are no pages. Can't load next page");
             return false;
         }
         const lastPage = this.pages[this.pages.length - 1];
 
         if (!lastPage.finishedLoading) {
-            console.log("[JournalFeedDataSource] Last page has not finished loading.");
+            logger.log("[JournalFeedDataSource] Last page has not finished loading.");
             return false;
         }
 
         if (lastPage.result?.mightHaveMore !== true) {
-            console.log("[JournalFeedDataSource] There is no more expected data. Not loading");
+            logger.log("[JournalFeedDataSource] There is no more expected data. Not loading");
             return false;
         }
 
@@ -193,7 +195,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
             lastResult: lastPage.result,
             onlyCompleted: this.onlyCompleted,
             onData: (page) => {
-                console.log("🌵 Got Next page results", page);
+                logger.log("🌵 Got Next page results", page);
                 nextPage.result = page;
 
                 this.handlePageResult(page);
@@ -206,7 +208,7 @@ class JournalFeedDataSource implements JournalEntryDelegate {
     }
 
     stop() {
-        console.log("[JournalEntryDataSource] stop() called");
+        logger.log("[JournalEntryDataSource] stop() called");
         this.pages.forEach(page => {
             page.stop()
         });

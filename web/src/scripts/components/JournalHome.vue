@@ -73,7 +73,8 @@
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
-
+    import Logger from "@shared/Logger";
+    const logger = new Logger("JournalHome.vue");
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
         authUnsubscribe?: () => void,
@@ -107,12 +108,12 @@
             this.scrollHandler();
         },
         beforeMount() {
-            console.log("Journal Home calling Created function");
+            logger.log("Journal Home calling Created function");
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
-                        console.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         window.location.href = PageRoute.HOME;
                         return;
                     }
@@ -157,26 +158,26 @@
                                 }
                             });
                         } else {
-                            console.error("Today's prompt could not be found for member");
+                            logger.error("Today's prompt could not be found for member");
                         }
                     }
 
                     if (isFreshLogin) {
-                        console.log("[JournalHome] fresh login. Setting up data source");
+                        logger.log("[JournalHome] fresh login. Setting up data source");
                         this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
-                                console.log("[JournalHome] didLoad called. Has Data = ", hasData);
+                                logger.log("[JournalHome] didLoad called. Has Data = ", hasData);
 
                                 this.journalEntries = this.dataSource!.journalEntries;
                                 this.dataHasLoaded = true;
                             },
                             updateAll: (entries) => {
-                                console.log("got entries in journal home", entries);
+                                logger.log("got entries in journal home", entries);
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                console.log(`entry updated at index ${index}`, entry);
+                                logger.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -234,7 +235,7 @@
                 const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
-                    console.log("load more! Offset = ", distance);
+                    logger.log("load more! Offset = ", distance);
 
                     const willLoad = this.dataSource?.loadNextPage() || false;
                     this.showPageLoading = this.dataSource?.loadingPage || willLoad

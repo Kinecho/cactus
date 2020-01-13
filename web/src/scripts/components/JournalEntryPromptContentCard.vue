@@ -87,7 +87,9 @@
     import {PromptCopy} from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -270,10 +272,10 @@
         watch: {
             showContent(show) {
                 if (show && this.entry.promptContent && this.entry.promptContent.entryId) {
-                    console.log("adding prompt content entry id query param");
+                    logger.log("adding prompt content entry id query param");
                     updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.entry.promptContent.entryId);
                 } else {
-                    console.log("removing prompt content entry id");
+                    logger.log("removing prompt content entry id");
                     removeQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);
                     removeQueryParam(QueryParam.CONTENT_INDEX);
                 }

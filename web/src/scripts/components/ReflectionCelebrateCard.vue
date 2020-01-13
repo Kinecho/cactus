@@ -138,7 +138,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -158,7 +160,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     this.loggedIn = !!member;
 
                     if (StorageService.getBoolean(LocalStorageKey.memberStatsEnabled) && member && member.stats.reflections) {
-                        console.log("using member stats");
+                        logger.log("using member stats");
                         this.setDurationMs(member.stats.reflections.totalDurationMs);
                         this.reflectionCount = member.stats.reflections.totalCount;
                         this.streakDays = member.stats.reflections.currentStreakDays;
@@ -166,7 +168,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     } else {
                         //this will calculate stats if the member doesn't have the new stats object
                         //Or, if the user is anonymous/not logged in.
-                        console.log("calculating streak from raw data");
+                        logger.log("calculating streak from raw data");
                         await this.calculateStats()
                     }
 
@@ -269,19 +271,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
             async calculateStats() {
                 const member = this.member;
                 const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
-                console.log("all reflections", reflections);
+                logger.log("all reflections", reflections);
                 if (reflections.length === 0 && this.reflectionResponse) {
                     reflections.push(this.reflectionResponse);
                 }
 
                 const totalDuration = reflections.reduce((duration, doc) => {
                     const current = doc.reflectionDurationMs || 0;
-                    console.log("current response duration ", current);
+                    logger.log("current response duration ", current);
                     return duration + (Number(current) || 0);
                 }, 0);
 
 
-                console.log("totalDuration", totalDuration);
+                logger.log("totalDuration", totalDuration);
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
@@ -317,13 +319,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.$emit("navigationDisabled")
             },
             magicLinkSuccess(email: string | undefined) {
-                console.log("Celebrate Screen: Magic link sent successfully to ", email);
+                logger.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
                     StorageService.removeItem(LocalStorageKey.anonReflectionResponse, this.reflectionResponse.promptId);
                 }
             },
             magicLinkError(message: string | undefined) {
-                console.error("Celebrate component: Failed to send magic link", message);
+                logger.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
                 window.location.href = PageRoute.SIGNUP;

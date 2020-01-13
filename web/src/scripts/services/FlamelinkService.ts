@@ -4,6 +4,9 @@ import FlamelinkModel from "@shared/FlamelinkModel";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {IGetOptions} from "@shared/types/FirestoreTypes";
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("FlamelinkService");
 
 export interface PopulateOptions {
     field: string;
@@ -34,13 +37,13 @@ export default class FlamelinkService {
         const data = model.toFlamelinkData();
         let saved: any;
         if (!model.entryId) {
-            console.log("Adding new Flamelink content");
+            logger.log("Adding new Flamelink content");
             saved = await this.content.add({
                 schemaKey: model.schema,
                 data: data,
             })
         } else {
-            console.log("Updating Flamelink content");
+            logger.log("Updating Flamelink content");
             saved = await this.content.update({
                 entryId: model.entryId,
                 schemaKey: model.schema,
@@ -49,7 +52,7 @@ export default class FlamelinkService {
         }
 
         if (saved) {
-            // console.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
+            // logger.log("setting fl_meta on saved model", JSON.stringify(saved, null, 2));
             model.updateFromData(saved);
         }
 
@@ -59,7 +62,7 @@ export default class FlamelinkService {
     async getById<T extends FlamelinkModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
         const schema = type.schema;
-        console.log(`Fetching ${id} from ${schema}`);
+        logger.log(`Fetching ${id} from ${schema}`);
 
         const content = await this.flamelink.content.get({entryId: id, schemaKey: schema});
         if (!content) {
@@ -79,12 +82,12 @@ export default class FlamelinkService {
             populate: options.populate,
             callback: (error: any, data: Partial<T>) => {
                 if (error) {
-                    console.error("Failed to load data from flamelink", error);
+                    logger.error("Failed to load data from flamelink", error);
                     options.onData(undefined, error);
                     return;
                 }
                 if (!data) {
-                    console.log(`No entry found for ${schema} ${id}`);
+                    logger.log(`No entry found for ${schema} ${id}`);
                     options.onData(undefined, undefined);
                     return;
                 }
@@ -113,7 +116,7 @@ export default class FlamelinkService {
                 return fromFlamelinkData(entry, Type);
             }
         } catch (error) {
-            console.error("Error fetching data from flamelink content", error);
+            logger.error("Error fetching data from flamelink content", error);
         }
         return;
     }
@@ -136,12 +139,12 @@ export default class FlamelinkService {
 
 
                 if (error) {
-                    console.error("Failed to load data from flamelink", error);
+                    logger.error("Failed to load data from flamelink", error);
                     options.onData(undefined, error);
                     return;
                 }
                 if (!entry) {
-                    console.log(`No entry found for ${schema} where ${name}=${value}`);
+                    logger.log(`No entry found for ${schema} where ${name}=${value}`);
                     options.onData(undefined, undefined);
                     return;
                 }

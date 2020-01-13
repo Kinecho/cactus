@@ -6,6 +6,9 @@ import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
 import PromptContentService from "@web/services/PromptContentService";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("JournalEntry.ts");
 
 export interface JournalEntryDelegate {
     entryUpdated: (entry: JournalEntry) => void
@@ -42,7 +45,7 @@ class JournalEntry {
     }
 
     start() {
-        console.log("Starting listeners for journal entry");
+        logger.log("Starting listeners for journal entry");
         const promptId = this.promptId;
         this.responsesUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
             onData: (responses) => {
@@ -70,7 +73,7 @@ class JournalEntry {
     }
 
     stop() {
-        console.log("Stopping entries for prompt id");
+        logger.log("Stopping entries for prompt id");
         this.promptUnsubscriber?.();
         this.promptUnsubscriber = undefined;
 

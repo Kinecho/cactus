@@ -17,6 +17,9 @@
     import {getQueryParam, removeQueryParam, updateQueryParam} from "@web/util"
     import Modal from "@components/Modal.vue";
     import PromptContent from "@components/PromptContent.vue";
+    import Logger from "@shared/Logger";
+
+    const logger = new Logger("AutoPromptContentModal.vue");
 
     export default Vue.extend({
 
@@ -46,10 +49,10 @@
         watch: {
             showContent(show) {
                 if (show && this.entryId) {
-                    console.log("adding prompt content entry id query param");
+                    logger.log("adding prompt content entry id query param");
                     updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.entryId);
                 } else {
-                    console.log("removing prompt content entry id");
+                    logger.log("removing prompt content entry id");
                     removeQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);
                     removeQueryParam(QueryParam.CONTENT_INDEX);
                 }

@@ -3,7 +3,7 @@
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
-                    <div class="element-icon" >
+                    <div class="element-icon">
                         <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
                     </div>
                     <h4 class="label">{{cactusElement}}</h4>
@@ -32,7 +32,9 @@
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                         <div v-if="nativeShareEnabled" class="sharing">
-                            <button class="btn secondary" @click="shareNatively()"><img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
+                            <button class="btn secondary" @click="shareNatively()">
+                                <img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share
+                            </button>
                         </div>
                     </div>
                     <button v-else class="button primary getLink"
@@ -98,7 +100,7 @@
             <!--      END Link      -->
 
             <!--    START Elements  -->
-            <prompt-content-card-elements v-if="processedContent.elements" />
+            <prompt-content-card-elements v-if="processedContent.elements"/>
             <!--    END Elements    -->
 
             <!--    START Grow -->
@@ -250,11 +252,11 @@
         </section>
 
         <element-description-modal
-            :cactusElement = "cactusModalElement"
-            :showModal="cactusModalVisible"
-            :navigationEnabled="true"
-            :showIntroCard="false"
-            @close="hideCactusModal"/>
+                :cactusElement="cactusModalElement"
+                :showModal="cactusModalVisible"
+                :navigationEnabled="true"
+                :showIntroCard="false"
+                @close="hideCactusModal"/>
     </div>
 </template>
 
@@ -287,7 +289,9 @@
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
 
@@ -349,7 +353,7 @@
         },
         watch: {
             saved(isSaved) {
-                console.log("saved changed", isSaved);
+                logger.log("saved changed", isSaved);
                 if (this.showSavingTimeout) {
                     window.clearTimeout(this.showSavingTimeout);
                     this.showSavingTimeout = undefined;
@@ -517,10 +521,9 @@
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow:
-                0 11px 15px -7px rgba(0,0,0,.16),
-                0 24px 38px 3px rgba(0,0,0,.1),
-                0 9px 46px 8px rgba(0,0,0,.08);
+            box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
+            0 24px 38px 3px rgba(0, 0, 0, .1),
+            0 9px 46px 8px rgba(0, 0, 0, .08);
             min-height: 100%;
             justify-content: space-between;
             position: relative;
