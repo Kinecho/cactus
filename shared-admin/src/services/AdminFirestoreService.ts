@@ -10,6 +10,7 @@ export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
+
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
@@ -242,9 +243,10 @@ export default class AdminFirestoreService {
 
             return queryResult;
         } catch (e) {
-            console.error(`Failed to execute query ${options.queryName || ""}`.trim(), e);
+            const errorMessage = `Failed to execute query ${options.queryName || ""}`.trim() + (options.transaction ? " while using a transaction" : "").trim();
+            console.error(errorMessage, e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${e}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${errorMessage}\n\`\`\`${e}\`\`\``);
             return {size: 0, results: [], error: e};
         }
 

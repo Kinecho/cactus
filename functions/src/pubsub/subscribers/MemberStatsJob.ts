@@ -39,8 +39,8 @@ async function handleMember(member: CactusMember) {
         try {
             const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
                 memberId,
-                timeZone
-            }, {transaction: t});
+                timeZone,
+            }, {transaction: t, queryName: "calculateMemberStats"});
 
             if (stats) {
                 await AdminCactusMemberService.getSharedInstance().setReflectionStats({

@@ -276,7 +276,6 @@ export function atMidnight(date: Date): Date {
  */
 export function getStreak(options: { dates: Date[], start?: Date, timeZone?: string }) {
     const {dates = [], start = new Date(), timeZone} = options;
-    console.log('calculating streak for timezone', timeZone);
     let _dates = dates;
     if (_dates.length === 0) {
         return 0;
