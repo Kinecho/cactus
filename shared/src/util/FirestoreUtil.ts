@@ -1,6 +1,8 @@
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("FirestoreUti.ts");
 let TimestampClass: TimestampInterface | any;
 
 export interface TimestampInterface {
@@ -144,7 +146,7 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
         if (model) {
             results.push(model);
         } else {
-            console.warn("Unable to decode model", Type);
+            logger.warn("Unable to decode model", Type);
         }
     });
     return results;

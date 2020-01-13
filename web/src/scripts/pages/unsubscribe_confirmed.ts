@@ -3,7 +3,9 @@ import "@styles/pages/unsubscribe_confirmed.scss"
 import {commonInit} from "@web/common";
 import UnsubPage from "@components/UnsubscribeConfirmedPage.vue";
 import Vue from "vue";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("unsubscribe_confirmed.ts");
 commonInit();
 
 new Vue({
@@ -17,6 +19,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

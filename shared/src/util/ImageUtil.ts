@@ -1,4 +1,7 @@
 import {stripQueryParams} from '@shared/util/StringUtil'
+import Logger from "@shared/Logger";
+
+const logger = new Logger("ImageUtil.ts");
 
 export enum ImageWidth {
     w50 = 50,
@@ -18,14 +21,14 @@ export function getImageBreakpointWidth(input: string | number | ImageWidth): nu
         const width = Number(input);
 
         if (isNaN(width)) {
-            console.error(`Can not convert input "${input}" to a number. Returning a medium sized image`);
+            logger.error(`Can not convert input "${input}" to a number. Returning a medium sized image`);
             return ImageWidth.w667
         }
 
-        console.log("input width", width);
+        logger.log("input width", width);
         return breakpoints.find(breakpoint => breakpoint >= width) || ImageWidth.w1920;
     } catch (error) {
-        console.error(`Can not convert input "${input}" to a number. Returning a medium sized image`);
+        logger.error(`Can not convert input "${input}" to a number. Returning a medium sized image`);
         return ImageWidth.w667;
     }
 

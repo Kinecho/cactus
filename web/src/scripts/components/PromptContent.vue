@@ -124,7 +124,9 @@
     import CopyService from "@shared/copy/CopyService";
     import PromptContentService from "@web/services/PromptContentService";
     import FourOhFour from "@components/404.vue"
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
     Vue.use(Vue2TouchEvents);
 
@@ -207,9 +209,9 @@
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
                 promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
-                console.log("using path for promptContentId", promptContentId);
+                logger.log("using path for promptContentId", promptContentId);
             } else {
-                console.log("using prop for promptContentId", promptContentId)
+                logger.log("using prop for promptContentId", promptContentId)
             }
 
             let slideParam = getQueryParam(QueryParam.CONTENT_INDEX);
@@ -239,16 +241,16 @@
                         this.loading = false;
                         this.error = "Oops! We were unable to load the prompt. Please try again later.";
                         this.show404 = false;
-                        console.error("Failed to load prompts", error);
+                        logger.error("Failed to load prompts", error);
                         return;
                     }
-                    // console.log("raw promptContent data", data);
+                    // logger.log("raw promptContent data", data);
 
                     // const promptContent = new PromptContent(data);
                     this.promptContent = promptContent;
-                    console.log("on load - promptContentLength", promptContent.content && promptContent.content.length);
+                    logger.log("on load - promptContentLength", promptContent.content && promptContent.content.length);
                     if (isShare) {
-                        console.log("setting pendingActiveIndex to promptContent.content.length");
+                        logger.log("setting pendingActiveIndex to promptContent.content.length");
                         this.pendingActiveIndex = promptContent.content.length
                     } else if (isDone) {
                         this.completed = true;
@@ -282,7 +284,7 @@
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
-                console.log("Unsubscribing from flamelink promptContent listener");
+                logger.log("Unsubscribing from flamelink promptContent listener");
                 this.promptsUnsubscriber();
             }
 
@@ -364,7 +366,7 @@
 
                 const items = [...this.promptContent.content];
 
-                console.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
+                logger.log("this.promptContent.shareReflectionCopy_md", this.promptContent.shareReflectionCopy_md);
 
                 // if (this.reflectionResponse && !isBlank(this.reflectionResponse.content.text)) {
                 //     let shareReflectionCopy = isBlank(this.promptContent.shareReflectionCopy_md) ? copy.prompts.SHARE_PROMPT_COPY_MD : this.promptContent.shareReflectionCopy_md;
@@ -373,7 +375,7 @@
                 //         text_md: shareReflectionCopy,
                 //         title: copy.prompts.SHARE_YOUR_NOTE,
                 //     };
-                //     console.log("adding share card to content items");
+                //     logger.log("adding share card to content items");
                 //     items.push(sharingCard);
                 // }
 
@@ -422,7 +424,7 @@
                     const styles = {
                         transform: `rotate(${Math.min(this.reflectionProgress, 1) * 360}deg)`,
                     };
-                    console.log("Style object", styles);
+                    logger.log("Style object", styles);
                     return styles;
                 }
             },
@@ -445,7 +447,7 @@
         },
         watch: {
             responsesLoaded(loaded) {
-                // console.log("responses loaded. Pending Active Index is", this.pendingActiveIndex, "contentItems.length", this.contentItems && this.contentItems.length)
+                // logger.log("responses loaded. Pending Active Index is", this.pendingActiveIndex, "contentItems.length", this.contentItems && this.contentItems.length)
                 // if (loaded && this.pendingActiveIndex !== undefined) {
                 //     if (this.contentItems && this.contentItems.length > 0) {
                 //         this.activeIndex = Math.min(Math.max(0, this.contentItems.length - 1), this.pendingActiveIndex)
@@ -477,10 +479,10 @@
         },
         methods: {
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
-                console.log("Update pending active index");
+                logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
                     if (this.promptContent && this.promptContent.content.length > 0) {
-                        console.log("Setting active index in pending active index method");
+                        logger.log("Setting active index in pending active index method");
                         this.activeIndex = Math.min(this.promptContent.content.length, this.pendingActiveIndex);
                     }
                 } else if (!this.completed) {
@@ -528,7 +530,7 @@
                 }
 
                 if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    console.log(openGraphImage.storageUrl);
+                    logger.log(openGraphImage.storageUrl);
                     let pngUrl = getCloudinaryUrlFromStorageUrl({
                         storageUrl: openGraphImage.storageUrl,
                         width: 1200,
@@ -545,12 +547,12 @@
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
 
                 if (this.navigationDisabled) {
-                    console.log("tap is disabled");
+                    logger.log("tap is disabled");
                     return;
                 }
 
                 if (!this.tapAnywhereEnabled) {
-                    console.log("tap anywhere is disabled");
+                    logger.log("tap anywhere is disabled");
                     return;
                 }
                 const {width} = getDeviceDimensions();
@@ -563,13 +565,13 @@
                     });
 
                     if (!foundExcludedTarget) {
-                        console.log("tap event", event);
+                        logger.log("tap event", event);
                         const touch = event.changedTouches && event.changedTouches.item(0);
                         const leftThreshold = width * .20;
-                        console.log("left threshold", leftThreshold);
+                        logger.log("left threshold", leftThreshold);
                         let isPrevious = false;
                         if (touch) {
-                            console.log("clientX tap", touch.clientX);
+                            logger.log("clientX tap", touch.clientX);
                             isPrevious = touch.clientX < leftThreshold;
                         }
 
@@ -605,7 +607,7 @@
                     transform: `translateX(${diffX}px)`,
                 };
 
-                console.log("Move Handler", args);
+                logger.log("Move Handler", args);
             },
             stopReflectionTimer() {
                 clearInterval(this.reflectionTimerInterval);
@@ -621,7 +623,7 @@
             },
             subscribeToResponse() {
                 if (this.reflectionResponseUnsubscriber) {
-                    console.log("Reflection response unsubscriber already exists, resetting in now");
+                    logger.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
                 }
                 let promptId = this.promptContent && this.promptContent.promptId;
@@ -631,28 +633,28 @@
                 if (promptId) {
 
                     let localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
-                    console.log("local response found in storage", localResponse);
+                    logger.log("local response found in storage", localResponse);
 
                     this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
-                    // console.log("subscribing to responses for promptId", promptId);
+                    // logger.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
                             const [first] = responses;
-                            // console.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
+                            // logger.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
 
 
                             if (!first && !localResponse) {
-                                // console.log("No local response and no db response, creating one now");
-                                // console.log("Using the newly created response for this prompt.");
+                                // logger.log("No local response and no db response, creating one now");
+                                // logger.log("Using the newly created response for this prompt.");
                                 localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
                             } else if (first) {
                             }
 
                             if (!first && localResponse) {
-                                // console.log("No data found from database, using the locally created response");
+                                // logger.log("No data found from database, using the locally created response");
                             }
 
                             //TODO: combine if there are multiple?
@@ -669,7 +671,7 @@
                         }
                     })
                 } else {
-                    console.warn("NO prompt ID found for prompt content ", this.promptContent)
+                    logger.warn("NO prompt ID found for prompt content ", this.promptContent)
                 }
             },
 
@@ -685,7 +687,7 @@
                     });
                     this.reflectionResponse = saved;
                     if (!this.member && saved && saved.promptId) {
-                        console.log("Member is not logged in, saving to localstorage");
+                        logger.log("Member is not logged in, saving to localstorage");
                         StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
                     }
                     this.saved = true;
@@ -696,7 +698,7 @@
             },
             async next() {
                 if (this.isReflection && !this.reflectionComplete) {
-                    console.log("Next is disabled until the reflection is complete");
+                    logger.log("Next is disabled until the reflection is complete");
                     return;
                 }
 

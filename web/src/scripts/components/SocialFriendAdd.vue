@@ -24,7 +24,9 @@
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
     import {notifyFriendRequest} from '@web/social';
     import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("SocialFriendAdd.vue");
     export default Vue.extend({
         props: {
             member: {type: Object as () => CactusMember},
@@ -64,7 +66,7 @@
 
                         return !!result;
                     } catch(e) {
-                        console.error("Failed to notify friend request", e);
+                        logger.error("Failed to notify friend request", e);
                         return false;
                     }
                 } else {

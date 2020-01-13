@@ -2,7 +2,8 @@ import "@styles/pages/values_home.scss"
 import Vue from "vue";
 import ValuesHome from "@components/ValuesHome.vue";
 import {commonInit} from "@web/common";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("values_home.ts");
 commonInit();
 new Vue({
     el: "#app",
@@ -13,6 +14,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

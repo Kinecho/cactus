@@ -5,6 +5,9 @@ import {SchemaName} from "@shared/FlamelinkModel";
 import {dateObjectToISODate, getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("PromptContentService");
 
 export default class PromptContentService {
     public static sharedInstance = new PromptContentService();
@@ -60,16 +63,16 @@ export default class PromptContentService {
                 endDateString = getFlamelinkDateString(midnightDenver);
 
             } else {
-                console.error("No valid date passed into getPromptContentForDate method");
+                logger.error("No valid date passed into getPromptContentForDate method");
                 return;
             }
 
-            console.log("start date", startDateString);
-            console.log("end date", endDateString);
+            logger.log("start date", startDateString);
+            logger.log("end date", endDateString);
 
             const filters: string[][] = [];
             if (status) {
-                console.log("adding status filter for status = ", status);
+                logger.log("adding status filter for status = ", status);
                 filters.push([PromptContent.Fields.contentStatus, "==", status])
             }
 
@@ -84,12 +87,12 @@ export default class PromptContentService {
             const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
-                console.warn("PromptContentService.getPromptContentForDate: No objects found for dates given");
+                logger.warn("PromptContentService.getPromptContentForDate: No objects found for dates given");
                 return
             }
 
             const allValues = Object.values(raw);
-            console.log(`Found ${allValues.length} that matched the criteria for the date range`);
+            logger.log(`Found ${allValues.length} that matched the criteria for the date range`);
             const [content]: (any | undefined)[] = allValues;
             if (!content) {
                 return undefined
@@ -97,7 +100,7 @@ export default class PromptContentService {
 
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
-            console.error("Failed to fetch content", error);
+            logger.error("Failed to fetch content", error);
             return undefined;
         }
     }

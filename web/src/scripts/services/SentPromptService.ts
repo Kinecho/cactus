@@ -1,5 +1,6 @@
 import FirestoreService, {
-    ListenerUnsubscriber, PageListenerResult,
+    ListenerUnsubscriber,
+    PageListenerResult,
     PageResult,
     Query,
     QueryCursor,
@@ -9,9 +10,11 @@ import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
-import {minusDays} from "@shared/util/DateUtil";
+import {toTimestamp} from "@shared/util/FirestoreUtil";
 import {DocObserverOptions} from "@shared/types/FirestoreTypes";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("SentPromptService");
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -63,7 +66,7 @@ export default class SentPromptService {
         try {
             return await this.firestoreService.getById(id, SentPrompt);
         } catch (e) {
-            console.error("Failed to get sent prompt by id", e);
+            logger.error("Failed to get sent prompt by id", e);
         }
 
     }
@@ -75,7 +78,7 @@ export default class SentPromptService {
     async getSentPrompt(promptId: string): Promise<SentPrompt | undefined> {
         const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!member) {
-            console.warn("Unable to get current member. Can not delete the sentQuestion");
+            logger.warn("Unable to get current member. Can not delete the sentQuestion");
             return;
         }
 
@@ -84,7 +87,7 @@ export default class SentPromptService {
                 .where(SentPrompt.Fields.promptId, "==", promptId);
             return this.firestoreService.getFirst(query, SentPrompt);
         } catch (e) {
-            console.error("failed to get sent prompt by promptId", e);
+            logger.error("failed to get sent prompt by promptId", e);
         }
 
     }
@@ -95,7 +98,7 @@ export default class SentPromptService {
             try {
                 return this.delete(sentPrompt.id);
             } catch (e) {
-                console.error(`Failed to delete prompt for promptId=${promptId} and sentPromptId=${sentPrompt.id}`)
+                logger.error(`Failed to delete prompt for promptId=${promptId} and sentPromptId=${sentPrompt.id}`)
             }
 
         }
@@ -128,7 +131,7 @@ export default class SentPromptService {
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
-            console.log("beforeOrEqualTo Timestamp", beforeTimestamp);
+            logger.log("beforeOrEqualTo Timestamp", beforeTimestamp);
             query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
         }
 

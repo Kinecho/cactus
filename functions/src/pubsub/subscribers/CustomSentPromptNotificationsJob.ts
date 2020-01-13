@@ -12,6 +12,9 @@ import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import {convertDateToSendTimeUTC, getSendTimeUTC} from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("CustomSentPromptNotificationsJob");
 
 export interface CustomNotificationJobResult {
     success: boolean,
@@ -59,7 +62,7 @@ export interface MemberResult {
 
 export async function onPublish(message: Message, context: functions.EventContext) {
     if (!message.json) {
-        console.error("No message json found");
+        logger.error("No message json found");
         return;
     }
     const job: CustomNotificationJob = message.json;
@@ -68,22 +71,22 @@ export async function onPublish(message: Message, context: functions.EventContex
     // const contentDate = getDateFromISOString(job.contentDate) || getDateAtMidnightDenver();
     // const sendDate: Date | undefined = getDateFromISOString(job.sendDate);
     const result = await runCustomNotificationJob(job);
-    console.log("Job result", result);
+    logger.log("Job result", result);
 }
 
 export async function runCustomNotificationJob(job: CustomNotificationJob): Promise<CustomNotificationJobResult> {
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
     const result: CustomNotificationJobResult = {success: false, systemDateObject: job.systemDateObject};
 
-    console.log("Looking for members where UTC send time is", JSON.stringify(sendTimeUTC));
+    logger.log("Looking for members where UTC send time is", JSON.stringify(sendTimeUTC));
     const members = await AdminCactusMemberService.getSharedInstance().getMembersForUTCSendPromptTime(sendTimeUTC);
     result.numMembersFound = members.length;
 
-    console.log("Got members", members.length);
+    logger.log("Got members", members.length);
 
     const allErrors: string[] = [];
     const memberResults: MemberResult[] = await Promise.all(members.map(member => processMember({job, member})));
-    console.log(`processed all ${memberResults.length} members`);
+    logger.log(`processed all ${memberResults.length} members`);
     const emailsProcessed: string[] = [];
     memberResults.forEach(r => {
         if (r.sentPush) {
@@ -115,10 +118,10 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
     result.allErrors = allErrors;
     result.emailsProcessed = emailsProcessed;
 
-    console.log("member results.length = ", memberResults.length);
-    console.log(memberResults);
+    logger.log("member results.length = ", memberResults.length);
+    logger.log(memberResults);
     result.memberResults = memberResults;
-    console.log("Job result", result);
+    logger.log("Job result", result);
     const trimmedResult = {...result};
     delete trimmedResult.memberResults;
     await AdminSlackService.getSharedInstance().sendDataLogMessage(`:calling: Custom Sent Prompt Notification Job results \n\`\`\`${JSON.stringify(trimmedResult, null, 2)}\`\`\``);
@@ -135,7 +138,7 @@ function getMemberSendTimeInfo(options: { systemDateObject: DateObject, member: 
     });
 
     if (!memberSendTimeUTC) {
-        console.log(`Member ${member.email} does not have a preferred send time in UTC. Not processing`);
+        logger.log(`Member ${member.email} does not have a preferred send time in UTC. Not processing`);
         return {error: `memberSendTimeUTC not found on member ${member.email}`};
     }
 
@@ -152,10 +155,10 @@ function getMemberSendTimeInfo(options: { systemDateObject: DateObject, member: 
 export async function processMember(args: { job: CustomNotificationJob, member?: CactusMember }): Promise<MemberResult> {
     const {member, job} = args;
     const systemDateObject = job.systemDateObject || DateTime.utc().toObject();
-    console.log("processMember job starting", JSON.stringify(job));
+    logger.log("processMember job starting", JSON.stringify(job));
 
     if (!member) {
-        console.error("No member provided to job. Exiting");
+        logger.error("No member provided to job. Exiting");
         return {success: false, errors: ["No member provided"], systemDate: systemDateObject};
     }
 
@@ -177,20 +180,20 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
     });
 
     if (sendTimeError) {
-        console.error(sendTimeError);
+        logger.error(sendTimeError);
         errors.push(sendTimeError);
         return result;
     }
 
     result.isSendTime = isSendTime;
     if (!isSendTime) {
-        console.log(`not the time to send notification for ${member.email}, returning`);
+        logger.log(`not the time to send notification for ${member.email}, returning`);
         result.success = true;
         return result;
     }
 
     const promptContent = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({dateObject: memberLocaleDateObject});
-    console.log("Fetched prompt content for member", promptContent?.subjectLine, promptContent?.scheduledSendAt);
+    logger.log("Fetched prompt content for member", promptContent?.subjectLine, promptContent?.scheduledSendAt);
 
     if (!promptContent) {
         result.success = false;
@@ -248,10 +251,10 @@ async function getOrCreateSentPrompt(options: { promptContent: PromptContent, pr
     let sentPrompt: SentPrompt;
 
     if (existingSentPrompt) {
-        console.log("The sent prompt existed... not doing anything");
+        logger.log("The sent prompt existed... not doing anything");
         return {sentPrompt: existingSentPrompt, existed: true}
     } else {
-        console.log("The sent prompt did not exist. Creating it now");
+        logger.log("The sent prompt did not exist. Creating it now");
         const createSentPromptResult: CreateSentPromptResult = AdminSentPromptService.createSentPrompt({
             member,
             promptContent,

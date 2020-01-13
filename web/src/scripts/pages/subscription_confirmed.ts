@@ -6,30 +6,31 @@ import {PageRoute} from "@shared/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
 import {commonInit} from "@web/common";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("subscription_confirmed.ts");
 commonInit();
 
 let hasLoaded = false;
 getAuth().onAuthStateChanged(async user => {
-    console.log("auth state changed. Has Loaded = ", hasLoaded, " User = ", user);
+    logger.log("auth state changed. Has Loaded = ", hasLoaded, " User = ", user);
     if (!hasLoaded && !user) {
-        console.log("not logged in and this is the first time. handling email link...");
+        logger.log("not logged in and this is the first time. handling email link...");
         hasLoaded = true;
         const response = await handleEmailLinkSignIn();
         await handleResponse(response);
     } else if (!hasLoaded && user) {
-        console.log("user is signed in, and the page has not yet loaded auth");
+        logger.log("user is signed in, and the page has not yet loaded auth");
         hasLoaded = true;
         await handleExistingUserLoginSuccess(user);
     } else {
-        console.log("auth changed, probably has loaded before. Has loaded =", hasLoaded);
+        logger.log("auth changed, probably has loaded before. Has loaded =", hasLoaded);
     }
     hasLoaded = true;
 
 });
 
 async function handleExistingUserLoginSuccess(user: FirebaseUser) {
-    console.log("redirecting...");
+    logger.log("redirecting...");
 
     await sendLoginEvent({user});
 
@@ -51,7 +52,7 @@ async function handleResponse(response: EmailLinkSignupResult) {
                 localStorage.removeItem(LocalStorageKey.newUserSignIn);
             }
         } catch (e) {
-            console.error("unable to persist new user status to localstorage");
+            logger.error("unable to persist new user status to localstorage");
         } finally {
             await sendLoginEvent(response.credential);
             const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
@@ -96,13 +97,13 @@ async function handleResponse(response: EmailLinkSignupResult) {
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    console.log("Subscription Confirmed Page Loaded");
+    logger.log("Subscription Confirmed Page Loaded");
 });
 
 
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

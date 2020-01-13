@@ -37,9 +37,11 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    console.log("Redirect url param is ", redirectUrlParam);
+    logger.log("Redirect url param is ", redirectUrlParam);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
@@ -69,8 +71,8 @@
                 emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
                     this.isSigningIn = true;
-                    console.log("Redirect URL is", redirectUrl);
-                    console.log("Need to handle auth redirect");
+                    logger.log("Redirect URL is", redirectUrl);
+                    logger.log("Need to handle auth redirect");
                     this.pendingRedirectUrl = redirectUrl;
                     this.authResult = authResult;
                     this.doRedirect = true;
@@ -78,7 +80,7 @@
                 },
                 signInFailure: async (error: firebaseui.auth.AuthUIError) => {
                     alert("Sign In Failure");
-                    console.error("Sign in failure", error);
+                    logger.error("Sign in failure", error);
                 },
                 uiShown: () => {
                     this.firebaseUiLoading = false;
@@ -87,7 +89,7 @@
 
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
-                console.log("Is pending redirect.... need to log the user in");
+                logger.log("Is pending redirect.... need to log the user in");
             }
             ui.start('#signup-app', config);
         },
@@ -95,7 +97,7 @@
             const ui = getAuthUI();
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
-                console.log("Is pending redirect.... need to log the user in");
+                logger.log("Is pending redirect.... need to log the user in");
             }
 
             this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
@@ -167,7 +169,7 @@
                     try {
                         await sendLoginEvent(this.authResult)
                     } catch (e) {
-                        console.error("failed to log login event", e);
+                        logger.error("failed to log login event", e);
                     } finally {
                         window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
                     }

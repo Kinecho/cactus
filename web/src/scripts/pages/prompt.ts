@@ -8,36 +8,36 @@ import {PageRoute} from "@shared/PageRoutes";
 import {getAuth} from "@web/firebase";
 import {getQueryParam, removeQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
-
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("prompt.ts");
 
 commonInit();
-
-
 
 const emailParam = getQueryParam(QueryParam.EMAIL);
 
 if (emailParam) {
     getAuth().onAuthStateChanged(user => {
         if (!user) {
-            console.log("auth state changed, user is not logged in");
+            logger.log("auth state changed, user is not logged in");
             const message = getQueryParam(QueryParam.MESSAGE) || "To begin reflecting, please sign in.";
             removeQueryParam(QueryParam.MESSAGE);
             const url = window.location.href;
 
             window.location.href = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${url}&${QueryParam.MESSAGE}=${encodeURIComponent(message)}`;
         } else {
-            console.log("auth state changed, user is logged in");
+            logger.log("auth state changed, user is logged in");
             renderPromptComponent();
         }
     })
 } else {
-    console.log("not requiring login");
+    logger.log("not requiring login");
     renderPromptComponent();
 }
 
 function renderPromptComponent() {
-    console.log("rendering prompt component");
+    logger.log("rendering prompt component");
     new Vue({
         el: "#app",
         template: `<div class="prompt-page">
@@ -61,6 +61,6 @@ function renderPromptComponent() {
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

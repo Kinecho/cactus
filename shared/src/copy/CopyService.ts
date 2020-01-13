@@ -1,5 +1,8 @@
 import {LocalizedCopy} from "@shared/copy/CopyTypes";
 import EnglishCopy from "@shared/copy/en-US";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("CopyService");
 
 export enum LocaleCode {
     en_US = "en-US",
@@ -18,7 +21,7 @@ export default class CopyService {
     }
 
     static initialize(config: { locale?: LocaleCode } = {}) {
-        console.log("Initializing firestore service");
+        logger.log("Initializing firestore service");
         CopyService.sharedInstance = new CopyService(config);
     }
 
@@ -33,7 +36,7 @@ export default class CopyService {
                 this.copy = new EnglishCopy();
                 break;
             default:
-                console.error(`Unsupported locale ${this.locale}, using ${LocaleCode.en_US} as default`);
+                logger.error(`Unsupported locale ${this.locale}, using ${LocaleCode.en_US} as default`);
                 this.copy = new EnglishCopy();
         }
     }

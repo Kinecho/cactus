@@ -69,7 +69,9 @@
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
@@ -209,7 +211,7 @@
         },
         methods: {
             async logout(): Promise<void> {
-                console.log('Logging out...');
+                logger.log('Logging out...');
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
@@ -230,7 +232,7 @@
                 if (content) content.scrollIntoView();
             },
             async updateActivityCount() {
-                console.log("Refreshing activity count");
+                logger.log("Refreshing activity count");
                 const member = this.member;
                 if (!member) {
                     return;
@@ -238,7 +240,7 @@
 
                 const activitySummary = await fetchActivityFeedSummary();
                 if (!activitySummary) {
-                    console.error("Failed to fetch activity summary");
+                    logger.error("Failed to fetch activity summary");
                     this.activityBadgeCount = 0;
                     return;
                 }
