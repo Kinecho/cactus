@@ -7,20 +7,23 @@
             </div>
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
                 <div class="graphic">
-                    <SocialActivityEvent
+                    <SocialActivityCard
                         avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FxLeo5gYlAqvqhJ4IQV8y_memory2.png?alt=media&token=82f832f7-3d77-40ec-84a1-343d88f73d37"
-                        occurredDate="7 minutes ago"
-                        memberName="Richard Wolf"
+                        date="7 minutes ago"
+                        name="Richard Wolf"
+                        promptContentPath="/prompts/1234"
                         promptQuestion="Who energizes you?"/>
-                    <SocialActivityEvent
+                    <SocialActivityCard
                         avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvbK9t2qyY9MprQ0171zD_lost1.png?alt=media&token=46e59600-c8c5-4c05-bf3f-bd80bf63142d"
-                        occurredDate="8 hours ago"
-                        memberName="Nikky Nealon"
+                        date="8 hours ago"
+                        name="Nikky Nealon"
+                        promptContentPath="/prompts/1234"
                         promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
-                    <SocialActivityEvent
+                    <SocialActivityCard
                         avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvWQvgnCOIeZxDFpqGNnA_focus1.png?alt=media&token=2b6cbc37-9794-46c2-bfc9-9299ba7bd4c8"
-                        occurredDate="1 day ago"
-                        memberName="Patricia Smith"
+                        date="1 day ago"
+                        name="Patricia Smith"
+                        promptContentPath="/prompts/1234"
                         promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
                 </div>
                 <h1>Mindful Friends</h1>
@@ -42,6 +45,7 @@
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityEvent from "@components/SocialActivityEvent.vue"
+    import SocialActivityCard from "@components/SocialActivityCard.vue"
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
@@ -55,6 +59,7 @@
         components: {
             NavBar,
             Footer,
+            SocialActivityCard,
             SocialActivityEvent,
             SocialActivityFeed
         },
