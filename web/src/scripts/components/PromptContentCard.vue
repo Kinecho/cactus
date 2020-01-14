@@ -911,7 +911,7 @@
 
     .reflect-container textarea {
         @include textArea;
-        background-color: $beige;
+        background-color: transparent;
         border-width: 0;
         border-radius: 2.4rem;
         cursor: pointer;
@@ -927,6 +927,7 @@
 
         &.hasValue {
             border-width: 1px;
+            background-color: $beige;
         }
 
         &:hover + .textareaPlaceholder .wiggle {
