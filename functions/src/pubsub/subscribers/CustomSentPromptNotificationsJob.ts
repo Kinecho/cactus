@@ -18,6 +18,7 @@ const logger = new Logger("CustomSentPromptNotificationsJob");
 const contentCacheByDate: { [date: string]: PromptContent | undefined } = {};
 
 export interface CustomNotificationJobResult {
+    sendTimeUTC: PromptSendTime,
     success: boolean,
     numSuccess?: number,
     numAlreadyReflected?: number,
@@ -79,6 +80,7 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
     const jobStartTime = (new Date()).getTime();
     const sendTimeUTC = job.sendTimeUTC || convertDateToSendTimeUTC(new Date());
     const result: CustomNotificationJobResult = {
+        sendTimeUTC,
         success: false,
         systemDateObject: job.systemDateObject,
         numMembersFound: 0
