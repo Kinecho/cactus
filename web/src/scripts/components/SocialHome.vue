@@ -6,14 +6,30 @@
                 <SocialActivityFeed :member="member"/>
             </div>
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
-                <h1>No activity yet</h1>
-                <p>See what your friends are up to.</p>
-                <img class="graphic" src="assets/images/twoFriends.png" alt="Two friends welcoming you"/>
+                <div class="graphic">
+                    <SocialActivityEvent
+                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FxLeo5gYlAqvqhJ4IQV8y_memory2.png?alt=media&token=82f832f7-3d77-40ec-84a1-343d88f73d37"
+                        occurredDate="7 minutes ago"
+                        memberName="Richard Wolf"
+                        promptQuestion="Who energizes you?"/>
+                    <SocialActivityEvent
+                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvbK9t2qyY9MprQ0171zD_lost1.png?alt=media&token=46e59600-c8c5-4c05-bf3f-bd80bf63142d"
+                        occurredDate="8 hours ago"
+                        memberName="Nikky Nealon"
+                        promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
+                    <SocialActivityEvent
+                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvWQvgnCOIeZxDFpqGNnA_focus1.png?alt=media&token=2b6cbc37-9794-46c2-bfc9-9299ba7bd4c8"
+                        occurredDate="1 day ago"
+                        memberName="Patricia Smith"
+                        promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
+                </div>
+                <h1>Mindful Friends</h1>
+                <p>Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
                 <a class="button primary wiggle" :href="friendsPath">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
                     </svg>
-                    Add Friends
+                    Add a Friend
                 </a>
             </div>
         </div>
@@ -25,6 +41,7 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
+    import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
@@ -38,6 +55,7 @@
         components: {
             NavBar,
             Footer,
+            SocialActivityEvent,
             SocialActivityFeed
         },
         data(): {
@@ -154,6 +172,7 @@
         display: flex;
         flex-direction: column;
         padding: 6.4rem 2.4rem;
+        text-align: center;
 
         h1 {
             line-height: 1.2;
@@ -162,7 +181,7 @@
 
         p {
             margin: 0 auto 2.4rem;
-            max-width: 60rem;
+            max-width: 40rem;
             opacity: .8;
 
             @include r(768) {
@@ -172,8 +191,19 @@
 
         .graphic {
             margin-bottom: 3.2rem;
-            max-width: 48rem;
-            width: 90%;
+            overflow: hidden;
+            position: relative;
+
+            &:after {
+                background: linear-gradient(rgba(255,255,255,0), $white);
+                bottom: 0;
+                content: '';
+                display: block;
+                height: 4.8rem;
+                left: 0;
+                position: absolute;
+                width: 100%;
+            }
         }
 
         .button {
