@@ -13,6 +13,7 @@ export enum LocalStorageKey {
     memberStatsEnabled = "memberStatsEnabled",
     contactsImportEnabled = "contactsImportEnabled",
     activityBadgeCount = "activityBadgeCount",
+    androidFCMToken = "androidFCMToken",
 }
 
 const logger = new Logger("StorageService.ts");
@@ -66,6 +67,14 @@ export default class StorageService {
 
     static saveNumber(key: LocalStorageKey, value: number) {
         localStorage.setItem(key, `${value}`);
+    }
+
+    static saveString(key: LocalStorageKey, value: string) {
+        localStorage.setItem(key, value);
+    }
+
+    static getString(key: LocalStorageKey): string | undefined {
+        return localStorage.getItem(key) || undefined;
     }
 
     static getNumber(key: LocalStorageKey, defaultValue?: number): number | undefined {
