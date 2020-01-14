@@ -867,7 +867,8 @@
         right: 2.4rem;
 
         @include r(600) {
-            position: absolute;
+            /*Removing absolute positioning to help with devices with a software keyboard (i.e. tablets) */
+            /*position: absolute;*/
         }
     }
 
@@ -910,7 +911,7 @@
 
     .reflect-container textarea {
         @include textArea;
-        background-color: transparent;
+        background-color: $beige;
         border-width: 0;
         border-radius: 2.4rem;
         cursor: pointer;
