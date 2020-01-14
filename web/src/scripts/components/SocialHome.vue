@@ -8,23 +8,23 @@
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
                 <div class="graphic">
                     <SocialActivityCard
-                        avatarUrl="/assets/images/avatars/blobatar1.png"
+                        avatarUrl="/assets/images/avatars/blobatar2.png"
                         date="7 minutes ago"
-                        name="Richard Wolf"
-                        promptContentPath="/prompts/1234"
+                        name="Mary Demoss"
+                        promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
                         promptQuestion="Who energizes you?"/>
                     <SocialActivityCard
-                        avatarUrl="/assets/images/avatars/blobatar2.png"
+                        avatarUrl="/assets/images/avatars/blobatar1.png"
                         date="8 hours ago"
-                        name="Nikky Nealon"
-                        promptContentPath="/prompts/1234"
-                        promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
+                        name="Aaron Nichols"
+                        promptContentPath="https://cactus.app/prompts/P0LRm37OKPBwCAHivbXG"
+                        promptQuestion="What helps you feel calm?"/>
                     <SocialActivityCard
                         avatarUrl="/assets/images/avatars/blobatar3.png"
                         date="1 day ago"
                         name="Patricia Smith"
-                        promptContentPath="/prompts/1234"
-                        promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
+                        promptContentPath="https://cactus.app/prompts/cPOoU4Lfv6z3nEJ5YZoZ"
+                        promptQuestion="What are you grateful for this week?"/>
                 </div>
                 <h1>Mindful Friends</h1>
                 <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
