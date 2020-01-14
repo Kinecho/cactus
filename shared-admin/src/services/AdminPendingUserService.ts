@@ -2,7 +2,9 @@ import AdminFirestoreService, {QueryOptions, SaveOptions, Transaction} from "@ad
 import PendingUser, {PendingUserStatus} from "@shared/models/PendingUser";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminPendingUserService");
 let firestoreService: AdminFirestoreService;
 
 export interface PendingUserRequest {
@@ -48,7 +50,7 @@ export default class AdminPendingUserService {
 
             return await AdminFirestoreService.getSharedInstance().getFirst(query, PendingUser, options);
         } catch (e) {
-            console.error("Failed to execute getPendingByEmail", e);
+            logger.error("Failed to execute getPendingByEmail", e);
             return;
         }
 
@@ -91,19 +93,19 @@ export default class AdminPendingUserService {
 
         if (recentReferrer && recentReferrer.queryParams) {
             pendingUser.queryParams = {...recentReferrer.queryParams, ...queryParams};
-            console.log("merged query params into ", pendingUser.queryParams)
+            logger.log("merged query params into ", pendingUser.queryParams)
         }
 
         pendingUser.status = PendingUserStatus.PENDING;
         pendingUser.magicLinkSentAt = new Date();
         const savedPending = await this.save(pendingUser);
-        console.log("Saved pending user", savedPending);
+        logger.log("Saved pending user", savedPending);
         return savedPending;
 
     }
 
     async cancelAllPending(email: string): Promise<PendingUser[]> {
-        console.log("attempting to cancel all pending users");
+        logger.log("attempting to cancel all pending users");
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
@@ -111,22 +113,22 @@ export default class AdminPendingUserService {
 
             const now = new Date();
             const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
-            console.log("got pending results", results.size);
+            logger.log("got pending results", results.size);
             const tasks = results.results.map(pending => {
                 pending.signupCanceledAt = now;
                 pending.status = PendingUserStatus.CANCELED;
                 return this.save(pending)
             });
-            console.log("awaiting all update tasks");
+            logger.log("awaiting all update tasks");
             return await Promise.all(tasks);
         } catch (error) {
-            console.error("Failed to cancel all existing pending users", error);
+            logger.error("Failed to cancel all existing pending users", error);
             return []
         }
     }
 
     async findMostRecentReferrer(email: string): Promise<PendingUser | undefined> {
-        console.log("Attempting to find most recent referrers");
+        logger.log("Attempting to find most recent referrers");
         try {
             const query = this.getCollectionRef()
                 .where(PendingUser.Field.email, "==", email)
@@ -135,10 +137,10 @@ export default class AdminPendingUserService {
 
             const result = await AdminFirestoreService.getSharedInstance().executeQuery(query, PendingUser);
             const [mostRecent] = result.results;
-            console.log("Fetched most recent referrers", mostRecent);
+            logger.log("Fetched most recent referrers", mostRecent);
             return mostRecent;
         } catch (e) {
-            console.error("Failed to get most recent referrers", e);
+            logger.error("Failed to get most recent referrers", e);
             return;
         }
 
@@ -146,7 +148,7 @@ export default class AdminPendingUserService {
 
     async completeSignupForPendingUser(args: {pendingUser: PendingUser, userId: string}, options? : QueryOptions): Promise<PendingUser> {
         const {userId, pendingUser} = args;
-        console.log("Found pending user for email", pendingUser);
+        logger.log("Found pending user for email", pendingUser);
         pendingUser.signupCompletedAt = new Date();
         pendingUser.signupCompleted = true;
         pendingUser.userId = userId;
@@ -162,20 +164,20 @@ export default class AdminPendingUserService {
         const transactionJob = async (t: Transaction) => {
             const pendingUser = await this.getPendingByEmail(email, {transaction: t});
             if (pendingUser) {
-                console.log("Found pending user for email", email, pendingUser);
+                logger.log("Found pending user for email", email, pendingUser);
                 pendingUser.signupCompletedAt = new Date();
                 pendingUser.signupCompleted = true;
                 pendingUser.userId = userId;
                 pendingUser.status = PendingUserStatus.COMPLETED;
                 return await this.save(pendingUser, {transaction: t});
             } else {
-                console.log("No pending user was found for email", email);
+                logger.log("No pending user was found for email", email);
             }
             return
         };
 
         if (transaction) {
-            console.log("Using existing transaction to run pending user job");
+            logger.log("Using existing transaction to run pending user job");
             await transactionJob(transaction)
         } else {
             await firestoreService.firestore.runTransaction(transactionJob);

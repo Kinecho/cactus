@@ -17,7 +17,10 @@ import {ApiResponse} from "@shared/api/ApiTypes";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {AxiosError} from "axios";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminReflectionResponseService");
 
 export interface ResetUserResponse {
     success: boolean
@@ -40,7 +43,7 @@ export default class AdminReflectionResponseService {
         if (AdminReflectionResponseService.sharedInstance) {
             return AdminReflectionResponseService.sharedInstance;
         }
-        console.error("no shared instance of AdminReflectionResponseService is yet available. Initializing it now (in the getter)");
+        logger.error("no shared instance of AdminReflectionResponseService is yet available. Initializing it now (in the getter)");
         return AdminReflectionResponseService.initialize();
 
     }
@@ -71,7 +74,7 @@ export default class AdminReflectionResponseService {
     async getResponseForCampaignId(memberId: string, campaignId: string): Promise<ReflectionResponse> {
         const collection = this.firestoreService.getCollectionRef(Collection.reflectionResponses);
         // collection.where()
-        console.log("getting response from collection", collection);
+        logger.log("getting response from collection", collection);
 
         throw new Error("Not implemented");
     }
@@ -99,7 +102,7 @@ export default class AdminReflectionResponseService {
         const mailchimpService = MailchimpService.getSharedInstance();
 
         if (!email) {
-            console.warn("No email provided to setLastJournalDate function");
+            logger.warn("No email provided to setLastJournalDate function");
             return {success: false, error: "No email provided"};
         }
 
@@ -119,49 +122,65 @@ export default class AdminReflectionResponseService {
     }
 
     static async resetUserReminder(email?: string): Promise<ResetUserResponse> {
-        const mailchimpService = MailchimpService.getSharedInstance();
-        const memberService = AdminCactusMemberService.getSharedInstance();
-        if (!email) {
-            console.warn("No email given provided to resetUserReminder function");
+        try {
+            const mailchimpService = MailchimpService.getSharedInstance();
+            const memberService = AdminCactusMemberService.getSharedInstance();
+            if (!email) {
+                logger.warn("No email given provided to resetUserReminder function");
+                return {
+                    success: false,
+                    unknownError: "No email provided to resetUser function",
+                    mergeResponse: {success: false},
+                    tagResponse: {success: false}
+                };
+            }
+
+            const lastReplyString = getMailchimpDateString();
+            const lastReplyDate = getDateFromISOString(lastReplyString);
+            const mergeRequest: UpdateMergeFieldRequest = {
+                email,
+                mergeFields: {
+                    [MergeField.LAST_REPLY]: lastReplyString
+                }
+            };
+
+            const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+
+            const tagRequest: UpdateTagsRequest = {
+                email,
+                tags: [
+                    {
+                        name: TagName.NEEDS_ONBOARDING_REMINDER,
+                        status: TagStatus.INACTIVE
+                    },
+                ]
+            };
+
+            await memberService.updateLastReplyByEmail(email, lastReplyDate);
+
+            const tagResponse = await mailchimpService.updateTags(tagRequest);
+
+            return {
+                success: tagResponse.success && tagResponse.success,
+                tagResponse,
+                mergeResponse,
+                lastReplyString: lastReplyString
+            };
+        } catch (error) {
+            if (error.isAxiosError) {
+                const axiosError = error as AxiosError;
+                logger.error("Unexpected error occurred while resetting the user's reminder. API Error", axiosError.response?.data || axiosError.response)
+            } else {
+                logger.error("Unexpected error occurred while resetting the user's reminder", error);
+            }
+
             return {
                 success: false,
-                unknownError: "No email provided to resetUser function",
+                unknownError: error.isAxiosError ? error.response : error,
                 mergeResponse: {success: false},
                 tagResponse: {success: false}
-            };
-        }
-
-        const lastReplyString = getMailchimpDateString();
-        const lastReplyDate = getDateFromISOString(lastReplyString);
-        const mergeRequest: UpdateMergeFieldRequest = {
-            email,
-            mergeFields: {
-                [MergeField.LAST_REPLY]: lastReplyString
             }
-        };
-
-        const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
-
-        const tagRequest: UpdateTagsRequest = {
-            email,
-            tags: [
-                {
-                    name: TagName.NEEDS_ONBOARDING_REMINDER,
-                    status: TagStatus.INACTIVE
-                },
-            ]
-        };
-
-        await memberService.updateLastReplyByEmail(email, lastReplyDate);
-
-        const tagResponse = await mailchimpService.updateTags(tagRequest);
-
-        return {
-            success: tagResponse.success && tagResponse.success,
-            tagResponse,
-            mergeResponse,
-            lastReplyString: lastReplyString
-        };
+        }
     }
 
     async getResponseSinceDate(date: Date): Promise<ReflectionResponse[]> {
@@ -174,7 +193,7 @@ export default class AdminReflectionResponseService {
 
             return results.results;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return [];
         }
     }
@@ -183,7 +202,7 @@ export default class AdminReflectionResponseService {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
         const queryOptions = options || {};
         if (queryOptions.queryName) {
-            queryOptions.queryName = queryOptions.queryName  + "_AdminReflectionResponseService.getResponsesForMember";
+            queryOptions.queryName = queryOptions.queryName + "_AdminReflectionResponseService.getResponsesForMember";
         } else {
             queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
         }
@@ -196,12 +215,12 @@ export default class AdminReflectionResponseService {
         try {
             const {memberId, timeZone} = options;
             if (!memberId) {
-                console.error("No memberId provided to calculate stats.");
+                logger.error("No memberId provided to calculate stats.");
                 return
             }
 
             if (!timeZone) {
-                console.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
+                logger.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
             }
 
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
@@ -217,7 +236,7 @@ export default class AdminReflectionResponseService {
                 elementAccumulation: elementAccumulation
             };
         } catch (error) {
-            console.error("Failed to calculate stats for memberId", options.memberId);
+            logger.error("Failed to calculate stats for memberId", options.memberId);
             return undefined;
         }
 
@@ -237,7 +256,7 @@ export default class AdminReflectionResponseService {
             totalDeleted += idNumber;
         }
 
-        console.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
+        logger.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
         return totalDeleted
     }
 
@@ -245,7 +264,7 @@ export default class AdminReflectionResponseService {
         batchSize?: number,
         onData: (sentPrompts: ReflectionResponse[], batchNumber: number) => Promise<void>
     }) {
-        console.log("Getting batched result 1 for all members");
+        logger.log("Getting batched result 1 for all members");
         const query: FirebaseFirestore.Query = this.getCollectionRef();
 
         // if (options.excludeCompleted === true) {

@@ -11,8 +11,10 @@ export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 import {getConfig} from "@admin/config/configService";
-
+import Logger from "@shared/Logger";
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
+
+const logger = new Logger("AdminFirestoreService");
 const config = getConfig();
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
@@ -74,7 +76,7 @@ export default class AdminFirestoreService {
     }
 
     static initialize(app: firebaseAdmin.app.App) {
-        console.log("Initializing firestore service");
+        logger.log("Initializing firestore service");
         AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
     }
 
@@ -160,7 +162,7 @@ export default class AdminFirestoreService {
             // const doc = this.getDocumentRefFromModel(model);
 
             const data = await model.toFirestoreData();
-            // console.log("Data to save:", JSON.stringify(data));
+            // logger.log("Data to save:", JSON.stringify(data));
             if (options.transaction) {
                 await options.transaction.set(doc, data, {merge: true})
             } else {
@@ -169,7 +171,7 @@ export default class AdminFirestoreService {
 
             return model;
         } catch (e) {
-            console.error(`[${config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
+            logger.error(`[${config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
             throw e;
         }
     }
@@ -192,7 +194,7 @@ export default class AdminFirestoreService {
         }
 
         if (!options.includeDeleted && doc.get("deleted") === true) {
-            console.warn("Document is deleted, and the request options did not include deleted objects");
+            logger.warn("Document is deleted, and the request options did not include deleted objects");
             return;
         }
 
@@ -247,7 +249,7 @@ export default class AdminFirestoreService {
         } catch (e) {
             // const serverName = config.serv
             const errorMessage = `[${config.app.serverName}] Failed to execute query ${options.queryName || ""}`.trim() + (options.transaction ? " while using a transaction" : "").trim();
-            console.error(errorMessage, e);
+            logger.error(errorMessage, e);
             Sentry.captureException(e);
             await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${errorMessage}\n\`\`\`${e}\`\`\``);
             return {size: 0, results: [], error: e};
@@ -272,7 +274,7 @@ export default class AdminFirestoreService {
                 orderBy: options.orderBy || BaseModelField.createdAt,
             }
         });
-        console.log(`Fetched ${results.size} sentPrompts in batch ${batchNumber}`);
+        logger.log(`Fetched ${results.size} sentPrompts in batch ${batchNumber}`);
         await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;
@@ -284,7 +286,7 @@ export default class AdminFirestoreService {
                     sortDirection: options.sortDirection || QuerySortDirection.asc,
                 }
             });
-            console.log(`Fetched ${results.size} results in batch ${batchNumber}`);
+            logger.log(`Fetched ${results.size} results in batch ${batchNumber}`);
             await options.onData(results.results, batchNumber);
         }
     }
@@ -300,9 +302,9 @@ export default class AdminFirestoreService {
             model.deletedAt = new Date();
             await this.save(model);
         } else if (model && model.deleted) {
-            console.warn("Model is already deleted. Not performing any action");
+            logger.warn("Model is already deleted. Not performing any action");
         } else {
-            console.warn("No object found for given id. Not deleting anything.");
+            logger.warn("No object found for given id. Not deleting anything.");
         }
 
         return model;
@@ -321,7 +323,7 @@ export default class AdminFirestoreService {
             await doc.delete();
         }
 
-        console.log(`Deleted ${model.collection}.${model.id} from the database`);
+        logger.log(`Deleted ${model.collection}.${model.id} from the database`);
         return model
     }
 
@@ -343,7 +345,7 @@ export default class AdminFirestoreService {
         });
 
         const results = await Promise.all(tasks);
-        console.log(`Permanently Deleted ${results.length} documents`);
+        logger.log(`Permanently Deleted ${results.length} documents`);
         return results.length
 
     }
@@ -351,7 +353,7 @@ export default class AdminFirestoreService {
     async deleteForQuery<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }): Promise<(T | undefined)[]> {
         const results = await this.executeQuery(query, Type);
         const deletedModels = await Promise.all(results.results.map(this.deleteModel));
-        console.log(`deleted ${deletedModels.length} models`);
+        logger.log(`deleted ${deletedModels.length} models`);
         return deletedModels;
     }
 }

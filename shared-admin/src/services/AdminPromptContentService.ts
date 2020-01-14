@@ -6,7 +6,9 @@ import {dateObjectToISODate, getFlamelinkDateString, plusDays} from "@shared/uti
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminPromptContentService");
 
 export default class AdminPromptContentService {
     protected static sharedInstance: AdminPromptContentService;
@@ -30,9 +32,9 @@ export default class AdminPromptContentService {
     }
 
     async save(model: PromptContent): Promise<PromptContent | undefined> {
-        console.log("[AdminPromptContentService.save] Saving prompt content with scheduledSendAt = ", model.scheduledSendAt);
+        logger.log("[AdminPromptContentService.save] Saving prompt content with scheduledSendAt = ", model.scheduledSendAt);
         const saved = await this.flamelinkService.save(model);
-        console.log("[AdminPromptContentService.save] Saved prompt content with scheduledSendAt = ", saved?.scheduledSendAt);
+        logger.log("[AdminPromptContentService.save] Saved prompt content with scheduledSendAt = ", saved?.scheduledSendAt);
         return saved;
     }
 
@@ -91,17 +93,17 @@ export default class AdminPromptContentService {
                 endDateString = getFlamelinkDateString(midnightDenver);
 
             } else {
-                console.error("No valid date passed into getPromptContentForDate method");
+                logger.error("No valid date passed into getPromptContentForDate method");
                 return;
             }
 
-            console.log("start date", startDateString);
-            console.log("end date", endDateString);
+            logger.log("start date", startDateString);
+            logger.log("end date", endDateString);
 
 
             const filters: string[][] = [];
             if (status) {
-                console.log("adding status filter for status = ", status);
+                logger.log("adding status filter for status = ", status);
                 filters.push([PromptContent.Fields.contentStatus, "==", status])
             }
 
@@ -117,12 +119,12 @@ export default class AdminPromptContentService {
             const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
-                console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
+                logger.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
                 return
             }
 
             const allValues = Object.values(raw);
-            console.log(`Found ${allValues.length} that matched the criteria for the date range`);
+            logger.log(`Found ${allValues.length} that matched the criteria for the date range`);
             const [content]: (any | undefined)[] = allValues;
             if (!content) {
                 return undefined
@@ -130,7 +132,7 @@ export default class AdminPromptContentService {
 
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
-            console.error("Failed to fetch content", error);
+            logger.error("Failed to fetch content", error);
             await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\``);
             return undefined;
         }
