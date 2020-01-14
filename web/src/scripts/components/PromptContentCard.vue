@@ -509,6 +509,7 @@
     @import "common";
     @import "transitions";
 
+    $cardPadding: 2.4rem;
     .content-card {
         background: $beige no-repeat;
         display: flex;
@@ -516,8 +517,16 @@
         flex-grow: 1;
         min-height: 100vh;
         justify-content: center;
-        padding: 2.4rem;
+        padding: $cardPadding;
         width: 100%;
+
+        &.type-reflect {
+            padding-bottom: 0;
+
+            .lowerActions {
+                padding-bottom: $cardPadding;
+            }
+        }
 
         @include r(600) {
             border-radius: 12px;
@@ -559,6 +568,7 @@
     }
 
     .content, .lowerActions {
+        background-color: $beige;
         z-index: 2;
     }
 
@@ -861,7 +871,7 @@
     }
 
     .lowerActions {
-        bottom: 3.2rem;
+        bottom: 0;
         left: 2.4rem;
         position: sticky;
         right: 2.4rem;
