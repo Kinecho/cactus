@@ -8,7 +8,7 @@
                 promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
                 promptQuestion="Who energizes you?"/>
             <h2>Mindful Friends</h2>
-            <p class="subtext">Your mindfulness journey is more effective when you share it with others.</p>
+            <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
             <button class="button" @click="showInviteForm = true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
@@ -21,7 +21,7 @@
             <p class="subtext">They'll get just one email inviting them to&nbsp;Cactus.</p>
             <div class="formItem">
                 <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" />
-                <div class="alert error" v-if="validEmail === false">That email doesn't look quite right.</div>
+                <div class="alert error" v-if="validEmail === false">That email doesn't look quite&nbsp;right.</div>
             </div>
             <div class="formItem">
                 <textarea placeholder="Optional message" rows="4"/>
@@ -121,6 +121,10 @@
         }
     }
 
+    h2 {
+        font-size: 3.2rem;
+    }
+
     .subtext {
         margin: 0 auto 2.4rem;
         max-width: 40rem;
@@ -142,6 +146,7 @@
 
     .formItem {
         margin-bottom: 1.6rem;
+        padding: 0 1.6rem;
     }
 
     input {
@@ -160,6 +165,7 @@
 
     .buttonContainer {
         display: flex;
+        padding: 0 1.6rem;
 
         .button {
             min-width: 0;
