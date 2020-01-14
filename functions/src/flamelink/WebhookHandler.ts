@@ -5,6 +5,9 @@ import * as Sentry from "@sentry/node";
 import AdminUserService from "@admin/services/AdminUserService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import chalk from "chalk";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("WebhookHandler");
 
 export interface WebhookEventResult {
     success: boolean,
@@ -22,14 +25,14 @@ function parseEventType(eventType: string): { module: ModuleType, action: EventA
 
 
 export async function handleWebhookEvent(event: FlamelinkWebhookEvent, eventType: string): Promise<WebhookEventResult> {
-    console.log("Handing webhook event for type", eventType);
+    logger.log("Handing webhook event for type", eventType);
     const {module, action} = parseEventType(eventType);
 
     switch (module) {
         case ModuleType.content:
             return handleContentEvent(event, action);
         default:
-            console.error(`Module ${module} is not handled`);
+            logger.error(`Module ${module} is not handled`);
             return {success: false, message: `No handler Module "${module}" was found.`};
     }
 }
@@ -51,24 +54,24 @@ async function handleContentEvent(event: FlamelinkWebhookEvent, action: EventAct
 
 async function handlePromptContentEvent(event: FlamelinkWebhookEvent, action: EventAction): Promise<WebhookEventResult> {
     try {
-        console.log(`Handing prompt content ${action}`);
+        logger.log(`Handing prompt content ${action}`);
 
         const {_fl_meta_: meta} = event.data;
         const promptContent = new PromptContent(event.data);
-        console.log("Prompt content is", JSON.stringify(promptContent, null, 2));
+        logger.log("Prompt content is", JSON.stringify(promptContent, null, 2));
         const updatedUserId = meta ? meta.lastModifiedBy : undefined;
         const updatedUser = await AdminUserService.getSharedInstance().getById(updatedUserId);
         if (updatedUser) {
-            console.log(`Updated by ${updatedUser.email}`);
+            logger.log(`Updated by ${updatedUser.email}`);
         }
 
 
         const promptFromDb = await AdminPromptContentService.getSharedInstance().getByEntryId(promptContent.entryId);
-        console.log(chalk.green("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2)));
+        logger.log(chalk.green("fetched prompt from db using service class:", JSON.stringify(promptFromDb, null, 2)));
 
         return {success: true, message: "Not yet implemented"}
     } catch (error) {
-        console.error("Failed to handle Prompt Content event", error);
+        logger.error("Failed to handle Prompt Content event", error);
         Sentry.captureException(error);
         return {success: false, message: "Unexpected Error", error,}
     }

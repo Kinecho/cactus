@@ -2,7 +2,9 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import SocialInvite, {SocialInviteField} from "@shared/models/SocialInvite";
 import {Collection} from "@shared/FirestoreBaseModels";
 import CactusMember from "@shared/models/CactusMember";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminSocialInviteService");
 let firestoreService: AdminFirestoreService;
 
 export default class AdminSocialInviteService {
@@ -62,9 +64,9 @@ export default class AdminSocialInviteService {
         if (memberJoined.signupQueryParams.inviteId) {
             try {
                 await AdminSocialInviteService.getSharedInstance().updateMemberInvite(memberJoined);
-                console.log('updated SocialInvite record with recipientMemberId');
+                logger.log('updated SocialInvite record with recipientMemberId');
             } catch (e) {
-                console.error("failed to update social invite", e);
+                logger.error("failed to update social invite", e);
             }
             // create a new invite record if one doesn't exist but they were invited
         } else if (invitedByMember) {
@@ -73,9 +75,9 @@ export default class AdminSocialInviteService {
                     invitedByMember,
                     memberJoined
                 );
-                console.log('created new SocialInvite record with recipientMemberId');
+                logger.log('created new SocialInvite record with recipientMemberId');
             } catch (e) {
-                console.error("failed to create new social invite", e);
+                logger.error("failed to create new social invite", e);
             }
         }
     }

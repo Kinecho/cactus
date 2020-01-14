@@ -7,7 +7,9 @@ import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {getConfig} from "@admin/config/configService";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {buildPromptContentURL} from "@admin/util/StringUtil";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("PromptContentTriggers");
 
 export const onContentPublished = functions.firestore
     .document(`${Collection.flamelink_content}/{documentId}`)
@@ -16,25 +18,25 @@ export const onContentPublished = functions.firestore
         const afterStatus = change.after.get(PromptContent.Fields.contentStatus);
 
         if (afterStatus !== ContentStatus.submitted) {
-            console.log("Content is not of status \"submitted\", not processing");
+            logger.log("Content is not of status \"submitted\", not processing");
             return;
         }
 
         if (beforeStatus === ContentStatus.submitted) {
-            console.log("status of the before snapshot was also submitted, not processing.")
+            logger.log("status of the before snapshot was also submitted, not processing.")
             return;
         }
 
         const promptContent = fromFlamelinkData(change.after.data(), PromptContent);
 
         if (!promptContent) {
-            console.error("Unable to parse prompt content from firestore data", change.after.data());
+            logger.error("Unable to parse prompt content from firestore data", change.after.data());
         }
         const config = getConfig();
         const job = new PromptContentScheduler({promptContent, config: config});
 
         const result = await job.run();
-        console.log("result is ", stringifyJSON(result));
+        logger.log("result is ", stringifyJSON(result));
 
         if (result.promptContent.contentStatus === ContentStatus.published) {
             const link = buildPromptContentURL(promptContent);

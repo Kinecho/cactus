@@ -35,7 +35,9 @@
     import Vue from "vue";
     import {clickOutsideDirective} from '@web/vueDirectives'
     import {ComputedMenuLink, DropdownMenuLink} from "@components/DropdownMenuTypes"
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("DropdownMenu.vue");
 
     export default Vue.extend({
         created() {
@@ -75,7 +77,6 @@
                 const clickHandler = (onClick: ((event: Event | any) => void) | undefined) => {
                     if (onClick) {
                         return (event: Event) => {
-                            console.log("handling event ");
                             this.menuOpen = false;
                             event.preventDefault();
                             onClick(event);
@@ -122,6 +123,7 @@
 
     .dropdown-menu-wrapper {
         position: relative;
+        z-index: 1500;
     }
 
     .dropdown-menu {

@@ -9,7 +9,8 @@ import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
 import {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("Analytics.ts");
 declare global {
     interface Window {
         dataLayer: Array<any>;
@@ -44,7 +45,7 @@ let hasInit = false;
  */
 export function init() {
     if (hasInit) {
-        console.warn("Analytics already initialized, not reinitializing");
+        logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
 
@@ -52,7 +53,7 @@ export function init() {
     getAuth().onAuthStateChanged(user => {
         setUser(user);
         if (user) {
-            console.log("User has logged in, removing any tracking/referral info");
+            logger.log("User has logged in, removing any tracking/referral info");
         }
 
     });
@@ -78,7 +79,7 @@ export function init() {
         });
     }
 
-    console.log("version is ", Config.version);
+    logger.log("version is ", Config.version);
 
     // if ()
 
@@ -103,7 +104,7 @@ export function clearTrackingData() {
         window.localStorage.removeItem(LocalStorageKey.referredByEmail);
         window.localStorage.removeItem(LocalStorageKey.emailAutoFill);
     } catch (e) {
-        console.error("Failed to clear tracking data", e);
+        logger.error("Failed to clear tracking data", e);
     }
 }
 

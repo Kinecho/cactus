@@ -1,3 +1,7 @@
+import Logger from "@shared/Logger";
+
+const logger = new Logger("ObjectUtil.ts")
+
 export function isNonEmptyObject(input: any): boolean {
     if (isNull(input)) {
         return false;
@@ -87,7 +91,7 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
     if (depth >= 10) {
-        console.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
+        logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
         return input;
     }
     if (isArray(input)) {
@@ -136,7 +140,7 @@ export function stringifyJSON(input: any, space?: number): string {
         if (value && typeof value === "object") {
             if (value && value.toJSON) {
                 try {
-                    console.log("Calling toJSON on object");
+                    logger.log("Calling toJSON on object");
                     return value.toJSON()
                 } catch (error) {
                     return value;

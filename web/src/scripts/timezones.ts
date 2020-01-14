@@ -1,4 +1,7 @@
 import {DateTime} from "luxon";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("timezones.ts");
 
 const timezones = [
     "Etc/GMT+12",
@@ -209,9 +212,9 @@ export function findByZoneName(zoneName?: string): ZoneInfo | undefined {
     const region = zoneName.split("/")[0];
 
     const zoneNamesByRegion = timezones.filter(z => z.startsWith(region));
-    console.log("zone options", zoneNamesByRegion);
+    logger.log("zone options", zoneNamesByRegion);
     const matchedTimeZone = zoneNamesByRegion.find(zone => isZoneSameTime(zone, zoneName));
-    console.log("matched timezone: ", matchedTimeZone)
+    logger.log("matched timezone: ", matchedTimeZone)
 
     if (matchedTimeZone) {
         return zonesByName[matchedTimeZone];

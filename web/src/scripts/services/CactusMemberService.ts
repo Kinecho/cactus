@@ -1,8 +1,13 @@
-import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
+import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/FirestoreService";
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone} from "@web/DeviceUtil";
+import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
+import Logger from "@shared/Logger";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import {Config} from "@web/config";
+
+const logger = new Logger("CactusMemberService");
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -22,14 +27,14 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
-                        console.log("********* Got current cactus member", member);
+                        logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
                         await this.updateMemberSettingsIfNeeded(member)
                     }
                 })
             } else {
-                console.log("***** *unsetting current cactus member");
+                logger.info("unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });
@@ -58,11 +63,43 @@ export default class CactusMemberService {
             doSave = true
         }
 
+        const fcmToken = StorageService.getString(LocalStorageKey.androidFCMToken);
+        const currentTokens: string[] = member.fcmTokens ?? [];
+        if (fcmToken && !currentTokens.includes(fcmToken)) {
+            console.log("Adding FCM token to member");
+            currentTokens.push(fcmToken);
+            member.fcmTokens = currentTokens;
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
+            doSave = true;
+        }
+
         if (doSave) {
-            console.log("Updating member settings");
+            logger.log("Updating member settings");
             await this.save(member)
         }
 
+    }
+
+    async registerFCMToken(token: string) {
+        const member = this.currentMember;
+        if (!member) {
+            logger.info("No cactus member found, not registering token");
+            return;
+        }
+
+        if (!isAndroidApp()) {
+            logger.warn(`User agent not allowed: ${getUserAgent()}`);
+            return;
+        }
+
+        const currentTokens: string[] = member.fcmTokens ?? [];
+        if (!currentTokens.includes(token)) {
+            currentTokens.push(token);
+            member.fcmTokens = currentTokens;
+            await this.save(member);
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
+            logger.info("Saved token to member");
+        }
     }
 
     getCurrentCactusMember(): CactusMember | undefined {
@@ -126,6 +163,3 @@ export default class CactusMemberService {
         }
     }
 }
-
-
-

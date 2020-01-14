@@ -23,9 +23,10 @@ import AdminMemberProfileService from "@admin/services/AdminMemberProfileService
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("AdminServiceConfig");
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
-    console.log(chalk.green("initializing all services"));
+    logger.log(chalk.green("initializing all services"));
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     //Firestore
@@ -53,7 +54,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPromptContentService.initialize();
 
 
-    console.log("Initializing Sentry");
+    logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {
         dsn: config.sentry.functions_dsn,
         environment: config.app.environment,

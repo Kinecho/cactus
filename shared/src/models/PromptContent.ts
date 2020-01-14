@@ -3,6 +3,9 @@ import {CactusElement} from "@shared/models/CactusElement";
 import {preventOrphanedWords} from "@shared/util/StringUtil";
 import {timestampToDate} from "@shared/util/FirestoreUtil";
 import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("PromptContent.ts");
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -148,7 +151,7 @@ export function processContent(content: Content): Content {
             processed.invite = true;
             break;
         default:
-            console.warn("UNHANDLED CONTENT TYPE", content.contentType);
+            logger.warn("UNHANDLED CONTENT TYPE", content.contentType);
     }
 
     processed.title = preventOrphanedWords(processed.title);
@@ -212,9 +215,9 @@ export default class PromptContent extends FlamelinkModel {
             this.cactusElement = data.cactusElement;
 
             if (data.scheduledSendAt) {
-                console.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
+                logger.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
                 this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
-                console.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
+                logger.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
             }
         }
     }
@@ -233,7 +236,7 @@ export default class PromptContent extends FlamelinkModel {
         super.updateFromData(data);
         const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
         if (scheduledDateField) {
-            console.log("Setting scheduledSendAt from data value", scheduledDateField);
+            logger.log("Setting scheduledSendAt from data value", scheduledDateField);
             this.scheduledSendAt = new Date(scheduledDateField);
         } else {
             this.scheduledSendAt = undefined;

@@ -1,9 +1,12 @@
 import {promisify} from "util";
-
 const path = require("path");
 const fs = require("fs-extra");
 import {getConfig} from "@admin/config/configService";
 import * as admin from "firebase-admin";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("FileUtil");
+
 /**
  * write data to a file
  * @param {string} filePath
@@ -21,18 +24,18 @@ export async function writeToFile(filePath:string, data: any): Promise<string|bo
         try {
             await fs.mkdirp(folder, {recursive: true});
         } catch (error){
-            // console.debug("Unable to create folder " + folder, error);
+            // logger.debug("Unable to create folder " + folder, error);
         }
 
         try {
             await promisify(fs.writeFile)(filePath, data);
             return true;
         } catch (error){
-            console.error("Failed to write to file", filePath, error);
+            logger.error("Failed to write to file", filePath, error);
             return false
         }
     } catch (e){
-        console.error("Failed to write to file/storage", e);
+        logger.error("Failed to write to file/storage", e);
         return false;
     }
 
@@ -44,10 +47,10 @@ export async function writeTextToStorage(filePath:string, data:any): Promise<str
     // await file.setMetadata({contentType: "text/plain"});
     try{
         await file.save(data);
-        console.log("Upload success. File: ", filePath);
+        logger.log("Upload success. File: ", filePath);
         return filePath;
     } catch (error){
-        console.error("Failed to upload to cloud storage", error);
+        logger.error("Failed to upload to cloud storage", error);
         return false;
     }
 

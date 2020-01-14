@@ -38,7 +38,9 @@ import {QueryParam} from '@shared/util/queryParams'
     import {AxiosError} from "axios"
     import {UnsubscribeResponse} from '@shared/mailchimp/models/UpdateStatusTypes'
     import {Config} from "@web/config";
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("UnsubscribeConfirmedPage.vue");
     export default Vue.extend({
         components: {
             NavBar,
@@ -93,7 +95,7 @@ import {QueryParam} from '@shared/util/queryParams'
 
                 try {
                     let response = await confirmUnsubscribe({email: email, mcuid: mcuid});
-                    console.log("Unsubscribe response", response);
+                    logger.log("Unsubscribe response", response);
                     this.submitting = false;
                     this.unsubscribeSuccess = response.success;
                     this.error = false;

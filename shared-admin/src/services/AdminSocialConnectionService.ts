@@ -1,7 +1,8 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import SocialConnection, {SocialConnectionFields} from "@shared/models/SocialConnection";
 import {Collection} from "@shared/FirestoreBaseModels";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("AdminSocialConnectionService");
 export default class AdminSocialConnectionService {
     protected static sharedInstance: AdminSocialConnectionService;
 
@@ -14,7 +15,7 @@ export default class AdminSocialConnectionService {
         if (AdminSocialConnectionService.sharedInstance) {
             return AdminSocialConnectionService.sharedInstance;
         }
-        console.error("no shared instance of AdminSocialConnectionService is yet available. Initializing it now (in the getter)");
+        logger.error("no shared instance of AdminSocialConnectionService is yet available. Initializing it now (in the getter)");
         return AdminSocialConnectionService.initialize();
 
     }
@@ -35,7 +36,7 @@ export default class AdminSocialConnectionService {
             const results = await this.firestoreService.executeQuery(query, SocialConnection);
             return results.results
         } catch (error) {
-            console.error("Failed to fetch social connections for member", memberId);
+            logger.error("Failed to fetch social connections for member", memberId);
             return [];
         }
     }
@@ -45,7 +46,7 @@ export default class AdminSocialConnectionService {
             const query = this.getCollectionRef().where(SocialConnectionFields.memberId, "==", memberId)
             return await this.firestoreService.deletePermanentlyForQuery(query)
         } catch (error) {
-            console.error("Failed to delete admin connections", error);
+            logger.error("Failed to delete admin connections", error);
             return 0;
         }
     }

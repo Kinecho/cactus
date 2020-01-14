@@ -7,6 +7,9 @@ import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutT
 import {Endpoint, request} from "@web/requestUtils";
 import {gtag} from "@web/analytics";
 import StripeCheckoutOptions = stripe.StripeClientCheckoutOptions;
+import Logger from "@shared/Logger";
+
+const logger = new Logger("checkoutService.ts");
 
 export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessionRequest, errorElementId:string|undefined="stripe-error-message"):Promise<any|null|undefined> {
     const stripe = Stripe(Config.stripe.apiKey);
@@ -15,12 +18,12 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
         const response = await request.post(Endpoint.checkoutSessions, sessionRequest);
         const createResponse = response.data as CreateSessionResponse;
         if (createResponse.error){
-            console.log("Unable to create stripe session", createResponse.error);
+            logger.log("Unable to create stripe session", createResponse.error);
             return "Oops, something went wrong. Please try again later"
         }
 
         if (!createResponse.sessionId){
-            console.log("Unable to create stripe session - no sessionId returned");
+            logger.log("Unable to create stripe session - no sessionId returned");
             return "Oops, something went wrong. Please try again later"
         }
 
@@ -28,7 +31,7 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
             sessionId: createResponse.sessionId
         };
 
-        console.log("stripe options:", stripeOptions);
+        logger.log("stripe options:", stripeOptions);
 
 
         gtag('event', 'begin_checkout', {
@@ -49,7 +52,7 @@ export async function redirectToCheckoutWithSessionId(sessionRequest:CreateSessi
             return;
         }
     } catch(error) {
-        console.log("error getting checkout session", error);
+        logger.log("error getting checkout session", error);
         return "Oops, something went wrong. Please try again later"
     }
 }
@@ -80,7 +83,7 @@ export async function redirectToCheckoutWithPlanId(planId:string=Config.stripe.m
         stripeOptions.customerEmail = memberEmail;
     }
 
-    console.log("stripe options:", stripeOptions);
+    logger.log("stripe options:", stripeOptions);
 
 
     gtag('event', 'begin_checkout', {

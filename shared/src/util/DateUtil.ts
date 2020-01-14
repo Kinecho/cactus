@@ -3,6 +3,9 @@ import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("DateUtil.ts");
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -191,7 +194,7 @@ export function asDate(input: any): Date | undefined {
         return new Date(input);
     }
 
-    console.warn("Could not convert input of ", input, "to date");
+    logger.warn("Could not convert input of ", input, "to date");
     return;
 
 }

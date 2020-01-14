@@ -19,7 +19,9 @@
     import {gtag} from "@web/analytics"
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("MagicLinkInput.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -50,7 +52,7 @@
         },
         methods: {
             async submit(): Promise<void> {
-                console.log("MagicLinkInput.vue: submitting email");
+                logger.log("MagicLinkInput.vue: submitting email");
                 this.submitting = true;
                 let email = (this.email || "").toLowerCase().trim();
                 if (!email || email.trim().length === 0) {
@@ -126,7 +128,7 @@
                 } catch (error) {
                     const message = copy.error.SORRY_WE_ARE_HAVING_ISSUES;
                     this.$emit("sendError", {message});
-                    console.error("failed to process form", error);
+                    logger.error("failed to process form", error);
                     this.error = message;
                 } finally {
                     this.submitting = false;

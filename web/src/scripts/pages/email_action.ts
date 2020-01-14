@@ -1,7 +1,9 @@
 import Vue from "vue";
 import EmailActionHandler from "@components/EmailActionHandler.vue";
-
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
+const logger = new Logger("email_action.ts");
+
 
 commonInit();
 
@@ -16,6 +18,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }
