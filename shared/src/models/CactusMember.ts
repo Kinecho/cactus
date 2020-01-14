@@ -85,7 +85,7 @@ export default class CactusMember extends BaseModel {
 
     journalStatus = JournalStatus.NONE;
 
-    fcmTokens?: [string];
+    fcmTokens?: string[];
     notificationSettings: NotificationSettings = {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,

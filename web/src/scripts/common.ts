@@ -5,10 +5,22 @@ import {getAllQueryParams, getQueryParam} from "@web/util";
 import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import Logger from "@shared/Logger";
+import CactusMemberService from "@web/services/CactusMemberService";
 
 const logger = new Logger("common.ts");
 
 let hasCommonInit = false;
+
+//this lets android tell the web about a new token. Should probably add some sort of client secret check here or something.
+window.registerFCMToken = async (token?: string) => {
+    if (!token) {
+        logger.warn("No token was provided. Can not register it");
+        return;
+    }
+    StorageService.saveString(LocalStorageKey.androidFCMToken, token);
+    console.log("Saved token to local storage, attempting to register FCM token");
+    await CactusMemberService.sharedInstance.registerFCMToken(token);
+};
 
 export function commonInit() {
     if (hasCommonInit) {
