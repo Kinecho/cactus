@@ -20,8 +20,9 @@ import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import {generateReferralLink} from '@shared/util/SocialInviteUtil';
 import {PageRoute} from "@shared/PageRoutes";
 import {unseenActivityCount} from "@shared/util/SocialUtil";
+import Logger from "@shared/Logger";
 
-
+const logger = new Logger("socialEndpoints");
 const Config = getConfig();
 
 const app = express();
@@ -30,16 +31,16 @@ app.use(cors({origin: true}));
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUser = await getAuthUser(req);
     if (!requestUser || !requestUser.email) {
-        console.log("No auth user was found on the request");
+        logger.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
 
     const payload: SocialInviteRequest | undefined | null = req.body;
-    console.log("socialEndpoints.send-invite", payload);
+    logger.log("socialEndpoints.send-invite", payload);
 
     if (!payload) {
-        console.log("No payload was included");
+        logger.log("No payload was included");
         resp.sendStatus(500);
         return
     }
@@ -47,7 +48,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     const {toContact, message} = payload;
 
     if (!toContact) {
-        console.error("socialEndpoints.send-invite: Email to send to was not provided in payload");
+        logger.error("socialEndpoints.send-invite: Email to send to was not provided in payload");
         const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmail: ""};
         resp.send(errorResponse);
         return;
@@ -71,7 +72,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
     }
     socialInvite.recipientEmail = toContact.email;
     await AdminSocialInviteService.getSharedInstance().save(socialInvite);
-    console.log(socialInvite.id);
+    logger.log(socialInvite.id);
 
     const referralLink: string =
         generateReferralLink({
@@ -96,13 +97,13 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
             socialInvite.sentAt = new Date();
             await AdminSocialInviteService.getSharedInstance().save(socialInvite);
         } else {
-            console.error('Unable to send invite for SocialConnectionRequest ' + socialInvite.id + 'via email.');
+            logger.error('Unable to send invite for SocialConnectionRequest ' + socialInvite.id + 'via email.');
         }
 
         resp.send(response);
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
 
         resp.status(500).send({
             toEmail: toContact.email,
@@ -118,16 +119,16 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
 app.post("/notify-friend-request", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUser = await getAuthUser(req);
     if (!requestUser || !requestUser.email) {
-        console.log("No auth user was found on the request");
+        logger.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
 
     const payload: SocialConnectionRequestNotification | undefined | null = req.body;
-    console.log("socialEndpoints.notify-friend-request", payload);
+    logger.log("socialEndpoints.notify-friend-request", payload);
 
     if (!payload) {
-        console.log("No payload was included");
+        logger.log("No payload was included");
         resp.sendStatus(500);
         return
     }
@@ -135,7 +136,7 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
     const {toEmail} = payload;
 
     if (!toEmail) {
-        console.error("socialEndpoints.notify-friend-request: Email to send to was not provided in payload");
+        logger.error("socialEndpoints.notify-friend-request: Email to send to was not provided in payload");
         const errorResponse: SocialConnectionRequestNotificationResult = {
             success: false,
             toEmail: '',
@@ -160,7 +161,7 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
         });
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
     }
 
     try {
@@ -174,7 +175,7 @@ app.post("/notify-friend-request", async (req: functions.https.Request | any, re
         resp.send(response);
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
 
         const errorResponse: SocialConnectionRequestNotificationResult = {
             toEmail: toEmail,
@@ -193,10 +194,10 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
     const startDate = new Date();
     const requestUserId = await getAuthUserId(req);
     const authDate = new Date();
-    console.log(`Got the auth user after ${authDate.getTime() - startDate.getTime()}`);
-    console.log("request user id is", requestUserId);
+    logger.log(`Got the auth user after ${authDate.getTime() - startDate.getTime()}`);
+    logger.log("request user id is", requestUserId);
     if (!requestUserId) {
-        console.log("No auth user was found on the request");
+        logger.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
@@ -205,10 +206,10 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
         const memberStart = new Date().getTime();
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
         const memberEnd = new Date().getTime();
-        console.log(`Get member duration ${memberEnd - memberStart}ms`);
+        logger.log(`Get member duration ${memberEnd - memberStart}ms`);
         const memberId = member?.id;
         if (!member || !memberId) {
-            console.error("No member or memberId found for userId", requestUserId);
+            logger.error("No member or memberId found for userId", requestUserId);
             resp.sendStatus(404);
             return;
         }
@@ -221,13 +222,13 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
             lastFriendActivityDate
         };
         const endDate = new Date();
-        console.log(`activity feed summary endpoint processed in ${endDate.getTime() - startDate.getTime()}ms`);
+        logger.log(`activity feed summary endpoint processed in ${endDate.getTime() - startDate.getTime()}ms`);
 
         resp.status(200).send(response);
 
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
 
         const errorResponse: ActivitySummaryResponse = {
             unseenCount: 0
@@ -242,7 +243,7 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
 app.get("/activity-feed", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUserId = await getAuthUserId(req);
     if (!requestUserId) {
-        console.log("No auth user was found on the request");
+        logger.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
     }
@@ -250,7 +251,7 @@ app.get("/activity-feed", async (req: functions.https.Request | any, resp: funct
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
     const memberId = member?.id;
     if (!member || !memberId) {
-        console.warn("No member was found for the request user id", requestUserId);
+        logger.warn("No member was found for the request user id", requestUserId);
         resp.sendStatus(404);
         return;
     }
@@ -267,7 +268,7 @@ app.get("/activity-feed", async (req: functions.https.Request | any, resp: funct
 
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
 
         const errorResponse: SocialActivityFeedResponse = {
             success: false,

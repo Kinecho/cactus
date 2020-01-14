@@ -1,8 +1,6 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-
-
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
@@ -36,8 +34,9 @@ import {getISODate} from "@shared/util/DateUtil";
 import {UnsubscribeRequest, UpdateStatusRequest} from "@shared/mailchimp/models/UpdateStatusTypes";
 import {getAuthUser} from "@api/util/RequestUtil";
 import {isNonPromptCampaignId} from "@admin/config/configService";
+import Logger from "@shared/Logger";
 
-
+const logger = new Logger("mailchimpEndpoints");
 const app = express();
 
 // Automatically allow cross-origin requests
@@ -50,7 +49,7 @@ app.get("/", async (req: express.Request, res: express.Response) => {
 
 app.post("/webhook", async (req: express.Request, res: express.Response) => {
     const event = req.body as WebhookEvent;
-    console.log("webhook event", JSON.stringify(event));
+    logger.log("webhook event", JSON.stringify(event));
     const date = new Date();
     const dateId = date.getTime();
     await writeToFile(`output/webhook/${dateId}-mailchimp.json`, JSON.stringify(event));
@@ -65,7 +64,7 @@ app.post("/webhook", async (req: express.Request, res: express.Response) => {
             break;
         case EventType.subscribe:
             //already have a hook for this
-            console.log("webhook received for subscribe");
+            logger.log("webhook received for subscribe");
             const data = event.data as SubscribeEventData;
             await handleSubscribeEvent(data);
             break;
@@ -95,20 +94,20 @@ app.post("/", async (req: express.Request, res: express.Response) => {
 
     const mailchimpService = MailchimpService.getSharedInstance();
     const slackService = AdminSlackService.getSharedInstance();
-    console.log("request params", req.body);
+    logger.log("request params", req.body);
     const subscription = SubscriptionRequest.fromData(req.body);
     res.contentType("application/json");
 
 
     // const userResult = await userService.signupSubscriber(subscription);
-    // console.log("userResult", userResult);
+    // logger.log("userResult", userResult);
 
     try {
         const signupResult = await mailchimpService.addSubscriber(subscription);
-        console.log("singed up with result", signupResult);
+        logger.log("singed up with result", signupResult);
 
         if (signupResult.status === SubscriptionResultStatus.new_subscriber) {
-            console.log("new user signed up successfully");
+            logger.log("new user signed up successfully");
             const fields = [
                 {
                     title: "Email",
@@ -141,12 +140,12 @@ app.post("/", async (req: express.Request, res: express.Response) => {
             }
 
 
-            console.log("subscription", JSON.stringify(subscription, null, 2));
+            logger.log("subscription", JSON.stringify(subscription, null, 2));
             if (subscription.subscriptionLocation) {
-                console.log("adding footer to message");
+                logger.log("adding footer to message");
                 attachmentSummary.footer = `${subscription.subscriptionLocation.page} - ${subscription.subscriptionLocation.formId}`;
             } else {
-                console.log("Not adding footer to message");
+                logger.log("Not adding footer to message");
             }
 
             const message: SlackMessage = {
@@ -155,7 +154,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
             };
 
             const slackResult = await slackService.sendActivityNotification(message);
-            console.log("slack result", slackResult);
+            logger.log("slack result", slackResult);
         } else if (!signupResult.success) {
             await slackService.sendActivityNotification(`An error occurred while signing up \`${subscription.email}\`. They were not added to mailchimp. \n\n \`\`\`${JSON.stringify(signupResult.error)}\`\`\``)
         }
@@ -186,7 +185,7 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
     const payload = req.body as UnsubscribeRequest;
     const {email, mcuid} = payload;
 
-    console.log(`handing unsubscribe confirm email: ${email}, mcuid: ${mcuid}`);
+    logger.log(`handing unsubscribe confirm email: ${email}, mcuid: ${mcuid}`);
 
     const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mcuid);
 
@@ -219,14 +218,14 @@ app.post("/unsubscribe/confirm", async (req: express.Request, res: express.Respo
         member.unsubscribedAt = new Date();
         member.notificationSettings.email = NotificationStatus.INACTIVE;
     } else {
-        console.error("The unsubscribe request was not successful");
+        logger.error("The unsubscribe request was not successful");
     }
 
     if (response.listMember) {
-        console.log("Updating the cactus member with the new mailchimp member");
+        logger.log("Updating the cactus member with the new mailchimp member");
         member.mailchimpListMember = response.listMember;
     } else {
-        console.log(`No mailchimp list member found. Can't update the cactus member. email = ${email}. mcuid = ${mcuid}`);
+        logger.log(`No mailchimp list member found. Can't update the cactus member. email = ${email}. mcuid = ${mcuid}`);
     }
 
     await AdminCactusMemberService.getSharedInstance().save(member);
@@ -264,7 +263,7 @@ app.put("/status", async (req: express.Request, res: express.Response) => {
             cactusMember.unsubscribedAt = isUnsubscribe ? new Date() : undefined;
             cactusMember.notificationSettings.email = isUnsubscribe ? NotificationStatus.INACTIVE : NotificationStatus.ACTIVE;
             await AdminCactusMemberService.getSharedInstance().save(cactusMember);
-            console.log("updated member after changing the status", cactusMember);
+            logger.log("updated member after changing the status", cactusMember);
         }
     }
 
@@ -317,7 +316,7 @@ async function sendSlackUserUnsubscribedEmail(options: { email: string, status: 
 export async function handleCampaignEvent(campaignData: CampaignEventData): Promise<void> {
     const mailchimpService = MailchimpService.getSharedInstance();
     if (campaignData.id && isNonPromptCampaignId(campaignData.id)) {
-        console.log("Skipping campaign as it is not a prompt email");
+        logger.log("Skipping campaign as it is not a prompt email");
         return;
     }
     const campaign = await mailchimpService.getCampaign(campaignData.id);

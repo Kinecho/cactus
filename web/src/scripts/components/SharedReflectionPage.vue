@@ -31,7 +31,9 @@
     import {getPromptQuestion, isBlank} from '@shared/util/StringUtil'
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("SharedReflectionPage.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -50,7 +52,7 @@
             try {
                 responseId = window.location.pathname.split(`${PageRoute.SHARED_REFLECTION}/`)[1].split("/")[0]
             } catch (error) {
-                console.error("Failed to parse path to get reflection id", error);
+                logger.error("Failed to parse path to get reflection id", error);
             }
 
             if (!responseId) {

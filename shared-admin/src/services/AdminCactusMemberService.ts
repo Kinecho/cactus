@@ -1,6 +1,7 @@
 import AdminFirestoreService, {
     CollectionReference,
     DefaultGetOptions,
+    GetBatchOptions,
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
@@ -17,8 +18,10 @@ import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@sh
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
+import Logger from "@shared/Logger";
 import DocumentReference = admin.firestore.DocumentReference;
 
+const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
 const DEFAULT_BATCH_SIZE = 500;
 
@@ -76,7 +79,7 @@ export default class AdminCactusMemberService {
                 await doc.set(data, {merge: true});
             }
         } catch (error) {
-            console.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
+            logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
         }
 
     }
@@ -93,7 +96,7 @@ export default class AdminCactusMemberService {
         }
 
         if (result.size > 1) {
-            console.warn("Found more than one CactusMember for mailchimp memberId", id);
+            logger.warn("Found more than one CactusMember for mailchimp memberId", id);
         }
 
         const [member] = result.results;
@@ -111,7 +114,7 @@ export default class AdminCactusMemberService {
         }
 
         if (result.size > 1) {
-            console.warn("Found more than one CactusMember for mailchimp memberId", id);
+            logger.warn("Found more than one CactusMember for mailchimp memberId", id);
         }
 
         const [member] = result.results;
@@ -129,7 +132,7 @@ export default class AdminCactusMemberService {
         }
 
         if (result.size > 1) {
-            console.warn("Found more than one CactusMember for mailchimp member web_id", id);
+            logger.warn("Found more than one CactusMember for mailchimp member web_id", id);
         }
 
         const [member] = result.results;
@@ -170,7 +173,7 @@ export default class AdminCactusMemberService {
                 notification = NotificationStatus.NOT_SET;
                 break;
             default:
-                console.warn(`Unable to handle list member status ${status}`);
+                logger.warn(`Unable to handle list member status ${status}`);
         }
         return notification;
     }
@@ -185,7 +188,7 @@ export default class AdminCactusMemberService {
             cactusMember = new CactusMember();
             cactusMember.createdAt = new Date()
         } else {
-            console.log("Got cactus member", cactusMember.email);
+            logger.log("Got cactus member", cactusMember.email);
         }
 
         if (listMember.unsubscribe_reason) {
@@ -221,7 +224,7 @@ export default class AdminCactusMemberService {
             cactusMember.journalStatus = JournalStatus.NONE;
         }
 
-        console.log("Saving cactus member", cactusMember.email);
+        logger.log("Saving cactus member", cactusMember.email);
 
         cactusMember = await this.save(cactusMember);
         return cactusMember;
@@ -284,7 +287,7 @@ export default class AdminCactusMemberService {
         if (result.size > 0) {
             const [member] = result.results;
             if (result.size > 1) {
-                console.warn("More than one member found for email", email);
+                logger.warn("More than one member found for email", email);
             }
             return member;
         }
@@ -293,14 +296,19 @@ export default class AdminCactusMemberService {
     }
 
     async updateLastReplyByEmail(email: string, lastReply: Date = new Date()): Promise<CactusMember | undefined> {
-        const member = await this.getMemberByEmail(email);
-        if (!member) {
-            return
-        }
+        try {
+            const member = await this.getMemberByEmail(email);
+            if (!member) {
+                return
+            }
 
-        member.lastReplyAt = lastReply;
-        await this.save(member);
-        return member;
+            member.lastReplyAt = lastReply;
+            await this.save(member);
+            return member;
+        } catch (error) {
+            logger.error("Failed to update last reply for user email ", email);
+            return undefined;
+        }
     }
 
 
@@ -316,7 +324,7 @@ export default class AdminCactusMemberService {
     }
 
     async getAllMembers(): Promise<CactusMember[]> {
-        console.warn("Warning, fetching all members could be expensive");
+        logger.warn("Warning, fetching all members could be expensive");
         const query = this.getCollectionRef();
         const results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember);
         return results.results;
@@ -326,7 +334,7 @@ export default class AdminCactusMemberService {
         batchSize?: number,
         onData: (members: CactusMember[], batchNumber: number) => Promise<void>
     }) {
-        console.log("Getting batched result 1 for all members");
+        logger.log("Getting batched result 1 for all members");
         const query = this.getCollectionRef();
         let batchNumber = 0;
         let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
@@ -336,7 +344,7 @@ export default class AdminCactusMemberService {
                 sortDirection: QuerySortDirection.asc
             }
         });
-        console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+        logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
         await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;
@@ -348,7 +356,7 @@ export default class AdminCactusMemberService {
                     sortDirection: QuerySortDirection.asc
                 }
             });
-            console.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+            logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
             await options.onData(results.results, batchNumber)
         }
     }
@@ -363,7 +371,7 @@ export default class AdminCactusMemberService {
 
             return results.results;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return [];
         }
     }
@@ -378,7 +386,7 @@ export default class AdminCactusMemberService {
 
             return results.results;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return [];
         }
     }
@@ -391,10 +399,25 @@ export default class AdminCactusMemberService {
         return results.results;
     }
 
+    async getMembersForUTCSendPromptTimeBatch(sendTime: PromptSendTime, options: GetBatchOptions<CactusMember>): Promise<void> {
+        const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
+            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+
+        await firestoreService.executeBatchedQuery({
+            query,
+            type: CactusMember,
+            onData: options.onData,
+            batchSize: options?.batchSize,
+            orderBy: BaseModelField.createdAt,
+            sortDirection: QuerySortDirection.asc
+        });
+        return;
+    }
+
     async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
-        console.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
+        logger.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
         const afterUTC = getSendTimeUTC({
@@ -403,8 +426,8 @@ export default class AdminCactusMemberService {
             sendTime: member.promptSendTime
         });
 
-        console.log("before", JSON.stringify(beforeUTC));
-        console.log("afterUTC", JSON.stringify(afterUTC));
+        logger.log("before", JSON.stringify(beforeUTC));
+        logger.log("afterUTC", JSON.stringify(afterUTC));
 
         const denverUTCDefault = getSendTimeUTC({
             forDate: new Date(),
@@ -416,19 +439,19 @@ export default class AdminCactusMemberService {
         const {minute: beforeMinute, hour: beforeHour} = beforeUTC || {};
 
         if (afterUTC && (afterMin !== beforeMinute || afterHour !== beforeHour)) {
-            console.log("Member has changes, saving them");
+            logger.log("Member has changes, saving them");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: afterUTC});
-            console.log("saved changes.");
+            logger.log("saved changes.");
             return {updated: true, promptSendTimeUTC: afterUTC};
         } else if (useDefault && !afterUTC && denverUTCDefault) {
-            console.log("No sendPromptTime for UTC found. using the default value");
+            logger.log("No sendPromptTime for UTC found. using the default value");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTimeUTC]: denverUTCDefault});
             return {updated: true, promptSendTimeUTC: denverUTCDefault};
         } else if (useDefault && !denverUTCDefault) {
-            console.error("No default value was created.");
+            logger.error("No default value was created.");
             return {updated: false, promptSendTimeUTC: beforeUTC}
         } else {
-            console.log("No changes, not saving");
+            logger.log("No changes, not saving");
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
     }

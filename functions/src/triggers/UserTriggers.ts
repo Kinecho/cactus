@@ -19,7 +19,8 @@ import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import PendingUser from "@shared/models/PendingUser";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminFirestoreService, {Transaction} from "@admin/services/AdminFirestoreService";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("UserTriggers");
 const mailchimpService = MailchimpService.getSharedInstance();
 const slackService = AdminSlackService.getSharedInstance();
 
@@ -43,13 +44,13 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
     const userId = userRecord.uid;
     const email = userRecord.email;
 
-    console.log(`Starting signup process for ${email} userId = ${userId}`);
+    logger.log(`Starting signup process for ${email} userId = ${userId}`);
     try {
         /*
         Note: All read actions must happen first. Then the writes.
          */
         return await AdminFirestoreService.getSharedInstance().firestore.runTransaction(async transaction => {
-            console.log(`Transaction beginning for ${email} userId = ${userId}`);
+            logger.log(`Transaction beginning for ${email} userId = ${userId}`);
             const user = await AdminUserService.getSharedInstance().getById(userId, {transaction});
             const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
                 userId,
@@ -74,7 +75,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
                 return result;
             }
 
-            console.log("Looking for pending user....");
+            logger.log("Looking for pending user....");
             const pendingUser = await AdminPendingUserService.getSharedInstance().getPendingByEmail(email, {transaction});
 
             /*
@@ -82,38 +83,38 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
                 Next up, write to the DB.
              */
 
-            console.log(`Pending User for email = ${email}`, pendingUser);
+            logger.log(`Pending User for email = ${email}`, pendingUser);
             if (pendingUser) {
-                console.log(`Completing pending user signup for ${email}, ${userId}....`);
+                logger.log(`Completing pending user signup for ${email}, ${userId}....`);
                 result.pendingUser = await AdminPendingUserService.getSharedInstance().completeSignupForPendingUser({
                     pendingUser,
                     userId
                 }, {transaction});
-                console.log("Pending user signup completed", result.pendingUser);
+                logger.log("Pending user signup completed", result.pendingUser);
             }
 
-            console.log("\ncreating cactus member....");
+            logger.log("\ncreating cactus member....");
             const createMemberResult = await createCactusMember({user: userRecord, pendingUser, transaction, email});
-            console.log(`Cactus Member created ${email}, userId = ${userId}, memberId = ${member && member.id}`, createMemberResult);
+            logger.log(`Cactus Member created ${email}, userId = ${userId}, memberId = ${member && member.id}`, createMemberResult);
 
             result.member = createMemberResult.member;
             result.mailchimpError = createMemberResult.mailchimpError;
 
-            console.log("Creating the cactus user....");
+            logger.log("Creating the cactus user....");
             const createUserResult = await createCactusUser({
                 user: userRecord,
                 member: createMemberResult.member,
                 transaction
             });
-            console.log(`Cactus User created ${email}, userId = ${userId}`, createUserResult);
+            logger.log(`Cactus User created ${email}, userId = ${userId}`, createUserResult);
 
             result.user = createUserResult.user;
 
-            console.log(`Transaction returning ${email}, ${userId}...`, result);
+            logger.log(`Transaction returning ${email}, ${userId}...`, result);
             return result
         });
     } catch (error) {
-        console.error("Failed to complete signup", error);
+        logger.error("Failed to complete signup", error);
         return {
             error: `Failed to complete signup transaction.`
         }
@@ -184,20 +185,20 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
 }
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
-    console.log("Setting up user using new transactional method");
+    logger.log("Setting up user using new transactional method");
     try {
         const userCheckResult = await setupUserTransaction(user);
-        console.log("setupUserTransaction finished", userCheckResult);
+        logger.log("setupUserTransaction finished", userCheckResult);
 
         if (userCheckResult.pendingUser && userCheckResult.member && userCheckResult.user) {
-            console.log("Pending user was found. Setting up sent prompts from the pending user");
+            logger.log("Pending user was found. Setting up sent prompts from the pending user");
             await AdminSentPromptService.getSharedInstance().initializeSentPromptsFromPendingUser({
                 pendingUser: userCheckResult.pendingUser,
                 user: userCheckResult.user,
                 member: userCheckResult.member
             });
         } else {
-            console.log("No pending user was found, not doing anything about sent prompts");
+            logger.log("No pending user was found, not doing anything about sent prompts");
         }
 
 
@@ -211,10 +212,10 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
         await slackService.sendActivityNotification(slackMessage);
 
     } catch (error) {
-        console.error("Failed to run check for user transaction", error)
+        logger.error("Failed to run check for user transaction", error)
     }
 
-    console.log("finished transactionalOnCreate function")
+    logger.log("finished transactionalOnCreate function")
 }
 
 /**
@@ -234,7 +235,7 @@ async function upsertMailchimpSubscriber(subscription: SubscriptionRequest): Pro
         // mailchimpListMember = mailchimpMember;
         return {mailchimpListMember: mailchimpMember};
     } else {
-        console.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));//
+        logger.error("Failed to create mailchimp subscriber", JSON.stringify(mailchimpResult));//
         return {error: mailchimpResult.error || {message: `Failed to subscribe ${subscription.email} to mailchimp.`}};
     }
 }
@@ -310,17 +311,17 @@ function createSlackMessage(args: SlackMessageInput): SlackMessage {
  */
 export async function onDelete(user: admin.auth.UserRecord) {
     const email = user.email;
-    console.log("Deleting user ", JSON.stringify(user.toJSON()));
+    logger.log("Deleting user ", JSON.stringify(user.toJSON()));
     if (!email) {
-        console.error("No email found on the user, can't delete.");
+        logger.error("No email found on the user, can't delete.");
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${user.toJSON()}\`\`\``);
         return
     }
     try {
         await AdminUserService.getSharedInstance().deleteAllDataPermanently({email, userRecord: user});
-        console.log("finished deleting user with email", email);
+        logger.log("finished deleting user with email", email);
     } catch (error) {
-        console.error("Failed to delete user data", error);
+        logger.error("Failed to delete user data", error);
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${error.message}\`\`\``);
     }
 }

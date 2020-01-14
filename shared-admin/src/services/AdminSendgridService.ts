@@ -3,9 +3,10 @@ import * as sgMail from "@sendgrid/mail";
 import {MagicLinkEmail, 
         InvitationEmail, 
         FriendRequestEmail} from "@admin/services/SendgridServiceTypes";
+import Logger from "@shared/Logger";
 
 // declare type MailService = sgMail.MailService;
-
+const logger = new Logger("AdminSendgridService");
 export default class AdminSendgridService {
     apiKey: string;
     config: CactusConfig;
@@ -13,7 +14,7 @@ export default class AdminSendgridService {
     protected static sharedInstance: AdminSendgridService;
 
     static initialize(config: CactusConfig) {
-        console.log("initializing SendGrid service");
+        logger.log("initializing SendGrid service");
         AdminSendgridService.sharedInstance = new AdminSendgridService(config);
     }
 
@@ -46,16 +47,16 @@ export default class AdminSendgridService {
                     displayName: options.displayName,
                 }
             };
-            console.log("Sending magic link email with params", params);
+            logger.log("Sending magic link email with params", params);
             await sgMail.send(params);
 
-            console.log("Sendgrid email sent successfully");
+            logger.log("Sendgrid email sent successfully");
             return true
         } catch (error) {
             if (error.response && error.response.body) {
-                console.error("Failed to send Magic Link email", error.response.body);
+                logger.error("Failed to send Magic Link email", error.response.body);
             } else {
-                console.error("Failed to send Magic Link email", error);
+                logger.error("Failed to send Magic Link email", error);
             }
             return false;
         }
@@ -78,18 +79,18 @@ export default class AdminSendgridService {
                 }
             };
 
-            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+            logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
             await sgMail.send(mailParams);
 
-            console.log("Sendgrid email sent successfully");
+            logger.log("Sendgrid email sent successfully");
             return true;
 
         } catch (error) {
             if (error.response && error.response.body) {
-                console.error("Failed to send Magic Link New User email", error.response.body);
+                logger.error("Failed to send Magic Link New User email", error.response.body);
             } else {
-                console.error("Failed to send Magic Link New User email", error);
+                logger.error("Failed to send Magic Link New User email", error);
             }
             return false;
         }
@@ -113,18 +114,18 @@ export default class AdminSendgridService {
                 }
             };
 
-            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+            logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
             await sgMail.send(mailParams);
 
-            console.log("Sendgrid email sent successfully");
+            logger.log("Sendgrid email sent successfully");
             return true;
 
         } catch (error) {
             if (error.response && error.response.body) {
-                console.error("Failed to send Invitation email", error.response.body);
+                logger.error("Failed to send Invitation email", error.response.body);
             } else {
-                console.error("Failed to send Invitation email", error);
+                logger.error("Failed to send Invitation email", error);
             }
             return false;
         }
@@ -146,18 +147,18 @@ export default class AdminSendgridService {
                 }
             };
 
-            console.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+            logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
             await sgMail.send(mailParams);
 
-            console.log("Sendgrid email sent successfully");
+            logger.log("Sendgrid email sent successfully");
             return true;
 
         } catch (error) {
             if (error.response && error.response.body) {
-                console.error("Failed to send Invitation email", error.response.body);
+                logger.error("Failed to send Invitation email", error.response.body);
             } else {
-                console.error("Failed to send Invitation email", error);
+                logger.error("Failed to send Invitation email", error);
             }
             return false;
         }

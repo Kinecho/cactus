@@ -1,7 +1,9 @@
 import {QueryParam} from "@shared/util/queryParams";
 import {isValidEmail} from "@shared/util/StringUtil";
 import * as qs from "qs";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("util.ts");
 
 function createElementFromString(htmlString: string): ChildNode {
     const div = document.createElement('div');
@@ -17,7 +19,7 @@ function addModalCloseListener() {
         button.addEventListener("click", () => {
             const modalId = button.dataset.for;
             if (!modalId) {
-                console.error("Unable to get modal as the modal ID was null");
+                logger.error("Unable to get modal as the modal ID was null");
                 return;
             }
             const modal = <HTMLDivElement>document.getElementById(modalId);
@@ -86,7 +88,7 @@ export function showConfirmEmailModal(options: {
         // modal.child
         const $content = modal.getElementsByClassName("modal-content").item(0);
         if (!$content) {
-            console.error("unable to create modal content");
+            logger.error("unable to create modal content");
             return;
         }
         const $emailInput = createElementFromString(`<input type="email" class="email-confirm" name="email" autocomplete="username" placeholder="Enter your email"/>`) as HTMLInputElement;
@@ -153,7 +155,7 @@ export function addModal(modalId: string, options: {
 
     const existingModal = <HTMLDivElement>document.getElementById(modalId);
     if (existingModal) {
-        console.warn(`a modal with id ${modalId} already exists, removing it`);
+        logger.warn(`a modal with id ${modalId} already exists, removing it`);
         existingModal.remove()
     }
 
@@ -209,7 +211,7 @@ export function getAllQueryParams(url: string = window.location.search): { [name
             ignoreQueryPrefix: true
         });
     } catch (e) {
-        console.error("browser does not support url params", e);
+        logger.error("browser does not support url params", e);
         return;
     }
 }
@@ -224,7 +226,7 @@ export function getQueryParam(name: QueryParam): string | null {
         return params[name];
         // return params.get(name);
     } catch (e) {
-        console.error("browser does not support url params", e);
+        logger.error("browser does not support url params", e);
         return null;
     }
 
@@ -234,16 +236,16 @@ export function removeQueryParam(name: QueryParam) {
     try {
         const params = qs.parse(window.location.search, {ignoreQueryPrefix: true});
         if (params) {
-            console.log("before removal query params;", qs.stringify(params));
+            logger.log("before removal query params;", qs.stringify(params));
             delete params[name];
             const updatedQs = qs.stringify(params);
-            console.log("updated params", updatedQs);
+            logger.log("updated params", updatedQs);
             const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
             window.history.pushState({path: newurl}, '', newurl);
 
         }
     } catch (e) {
-        console.error("Error removing query param", e);
+        logger.error("Error removing query param", e);
     }
 
 }
@@ -256,7 +258,7 @@ export function updateQueryParam(name: QueryParam, value: string | number) {
         const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
         window.history.replaceState({path: newurl}, '', newurl);
     } catch (error) {
-        console.error(`Failed to update query param value: ${name}=${value}`, error);
+        logger.error(`Failed to update query param value: ${name}=${value}`, error);
     }
 }
 
@@ -269,7 +271,7 @@ export function pushQueryParam(name: QueryParam, value: string | number) {
         const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + (updatedQs ? `?${updatedQs}` : "");
         window.history.pushState({path: newurl}, '', newurl);
     } catch (error) {
-        console.error(`Failed to update query param value: ${name}=${value}`, error);
+        logger.error(`Failed to update query param value: ${name}=${value}`, error);
     }
 }
 

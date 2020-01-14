@@ -148,7 +148,10 @@
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
+    import Logger from "@shared/Logger";
 
+    
+    const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export interface Provider {
@@ -329,17 +332,17 @@
                 return id;
             },
             removeSnackbar(id: string) {
-                console.log("removing snackbar", id);
+                logger.log("removing snackbar", id);
                 this.snackbars = this.snackbars.filter(snack => snack.id !== id);
             },
             updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
                 const snackbar = this.snackbars.find(snack => snack.id === id);
 
                 if (!snackbar) {
-                    console.log("no snackbar found with id");
+                    logger.log("no snackbar found with id");
                     return;
                 }
-                console.log("Found snackbar ", id);
+                logger.log("Found snackbar ", id);
                 if (typeof message === "string") {
                     snackbar.message = message;
                 } else {
@@ -349,7 +352,7 @@
             async save() {
                 if (this.member) {
                     await CactusMemberService.sharedInstance.save(this.member);
-                    console.log("Save success");
+                    logger.log("Save success");
                     this.addSnackbar({message: "Changes Saved", color: "success"});
                     this.changesToSave = false;
                 }
@@ -361,13 +364,13 @@
                     autoHide: false,
                     color: "info",
                 });
-                console.log("Saving status...", status);
+                logger.log("Saving status...", status);
                 this.error = undefined;
                 if (this.member && this.member.email) {
                     const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
                         this.addSnackbar("Oops! Unable to save email settings.");
-                        console.log("Unsetting notification status change since the update failed");
+                        logger.log("Unsetting notification status change since the update failed");
 
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
 

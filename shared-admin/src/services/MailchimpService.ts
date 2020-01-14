@@ -61,6 +61,9 @@ import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/mo
 import ApiError from "@shared/api/ApiError";
 import {CactusConfig} from "@shared/CactusConfig";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("MailchimpService");
 
 interface MailchimpAuth {
     username: string,
@@ -87,7 +90,7 @@ export default class MailchimpService {
     protected static sharedInstance: MailchimpService;
 
     static initialize(config: CactusConfig) {
-        console.log("initializing mailchimp service");
+        logger.log("initializing mailchimp service");
         MailchimpService.sharedInstance = new MailchimpService(config.mailchimp.api_key, config.mailchimp.audience_id);
     }
 
@@ -107,7 +110,7 @@ export default class MailchimpService {
 
         this.apiDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
 
-        this.request = axios.create({baseURL: this.apiDomain});
+        this.request = axios.create({baseURL: this.apiDomain, timeout: 5000});
         this.request.interceptors.request.use(config => {
             config.auth = this.getAuthConfig();
             return config;
@@ -226,9 +229,9 @@ export default class MailchimpService {
         } catch (error) {
             if (error.isAxiosError) {
                 const axiosError = error as AxiosError;
-                console.error(`${axiosError.code}: failed to get mailchimp campaign for campaignId=${id}. ${axiosError.response ? JSON.stringify(axiosError.response.data) : "no data found"}`);
+                logger.error(`${axiosError.code}: failed to get mailchimp campaign for campaignId=${id}. ${axiosError.response ? JSON.stringify(axiosError.response.data) : "no data found"}`);
             } else {
-                console.error("failed to get mailchimp campaign for campaign id", id, error);
+                logger.error("failed to get mailchimp campaign for campaign id", id, error);
             }
 
             return undefined;
@@ -253,9 +256,9 @@ export default class MailchimpService {
 
         if (fields) {
             queryParams.fields = fields;
-            console.log("Get Campaigns with Fields = ", fields);
+            logger.log("Get Campaigns with Fields = ", fields);
         } else if (exclude_fields.length > 0) {
-            console.log("Get Campaigns exclude fields", exclude_fields);
+            logger.log("Get Campaigns exclude fields", exclude_fields);
             queryParams.exclude_fields = exclude_fields.join(",");
         }
 
@@ -264,7 +267,7 @@ export default class MailchimpService {
             params: queryParams,
         });
 
-        console.log("fetch campaigns config", JSON.stringify(response.config.params, null, 2));
+        logger.log("fetch campaigns config", JSON.stringify(response.config.params, null, 2));
 
         return response.data;
     }
@@ -310,7 +313,7 @@ export default class MailchimpService {
             });
             return response.data;
         } catch (e) {
-            console.log("Unable to get campaign content", e);
+            logger.log("Unable to get campaign content", e);
             return;
         }
     }
@@ -384,7 +387,7 @@ export default class MailchimpService {
         const url = `${this.apiDomain}/campaigns`;
         const response = await this.request.post(url, campaign);
 
-        // console.log("created campaign", JSON.stringify(response.data));
+        // logger.log("created campaign", JSON.stringify(response.data));
         delete response.data._links;
         return response.data;
     }
@@ -399,7 +402,7 @@ export default class MailchimpService {
     async updateCampaignContent(campaignId: string | number, content: CampaignContentRequest): Promise<CampaignContent> {
         const url = `${this.apiDomain}/campaigns/${campaignId}/content`;
         const response = await this.request.put(url, content);
-        // console.log("updated campaign content", response.data);
+        // logger.log("updated campaign content", response.data);
         return response.data;
     }
 
@@ -469,7 +472,7 @@ export default class MailchimpService {
 
     async updateMemberStatus(updateRequest: UpdateStatusRequest): Promise<UpdateStatusResponse> {
         const memberId = getMemberIdFromEmail(updateRequest.email);
-        console.log("Updating member status with patch", updateRequest);
+        logger.log("Updating member status with patch", updateRequest);
 
         try {
             const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}?exclude_fields=_links`, {
@@ -483,10 +486,10 @@ export default class MailchimpService {
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
-                console.error("failed to update status", error.response);
+                logger.error("failed to update status", error.response);
                 return {success: false, error: error.response.data}
             } else {
-                console.error("Unknown error while updating member status", error);
+                logger.error("Unknown error while updating member status", error);
                 return {success: false, error: error};
             }
         }
@@ -495,7 +498,7 @@ export default class MailchimpService {
 
     async updateTags(tagRequest: UpdateTagsRequest): Promise<UpdateTagResponse> {
         const memberId = getMemberIdFromEmail(tagRequest.email);
-        console.log("Updating member with patch", tagRequest);
+        logger.log("Updating member with patch", tagRequest);
 
         try {
             //this just returns a 204 or an error
@@ -507,11 +510,11 @@ export default class MailchimpService {
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
-                console.error("failed to update tags", error.response);
+                logger.error("failed to update tags", error.response);
                 const errorData = error.response.data as TagResponseError;
                 return {success: false, error: errorData}
             } else {
-                console.error("Unknown error while updating tags", error);
+                logger.error("Unknown error while updating tags", error);
                 return {success: false, unknownError: error};
             }
         }
@@ -527,11 +530,11 @@ export default class MailchimpService {
         } catch (error) {
             const axiosError = error as AxiosError;
             if (axiosError.response) {
-                console.error("failed to update merge fields", error.response);
+                logger.error("failed to update merge fields", error.response);
                 const errorData = error.response.data as TagResponseError;
                 return {success: false, error: errorData}
             } else {
-                console.error("Unknown error while updating merge fields", error);
+                logger.error("Unknown error while updating merge fields", error);
                 return {success: false, unknownError: error};
             }
         }
@@ -607,7 +610,7 @@ export default class MailchimpService {
             });
             return response.data;
         } catch (e) {
-            console.error("Failed to get workflow email. WorkflowId = ", workflowId, "emailId =", emailId);
+            logger.error("Failed to get workflow email. WorkflowId = ", workflowId, "emailId =", emailId);
             return;
         }
 
@@ -679,7 +682,7 @@ export default class MailchimpService {
 
             return allEmails;
         } catch (error) {
-            console.error("Failed to get automation emails", error);
+            logger.error("Failed to get automation emails", error);
             return []
         }
     }
@@ -720,9 +723,9 @@ export default class MailchimpService {
             if (error.isAxiosError) {
                 const e = error as AxiosError<MailchimpApiError>;
                 if (e.response && e.response.data) {
-                    console.error(`${e.response.data.title}: ${e.response.data.detail}`, e)
+                    logger.error(`${e.response.data.title}: ${e.response.data.detail}`, e)
                 } else {
-                    console.error("Failed to get unsubscribe reason", e);
+                    logger.error("Failed to get unsubscribe reason", e);
                 }
 
             }
@@ -765,10 +768,10 @@ export default class MailchimpService {
 
             results.push(...values);
             currentOffset = results.length;
-            console.log("fetched ", results.length, "/", listResponse.total_items, "items. # Fetches", fetchCount)
+            logger.log("fetched ", results.length, "/", listResponse.total_items, "items. # Fetches", fetchCount)
 
             if (pageDelay > 0) {
-                console.log(`delaying between pages for ${pageDelay}ms`);
+                logger.log(`delaying between pages for ${pageDelay}ms`);
                 await new Promise(resolve => {
                     setTimeout(() => {
                         resolve()
@@ -798,9 +801,9 @@ export default class MailchimpService {
     async scheduleCampaign(campaignId: string, config: CampaignScheduleBody, campaignWebId: string): Promise<{ success: boolean, alreadyScheduled: boolean, error?: any }> {
         const url = `/campaigns/${campaignId}/actions/schedule`;
         try {
-            console.log("attempting to schedule campaign with config", config);
+            logger.log("attempting to schedule campaign with config", config);
             const response = await this.request.post(url, config);
-            console.log(`scheduled campaign successfully. Response Status = ${response.status}`);
+            logger.log(`scheduled campaign successfully. Response Status = ${response.status}`);
             return {success: true, alreadyScheduled: false}
         } catch (e) {
             let alreadyScheduled = false;
@@ -808,7 +811,7 @@ export default class MailchimpService {
             if (e.isAxiosError) {
                 const apiError = e as AxiosError;
                 const body = apiError.response?.data || {};
-                console.error("Schedule Campaign Error Data", body);
+                logger.error("Schedule Campaign Error Data", body);
                 alreadyScheduled = (body.detail || "").includes("Cannot schedule an already scheduled campaign");
                 const mcErrors = body.errors;
                 if (!alreadyScheduled && mcErrors && mcErrors.length > 0) {
@@ -818,7 +821,7 @@ export default class MailchimpService {
                 }
             }
 
-            console.error("Failed to schedule campaign", message);
+            logger.error("Failed to schedule campaign", message);
 
             return {
                 success: false,
@@ -831,9 +834,9 @@ export default class MailchimpService {
     async unscheduleCampaign(campaign: Campaign): Promise<{ success: boolean, errorMessage?: string }> {
         const url = `/campaigns/${campaign.id}/actions/unschedule`;
         try {
-            console.log("attempting to unschedule campaign");
+            logger.log("attempting to unschedule campaign");
             const response = await this.request.post(url);
-            console.log(`Successfully unscheduled campaign. Status Code = ${response.status}`);
+            logger.log(`Successfully unscheduled campaign. Status Code = ${response.status}`);
             return {success: true}
         } catch (e) {
             let message = e.message || "Unknown error";
@@ -841,7 +844,7 @@ export default class MailchimpService {
                 const apiError = e as AxiosError;
                 message = JSON.stringify(apiError.response?.data || message);
             }
-            console.error("Failed to un-schedule campaign", message);
+            logger.error("Failed to un-schedule campaign", message);
             return {
                 success: false,
                 errorMessage: `Unable to un-schedule campaign: ${message}.\n\nPlease check the mailchimp UI for more details https://us20.admin.mailchimp.com/campaigns/edit?id=${campaign.web_id}`
@@ -865,9 +868,9 @@ export default class MailchimpService {
         } catch (error) {
             if (error.isAxiosError) {
                 const axiosError = error as AxiosError;
-                console.error(`MailchimpService.getmeMemberByEmail | Failed to get list member for email ${email}`, axiosError.response);
+                logger.error(`MailchimpService.getmeMemberByEmail | Failed to get list member for email ${email}`, axiosError.response);
             } else {
-                console.error(`Failed to get list member for email ${email}`, error);
+                logger.error(`Failed to get list member for email ${email}`, error);
             }
             return undefined;
         }
@@ -906,7 +909,7 @@ export default class MailchimpService {
 
         try {
             const response = await this.request.post(url, listMember);
-            console.log("mailchimp response", response.data);
+            logger.log("mailchimp response", response.data);
             result.member = response.data;
             result.success = true;
             result.status = SubscriptionResultStatus.new_subscriber;
@@ -916,13 +919,13 @@ export default class MailchimpService {
                 const data = error.response.data;
                 switch (data.title) {
                     case "Member Exists":
-                        console.warn("User is already on list. Treating as a successful signup", data);
+                        logger.warn("User is already on list. Treating as a successful signup", data);
                         result.success = true;
                         result.status = SubscriptionResultStatus.existing_subscriber;
                         // data
                         break;
                     case "Invalid Resource":
-                        console.warn("unable to sign up user", data);
+                        logger.warn("unable to sign up user", data);
                         result.success = false;
                         result.status = SubscriptionResultStatus.unknown;
                         apiError.friendlyMessage = data.detail || "Please provide a valid email address.";
@@ -930,7 +933,7 @@ export default class MailchimpService {
                         apiError.error = error.response.data;
                         break;
                     default:
-                        console.error("failed to create new member. Response data", data);
+                        logger.error("failed to create new member. Response data", data);
                         apiError.friendlyMessage = "Oops, we're unable to sign you up right now. Please try again later.";
                         apiError.error = error.response.data;
                         apiError.code = data.status;
@@ -940,7 +943,7 @@ export default class MailchimpService {
                 }
 
             } else {
-                console.error("Failed to update mailchimp list", error);
+                logger.error("Failed to update mailchimp list", error);
                 apiError.code = 500;
                 apiError.error = error;
                 apiError.friendlyMessage = "An unexpected error occurred. Please try again later";
@@ -958,7 +961,7 @@ export default class MailchimpService {
     async getMemberActivity(email: string): Promise<MemberActivityListResponse | undefined> {
         try {
             const url = `/lists/${this.audienceId}/members/${getMemberIdFromEmail(email)}/activity`;
-            console.log("fetching activity via", url);
+            logger.log("fetching activity via", url);
             const response = await this.request.get(url, {
                 params: {
                     exclude_fields: "_links",
@@ -969,7 +972,7 @@ export default class MailchimpService {
             return response.data;
         } catch (e) {
             const error = e as AxiosError;
-            console.error(`Unable to get member activity for ${email}`, error.response ? {
+            logger.error(`Unable to get member activity for ${email}`, error.response ? {
                 config: error.config,
                 data: error.response.data
             } : error);

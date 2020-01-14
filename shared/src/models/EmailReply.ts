@@ -4,6 +4,9 @@ import ParsedMailbox = emailAddresses.ParsedMailbox;
 import EmailAddress from "@shared/EmailAddress";
 import EmailHeaders, {MailchimpMemberId} from "@shared/models/EmailHeaders";
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("EmailReply.ts");
 
 export enum EmailStoragePath {
     HEADERS = "HEADERS",
@@ -84,7 +87,7 @@ export default class EmailReply extends BaseModel {
                     domain: fromParsed.domain
                 }
             } else {
-                console.error("EmailReply.ts Unable to parse raw input value", input.fromRaw);
+                logger.error("EmailReply.ts Unable to parse raw input value", input.fromRaw);
             }
         }
 
@@ -95,7 +98,7 @@ export default class EmailReply extends BaseModel {
             if (toParsed && toParsed.local && toParsed.local.includes("hello+p_")) {
                 const [, promptId] = toParsed.local.split("hello+p_");
                 if (promptId) {
-                    console.log("Parsed prompt ID from to address", promptId);
+                    logger.log("Parsed prompt ID from to address", promptId);
                     this.reflectionPromptId = promptId
                 }
             }
