@@ -27,7 +27,7 @@
                         promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
                 </div>
                 <h1>Mindful Friends</h1>
-                <p>Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
+                <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
                 <a class="button primary wiggle" :href="friendsPath">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
@@ -44,7 +44,6 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
-    import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
@@ -60,7 +59,6 @@
             NavBar,
             Footer,
             SocialActivityCard,
-            SocialActivityEvent,
             SocialActivityFeed
         },
         data(): {
@@ -176,15 +174,19 @@
         align-items: center;
         display: flex;
         flex-direction: column;
-        padding: 6.4rem 2.4rem;
+        padding: 0 2.4rem 6.4rem;
         text-align: center;
+
+        @include r(600) {
+            padding: 6.4rem 2.4rem 12rem;
+        }
 
         h1 {
             line-height: 1.2;
             margin-bottom: .4rem;
         }
 
-        p {
+        .subtext {
             margin: 0 auto 2.4rem;
             max-width: 40rem;
             opacity: .8;
@@ -195,8 +197,7 @@
         }
 
         .graphic {
-            margin-bottom: 3.2rem;
-            overflow: hidden;
+            margin-bottom: 2.4rem;
             position: relative;
 
             &:after {
@@ -204,10 +205,21 @@
                 bottom: 0;
                 content: '';
                 display: block;
-                height: 4.8rem;
+                height: 75%;
                 left: 0;
+                margin: 0 0 0 -2.4rem;
                 position: absolute;
-                width: 100%;
+                width: calc(100% + 4.8rem);
+            }
+        }
+
+        .activityCard {
+            @include r(600) {
+                margin-bottom: 1.6rem;
+            }
+
+            &:last-of-type {
+                box-shadow: none;
             }
         }
 
