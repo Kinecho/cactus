@@ -2,7 +2,7 @@ import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/Fires
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone, getUserAgent} from "@web/DeviceUtil";
+import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
 import Logger from "@shared/Logger";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import {Config} from "@web/config";
@@ -87,7 +87,7 @@ export default class CactusMemberService {
             return;
         }
 
-        if (getUserAgent() !== Config.androidUserAgent) {
+        if (!isAndroidApp()) {
             logger.warn(`User agent not allowed: ${getUserAgent()}`);
             return;
         }
@@ -163,6 +163,3 @@ export default class CactusMemberService {
         }
     }
 }
-
-
-

@@ -77,7 +77,6 @@ export function commonInit() {
     });
 
     hasCommonInit = true;
-
 }
 
 commonInit();

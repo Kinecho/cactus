@@ -1,3 +1,4 @@
+import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">
@@ -113,12 +114,12 @@
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionResponse, {ResponseMedium} from '@shared/models/ReflectionResponse'
+    import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
-    import {getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
+    import {getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
     import {isBlank} from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
@@ -649,7 +650,10 @@
                             if (!first && !localResponse) {
                                 // logger.log("No local response and no db response, creating one now");
                                 // logger.log("Using the newly created response for this prompt.");
-                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, ResponseMedium.PROMPT_WEB, promptQuestion);
+                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, getResponseMedium({
+                                    app: getAppType(),
+                                    type: ResponseMediumType.PROMPT
+                                }), promptQuestion);
                             } else if (first) {
                             }
 

@@ -1,4 +1,6 @@
 import Logger from "@shared/Logger";
+import {Config} from "@web/config";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 export const MOBILE_BREAKPOINT_PX = 600;
 const logger = new Logger("DeviceUtil");
@@ -33,4 +35,15 @@ export function getDeviceLocale(): string | undefined {
 
 export function getUserAgent(): string {
     return navigator.userAgent
+}
+
+export function isAndroidApp(): boolean {
+    return navigator.userAgent === Config.androidUserAgent;
+}
+
+export function getAppType(): AppType {
+    if (isAndroidApp()) {
+        return AppType.ANDROID
+    }
+    return AppType.WEB;
 }

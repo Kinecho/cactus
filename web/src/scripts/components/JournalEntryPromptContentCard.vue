@@ -1,3 +1,4 @@
+import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
@@ -72,7 +73,7 @@
     import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
     import {formatDate} from "@shared/util/DateUtil"
-    import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
+    import ReflectionResponse, {getResponseMedium, ResponseMedium, ResponseMediumType} from "@shared/models/ReflectionResponse"
     import {getIntegerFromStringBetween, getResponseText, isBlank, preventOrphanedWords} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
@@ -88,6 +89,7 @@
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import Logger from "@shared/Logger";
+    import {getAppType} from "@web/DeviceUtil";
 
     const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -130,7 +132,7 @@
                 showContent: false,
                 editedText: "",
                 editedResponses: [],
-                responseMedium: ResponseMedium.JOURNAL_WEB,
+                responseMedium: getResponseMedium({app: getAppType(), type: ResponseMediumType.JOURNAL}),
                 showSharing: false,
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
