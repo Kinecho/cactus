@@ -67,7 +67,7 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
-    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus, }): Promise<PromptContent | undefined> {
         try {
             const {systemDate, dateObject, status} = options;
             // const midnightDenver = getDateAtMidnightDenver(date);

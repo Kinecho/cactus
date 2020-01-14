@@ -5,13 +5,14 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {getConfig} from "@admin/config/configService";
+import Logger from "@shared/Logger";
 export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
-import {getConfig} from "@admin/config/configService";
-import Logger from "@shared/Logger";
+
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 const logger = new Logger("AdminFirestoreService");
@@ -24,6 +25,11 @@ export interface QueryOptions extends IQueryOptions<QueryCursor> {
 export interface GetOptions extends IGetOptions {
     transaction?: Transaction
     throwOnError?: boolean,
+}
+
+export interface GetBatchOptions<T extends BaseModel> extends GetOptions {
+    batchSize?: number,
+    onData: (models: T[], batchNumber: number) => Promise<void>
 }
 
 export interface DeleteOptions {
@@ -261,7 +267,7 @@ export default class AdminFirestoreService {
         query: FirebaseFirestore.Query,
         type: { new(): T }
         batchSize?: number,
-        onData: (sentPrompts: T[], batchNumber: number) => Promise<void>,
+        onData: (models: T[], batchNumber: number) => Promise<void>,
         orderBy?: string,
         sortDirection?: QuerySortDirection,
     }) {

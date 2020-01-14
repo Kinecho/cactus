@@ -1,6 +1,7 @@
 import AdminFirestoreService, {
     CollectionReference,
     DefaultGetOptions,
+    GetBatchOptions,
     GetOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
@@ -17,8 +18,8 @@ import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@sh
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
-import DocumentReference = admin.firestore.DocumentReference;
 import Logger from "@shared/Logger";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -396,6 +397,21 @@ export default class AdminCactusMemberService {
 
         const results = await firestoreService.executeQuery(query, CactusMember);
         return results.results;
+    }
+
+    async getMembersForUTCSendPromptTimeBatch(sendTime: PromptSendTime, options: GetBatchOptions<CactusMember>): Promise<void> {
+        const query = this.getCollectionRef().where(CactusMember.Field.promptSendTimeUTC_hour, "==", sendTime.hour)
+            .where(CactusMember.Field.promptSendTimeUTC_minute, "==", sendTime.minute);
+
+        await firestoreService.executeBatchedQuery({
+            query,
+            type: CactusMember,
+            onData: options.onData,
+            batchSize: options?.batchSize,
+            orderBy: BaseModelField.createdAt,
+            sortDirection: QuerySortDirection.asc
+        });
+        return;
     }
 
     async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
