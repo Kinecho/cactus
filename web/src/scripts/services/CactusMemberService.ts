@@ -68,6 +68,7 @@ export default class CactusMemberService {
             console.log("Adding FCM token to member");
             currentTokens.push(fcmToken);
             member.fcmTokens = currentTokens;
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
             doSave = true;
         }
 
@@ -89,6 +90,7 @@ export default class CactusMemberService {
             currentTokens.push(token);
             member.fcmTokens = currentTokens;
             await this.save(member);
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
             logger.info("Saved token to member");
         }
     }

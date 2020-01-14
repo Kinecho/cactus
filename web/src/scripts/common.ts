@@ -20,7 +20,7 @@ window.registerFCMToken = async (token?: string) => {
     StorageService.saveString(LocalStorageKey.androidFCMToken, token);
     console.log("Saved token to local storage, attempting to register FCM token");
     await CactusMemberService.sharedInstance.registerFCMToken(token);
-}
+};
 
 export function commonInit() {
     if (hasCommonInit) {
