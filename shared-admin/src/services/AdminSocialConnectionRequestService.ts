@@ -1,7 +1,9 @@
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import SocialConnectionRequest, {SocialConnectionRequestFields} from "@shared/models/SocialConnectionRequest";
 import {Collection} from "@shared/FirestoreBaseModels";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminSocialConnectionRequestService");
 let firestoreService: AdminFirestoreService;
 
 export default class AdminSocialConnectionRequestService {
@@ -41,7 +43,7 @@ export default class AdminSocialConnectionRequestService {
 
             return memberTotal + friendTotal;
         } catch (error) {
-            console.error("Failed to delete admin connections", error);
+            logger.error("Failed to delete admin connections", error);
             return 0;
         }
     }
