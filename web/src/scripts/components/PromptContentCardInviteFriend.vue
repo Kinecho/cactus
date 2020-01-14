@@ -3,10 +3,10 @@
         <div class="cta" v-if="!showInviteForm">
             <h2>Mindful Friends</h2>
             <p>Your mindfulness journey is more effective when you share it with others.</p>
-            <button @click="showInviteForm = true">Invite a friend</button>
+            <button @click="showInviteForm = true">Invite a Friend</button>
         </div>
         <div class="inviting" v-if="showInviteForm">
-            <h2>Invite a friend</h2>
+            <h2>Invite a Friend</h2>
             <div>
                 <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" /><br>
                 <span class="error" v-if="validEmail === false">Email address is invalid.</span>
@@ -59,7 +59,7 @@
         methods: {
             sendInvite() {
                 this.validateEmail();
-                
+
                 if (this.validEmail) {
                     console.log('would send invite');
                 }
@@ -67,7 +67,7 @@
             validateEmail() {
                 if (isValidEmail(this.emailAddress)) {
                     this.validEmail = true;
-                } else { 
+                } else {
                     this.validEmail = false;
                 }
             }
@@ -83,30 +83,30 @@
     @import "common";
     @import "transitions";
 
-    .inviting {
-        text-align: left;
-
-        input {
-            width: 80%;
-            padding: 1rem;
-        }
-        .add {
-            font-size: 80%;
-            margin: 0 0 2rem;
-            display: block;
-        }
-        .error {
-            color: red;
-            display: block;
-            margin: 0 0 1rem;
-        }
-        textarea {
-            width: 80%;
-            padding: 1rem;
-        }
-        button {
-            margin: 3rem 0 0;
-        }
-    }
+    // .inviting {
+    //     text-align: left;
+    //
+    //     input {
+    //         width: 80%;
+    //         padding: 1rem;
+    //     }
+    //     .add {
+    //         font-size: 80%;
+    //         margin: 0 0 2rem;
+    //         display: block;
+    //     }
+    //     .error {
+    //         color: red;
+    //         display: block;
+    //         margin: 0 0 1rem;
+    //     }
+    //     textarea {
+    //         width: 80%;
+    //         padding: 1rem;
+    //     }
+    //     button {
+    //         margin: 3rem 0 0;
+    //     }
+    // }
 
 </style>
