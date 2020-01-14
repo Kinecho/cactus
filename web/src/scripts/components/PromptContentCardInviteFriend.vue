@@ -18,14 +18,25 @@
         </div>
         <div class="inviting" v-if="showInviteForm">
             <h2>Invite a Friend</h2>
-            <div>
-                <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" /><br>
-                <span class="error" v-if="validEmail === false">Email address is invalid.</span>
+            <p class="subtext">They'll get just one email inviting them to&nbsp;Cactus.</p>
+            <div class="formItem">
+                <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" />
+                <div class="alert error" v-if="validEmail === false">That email doesn't look quite right.</div>
             </div>
-            <div>
-                <textarea placeholder="Optional message from you" rows="5"/>
+            <div class="formItem">
+                <textarea placeholder="Optional message" rows="4"/>
             </div>
-            <button @click="sendInvite()">Invite</button>
+            <div class="buttonContainer">
+                <button class="button" @click="sendInvite()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
+                        <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
+                    </svg>
+                    Invite
+                </button>
+                <button class="button tertiary" @click="sendInvite()">
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -129,30 +140,34 @@
         }
     }
 
-    // .inviting {
-    //     text-align: left;
-    //
-    //     input {
-    //         width: 80%;
-    //         padding: 1rem;
-    //     }
-    //     .add {
-    //         font-size: 80%;
-    //         margin: 0 0 2rem;
-    //         display: block;
-    //     }
-    //     .error {
-    //         color: red;
-    //         display: block;
-    //         margin: 0 0 1rem;
-    //     }
-    //     textarea {
-    //         width: 80%;
-    //         padding: 1rem;
-    //     }
-    //     button {
-    //         margin: 3rem 0 0;
-    //     }
-    // }
+    .formItem {
+        margin-bottom: 1.6rem;
+    }
+
+    input {
+        @include textInputAlt;
+        width: 100%;
+    }
+    textarea {
+        @include textAreaAlt;
+        width: 100%;
+    }
+
+    .error {
+        margin: .8rem 0 2.4rem;
+        padding: 1.6rem;
+    }
+
+    .buttonContainer {
+        display: flex;
+
+        .button {
+            min-width: 0;
+
+            &.tertiary:hover {
+                background-color: transparent;
+            }
+        }
+    }
 
 </style>
