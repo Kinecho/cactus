@@ -68,7 +68,7 @@ export async function onPublish(message: Message, context: functions.EventContex
         return;
     }
     const job: CustomNotificationJob = message.json;
-
+    console.log("processing job", job);
     // const {dryRun} = job;
     // const contentDate = getDateFromISOString(job.contentDate) || getDateAtMidnightDenver();
     // const sendDate: Date | undefined = getDateFromISOString(job.sendDate);
