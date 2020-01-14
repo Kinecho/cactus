@@ -8,19 +8,19 @@
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
                 <div class="graphic">
                     <SocialActivityCard
-                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FxLeo5gYlAqvqhJ4IQV8y_memory2.png?alt=media&token=82f832f7-3d77-40ec-84a1-343d88f73d37"
+                        avatarUrl="/assets/images/avatars/blobatar1.png"
                         date="7 minutes ago"
                         name="Richard Wolf"
                         promptContentPath="/prompts/1234"
                         promptQuestion="Who energizes you?"/>
                     <SocialActivityCard
-                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvbK9t2qyY9MprQ0171zD_lost1.png?alt=media&token=46e59600-c8c5-4c05-bf3f-bd80bf63142d"
+                        avatarUrl="/assets/images/avatars/blobatar2.png"
                         date="8 hours ago"
                         name="Nikky Nealon"
                         promptContentPath="/prompts/1234"
                         promptQuestion="If you can only accomplish one thing this coming week, what will it be?"/>
                     <SocialActivityCard
-                        avatarURL="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2FvWQvgnCOIeZxDFpqGNnA_focus1.png?alt=media&token=2b6cbc37-9794-46c2-bfc9-9299ba7bd4c8"
+                        avatarUrl="/assets/images/avatars/blobatar3.png"
                         date="1 day ago"
                         name="Patricia Smith"
                         promptContentPath="/prompts/1234"
@@ -197,11 +197,11 @@
         }
 
         .graphic {
-            margin-bottom: 2.4rem;
+            margin: 1.6rem 0;
             position: relative;
 
             &:after {
-                background: linear-gradient(rgba(255,255,255,0), $white);
+                background: linear-gradient(rgba(255,255,255,0), $white 90%);
                 bottom: 0;
                 content: '';
                 display: block;
@@ -220,6 +220,7 @@
 
             &:last-of-type {
                 box-shadow: none;
+                margin-bottom: 0;
             }
         }
 
