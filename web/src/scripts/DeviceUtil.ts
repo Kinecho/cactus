@@ -30,3 +30,7 @@ export function getDeviceLocale(): string | undefined {
         logger.error("Unable to fetch timezone from device. The 'Intl' API may not be supported");
     }
 }
+
+export function getUserAgent(): string {
+    return navigator.userAgent
+}

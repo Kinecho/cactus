@@ -2,9 +2,10 @@ import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/Fires
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone} from "@web/DeviceUtil";
+import {getDeviceLocale, getDeviceTimeZone, getUserAgent} from "@web/DeviceUtil";
 import Logger from "@shared/Logger";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import {Config} from "@web/config";
 
 const logger = new Logger("CactusMemberService");
 
@@ -85,6 +86,12 @@ export default class CactusMemberService {
             logger.info("No cactus member found, not registering token");
             return;
         }
+
+        if (getUserAgent() !== Config.androidUserAgent) {
+            logger.warn(`User agent not allowed: ${getUserAgent()}`);
+            return;
+        }
+
         const currentTokens: string[] = member.fcmTokens ?? [];
         if (!currentTokens.includes(token)) {
             currentTokens.push(token);

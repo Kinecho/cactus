@@ -63,5 +63,6 @@ export const Config = {
     isDev: __BUILD_ENV__ === "dev",
     isStage: __BUILD_ENV__ === "stage",
     isProd: __BUILD_ENV__ === "prod",
-    version: __SENTRY_VERSION__
+    version: __SENTRY_VERSION__,
+    androidUserAgent: "CactusAndroid"
 };
