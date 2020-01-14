@@ -36,6 +36,7 @@
                             ></entry>
                             <entry
                                     :class="['journalListItem', {even: index%2}]"
+                                    :style="{zIndex: Math.max(1000 - index, 0)}"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
