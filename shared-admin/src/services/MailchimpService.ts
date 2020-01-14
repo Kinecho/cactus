@@ -107,7 +107,7 @@ export default class MailchimpService {
 
         this.apiDomain = `https://${datacenter}.api.mailchimp.com/3.0`;
 
-        this.request = axios.create({baseURL: this.apiDomain});
+        this.request = axios.create({baseURL: this.apiDomain, timeout: 5000});
         this.request.interceptors.request.use(config => {
             config.auth = this.getAuthConfig();
             return config;
