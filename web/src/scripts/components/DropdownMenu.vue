@@ -123,6 +123,7 @@
 
     .dropdown-menu-wrapper {
         position: relative;
+        z-index: 1500;
     }
 
     .dropdown-menu {
