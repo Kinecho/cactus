@@ -112,6 +112,15 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         });
     }
 
+    try {
+        await AdminSlackService.getSharedInstance().sendActivityMessage({
+            text: `:love_letter: ${requestUser.email} sent an email invite to ${toContact.email}`
+        });
+    } catch (error) {
+        Sentry.captureException(error);
+        logger.error(error);
+    }
+
     return;
 });
 
