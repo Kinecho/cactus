@@ -77,8 +77,12 @@ export default class PushNotificationService {
             }
 
             const promptId = prompt?.id || promptContent?.promptId;
+            const entryId = promptContent?.entryId;
             if (promptId) {
                 data.promptId = promptId;
+            }
+            if (entryId) {
+                data.promptContentEntryId = entryId;
             }
 
             const payload: admin.messaging.MessagingPayload = {
