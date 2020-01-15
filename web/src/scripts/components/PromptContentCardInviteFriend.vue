@@ -24,14 +24,20 @@
                 <div class="alert error" v-if="validEmail === false">That email doesn't look quite&nbsp;right.</div>
             </div>
             <div class="formItem">
-                <textarea placeholder="Optional message" rows="4"/>
+                <textarea v-model="message" placeholder="Optional message" rows="4"/>
             </div>
             <div class="buttonContainer">
-                <button class="button" @click="sendInvite()">
+                <button class="button" @click="sendInvite()" v-if="!sendingInvite && !wasInvited">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
                         <path fill="#fff" d="M1.707 6.293A1 1 0 0 0 .293 7.707l5 5a1 1 0 0 0 1.414 0l11-11A1 1 0 1 0 16.293.293L6 10.586 1.707 6.293z"/>
                     </svg>
                     Invite
+                </button>
+                <button class="button" disabled="true" v-if="sendingInvite">
+                    Sending...
+                </button>
+                <button class="button secondary" v-if="wasInvited">
+                    Sent!
                 </button>
                 <button class="button tertiary" @click="skip()">
                     Cancel
@@ -49,6 +55,8 @@
     import {isValidEmail} from "@shared/util/StringUtil"
     import {Image} from '@shared/models/PromptContent'
     import SocialActivityCard from "@components/SocialActivityCard.vue"
+    import {sendInvite} from '@web/social';
+    import {EmailContact} from "@shared/types/EmailContactTypes";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -61,14 +69,22 @@
             deviceWidth: number,
             showInviteForm: boolean,
             emailAddress: string,
+            message: string,
             validEmail: boolean | undefined,
+            sendingInvite: boolean,
+            wasInvited: boolean
+            error: string | undefined
         } {
             return {
                 resizeListener: undefined,
                 deviceWidth: 0,
                 showInviteForm: false,
                 emailAddress: '',
-                validEmail: undefined
+                message: '',
+                validEmail: undefined,
+                sendingInvite: false,
+                wasInvited: false,
+                error: undefined
             }
         },
         destroyed() {
@@ -83,11 +99,32 @@
             })
         },
         methods: {
-            sendInvite() {
+            async sendInvite(): Promise<void> {
                 this.validateEmail();
 
                 if (this.validEmail) {
-                    console.log('would send invite');
+                    this.sendingInvite = true;
+
+                    const contact: EmailContact = {
+                        first_name: '',
+                        last_name: '',
+                        email: this.emailAddress
+                    }
+
+                    const sendInviteResult = await sendInvite(contact, this.message);
+
+                    if (sendInviteResult.data && sendInviteResult.data.success) {
+                        this.sendingInvite = false;
+                        this.wasInvited = true;
+                        this.error = undefined;
+                        setTimeout(() => this.skip(), 1500);
+                        return;
+                    } else {
+                        this.sendingInvite = false;
+                        this.wasInvited = false;
+                        this.error = sendInviteResult.message;
+                        return;
+                    }
                 }
             },
             validateEmail() {
