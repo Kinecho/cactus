@@ -33,7 +33,7 @@
                     </svg>
                     Invite
                 </button>
-                <button class="button tertiary" @click="sendInvite()">
+                <button class="button tertiary" @click="skip()">
                     Cancel
                 </button>
             </div>
@@ -96,6 +96,9 @@
                 } else {
                     this.validEmail = false;
                 }
+            },
+            skip() {
+                this.$emit("skip");
             }
         }
     })

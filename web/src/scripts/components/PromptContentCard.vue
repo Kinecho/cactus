@@ -104,7 +104,9 @@
             <!--    END Elements    -->
 
             <!--    START Invite Friend  -->
-            <prompt-content-card-invite-friend v-if="processedContent.invite" />
+            <prompt-content-card-invite-friend 
+                v-if="processedContent.invite"
+                v-on:skip="next()" />
             <!--    END Invite Friend    -->
 
             <!--    START Grow -->
