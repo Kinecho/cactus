@@ -104,7 +104,7 @@
             <!--    END Elements    -->
 
             <!--    START Invite Friend  -->
-            <prompt-content-card-invite-friend 
+            <prompt-content-card-invite-friend
                 v-if="processedContent.invite"
                 @skip="next()"
                 @disableNavigation="disableNavigation()" />
@@ -579,6 +579,10 @@
     .content, .lowerActions {
         background-color: $beige;
         z-index: 2;
+
+        .type-share_reflection & {
+            background-color: transparent;
+        }
     }
 
     .backgroundImage {
@@ -946,7 +950,7 @@
 
         &.hasValue {
             border-width: 1px;
-            background-color: $beige;
+            background-color: $white;
         }
 
         &:hover + .textareaPlaceholder .wiggle {
