@@ -39,7 +39,7 @@
                     Sending...
                 </button>
                 <div class="alert success" v-if="wasInvited">Invitation sent!</div>
-                <button class="button tertiary" @click="skip()" v-if="!wasInvited">
+                <button class="button tertiary" @click="reset()" v-if="!wasInvited">
                     Cancel
                 </button>
             </div>
@@ -136,6 +136,9 @@
             },
             skip() {
                 this.$emit("skip");
+            },
+            reset() {
+                this.showInviteForm = false;
             },
             switchToInvite() {
                 this.showInviteForm = true;
