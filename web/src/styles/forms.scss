@@ -88,6 +88,34 @@
   }
 }
 
+@mixin textAreaAlt {
+    border: 1px solid darken($lightestGreen, 5%);
+    border-radius: .8rem;
+    color: $darkestGreen;
+    display: block;
+    flex-grow: 1;
+    font-family: $font-stack;
+    font-size: 1.8rem;
+    line-height: 1.43;
+    max-width: 53rem;
+    padding: 1.2rem 1.6rem;
+    resize: none;
+    transition: border-color .3s ease-in-out;
+
+    @include r(768) {
+      min-width: 32rem;
+    }
+
+    &:hover {
+        border-color: $darkGreen;
+    }
+
+    &:focus {
+        border-color: $darkestGreen;
+        border-weight: 2px;
+        outline: 0;
+    }
+}
 
 @mixin buttonPrimary {
 

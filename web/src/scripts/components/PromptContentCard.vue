@@ -103,6 +103,13 @@
             <prompt-content-card-elements v-if="processedContent.elements"/>
             <!--    END Elements    -->
 
+            <!--    START Invite Friend  -->
+            <prompt-content-card-invite-friend 
+                v-if="processedContent.invite"
+                @skip="next()"
+                @disableNavigation="disableNavigation()" />
+            <!--    END Invite Friend    -->
+
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
                 <svg v-if="cactusElement === 'experience'" class="grow5 experience" viewBox="0 0 69 122" xmlns="http://www.w3.org/2000/svg">
@@ -284,6 +291,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import PromptContentCardElements from "@components/PromptContentCardElements.vue";
+    import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
@@ -306,6 +314,7 @@
             SnackbarContent,
             SharedReflectionCard,
             PromptContentCardElements,
+            PromptContentCardInviteFriend,
             ElementDescriptionModal
         },
         props: {

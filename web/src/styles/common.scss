@@ -166,6 +166,13 @@ h4 {
       fill: $lightPink;
     }
   }
+
+  &.success {
+      background: $lightGreen;
+      border-radius: 6px;
+      color: $darkestGreen;
+      padding: 1.6rem;
+  }
 }
 
 .hidden {
