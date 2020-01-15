@@ -19,13 +19,15 @@
         <div class="inviting" v-if="showInviteForm">
             <h2>Invite a Friend</h2>
             <p class="subtext">They'll get just one email inviting them to&nbsp;Cactus.</p>
-            <div class="formItem">
-                <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" />
-                <div class="alert error" v-if="validEmail === false">That email doesn't look quite&nbsp;right.</div>
-            </div>
-            <div class="formItem">
-                <textarea v-model="message" placeholder="Optional message" rows="4"/>
-            </div>
+            <template v-if="!wasInvited">
+                <div class="formItem">
+                    <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" />
+                    <div class="alert error" v-if="validEmail === false">That email doesn't look quite&nbsp;right.</div>
+                </div>
+                <div class="formItem">
+                    <textarea v-model="message" placeholder="Optional message" rows="4"/>
+                </div>
+            </template>
             <div class="buttonContainer">
                 <button class="button" @click="sendInvite()" v-if="!sendingInvite && !wasInvited">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 13">
@@ -36,10 +38,8 @@
                 <button class="button" disabled="true" v-if="sendingInvite">
                     Sending...
                 </button>
-                <button class="button secondary" v-if="wasInvited">
-                    Sent!
-                </button>
-                <button class="button tertiary" @click="skip()">
+                <div class="alert success" v-if="wasInvited">Invitation sent!</div>
+                <button class="button tertiary" @click="skip()" v-if="!wasInvited">
                     Cancel
                 </button>
             </div>
@@ -180,6 +180,16 @@
         justify-content: center;
         margin: 0 auto;
         min-width: 22rem;
+
+        &:disabled {
+            position: relative;
+
+            &:before {
+                bottom: 0;
+                left: 2.4rem;
+                top: 1.2rem;
+            }
+        }
 
         svg {
             height: 2rem;
