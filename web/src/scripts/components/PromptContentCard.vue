@@ -106,7 +106,8 @@
             <!--    START Invite Friend  -->
             <prompt-content-card-invite-friend 
                 v-if="processedContent.invite"
-                v-on:skip="next()" />
+                @skip="next()"
+                @disableNavigation="disableNavigation()" />
             <!--    END Invite Friend    -->
 
             <!--    START Grow -->
