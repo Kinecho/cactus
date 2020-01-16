@@ -298,6 +298,7 @@
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
     import Logger from "@shared/Logger";
+    import {gtag} from "@web/analytics"
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -448,6 +449,7 @@
                 })
             },
             async createSharableLink() {
+                this.trackShareLink();
                 this.creatingLink = true;
                 let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
                 this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(saved);
@@ -507,6 +509,12 @@
                 this.cactusModalVisible = false;
                 this.enableNavigation()
             },
+            trackShareLink() {
+                gtag('event', 'click', {
+                    'event_category': "prompt_content",
+                    'event_action': "shared_reflection"
+                });
+            }
         }
     })
 </script>

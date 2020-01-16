@@ -139,6 +139,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
     import Logger from "@shared/Logger";
+    import {gtag} from "@web/analytics"
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -337,6 +338,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             tradeNote() {
+                this.trackShareTap();
                 if (this.member && !this.member.getFullName() && !this.sawInputNameModal) {
                     this.showInputNameModal();
                 } else {
@@ -364,6 +366,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.updateResponseMemberName();
                 this.hideInputNameModal();
                 this.tradeNote();
+            },
+            trackShareTap() {
+                gtag('event', 'click', {
+                    'event_category': "prompt_content",
+                    'event_action': "clicked_share_note"
+                });
             }
         }
     })
