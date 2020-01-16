@@ -5,7 +5,6 @@
                 avatarUrl="/assets/images/avatars/blobatar1.png"
                 date="7 minutes ago"
                 name="Aaron Nichols"
-                promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
                 promptQuestion="Who energizes you?"/>
             <h2>Mindful Friends</h2>
             <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
@@ -39,7 +38,7 @@
                     Sending...
                 </button>
                 <div class="alert success" v-if="wasInvited">Invitation sent!</div>
-                <button class="button tertiary" @click="skip()" v-if="!wasInvited">
+                <button class="button tertiary" @click="reset()" v-if="!wasInvited">
                     Cancel
                 </button>
             </div>
@@ -136,6 +135,9 @@
             },
             skip() {
                 this.$emit("skip");
+            },
+            reset() {
+                this.showInviteForm = false;
             },
             switchToInvite() {
                 this.showInviteForm = true;
