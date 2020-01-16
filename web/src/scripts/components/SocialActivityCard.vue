@@ -15,15 +15,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import MemberProfile from "@shared/models/MemberProfile";
-    import CactusMember from "@shared/models/CactusMember";
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
-    import MemberProfileService from '@web/services/MemberProfileService';
-    import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
-    import {PageRoute} from "@shared/PageRoutes";
-    import {formatAsTimeAgo} from "@shared/util/DateUtil";
-    import {QueryParam} from "@shared/util/queryParams";
-    import {titleCase} from "@shared/util/StringUtil";
 
     export default Vue.extend({
         props: {
