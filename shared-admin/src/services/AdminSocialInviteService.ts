@@ -124,6 +124,8 @@ export default class AdminSocialInviteService {
             success: false,
             sentSuccess: false,
             toEmail: toContact.email,
+            toFirstName: toContact.first_name,
+            toLastName: toContact.last_name,
         };
 
 

@@ -26,6 +26,8 @@ export function isSocialInviteRequestSingle(invite: SocialInvitePayload): invite
 
 export interface InvitationSendResult {
     toEmail: string,
+    toFirstName?: string,
+    toLastName?: string,
     success: boolean,
     sentSuccess: boolean,
     error?: any,

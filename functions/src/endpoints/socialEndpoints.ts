@@ -27,6 +27,7 @@ import Logger from "@shared/Logger";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {getAppEmoji} from "@shared/models/ReflectionResponse";
+import {isBlank} from "@shared/util/StringUtil";
 
 const logger = new Logger("socialEndpoints");
 
@@ -94,13 +95,18 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         const sendInviteResults = await Promise.all(sendInviteTasks);
         logger.info("Send Invite task results", stringifyJSON(sendInviteResults, 2));
         const errorEmails: string[] = [];
-        const successEmails: string[] = [];
+        const successContacts: string[] = [];
         const resultMap: { [email: string]: InvitationSendResult } = {};
 
         sendInviteResults.forEach(r => {
             resultMap[r.toEmail] = r;
             if (r.success) {
-                successEmails.push(r.toEmail);
+                const name = `${r.toFirstName} ${r.toLastName}`.trim();
+                if (!isBlank(name)) {
+                    successContacts.push(`${name} (${r.toEmail})`);
+                } else {
+                    successContacts.push(r.toEmail);
+                }
             } else {
                 errorEmails.push(r.toEmail);
             }
@@ -126,7 +132,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         logger.info("found user agent for request", userAgent);
 
         await AdminSlackService.getSharedInstance().sendActivityMessage({
-            text: `${getAppEmoji(payload.app)} :love_letter: ${requestUser.email} sent an email invite to ${successEmails.join(", ")}`,
+            text: `${getAppEmoji(payload.app)} :love_letter: ${requestUser.email} sent an email invite to ${successContacts.join(", ")}`,
             attachments
         });
     } catch (error) {
