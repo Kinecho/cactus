@@ -418,8 +418,15 @@ export default class AdminCactusMemberService {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
         logger.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
+
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
+        
+        if (!member.timeZone) {
+            logger.log("Member's local timezone is unknown. Skipping!");
+            return {updated: false, promptSendTimeUTC: beforeUTC}
+        }
+
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
             timeZone: member.timeZone,
