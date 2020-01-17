@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="shareReflection">
         <shared-reflection-card :response="response"/>
         <h2>Share your reflection with friends</h2>
         <p>Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each other.</p>
@@ -43,4 +43,12 @@
     @import "forms";
     @import "common";
     @import "transitions";
+
+    .shareReflection {
+        padding: 2.4rem;
+    }
+
+    h2 {
+        line-height: 1.2
+    }
 </style>

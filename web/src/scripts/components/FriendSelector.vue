@@ -1,10 +1,10 @@
 <template>
-    <div>
-      <div v-for="connection of connections">
-        <SocialFriend :member="member" :connection="connection" />
-        <input type="checkbox">
-      </div>
-    </div>
+    <ul class="friendSelector">
+        <li class="listItem" v-for="connection of connections">
+            <SocialFriend :member="member" :connection="connection" />
+            <input type="checkbox">
+        </li>
+    </ul>
 </template>
 
 <script lang="ts">
@@ -43,5 +43,17 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
+    .friendSelector {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .listItem {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
 
 </style>
