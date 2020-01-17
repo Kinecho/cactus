@@ -78,10 +78,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 </div>
             </div>
             <div :class="[ 'flip-card', 'back']">
-                <prompt-content-card
+                <reciprocal-sharing
                         v-if="showTradeNote"
-                        :content="sharingContentCard"
-                        :response="reflectionResponse"/>
+                        :response="reflectionResponse"
+                        :member="member" />
                 <div class="auth-card" v-else>
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2>Become a better version of yourself</h2>
@@ -133,6 +133,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
     import {isBlank} from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
+    import PromptContentCardReciprocalSharing from '@components/PromptContentCardReciprocalSharing.vue'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
@@ -151,7 +152,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             MagicLink,
             PromptContentCard,
             ElementDescriptionModal,
-            InputNameModal
+            InputNameModal,
+            ReciprocalSharing: PromptContentCardReciprocalSharing
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
