@@ -9,6 +9,7 @@ import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
 import {AxiosError} from "axios";
 import Logger from "@shared/Logger";
+import {getAppType} from "@web/DeviceUtil";
 
 const logger = new Logger("social.ts");
 
@@ -25,6 +26,7 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
     } else {
         logger.log("current user", currentUser);
         const requestOptions: SocialInviteRequest = {
+            app: getAppType(),
             toContact: contact,
             message: message
         };

@@ -19,13 +19,14 @@ import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
-import {getAuthUser, getAuthUserId} from "@api/util/RequestUtil";
+import {getAppType, getAuthUser, getAuthUserId} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
 import {PageRoute} from "@shared/PageRoutes";
 import {unseenActivityCount} from "@shared/util/SocialUtil";
 import Logger from "@shared/Logger";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import {getAppEmoji} from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("socialEndpoints");
 
@@ -65,52 +66,76 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         return;
     }
 
-    const requestEmail = requestUser.email;
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestEmail);
+    const fromEmail = requestUser.email;
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(fromEmail);
     const memberId = member?.id;
 
     if (!member || !memberId) {
-        logger.error(`No member was found for user with email ${requestEmail} | userId = ${requestUser.uid}`);
+        logger.error(`No member was found for user with email ${fromEmail} | userId = ${requestUser.uid}`);
         resp.sendStatus(403); //forbidden
         return;
     }
 
-    //create the invites
-    const tasks: Promise<InvitationSendResult>[] = toContacts.map(toContact => AdminSocialInviteService.getSharedInstance().createAndSendSocialInvite({
-        member,
-        toContact,
-        message
-    }));
+    const inviteResponse: InvitationResponse = {
+        success: false,
+        toEmails: toContacts.map(c => c.email),
+        fromEmail: fromEmail,
+    };
 
-    const taskResults = await Promise.all(tasks);
-    logger.info("Send Invite task results", stringifyJSON(taskResults, 2));
-    const errorEmails: string[] = [];
-    const successEmails: string[] = [];
-    const resultMap: { [email: string]: InvitationSendResult } = {};
-    taskResults.forEach(r => {
-        resultMap[r.toEmail] = r;
-        if (r.success) {
-            successEmails.push(r.toEmail);
-        } else {
-            errorEmails.push(r.toEmail);
-        }
-    });
     try {
+        //create the invites
+        const sendInviteTasks: Promise<InvitationSendResult>[] = toContacts.map(toContact => AdminSocialInviteService.getSharedInstance().createAndSendSocialInvite({
+            member,
+            toContact,
+            message
+        }));
+
+        const sendInviteResults = await Promise.all(sendInviteTasks);
+        logger.info("Send Invite task results", stringifyJSON(sendInviteResults, 2));
+        const errorEmails: string[] = [];
+        const successEmails: string[] = [];
+        const resultMap: { [email: string]: InvitationSendResult } = {};
+
+        sendInviteResults.forEach(r => {
+            resultMap[r.toEmail] = r;
+            if (r.success) {
+                successEmails.push(r.toEmail);
+            } else {
+                errorEmails.push(r.toEmail);
+            }
+        });
+
+        inviteResponse.results = resultMap;
+        inviteResponse.success = true;
+
+        // create and send slack message
         const attachments: SlackAttachment[] = [];
-        if (errorEmails) {
+        if (errorEmails.length > 0) {
             attachments.push({
                 text: `To Emails With Errors: \n${errorEmails.join("\n")}`,
                 color: "danger"
+            });
+            attachments.push({
+                title: "Send Results",
+                text: `\`\`\`${stringifyJSON(resultMap, 2)}\`\`\``
             })
         }
+
+        const userAgent = getAppType(req);
+        logger.info("found user agent for request", userAgent);
+
         await AdminSlackService.getSharedInstance().sendActivityMessage({
-            text: `:love_letter: ${requestUser.email} sent an email invite to ${successEmails.join(", ")}`,
+            text: `${getAppEmoji(payload.app)} :love_letter: ${requestUser.email} sent an email invite to ${successEmails.join(", ")}`,
             attachments
         });
     } catch (error) {
         Sentry.captureException(error);
         logger.error(error);
+        inviteResponse.success = false;
+        inviteResponse.error = error;
     }
+
+    resp.send(inviteResponse);
 
     return;
 });

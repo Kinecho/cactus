@@ -1,14 +1,17 @@
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 export type SocialInvitePayload = SocialInviteRequest | SocialInviteRequestBatch;
 
 export interface SocialInviteRequest {
+    app: AppType
     toContact: EmailContact,
     message?: string
 }
 
 export interface SocialInviteRequestBatch {
+    app: AppType
     toContacts: EmailContact[],
     message?: string
 }
