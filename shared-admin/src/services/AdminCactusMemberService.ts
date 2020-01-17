@@ -6,7 +6,6 @@ import AdminFirestoreService, {
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
-    DEFAULT_PROMPT_SEND_TIME,
     Field,
     JournalStatus,
     NotificationStatus,
@@ -414,7 +413,7 @@ export default class AdminCactusMemberService {
         return;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
+    async updateMemberSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
         logger.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
@@ -427,19 +426,35 @@ export default class AdminCactusMemberService {
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
 
+        // the member has a default promptSendTimeUTC and a timeZone 
+        // but *not* a local promptSendTime
+        // we can set their local promptSendTime and return
+        if (member.timeZone && 
+            member.promptSendTimeUTC &&
+            !member.promptSendTime) {
+
+            const localPromptSendTime = member.getLocalPromptSendTimeFromUTC();
+            logger.log("Member's local promptSendTime is not set but UTC is. Setting from UTC.");
+            logger.log("PromptSendTime calculated", JSON.stringify(localPromptSendTime));
+            logger.log("Saving change...");
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTime]: localPromptSendTime});
+            logger.log("Saved changes.");
+            return {updated: true, promptSendTimeUTC: beforeUTC, promptSendTime: localPromptSendTime};
+        }
+
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
             timeZone: member.timeZone,
             sendTime: member.promptSendTime
         });
 
-        logger.log("before", JSON.stringify(beforeUTC));
+        logger.log("beforeUTC", JSON.stringify(beforeUTC));
         logger.log("afterUTC", JSON.stringify(afterUTC));
 
         const denverUTCDefault = getSendTimeUTC({
             forDate: new Date(),
             timeZone: 'America/Denver',
-            sendTime: DEFAULT_PROMPT_SEND_TIME,
+            sendTime: {hour: 2, minute: 45},
         });
 
         const {minute: afterMin, hour: afterHour} = afterUTC || {};

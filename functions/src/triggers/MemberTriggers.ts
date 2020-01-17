@@ -25,8 +25,8 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
-        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
-        logger.log(JSON.stringify(result, null, 2));
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(memberAfter);
+        logger.log(JSON.stringify(result, null, 2));        
     });
 
 
