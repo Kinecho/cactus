@@ -18,7 +18,7 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
     if (!currentUser) {
         return {
             success: false,
-            toEmail: contact.email,
+            toEmails: [contact.email],
             error: "Current user is not logged in.",
             message: "Current user is not logged in."
         }
