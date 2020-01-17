@@ -2,6 +2,7 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
+import {getCurrentQuarterHour} from "@shared/util/DateUtil";
 import * as DateUtil from "@shared/util/DateUtil";
 
 export enum JournalStatus {
@@ -62,8 +63,6 @@ export interface PromptSendTime {
 
 export type QuarterHour = 0 | 15 | 30 | 45;
 
-export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
-
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;
@@ -92,7 +91,7 @@ export default class CactusMember extends BaseModel {
     };
     timeZone?: string | null;
     locale?: string | null | undefined;
-    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
+    promptSendTime?: PromptSendTime;
     readonly promptSendTimeUTC?: PromptSendTime;
     referredByEmail?: string;
     signupQueryParams: {
@@ -149,5 +148,12 @@ export default class CactusMember extends BaseModel {
             return DateUtil.getDateObjectForTimezone(date, this.timeZone);
         }
         return DateTime.local().toObject();
+    }
+
+    getDefaultSendTimeUTC(): PromptSendTime {
+        return {
+            hour: DateTime.utc().minus({ hours: 1 }).hour,
+            minute: getCurrentQuarterHour()
+        } as PromptSendTime;
     }
 }
