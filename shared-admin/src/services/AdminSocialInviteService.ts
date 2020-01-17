@@ -3,12 +3,18 @@ import SocialInvite, {SocialInviteField} from "@shared/models/SocialInvite";
 import {Collection} from "@shared/FirestoreBaseModels";
 import CactusMember from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";
+import {InvitationSendResult} from "@shared/types/SocialInviteTypes";
+import {generateReferralLink} from "@shared/util/SocialInviteUtil";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
+import {EmailContact} from "@shared/types/EmailContactTypes";
+import {CactusConfig} from "@shared/CactusConfig";
+import Sentry from "@sentry/node";
 
 const logger = new Logger("AdminSocialInviteService");
 let firestoreService: AdminFirestoreService;
-
 export default class AdminSocialInviteService {
     protected static sharedInstance: AdminSocialInviteService;
+    config: CactusConfig;
 
     static getSharedInstance() {
         if (AdminSocialInviteService.sharedInstance) {
@@ -21,9 +27,13 @@ export default class AdminSocialInviteService {
         return firestoreService.getCollectionRef(Collection.socialInvites);
     }
 
-    static initialize() {
+    static initialize(config: CactusConfig) {
         firestoreService = AdminFirestoreService.getSharedInstance();
-        AdminSocialInviteService.sharedInstance = new AdminSocialInviteService();
+        AdminSocialInviteService.sharedInstance = new AdminSocialInviteService(config);
+    }
+
+    constructor(config: CactusConfig) {
+        this.config = config;
     }
 
     async save(model: SocialInvite): Promise<SocialInvite> {
@@ -103,5 +113,74 @@ export default class AdminSocialInviteService {
         }
 
         return total;
+    }
+
+    async createAndSendSocialInvite(options: { member: CactusMember, toContact: EmailContact, message?: string }): Promise<InvitationSendResult> {
+        const {member, toContact, message} = options;
+        const memberId = member.id;
+        const fromEmail = member.email;
+        const result: InvitationSendResult = {
+            success: false,
+            sentSuccess: false,
+            toEmail: toContact.email,
+        };
+
+
+        if (!memberId || !fromEmail) {
+            result.error = `Either the memberId or memberEmail was not found on the provided cactus member. MemberId = ${member.id} | MemberEmail = ${member.email}`;
+            result.errorMessage = `The sending user was missing required fields memberId or email`;
+            return result;
+        }
+
+        const domain = this.config.web.domain;
+        const protocol = this.config.web.protocol;
+
+        const socialInvite = new SocialInvite();
+
+        socialInvite.senderMemberId = memberId;
+        socialInvite.recipientEmail = toContact.email;
+        await this.save(socialInvite);
+
+        result.socialInviteId = socialInvite.id;
+
+        logger.log(`Successfully saved socialInvite ${socialInvite.id}`);
+
+        const referralLink: string =
+            generateReferralLink({
+                member: member,
+                utm_source: 'cactus.app',
+                utm_medium: 'invite-contact',
+                domain: `${protocol}://${domain}`,
+                social_invite_id: (socialInvite ? socialInvite.id : undefined)
+            });
+
+        try {
+            const sentSuccess = await AdminSendgridService.getSharedInstance().sendInvitation({
+                toEmail: toContact.email,
+                fromEmail: fromEmail,
+                fromName: member ? member.getFullName() : undefined,
+                message: message,
+                link: referralLink
+            });
+
+            result.sentSuccess = sentSuccess;
+            result.success = true;
+
+            if (sentSuccess) {
+                // update the SocialInvite record with the sentAt date
+                socialInvite.sentAt = new Date();
+                await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+            } else {
+                logger.error('Unable to send invite for SocialConnectionRequest ' + socialInvite.id + 'via email.');
+            }
+
+        } catch (error) {
+            Sentry.captureException(error);
+            logger.error(`Error creating/sending invitation to ${toContact.email}. Sender: ${fromEmail} (${memberId})`, error);
+            result.error = error;
+
+        }
+
+        return result;
     }
 }

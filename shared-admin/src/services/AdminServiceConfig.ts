@@ -43,7 +43,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
     AdminEmailReplyService.initialize();
-    AdminSocialInviteService.initialize();
+    AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();
     AdminSocialActivityService.initialize();
     AdminSocialConnectionService.initialize();

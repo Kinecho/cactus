@@ -1,29 +1,33 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
-import {InvitationResponse} from "@shared/api/SignupEndpointTypes";
-import {SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import {
+    InvitationResponse,
+    InvitationSendResult,
+    isSocialInviteRequestBatch,
+    isSocialInviteRequestSingle,
+    SocialInvitePayload
+} from "@shared/types/SocialInviteTypes";
 import {ActivitySummaryResponse, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
 import {
     SocialConnectionRequestNotification,
     SocialConnectionRequestNotificationResult
 } from "@shared/types/SocialConnectionRequestTypes";
-import SocialInvite from "@shared/models/SocialInvite";
-import AdminSlackService from "@admin/services/AdminSlackService";
-import {getConfig, getHostname} from "@admin/config/configService";
+import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
+import {getHostname} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
 import {getAuthUser, getAuthUserId} from "@api/util/RequestUtil";
 import AdminSocialInviteService from "@admin/services/AdminSocialInviteService";
-import {generateReferralLink} from '@shared/util/SocialInviteUtil';
 import {PageRoute} from "@shared/PageRoutes";
 import {unseenActivityCount} from "@shared/util/SocialUtil";
 import Logger from "@shared/Logger";
+import {EmailContact} from "@shared/types/EmailContactTypes";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("socialEndpoints");
-const Config = getConfig();
 
 const app = express();
 app.use(cors({origin: true}));
@@ -36,7 +40,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         return
     }
 
-    const payload: SocialInviteRequest | undefined | null = req.body;
+    const payload: SocialInvitePayload | undefined = req.body || undefined;
     logger.log("socialEndpoints.send-invite", payload);
 
     if (!payload) {
@@ -45,76 +49,63 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         return
     }
 
-    const {toContact, message} = payload;
+    const {message} = payload;
+    const toContacts: EmailContact[] = [];
+    if (isSocialInviteRequestBatch(payload)) {
+        toContacts.push(...payload.toContacts)
+    } else if (isSocialInviteRequestSingle(payload)) {
+        toContacts.push(payload.toContact)
+    }
 
-    if (!toContact) {
+
+    if (toContacts.length === 0) {
         logger.error("socialEndpoints.send-invite: Email to send to was not provided in payload");
-        const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmail: ""};
+        const errorResponse: InvitationResponse = {success: false, error: "No 'to' email provided", toEmails: []};
         resp.send(errorResponse);
         return;
     }
 
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestUser.email);
+    const requestEmail = requestUser.email;
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(requestEmail);
+    const memberId = member?.id;
 
-    const response: InvitationResponse = {
-        success: true,
-        toEmail: toContact.email,
-        fromEmail: requestUser.email,
-        message: message
-    };
-
-    const domain = Config.web.domain;
-    const protocol = Config.web.protocol;
-
-    const socialInvite = new SocialInvite();
-    if (member) {
-        socialInvite.senderMemberId = member.id;
+    if (!member || !memberId) {
+        logger.error(`No member was found for user with email ${requestEmail} | userId = ${requestUser.uid}`);
+        resp.sendStatus(403); //forbidden
+        return;
     }
-    socialInvite.recipientEmail = toContact.email;
-    await AdminSocialInviteService.getSharedInstance().save(socialInvite);
-    logger.log(socialInvite.id);
 
-    const referralLink: string =
-        generateReferralLink({
-            member: member,
-            utm_source: 'cactus.app',
-            utm_medium: 'invite-contact',
-            domain: `${protocol}://${domain}`,
-            social_invite_id: (socialInvite ? socialInvite.id : undefined)
-        });
+    //create the invites
+    const tasks: Promise<InvitationSendResult>[] = toContacts.map(toContact => AdminSocialInviteService.getSharedInstance().createAndSendSocialInvite({
+        member,
+        toContact,
+        message
+    }));
 
-    try {
-        const sentSuccess = await AdminSendgridService.getSharedInstance().sendInvitation({
-            toEmail: toContact.email,
-            fromEmail: requestUser.email,
-            fromName: member ? member.getFullName() : undefined,
-            message: message,
-            link: referralLink
-        });
-
-        if (sentSuccess) {
-            // update the SocialInvite record with the sentAt date
-            socialInvite.sentAt = new Date();
-            await AdminSocialInviteService.getSharedInstance().save(socialInvite);
+    const taskResults = await Promise.all(tasks);
+    logger.info("Send Invite task results", stringifyJSON(taskResults, 2));
+    const errorEmails: string[] = [];
+    const successEmails: string[] = [];
+    const resultMap: { [email: string]: InvitationSendResult } = {};
+    taskResults.forEach(r => {
+        resultMap[r.toEmail] = r;
+        if (r.success) {
+            successEmails.push(r.toEmail);
         } else {
-            logger.error('Unable to send invite for SocialConnectionRequest ' + socialInvite.id + 'via email.');
+            errorEmails.push(r.toEmail);
         }
-
-        resp.send(response);
-    } catch (error) {
-        Sentry.captureException(error);
-        logger.error(error);
-
-        resp.status(500).send({
-            toEmail: toContact.email,
-            sendSuccess: false,
-            error: error,
-        });
-    }
-
+    });
     try {
+        const attachments: SlackAttachment[] = [];
+        if (errorEmails) {
+            attachments.push({
+                text: `To Emails With Errors: \n${errorEmails.join("\n")}`,
+                color: "danger"
+            })
+        }
         await AdminSlackService.getSharedInstance().sendActivityMessage({
-            text: `:love_letter: ${requestUser.email} sent an email invite to ${toContact.email}`
+            text: `:love_letter: ${requestUser.email} sent an email invite to ${successEmails.join(", ")}`,
+            attachments
         });
     } catch (error) {
         Sentry.captureException(error);
@@ -210,7 +201,7 @@ app.get("/activity-feed-summary", async (req: functions.https.Request | any, res
         resp.sendStatus(401);
         return
     }
-    
+
     try {
         const memberStart = new Date().getTime();
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(requestUserId);
