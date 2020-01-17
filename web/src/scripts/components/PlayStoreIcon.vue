@@ -10,6 +10,7 @@
     import Vue from "vue";
     import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes'
+    import {isAndroidApp, isAndroidDevice} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
     import Logger from "@shared/Logger";
     const logger = new Logger("PlayStoreIcon.vue");
@@ -41,23 +42,13 @@
         methods: {
             showToDevice(): boolean {
                 if (this.onlyAndroid && 
-                    this.isAndroidDevice() && 
-                    !this.isAndroidAppWebview()) {
+                    isAndroidDevice() && 
+                    !isAndroidApp()) {
                     return true;
                 } else if (!this.onlyAndroid) {
                     return true;
                 }
                 return false;
-            },
-            isAndroidDevice(): boolean {
-                const expression = new RegExp("android","i");
-                logger.log('checking if android user agent ' + navigator.userAgent);
-                logger.log(expression.test(navigator.userAgent))
-                return expression.test(navigator.userAgent);
-            },
-            isAndroidAppWebview(): boolean {
-                const expression = new RegExp(this.appUserAgent + "\/[0-9\.]+$");
-                return expression.test(navigator.userAgent);
             },
             trackEvent(url: string) {
                 gtag('event', 'click', {

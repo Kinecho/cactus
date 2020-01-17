@@ -10,6 +10,7 @@
     import Vue from "vue";
     import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes'
+    import {isIosDevice} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
 
     export default Vue.extend({
@@ -33,15 +34,12 @@
         },
         methods: {
             showToDevice(): boolean {
-                if (this.onlyiOS && this.isIosDevice()) {
+                if (this.onlyiOS && isIosDevice()) {
                     return true;
                 } else if (!this.onlyiOS) {
                     return true;
                 }
                 return false;
-            },
-            isIosDevice(): boolean {
-                return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             },
             trackEvent(url: string) {
                 gtag('event', 'click', {
