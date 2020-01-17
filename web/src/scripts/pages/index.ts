@@ -6,6 +6,7 @@ import {PageRoute} from "@shared/PageRoutes";
 import {setupNavigation} from "@web/NavigationUtil";
 import PremiumPricing from "@components/PremiumPricing.vue";
 import AppStoreIcon from "@components/AppStoreIcon.vue";
+import PlayStoreIcon from "@components/PlayStoreIcon.vue";
 import StandardFooter from "@components/StandardFooter.vue";
 
 import {commonInit} from "@web/common";
@@ -60,8 +61,22 @@ new Vue({
 new Vue({
     el: "#app-store-top",
     template: `
-        <AppStoreIcon/>`,
+        <AppStoreIcon :onlyiOS="true" />`,
     components: {AppStoreIcon}
+});
+
+new Vue({
+    el: "#play-store",
+    template: `
+        <PlayStoreIcon/>`,
+    components: {PlayStoreIcon}
+});
+
+new Vue({
+    el: "#play-store-top",
+    template: `
+        <PlayStoreIcon :onlyAndroid="true" />`,
+    components: {PlayStoreIcon}, 
 });
 
 new Vue({
