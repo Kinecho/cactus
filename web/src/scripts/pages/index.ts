@@ -61,7 +61,7 @@ new Vue({
 new Vue({
     el: "#app-store-top",
     template: `
-        <AppStoreIcon :onlyiOS="true" />`,
+        <AppStoreIcon :onlyiOS="true" :onlyMobile="true" />`,
     components: {AppStoreIcon}
 });
 
@@ -75,7 +75,7 @@ new Vue({
 new Vue({
     el: "#play-store-top",
     template: `
-        <PlayStoreIcon :onlyAndroid="true" />`,
+        <PlayStoreIcon :onlyAndroid="true" :onlyMobile="true"/>`,
     components: {PlayStoreIcon}, 
 });
 

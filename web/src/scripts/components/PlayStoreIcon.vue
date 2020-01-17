@@ -1,5 +1,5 @@
 <template lang="html">
-    <div class="play-store-icon" v-if="showToDevice()">
+    <div :class="['play-store-icon', {'only-mobile':onlyMobile}]" v-if="showToDevice()">
         <a @click.prevent="trackEvent(playStoreUrl); return false;" :href="playStoreUrl">
             <img class="googleBadge" src="/assets/google_play_store_badge.svg" alt="Get it on Google Play" />
         </a>
@@ -17,6 +17,10 @@
     export default Vue.extend({
         props: {
             onlyAndroid: {
+                type: Boolean,
+                default: false
+            },
+            onlyMobile: {
                 type: Boolean,
                 default: false
             }
@@ -81,6 +85,12 @@
 
     .googleBadge {
         height: 5rem;
+    }
+
+    @include r(768) {
+      .play-store-icon.only-mobile {
+        display: none;
+      }
     }
 
 </style>
