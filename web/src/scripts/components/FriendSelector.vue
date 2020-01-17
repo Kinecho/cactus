@@ -2,7 +2,7 @@
     <div>
       <div v-for="connection of connections">
         <SocialFriend :member="member" :connection="connection" />
-        <CheckBox />
+        <input type="checkbox">
       </div>
     </div>
 </template>
@@ -13,12 +13,10 @@
     import SocialConnection from "@shared/models/SocialConnection";
     import SocialFriend from '@components/SocialFriend.vue'
     import {getIntegerFromStringBetween} from '@shared/util/StringUtil';
-    import CheckBox from "@components/CheckBox.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService'
 
     export default Vue.extend({
         components: {
-          CheckBox,
           SocialFriend
         },
         props: {
