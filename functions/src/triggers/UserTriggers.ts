@@ -4,7 +4,10 @@ import User from "@shared/models/User";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
 import {destructureDisplayName, getProviderDisplayName} from "@shared/util/StringUtil";
-import CactusMember from "@shared/models/CactusMember";
+import CactusMember, {
+        getDefaultSendTimeUTC,
+        PromptSendTime
+    } from "@shared/models/CactusMember";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
@@ -164,6 +167,7 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.firstName = firstName;
     cactusMember.signupAt = new Date();
     cactusMember.signupConfirmedAt = new Date();
+    cactusMember.promptSendTimeUTC = getDefaultSendTimeUTC();
     cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
 
