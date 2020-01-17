@@ -12,6 +12,7 @@
             <section class="needsApp" v-if="true">
                 <h4>Need to install Cactus?</h4>
                 <AppStoreIcon />
+                <PlayStoreIcon />
             </section>
 
         </div>
@@ -25,13 +26,15 @@
     import {appendQueryParams} from '@shared/util/StringUtil';
     import NavBar from "@components/NavBar.vue";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
+    import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("MagicLinkAppContinue.vue");
     export default Vue.extend({
         components: {
             NavBar,
-            AppStoreIcon
+            AppStoreIcon,
+            PlayStoreIcon
         },
         created() {
             logger.log("magic link app continue");
