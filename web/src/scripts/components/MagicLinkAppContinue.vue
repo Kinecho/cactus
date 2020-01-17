@@ -84,7 +84,8 @@
                     padding: 4rem 0;
                 }
             }
-            .app-store-icon {
+            .app-store-icon,
+            .play-store-icon {
                 margin-top: 1rem;
             }
 
