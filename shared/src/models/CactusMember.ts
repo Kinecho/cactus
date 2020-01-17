@@ -92,7 +92,7 @@ export default class CactusMember extends BaseModel {
     timeZone?: string | null;
     locale?: string | null | undefined;
     promptSendTime?: PromptSendTime;
-    readonly promptSendTimeUTC?: PromptSendTime;
+    readonly promptSendTimeUTC?: PromptSendTime = getDefaultPromptSendTimeUTC();
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,
@@ -150,7 +150,7 @@ export default class CactusMember extends BaseModel {
         return DateTime.local().toObject();
     }
 
-    getDefaultSendTimeUTC(): PromptSendTime {
+    getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
             hour: DateTime.utc().minus({ hours: 1 }).hour,
             minute: getCurrentQuarterHour()

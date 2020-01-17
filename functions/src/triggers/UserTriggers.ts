@@ -167,7 +167,6 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.firstName = firstName;
     cactusMember.signupAt = new Date();
     cactusMember.signupConfirmedAt = new Date();
-    cactusMember.promptSendTimeUTC = getDefaultSendTimeUTC();
     cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
 
