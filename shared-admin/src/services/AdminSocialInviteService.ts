@@ -9,6 +9,7 @@ import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {CactusConfig} from "@shared/CactusConfig";
 import Sentry from "@sentry/node";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("AdminSocialInviteService");
 let firestoreService: AdminFirestoreService;
@@ -115,8 +116,8 @@ export default class AdminSocialInviteService {
         return total;
     }
 
-    async createAndSendSocialInvite(options: { member: CactusMember, toContact: EmailContact, message?: string }): Promise<InvitationSendResult> {
-        const {member, toContact, message} = options;
+    async createAndSendSocialInvite(options: { member: CactusMember, toContact: EmailContact, message?: string, appType?: AppType }): Promise<InvitationSendResult> {
+        const {member, toContact, message, appType} = options;
         const memberId = member.id;
         const fromEmail = member.email;
         const result: InvitationSendResult = {
@@ -136,7 +137,7 @@ export default class AdminSocialInviteService {
         const protocol = this.config.web.protocol;
 
         const socialInvite = new SocialInvite();
-
+        socialInvite.sourceApp = appType;
         socialInvite.senderMemberId = memberId;
         socialInvite.recipientEmail = toContact.email;
         await this.save(socialInvite);

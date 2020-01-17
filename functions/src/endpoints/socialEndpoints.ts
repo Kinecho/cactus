@@ -87,6 +87,7 @@ app.post("/send-invite", async (req: functions.https.Request | any, resp: functi
         const sendInviteTasks: Promise<InvitationSendResult>[] = toContacts.map(toContact => AdminSocialInviteService.getSharedInstance().createAndSendSocialInvite({
             member,
             toContact,
+            appType: payload.app,
             message
         }));
 
