@@ -45,7 +45,13 @@
     @import "transitions";
 
     .shareReflection {
+        background-color: $beige; //this is likely temporary until the card is moved.
         padding: 2.4rem;
+
+        @include r(600) {
+            max-height: 60rem;
+            overflow: auto;
+        }
     }
 
     h2 {
