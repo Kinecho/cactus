@@ -27,7 +27,8 @@ const DEFAULT_BATCH_SIZE = 500;
 
 export interface UpdateSendPromptUTCResult {
     updated: boolean,
-    promptSendTimeUTC?: PromptSendTime
+    promptSendTimeUTC?: PromptSendTime,
+    promptSendTime?: PromptSendTime
 }
 
 export default class AdminCactusMemberService {
