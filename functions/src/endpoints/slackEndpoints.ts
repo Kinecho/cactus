@@ -54,7 +54,7 @@ const signatureHandler = (req: functions.https.Request | any, resp: functions.Re
 app.use(cors({origin: true}));
 app.use(signatureHandler);
 
-app.post("/commands/stats", async (req: functions.https.Request|any, resp: functions.Response) => {
+app.post("/commands/stats", async (req: functions.https.Request | any, resp: functions.Response) => {
     const payload: CommandPayload = req.body;
     const payloadText = payload.text;
     const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
@@ -173,7 +173,7 @@ async function submitJobAndReturn(options: { job: JobRequest, immediate: boolean
         try {
             await processJob(job);
         } catch (error) {
-            response.status(200).send({text: `Error Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\`\n\`${error.message || error}\``});
+            response.status(200).send({text: `Error Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\`\n\`${JSON.stringify(error.message || error, null, 2)}\``});
         }
     }
     return;

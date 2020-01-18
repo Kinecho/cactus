@@ -27,6 +27,7 @@ import {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {isValidEmail} from "@shared/util/StringUtil";
+import {CactusElement} from "@shared/models/CactusElement";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();
@@ -72,7 +73,9 @@ export async function processJob(job: JobRequest) {
         case JobType.activeUsers:
             task = processActiveUsers(job);
             break;
-
+        case JobType.memberStats:
+            task = processMemberStats(job);
+            break;
     }
     if (task) {
         const message = await task;
@@ -89,7 +92,7 @@ export async function processJob(job: JobRequest) {
         }
 
         lastAttachment = {
-            text: "Task completed",
+            // text: lastAttachment.text || "Task completed",
             ts: slackTimestamp,
             footer: `\`${job.type}\` took ${prettyMilliseconds(duration)}`,
             ...lastAttachment,
@@ -125,6 +128,16 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
         };
     }
 
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    const memberId = member?.id;
+    const timeZone = member?.timeZone || undefined;
+    if (!memberId) {
+        return {
+            text: `:face_with_symbols_on_mouth: Unable to find a member with email ${email}`,
+            response_type: SlackResponseType.ephemeral
+        }
+    }
+
     const [stats] = await Promise.all([
         AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
             memberId,
@@ -145,30 +158,34 @@ async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse
 
     const fields: SlackAttachmentField[] = [
         {
-            name: "Streak",
+            title: "Time Zone",
+            value: `${timeZone || "Not Found on Member"}`,
+            short: true
+        },
+        {
+            title: "Streak",
             value: `${stats.currentStreakDays}`,
             short: true,
         },
         {
-            name: "Total Reflections",
+            title: "Total Reflections",
             value: `${stats.totalCount}`,
             short: true
         },
         {
-            name: "Minutes Reflected",
+            title: "Minutes Reflected",
             value: `${millisecondsToMinutes(stats.totalDurationMs)}`,
             short: true,
         },
         {
-            name: "Elements",
+            title: "Elements",
             value: `${Object.keys(stats.elementAccumulation).map(key => {
-                return `*${key}*: ${stats.elementAccumulation[key]}\n`
-            })}`
+                return `${key}: ${stats.elementAccumulation[key as CactusElement]}`
+            }).join("\n")}`
         }
     ];
 
     const attachments = [{
-        title: `Stats for ${eail}`,
         fields: fields,
         color: AttachmentColor.info,
     }];
