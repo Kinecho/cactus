@@ -2,7 +2,6 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
-import {getCurrentQuarterHour} from "@shared/util/DateUtil";
 import * as DateUtil from "@shared/util/DateUtil";
 
 export enum JournalStatus {
@@ -156,7 +155,7 @@ export default class CactusMember extends BaseModel {
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
             hour: DateTime.utc().minus({ hours: 1 }).hour,
-            minute: getCurrentQuarterHour()
+            minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }
 
