@@ -51,6 +51,7 @@ export enum Field {
     stats = "stats",
     stats_reflections = "reflections",
     activityStatus = "activityStatus",
+    promptSendTime = "promptSendTime",
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
