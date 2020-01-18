@@ -30,7 +30,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     //Firestore
-    AdminFirestoreService.initialize(app);
+    AdminFirestoreService.initialize(app, config);
+
+    //model services
     AdminSendgridService.initialize(config);
     AdminSlackService.initialize(config);
     MailchimpService.initialize(config);

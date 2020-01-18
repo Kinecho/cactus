@@ -8,7 +8,7 @@ import {generateReferralLink} from "@shared/util/SocialInviteUtil";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import {EmailContact} from "@shared/types/EmailContactTypes";
 import {CactusConfig} from "@shared/CactusConfig";
-import Sentry from "@sentry/node";
+import * as Sentry from "@sentry/node";
 import {AppType} from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("AdminSocialInviteService");
