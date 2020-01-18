@@ -63,6 +63,8 @@ export interface PromptSendTime {
 
 export type QuarterHour = 0 | 15 | 30 | 45;
 
+export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
     static Field = Field;

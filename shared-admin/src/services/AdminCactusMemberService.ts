@@ -10,7 +10,8 @@ import CactusMember, {
     JournalStatus,
     NotificationStatus,
     PromptSendTime,
-    ReflectionStats
+    ReflectionStats,
+    DEFAULT_PROMPT_SEND_TIME
 } from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
@@ -454,7 +455,7 @@ export default class AdminCactusMemberService {
         const denverUTCDefault = getSendTimeUTC({
             forDate: new Date(),
             timeZone: 'America/Denver',
-            sendTime: {hour: 2, minute: 45},
+            sendTime: DEFAULT_PROMPT_SEND_TIME,
         });
 
         const {minute: afterMin, hour: afterHour} = afterUTC || {};
