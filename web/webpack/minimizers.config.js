@@ -5,7 +5,7 @@ const minimizers = [
     new OptimizeCSSAssetsPlugin({sourceMap: true}),
     new TerserPlugin({
         sourceMap: true,
-        cache: false,
+        cache: true,
         parallel: true,
         terserOptions: {
             safari10: true,
