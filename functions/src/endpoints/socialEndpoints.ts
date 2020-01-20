@@ -14,7 +14,7 @@ import {
     SocialConnectionRequestNotificationResult
 } from "@shared/types/SocialConnectionRequestTypes";
 import AdminSlackService, {SlackAttachment} from "@admin/services/AdminSlackService";
-import {getHostname} from "@admin/config/configService";
+import {getConfig, getHostname} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -30,7 +30,7 @@ import {getAppEmoji} from "@shared/models/ReflectionResponse";
 import {isBlank} from "@shared/util/StringUtil";
 
 const logger = new Logger("socialEndpoints");
-
+const Config = getConfig();
 const app = express();
 app.use(cors({
     origin: Config.allowedOrigins,
