@@ -1,4 +1,5 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 export enum SocialInviteField {
     senderMemberId = "senderMemberId",
@@ -21,4 +22,5 @@ export default class SocialInvite extends BaseModel {
     recipientMemberId?: string;
     sentAt?: Date;
     source?: SocialInviteSource;
+    sourceApp?: AppType;
 }

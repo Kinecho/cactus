@@ -56,13 +56,14 @@ export abstract class FirebaseCommand implements Command {
             }
         }
 
-        const app = await this.getFirebaseApp();
-        const firestoreService = await this.getFirestoreService();
-
         const project = this.project || Project.STAGE;
         console.log("Fetching config for ", project);
         const config = await getCactusConfig(project);
         this.config = config;
+
+        const app = await this.getFirebaseApp();
+        const firestoreService = await this.getFirestoreService();
+
         console.log("initializing all services");
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
@@ -84,7 +85,7 @@ export abstract class FirebaseCommand implements Command {
         }
 
         const app = await this.getFirebaseApp();
-        AdminFirestoreService.initialize(app);
+        AdminFirestoreService.initialize(app, this.config);
         this.firestoreService = AdminFirestoreService.getSharedInstance();
         return this.firestoreService;
     }
