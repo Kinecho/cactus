@@ -17,9 +17,8 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
-import Logger from "@shared/Logger";
 import {getConfig} from "@admin/config/configService";
-
+import Logger from "@shared/Logger";
 
 const logger = new Logger("inboundApp");
 const app = express();
