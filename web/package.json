@@ -4,7 +4,7 @@
     "description": "Static website for cactus app",
     "main": "index.js",
     "scripts": {
-        "build:deploy": "npm run clean && npm run logo && NODE_OPTIONS=--max_old_space_size=8000 webpack --config webpack/webpack.deploy.config.js",
+        "build:deploy": "npm run clean && npm run logo && NODE_OPTIONS=--max_old_space_size=6000 webpack --config webpack/webpack.deploy.config.js",
         "build:firebase": "npm run build:deploy && npm run copy",
         "build:prod": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.deploy.config.js --progress",
         "build:analyze": "npm run logo && GCLOUD_PROJECT=cactus-app-prod NODE_OPTIONS=--max_old_space_size=4096 webpack --config webpack/webpack.config.test-prod.js --progress",
