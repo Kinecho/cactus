@@ -8,6 +8,9 @@ import MemberProfileService from '@web/services/MemberProfileService';
 import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
 import {AxiosError} from "axios";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("social.ts");
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
     const currentUser = getAuth().currentUser;
@@ -21,7 +24,7 @@ export async function sendInvite(contact: EmailContact, message: string): Promis
             message: "Current user is not authenticated."
         }
     } else {
-        console.log(currentUser);
+        logger.log("current user", currentUser);
         const requestOptions: SocialInviteRequest = {
             toContact: contact,
             message: message
@@ -48,7 +51,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
     const toMember = await MemberProfileService.sharedInstance.getByMemberId(socialConnectionRequest.friendMemberId);
 
     if (!currentUser || !toMember?.email || !socialConnectionRequest.id) {
-        console.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.');
+        logger.error('User, member, or SocialConnectionRequest was missing while sending a Friend Request.');
         return {
             success: false,
             socialConnectionRequest: socialConnectionRequest.id,
@@ -64,7 +67,7 @@ export async function notifyFriendRequest(socialConnectionRequest: SocialConnect
             const headers = await getAuthHeaders();
             return await request.post(Endpoint.notifyFriendRequest, requestOptions, {headers});
         } catch (e) {
-            console.error("Failed to notify friend request. The API call threw an error", e);
+            logger.error("Failed to notify friend request. The API call threw an error", e);
             return {
                 success: false,
                 socialConnectionRequest: socialConnectionRequest.id,
@@ -78,7 +81,7 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
     const currentUser = getAuth().currentUser;
 
     if (!currentUser || !member?.id) {
-        console.error('No user found for getSocialActivity request');
+        logger.error('No user found for getSocialActivity request');
         return {
             success: false,
             message: "You must be logged in to make this request."
@@ -91,7 +94,7 @@ export async function getSocialActivity(member: CactusMember): Promise<SocialAct
             const apiResponse = await request.get(Endpoint.activityFeed, {headers});
             return apiResponse.data;
         } catch (e) {
-            console.error("Failed get activity feed. The API call threw an error", e);
+            logger.error("Failed get activity feed. The API call threw an error", e);
             return {
                 success: false,
                 message: "Unexpected error",
@@ -107,9 +110,9 @@ export async function fetchActivityFeedSummary(): Promise<ActivitySummaryRespons
         return response.data;
     } catch (error) {
         if (error.isAxiosError) {
-            console.error("Failed to fetch activity summary", (error as AxiosError).response?.data)
+            logger.error("Failed to fetch activity summary", (error as AxiosError).response?.data)
         } else {
-            console.log("Failed to fetch activity summary", error);
+            logger.log("Failed to fetch activity summary", error);
         }
         return;
     }

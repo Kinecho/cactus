@@ -6,24 +6,25 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import CactusMember from "@shared/models/CactusMember";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import AdminSlackService from "@admin/services/AdminSlackService";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("MemberStatsJob");
 export async function onPublish(message: Message, context: functions.EventContext) {
     try {
-        console.log("Starting MemberStats job");
+        logger.log("Starting MemberStats job");
 
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize: 500,
             onData: async (members, batchNumber) => {
-                console.log(`Processing batch ${batchNumber}`);
+                logger.log(`Processing batch ${batchNumber}`);
                 const tasks: Promise<void>[] = members.map(handleMember);
                 await Promise.all(tasks);
-                console.log(`finished batch ${batchNumber}`);
+                logger.log(`finished batch ${batchNumber}`);
                 return;
             }
         });
 
     } catch (error) {
-        console.error("Failed to process MemberStats job", error);
+        logger.error("Failed to process MemberStats job", error);
         Sentry.captureException(error);
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: An error occurred while running \`MemberStatsJob\`\n,\`\`\`${JSON.stringify(error)}\`\`\``)
     }
@@ -39,8 +40,8 @@ async function handleMember(member: CactusMember) {
         try {
             const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
                 memberId,
-                timeZone
-            }, {transaction: t});
+                timeZone,
+            }, {transaction: t, queryName: "calculateMemberStats"});
 
             if (stats) {
                 await AdminCactusMemberService.getSharedInstance().setReflectionStats({
@@ -50,7 +51,7 @@ async function handleMember(member: CactusMember) {
             }
             return {success: true};
         } catch (error) {
-            console.error("Failed to update member stats for memberId", memberId);
+            logger.error("Failed to update member stats for memberId", memberId);
             return {success: false};
         }
     });

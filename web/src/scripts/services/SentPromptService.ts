@@ -1,5 +1,6 @@
 import FirestoreService, {
-    ListenerUnsubscriber, PageListenerResult,
+    ListenerUnsubscriber,
+    PageListenerResult,
     PageResult,
     Query,
     QueryCursor,
@@ -9,7 +10,11 @@ import SentPrompt from "@shared/models/SentPrompt";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {convertDateToTimestamp, toTimestamp} from "@shared/util/FirestoreUtil";
+import {toTimestamp} from "@shared/util/FirestoreUtil";
+import {DocObserverOptions} from "@shared/types/FirestoreTypes";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("SentPromptService");
 
 export interface SentPromptPageOptions {
     memberId: string,
@@ -23,6 +28,7 @@ export interface SentPromptPageListenerOptions {
     memberId: string,
     beforeOrEqualTo?: Date,
     limit?: number,
+    onlyCompleted: boolean,
     lastResult?: PageResult<SentPrompt>,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
@@ -32,6 +38,7 @@ export interface FutureSentPromptPageListenerOptions {
     since: Date,
     limit?: number,
     lastResult?: PageResult<SentPrompt>,
+    onlyCompleted: boolean,
     onData: (pageResult: PageListenerResult<SentPrompt>) => void
 }
 
@@ -59,7 +66,7 @@ export default class SentPromptService {
         try {
             return await this.firestoreService.getById(id, SentPrompt);
         } catch (e) {
-            console.error("Failed to get sent prompt by id", e);
+            logger.error("Failed to get sent prompt by id", e);
         }
 
     }
@@ -71,7 +78,7 @@ export default class SentPromptService {
     async getSentPrompt(promptId: string): Promise<SentPrompt | undefined> {
         const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
         if (!member) {
-            console.warn("Unable to get current member. Can not delete the sentQuestion");
+            logger.warn("Unable to get current member. Can not delete the sentQuestion");
             return;
         }
 
@@ -80,7 +87,7 @@ export default class SentPromptService {
                 .where(SentPrompt.Fields.promptId, "==", promptId);
             return this.firestoreService.getFirst(query, SentPrompt);
         } catch (e) {
-            console.error("failed to get sent prompt by promptId", e);
+            logger.error("failed to get sent prompt by promptId", e);
         }
 
     }
@@ -91,20 +98,22 @@ export default class SentPromptService {
             try {
                 return this.delete(sentPrompt.id);
             } catch (e) {
-                console.error(`Failed to delete prompt for promptId=${promptId} and sentPromptId=${sentPrompt.id}`)
+                logger.error(`Failed to delete prompt for promptId=${promptId} and sentPromptId=${sentPrompt.id}`)
             }
 
         }
     }
 
     observeFuturePrompts(options: FutureSentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, since, lastResult, limit, onData} = options;
+        const {memberId, since, lastResult, limit, onData, onlyCompleted} = options;
 
-        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+        let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
             .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
             .where(SentPrompt.Fields.firstSentAt, ">", toTimestamp(since));
 
-
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
+        }
 
         return this.firestoreService.observePaginated(query, {
             limit: limit,
@@ -115,15 +124,19 @@ export default class SentPromptService {
     }
 
     observePage(options: SentPromptPageListenerOptions): ListenerUnsubscriber {
-        const {memberId, beforeOrEqualTo, lastResult, limit, onData} = options;
+        const {memberId, beforeOrEqualTo, lastResult, limit, onData, onlyCompleted} = options;
 
         let query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
-            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc)
 
         if (beforeOrEqualTo) {
             const beforeTimestamp = toTimestamp(beforeOrEqualTo);
-            console.log("beforeOrEqualTo Timestamp", beforeTimestamp);
+            logger.log("beforeOrEqualTo Timestamp", beforeTimestamp);
             query = query.where(SentPrompt.Fields.firstSentAt, "<=", beforeOrEqualTo)
+        }
+
+        if (onlyCompleted) {
+            query = query.where(SentPrompt.Fields.completed, "==", true)
         }
 
         return this.firestoreService.observePaginated(query, {
@@ -140,6 +153,15 @@ export default class SentPromptService {
 
         options.queryName = "observeSentPromptsForCactusMemberId=" + memberId;
         return this.firestoreService.observeQuery(query, SentPrompt, options);
+    }
+
+    observeByPromptId(memberId: string, promptId: string, options: DocObserverOptions<SentPrompt>): ListenerUnsubscriber {
+        const query = this.getCollectionRef().where(SentPrompt.Fields.cactusMemberId, "==", memberId)
+            .where(SentPrompt.Fields.promptId, "==", promptId)
+            .orderBy(SentPrompt.Fields.firstSentAt, QuerySortDirection.desc);
+
+        options.queryName = "observeByPromptId" + promptId;
+        return this.firestoreService.observeFirst(query, SentPrompt, options);
     }
 
     async getPrompts(options: { limit?: number, cursor?: QueryCursor }): Promise<SentPrompt[]> {

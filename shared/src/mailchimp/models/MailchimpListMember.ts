@@ -8,7 +8,9 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("MailchimpListMember.ts");
 
 export default class MailchimpListMember implements ListMember {
     id?: string;
@@ -55,10 +57,10 @@ export default class MailchimpListMember implements ListMember {
     }
 
     addMergeField(field: MergeField, value?: String | Number) {
-        console.log("setting merge field", field, value);
+        logger.log("setting merge field", field, value);
         // this.merge_fields.set(field, value);
         this.merge_fields[field] = value;
-        console.log("merge fields to json", JSON.stringify(this.merge_fields));
+        logger.log("merge fields to json", JSON.stringify(this.merge_fields));
     }
 
     removeMergeField(field: MergeField) {
@@ -75,7 +77,7 @@ export default class MailchimpListMember implements ListMember {
         }
 
         data = convertDateToTimestamp(this);
-        // console.log("data after converting to dates", data);
+        // logger.log("data after converting to dates", data);
 
         Object.keys(data).forEach(key => {
             if (data[key] === undefined) {
@@ -96,7 +98,7 @@ export default class MailchimpListMember implements ListMember {
         }
 
         data = convertDateToJSON(this);
-        // console.log("data after converting to dates", data);
+        // logger.log("data after converting to dates", data);
 
         Object.keys(data).forEach(key => {
             if (data[key] === undefined) {

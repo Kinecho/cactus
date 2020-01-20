@@ -9,7 +9,9 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import {QueryParam} from '@shared/util/queryParams'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("AuthButton.vue");
 
     export default Vue.extend({
         props: {
@@ -34,7 +36,7 @@
         },
         destroyed() {
           if (this.authUnsubscriber){
-              console.log("Unsubscribing auth listener for AuthButton");
+              logger.log("Unsubscribing auth listener for AuthButton");
               this.authUnsubscriber()
           }
         },

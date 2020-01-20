@@ -42,6 +42,9 @@
     import DropdownMenu from "@components/DropdownMenu.vue";
     import EditReflection from "@components/ReflectionResponseTextEdit.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
+    import CopyService from "@shared/copy/CopyService";
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
@@ -63,7 +66,7 @@
             editedResponses: { id: string | undefined, text: string }[],
             responseMedium: ResponseMedium,
             prompt: ReflectionPrompt,
-            sentPrompt: SentPrompt,
+            sentPrompt: SentPrompt | undefined,
             responses: ReflectionResponse[]|undefined,
             responsesLoaded: boolean,
         } {
@@ -80,7 +83,11 @@
         },
         computed: {
             promptDate(): string | undefined {
-                return formatDate(this.sentPrompt.firstSentAt, "LLLL d, yyyy")
+                if (this.sentPrompt?.firstSentAt) {
+                    return formatDate(this.sentPrompt.firstSentAt, copy.settings.dates.longFormat);
+                } else {
+                    return formatDate(new Date(), copy.settings.dates.longFormat);
+                }
             },
             linkItems(): {
                 title: string,

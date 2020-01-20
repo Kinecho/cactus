@@ -1,6 +1,10 @@
-import Vue, {DirectiveOptions} from "vue";
+import {DirectiveOptions} from "vue";
+import Logger from "@shared/Logger";
+
+
 
 export function clickOutsideDirective():DirectiveOptions{
+    const logger = new Logger("vueDirectives.clickOutsideDirective");
     return {
         bind: function (el, binding, vNode) {
             // Provided expression must evaluate to a function.
@@ -11,7 +15,7 @@ export function clickOutsideDirective():DirectiveOptions{
                     warn += `Found in component '${compName}'`
                 }
 
-                console.warn(warn)
+                logger.warn(warn)
             }
             // Define Handler and cache it on the element
             const bubble = binding.modifiers.bubble;

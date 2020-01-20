@@ -5,7 +5,9 @@ import {Unsubscribe} from "@web/firebase";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import SocialConnectionService from "@web/services/SocialConnectionService";
 import SocialConnectionRequest, {SocialConnectionRequestFields} from "@shared/models/SocialConnectionRequest";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("SocialConnectionRequestService");
 
 export default class SocialConnectionRequestService {
     public static sharedInstance = new SocialConnectionRequestService();
@@ -102,7 +104,7 @@ export default class SocialConnectionRequestService {
             connectionRequest.confirmedAt = new Date();
             return await this.save(connectionRequest);
         } catch (error) {
-            console.error("Failed to create connections", error);
+            logger.error("Failed to create connections", error);
             return;
         }
     }

@@ -27,13 +27,13 @@
                         Journal</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
-                    <span class="navLabel">Home</span>
+                    <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </a>
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
-                    <span class="navLabel">Activity</span>
+                    <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
@@ -69,7 +69,9 @@
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
@@ -205,11 +207,11 @@
             },
             socialHref(): string {
                 return PageRoute.SOCIAL;
-            }
+            },
         },
         methods: {
             async logout(): Promise<void> {
-                console.log('Logging out...');
+                logger.log('Logging out...');
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
@@ -230,7 +232,7 @@
                 if (content) content.scrollIntoView();
             },
             async updateActivityCount() {
-                console.log("Refreshing activity count");
+                logger.log("Refreshing activity count");
                 const member = this.member;
                 if (!member) {
                     return;
@@ -238,7 +240,7 @@
 
                 const activitySummary = await fetchActivityFeedSummary();
                 if (!activitySummary) {
-                    console.error("Failed to fetch activity summary");
+                    logger.error("Failed to fetch activity summary");
                     this.activityBadgeCount = 0;
                     return;
                 }

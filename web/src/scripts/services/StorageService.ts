@@ -1,5 +1,6 @@
 import {BaseModel} from "@shared/FirestoreBaseModels";
 import {fromJSON} from "@shared/util/FirestoreUtil";
+import Logger from "@shared/Logger";
 
 export enum LocalStorageKey {
     emailForSignIn = 'emailForSignIn',
@@ -12,7 +13,10 @@ export enum LocalStorageKey {
     memberStatsEnabled = "memberStatsEnabled",
     contactsImportEnabled = "contactsImportEnabled",
     activityBadgeCount = "activityBadgeCount",
+    androidFCMToken = "androidFCMToken",
 }
+
+const logger = new Logger("StorageService.ts");
 
 export default class StorageService {
 
@@ -20,7 +24,7 @@ export default class StorageService {
         try {
             localStorage.clear();
         } catch (error) {
-            console.error("StorageService Failed to clear storage", error)
+            logger.error("StorageService Failed to clear storage", error)
         }
     }
 
@@ -28,7 +32,7 @@ export default class StorageService {
         if (id) {
             const map = this.getEncodedMap(key);
             delete map[id];
-            console.log(`removed ${id} from `, map);
+            logger.log(`removed ${id} from `, map);
             this.saveJSON(key, map);
         } else {
             localStorage.removeItem(key);
@@ -43,7 +47,7 @@ export default class StorageService {
         try {
             return localStorage.getItem(key) || undefined;
         } catch (error) {
-            console.error(`Failed to get item ${key} from local storage`);
+            logger.error(`Failed to get item ${key} from local storage`);
             return;
         }
     }
@@ -65,6 +69,14 @@ export default class StorageService {
         localStorage.setItem(key, `${value}`);
     }
 
+    static saveString(key: LocalStorageKey, value: string) {
+        localStorage.setItem(key, value);
+    }
+
+    static getString(key: LocalStorageKey): string | undefined {
+        return localStorage.getItem(key) || undefined;
+    }
+
     static getNumber(key: LocalStorageKey, defaultValue?: number): number | undefined {
         const storedValue = this.getItem(key);
         if (storedValue === undefined || storedValue === null || storedValue.trim() === "") {
@@ -77,7 +89,7 @@ export default class StorageService {
                 return num
             }
         } catch (error) {
-            console.error("An error occurred while parsing to number for value: ", storedValue)
+            logger.error("An error occurred while parsing to number for value: ", storedValue)
         }
         return defaultValue
     }
@@ -102,7 +114,7 @@ export default class StorageService {
             }
 
         } catch (error) {
-            console.error("Failed to save to localstorage", error);
+            logger.error("Failed to save to localstorage", error);
         }
     }
 
@@ -127,7 +139,7 @@ export default class StorageService {
             }
 
         } catch (error) {
-            console.error("Failed to fetch model from localstorage", error);
+            logger.error("Failed to fetch model from localstorage", error);
         }
     }
 
@@ -142,7 +154,7 @@ export default class StorageService {
                     decodedMap[id] = model;
                 }
             } catch (error) {
-                console.error(`StorageService: ${key}: Decoding error for modelId ${id} `)
+                logger.error(`StorageService: ${key}: Decoding error for modelId ${id} `)
             }
         });
 

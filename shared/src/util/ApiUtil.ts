@@ -1,3 +1,7 @@
+import Logger from "@shared/Logger";
+
+const logger = new Logger("ApiUtil.ts");
+
 // Dates are serialized in TZ format, example: '1981-12-20T04:00:14.000Z'.
 const datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
@@ -5,7 +9,7 @@ export function deserializeJson(payload: string) {
     try {
         return  JSON.parse(payload, jsonReviver);
     } catch (error) {
-        console.error("Unable to parse JSON string", error);
+        logger.error("Unable to parse JSON string", error);
     }
 }
 

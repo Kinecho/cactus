@@ -35,9 +35,11 @@
     import 'vue-multiselect/dist/vue-multiselect.min.css'
     import CopyService from '@shared/copy/CopyService'
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("TimePicker.vue");
     const copy = CopyService.getSharedInstance().copy;
-
+    
     export default Vue.extend({
         components: {
             Multiselect,
@@ -63,7 +65,6 @@
                 } else if (this.amPm === "AM" && h === 0) {
                     h = 12
                 }
-                console.log("input hour is...", h);
                 return h
             },
             amPmValue(): "AM" | "PM" {
@@ -87,7 +88,7 @@
                 return `${minute}`
             },
             handleHourChange(newValue: number | undefined) {
-                console.log("hour changed changed", newValue);
+                logger.log("hour changed changed", newValue);
                 // const newValue = "";
 
                 let h = newValue || 0;
@@ -100,7 +101,7 @@
                 this.$forceUpdate();
             },
             handleMinuteChange(newValue: number | undefined) {
-                console.log("minuteChanged", newValue);
+                logger.log("minuteChanged", newValue);
                 this.$emit('change', {hour: this.hour, minute: newValue});
                 this.$forceUpdate()
             },

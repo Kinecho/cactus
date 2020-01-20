@@ -3,7 +3,7 @@
         <section class="content">
             <div v-if="processedContent.text" class="text">
                 <a v-if="processedContent.showElementIcon" class="element-container" @click.prevent="showCactusModal(cactusElement)">
-                    <div class="element-icon" >
+                    <div class="element-icon">
                         <img :src="'/assets/images/cacti/' + cactusElement + '-3.svg'" alt=""/>
                     </div>
                     <h4 class="label">{{cactusElement}}</h4>
@@ -32,7 +32,9 @@
                         <p class="directLink">Here's your direct link to share:</p>
                         <copy-text-input v-if="shareableLinkUrl" :text="shareableLinkUrl" :queryParams="shareableLinkParams" :editable="false" buttonStyle="primary"/>
                         <div v-if="nativeShareEnabled" class="sharing">
-                            <button class="btn secondary" @click="shareNatively()"><img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share</button>
+                            <button class="btn secondary" @click="shareNatively()">
+                                <img class="shareIcon" src="/assets/images/share.svg" alt="Share Icon"/>Share
+                            </button>
                         </div>
                     </div>
                     <button v-else class="button primary getLink"
@@ -98,8 +100,15 @@
             <!--      END Link      -->
 
             <!--    START Elements  -->
-            <prompt-content-card-elements v-if="processedContent.elements" />
+            <prompt-content-card-elements v-if="processedContent.elements"/>
             <!--    END Elements    -->
+
+            <!--    START Invite Friend  -->
+            <prompt-content-card-invite-friend
+                v-if="processedContent.invite"
+                @skip="next()"
+                @disableNavigation="disableNavigation()" />
+            <!--    END Invite Friend    -->
 
             <!--    START Grow -->
             <div class="grow-container" v-if="isReflectScreen">
@@ -250,11 +259,11 @@
         </section>
 
         <element-description-modal
-            :cactusElement = "cactusModalElement"
-            :showModal="cactusModalVisible"
-            :navigationEnabled="true"
-            :showIntroCard="false"
-            @close="hideCactusModal"/>
+                :cactusElement="cactusModalElement"
+                :showModal="cactusModalVisible"
+                :navigationEnabled="true"
+                :showIntroCard="false"
+                @close="hideCactusModal"/>
     </div>
 </template>
 
@@ -282,12 +291,16 @@
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import PromptContentCardElements from "@components/PromptContentCardElements.vue";
+    import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
+    import Logger from "@shared/Logger";
+    import {gtag} from "@web/analytics"
 
+    const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
 
@@ -302,6 +315,7 @@
             SnackbarContent,
             SharedReflectionCard,
             PromptContentCardElements,
+            PromptContentCardInviteFriend,
             ElementDescriptionModal
         },
         props: {
@@ -349,7 +363,7 @@
         },
         watch: {
             saved(isSaved) {
-                console.log("saved changed", isSaved);
+                logger.log("saved changed", isSaved);
                 if (this.showSavingTimeout) {
                     window.clearTimeout(this.showSavingTimeout);
                     this.showSavingTimeout = undefined;
@@ -435,6 +449,7 @@
                 })
             },
             async createSharableLink() {
+                this.trackShareLink();
                 this.creatingLink = true;
                 let saved = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
                 this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(saved);
@@ -494,6 +509,12 @@
                 this.cactusModalVisible = false;
                 this.enableNavigation()
             },
+            trackShareLink() {
+                gtag('event', 'click', {
+                    'event_category': "prompt_content",
+                    'event_action': "shared_reflection"
+                });
+            }
         }
     })
 </script>
@@ -505,6 +526,7 @@
     @import "common";
     @import "transitions";
 
+    $cardPadding: 2.4rem;
     .content-card {
         background: $beige no-repeat;
         display: flex;
@@ -512,15 +534,22 @@
         flex-grow: 1;
         min-height: 100vh;
         justify-content: center;
-        padding: 2.4rem;
+        padding: $cardPadding;
         width: 100%;
+
+        &.type-reflect {
+            padding-bottom: 0;
+
+            .lowerActions {
+                padding-bottom: $cardPadding;
+            }
+        }
 
         @include r(600) {
             border-radius: 12px;
-            box-shadow:
-                0 11px 15px -7px rgba(0,0,0,.16),
-                0 24px 38px 3px rgba(0,0,0,.1),
-                0 9px 46px 8px rgba(0,0,0,.08);
+            box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
+            0 24px 38px 3px rgba(0, 0, 0, .1),
+            0 9px 46px 8px rgba(0, 0, 0, .08);
             min-height: 100%;
             justify-content: space-between;
             position: relative;
@@ -556,7 +585,12 @@
     }
 
     .content, .lowerActions {
+        background-color: $beige;
         z-index: 2;
+
+        .type-share_reflection & {
+            background-color: transparent;
+        }
     }
 
     .backgroundImage {
@@ -858,13 +892,14 @@
     }
 
     .lowerActions {
-        bottom: 3.2rem;
+        bottom: 0;
         left: 2.4rem;
         position: sticky;
         right: 2.4rem;
 
         @include r(600) {
-            position: absolute;
+            /*Removing absolute positioning to help with devices with a software keyboard (i.e. tablets) */
+            /*position: absolute;*/
         }
     }
 
@@ -923,6 +958,7 @@
 
         &.hasValue {
             border-width: 1px;
+            background-color: $white;
         }
 
         &:hover + .textareaPlaceholder .wiggle {

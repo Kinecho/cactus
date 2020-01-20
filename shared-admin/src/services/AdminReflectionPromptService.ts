@@ -3,8 +3,9 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt, {Field} from "@shared/models/ReflectionPrompt";
 import {Campaign} from "@shared/mailchimp/models/MailchimpTypes";
 import {getDateFromISOString} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
 
-
+const logger = new Logger("AdminReflectionPromptService");
 let firestoreService: AdminFirestoreService;
 
 export default class AdminReflectionPromptService {
@@ -46,7 +47,7 @@ export default class AdminReflectionPromptService {
 
         const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
         if (size > 1) {
-            console.warn("Found more than one question prompt for given campaign id");
+            logger.warn("Found more than one question prompt for given campaign id");
         }
 
         const [prompt] = results;
@@ -63,7 +64,7 @@ export default class AdminReflectionPromptService {
 
         const {results, size} = await firestoreService.executeQuery(query, ReflectionPrompt);
         if (size > 1) {
-            console.warn("Found more than one question prompt for given campaign id");
+            logger.warn("Found more than one question prompt for given campaign id");
         }
 
         const [prompt] = results;
@@ -82,7 +83,7 @@ export default class AdminReflectionPromptService {
             } else if (reflectionPrompt.reminderCampaign && reflectionPrompt.reminderCampaign.id === campaign.id) {
                 reflectionPrompt.reminderCampaign = campaign;
             } else {
-                console.warn("Unable to find matching campaign info on reflection prompt", reflectionPrompt.id, "for campaignId", campaign.id);
+                logger.warn("Unable to find matching campaign info on reflection prompt", reflectionPrompt.id, "for campaignId", campaign.id);
                 return reflectionPrompt;
             }
 

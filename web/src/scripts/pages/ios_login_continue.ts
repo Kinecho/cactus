@@ -2,7 +2,9 @@
 import MagicLinkAppContinue from "@components/MagicLinkAppContinue.vue"
 import Vue from "vue";
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("ios_login_continue.ts");
 commonInit();
 
 new Vue({
@@ -21,6 +23,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

@@ -3,7 +3,9 @@ import Vue from "vue";
 
 // import Page from "@components/YOUR_PAGE"
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("YOUR_PAGE");
 commonInit();
 
 new Vue({
@@ -17,6 +19,6 @@ new Vue({
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

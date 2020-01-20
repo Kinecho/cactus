@@ -1,4 +1,9 @@
-import ReflectionResponse from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {
+    AppType,
+    getResponseMedium,
+    ResponseMedium,
+    ResponseMediumType
+} from "@shared/models/ReflectionResponse";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
 import * as firebase from "firebase";
 
@@ -158,3 +163,12 @@ describe("Add date log", () => {
         expect(model.reflectionDates).toHaveLength(3);
     });
 });
+
+test("Get Response Medium for Type", () => {
+    expect(getResponseMedium({app: AppType.ANDROID, type: ResponseMediumType.JOURNAL})).toEqual(ResponseMedium.JOURNAL_ANDROID);
+    expect(getResponseMedium({app: AppType.WEB, type: ResponseMediumType.JOURNAL})).toEqual(ResponseMedium.JOURNAL_WEB);
+    expect(getResponseMedium({app: AppType.ANDROID, type: ResponseMediumType.PROMPT})).toEqual(ResponseMedium.PROMPT_ANDROID);
+    expect(getResponseMedium({app: AppType.IOS, type: ResponseMediumType.JOURNAL})).toEqual(ResponseMedium.JOURNAL_IOS);
+    expect(getResponseMedium({app: AppType.IOS, type: ResponseMediumType.EMAIL})).toEqual(ResponseMedium.EMAIL);
+    expect(getResponseMedium({app: AppType.ANDROID, type: ResponseMediumType.EMAIL})).toEqual(ResponseMedium.EMAIL);
+})

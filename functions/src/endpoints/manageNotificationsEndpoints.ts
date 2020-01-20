@@ -6,7 +6,9 @@ import {QueryParam} from "@shared/util/queryParams";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
 // const config = getConfig();
 // Automatically allow cross-origin requests
@@ -15,7 +17,6 @@ const app = express();
 // expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
 // Neil Poulin, 2020-01-08
 app.use(cors({origin: true}));
-
 
 app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, res: express.Response) => {
     const mailchimpUniqueId = req.query.mcuid;
@@ -49,8 +50,8 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
     }
 
 
-    console.log("mailchimpFullId", mailchimpFullId);
-    console.log("mailchimp unique id", mailchimpUniqueId);
+    logger.log("mailchimpFullId", mailchimpFullId);
+    logger.log("mailchimp unique id", mailchimpUniqueId);
 
 
     if (!email) {
@@ -63,7 +64,7 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
         listMember = await MailchimpService.getSharedInstance().getMemberByUniqueEmailId(mailchimpUniqueId);
     }
 
-    console.log("list member status", listMember?.status);
+    logger.log("list member status", listMember?.status);
 
     const isUnsubscribed = listMember?.status === ListMemberStatus.unsubscribed;
 

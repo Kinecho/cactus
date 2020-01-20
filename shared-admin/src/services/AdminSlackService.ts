@@ -7,6 +7,9 @@ import {
     ChatPostMessageArguments
 } from "@slack/client";
 import axios from "axios";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("AdminSlackService");
 
 /**
  * @typedef {{
@@ -111,7 +114,7 @@ export default class AdminSlackService {
      */
     async sendActivityNotification(message: string | IncomingWebhookSendArguments): Promise<SlackMessageResult> {
         const isEnabled = this.enabled();
-        console.log("slack enabled: ", isEnabled);
+        logger.log("slack enabled: ", isEnabled);
         if (!isEnabled) {
             return Promise.resolve({enabled: false, success: true});
         }
@@ -199,7 +202,7 @@ export default class AdminSlackService {
         }
 
         if (response.error) {
-            console.error("Failed to post slack message", response.error);
+            logger.error("Failed to post slack message", response.error);
         }
     }
 
@@ -207,9 +210,9 @@ export default class AdminSlackService {
     async sendToResponseUrl(responseURL: string, message: SlashCommandResponse) {
         try {
             const response = await axios.post(responseURL, message);
-            console.log("send to response url response success", response.data);
+            logger.log("send to response url response success", response.data);
         } catch (error) {
-            console.error("failed to send to response url", error.code, error.response)
+            logger.error("failed to send to response url", error.code, error.response)
         }
     }
 
@@ -240,11 +243,11 @@ export default class AdminSlackService {
             }
 
             if (response.error) {
-                console.error("Failed to post slack message", response.error);
+                logger.error("Failed to post slack message", response.error);
             }
 
         } catch (error) {
-            console.error(`Failed to send slack message to ${channelName}`, error);
+            logger.error(`Failed to send slack message to ${channelName}`, error);
         }
     }
 
