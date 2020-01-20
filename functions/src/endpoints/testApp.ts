@@ -17,8 +17,9 @@ import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/Custo
 import Logger from "@shared/Logger";
 
 const logger = new Logger("testApp");
+const Config = getConfig();
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({origin: Config.allowedOrigins}));
 app.get('/', (req, res) => {
     res.status(200).json({status: 'ok', queryParams: req.query});
 });

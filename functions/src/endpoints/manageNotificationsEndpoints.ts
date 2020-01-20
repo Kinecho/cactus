@@ -10,7 +10,12 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
+// const config = getConfig();
+// Automatically allow cross-origin requests
 
+// TODO: This didn't setup the CORS with allowedOrigins because we
+// expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
+// Neil Poulin, 2020-01-08
 app.use(cors({origin: true}));
 
 app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, res: express.Response) => {

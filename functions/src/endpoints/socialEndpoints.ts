@@ -32,7 +32,9 @@ import {isBlank} from "@shared/util/StringUtil";
 const logger = new Logger("socialEndpoints");
 
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({
+    origin: Config.allowedOrigins,
+}));
 
 app.post("/send-invite", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUser = await getAuthUser(req);
