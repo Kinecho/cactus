@@ -46,9 +46,16 @@ export const updateReflectionStatsTrigger = functions.firestore
             logger.warn("No member ID was found in the document data", data);
             return;
         }
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        if (!member) {
+            logger.warn("Member details were not able to be loaded", data);
+            return;
+        }
+        const timeZone = member.timeZone || undefined;
 
         const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
             memberId,
+            timeZone
         });
         if (reflectionStats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
