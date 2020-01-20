@@ -37,6 +37,15 @@ export function getUserAgent(): string {
     return navigator.userAgent
 }
 
+export function isAndroidDevice(): boolean {
+    const expression = new RegExp("android","i");
+    return expression.test(getUserAgent());
+}
+
+export function isIosDevice(): boolean {
+    return /iPad|iPhone|iPod/.test(getUserAgent()) && !window.MSStream;
+}
+
 export function isAndroidApp(): boolean {
     return navigator.userAgent === Config.androidUserAgent;
 }
