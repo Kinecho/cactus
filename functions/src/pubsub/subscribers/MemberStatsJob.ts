@@ -66,7 +66,7 @@ function processResults(results: MemberStatResult[], agg: MemberStatResultAggreg
 interface MemberStatResult {
     success: boolean,
     memberId?: string,
-    memberEmail: string,
+    memberEmail?: string,
     error?: string,
     stats?: ReflectionStats
 }
