@@ -4,6 +4,7 @@
         <h2 class="header">Share your reflection with&nbsp;friends</h2>
         <p class="subtext">Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each&nbsp;other.</p>
         <friend-selector :member="member" />
+        <button class="shareBtn">Share</button>
     </div>
 </template>
 
@@ -68,6 +69,18 @@
     .subtext {
         margin-bottom: 1.6rem;
         opacity: .8;
+    }
+
+    .shareBtn {
+        bottom: 0;
+        margin-top: 2.4rem;
+        position: sticky;
+        width: 100%;
+
+        @include r(600) {
+            min-width: 60%;
+            width: auto;
+        }
     }
 
 </style>
