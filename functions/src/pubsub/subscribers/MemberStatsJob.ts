@@ -6,6 +6,7 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
+import AdminFirestoreService, {Batch} from "@admin/services/AdminFirestoreService";
 
 const logger = new Logger("MemberStatsJob");
 
@@ -13,41 +14,11 @@ interface MemberStatResultAggregation {
     failedEmails: string[],
     successCount: number,
     errorCount: number,
+    error?: string,
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    const start = new Date().getTime();
-    try {
-        logger.log("Starting MemberStats job");
-        const resultAgg: MemberStatResultAggregation = {
-            failedEmails: [],
-            successCount: 0,
-            errorCount: 0
-        };
-
-
-        await AdminCactusMemberService.getSharedInstance().getAllBatch({
-            batchSize: 500,
-            onData: async (members, batchNumber) => {
-                logger.log(`Processing batch ${batchNumber}`);
-                const tasks: Promise<MemberStatResult>[] = members.map(handleMember);
-                const results = await Promise.all(tasks);
-                processResults(results, resultAgg);
-                logger.log(`finished batch ${batchNumber} with ${results.length} results`);
-                return;
-            }
-        });
-        const end = new Date().getTime();
-        console.log("Finished all batches. Results:", JSON.stringify(resultAgg));
-        await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${end - start}ms`
-            + `\n\`\`\`${JSON.stringify(resultAgg)}\`\`\``);
-
-    } catch (error) {
-        logger.error("Failed to process MemberStats job", error);
-        Sentry.captureException(error);
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: An error occurred while running \`MemberStatsJob\`\n,\`\`\`${JSON.stringify(error)}\`\`\``)
-    }
-
+    await runMemberStatsJob();
     return "Completed member stats job";
 }
 
@@ -73,7 +44,7 @@ interface MemberStatResult {
     stats?: ReflectionStats
 }
 
-async function handleMember(member: CactusMember): Promise<MemberStatResult> {
+async function handleMember(member: CactusMember, batch: Batch): Promise<MemberStatResult> {
     const memberId = member.id;
     const result: MemberStatResult = {memberId, memberEmail: member.email, success: false, error: undefined};
     if (!memberId) {
@@ -90,7 +61,8 @@ async function handleMember(member: CactusMember): Promise<MemberStatResult> {
         if (stats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({
                 memberId,
-                stats: stats
+                stats: stats,
+                batch: batch,
             });
         }
         result.success = true;
@@ -101,4 +73,43 @@ async function handleMember(member: CactusMember): Promise<MemberStatResult> {
         result.error = error.message || `Failed to update member stats for memberId=${memberId}`;
         return result;
     }
+}
+
+export async function runMemberStatsJob(): Promise<MemberStatResultAggregation> {
+    const start = new Date().getTime();
+    const resultAgg: MemberStatResultAggregation = {
+        failedEmails: [],
+        successCount: 0,
+        errorCount: 0
+    };
+    try {
+        logger.log("Starting MemberStats job");
+
+
+        await AdminCactusMemberService.getSharedInstance().getAllBatch({
+            batchSize: 500,
+            onData: async (members, batchNumber) => {
+                const batch = AdminFirestoreService.getSharedInstance().getBatch();
+                logger.log(`Processing batch ${batchNumber}`);
+                const tasks: Promise<MemberStatResult>[] = members.map(member => handleMember(member, batch));
+                const results = await Promise.all(tasks);
+                const batchCommitResult = await batch.commit();
+                logger.info("Batch commit result size: ", batchCommitResult.length);
+                processResults(results, resultAgg);
+                logger.log(`finished batch ${batchNumber} with ${results.length} results`);
+                return;
+            }
+        });
+        const end = new Date().getTime();
+        console.log("Finished all batches. Results:", JSON.stringify(resultAgg));
+        await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${end - start}ms`
+            + `\n\`\`\`${JSON.stringify(resultAgg)}\`\`\``);
+
+    } catch (error) {
+        logger.error("Failed to process MemberStats job", error);
+        Sentry.captureException(error);
+        resultAgg.error = `Uncaught exception: ${error.message}`;
+        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: An error occurred while running \`MemberStatsJob\`\n,\`\`\`${JSON.stringify(error)}\`\`\``)
+    }
+    return resultAgg
 }

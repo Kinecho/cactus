@@ -3,7 +3,8 @@ import AdminFirestoreService, {
     DefaultGetOptions,
     GetBatchOptions,
     GetOptions,
-    SaveOptions
+    SaveOptions,
+    Batch
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -64,7 +65,7 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setReflectionStats(options: { memberId: string, stats: ReflectionStats }, queryOptions?: SaveOptions): Promise<void> {
+    async setReflectionStats(options: { memberId: string, stats: ReflectionStats, batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
         const {memberId, stats} = options;
         const doc: DocumentReference = this.getCollectionRef().doc(memberId);
         const data: Partial<CactusMember> = {
@@ -75,6 +76,8 @@ export default class AdminCactusMemberService {
         try {
             if (queryOptions?.transaction) {
                 await queryOptions?.transaction.set(doc, data, {merge: true})
+            } else if (options.batch) {
+                options.batch.set(doc, data, {merge: true})
             } else {
                 await doc.set(data, {merge: true});
             }

@@ -14,6 +14,7 @@ import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPro
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
+import {runMemberStatsJob} from "@api/pubsub/subscribers/MemberStatsJob";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("testApp");
@@ -54,6 +55,12 @@ app.get("/fcm", async (req, res) => {
     }
     return;
 
+});
+
+app.get("/stats", async (req, res) => {
+    const result = await runMemberStatsJob();
+    res.send(result);
+    return;
 });
 
 app.get("/operation", async (req, res) => {

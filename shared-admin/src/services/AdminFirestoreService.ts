@@ -11,6 +11,7 @@ export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
+export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
@@ -51,13 +52,15 @@ export const DefaultGetOptions: GetOptions = {
 
 export interface SaveOptions {
     setUpdatedAt?: boolean,
-    transaction?: Transaction
+    transaction?: Transaction,
+    batch?: Batch,
 }
 
 
 export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
     setUpdatedAt: true,
-    transaction: undefined
+    transaction: undefined,
+    batch: undefined,
 };
 
 export function getDefaultOptions(): SaveOptions {
@@ -150,6 +153,10 @@ export default class AdminFirestoreService {
         }, options)
     }
 
+    getBatch(): Batch {
+        return this.firestore.batch();
+    }
+
     async save<T extends BaseModel>(model: T, opts: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
         try {
             const options = {...DEFAULT_SAVE_OPTIONS, ...opts};
@@ -172,6 +179,8 @@ export default class AdminFirestoreService {
             // logger.log("Data to save:", JSON.stringify(data));
             if (options.transaction) {
                 await options.transaction.set(doc, data, {merge: true})
+            } else if (options.batch){
+                await options.batch.set(doc, data, {merge: true})
             } else {
                 await doc.set(data, {merge: true});
             }
