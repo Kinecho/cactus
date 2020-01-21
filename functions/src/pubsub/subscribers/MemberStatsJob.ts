@@ -34,11 +34,11 @@ export async function onPublish(message: Message, context: functions.EventContex
                 const results = await Promise.all(tasks);
                 processResults(results, resultAgg);
                 logger.log(`finished batch ${batchNumber} with ${results.length} results`);
-                return;
+                return results;
             }
         });
         const end = new Date().getTime();
-
+        console.log("Finished all batches. Results:", JSON.stringify(resultAgg));
         await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${end - start}ms`
             + `\n\`\`\`${JSON.stringify(resultAgg)}\`\`\``);
 

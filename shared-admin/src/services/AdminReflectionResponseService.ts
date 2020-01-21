@@ -220,7 +220,7 @@ export default class AdminReflectionResponseService {
             }
 
             if (!timeZone) {
-                logger.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
+                // logger.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
             }
 
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
