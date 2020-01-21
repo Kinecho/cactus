@@ -7,7 +7,7 @@
             <div class="info">
                 <p class="name" v-if="memberName">{{memberName}}</p>
                 <p class="email" v-if="!memberName">{{memberEmail}}</p>
-                <p class="date">{{shareDate}}</p>
+                <p class="date" v-if="!obscureCard">{{shareDate}}</p>
             </div>
         </div>
         <skeleton-bar v-if="obscureCard" :lines="4" size="small"/>
