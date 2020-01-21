@@ -79,20 +79,24 @@
 
     .listItem {
         align-items: center;
+        border-radius: 1.2rem;
         display: flex;
         justify-content: space-between;
         list-style: none;
         margin: 0;
-        padding: 0 .8rem 0 1.6rem;
+        padding: 0 .8rem;
         position: relative;
         text-align: left;
         transition: background-color ease-in .3s;
+        user-select: none;
+
+        &:active,
+        &:hover {
+            background-color: darken($beige, 3%);
+        }
 
         @include r(600) {
-            &:hover {
-                background-color: darken($beige, 3%);
-                border-radius: 1.2rem;
-            }
+            padding: 0 .8rem 0 1.6rem;
         }
     }
 
@@ -103,5 +107,6 @@
 
     .itemLabel {
         flex-grow: 1;
+        max-width: 88%;
     }
 </style>

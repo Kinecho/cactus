@@ -1,8 +1,8 @@
 <template>
     <div class="shareReflection">
         <shared-reflection-card :response="response"/>
-        <h2 class="header">Share your reflection with friends</h2>
-        <p class="subtext">Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each other.</p>
+        <h2 class="header">Share your reflection with&nbsp;friends</h2>
+        <p class="subtext">Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each&nbsp;other.</p>
         <friend-selector :member="member" />
     </div>
 </template>
@@ -55,12 +55,18 @@
     }
 
     .header {
-        line-height: 1.1;
+        font-size: 3.2rem;
+        line-height: 1.2;
         margin-bottom: .8rem;
+        padding-top: 1.6rem;
+
+        @include r(600) {
+            padding-top: 0;
+        }
     }
 
     .subtext {
-        margin-bottom: 2.4rem;
+        margin-bottom: 1.6rem;
         opacity: .8;
     }
 
