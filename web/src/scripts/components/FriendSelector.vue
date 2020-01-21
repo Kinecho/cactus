@@ -1,16 +1,17 @@
 <template>
     <ul class="friendSelector">
         <li class="listItem" v-for="connection of connections">
-            <input class="itemCheckbox" @click="toggleFriend(connection.friendMemberId, $event)" type="checkbox" :id="connection.friendMemberId">
             <label :for="connection.friendMemberId">
                 <SocialFriend :member="member" :connection="connection" />
             </label>
+            <CheckBox :inputId="connection.friendMemberId" v-on:change="function(emittedValue) { toggleFriend(connection.friendMemberId, emittedValue) }" />
         </li>
     </ul>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
+    import CheckBox from "@components/CheckBox.vue";
     import CactusMember from "@shared/models/CactusMember";
     import SocialConnection from "@shared/models/SocialConnection";
     import SocialFriend from '@components/SocialFriend.vue'
@@ -22,7 +23,8 @@
 
     export default Vue.extend({
         components: {
-          SocialFriend
+          SocialFriend,
+          CheckBox
         },
         props: {
             member: {type: Object as () => CactusMember}
@@ -42,27 +44,24 @@
             }
         },
         methods: {
-          toggleFriend(id: string, e: MouseEvent) {
-            if (e.target) {
-              const checkbox = e.target as HTMLInputElement;
-              if (checkbox?.checked) {
-                this.selectFriend(id);
-              } else {
-                this.deselectFriend(id);
-              }
-              logger.log(this.selectedFriends);
+            toggleFriend(id: string, isTrue: boolean) {
+                if (isTrue) {
+                    this.selectFriend(id);
+                } else {
+                    this.deselectFriend(id);
+                }
+                logger.log(this.selectedFriends);
+              },
+            selectFriend(id: string) {
+                this.selectedFriends.push(id);
+            },
+            deselectFriend(id: string) {
+                this.selectedFriends = this.selectedFriends.filter(
+                    function(selectedFriendId: string){
+                        return selectedFriendId != id;
+                    }
+                );
             }
-          },
-          selectFriend(id: string) {
-            this.selectedFriends.push(id);
-          },
-          deselectFriend(id: string) {
-            this.selectedFriends = this.selectedFriends.filter(
-              function(selectedFriendId: string){
-                return selectedFriendId != id;
-              }
-            );
-          }
         }
     })
 </script>

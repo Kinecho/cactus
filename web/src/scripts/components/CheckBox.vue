@@ -1,8 +1,8 @@
 <template>
     <label :class="['checkbox-container', {disabled}]">
-        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
+        <input :id="inputId" type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
         <span class="checkmark"></span>
-        <span class="checkbox-label">{{ label }}</span>
+        <span class="checkbox-label" v-if="label">{{ label }}</span>
     </label>
 </template>
 <script lang="ts">
@@ -26,10 +26,8 @@
                 type: [Boolean, String, Array],
             },
             label: {
-                type: String,
-                required: true,
-            }
-            ,
+                type: String
+            },
             // We set `true-value` and `false-value` to the default true and false so
             // we can always use them instead of checking whether or not they are set.
             // Also can use camelCase here, but hyphen-separating the attribute name
@@ -42,6 +40,9 @@
                 type: [Boolean, String],
                 default: false,
             },
+            inputId: {
+                type: String
+            }
         },
         data() {
             return {}
