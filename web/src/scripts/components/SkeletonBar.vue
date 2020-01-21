@@ -1,6 +1,6 @@
 <template>
     <div class="skeleton-bar">
-        <div v-for="n in lines" class="line" :class="[size]"></div>
+        <div v-for="n in lines" class="line" :class="[size, {animate: animate}]"></div>
     </div>
 </template>
 
@@ -16,7 +16,8 @@
             size: {
                 validator: (value: string) => ['small', 'medium', 'large', 'xl', 'block'].includes(value),
                 default: "medium"
-            }
+            },
+            animate: {type: Boolean, default: true}
 
         },
         data(): {} {
@@ -69,7 +70,7 @@
                 margin-bottom: 3rem;
             }
 
-            &::after {
+            &.animate:after {
                 display: block;
                 content: '';
                 position: absolute;

@@ -10,7 +10,7 @@
                 <p class="date" v-if="!obscureCard">{{shareDate}}</p>
             </div>
         </div>
-        <skeleton-bar v-if="obscureCard" :lines="4" size="small"/>
+        <skeleton-bar v-if="obscureCard" :lines="4" size="small" :animate="false"/>
         <div v-else class="note">
             <h3 class="noteQuestion">{{preventOrphan(response.promptQuestion)}}</h3>
             <p class="note-text">{{preventOrphan(response.content.text)}}</p>
