@@ -34,7 +34,7 @@ export async function onPublish(message: Message, context: functions.EventContex
                 const results = await Promise.all(tasks);
                 processResults(results, resultAgg);
                 logger.log(`finished batch ${batchNumber} with ${results.length} results`);
-                return results;
+                return;
             }
         });
         const end = new Date().getTime();
@@ -47,6 +47,8 @@ export async function onPublish(message: Message, context: functions.EventContex
         Sentry.captureException(error);
         await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:boom: An error occurred while running \`MemberStatsJob\`\n,\`\`\`${JSON.stringify(error)}\`\`\``)
     }
+
+    return "Completed member stats job";
 }
 
 function processResults(results: MemberStatResult[], agg: MemberStatResultAggregation) {
