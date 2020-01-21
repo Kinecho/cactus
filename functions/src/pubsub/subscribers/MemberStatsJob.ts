@@ -3,25 +3,44 @@ import * as functions from "firebase-functions";
 import * as Sentry from "@sentry/node"
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import CactusMember from "@shared/models/CactusMember";
-import AdminFirestoreService from "@admin/services/AdminFirestoreService";
+import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
+
 const logger = new Logger("MemberStatsJob");
+
+interface MemberStatResultAggregation {
+    failedEmails: string[],
+    successCount: number,
+    errorCount: number,
+}
+
 export async function onPublish(message: Message, context: functions.EventContext) {
+    const start = new Date().getTime();
     try {
         logger.log("Starting MemberStats job");
+        const resultAgg: MemberStatResultAggregation = {
+            failedEmails: [],
+            successCount: 0,
+            errorCount: 0
+        };
+
 
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize: 500,
             onData: async (members, batchNumber) => {
                 logger.log(`Processing batch ${batchNumber}`);
-                const tasks: Promise<void>[] = members.map(handleMember);
-                await Promise.all(tasks);
-                logger.log(`finished batch ${batchNumber}`);
+                const tasks: Promise<MemberStatResult>[] = members.map(handleMember);
+                const results = await Promise.all(tasks);
+                processResults(results, resultAgg);
+                logger.log(`finished batch ${batchNumber} with ${results.length} results`);
                 return;
             }
         });
+        const end = new Date().getTime();
+
+        await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${end - start}ms`
+            + `\n\`\`\`${JSON.stringify(resultAgg)}\`\`\``);
 
     } catch (error) {
         logger.error("Failed to process MemberStats job", error);
@@ -30,31 +49,54 @@ export async function onPublish(message: Message, context: functions.EventContex
     }
 }
 
-async function handleMember(member: CactusMember) {
+function processResults(results: MemberStatResult[], agg: MemberStatResultAggregation) {
+    results.forEach(r => {
+        if (!r) {
+            return;
+        }
+        if (r.success) {
+            agg.successCount += 1;
+        } else {
+            agg.errorCount += 1;
+            agg.failedEmails.push(r.memberEmail || "Email not set");
+        }
+    })
+}
+
+interface MemberStatResult {
+    success: boolean,
+    memberId?: string,
+    memberEmail: string,
+    error?: string,
+    stats?: ReflectionStats
+}
+
+async function handleMember(member: CactusMember): Promise<MemberStatResult> {
     const memberId = member.id;
+    const result: MemberStatResult = {memberId, memberEmail: member.email, success: false, error: undefined};
     if (!memberId) {
-        return;
+        result.error = `No member ID found for member ${member.email}, ${member.id}`;
+        return result;
     }
     const timeZone = member.timeZone || undefined;
-    await AdminFirestoreService.getSharedInstance().runTransaction(async t => {
-        try {
-            const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+    try {
+        const stats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+            memberId,
+            timeZone,
+        }, {queryName: `calculateMemberStats.${member.email}`});
+        result.stats = stats;
+        if (stats) {
+            await AdminCactusMemberService.getSharedInstance().setReflectionStats({
                 memberId,
-                timeZone,
-            }, {transaction: t, queryName: "calculateMemberStats"});
-
-            if (stats) {
-                await AdminCactusMemberService.getSharedInstance().setReflectionStats({
-                    memberId,
-                    stats: stats
-                }, {transaction: t});
-            }
-            return {success: true};
-        } catch (error) {
-            logger.error("Failed to update member stats for memberId", memberId);
-            return {success: false};
+                stats: stats
+            });
         }
-    });
-
-    return;
+        result.success = true;
+        result.error = undefined;
+        return result;
+    } catch (error) {
+        logger.error("Failed to update member stats for memberId", memberId);
+        result.error = error.message || `Failed to update member stats for memberId=${memberId}`;
+        return result;
+    }
 }
