@@ -50,7 +50,7 @@
                 } else {
                     this.deselectFriend(id);
                 }
-                logger.log(this.selectedFriends);
+                this.$emit('change', this.selectedFriends);
               },
             selectFriend(id: string) {
                 this.selectedFriends.push(id);

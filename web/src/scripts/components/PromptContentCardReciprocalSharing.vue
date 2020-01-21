@@ -3,8 +3,12 @@
         <shared-reflection-card :response="response"/>
         <h2 class="header">Share your reflection with&nbsp;friends</h2>
         <p class="subtext">Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each&nbsp;other.</p>
-        <friend-selector :member="member" />
-        <button class="shareBtn">Share</button>
+        <friend-selector :member="member" @change="updateFriends" />
+        <button v-if="hasFriendsSelected" class="shareBtn" :disabled="sharingNote || noteShared" @click="shareNote">
+            <span v-if="readyToShare">Share</span>
+            <span v-if="sharingNote">Sharing...</span>
+            <span v-if="noteShared">Shared!</span>
+        </button>
     </div>
 </template>
 
@@ -16,6 +20,7 @@
     import ReflectionResponse from '@shared/models/ReflectionResponse';
     import FriendSelector from "@components/FriendSelector.vue";
     import CactusMember from '@shared/models/CactusMember'
+    import ReflectionResponseService from '@web/services/ReflectionResponseService'
 
     const logger = new Logger("PromptContentCardReciprocalSharing.vue");
 
@@ -29,12 +34,47 @@
             response: Object as () => ReflectionResponse
         },
         data(): {
+            selectedFriends: string[],
             nativeShareEnabled: boolean,
+            shareableLinkUrl: string | undefined,
+            sharingNote: boolean,
+            noteShared: boolean
         } {
             return {
-                nativeShareEnabled: SharingService.canShareNatively()
+                nativeShareEnabled: SharingService.canShareNatively(),
+                shareableLinkUrl: undefined,
+                sharingNote: false,
+                noteShared: false,
+                selectedFriends: []
             }
         },
+        computed: {
+            hasFriendsSelected(): boolean {
+                return this.selectedFriends.length > 0;
+            },
+            readyToShare(): boolean {
+                return (this.hasFriendsSelected && !this.sharingNote && !this.noteShared)
+            }
+        },
+        methods: {
+            async shareNote() {
+                this.sharingNote = true;
+                if(!this.response.shared) {
+                    const reflectionResponse = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
+                    this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(reflectionResponse);
+                } else {
+                    this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
+                }
+
+                if (this.shareableLinkUrl) {
+                    this.sharingNote = false;
+                    this.noteShared = true;
+                }
+            },
+            updateFriends(friends: string[]) {
+                this.selectedFriends = friends;
+            }
+        }
     });
 </script>
 
