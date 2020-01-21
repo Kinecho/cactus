@@ -4,7 +4,7 @@
             <label class="itemLabel" :for="connection.friendMemberId">
                 <SocialFriend :member="member" :connection="connection" />
             </label>
-            <CheckBox :inputId="connection.friendMemberId" v-on:change="function(emittedValue) { toggleFriend(connection.friendMemberId, emittedValue) }" />
+            <CheckBox :inputId="connection.friendMemberId" v-on:change="function(emittedValue) { toggleFriend(connection.friendMemberId) }" :value="connection.friendMemberId" :modelValue="selectedFriends" />
         </li>
     </ul>
 </template>
@@ -27,11 +27,15 @@
           CheckBox
         },
         props: {
-            member: {type: Object as () => CactusMember}
+            member: {type: Object as () => CactusMember},
+            preSelected: {type: Array as () => string[] }
         },
         async beforeMount() {
           if (this.member?.id) {
             this.connections = await SocialConnectionService.sharedInstance.getByMemberId(this.member.id)
+          }
+          if (this.preSelected) {
+            this.selectedFriends = this.preSelected;
           }
         },
         data(): {
@@ -44,8 +48,8 @@
             }
         },
         methods: {
-            toggleFriend(id: string, isTrue: boolean) {
-                if (isTrue) {
+            toggleFriend(id: string) {
+                if (!this.selectedFriends.includes(id)) {
                     this.selectFriend(id);
                 } else {
                     this.deselectFriend(id);

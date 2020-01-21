@@ -3,7 +3,7 @@
         <shared-reflection-card :response="response"/>
         <h2 class="header">Share your reflection with&nbsp;friends</h2>
         <p class="subtext">Build stronger connections with friends through sharing. After you've both reflected, your notes will be shared with each&nbsp;other.</p>
-        <friend-selector :member="member" @change="updateFriends" />
+        <friend-selector :member="member" :preSelected="this.selectedFriends" @change="updateFriends" />
         <button v-if="hasFriendsSelected" class="shareBtn" :disabled="sharingNote || noteShared" @click="shareNote">
             <span v-if="readyToShare">Share</span>
             <span v-if="sharingNote">Sharing...</span>
@@ -45,7 +45,7 @@
                 shareableLinkUrl: undefined,
                 sharingNote: false,
                 noteShared: false,
-                selectedFriends: []
+                selectedFriends: this.response?.tradedWithMemberIds || []
             }
         },
         computed: {
@@ -59,20 +59,17 @@
         methods: {
             async shareNote() {
                 this.sharingNote = true;
-                if(!this.response.shared) {
-                    const reflectionResponse = await ReflectionResponseService.sharedInstance.shareResponse(this.response);
-                    this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(reflectionResponse);
-                } else {
-                    this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
-                }
+                const result = await ReflectionResponseService.sharedInstance.tradeResponse(this.response, this.selectedFriends);
 
-                if (this.shareableLinkUrl) {
+                if (result) {
                     this.sharingNote = false;
                     this.noteShared = true;
                 }
             },
             updateFriends(friends: string[]) {
+                logger.log(friends);
                 this.selectedFriends = friends;
+                logger.log(this.selectedFriends);
             }
         }
     });

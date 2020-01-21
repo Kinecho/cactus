@@ -52,6 +52,15 @@ export default class ReflectionResponseService {
         return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
     }
 
+    async tradeResponse(response?: ReflectionResponse, memberIds?: string[]): Promise<ReflectionResponse | undefined> {
+        if (!response || !memberIds) {
+            return;
+        }
+
+        response.tradedWithMemberIds = memberIds;
+        return await this.save(response, {saveIfAnonymous: true, updateReflectionLog: false});
+    }
+
     async unShareResponse(response?: ReflectionResponse): Promise<ReflectionResponse | undefined> {
         if (!response) {
             return;

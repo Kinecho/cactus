@@ -120,7 +120,8 @@ export enum ReflectionResponseField {
     promptQuestion = "promptQuestion",
     reflectionDurationMs = "reflectionDurationMs",
     shared = "shared",
-    cactusElement = "cactusElement"
+    cactusElement = "cactusElement",
+    tradedWithMemberIds = "tradedWithMemberIds"
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -146,6 +147,7 @@ export default class ReflectionResponse extends BaseModel {
     unsharedAt?: Date;
     cactusElement?: CactusElement | null;
     reflectionDates: Date[] = [];
+    tradedWithMemberIds?: string[];
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date
