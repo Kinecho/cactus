@@ -95,6 +95,13 @@
         transition: background-color ease-in .3s;
         width: 100%;
 
+        @include r(600) {
+            &:hover {
+                background-color: darken($beige, 3%);
+                border-radius: 1.2rem;
+            }
+        }
+
         &:before {
             background-color: $white;
             border-radius: .4rem;

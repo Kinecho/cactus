@@ -132,6 +132,7 @@
 
     /* Create a custom checkbox */
     .checkmark {
+        background-color: $white;
         border: 1px solid $green;
         border-radius: .4rem;
         flex-shrink: 0;
