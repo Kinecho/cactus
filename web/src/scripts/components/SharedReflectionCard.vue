@@ -10,7 +10,8 @@
                 <p class="date">{{shareDate}}</p>
             </div>
         </div>
-        <div class="note">
+        <skeleton-bar v-if="obscureCard" :lines="4" size="small"/>
+        <div v-else class="note">
             <h3 class="noteQuestion">{{preventOrphan(response.promptQuestion)}}</h3>
             <p class="note-text">{{preventOrphan(response.content.text)}}</p>
         </div>
@@ -27,10 +28,14 @@
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
     import {preventOrphanedWords} from "@shared/util/StringUtil"
+    import SkeletonBar from "@components/SkeletonBar.vue"
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
+        components: {
+            SkeletonBar,
+        },
         async beforeMount() {
             if (!this.fetchedProfile && this.response?.cactusMemberId) {
                 this.fetchedProfile = await MemberProfileService.sharedInstance.getByMemberId(this.response.cactusMemberId);
@@ -38,7 +43,8 @@
         },
         props: {
             response: Object as () => ReflectionResponse,
-            memberProfile: Object as () => MemberProfile
+            memberProfile: Object as () => MemberProfile,
+            obscureCard: {type: Boolean, default: false},
         },
         data(): {
             resizeListener: any | undefined,

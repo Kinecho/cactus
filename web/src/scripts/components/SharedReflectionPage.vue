@@ -5,6 +5,7 @@
             <div v-if="error" class="error">{{error}}</div>
             <div class="reflection-container" v-if="reflectionResponse">
                 <card :response="reflectionResponse" :memberProfile="memberProfile" class="full" v-if="reflectionResponse"/>
+                <card :obscureCard="true" :response="reflectionResponse" :memberProfile="memberProfile"/>
             </div>
             <sign-up-footer/>
         </div>
