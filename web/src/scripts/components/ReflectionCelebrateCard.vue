@@ -81,7 +81,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 <reciprocal-sharing
                         v-if="showTradeNote"
                         :response="reflectionResponse"
-                        :member="member" />
+                        :member="member"
+                        @close="hideTradeNoteDelayed" />
                 <div class="auth-card" v-else>
                     <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
                     <h2>Become a better version of yourself</h2>
@@ -347,6 +348,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     this.showTradeNote = true;
                     this.flipped = true;
                 }
+            },
+            hideTradeNoteDelayed() {
+                setTimeout(() => this.hideTradeNote(), 1500);
+            },
+            hideTradeNote() {
+                this.showTradeNote = false;
+                this.flipped = false;
             },
             hideCactusModal() {
                 this.cactusModalVisible = false;

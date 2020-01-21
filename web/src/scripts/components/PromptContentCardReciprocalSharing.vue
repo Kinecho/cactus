@@ -64,12 +64,11 @@
                 if (result) {
                     this.sharingNote = false;
                     this.noteShared = true;
+                    this.$emit('close');
                 }
             },
             updateFriends(friends: string[]) {
-                logger.log(friends);
                 this.selectedFriends = friends;
-                logger.log(this.selectedFriends);
             }
         }
     });
