@@ -3,6 +3,13 @@
         <div v-if="show404">
             <FourOhFour/>
         </div>
+
+        <h1>Your Reflection</h1>
+        <div class="reflection-container" v-if="viewerResponse">
+            <SharedReflectionCard :response="viewerResponse" class="full"/>
+        </div>
+
+        <h1>Shared With You</h1>
         <div class="reflection-container" v-if="responses" v-for="response in responses">
             <SharedReflectionCard :response="response" class="full"/>
         </div>
@@ -62,15 +69,6 @@
                         this.promptContent = promptContent;
                         this.promptId = promptContent.promptId;
                         this.loading = false;
-
-                        // setup observer for responses that are shared with you
-                        if (this.member?.id && this.promptId) {
-                            this.sharedResponsesUnsubscriber = ReflectionResponseService.sharedInstance.observeTradedByEntryId(this.member.id, this.promptId, {
-                                onData: async (responses: ReflectionResponse[]): Promise<void> => {
-                                    this.responses = responses;
-                                }
-                            });
-                        }
                     }
                 };
 
@@ -94,7 +92,8 @@
             sharedResponsesUnsubscriber: ListenerUnsubscriber | undefined,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
-            responses: ReflectionResponse[] | undefined
+            responses: ReflectionResponse[] | undefined,
+            viewerResponse: ReflectionResponse | undefined
         }{
             return {
                 promptId: undefined,
@@ -108,6 +107,7 @@
                 error: undefined,
                 loading: false,
                 responses: undefined
+                viewerResponse: undefined
             }
         },
         methods: {
