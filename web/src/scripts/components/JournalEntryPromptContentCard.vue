@@ -4,6 +4,12 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
         <p class="date">{{dateLabel}}</p>
         <div class="menuParent">
+            <button class="hoverShareBtn secondary" @click="showShareNote = true" v-show="this.hasNote && this.entry.promptContent && this.entry.promptContent.content">
+                <span class="buttonInside">
+                    <svg class="shareIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22"><path fill="#07454C" d="M10 3.414V14a1 1 0 0 1-2 0V3.414L5.707 5.707a1 1 0 0 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4a1 1 0 1 1-1.414 1.414L10 3.414zM0 11a1 1 0 0 1 2 0v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 1 2 0v8a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3v-8z"/></svg>
+                    <span class="shareCopy">{{promptCopy.SHARE_NOTE}}</span>
+                </span>
+            </button>
             <dropdown-menu :items="linkItems"/>
         </div>
 
@@ -297,6 +303,64 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
     @import "variables";
     @import "journal";
     @import "transitions";
+
+    button.hoverShareBtn {
+        display: none;
+    }
+
+    @include r(768) {
+        .menuParent {
+            display: flex;
+        }
+
+        button.hoverShareBtn {
+            border: 0;
+            border-radius: 3rem;
+            display: block;
+            height: 3.6rem;
+            overflow: hidden;
+            padding: 0;
+            width: 3.6rem;
+
+            &:focus {
+                box-shadow: 0 0 3px 2pt #29A389;
+                outline: none;
+            }
+
+            &:focus,
+            &:active,
+            &:hover {
+                padding: .4rem .8rem;
+                width: auto;
+
+                .buttonInside,
+                .shareCopy {
+                    transform: none;
+                }
+            }
+
+            .buttonInside {
+                align-items: center;
+                display: inline-flex;
+                transform: translateX(.6rem);
+                transition: transform .1s ease-in;
+                white-space: nowrap;
+            }
+
+            .shareIcon {
+                height: 3rem;
+                margin-right: 0;
+                padding: .4rem;
+                width: 3rem;
+            }
+
+            .shareCopy {
+                transform: scale(.9) translateY(3rem);
+                transform-origin: 0;
+                transition: transform .1s ease-in;
+            }
+        }
+    }
 
     .sharing-card {
         background-color: $darkerGreen;
