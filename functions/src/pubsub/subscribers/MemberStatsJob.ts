@@ -18,7 +18,7 @@ interface MemberStatResultAggregation {
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    await runMemberStatsJob();
+    await runMemberStatsJob(250);
     return "Completed member stats job";
 }
 
@@ -75,7 +75,7 @@ async function handleMember(member: CactusMember, batch: Batch): Promise<MemberS
     }
 }
 
-export async function runMemberStatsJob(): Promise<MemberStatResultAggregation> {
+export async function runMemberStatsJob(batchSize: number): Promise<MemberStatResultAggregation> {
     const start = new Date().getTime();
     const resultAgg: MemberStatResultAggregation = {
         failedEmails: [],
@@ -87,7 +87,7 @@ export async function runMemberStatsJob(): Promise<MemberStatResultAggregation> 
 
 
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
-            batchSize: 500,
+            batchSize,
             onData: async (members, batchNumber) => {
                 const batch = AdminFirestoreService.getSharedInstance().getBatch();
                 logger.log(`Processing batch ${batchNumber}`);

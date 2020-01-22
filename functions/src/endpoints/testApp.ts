@@ -58,7 +58,7 @@ app.get("/fcm", async (req, res) => {
 });
 
 app.get("/stats", async (req, res) => {
-    const result = await runMemberStatsJob();
+    const result = await runMemberStatsJob(100);
     res.send(result);
     return;
 });
