@@ -7,12 +7,12 @@ import AdminFirestoreService, {
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
-    DEFAULT_PROMPT_SEND_TIME,
     Field,
     JournalStatus,
     NotificationStatus,
     PromptSendTime,
-    ReflectionStats
+    ReflectionStats,
+    DEFAULT_PROMPT_SEND_TIME
 } from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
@@ -28,7 +28,8 @@ const DEFAULT_BATCH_SIZE = 500;
 
 export interface UpdateSendPromptUTCResult {
     updated: boolean,
-    promptSendTimeUTC?: PromptSendTime
+    promptSendTimeUTC?: PromptSendTime,
+    promptSendTime?: PromptSendTime
 }
 
 export default class AdminCactusMemberService {
@@ -434,19 +435,43 @@ export default class AdminCactusMemberService {
         return;
     }
 
-    async updateMemberUTCSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
+    async updateMemberSendPromptTime(member: CactusMember, options: { useDefault: boolean } = {
         useDefault: false,
     }): Promise<UpdateSendPromptUTCResult> {
         logger.log("Updating memberUTC Send Prompt Time for member", member.email, member.id);
+
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
+        
+        if (!member.timeZone) {
+            logger.log("Member's local timezone is unknown. Skipping!");
+            return {updated: false, promptSendTimeUTC: beforeUTC}
+        }
+
+        // the member has a default promptSendTimeUTC and a timeZone 
+        // but *not* a local promptSendTime
+        // we can set their local promptSendTime and return
+        if (member.timeZone && 
+            member.promptSendTimeUTC &&
+            !member.promptSendTime) {
+
+            const localPromptSendTime = member.getLocalPromptSendTimeFromUTC();
+            logger.log("Member's local promptSendTime is not set but UTC is. Setting from UTC.");
+            logger.log("Member's timezone is: " + member.timeZone);
+            logger.log("PromptSendTime calculated: ", JSON.stringify(localPromptSendTime));
+            logger.log("Saving change...");
+            await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTime]: localPromptSendTime});
+            logger.log("Saved changes.");
+            return {updated: true, promptSendTimeUTC: beforeUTC, promptSendTime: localPromptSendTime};
+        }
+
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
             timeZone: member.timeZone,
             sendTime: member.promptSendTime
         });
 
-        logger.log("before", JSON.stringify(beforeUTC));
+        logger.log("beforeUTC", JSON.stringify(beforeUTC));
         logger.log("afterUTC", JSON.stringify(afterUTC));
 
         const denverUTCDefault = getSendTimeUTC({
