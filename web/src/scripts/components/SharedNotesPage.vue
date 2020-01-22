@@ -46,7 +46,7 @@
 
             if (!this.promptContentEntryId) {
                 this.promptContentEntryId = window.location.pathname.split(`${PageRoute.SHARED_NOTES_ROOT}/`)[1];
-                
+
                 const flamelinkOptions = {
                     onData: async (promptContent?: PromptContent | undefined, error?: any) => {
                         if (!promptContent) {
@@ -73,7 +73,7 @@
                 };
 
                 this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(this.promptContentEntryId, flamelinkOptions)
-            
+
             } else {
                 this.show404 = true;
             }
@@ -106,14 +106,14 @@
                 show404: false,
                 error: undefined,
                 loading: false,
-                responses: undefined
+                responses: undefined,
                 viewerResponse: undefined
             }
         },
         methods: {
             setupResponseObserver(): void {
                 if (!this.sharedResponsesUnsubscriber &&
-                    this.member?.id && 
+                    this.member?.id &&
                     this.promptId) {
                     this.sharedResponsesUnsubscriber = ReflectionResponseService.sharedInstance.observeTradedByEntryId(this.member.id, this.promptId, {
                         onData: async (responses: ReflectionResponse[]): Promise<void> => {
