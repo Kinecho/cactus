@@ -123,7 +123,7 @@ service cloud.firestore {
     }
 
     match /reflectionResponses/{document=**} {
-      allow read: if belongsToMember() || resource.data.shared == true;
+      allow read: if belongsToMember() || resource.data.shared == true || getMemberId() in resource.data.tradedWithMemberIds;
       allow update: if belongsToMember() || resource.data.anonymous == true;
       // allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
       allow create: if true;
