@@ -93,6 +93,10 @@
         ],
         "rewrites": [
             {
+                "source": "/shared-notes/**",
+                "destination": "/shared_notes.html"
+            },
+            {
                 "source": "/activity",
                 "destination": "/social_home.html"
             },

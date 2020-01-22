@@ -106,5 +106,11 @@ module.exports = {
         "title": "iOS Login",
         "path": "/ios-login-continue",
         "name": "ios_login_continue"
+    },
+    "shared_notes": {
+        "title": "Shared Notes",
+        "path": "/shared-notes",
+        "name": "shared_notes",
+        "indexPath": true
     }
 }
