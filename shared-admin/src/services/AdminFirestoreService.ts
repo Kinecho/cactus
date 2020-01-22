@@ -19,7 +19,7 @@ export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 const logger = new Logger("AdminFirestoreService");
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
-    transaction?: Transaction
+    transaction?: Transaction,
 }
 
 export interface GetOptions extends IGetOptions {

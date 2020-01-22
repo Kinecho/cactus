@@ -1,10 +1,10 @@
 import AdminFirestoreService, {
+    Batch,
     CollectionReference,
     DefaultGetOptions,
     GetBatchOptions,
     GetOptions,
-    SaveOptions,
-    Batch
+    SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
     DEFAULT_PROMPT_SEND_TIME,
@@ -335,32 +335,49 @@ export default class AdminCactusMemberService {
 
     async getAllBatch(options: {
         batchSize?: number,
+        pageDelay?: number,
         onData: (members: CactusMember[], batchNumber: number) => Promise<void>
     }) {
-        logger.log("Getting batched result 1 for all members");
-        const query = this.getCollectionRef();
-        let batchNumber = 0;
-        let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
-            pagination: {
-                limit: options.batchSize || DEFAULT_BATCH_SIZE,
-                orderBy: BaseModelField.createdAt,
-                sortDirection: QuerySortDirection.asc
-            }
-        });
-        logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-        await options.onData(results.results, 0);
-        while (results.results.length > 0 && results.lastCursor) {
-            batchNumber++;
-            results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
+        try {
+            logger.log("Getting batched result 1 for all members");
+            const query = this.getCollectionRef();
+            let batchNumber = 0;
+            let results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
                 pagination: {
-                    limit: options.batchSize || 100,
-                    startAfter: results.lastCursor,
+                    limit: options.batchSize || DEFAULT_BATCH_SIZE,
                     orderBy: BaseModelField.createdAt,
                     sortDirection: QuerySortDirection.asc
                 }
             });
             logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
-            await options.onData(results.results, batchNumber)
+            await options.onData(results.results, 0);
+            while (results.results.length > 0 && results.lastCursor) {
+                try {
+                    batchNumber++;
+                    results = await AdminFirestoreService.getSharedInstance().executeQuery(query, CactusMember, {
+                        pagination: {
+                            limit: options.batchSize || 100,
+                            startAfter: results.lastCursor,
+                            orderBy: BaseModelField.createdAt,
+                            sortDirection: QuerySortDirection.asc
+                        }
+                    });
+                    logger.log(`Fetched ${results.size} members in batch ${batchNumber}`);
+                    await options.onData(results.results, batchNumber);
+                    if (options.pageDelay && options.pageDelay > 0) {
+                        await new Promise(resolve => {
+                            logger.info(`Waiting ${options.pageDelay}ms before processing next page`);
+                            setTimeout(() => {
+                                resolve()
+                            }, options.pageDelay)
+                        })
+                    }
+                } catch (batchError) {
+                    logger.error("Failed to execute the batch", batchError);
+                }
+            }
+        } catch (error) {
+            logger.error("The pagination query failed to execute", error);
         }
     }
 

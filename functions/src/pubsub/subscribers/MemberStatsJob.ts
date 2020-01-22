@@ -7,6 +7,7 @@ import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import AdminFirestoreService, {Batch} from "@admin/services/AdminFirestoreService";
+import {chunkArray} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("MemberStatsJob");
 
@@ -15,13 +16,16 @@ interface MemberStatResultAggregation {
     successCount: number,
     errorCount: number,
     error?: string,
+    chunkErrors?: string[],
+    duration?: number
 }
 
 export async function onPublish(message: Message, context: functions.EventContext) {
-    await runMemberStatsJob(250);
+    await runMemberStatsJob(1500);
     return "Completed member stats job";
 }
 
+// @ts-ignore
 function processResults(results: MemberStatResult[], agg: MemberStatResultAggregation) {
     results.forEach(r => {
         if (!r) {
@@ -44,7 +48,9 @@ interface MemberStatResult {
     stats?: ReflectionStats
 }
 
-async function handleMember(member: CactusMember, batch: Batch): Promise<MemberStatResult> {
+
+// @ts-ignore
+async function handleMember(member: CactusMember, batch?: Batch): Promise<MemberStatResult> {
     const memberId = member.id;
     const result: MemberStatResult = {memberId, memberEmail: member.email, success: false, error: undefined};
     if (!memberId) {
@@ -80,7 +86,8 @@ export async function runMemberStatsJob(batchSize: number): Promise<MemberStatRe
     const resultAgg: MemberStatResultAggregation = {
         failedEmails: [],
         successCount: 0,
-        errorCount: 0
+        errorCount: 0,
+        duration: 0
     };
     try {
         logger.log("Starting MemberStats job");
@@ -89,21 +96,44 @@ export async function runMemberStatsJob(batchSize: number): Promise<MemberStatRe
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize,
             onData: async (members, batchNumber) => {
-                const batch = AdminFirestoreService.getSharedInstance().getBatch();
-                logger.log(`Processing batch ${batchNumber}`);
-                const tasks: Promise<MemberStatResult>[] = members.map(member => handleMember(member, batch));
-                const results = await Promise.all(tasks);
-                const batchCommitResult = await batch.commit();
-                logger.info("Batch commit result size: ", batchCommitResult.length);
-                processResults(results, resultAgg);
-                logger.log(`finished batch ${batchNumber} with ${results.length} results`);
-                return;
+                const batchStart = new Date().getTime();
+                try {
+                    logger.log(`Processing batch ${batchNumber}`);
+                    const memberChunks = chunkArray(members, 500);
+                    const chunkTasks = memberChunks.map(async membersChunk => {
+                        const batch = AdminFirestoreService.getSharedInstance().getBatch();
+                        const memberTasks = membersChunk.map(member => handleMember(member, batch));
+                        const memberResults = await Promise.all(memberTasks);
+                        const commitResults = await batch.commit();
+                        logger.info(`Committed batch for batch #${batchNumber}. Results.length = ${commitResults.length}`);
+                        return memberResults
+                    });
+
+                    const chunkResults = await Promise.all(chunkTasks);
+
+                    const results = chunkResults.reduce((allResults, c) => {
+                        allResults.push(...c);
+                        return allResults;
+                    }, []);
+
+                    processResults(results, resultAgg);
+                    const batchEnd = new Date().getTime();
+                    logger.log(`finished batch ${batchNumber} in ${batchEnd - batchStart}ms with ${members.length} results and ${memberChunks.length} chunks`);
+                    return;
+                } catch (error) {
+                    logger.error(`Chunk ${batchNumber} failed to process`, error);
+                    const chunkErrors = resultAgg.chunkErrors || [];
+                    chunkErrors.push(`Failed to process chunk ${batchNumber}. ${error.message}`);
+                    resultAgg.chunkErrors = chunkErrors;
+                    return;
+                }
             }
         });
         const end = new Date().getTime();
+        resultAgg.duration = end - start;
         console.log("Finished all batches. Results:", JSON.stringify(resultAgg));
-        await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${end - start}ms`
-            + `\n\`\`\`${JSON.stringify(resultAgg)}\`\`\``);
+        await AdminSlackService.getSharedInstance().sendDataLogMessage(`:white_check_mark: Finished \`MemberStatsJob\` in ${((end - start)/1000).toFixed(2)}s`
+            + `\n\`\`\`${JSON.stringify(resultAgg, null, 2)}\`\`\``);
 
     } catch (error) {
         logger.error("Failed to process MemberStats job", error);
