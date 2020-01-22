@@ -27,7 +27,7 @@
         "watch": "tsc -w"
     },
     "engines": {
-        "node": "8"
+        "node": "10"
     },
     "main": "lib/functions/src/main.js",
     "_moduleAliases": {
