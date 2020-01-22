@@ -74,7 +74,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timezone" />
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone" />
                         </div>
                     </div>
 
@@ -128,7 +128,8 @@
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {
         NotificationStatus,
-        PromptSendTime
+        PromptSendTime,
+        DEFAULT_PROMPT_SEND_TIME
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
@@ -226,8 +227,10 @@
             }
         },
         computed: {
-            promptSendTime(): PromptSendTime | undefined {
-                return this.member?.promptSendTime || this.member?.getLocalPromptSendTimeFromUTC();
+            promptSendTime(): PromptSendTime {
+                return this.member?.promptSendTime || 
+                       this.member?.getLocalPromptSendTimeFromUTC() ||
+                       DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
