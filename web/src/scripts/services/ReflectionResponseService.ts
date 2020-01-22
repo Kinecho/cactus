@@ -179,6 +179,15 @@ export default class ReflectionResponseService {
         }
     }
 
+    observeTradedByEntryId(memberId: string, promptId: string, options: QueryObserverOptions<ReflectionResponse>): ListenerUnsubscriber {
+        const query = this.getCollectionRef().where(ReflectionResponse.Field.tradedWithMemberIds, "array-contains", memberId)
+                    .where(ReflectionResponse.Field.promptId, "==", promptId)
+                    .orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
+
+        options.queryName = "ReflectionResponseService:observeTradedByEntryId";
+        return this.firestoreService.observeQuery(query, ReflectionResponse, options);
+    }
+
     observeSharedReflection(reflectionId: string, options: { onData: (model: ReflectionResponse | undefined, error?: any) => void }): ListenerUnsubscriber | undefined {
         return this.firestoreService.observeById(reflectionId, ReflectionResponse, {
             queryName: "observeSharedReflection",
