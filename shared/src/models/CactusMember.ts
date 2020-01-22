@@ -50,6 +50,7 @@ export enum Field {
     stats = "stats",
     stats_reflections = "reflections",
     activityStatus = "activityStatus",
+    promptSendTime = "promptSendTime",
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
@@ -92,8 +93,8 @@ export default class CactusMember extends BaseModel {
     };
     timeZone?: string | null;
     locale?: string | null | undefined;
-    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME;
-    readonly promptSendTimeUTC?: PromptSendTime;
+    promptSendTime?: PromptSendTime;
+    readonly promptSendTimeUTC?: PromptSendTime = this.getDefaultPromptSendTimeUTC();
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,
@@ -149,5 +150,25 @@ export default class CactusMember extends BaseModel {
             return DateUtil.getDateObjectForTimezone(date, this.timeZone);
         }
         return DateTime.local().toObject();
+    }
+
+    getDefaultPromptSendTimeUTC(): PromptSendTime {
+        return {
+            hour: DateTime.utc().minus({ hours: 1 }).hour,
+            minute: DateUtil.getCurrentQuarterHour()
+        } as PromptSendTime;
+    }
+
+    getLocalPromptSendTimeFromUTC(): PromptSendTime | undefined {
+        if (this.promptSendTimeUTC && this.timeZone) {
+            const utcDateTime = DateTime.utc().set(this.promptSendTimeUTC);
+            const localDateTime = utcDateTime.setZone(this.timeZone);
+
+            return {
+                hour: localDateTime.hour,
+                minute: localDateTime.minute
+            } as PromptSendTime;
+        }
+        return;
     }
 }

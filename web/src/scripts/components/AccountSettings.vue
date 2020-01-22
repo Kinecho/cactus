@@ -51,7 +51,7 @@
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         </div>
 
-                        <div class="item">
+                        <div class="item" v-if="promptSendTime">
                             <label class="label">
                                 {{copy.account.PREFERRED_NOTIFICATION_TIME}}
                             </label>
@@ -74,7 +74,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone"/>
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone" />
                         </div>
                     </div>
 
@@ -127,9 +127,9 @@
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {
-        DEFAULT_PROMPT_SEND_TIME,
         NotificationStatus,
-        PromptSendTime
+        PromptSendTime,
+        DEFAULT_PROMPT_SEND_TIME
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
@@ -228,7 +228,9 @@
         },
         computed: {
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || DEFAULT_PROMPT_SEND_TIME
+                return this.member?.promptSendTime || 
+                       this.member?.getLocalPromptSendTimeFromUTC() ||
+                       DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
