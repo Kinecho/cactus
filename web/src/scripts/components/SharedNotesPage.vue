@@ -93,7 +93,8 @@
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
             responses: ReflectionResponse[] | undefined,
-            viewerResponse: ReflectionResponse | undefined
+            viewerResponse: ReflectionResponse | undefined,
+            viewerResponseUnsubscriber: ListenerUnsubscriber | undefined
         }{
             return {
                 promptId: undefined,
@@ -107,7 +108,8 @@
                 error: undefined,
                 loading: false,
                 responses: undefined,
-                viewerResponse: undefined
+                viewerResponse: undefined,
+                viewerResponseUnsubscriber: undefined
             }
         },
         methods: {
@@ -121,11 +123,23 @@
                         }
                     });
                 }
+            },
+            setupViewerResponseObserver(): void {
+                if (!this.responseUnsubscriber &&
+                    this.member?.id &&
+                    this.promptId) {
+                    this.viewerResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(this.promptId, {
+                        onData: async (responses: ReflectionResponse[]): Promise<void> => {
+                            this.viewerRepsonse = responses[0];
+                        }
+                    });
+                }
             }
         },
         watch: {
             member() {
                 this.setupResponseObserver();
+                this.setupViewerResponseObserver();
             },
             promptId() {
                 this.setupResponseObserver();
