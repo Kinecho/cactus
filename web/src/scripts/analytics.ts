@@ -3,13 +3,14 @@ import {QueryParam} from "@shared/util/queryParams";
 import {getQueryParam} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
-
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
 import {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
+import {init as startBranchSDK} from "@web/branch-sdk";
+
 const logger = new Logger("Analytics.ts");
 declare global {
     interface Window {
@@ -58,6 +59,7 @@ export function init() {
 
     });
 
+    configureBranch();
     const sentryIntegrations = [];
     if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
@@ -96,6 +98,19 @@ export function init() {
     hasInit = true;
 }
 
+function configureBranch() {
+    startBranchSDK();
+    if (window.branch) {
+        window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
+            if (error) {
+                logger.error("Failed to initialize Branch", error);
+            }
+            logger.info("Branch init data", data);
+        });
+
+    }
+}
+
 /**
  * Clear tracking cookies and local storage items
  */
@@ -125,19 +140,25 @@ export function setUser(user?: User | null) {
             id: user.uid,
             email: email || undefined,
         };
-
+        window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
+            if (error) {
+                logger.error("Failed to set user identitty for branch user", error);
+            }
+            logger.info("Set branch identity", data);
+        });
         Sentry.setUser(sentryUser);
-        
+
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
+        window.branch?.logout?.()
     }
 }
 
 export function fireConfirmedSignupEvent() {
     /* Facebook */
     if (window.fbq) {
-        window.fbq('track','CompleteRegistration', {
+        window.fbq('track', 'CompleteRegistration', {
             value: 0.00,
             currency: 'USD'
         });
@@ -147,11 +168,11 @@ export function fireConfirmedSignupEvent() {
 export function fireSignupEvent() {
     /* Facebook */
     if (window.fbq) {
-        window.fbq('track','Lead');
+        window.fbq('track', 'Lead');
     }
 }
 
-export function socialSharingEvent(options: {type: "open"|"close"|"change", network?: string, url?: string}) {
+export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
     gtag('event', options.type, {
         event_category: "social_share",
         event_label: options.network
