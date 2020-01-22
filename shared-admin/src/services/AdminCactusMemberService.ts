@@ -437,7 +437,8 @@ export default class AdminCactusMemberService {
 
             const localPromptSendTime = member.getLocalPromptSendTimeFromUTC();
             logger.log("Member's local promptSendTime is not set but UTC is. Setting from UTC.");
-            logger.log("PromptSendTime calculated", JSON.stringify(localPromptSendTime));
+            logger.log("Member's timezone is: " + member.timeZone);
+            logger.log("PromptSendTime calculated: ", JSON.stringify(localPromptSendTime));
             logger.log("Saving change...");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTime]: localPromptSendTime});
             logger.log("Saved changes.");
