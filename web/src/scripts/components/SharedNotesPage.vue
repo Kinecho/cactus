@@ -4,14 +4,14 @@
             <FourOhFour/>
         </div>
 
-        <h1>Your Reflection</h1>
+        <h2>Your Reflection</h2>
         <div class="reflection-container" v-if="viewerResponse">
             <SharedReflectionCard :response="viewerResponse" class="full"/>
         </div>
 
-        <h1>Shared With You</h1>
+        <h2>Shared With You</h2>
         <div class="reflection-container" v-if="responses" v-for="response in responses">
-            <SharedReflectionCard :response="response" class="full"/>
+            <SharedReflectionCard :response="response" class="full" :obscureCard="tradeComplete(response)"/>
         </div>
     </div>
 </template>
@@ -78,9 +78,6 @@
                 this.show404 = true;
             }
         },
-        props: {
-
-        },
         data():{
             promptId: string | undefined,
             promptContentEntryId: string | undefined,
@@ -113,6 +110,15 @@
             }
         },
         methods: {
+            tradeComplete(response: ReflectionResponse): boolean {
+                if (this.member &&
+                    response?.cactusMemberId &&
+                    this.viewerResponse?.tradedWithMemberIds?.includes(response.cactusMemberId)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
             setupResponseObserver(): void {
                 if (!this.sharedResponsesUnsubscriber &&
                     this.member?.id &&
@@ -125,12 +131,12 @@
                 }
             },
             setupViewerResponseObserver(): void {
-                if (!this.responseUnsubscriber &&
+                if (!this.viewerResponseUnsubscriber &&
                     this.member?.id &&
                     this.promptId) {
                     this.viewerResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(this.promptId, {
                         onData: async (responses: ReflectionResponse[]): Promise<void> => {
-                            this.viewerRepsonse = responses[0];
+                            this.viewerResponse = responses[0];
                         }
                     });
                 }
