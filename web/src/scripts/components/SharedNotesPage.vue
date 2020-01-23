@@ -111,9 +111,10 @@
         },
         methods: {
             tradeComplete(response: ReflectionResponse): boolean {
-                if (this.member &&
+                if (this.member?.id &&
                     response?.cactusMemberId &&
-                    this.viewerResponse?.tradedWithMemberIds?.includes(response.cactusMemberId)) {
+                    this.viewerResponse?.tradedWithMemberIds?.includes(response.cactusMemberId) &&
+                    response.tradedWithMemberIds?.includes(this.member.id)) {
                     return true;
                 } else {
                     return false;
