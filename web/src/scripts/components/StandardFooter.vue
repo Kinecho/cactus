@@ -19,7 +19,10 @@
                     </nav>
                 </div>
             </div>
-            <AppStoreIcon/>
+            <div class="app-icons">
+                <AppStoreIcon/>
+                <PlayStoreIcon/>
+            </div>
         </div>
     </footer>
 </template>
@@ -27,13 +30,15 @@
 <script lang="ts">
     import Vue from "vue"
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
+    import PlayStoreIcon from "@web/components/PlayStoreIcon.vue";
 
     export default Vue.extend({
         props: {
             lifted: {type: Boolean, required: false, default: false}
         },
         components: {
-            AppStoreIcon
+            AppStoreIcon,
+            PlayStoreIcon
         }
     })
 
@@ -57,7 +62,8 @@
             padding: 8rem 2.4rem 3.2rem;
         }
 
-        .app-store-icon {
+        .app-store-icon,
+        .play-store-icon {
             display: block;
             margin-top: 2rem;
             text-align: center;

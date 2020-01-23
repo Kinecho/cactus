@@ -5,21 +5,21 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {getConfig} from "@admin/config/configService";
 import Logger from "@shared/Logger";
+import {CactusConfig} from "@shared/CactusConfig";
 export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
 export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
 export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
+export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
 
 const logger = new Logger("AdminFirestoreService");
-const config = getConfig();
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
-    transaction?: Transaction
+    transaction?: Transaction,
 }
 
 export interface GetOptions extends IGetOptions {
@@ -52,13 +52,15 @@ export const DefaultGetOptions: GetOptions = {
 
 export interface SaveOptions {
     setUpdatedAt?: boolean,
-    transaction?: Transaction
+    transaction?: Transaction,
+    batch?: Batch,
 }
 
 
 export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
     setUpdatedAt: true,
-    transaction: undefined
+    transaction: undefined,
+    batch: undefined,
 };
 
 export function getDefaultOptions(): SaveOptions {
@@ -70,6 +72,7 @@ export const DEFAULT_BATCH_SIZE = 500;
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
+    config: CactusConfig;
     static Timestamp = Timestamp;
 
     protected static sharedInstance: AdminFirestoreService;
@@ -81,14 +84,15 @@ export default class AdminFirestoreService {
         return AdminFirestoreService.sharedInstance;
     }
 
-    static initialize(app: firebaseAdmin.app.App) {
+    static initialize(app: firebaseAdmin.app.App, config: CactusConfig) {
         logger.log("Initializing firestore service");
-        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
+        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app, config);
     }
 
-    constructor(admin: firebaseAdmin.app.App) {
+    constructor(admin: firebaseAdmin.app.App, config: CactusConfig) {
         this.admin = admin;
         this.firestore = admin.firestore();
+        this.config = config;
     }
 
     getCollectionRef(collectionName: Collection): CollectionReference {
@@ -149,6 +153,10 @@ export default class AdminFirestoreService {
         }, options)
     }
 
+    getBatch(): Batch {
+        return this.firestore.batch();
+    }
+
     async save<T extends BaseModel>(model: T, opts: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
         try {
             const options = {...DEFAULT_SAVE_OPTIONS, ...opts};
@@ -171,13 +179,15 @@ export default class AdminFirestoreService {
             // logger.log("Data to save:", JSON.stringify(data));
             if (options.transaction) {
                 await options.transaction.set(doc, data, {merge: true})
+            } else if (options.batch){
+                await options.batch.set(doc, data, {merge: true})
             } else {
                 await doc.set(data, {merge: true});
             }
 
             return model;
         } catch (e) {
-            logger.error(`[${config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
+            logger.error(`[${this.config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
             throw e;
         }
     }
@@ -254,7 +264,8 @@ export default class AdminFirestoreService {
             return queryResult;
         } catch (e) {
             // const serverName = config.serv
-            const errorMessage = `[${config.app.serverName}] Failed to execute query ${options.queryName || ""}`.trim() + (options.transaction ? " while using a transaction" : "").trim();
+            const errorMessage = `[${this.config.app.serverName}] Failed to execute query ${options.queryName || ""}`.trim()
+                + (options.transaction ? " while using a transaction" : "").trim();
             logger.error(errorMessage, e);
             Sentry.captureException(e);
             await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${errorMessage}\n\`\`\`${e}\`\`\``);

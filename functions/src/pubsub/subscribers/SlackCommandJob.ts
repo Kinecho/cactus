@@ -11,7 +11,13 @@ import AdminSlackService, {
     SlashCommandResponse
 } from "@admin/services/AdminSlackService";
 import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
-import {formatDateTime, getDateAtMidnightDenver, getISODate, mailchimpTimeZone} from "@shared/util/DateUtil";
+import {
+    formatDateTime,
+    getDateAtMidnightDenver,
+    getISODate,
+    mailchimpTimeZone,
+    millisecondsToMinutes
+} from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import * as prettyMilliseconds from "pretty-ms";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
@@ -19,6 +25,9 @@ import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import {getResponseMediumDisplayName} from "@shared/models/ReflectionResponse";
 import Logger from "@shared/Logger";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
+import {isValidEmail} from "@shared/util/StringUtil";
+import {CactusElement} from "@shared/models/CactusElement";
 
 const logger = new Logger("SlackCommandJob");
 const config = getConfig();
@@ -28,6 +37,7 @@ export enum JobType {
     bigquery = "bigquery",
     durumuru = "durumuru",
     activeUsers = "activeUsers",
+    memberStats = "stats"
 }
 
 export interface JobRequest {
@@ -63,7 +73,9 @@ export async function processJob(job: JobRequest) {
         case JobType.activeUsers:
             task = processActiveUsers(job);
             break;
-
+        case JobType.memberStats:
+            task = processMemberStats(job);
+            break;
     }
     if (task) {
         const message = await task;
@@ -80,7 +92,7 @@ export async function processJob(job: JobRequest) {
         }
 
         lastAttachment = {
-            text: "Task completed",
+            // text: lastAttachment.text || "Task completed",
             ts: slackTimestamp,
             footer: `\`${job.type}\` took ${prettyMilliseconds(duration)}`,
             ...lastAttachment,
@@ -103,6 +115,85 @@ export async function processJob(job: JobRequest) {
     } else {
         logger.warn("No task was created for job", JSON.stringify(job, null, 2));
     }
+}
+
+async function processMemberStats(job: JobRequest): Promise<SlashCommandResponse> {
+    logger.log("Getting member stats");
+    const email = job.payload as string;
+
+    if (!isValidEmail(email)) {
+        return {
+            text: `:shrug: Unable to fetch stats for email ${email}. The email was invalid.`,
+            response_type: SlackResponseType.ephemeral
+        };
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    const memberId = member?.id;
+    const timeZone = member?.timeZone || undefined;
+    if (!memberId) {
+        return {
+            text: `:face_with_symbols_on_mouth: Unable to find a member with email ${email}`,
+            response_type: SlackResponseType.ephemeral
+        }
+    }
+
+    const [stats] = await Promise.all([
+        AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+            memberId,
+            timeZone
+        })
+    ]);
+
+    if (!stats) {
+        const message = `Unable to calculate stats for member ${email}. No value was returned from the \`calculateStatsForMember\` method.`
+        logger.warn(message);
+        return {
+            text: message,
+            response_type: SlackResponseType.ephemeral,
+        }
+    }
+
+    logger.info("Got member stats", stringifyJSON(stats, 2));
+
+    const fields: SlackAttachmentField[] = [
+        {
+            title: "Time Zone",
+            value: `${timeZone || "Not Found on Member"}`,
+            short: true
+        },
+        {
+            title: "Streak",
+            value: `${stats.currentStreakDays}`,
+            short: true,
+        },
+        {
+            title: "Total Reflections",
+            value: `${stats.totalCount}`,
+            short: true
+        },
+        {
+            title: "Minutes Reflected",
+            value: `${millisecondsToMinutes(stats.totalDurationMs)}`,
+            short: true,
+        },
+        {
+            title: "Elements",
+            value: `${Object.keys(stats.elementAccumulation).map(key => {
+                return `${key}: ${stats.elementAccumulation[key as CactusElement]}`
+            }).join("\n")}`
+        }
+    ];
+
+    const attachments = [{
+        fields: fields,
+        color: AttachmentColor.info,
+    }];
+    return {
+        text: `Stats for ${email}`,
+        attachments,
+        response_type: SlackResponseType.in_channel
+    };
 }
 
 async function processToday(job: JobRequest): Promise<SlashCommandResponse> {

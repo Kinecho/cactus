@@ -15,9 +15,12 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
+import {runMemberStatsJob} from "@api/pubsub/subscribers/MemberStatsJob";
 
 const logger = new Logger("testApp");
+// const Config = getConfig();
 const app = express();
+// app.use(cors({origin: Config.allowedOrigins}));
 app.use(cors({origin: true}));
 app.get('/', (req, res) => {
     res.status(200).json({status: 'ok', queryParams: req.query});
@@ -52,6 +55,23 @@ app.get("/fcm", async (req, res) => {
         res.send(error);
     }
     return;
+
+});
+
+app.get("/stats", async (req, res) => {
+    try {
+        const size = req.query.size || 1000;
+        console.log("starting member batches");
+        const result = await runMemberStatsJob(Number(size));
+        // let total = 0;
+
+        console.log("finished all");
+        res.send(result);
+        return;
+    } catch (error) {
+        logger.error("Failed to execute query", error);
+        res.send("Unable to process the request. an error was thrown: " + error.message);
+    }
 
 });
 
@@ -152,6 +172,27 @@ app.get("/next-prompt", async (req, res) => {
             sentPrompt: memberResult?.sentPrompt?.toJSON() || undefined,
         } : "NOT PROCESSED",
     });
+});
+
+app.get("/member-send-time", async (req, resp) => {
+    let memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+    const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
+    return resp.send(result || "none")
 });
 
 app.get("/content", async (req, resp) => {

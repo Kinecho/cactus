@@ -1,8 +1,10 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
 import Logger from "@shared/Logger";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("RequestUtil")
+
 export async function getAuthUser(request: express.Request): Promise<admin.auth.UserRecord | undefined> {
     try {
         const startTime = new Date().getTime();
@@ -40,4 +42,15 @@ export async function getAuthUserId(request: express.Request): Promise<string | 
         logger.error("Unable to verify ID token or get a user", error);
         return undefined;
     }
+}
+
+export function getAppType(request: express.Request): AppType | undefined {
+    const agent = request.header("user-agent");
+    logger.info("Found user agent", agent);
+
+    if (agent === "CactusAndroid") {
+        return AppType.ANDROID
+    }
+
+    return;
 }

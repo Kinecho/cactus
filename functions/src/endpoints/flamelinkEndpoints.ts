@@ -76,7 +76,7 @@ const signatureHandler = (req: functions.https.Request | any, resp: functions.Re
 
 app.use(signatureHandler);
 
-app.use(cors({origin: true}));
+app.use(cors({origin: config.allowedOrigins}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
 

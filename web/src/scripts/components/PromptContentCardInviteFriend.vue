@@ -2,10 +2,10 @@
     <div class="invite-friends">
         <div class="cta" v-if="!showInviteForm">
             <SocialActivityCard
-                avatarUrl="/assets/images/avatars/blobatar1.png"
-                date="7 minutes ago"
-                name="Aaron Nichols"
-                promptQuestion="Who energizes you?"/>
+                    avatarUrl="/assets/images/avatars/blobatar1.png"
+                    date="7 minutes ago"
+                    name="Aaron Nichols"
+                    promptQuestion="Who energizes you?"/>
             <h2>Mindful Friends</h2>
             <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
             <button class="button" @click="switchToInvite()">
@@ -20,7 +20,7 @@
             <p class="subtext">They'll get just one email inviting them to&nbsp;Cactus.</p>
             <template v-if="!wasInvited">
                 <div class="formItem">
-                    <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address" />
+                    <input v-model="emailAddress" @blur="validateEmail()" type="text" placeholder="Email address"/>
                     <div class="alert error" v-if="validEmail === false">That email doesn't look quite&nbsp;right.</div>
                 </div>
                 <div class="formItem">
@@ -108,11 +108,11 @@
                         first_name: '',
                         last_name: '',
                         email: this.emailAddress
-                    }
+                    };
 
                     const sendInviteResult = await sendInvite(contact, this.message);
 
-                    if (sendInviteResult.data && sendInviteResult.data.success) {
+                    if (sendInviteResult.success) {
                         this.sendingInvite = false;
                         this.wasInvited = true;
                         this.error = undefined;
@@ -209,6 +209,7 @@
         @include textInputAlt;
         width: 100%;
     }
+
     textarea {
         @include textAreaAlt;
         width: 100%;

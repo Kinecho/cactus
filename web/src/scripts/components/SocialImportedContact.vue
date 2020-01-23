@@ -103,7 +103,7 @@
 
                     const sendInviteResult = await sendInvite(this.contact, this.message);
 
-                    if (sendInviteResult.data && sendInviteResult.data.success) {
+                    if (sendInviteResult.success) {
                         this.sendingInvite = false;
                         this.wasInvited = true;
                         this.readyToInvite = false;

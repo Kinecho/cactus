@@ -152,3 +152,17 @@ export function stringifyJSON(input: any, space?: number): string {
 
     return JSON.stringify(input, replacer, space);
 }
+
+export function chunkArray<T>(list: T[], batchSize: number): (T[])[] {
+    if (!list || list.length === 0) {
+        return [];
+    }
+
+    if (batchSize < 1) {
+        throw new Error("You must provide a batch size greater than 0");
+    }
+
+    return Array(Math.ceil(list.length / batchSize))
+        .fill(0).map((_: any, index: number) => index * batchSize)
+        .map(begin => list.slice(begin, begin + batchSize));
+}

@@ -1,6 +1,6 @@
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import {EmailContact} from "@shared/types/EmailContactTypes";
-import {InviteResult, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
+import {InvitationResponse, SocialInviteRequest} from "@shared/types/SocialInviteTypes";
 import {SocialConnectionRequestNotification} from "@shared/types/SocialConnectionRequestTypes";
 import {ActivitySummaryResponse, SocialActivityFeedResponse} from "@shared/types/SocialTypes";
 import {getAuth} from "@web/firebase";
@@ -9,36 +9,37 @@ import SocialConnectionRequest from "@shared/models/SocialConnectionRequest";
 import CactusMember from "@shared/models/CactusMember";
 import {AxiosError} from "axios";
 import Logger from "@shared/Logger";
+import {getAppType} from "@web/DeviceUtil";
 
 const logger = new Logger("social.ts");
 
-export async function sendInvite(contact: EmailContact, message: string): Promise<InviteResult> {
+export async function sendInvite(contact: EmailContact, message: string): Promise<InvitationResponse> {
     const currentUser = getAuth().currentUser;
 
     if (!currentUser) {
         return {
-            data: {
-                success: false,
-            },
-            email: contact.email,
-            message: "Current user is not authenticated."
+            success: false,
+            toEmails: [contact.email],
+            error: "Current user is not logged in.",
+            message: "Current user is not logged in."
         }
     } else {
         logger.log("current user", currentUser);
         const requestOptions: SocialInviteRequest = {
+            app: getAppType(),
             toContact: contact,
             message: message
         };
 
         try {
             const headers = await getAuthHeaders();
-            return await request.post(Endpoint.sendInvite, requestOptions, {headers});
+            const apiResponse = await request.post(Endpoint.sendInvite, requestOptions, {headers});
+            return apiResponse.data;
         } catch (e) {
+            logger.error("API Call to social invite failed", e.response?.data ? e.response.data : e);
             return {
-                data: {
-                    success: false,
-                },
-                email: requestOptions.toContact.email,
+                success: false,
+                toEmails: [requestOptions.toContact.email],
                 message: "Failed to send invitation",
                 error: e
             }

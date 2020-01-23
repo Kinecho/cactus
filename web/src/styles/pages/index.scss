@@ -48,24 +48,15 @@
     grid-area: heroText;
     margin: 0 auto 4rem;
     max-width: 60rem;
-    .app-store-icon {
-      display: none;
-      margin-top: 2rem;
-    }
     
-    /* iOS-only css selector */
-    @supports (-webkit-overflow-scrolling: touch) {
-      .app-store-icon {
-        display: block;
-      }
+    .app-store-icon,
+    .play-store-icon {
+      margin-top: 2rem;
     }
 
     @include r(768) {
       margin: 0;
       text-align: left;
-      .app-store-icon {
-        display: none;
-      }
     }
     @include r(1140) {
       padding-top: 8rem;
@@ -118,11 +109,17 @@
         margin-bottom: 0;
       }
     }
+
+    .app-icons { 
+      display: flex; 
+    }
     
-    .app-store-icon a {
+    .app-store-icon a,
+    .play-store-icon a {
       display: block;
       text-align: left;
       margin-top: 3rem;
+      margin-right: 1rem;
     }
   }
 }

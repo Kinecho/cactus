@@ -10,6 +10,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
 const logger = new Logger("MemberTriggers");
+
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
@@ -25,8 +26,8 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
-        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
-        logger.log(JSON.stringify(result, null, 2));
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(memberAfter);
+        logger.log(JSON.stringify(result, null, 2));        
     });
 
 

@@ -71,6 +71,22 @@ export function getResponseMediumDisplayName(medium?: ResponseMedium | string): 
     return displayName;
 }
 
+export function getAppEmoji(app?: AppType): string {
+    if (!app) {
+        return ":question:"
+    }
+
+    switch (app) {
+        case AppType.WEB:
+            return ":computer:";
+        case AppType.ANDROID:
+            return ":android:";
+        case AppType.IOS:
+            return ":ios:";
+        default:
+            return ":question:";
+    }
+}
 
 export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
     if (!medium) {
