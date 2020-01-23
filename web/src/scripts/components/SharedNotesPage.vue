@@ -1,27 +1,23 @@
 <template>
-    <div class="page-wrapper">
-        <div v-if="show404">
-            <FourOhFour/>
-        </div>
-
-        <div v-if="viewerResponse">
-            <h2>Your Reflection</h2>
-            <div class="reflection-container">
+    <div class="sharedNotesPage">
+        <div class="centered">
+            <div v-if="show404">
+                <FourOhFour/>
+            </div>
+            <template v-if="viewerResponse">
+                <h2>Shared Reflections to {{promptId}}</h2>
+                <p class="subtext">In order to see notes shared with you, you'll need to share your reflection back with them. Sharing promotes a healthier mind through connection with&nbsp;others.</p>
+                <button v-if="viewerResponse && !tradeComplete(response)" class="shareBackBtn" @click="shareWith(response.cactusMemberId)">Share Back</button>
                 <SharedReflectionCard :response="viewerResponse" class="full"/>
+            </template>
+            <div class="not-reflected" v-else-if="promptContentPath">
+                <p>In order to see notes shared with you, you'll need to first reflect and share back.</p>
+                <a class="button" :href="promptContentPath">Reflect &amp; Share</a>
             </div>
-        </div>
-        <div class="not-reflected" v-else-if="promptContentPath">
-            <p>In order to see notes shared with you, you'll need to first reflect and share back.</p>
-            <a class="button" :href="promptContentPath">Reflect & Share</a>
-        </div>
-
-        <h2>Shared With You</h2>
-        <div class="reflection-container" v-if="responses" v-for="response in responses">
-            <SharedReflectionCard :response="response" class="full" :obscureCard="!tradeComplete(response)"/>
-            <div v-if="viewerResponse && !tradeComplete(response)">
-                <p>Once you tap Share, your reflection note (above) will be shared back and you'll be able to see this note.</p>
-                <button @click="shareWith(response.cactusMemberId)">Share Back</button>
-            </div>
+            <template class="reflection-container" v-if="responses" v-for="response in responses">
+                <SharedReflectionCard :response="response" class="full" :obscureCard="!tradeComplete(response)"/>
+            </template>
+            <p class="shareBackMsg" v-if="viewerResponse && !tradeComplete(response)">Once you tap Share Back, you'll be able to see their note and your reflection (above) will be shared with them.</p>
         </div>
     </div>
 </template>
@@ -162,13 +158,13 @@
             },
             async shareWith(cactusMemberId: string) {
                 let selectedFriends = [cactusMemberId];
-                
+
                 if (this.viewerResponse) {
                     if (this.viewerResponse.tradedWithMemberIds) {
                         selectedFriends = selectedFriends.concat(this.viewerResponse.tradedWithMemberIds);
                     }
                 }
-                
+
                 const result = await ReflectionResponseService.sharedInstance.tradeResponse(this.viewerResponse, selectedFriends);
             }
         },
@@ -189,21 +185,41 @@
     @import "mixins";
     @import "variables";
 
-    .page-wrapper {
-        background-color: $white;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        position: relative;
-        width: 100vw;
-        min-height: 50vh;
+    .sharedNotesPage {
+        .centered {
+            max-width: 70rem;
+            padding: 6.4rem 2.4rem 0;
 
-        .not-reflected {
-            text-align: center;
-            .button {
-                margin: 3rem auto;
-                display: inline-block;
+            @include r(600) {
+                padding: 6.4rem 2.4rem;
             }
+        }
+
+        .subtext {
+            margin-bottom: 1.6rem;
+            opacity: .8;
+        }
+    }
+
+    .shareBackBtn {
+        margin-bottom: 4rem;
+        max-width: 28rem;
+        width: 100%;
+    }
+
+    .shared-reflection-card + .shared-reflection-card {
+        margin-top: -1.6rem;
+    }
+
+    .shareBackMsg {
+        background-color: $lightestGreen;
+        margin: 4.8rem -2.4rem 0;
+        padding: 3.2rem 2.4rem;
+
+        @include r(600) {
+            border-radius: 1.2rem;
+            margin: 3.2rem auto 2.4rem;
+            max-width: 64rem;
         }
     }
 
