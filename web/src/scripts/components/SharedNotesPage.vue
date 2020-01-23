@@ -4,14 +4,20 @@
             <FourOhFour/>
         </div>
 
-        <h2>Your Reflection</h2>
-        <div class="reflection-container" v-if="viewerResponse">
-            <SharedReflectionCard :response="viewerResponse" class="full"/>
+        <div v-if="viewerResponse">
+            <h2>Your Reflection</h2>
+            <div class="reflection-container">
+                <SharedReflectionCard :response="viewerResponse" class="full"/>
+            </div>
         </div>
 
         <h2>Shared With You</h2>
         <div class="reflection-container" v-if="responses" v-for="response in responses">
-            <SharedReflectionCard :response="response" class="full" :obscureCard="tradeComplete(response)"/>
+            <SharedReflectionCard :response="response" class="full" :obscureCard="!tradeComplete(response)"/>
+            <div v-if="viewerResponse && !tradeComplete(response)">
+                <p>Once you tap Share, your reflection note (above) will be shared back and you'll be able to see this note.</p>
+                <button @click="shareWith(response.cactusMemberId)">Share Back</button>
+            </div>
         </div>
     </div>
 </template>
@@ -141,6 +147,17 @@
                         }
                     });
                 }
+            },
+            async shareWith(cactusMemberId: string) {
+                let selectedFriends = [cactusMemberId];
+                
+                if (this.viewerResponse) {
+                    if (this.viewerResponse.tradedWithMemberIds) {
+                        selectedFriends = selectedFriends.concat(this.viewerResponse.tradedWithMemberIds);
+                    }
+                }
+                
+                const result = await ReflectionResponseService.sharedInstance.tradeResponse(this.viewerResponse, selectedFriends);
             }
         },
         watch: {
