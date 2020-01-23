@@ -10,6 +10,10 @@
                 <SharedReflectionCard :response="viewerResponse" class="full"/>
             </div>
         </div>
+        <div class="not-reflected" v-else-if="promptContentPath">
+            <p>In order to see notes shared with you, you'll need to first reflect and share back.</p>
+            <a class="button" :href="promptContentPath">Reflect & Share</a>
+        </div>
 
         <h2>Shared With You</h2>
         <div class="reflection-container" v-if="responses" v-for="response in responses">
@@ -115,6 +119,14 @@
                 viewerResponseUnsubscriber: undefined
             }
         },
+        computed: {
+            promptContentPath(): string | undefined {
+                if (this.promptContentEntryId) {
+                    return `${PageRoute.PROMPTS_ROOT}/${this.promptContentEntryId}`
+                }
+                return;
+            }
+        },
         methods: {
             tradeComplete(response: ReflectionResponse): boolean {
                 if (this.member?.id &&
@@ -185,6 +197,14 @@
         position: relative;
         width: 100vw;
         min-height: 50vh;
+
+        .not-reflected {
+            text-align: center;
+            .button {
+                margin: 3rem auto;
+                display: inline-block;
+            }
+        }
     }
 
 </style>
