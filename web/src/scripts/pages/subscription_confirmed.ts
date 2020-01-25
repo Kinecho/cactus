@@ -1,5 +1,5 @@
 import "@styles/pages/subscription_confirmed.scss"
-import {EmailLinkSignupResult, handleEmailLinkSignIn, sendLoginEvent} from "@web/auth";
+import {EmailLinkSignupResult, sendLoginEvent} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
 import {getQueryParam, triggerWindowResize} from "@web/util";
 import {PageRoute} from "@shared/PageRoutes";
@@ -7,6 +7,7 @@ import {QueryParam} from "@shared/util/queryParams";
 import {LocalStorageKey} from "@web/services/StorageService";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
+import {handleEmailLinkSignIn} from "@web/authUi";
 const logger = new Logger("subscription_confirmed.ts");
 commonInit();
 

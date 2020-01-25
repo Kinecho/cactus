@@ -63,7 +63,8 @@ module.exports = (config) => {
             Object.keys(allPages).map(filename => {
                 cssCacheGroups[`${filename}Styles`] = {
                     name: filename,
-                    test: (m, c, entry = filename) => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                    // name: false,
+                    test: (m, c, entry = filename) => (m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry),
                     chunks: 'all',
                     enforce: true,
                 }
@@ -108,8 +109,10 @@ module.exports = (config) => {
                     extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html', '.vue'],
                 },
                 optimization: {
+                    runtimeChunk: true,
                     splitChunks: {
                         cacheGroups: cssCacheGroups,
+                        chunks: 'all',
                     },
                 },
                 module: {
