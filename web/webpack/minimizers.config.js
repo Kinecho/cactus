@@ -16,19 +16,5 @@ const minimizers = [
 module.exports = {
     optimization: {
         minimizer: minimizers,
-        splitChunks: {
-            chunks: 'all',
-        },
-        cacheGroups: {
-            defaultVendors: {
-                test: /[\\/]node_modules[\\/]/,
-                priority: -10,
-            },
-            default: {
-                minChunks: 2,
-                priority: -20,
-                reuseExistingChunk: true,
-            },
-        },
     },
 }
