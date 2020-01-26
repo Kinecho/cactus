@@ -63,7 +63,8 @@ module.exports = (config) => {
             Object.keys(allPages).map(filename => {
                 cssCacheGroups[`${filename}Styles`] = {
                     name: filename,
-                    test: (m, c, entry = filename) => m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+                    // name: false,
+                    test: (m, c, entry = filename) => (m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry),
                     chunks: 'all',
                     enforce: true,
                 }
@@ -108,8 +109,34 @@ module.exports = (config) => {
                     extensions: ['.js', '.ts', '.tsx', '.jsx', '.scss', '.css', '.svg', '.jpg', '.png', '.html', '.vue'],
                 },
                 optimization: {
+                    runtimeChunk: 'single',
                     splitChunks: {
-                        cacheGroups: cssCacheGroups,
+                        // minSize: 0,
+                        maxSize: 500000,
+                        chunks: 'all',
+                        cacheGroups: {
+                            ...cssCacheGroups,
+                            defaultVendors: {
+                                test: /[\\/]node_modules[\\/]/,
+                                name: "vendors",
+                                priority: 10,
+                                reuseExistingChunk: true,
+                            },
+                            shared: {
+                                test: /[\\/]shared[\\/]/,
+                                // minChunks: 2,
+                                name: 'shared',
+                                chunks: 'all',
+                                reuseExistingChunk: true,
+                                // priority: -20,
+                            },
+                            default: {
+                                minChunks: 2,
+                                priority: -20,
+                                reuseExistingChunk: true,
+                            },
+                        },
+
                     },
                 },
                 module: {

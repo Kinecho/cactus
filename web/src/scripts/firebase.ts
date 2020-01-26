@@ -22,6 +22,12 @@ export type FirebaseUserCredential = firebase.auth.UserCredential;
 export type Unsubscribe = firebase.Unsubscribe;
 export type AdditionalUserInfo = firebase.auth.AdditionalUserInfo;
 
+export import GoogleProvider = firebase.auth.GoogleAuthProvider;
+export import FacebookProvider = firebase.auth.FacebookAuthProvider;
+export import TwitterProvider = firebase.auth.TwitterAuthProvider;
+export import EmailProvider = firebase.auth.EmailAuthProvider;
+export import PhoneProvider = firebase.auth.PhoneAuthProvider;
+// export import AppleProvider = firebase.auth.Apple
 
 export enum FirebaseAppName {
     flamelink = "flamelink",

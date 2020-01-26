@@ -1,4 +1,3 @@
-import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
         <transition appear name="fade-in" mode="out-in">

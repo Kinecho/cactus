@@ -42,17 +42,17 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StandardFooter.vue";
-    import SocialActivityCard from "@components/SocialActivityCard.vue"
-    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from '@shared/util/queryParams'
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
+    import {PageRoute} from "@shared/PageRoutes"
+    import {QueryParam} from '@shared/util/queryParams'
+    import NavBar from "@components/NavBar.vue";
+    import Footer from "@components/StandardFooter.vue";
+    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
+    import SocialActivityCard from "@components/SocialActivityCard.vue"
 
     export default Vue.extend({
         components: {

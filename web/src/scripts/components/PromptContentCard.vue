@@ -11,7 +11,7 @@
                 <h4 v-if="processedContent.label" class="label">{{processedContent.label}}</h4>
                 <h2 v-if="processedContent.title" class="title">{{processedContent.title}}</h2>
                 <p :class="{tight: isShareNoteScreen}">
-                    <vue-simple-markdown :source="processedContent.text"></vue-simple-markdown>
+                    <MarkdownText :source="processedContent.text"/>
                 </p>
             </div>
 
@@ -285,7 +285,7 @@
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
     import CopyService from '@shared/copy/CopyService'
     import {PromptCopy} from '@shared/copy/CopyTypes'
-    import VueSimpleMarkdown from 'vue-simple-markdown'
+    // import VueSimpleMarkdown from 'vue-simple-markdown'
     import CopyTextInput from "@components/CopyTextInput.vue";
     import {QueryParam} from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
@@ -304,7 +304,7 @@
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
 
-    Vue.use(VueSimpleMarkdown);
+    // Vue.use(VueSimpleMarkdown);
 
     export default Vue.extend({
         components: {
@@ -316,7 +316,8 @@
             SharedReflectionCard,
             PromptContentCardElements,
             PromptContentCardInviteFriend,
-            ElementDescriptionModal
+            ElementDescriptionModal,
+            MarkdownText: () => import("@components/MarkdownText.vue")
         },
         props: {
             content: {
