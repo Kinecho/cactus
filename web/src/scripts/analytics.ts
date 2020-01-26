@@ -144,7 +144,7 @@ export function setUser(user?: User | null) {
         };
         window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
             if (error) {
-                logger.error("Failed to set user identitty for branch user", error);
+                logger.error("Failed to set user identity for branch user", error);
             }
             logger.info("Set branch identity", data);
         });
