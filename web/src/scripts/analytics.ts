@@ -9,7 +9,9 @@ import {getAuth} from "@web/firebase";
 import {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
-import {init as startBranchSDK} from "@web/branch-sdk";
+// import {init as startBranchSDK} from "@web/branch-sdk";
+import "branch-sdk";
+import {getAppType} from "@web/DeviceUtil";
 
 const logger = new Logger("Analytics.ts");
 declare global {
@@ -99,7 +101,7 @@ export function init() {
 }
 
 function configureBranch() {
-    startBranchSDK();
+    // window.branch.init();
     if (window.branch) {
         window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
             if (error) {
@@ -155,20 +157,60 @@ export function setUser(user?: User | null) {
     }
 }
 
-export function fireConfirmedSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        window.fbq('track', 'CompleteRegistration', {
-            value: 0.00,
-            currency: 'USD'
-        });
-    }
+export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
+    return new Promise(resolve => {
+
+
+        /* Facebook */
+        if (window.fbq) {
+            window.fbq('track', 'CompleteRegistration', {
+                value: 0.00,
+                currency: 'USD'
+            });
+        }
+
+        if (window.branch) {
+            logger.info("Sending COMPLETE_REGISTRATION event to Branch");
+            const customData = {app: getAppType(), email: options.email, userId: options.userId};
+            window.branch.logEvent(
+                "COMPLETE_REGISTRATION",
+                customData,
+                // content_items,
+                // customer_event_alias,
+                function (err: any) {
+                    if (err) {
+                        logger.error("Failed to log branch event", err);
+                    }
+                    resolve()
+                }
+            );
+        } else {
+            //no branch is available, resolve
+            resolve()
+        }
+    })
 }
 
 export function fireSignupEvent() {
     /* Facebook */
     if (window.fbq) {
         window.fbq('track', 'Lead');
+    }
+
+    if (window.branch) {
+        logger.log("Sending LEAD event to branch");
+        const customData = {app: getAppType()};
+        window.branch.logEvent(
+            "LEAD",
+            customData,
+            // content_items,
+            // customer_event_alias,
+            function (err: any) {
+                if (err) {
+                    logger.error("Failed to log branch event", err);
+                }
+            }
+        );
     }
 }
 
