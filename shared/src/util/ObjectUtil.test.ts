@@ -1,4 +1,5 @@
 import {
+    chunkArray,
     isArray,
     isDate,
     isNonEmptyObject,
@@ -521,5 +522,30 @@ describe("stringifyJSON", () => {
     test("base firestore model", () => {
         const t = new TestModel();
         expect(stringifyJSON({models: [t]})).toEqual('{"models":[{"deleted":false}]}')
+    })
+});
+
+describe("split into chunks", () => {
+    test("empty array", () => {
+        expect(chunkArray([], 3)).toEqual([])
+    });
+
+
+    test("10 items in batch of 3", () => {
+        expect(chunkArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10]])
+    });
+
+    test("10 items in batch of 20", () => {
+        expect(chunkArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 20)).toEqual([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]])
+    });
+
+    test("negative batch size", () => {
+        expect(() => chunkArray([1, 2], -3)).toThrow()
+    });
+
+    test("Batch with object type", () => {
+        const array: string[] = ["one", "two", "three", "four"];
+        expect(chunkArray(array, 2)).toEqual([["one", "two"], ["three", "four"]]);
+        expect(array).toBe(array)
     })
 });

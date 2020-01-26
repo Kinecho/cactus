@@ -28,7 +28,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import {FirebaseUser} from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
+    import {sendLoginEvent} from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import {PageRoute} from "@shared/PageRoutes"
     import {QueryParam} from "@shared/util/queryParams"
@@ -38,6 +38,7 @@
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
+    import {getAuthUI, getAuthUIConfig} from "@web/authUi";
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
