@@ -15,7 +15,7 @@
             <section id="free" class="tab-panel free-panel">
                 <h3 class="tab-header free-header">Free</h3>
                 <ul>
-                    <li>Available on web, iPhone, &amp;&nbsp;iPad</li>
+                    <li>Available on web, iOS, &amp;&nbsp;Android</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>256-bit encryption on&nbsp;notes</li>
@@ -29,7 +29,7 @@
             <section id="premium" class="tab-panel premium-panel">
                 <h3 class="tab-header premium-header">Premium</h3>
                 <ul>
-                    <li>Available on web, iPhone, &amp;&nbsp;iPad</li>
+                    <li>Available on web, iOS, &amp;&nbsp;Android</li>
                     <li>Unlimited reflection notes</li>
                     <li>Daily reflection prompts</li>
                     <li>256-bit encryption on&nbsp;notes</li>
