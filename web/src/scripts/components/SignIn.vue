@@ -1,24 +1,20 @@
 <template>
-    <div>
-        <div class="centered">
-            <div>
-                <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
-                <p v-if="message">{{message}}</p>
-            </div>
-            <div class="actions-container">
-                <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
-                <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
-                <div class="divider" v-if="!isPendingRedirect">
-                    <p class="message-container">Or choose from one of the following</p>
-                </div>
-            </div>
-            <div id="third-party-logins">
-                <spinner v-if="firebaseUiLoading" :delay="1000"/>
-                <div class="buttonContainer" id="signup-app"></div>
+    <div class="centered">
+        <div>
+            <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
+            <p v-if="message">{{message}}</p>
+        </div>
+        <div class="actions-container">
+            <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
+            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
+            <div class="divider" v-if="!isPendingRedirect">
+                <p class="message-container">Or choose from one of the following</p>
             </div>
         </div>
-        <img id="pinkBlob" src="assets/images/pinkBlob.svg" alt=""/>
-        <img id="yellowBlob1" src="assets/images/yellowNeedleBlob.svg" alt=""/>
+        <div id="third-party-logins">
+            <spinner v-if="firebaseUiLoading" :delay="1000"/>
+            <div class="buttonContainer" id="signup-app"></div>
+        </div>
     </div>
 </template>
 
@@ -266,10 +262,7 @@
                 width: 30rem;
                 margin: 3rem auto;
             }
-
-
         }
-
     }
 </style>
 
