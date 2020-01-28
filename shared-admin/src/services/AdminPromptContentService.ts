@@ -1,4 +1,5 @@
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
+import {getConfig} from "@admin/config/configService";
 import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
@@ -9,6 +10,7 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("AdminPromptContentService");
+const config = getConfig();
 
 export default class AdminPromptContentService {
     protected static sharedInstance: AdminPromptContentService;
@@ -73,13 +75,13 @@ export default class AdminPromptContentService {
             // const midnightDenver = getDateAtMidnightDenver(date);
             let startDateString = "";
             let endDateString = "";
-            if (dateObject) {
+            if (dateObject?.day) {
                 dateObject.hour = 0;
                 dateObject.minute = 0;
                 dateObject.second = 0;
                 dateObject.millisecond = 0;
                 endDateString = dateObjectToISODate(dateObject);
-                const startObject = {...dateObject, day: dateObject.day! + 1};
+                const startObject = {...dateObject, day: dateObject.day + 1};
                 startDateString = dateObjectToISODate(startObject);
             } else if (systemDate) {
                 const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
@@ -93,7 +95,7 @@ export default class AdminPromptContentService {
                 endDateString = getFlamelinkDateString(midnightDenver);
 
             } else {
-                logger.error("No valid date passed into getPromptContentForDate method");
+                logger.error("No valid date passed into getPromptContentForDate method", options);
                 return;
             }
 
@@ -133,7 +135,7 @@ export default class AdminPromptContentService {
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
             logger.error("Failed to fetch content", error);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(config.app.serverName + ` | getPromptContentForDate():  Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\`\nOptions\n\`\`\`${options}\`\`\``);
             return undefined;
         }
     }
