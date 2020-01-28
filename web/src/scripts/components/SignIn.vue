@@ -292,10 +292,10 @@
     .centered {
         position: relative;
         z-index: 1;
-        padding: 2.4rem;
+        padding: 6.4rem 2.4rem 0;
 
         @include r(600) {
-            padding: 6.4rem 0;
+            padding: 12rem 0 0;
         }
     }
 
