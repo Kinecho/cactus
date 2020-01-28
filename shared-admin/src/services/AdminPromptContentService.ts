@@ -73,13 +73,13 @@ export default class AdminPromptContentService {
             // const midnightDenver = getDateAtMidnightDenver(date);
             let startDateString = "";
             let endDateString = "";
-            if (dateObject) {
+            if (dateObject?.day) {
                 dateObject.hour = 0;
                 dateObject.minute = 0;
                 dateObject.second = 0;
                 dateObject.millisecond = 0;
                 endDateString = dateObjectToISODate(dateObject);
-                const startObject = {...dateObject, day: dateObject.day! + 1};
+                const startObject = {...dateObject, day: dateObject.day + 1};
                 startDateString = dateObjectToISODate(startObject);
             } else if (systemDate) {
                 const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
@@ -133,7 +133,7 @@ export default class AdminPromptContentService {
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
             logger.error("Failed to fetch content", error);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\`\nOptions\n\`\`\`${options}\`\`\``);
             return undefined;
         }
     }
