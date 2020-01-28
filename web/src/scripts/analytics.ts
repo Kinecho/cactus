@@ -187,27 +187,28 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
                 currency: 'USD'
             });
         }
+        resolve();
 
-        if (window.branch) {
-            await configureBranch();
-            logger.info("Sending COMPLETE_REGISTRATION event to Branch");
-            const customData = {app: getAppType(), email: options.email, userId: options.userId};
-            window.branch.logEvent(
-                "COMPLETE_REGISTRATION",
-                customData,
-                // content_items,
-                // customer_event_alias,
-                function (err: any) {
-                    if (err) {
-                        logger.error("Failed to log branch event", err);
-                    }
-                    resolve()
-                }
-            );
-        } else {
-            //no branch is available, resolve
-            resolve()
-        }
+        // if (window.branch) {
+        //     await configureBranch();
+        //     logger.info("Sending COMPLETE_REGISTRATION event to Branch");
+        //     const customData = {app: getAppType(), email: options.email, userId: options.userId};
+        //     window.branch.logEvent(
+        //         "COMPLETE_REGISTRATION",
+        //         customData,
+        //         // content_items,
+        //         // customer_event_alias,
+        //         function (err: any) {
+        //             if (err) {
+        //                 logger.error("Failed to log branch event", err);
+        //             }
+        //             resolve()
+        //         }
+        //     );
+        // } else {
+        //     //no branch is available, resolve
+        //     resolve()
+        // }
     })
 }
 
@@ -219,27 +220,27 @@ export async function fireSignupEvent() {
             logger.debug("Sending Lead event to Facebook");
             window.fbq('track', 'Lead');
         }
-
-        if (window.branch) {
-            await configureBranch();
-            logger.info("Sending LEAD event to branch");
-            const customData = {app: getAppType()};
-            window.branch.logEvent(
-                "LEAD",
-                customData,
-                // content_items,
-                // customer_event_alias,
-                function (err: any) {
-                    if (err) {
-                        logger.error("Failed to log branch event", err);
-                    }
-                    resolve();
-                }
-            );
-        } else {
-            logger.info("No branch object found on window. Can not fire Lead event");
-            resolve();
-        }
+        resolve();
+        // if (window.branch) {
+        //     await configureBranch();
+        //     logger.info("Sending LEAD event to branch");
+        //     const customData = {app: getAppType()};
+        //     window.branch.logEvent(
+        //         "LEAD",
+        //         customData,
+        //         // content_items,
+        //         // customer_event_alias,
+        //         function (err: any) {
+        //             if (err) {
+        //                 logger.error("Failed to log branch event", err);
+        //             }
+        //             resolve();
+        //         }
+        //     );
+        // } else {
+        //     logger.info("No branch object found on window. Can not fire Lead event");
+        //     resolve();
+        // }
     })
 }
 
