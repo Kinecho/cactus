@@ -1,7 +1,7 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
-            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
+            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
             <div v-if="displayLoginButton || displaySignupButton" class="anonLinks">
                 <transition name="fade-in-slow" appear>
                     <a v-if="displayLoginButton"
@@ -136,6 +136,7 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
+            whiteLogo: {type: Boolean, default: false},
             showLogin: {type: Boolean, default: true},
             forceTransparent: {type: Boolean, default: false},
             loginRedirectUrl: String,
@@ -208,6 +209,9 @@
             socialHref(): string {
                 return PageRoute.SOCIAL;
             },
+            logoSrc(): string {
+                return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
+            }
         },
         methods: {
             async logout(): Promise<void> {
