@@ -93,7 +93,7 @@ export default class AdminPromptContentService {
                 endDateString = getFlamelinkDateString(midnightDenver);
 
             } else {
-                logger.error("No valid date passed into getPromptContentForDate method");
+                logger.error("No valid date passed into getPromptContentForDate method", options);
                 return;
             }
 
