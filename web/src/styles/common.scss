@@ -178,3 +178,13 @@ h4 {
 .hidden {
   display: none;
 }
+
+.appStoreBadge {
+    display: block;
+    height: 4rem;
+    margin: 0 .4rem;
+
+    @include r(768) {
+        height: 4.8rem;
+    }
+}

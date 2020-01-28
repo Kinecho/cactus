@@ -67,19 +67,6 @@
             background-color: transparent;
         }
 
-        .app-store-icon,
-        .play-store-icon {
-            display: block;
-            margin-top: 2rem;
-            text-align: center;
-
-            @include r(600) {
-                display: inline-block;
-                margin-left: 1rem;
-                margin-top: 0;
-            }
-        }
-
         .centered {
             @include r(600) {
                 display: flex;
@@ -98,6 +85,11 @@
                 color: $yellow;
                 transition: color .3s ease-in-out;
             }
+        }
+
+        .app-icons {
+            display: flex;
+            justify-content: center;
         }
     }
 
@@ -159,5 +151,4 @@
             width: 2.4rem;
         }
     }
-
 </style>

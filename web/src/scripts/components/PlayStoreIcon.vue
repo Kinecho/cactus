@@ -1,7 +1,7 @@
 <template lang="html">
     <div :class="['play-store-icon', {'only-mobile':onlyMobile}]" v-if="showToDevice()">
         <a @click.prevent="trackEvent(playStoreUrl); return false;" :href="playStoreUrl">
-            <img class="googleBadge" src="/assets/google_play_store_badge.svg" alt="Get it on Google Play" />
+            <img class="appStoreBadge" src="/assets/google_play_store_badge.svg" alt="Get it on Google Play" />
         </a>
     </div>
 </template>
@@ -41,8 +41,8 @@
         },
         methods: {
             showToDevice(): boolean {
-                if (this.onlyAndroid && 
-                    isAndroidDevice() && 
+                if (this.onlyAndroid &&
+                    isAndroidDevice() &&
                     !isAndroidApp()) {
                     return true;
                 } else if (!this.onlyAndroid) {
@@ -72,10 +72,6 @@
 
     a {
         text-align: left;
-    }
-
-    .googleBadge {
-        height: 5rem;
     }
 
     @include r(768) {
