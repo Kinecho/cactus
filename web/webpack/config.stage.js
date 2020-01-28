@@ -3,7 +3,7 @@ module.exports = {
     __APP_CUSTOM_SCHEME__: "app.cactus-stage",
     __GOOGLE_ANALYTICS_ID__: 'UA-127159143-6',
     __GOOGLE_OPTIMIZE_ID__: 'GTM-KFBRFFG',
-    __FACEBOOK_PIXEL_ID__: '',
+    __FACEBOOK_PIXEL_ID__: '1028725524153114',
     __FIRST_PROMPT_ID__: 'iqRGVLbclcpbjmuP6LZ3',
     __API_DOMAIN__: 'https://us-central1-cactus-app-stage.cloudfunctions.net',
     __PUBLIC_DOMAIN__: 'https://cactus-app-stage.web.app',

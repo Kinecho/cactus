@@ -25,7 +25,7 @@ export function initializeAxios(): AxiosInstance {
     const domain = Config.apiDomain;
     const baseURL = `${domain}`;
     axios.defaults.baseURL = baseURL;
-    axios.defaults.timeout = 10000; //10 second timeout
+    axios.defaults.timeout = 30000; //30 second timeout
     _request = axios.create({
         baseURL: Config.apiDomain,
         transformResponse: [(data: string) => {

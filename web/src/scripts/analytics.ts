@@ -52,7 +52,6 @@ export function init() {
         return;
     }
 
-
     getAuth().onAuthStateChanged(user => {
         setUser(user);
         if (user) {
@@ -107,7 +106,7 @@ function configureBranch() {
             if (error) {
                 logger.error("Failed to initialize Branch", error);
             }
-            logger.info("Branch init data", data);
+            logger.info("Branch init data", JSON.stringify(data, null, 2));
         });
 
     }
@@ -142,13 +141,13 @@ export function setUser(user?: User | null) {
             id: user.uid,
             email: email || undefined,
         };
+        Sentry.setUser(sentryUser);
         window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
             if (error) {
                 logger.error("Failed to set user identity for branch user", error);
             }
             logger.info("Set branch identity", data);
         });
-        Sentry.setUser(sentryUser);
 
     } else {
         setUserId(undefined);
@@ -160,9 +159,10 @@ export function setUser(user?: User | null) {
 export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
     return new Promise(resolve => {
 
-
+        logger.debug("Firing confirmed signup event");
         /* Facebook */
         if (window.fbq) {
+            logger.debug("Sending CompleteRegistration event to facebook");
             window.fbq('track', 'CompleteRegistration', {
                 value: 0.00,
                 currency: 'USD'
@@ -194,11 +194,12 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
 export function fireSignupEvent() {
     /* Facebook */
     if (window.fbq) {
+        logger.debug("Sending Lead event to Facebook");
         window.fbq('track', 'Lead');
     }
 
     if (window.branch) {
-        logger.log("Sending LEAD event to branch");
+        logger.debug("Sending LEAD event to branch");
         const customData = {app: getAppType()};
         window.branch.logEvent(
             "LEAD",
