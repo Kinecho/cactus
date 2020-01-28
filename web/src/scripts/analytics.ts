@@ -6,7 +6,7 @@ import * as Integrations from '@sentry/integrations';
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
-import {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
 // import {init as startBranchSDK} from "@web/branch-sdk";
@@ -51,6 +51,7 @@ export function init() {
         logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
+    configureBranch();
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
@@ -60,7 +61,7 @@ export function init() {
 
     });
 
-    configureBranch();
+
     const sentryIntegrations = [];
     if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
@@ -107,6 +108,11 @@ function configureBranch() {
                 logger.error("Failed to initialize Branch", error);
             }
             logger.info("Branch init data", JSON.stringify(data, null, 2));
+            const refParam = data?.data_parsed?.ref || undefined;
+            if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
+                logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
+                StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
+            }
         });
 
     }
@@ -191,28 +197,34 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
     })
 }
 
-export function fireSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        logger.debug("Sending Lead event to Facebook");
-        window.fbq('track', 'Lead');
-    }
+export async function fireSignupEvent() {
+    return new Promise(resolve => {
+        logger.debug("Fired 'Lead' Event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending Lead event to Facebook");
+            window.fbq('track', 'Lead');
+        }
 
-    if (window.branch) {
-        logger.debug("Sending LEAD event to branch");
-        const customData = {app: getAppType()};
-        window.branch.logEvent(
-            "LEAD",
-            customData,
-            // content_items,
-            // customer_event_alias,
-            function (err: any) {
-                if (err) {
-                    logger.error("Failed to log branch event", err);
+        if (window.branch) {
+            logger.debug("Sending LEAD event to branch");
+            const customData = {app: getAppType()};
+            window.branch.logEvent(
+                "LEAD",
+                customData,
+                // content_items,
+                // customer_event_alias,
+                function (err: any) {
+                    if (err) {
+                        logger.error("Failed to log branch event", err);
+                    }
+                    resolve();
                 }
-            }
-        );
-    }
+            );
+        } else {
+            resolve();
+        }
+    })
 }
 
 export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
