@@ -1,5 +1,5 @@
 <template>
-    <footer :class={lifted}>
+    <footer v-bind:class="{lifted, transparent: isTransparent}">
         <div class="centered">
             <div class="footerInfo">
                 <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
@@ -34,7 +34,8 @@
 
     export default Vue.extend({
         props: {
-            lifted: {type: Boolean, required: false, default: false}
+            lifted: {type: Boolean, required: false, default: false},
+            isTransparent: {type: Boolean, default: false},
         },
         components: {
             AppStoreIcon,
@@ -60,6 +61,10 @@
         &.lifted {
             margin-top: -4.8rem;
             padding: 8rem 2.4rem 3.2rem;
+        }
+
+        &.transparent {
+            background-color: transparent;
         }
 
         .app-store-icon,
