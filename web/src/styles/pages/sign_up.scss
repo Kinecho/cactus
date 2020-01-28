@@ -36,4 +36,13 @@ body {
             min-height: calc(100vh - 19rem);
         }
     }
+
+    .firebaseui-tos,
+    .firebaseui-link {
+        color: $white;
+    }
+
+    .firebaseui-link {
+        text-decoration: underline;
+    }
 }
