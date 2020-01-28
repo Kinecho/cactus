@@ -239,7 +239,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         const payload: LoginEvent = req.body;
 
-        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = [], app} = payload;
+        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = [], app: appType} = payload;
 
         if (!userId) {
             logger.warn("No user Id was provided in the body fo the request");
@@ -282,7 +282,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         user.lastLoginAt = new Date();
         await AdminUserService.getSharedInstance().save(user);
 
-        message.text = `${app ? getAppEmoji(app) : ""} ${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
+        message.text = `${appType ? getAppEmoji(appType) : ""} ${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
 
         if (user.email) {
             logger.log("checking for pending user so we can grab the reflectionResponseIds from it");
@@ -302,7 +302,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
 
         if (isNewUser && member) {
-            message.text = `${app ? getAppEmoji(app) : ""}  ${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
+            message.text = `${appType ? getAppEmoji(appType) : ""}  ${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
             await AdminUserService.getSharedInstance().setReferredByEmail({
                 userId,
                 referredByEmail: referredByEmail || undefined

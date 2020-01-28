@@ -175,7 +175,7 @@ app.get("/next-prompt", async (req, res) => {
 });
 
 app.get("/member-send-time", async (req, resp) => {
-    let memberId = req.query.memberId;
+    const memberId = req.query.memberId;
     const email = req.query.email;
     let member: CactusMember | undefined;
     if (!memberId && email) {
