@@ -17,6 +17,7 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {fireConfirmedSignupEvent, fireSignupEvent} from "@web/analytics";
 import Logger from "@shared/Logger";
+import {getAppType} from "@web/DeviceUtil";
 // export AuthProviders = firebase.auth
 const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
@@ -144,6 +145,7 @@ export async function sendLoginEvent(args: {
                             referredByEmail: referredByEmail,
                             signupQueryParams: {...getAllQueryParams(), ...landingParams},
                             reflectionResponseIds: getAnonymousReflectionResponseIds(),
+                            app: getAppType(),
                         };
                         logger.log("login-event payload", JSON.stringify(event, null, 2));
                         const headers = await getAuthHeaders();
@@ -157,7 +159,10 @@ export async function sendLoginEvent(args: {
                         }
                         if (event.isNewUser) {
                             // all new users
-                            await fireConfirmedSignupEvent({email: args.user?.email || undefined, userId: args.user?.uid});
+                            await fireConfirmedSignupEvent({
+                                email: args.user?.email || undefined,
+                                userId: args.user?.uid
+                            });
                         }
                     } catch (error) {
                         logger.error("failed to send login event", error);

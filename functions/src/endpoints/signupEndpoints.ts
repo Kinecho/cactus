@@ -26,6 +26,7 @@ import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {getISODateTime} from "@shared/util/DateUtil";
 import {QueryParam} from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
+import {getAppEmoji} from "@shared/models/ReflectionResponse";
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();
@@ -238,7 +239,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         const payload: LoginEvent = req.body;
 
-        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = []} = payload;
+        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = [], app} = payload;
 
         if (!userId) {
             logger.warn("No user Id was provided in the body fo the request");
@@ -281,7 +282,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         user.lastLoginAt = new Date();
         await AdminUserService.getSharedInstance().save(user);
 
-        message.text = `${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
+        message.text = `${app ? getAppEmoji(app) : ""} ${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
 
         if (user.email) {
             logger.log("checking for pending user so we can grab the reflectionResponseIds from it");
@@ -301,7 +302,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
 
         if (isNewUser && member) {
-            message.text = `${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
+            message.text = `${app ? getAppEmoji(app) : ""}  ${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
             await AdminUserService.getSharedInstance().setReferredByEmail({
                 userId,
                 referredByEmail: referredByEmail || undefined
