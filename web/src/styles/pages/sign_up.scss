@@ -3,30 +3,37 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-html, body {
-  //overflow: hidden;
+body {
+    background-color: $darkestGreen;
+    background-image: url(/assets/images/grainy.png), url(/assets/images/loginBG.svg);
+    background-position: center;
+    background-size: auto, cover;
+    background-repeat: repeat, no-repeat;
 }
 
 .page-wrapper {
-  //min-height: 100vh;
-  position: relative;
-
-  header {
     position: relative;
-    z-index: 2;
-  }
 
-  .signin-wrapper {
-    flex-grow: 1;
-    overflow: hidden;
-    margin: 0 auto 4rem;
-    position: relative;
-    z-index: 2;
+    header {
+        position: relative;
+        z-index: 2;
 
-    min-height: calc(100vh - 26rem);
-    @include r(600) {
-      min-height: calc(100vh - 15rem);
+        .centered {
+            justify-content: center;
+        }
     }
 
-  }
+    .signin-wrapper {
+        color: $white;
+        flex-grow: 1;
+        overflow: hidden;
+        margin: 0 auto 4rem;
+        min-height: calc(100vh - 30rem);
+        position: relative;
+        z-index: 2;
+
+        @include r(600) {
+            min-height: calc(100vh - 19rem);
+        }
+    }
 }
