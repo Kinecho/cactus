@@ -13,6 +13,7 @@ import Logger from "@shared/Logger";
 import "branch-sdk";
 import {getAppType} from "@web/DeviceUtil";
 
+let branchConfigured = false;
 const logger = new Logger("Analytics.ts");
 declare global {
     interface Window {
@@ -51,16 +52,17 @@ export function init() {
         logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
-    configureBranch();
+    configureBranch().then(() => {
+        getAuth().onAuthStateChanged(user => {
+            setUser(user);
+            if (user) {
+                logger.log("User has logged in, removing any tracking/referral info");
+            }
 
-    getAuth().onAuthStateChanged(user => {
-        setUser(user);
-        if (user) {
-            logger.log("User has logged in, removing any tracking/referral info");
-        }
-
+        });
+    }).catch(error => {
+        logger.error("Something went wrong configuring branch", error);
     });
-
 
     const sentryIntegrations = [];
     if (!Config.isDev) {
@@ -100,22 +102,33 @@ export function init() {
     hasInit = true;
 }
 
-function configureBranch() {
-    // window.branch.init();
-    if (window.branch) {
-        window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
-            if (error) {
-                logger.error("Failed to initialize Branch", error);
-            }
-            logger.info("Branch init data", JSON.stringify(data, null, 2));
-            const refParam = data?.data_parsed?.ref || undefined;
-            if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
-                logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
-                StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
-            }
-        });
-
-    }
+async function configureBranch(): Promise<void> {
+    return new Promise(resolve => {
+        if (branchConfigured) {
+            resolve();
+            return;
+        }
+        if (window.branch) {
+            window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
+                if (error) {
+                    logger.error("Failed to initialize Branch", error);
+                }
+                logger.info("Branch init data", JSON.stringify(data, null, 2));
+                const refParam = data?.data_parsed?.ref || undefined;
+                if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
+                    logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
+                    StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
+                }
+                resolve();
+                branchConfigured = true;
+                return;
+            });
+        } else {
+            logger.error("No Branch instance was found on the window");
+            resolve();
+            return;
+        }
+    })
 }
 
 /**
@@ -163,7 +176,7 @@ export function setUser(user?: User | null) {
 }
 
 export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
 
         logger.debug("Firing confirmed signup event");
         /* Facebook */
@@ -176,6 +189,7 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
         }
 
         if (window.branch) {
+            await configureBranch();
             logger.info("Sending COMPLETE_REGISTRATION event to Branch");
             const customData = {app: getAppType(), email: options.email, userId: options.userId};
             window.branch.logEvent(
@@ -198,8 +212,8 @@ export async function fireConfirmedSignupEvent(options: { email?: string, userId
 }
 
 export async function fireSignupEvent() {
-    return new Promise(resolve => {
-        logger.debug("Fired 'Lead' Event");
+    return new Promise(async resolve => {
+        logger.info("Fired 'Lead' Event");
         /* Facebook */
         if (window.fbq) {
             logger.debug("Sending Lead event to Facebook");
@@ -207,7 +221,8 @@ export async function fireSignupEvent() {
         }
 
         if (window.branch) {
-            logger.debug("Sending LEAD event to branch");
+            await configureBranch();
+            logger.info("Sending LEAD event to branch");
             const customData = {app: getAppType()};
             window.branch.logEvent(
                 "LEAD",
@@ -222,6 +237,7 @@ export async function fireSignupEvent() {
                 }
             );
         } else {
+            logger.info("No branch object found on window. Can not fire Lead event");
             resolve();
         }
     })
