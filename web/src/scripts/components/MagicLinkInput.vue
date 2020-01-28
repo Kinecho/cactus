@@ -16,7 +16,7 @@
     import {addModal, getQueryParam, showModal} from "@web/util"
     import {QueryParam} from "@shared/util/queryParams"
     import StorageService, {LocalStorageKey} from "@web/services/StorageService"
-    import {gtag} from "@web/analytics"
+    import {fireSignupEvent, gtag} from "@web/analytics"
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
@@ -105,7 +105,7 @@
                             event_label: `MagicLinkInput`
                         });
                         showModal(modalId);
-
+                        await fireSignupEvent();
                         this.email = "";
 
                     } else if (signupResult.error) {

@@ -156,7 +156,7 @@ export function configureLoginForm(formId: string) {
                     event_category: "email_signup",
                     event_label: `${formId}`
                 });
-                fireSignupEvent();
+                await fireSignupEvent();
                 showModal(modalId);
 
 

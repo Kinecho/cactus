@@ -153,11 +153,11 @@ export async function sendLoginEvent(args: {
                            implement the Facebook Ads API */
                         if (event.isNewUser && isThirdPartySignIn(event.providerId)) {
                             // new user who did not previous enter their email address
-                            fireSignupEvent();
+                            await fireSignupEvent();
                         }
                         if (event.isNewUser) {
                             // all new users
-                            fireConfirmedSignupEvent();
+                            await fireConfirmedSignupEvent({email: args.user?.email || undefined, userId: args.user?.uid});
                         }
                     } catch (error) {
                         logger.error("failed to send login event", error);

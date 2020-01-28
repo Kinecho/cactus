@@ -42,6 +42,7 @@ declare var __PUBLIC_DOMAIN__: string;
 declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
 declare var __SENTRY__: SentryConfig;
 declare var __SENTRY_VERSION__: string | undefined;
+declare var __BRANCH_LIVE_KEY__: string;
 
 declare var __BUILD_ENV__: string;
 export const Config = {
@@ -66,5 +67,6 @@ export const Config = {
     isStage: __BUILD_ENV__ === "stage",
     isProd: __BUILD_ENV__ === "prod",
     version: __SENTRY_VERSION__,
-    androidUserAgent: "CactusAndroid"
+    androidUserAgent: "CactusAndroid",
+    branchLiveKey: __BRANCH_LIVE_KEY__,
 };
