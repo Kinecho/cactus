@@ -1,7 +1,6 @@
 <template>
     <transition name="fade-in" appear>
         <div class="centered" v-if="!loading">
-            <a :href="logoHref"><img class="large-desktop" src="/assets/images/logoWhite.svg" alt="Cactus logo"/></a>
             <p>Your private journal for mindfulness.</p>
             <a :href="continuePath" class="btn button primary">Continue</a>
         </div>
