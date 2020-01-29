@@ -16,7 +16,6 @@ import {PageRoute} from "@shared/PageRoutes";
 import {LocalStorageKey} from "@web/services/StorageService";
 import {EmailLinkSignupResult} from "@web/auth";
 import Logger from "@shared/Logger";
-import * as firebase from "firebase";
 import AuthUI = firebaseui.auth.AuthUI;
 
 let authUi: AuthUI;
@@ -32,14 +31,17 @@ export interface AuthUIConfigOptions {
 }
 
 export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
+
     const signInOptions: any[] = [
         GoogleProvider.PROVIDER_ID,
         FacebookProvider.PROVIDER_ID,
         TwitterProvider.PROVIDER_ID,
+        "apple.com",
         // getPhoneProviderConfig(),
         // emailProvider(opts)
 
     ];
+
     if (opts.includeEmailLink) {
         signInOptions.push(emailProvider(opts));
     }

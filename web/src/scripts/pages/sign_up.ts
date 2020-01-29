@@ -25,10 +25,10 @@ new Vue({
     template: `
         <div class="page-wrapper">
             <div class="signin-wrapper">
-                <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true"/>
+                <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
                 <SignIn :message="message" :title="title"/>
             </div>
-            <Footer/>
+            <Footer :isTransparent="true"/>
         </div>`,
     data: {
         message: getQueryParam(QueryParam.MESSAGE),

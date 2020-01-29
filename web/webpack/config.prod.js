@@ -19,7 +19,8 @@ module.exports = {
     __FLAMELINK_ENV_ID__: 'production',
     __FLAMELINK_FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyDu_-z20lelwf58ZtPurwNagHL0UBdMb4U',
-        authDomain: 'cactus-app-prod.firebaseapp.com',
+        // authDomain: 'cactus-app-prod.firebaseapp.com',
+        authDomain: 'cactus.app',
         databaseURL: 'https://cactus-app-prod.firebaseio.com',
         projectId: 'cactus-app-prod',
         storageBucket: 'cactus-app-prod.appspot.com',

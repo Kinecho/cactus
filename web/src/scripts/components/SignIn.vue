@@ -1,24 +1,20 @@
 <template>
-    <div>
-        <div class="centered">
-            <div>
-                <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
-                <p v-if="message">{{message}}</p>
-            </div>
-            <div class="actions-container">
-                <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
-                <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
-                <div class="divider" v-if="!isPendingRedirect">
-                    <p class="message-container">Or choose from one of the following</p>
-                </div>
-            </div>
-            <div id="third-party-logins">
-                <spinner v-if="firebaseUiLoading" :delay="1000"/>
-                <div class="buttonContainer" id="signup-app"></div>
+    <div class="centered">
+        <div>
+            <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
+            <p v-if="message">{{message}}</p>
+        </div>
+        <div class="actions-container">
+            <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
+            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
+            <div class="divider" v-if="!isPendingRedirect">
+                <p class="message-container">Or choose from one of the following</p>
             </div>
         </div>
-        <img id="pinkBlob" src="assets/images/pinkBlob.svg" alt=""/>
-        <img id="yellowBlob1" src="assets/images/yellowNeedleBlob.svg" alt=""/>
+        <div id="third-party-logins">
+            <spinner v-if="firebaseUiLoading" :delay="1000"/>
+            <div class="buttonContainer" id="signup-app"></div>
+        </div>
     </div>
 </template>
 
@@ -178,14 +174,11 @@
             }
         }
     })
-
-
 </script>
 
 <style lang="scss">
     @import "mixins";
     @import "variables";
-
 
     #signup-app {
         margin: 0 -24px 0;
@@ -266,10 +259,7 @@
                 width: 30rem;
                 margin: 3rem auto;
             }
-
-
         }
-
     }
 </style>
 
@@ -277,7 +267,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
 
     h1 {
         margin: 0;
@@ -299,10 +288,10 @@
     .centered {
         position: relative;
         z-index: 1;
-        padding: 2.4rem;
+        padding: 6.4rem 2.4rem 0;
 
         @include r(600) {
-            padding: 6.4rem 0;
+            padding: 12rem 0 0;
         }
     }
 
@@ -312,22 +301,4 @@
             font-size: 1.6rem;
         }
     }
-
-    #yellowBlob1 {
-        bottom: 3vh;
-        height: auto;
-        left: -180px;
-        position: absolute;
-        width: 360px;
-    }
-
-    #pinkBlob {
-        height: auto;
-        position: absolute;
-        right: -90px;
-        top: 24px;
-        transform: rotate(-165deg);
-        width: 180px;
-    }
-
 </style>

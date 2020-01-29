@@ -205,6 +205,11 @@ $widthDesktop: $widthXL;
 
 /*height*/
 @mixin h( $point ) {
+    @if $point==600 {
+      @media (min-height: 600px) {
+        @content;
+      }
+    }
   @if $point==768 {
     @media (min-height: 768px) {
       @content;
@@ -394,4 +399,14 @@ $widthDesktop: $widthXL;
   &.small {
     @include smallButton;
   }
+}
+
+@mixin blueWavyBackground {
+    background-attachment: fixed;
+    background-color: $darkestGreen;
+    background-image: url(/assets/images/grainy.png), url(/assets/images/loginBG-left.svg), url(/assets/images/loginBG-right.svg);
+    background-position: center, right 50% top 0, 100% 100%;
+    background-size: auto, cover, 50%;
+    background-repeat: repeat, no-repeat, no-repeat;
+
 }
