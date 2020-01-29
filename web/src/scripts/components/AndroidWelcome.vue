@@ -30,5 +30,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
+    @import "signup";
 
 </style>
