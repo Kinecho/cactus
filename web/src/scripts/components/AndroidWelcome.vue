@@ -1,7 +1,7 @@
 <template>
     <transition name="fade-in" appear>
-        <div class="centered" v-if="!loading">
-            <p>Your private journal for mindfulness.</p>
+        <div class="flexContainer" v-if="!loading">
+            <p class="subtext">Your private journal for&nbsp;mindfulness.</p>
             <a :href="continuePath" class="btn button primary">Continue</a>
         </div>
     </transition>
@@ -55,5 +55,39 @@
     @import "mixins";
     @import "variables";
     @import "transitions";
+
+    .flexContainer {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: space-between;
+        min-height: 58vh;
+
+        @include r(600) {
+            justify-content: flex-start;
+        }
+    }
+
+    .subtext {
+        margin: 0 auto 2.4rem;
+        max-width: 24rem;
+        text-align: center;
+
+        @include r(600) {
+            margin-bottom: 4.8rem;
+            max-width: none;
+        }
+    }
+
+    a.button {
+        bottom: 2.4rem;
+        display: block;
+        flex-grow: 0;
+        position: sticky;
+        text-align: center;
+
+        @include r(600) {
+            position: static;
+        }
+    }
 
 </style>
