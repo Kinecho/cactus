@@ -9,7 +9,6 @@
 }
 
 #loading-container {
-
   animation: 2s ease 0s normal forwards 1 fadein;
 
   img {
@@ -22,10 +21,14 @@
   }
 }
 
+header {
+    border: 0;
+}
 
-body {
-  &.error {
-    //background: $darkText url(assets/images/sadCactusPatternWhiteTransparent.svg);
-    //color: white;
-  }
+.pageContainer {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
 }
