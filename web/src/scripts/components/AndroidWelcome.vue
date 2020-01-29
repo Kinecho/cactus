@@ -1,8 +1,14 @@
 <template>
     <transition name="fade-in" appear>
         <div class="welcome-wrapper" v-if="!loading">
-            <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
-            <div class="flexContainer" >
+            <NavBar v-bind:showSignup="false"
+                    :showLogin="false"
+                    v-bind:redirectOnSignOut="false"
+                    :isSticky="false"
+                    :forceTransparent="true"
+                    :largeLogoOnDesktop="true"
+                    :whiteLogo="true"/>
+            <div class="flexContainer">
                 <p class="subtext">Your private journal for&nbsp;mindfulness.</p>
                 <a :href="continuePath" class="btn button primary">Continue</a>
             </div>
@@ -20,12 +26,7 @@
         components: {
             NavBar,
         },
-        created() {
-
-        },
-        props: {},
         beforeMount(): void {
-            // this.memberUnsubscriber = CactusMemberService.sharedInstance.authS
             this.authListener = getAuth().onAuthStateChanged(user => {
                 if (user) {
                     window.location.href = PageRoute.JOURNAL_HOME
@@ -40,12 +41,10 @@
             authLoaded: boolean,
             continuePath: PageRoute,
             authListener: Unsubscribe | undefined,
-            logoHref: string,
         } {
             return {
                 authLoaded: false,
                 continuePath: PageRoute.SIGNUP,
-                logoHref: PageRoute.HOME,
                 authListener: undefined,
             }
         },
