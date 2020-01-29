@@ -18,6 +18,7 @@ import {EmailLinkSignupResult} from "@web/auth";
 import Logger from "@shared/Logger";
 import * as firebase from "firebase";
 import AuthUI = firebaseui.auth.AuthUI;
+import {isAndroidDevice} from "@web/DeviceUtil";
 
 let authUi: AuthUI;
 const logger = new Logger("authUi.ts");
@@ -32,6 +33,7 @@ export interface AuthUIConfigOptions {
 }
 
 export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Config {
+
     const signInOptions: any[] = [
         GoogleProvider.PROVIDER_ID,
         FacebookProvider.PROVIDER_ID,
@@ -40,6 +42,11 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         // emailProvider(opts)
 
     ];
+
+    if (!isAndroidDevice()) {
+        signInOptions.push("apple.com");
+    }
+
     if (opts.includeEmailLink) {
         signInOptions.push(emailProvider(opts));
     }
