@@ -671,7 +671,7 @@
                             this.reflectionResponse = response;
                             this.reflectionDuration = response.reflectionDurationMs || 0;
 
-                            if (this.isFirstCard && !this.saved) {
+                            if (this.isFirstCard && !this.saving && !this.saved) {
                                 logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
                                 const saveTask = this.save({updateReflectionLog: false});
                                 await saveTask;
