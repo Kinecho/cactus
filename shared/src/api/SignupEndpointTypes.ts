@@ -1,4 +1,5 @@
 import {ApiResponse} from "@shared/api/ApiTypes";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 export interface EmailStatusRequest {
     email: string,
@@ -40,5 +41,5 @@ export interface LoginEvent {
     referredByEmail?: string | undefined | null,
     signupQueryParams?: { [name: string]: string } | undefined;
     reflectionResponseIds?: string[],
-
+    app?: AppType,
 }

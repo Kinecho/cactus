@@ -217,9 +217,9 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         systemDateObject
     });
 
-    if (!memberLocaleDateObject) {
+    if (!memberLocaleDateObject?.day) {
         const msg = `No member local date object was able to be determined for member ${member.email} (${member.id})`
-        logger.error(msg);
+        logger.error(msg, systemDateObject);
         errors.push(msg);
         return result;
     }

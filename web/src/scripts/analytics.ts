@@ -3,13 +3,17 @@ import {QueryParam} from "@shared/util/queryParams";
 import {getQueryParam} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
-
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
-import {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
+// import {init as startBranchSDK} from "@web/branch-sdk";
+import "branch-sdk";
+import {getAppType} from "@web/DeviceUtil";
+
+let branchConfigured = false;
 const logger = new Logger("Analytics.ts");
 declare global {
     interface Window {
@@ -48,14 +52,16 @@ export function init() {
         logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
+    configureBranch().then(() => {
+        getAuth().onAuthStateChanged(user => {
+            setUser(user);
+            if (user) {
+                logger.log("User has logged in, removing any tracking/referral info");
+            }
 
-
-    getAuth().onAuthStateChanged(user => {
-        setUser(user);
-        if (user) {
-            logger.log("User has logged in, removing any tracking/referral info");
-        }
-
+        });
+    }).catch(error => {
+        logger.error("Something went wrong configuring branch", error);
     });
 
     const sentryIntegrations = [];
@@ -96,6 +102,35 @@ export function init() {
     hasInit = true;
 }
 
+async function configureBranch(): Promise<void> {
+    return new Promise(resolve => {
+        if (branchConfigured) {
+            resolve();
+            return;
+        }
+        if (window.branch) {
+            window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
+                if (error) {
+                    logger.error("Failed to initialize Branch", error);
+                }
+                logger.info("Branch init data", JSON.stringify(data, null, 2));
+                const refParam = data?.data_parsed?.ref || undefined;
+                if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
+                    logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
+                    StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
+                }
+                resolve();
+                branchConfigured = true;
+                return;
+            });
+        } else {
+            logger.error("No Branch instance was found on the window");
+            resolve();
+            return;
+        }
+    })
+}
+
 /**
  * Clear tracking cookies and local storage items
  */
@@ -125,33 +160,91 @@ export function setUser(user?: User | null) {
             id: user.uid,
             email: email || undefined,
         };
-
         Sentry.setUser(sentryUser);
-        
+        window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
+            if (error) {
+                logger.error("Failed to set user identity for branch user", error);
+            }
+            logger.info("Set branch identity", data);
+        });
+
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
+        window.branch?.logout?.()
     }
 }
 
-export function fireConfirmedSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        window.fbq('track','CompleteRegistration', {
-            value: 0.00,
-            currency: 'USD'
-        });
-    }
+export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
+    return new Promise(async resolve => {
+
+        logger.debug("Firing confirmed signup event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending CompleteRegistration event to facebook");
+            window.fbq('track', 'CompleteRegistration', {
+                value: 0.00,
+                currency: 'USD'
+            });
+        }
+        resolve();
+
+        // if (window.branch) {
+        //     await configureBranch();
+        //     logger.info("Sending COMPLETE_REGISTRATION event to Branch");
+        //     const customData = {app: getAppType(), email: options.email, userId: options.userId};
+        //     window.branch.logEvent(
+        //         "COMPLETE_REGISTRATION",
+        //         customData,
+        //         // content_items,
+        //         // customer_event_alias,
+        //         function (err: any) {
+        //             if (err) {
+        //                 logger.error("Failed to log branch event", err);
+        //             }
+        //             resolve()
+        //         }
+        //     );
+        // } else {
+        //     //no branch is available, resolve
+        //     resolve()
+        // }
+    })
 }
 
-export function fireSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        window.fbq('track','Lead');
-    }
+export async function fireSignupEvent() {
+    return new Promise(async resolve => {
+        logger.info("Fired 'Lead' Event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending Lead event to Facebook");
+            window.fbq('track', 'Lead');
+        }
+        resolve();
+        // if (window.branch) {
+        //     await configureBranch();
+        //     logger.info("Sending LEAD event to branch");
+        //     const customData = {app: getAppType()};
+        //     window.branch.logEvent(
+        //         "LEAD",
+        //         customData,
+        //         // content_items,
+        //         // customer_event_alias,
+        //         function (err: any) {
+        //             if (err) {
+        //                 logger.error("Failed to log branch event", err);
+        //             }
+        //             resolve();
+        //         }
+        //     );
+        // } else {
+        //     logger.info("No branch object found on window. Can not fire Lead event");
+        //     resolve();
+        // }
+    })
 }
 
-export function socialSharingEvent(options: {type: "open"|"close"|"change", network?: string, url?: string}) {
+export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
     gtag('event', options.type, {
         event_category: "social_share",
         event_label: options.network

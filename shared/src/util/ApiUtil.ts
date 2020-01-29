@@ -1,19 +1,24 @@
 import Logger from "@shared/Logger";
+import {isBlank} from "@shared/util/StringUtil";
 
 const logger = new Logger("ApiUtil.ts");
 
 // Dates are serialized in TZ format, example: '1981-12-20T04:00:14.000Z'.
 const datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-export function deserializeJson(payload: string) {
+export function deserializeJson(payload?: string): any | undefined {
+    if (!payload || isBlank(payload)) {
+        return;
+    }
     try {
-        return  JSON.parse(payload, jsonReviver);
+        return JSON.parse(payload, jsonReviver);
     } catch (error) {
-        logger.error("Unable to parse JSON string", error);
+        logger.error(`Error deserializeing JSON in API Util. Payload = ${payload}. Unable to parse JSON string`, error);
+        return;
     }
 }
 
-function jsonReviver(key:any, value: any) {
+function jsonReviver(key: any, value: any) {
     if (isSerializedDate(value)) {
         return (new Date(value));
     }
