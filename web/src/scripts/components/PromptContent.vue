@@ -267,7 +267,6 @@
 
                     this.loading = false;
                     this.updateDocumentMeta();
-
                 }
             };
 
@@ -401,6 +400,9 @@
             },
             isLastCard(): boolean {
                 return this.contentItems && this.contentItems && this.activeIndex === this.contentItems.length - 1 || false
+            },
+            isFirstCard(): boolean {
+                return this.contentItems && this.contentItems && this.activeIndex === 0 || false
             },
             hasPrevious(): boolean {
                 return this.activeIndex > 0;
@@ -667,10 +669,13 @@
                             this.responsesLoaded = true;
                             this.reflectionResponses = responses;
                             this.reflectionResponse = response;
-
-
                             this.reflectionDuration = response.reflectionDurationMs || 0;
 
+                            if (this.isFirstCard && !this.saved) {
+                                logger.log("Attemping to save ReflectionResponse...");
+                                const saveTask = this.save({updateReflectionLog: false});
+                                await saveTask;
+                            }
                         }
                     })
                 } else {
