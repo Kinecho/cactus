@@ -395,3 +395,11 @@ $widthDesktop: $widthXL;
     @include smallButton;
   }
 }
+
+@mixin blueWavyBackground {
+    background-color: $darkestGreen;
+    background-image: url(/assets/images/grainy.png), url(/assets/images/loginBG.svg);
+    background-position: center;
+    background-size: auto, auto 110%;
+    background-repeat: repeat, no-repeat;
+}

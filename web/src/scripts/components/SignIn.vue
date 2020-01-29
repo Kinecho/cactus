@@ -174,14 +174,11 @@
             }
         }
     })
-
-
 </script>
 
 <style lang="scss">
     @import "mixins";
     @import "variables";
-
 
     #signup-app {
         margin: 0 -24px 0;
@@ -271,7 +268,6 @@
     @import "mixins";
     @import "variables";
 
-
     h1 {
         margin: 0;
     }
@@ -305,22 +301,4 @@
             font-size: 1.6rem;
         }
     }
-
-    #yellowBlob1 {
-        bottom: 3vh;
-        height: auto;
-        left: -180px;
-        position: absolute;
-        width: 360px;
-    }
-
-    #pinkBlob {
-        height: auto;
-        position: absolute;
-        right: -90px;
-        top: 24px;
-        transform: rotate(-165deg);
-        width: 180px;
-    }
-
 </style>

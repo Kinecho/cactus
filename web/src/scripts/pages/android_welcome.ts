@@ -16,11 +16,9 @@ new Vue({
         NavBar,
     },
     template: `
-        <div class="page-wrapper">
-            <div class="signin-wrapper">
-                <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
-                <AndroidWelcome/>
-            </div>
+        <div class="welcome-wrapper">
+            <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
+            <AndroidWelcome/>
         </div>`,
 });
 
