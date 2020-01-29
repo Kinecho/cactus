@@ -4,7 +4,6 @@ import AndroidWelcome from "@components/AndroidWelcome.vue"
 import Vue from "vue";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
-import NavBar from "@components/NavBar.vue";
 
 const logger = new Logger("AndroidWelcome");
 commonInit();
@@ -13,7 +12,6 @@ new Vue({
     el: "#app",
     components: {
         AndroidWelcome,
-        NavBar,
     },
     template: `        
         <AndroidWelcome/>
