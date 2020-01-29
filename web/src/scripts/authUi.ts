@@ -38,14 +38,11 @@ export function getAuthUIConfig(opts: AuthUIConfigOptions): firebaseui.auth.Conf
         GoogleProvider.PROVIDER_ID,
         FacebookProvider.PROVIDER_ID,
         TwitterProvider.PROVIDER_ID,
+        "apple.com",
         // getPhoneProviderConfig(),
         // emailProvider(opts)
 
     ];
-
-    if (!isAndroidDevice()) {
-        signInOptions.push("apple.com");
-    }
 
     if (opts.includeEmailLink) {
         signInOptions.push(emailProvider(opts));
