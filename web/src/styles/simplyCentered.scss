@@ -1,17 +1,16 @@
 @import "mixins";
 @import "variables";
 
-html, body {
-  background: $lightPink;
-}
-
 body {
-  @include h(768) {
-    align-items: center;
-    display: flex;
-    height: 100vh;
-    justify-content: center;
-  }
+    @include blueWavyBackground;
+    color: $white;
+    min-height: 100vh;
+
+    @include h(768) {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
 }
 
 header {
