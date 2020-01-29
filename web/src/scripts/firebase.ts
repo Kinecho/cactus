@@ -27,6 +27,8 @@ export import FacebookProvider = firebase.auth.FacebookAuthProvider;
 export import TwitterProvider = firebase.auth.TwitterAuthProvider;
 export import EmailProvider = firebase.auth.EmailAuthProvider;
 export import PhoneProvider = firebase.auth.PhoneAuthProvider;
+export import OAuthProvider = firebase.auth.OAuthProvider;
+// export import AppleProvider = firebase.auth.AppleAuthProvider;
 // export import AppleProvider = firebase.auth.Apple
 
 export enum FirebaseAppName {

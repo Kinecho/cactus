@@ -3,7 +3,7 @@
 @import "~styles/common";
 @import "~styles/modal";
 
-body {
+body.sign-up-body {
     background-color: $darkestGreen;
     background-image: url(/assets/images/grainy.png), url(/assets/images/loginBG.svg);
     background-position: center;

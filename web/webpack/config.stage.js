@@ -10,7 +10,7 @@ module.exports = {
     __BUILD_ENV__: 'stage',
     __FIREBASE_CONFIG__: {
         apiKey: 'AIzaSyA8q6tz-bzx5NM9bqEYS8xZ7NHpCffo-q0',
-        authDomain: 'cactus-app-stage.web.app',
+        authDomain: 'cactus-app-stage.firebaseapp.com',
         databaseURL: 'https://cactus-app-stage.firebaseio.com',
         projectId: 'cactus-app-stage',
         storageBucket: 'cactus-app-stage.appspot.com',

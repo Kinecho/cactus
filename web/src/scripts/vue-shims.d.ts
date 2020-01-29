@@ -3,12 +3,6 @@ declare module '*.vue' {
     export default Vue;
 }
 
-declare module 'vue-clipboard2' {
-    import {PluginObject} from 'vue';
-    const VueClipboard: PluginObject<any>;
-    export default VueClipboard;
-}
-
 declare module 'vue-social-sharing' {
     import {PluginObject} from 'vue';
     const SocialSharing: PluginObject<any>;
