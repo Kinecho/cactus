@@ -106,5 +106,10 @@ module.exports = {
         "title": "iOS Login",
         "path": "/ios-login-continue",
         "name": "ios_login_continue"
+    },
+    "android_welcome": {
+        "title": "Welcome",
+        "path": "/welcome",
+        "name": "android_welcome"
     }
 }

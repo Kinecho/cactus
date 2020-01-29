@@ -106,6 +106,10 @@
         ],
         "rewrites": [
             {
+                "source": "/welcome",
+                "destination": "/android_welcome.html"
+            },
+            {
                 "source": "/activity",
                 "destination": "/social_home.html"
             },
