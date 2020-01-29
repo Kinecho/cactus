@@ -1,8 +1,11 @@
 <template>
     <transition name="fade-in" appear>
-        <div class="flexContainer" v-if="!loading">
-            <p class="subtext">Your private journal for&nbsp;mindfulness.</p>
-            <a :href="continuePath" class="btn button primary">Continue</a>
+        <div class="welcome-wrapper" v-if="!loading">
+            <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
+            <div class="flexContainer" >
+                <p class="subtext">Your private journal for&nbsp;mindfulness.</p>
+                <a :href="continuePath" class="btn button primary">Continue</a>
+            </div>
         </div>
     </transition>
 </template>
@@ -11,8 +14,12 @@
     import Vue from "vue";
     import {PageRoute} from "@shared/PageRoutes";
     import {getAuth, Unsubscribe} from "@web/firebase";
+    import NavBar from "@components/NavBar.vue";
 
     export default Vue.extend({
+        components: {
+            NavBar,
+        },
         created() {
 
         },
@@ -55,6 +62,30 @@
     @import "mixins";
     @import "variables";
     @import "transitions";
+
+
+    body.sign-up-body {
+        @include blueWavyBackground;
+    }
+
+    .welcome-wrapper {
+        align-items: center;
+        color: $white;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    header {
+        margin-bottom: 1.6rem;
+        margin-top: 16vh;
+
+        @include h(600) {
+            margin-top: 30vh;
+        }
+    }
+
 
     .flexContainer {
         display: flex;

@@ -5,21 +5,3 @@
 body.sign-up-body {
     @include blueWavyBackground;
 }
-
-.welcome-wrapper {
-    align-items: center;
-    color: $white;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-    min-height: 100vh;
-}
-
-header {
-    margin-bottom: 1.6rem;
-    margin-top: 16vh;
-
-    @include h(600) {
-        margin-top: 30vh;
-    }
-}

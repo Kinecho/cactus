@@ -15,11 +15,9 @@ new Vue({
         AndroidWelcome,
         NavBar,
     },
-    template: `
-        <div class="welcome-wrapper">
-            <NavBar v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
-            <AndroidWelcome/>
-        </div>`,
+    template: `        
+        <AndroidWelcome/>
+    `,
 });
 
 //enables hot reload
