@@ -4,20 +4,11 @@
 @import "~styles/simplyCentered";
 
 body {
-    align-items: flex-start;
-    background-color: $beige;
-
-    @include r(600) {
-        align-items: center;
-    }
+    align-items: center;
 }
 
 .centered {
-    text-align: left;
-
-    @include r(600) {
-        text-align: center;
-    }
+    text-align: center;
 }
 
 .graphic {
@@ -25,7 +16,6 @@ body {
 }
 
 h1 {
-    line-height: 1.2;
     margin-bottom: .8rem;
 }
 

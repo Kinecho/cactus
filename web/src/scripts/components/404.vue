@@ -26,15 +26,6 @@
     })
 </script>
 
-<style lang="scss">
-    @import "variables";
-    @import "mixins";
-
-    html, body, body.error {
-        background: $lightPink;
-    }
-</style>
-
 <style lang="scss" scoped>
     @import "mixins";
     @import "variables";
