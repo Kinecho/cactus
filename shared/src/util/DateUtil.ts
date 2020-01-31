@@ -381,7 +381,13 @@ export function getContentQueryDateStrings(options: {
         dateObject.second = 0;
         dateObject.millisecond = 0;
         endDateString = dateObjectToISODate(dateObject);
-        const startObject = DateTime.fromObject(dateObject).plus({days: 1}).toObject();
+        const startTime = DateTime.fromObject(dateObject).plus({days: 1});
+
+        if (!DateTime.fromObject(dateObject).isValid || !startTime.isValid) {
+            logger.error(`The start date or end date were nto valid datetime objects: StartTime: ${JSON.stringify(startTime.toObject())} | EndTime: ${JSON.stringify(dateObject)}`)
+            return undefined;
+        }
+        const startObject = startTime.toObject();
         startDateString = dateObjectToISODate(startObject);
     } else if (systemDate) {
         const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one

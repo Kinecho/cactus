@@ -38,18 +38,22 @@ export default class PromptContentService {
     async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): Promise<PromptContent | undefined> {
         try {
             const getOptions = getPromptContentForDateQueryOptions(options);
+            if (!getOptions) {
+                logger.error("Unable to get query options for prompt content date");
+                return;
+            }
             const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
                 logger.warn("PromptContentService.getPromptContentForDate: No objects found for dates given");
-                return
+                return;
             }
 
             const allValues = Object.values(raw);
             logger.log(`Found ${allValues.length} that matched the criteria for the date range`);
             const [content]: (any | undefined)[] = allValues;
             if (!content) {
-                return undefined
+                return undefined;
             }
 
             return fromFlamelinkData(content, PromptContent);
