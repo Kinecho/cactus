@@ -3,6 +3,7 @@
     "version": "1.0.1",
     "description": "Cactus Monorepo",
     "main": "index.js",
+    "repository": "https://github.com/Kinecho/cactus",
     "scripts": {
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
         "update": "npm run rebuild:all && npm run install:all",

@@ -1,5 +1,6 @@
 {
     "name": "functions",
+    "repository": "https://github.com/Kinecho/cactus",
     "scripts": {
         "build": "tsc",
         "build:deploy": "tsc -p tsconfig.prod.json",
