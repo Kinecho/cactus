@@ -9,7 +9,6 @@
 <script lang="ts">
     import Vue from "vue";
     import {Config} from "@web/config";
-    import {PageRoute} from '@shared/PageRoutes'
     import {isIosDevice} from '@web/DeviceUtil'
     import {gtag} from "@web/analytics"
 

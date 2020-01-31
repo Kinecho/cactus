@@ -48,7 +48,12 @@
     grid-area: heroText;
     margin: 0 auto 4rem;
     max-width: 60rem;
-    
+
+    .app-icons {
+      display: flex;
+      justify-content: center;
+    }
+
     .app-store-icon,
     .play-store-icon {
       margin-top: 2rem;
@@ -110,8 +115,8 @@
       }
     }
 
-    .app-icons { 
-      display: flex; 
+    .app-icons {
+      display: flex;
     }
     
     .app-store-icon a,
