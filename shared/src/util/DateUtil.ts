@@ -366,3 +366,43 @@ export function convertDateToSendTimeUTC(date: Date = new Date()): PromptSendTim
 
     return {hour: hour, minute: quarterHour}
 }
+
+export function getContentQueryDateStrings(options: {
+    systemDate?: Date,
+    dateObject?: DateObject
+}): { startDateString: string, endDateString: string } | undefined {
+    const {systemDate, dateObject} = options;
+
+    let startDateString;
+    let endDateString;
+    if (dateObject) {
+        dateObject.hour = 0;
+        dateObject.minute = 0;
+        dateObject.second = 0;
+        dateObject.millisecond = 0;
+        endDateString = dateObjectToISODate(dateObject);
+        const startObject = DateTime.fromObject(dateObject).plus({days: 1}).toObject();
+        startDateString = dateObjectToISODate(startObject);
+    } else if (systemDate) {
+        const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
+        midnightDenver.setHours(0);
+        midnightDenver.setMinutes(0);
+        midnightDenver.setSeconds(0);
+        midnightDenver.setMilliseconds(0);
+        const nextDate = plusDays(1, midnightDenver);
+        nextDate.setHours(0);
+        startDateString = getFlamelinkDateString(nextDate);
+        endDateString = getFlamelinkDateString(midnightDenver);
+
+    } else {
+        logger.error("No valid date passed into getPromptContentForDate method");
+        return undefined;
+    }
+
+    if (!startDateString || !endDateString) {
+        logger.error(`Unable to get both a start date and end date string. StartDateString=${startDateString} | EndDateString = ${endDateString}`);
+        return undefined;
+    }
+
+    return {startDateString, endDateString}
+}

@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Static website for cactus app",
     "main": "index.js",
+    "repository": "https://github.com/Kinecho/cactus",
     "scripts": {
         "build:deploy": "npm run clean && npm run logo && NODE_OPTIONS=--max_old_space_size=6000 webpack --config webpack/webpack.deploy.config.js",
         "build:firebase": "npm run build:deploy && npm run copy",

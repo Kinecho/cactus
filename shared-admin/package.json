@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "shared modules",
   "main": "index.js",
+  "repository": "https://github.com/Kinecho/cactus",
   "scripts": {
     "test": "jest",
     "test:db": "jest -c ./jest.db.config.js",

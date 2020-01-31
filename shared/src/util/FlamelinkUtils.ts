@@ -1,6 +1,13 @@
-import FlamelinkModel from "@shared/FlamelinkModel";
-import {Image} from "@shared/models/PromptContent";
+import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import PromptContent, {ContentStatus, Image} from "@shared/models/PromptContent";
 import {isBlank} from "@shared/util/StringUtil";
+import {getContentQueryDateStrings} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
+import {DateObject} from "luxon";
+import * as ContentTypes from '@flamelink/sdk-content-types';
+import * as AppTypes from "@flamelink/sdk-app-types";
+
+const logger = new Logger("FlamelinkUtils");
 
 export function fromFlamelinkData<T extends FlamelinkModel>(data: any, Type: { new(): T }): T {
     // const transformed = convertTimestampToDate(data);
@@ -16,4 +23,31 @@ export function hasImage(image: Image | undefined) {
     }
 
     return !(isBlank(image.storageUrl) && isBlank(image.flamelinkFileName) && isBlank(image.url) && isBlank(image.storageUrl) && (!image.fileIds || image.fileIds.length === 0));
+}
+
+export function getPromptContentForDateQueryOptions(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): ContentTypes.CF.Get|undefined {
+    const {systemDate, dateObject, status} = options;
+    const queryDates = getContentQueryDateStrings({systemDate, dateObject});
+    if (!queryDates) {
+        logger.error("CAN NOT FETCH PROMPT CONTENT, NO DATES FOUND");
+        return;
+    }
+    const {startDateString, endDateString} = queryDates;
+    logger.log("start date", startDateString);
+    logger.log("end date", endDateString);
+
+    const filters: AppTypes.CF.FilterClause[] = [];
+    if (status) {
+        logger.log("adding status filter for status = ", status);
+        filters.push([PromptContent.Fields.contentStatus, "==", status])
+    }
+
+    return {
+        schemaKey: SchemaName.promptContent,
+        // field: PromptContent.Fields.scheduledSendAt,
+        filters,
+        orderBy: {field: PromptContent.Fields.scheduledSendAt, order: "desc"},
+        startAt: startDateString,
+        endAt: endDateString,
+    } as ContentTypes.CF.Get;
 }

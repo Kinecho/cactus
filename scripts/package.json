@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "main": "src/index.ts",
+    "repository": "https://github.com/Kinecho/cactus",
     "scripts": {
         "test": "jest",
         "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
