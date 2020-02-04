@@ -163,19 +163,19 @@ export function setUser(user?: User | null) {
         };
         Sentry.setUser(sentryUser);
 
-        window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
-            if (error) {
-                logger.error("Failed to set user identity for branch user", error);
-            }
-            logger.info("Set branch identity", data);
-        });
+        // window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
+        //     if (error) {
+        //         logger.error("Failed to set user identity for branch user", error);
+        //     }
+        //     logger.info("Set branch identity", data);
+        // });
 
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
         if (isFirstAuthLoad) {
-            logger.info("[BRANCH SDK] Logging out of branch")
-            window.branch?.logout?.()
+            // logger.info("[BRANCH SDK] Logging out of branch")
+            // window.branch?.logout?.()
         }
     }
 }
