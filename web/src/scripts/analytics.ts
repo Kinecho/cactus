@@ -42,6 +42,7 @@ export const gtag = createGTag();
 
 let hasInit = false;
 let isFirstAuthLoad = false;
+
 /**
  * set up the analytics function
  *
@@ -104,32 +105,33 @@ export function init() {
 }
 
 async function configureBranch(): Promise<void> {
-    return new Promise(resolve => {
-        if (branchConfigured) {
-            resolve();
-            return;
-        }
-        if (window.branch) {
-            window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
-                if (error) {
-                    logger.error("Failed to initialize Branch", error);
-                }
-                logger.info("Branch init data", JSON.stringify(data, null, 2));
-                const refParam = data?.data_parsed?.ref || undefined;
-                if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
-                    logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
-                    StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
-                }
-                resolve();
-                branchConfigured = true;
-                return;
-            });
-        } else {
-            logger.error("No Branch instance was found on the window");
-            resolve();
-            return;
-        }
-    })
+    return Promise.resolve();
+    // return new Promise(resolve => {
+    //     if (branchConfigured) {
+    //         resolve();
+    //         return;
+    //     }
+    //     if (window.branch) {
+    //         window.branch.init(Config.branchLiveKey, (error: any, data: any) => {
+    //             if (error) {
+    //                 logger.error("Failed to initialize Branch", error);
+    //             }
+    //             logger.info("Branch init data", JSON.stringify(data, null, 2));
+    //             const refParam = data?.data_parsed?.ref || undefined;
+    //             if (refParam && !StorageService.getString(LocalStorageKey.referredByEmail)) {
+    //                 logger.info("Setting the referredByEmail via Branch Params to: ", refParam);
+    //                 StorageService.saveString(LocalStorageKey.referredByEmail, refParam)
+    //             }
+    //             resolve();
+    //             branchConfigured = true;
+    //             return;
+    //         });
+    //     } else {
+    //         logger.error("No Branch instance was found on the window");
+    //         resolve();
+    //         return;
+    //     }
+    // })
 }
 
 /**
