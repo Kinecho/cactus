@@ -41,7 +41,7 @@ export const gtag = createGTag();
 
 
 let hasInit = false;
-let isFirstAuthLoad = true;
+let isFirstAuthLoad = false;
 /**
  * set up the analytics function
  *
@@ -58,7 +58,7 @@ export function init() {
             if (user) {
                 logger.log("User has logged in, removing any tracking/referral info");
             }
-            isFirstAuthLoad = false;
+            isFirstAuthLoad = true;
 
         });
     }).catch(error => {
@@ -173,7 +173,8 @@ export function setUser(user?: User | null) {
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
-        if (!isFirstAuthLoad) {
+        if (isFirstAuthLoad) {
+            logger.info("[BRANCH SDK] Logging out of branch")
             window.branch?.logout?.()
         }
     }
