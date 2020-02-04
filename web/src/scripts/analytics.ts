@@ -41,7 +41,7 @@ export const gtag = createGTag();
 
 
 let hasInit = false;
-let authLoaded = false;
+let isFirstAuthLoad = true;
 /**
  * set up the analytics function
  *
@@ -58,7 +58,7 @@ export function init() {
             if (user) {
                 logger.log("User has logged in, removing any tracking/referral info");
             }
-            authLoaded = true;
+            isFirstAuthLoad = false;
 
         });
     }).catch(error => {
@@ -173,7 +173,7 @@ export function setUser(user?: User | null) {
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
-        if (authLoaded) {
+        if (!isFirstAuthLoad) {
             window.branch?.logout?.()
         }
     }
