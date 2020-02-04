@@ -41,7 +41,7 @@ export const gtag = createGTag();
 
 
 let hasInit = false;
-
+let authLoaded = false;
 /**
  * set up the analytics function
  *
@@ -58,6 +58,7 @@ export function init() {
             if (user) {
                 logger.log("User has logged in, removing any tracking/referral info");
             }
+            authLoaded = true;
 
         });
     }).catch(error => {
@@ -161,6 +162,7 @@ export function setUser(user?: User | null) {
             email: email || undefined,
         };
         Sentry.setUser(sentryUser);
+
         window.branch?.setIdentity?.(user.uid, (error: any, data: any) => {
             if (error) {
                 logger.error("Failed to set user identity for branch user", error);
@@ -171,7 +173,9 @@ export function setUser(user?: User | null) {
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
-        window.branch?.logout?.()
+        if (authLoaded) {
+            window.branch?.logout?.()
+        }
     }
 }
 

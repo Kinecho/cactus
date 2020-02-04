@@ -3,7 +3,10 @@
     "version": "1.0.1",
     "description": "Cactus Monorepo",
     "main": "index.js",
-    "repository": "https://github.com/Kinecho/cactus",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kinecho/cactus.git"
+    },
     "scripts": {
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
         "update": "npm run rebuild:all && npm run install:all",
@@ -31,10 +34,6 @@
         "add:all:dev": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save-dev;npm --prefix \"shared-admin\" install $1 --save-dev;npm --prefix \"functions\" install $1 --save-dev;npm --prefix \"shared\" install $1 --save-dev;npm --prefix \"scripts\" install $1 --save-dev; }; func",
         "add:all:prod": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save;npm --prefix \"shared-admin\" install $1 --save;npm --prefix \"functions\" install $1 --save;npm --prefix \"shared\" install $1 --save;npm --prefix \"scripts\" install $1 --save; }; func",
         "indexes:get": "firebase firestore:indexes > firestore.indexes.json"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Kinecho/cactus.git"
     },
     "author": {
         "name": "Neil Poulin",
