@@ -57,6 +57,7 @@ export enum ChannelName {
     ci = "ci",
     alerts = "cactus-alerts",
     content = "content",
+    customer_support = "customer-support"
 }
 
 export enum SlackResponseType {
@@ -253,6 +254,10 @@ export default class AdminSlackService {
 
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.engineering, message);
+    }
+
+    async sendCustomerSupportMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.customer_support, message);
     }
 
     async sendDataLogMessage(message: string | ChatMessage): Promise<void> {

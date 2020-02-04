@@ -314,7 +314,7 @@ export async function onDelete(user: admin.auth.UserRecord) {
     logger.log("Deleting user ", JSON.stringify(user.toJSON()));
     if (!email) {
         logger.error("No email found on the user, can't delete.");
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${user.toJSON()}\`\`\``);
+        await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:warning: User deleted but no email address found. \`\`\`\n${user.toJSON()}\`\`\``);
         return
     }
     try {
@@ -322,6 +322,6 @@ export async function onDelete(user: admin.auth.UserRecord) {
         logger.log("finished deleting user with email", email);
     } catch (error) {
         logger.error("Failed to delete user data", error);
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage(`:warning: User deleted but no email found. \`\`\`\n${error.message}\`\`\``);
+        await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:warning: User deleted but no email found. \`\`\`\n${error.message}\`\`\``);
     }
 }
