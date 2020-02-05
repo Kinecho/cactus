@@ -10,7 +10,7 @@
                 </div>
             </section>
             <section class="needsApp" v-if="true">
-                <h4>Need to install Cactus?</h4>
+                <h3>Need to install Cactus?</h3>
                 <AppStoreIcon />
             </section>
 
@@ -81,12 +81,15 @@
                     padding: 4rem 0;
                 }
             }
-            .app-store-icon {
-                margin-top: 1rem;
+
+            .needsApp {
+                text-align: center;
             }
 
+            h3 {
+                color: $magenta;
+                margin-bottom: 1.6rem;
+            }
         }
     }
-
-
 </style>
