@@ -1,9 +1,7 @@
 <template lang="html">
-    <div :class="['app-store-icon', {'only-mobile':onlyMobile}]" v-if="showToDevice()">
-        <a @click.prevent="trackEvent(appStoreUrl); return false;" :href="appStoreUrl">
-            <img class="appStoreBadge" src="/assets/apple_app_store_badge.svg" alt="Download on the App Store" />
-        </a>
-    </div>
+    <a v-if="showToDevice()" :class="['app-store-icon', {'only-mobile':onlyMobile}]" @click.prevent="trackEvent(appStoreUrl); return false;" :href="appStoreUrl">
+        <img class="appStoreBadge" src="/assets/apple_app_store_badge.svg" alt="Download on the App Store" />
+    </a>
 </template>
 
 <script lang="ts">
