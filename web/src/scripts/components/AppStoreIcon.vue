@@ -58,8 +58,8 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    a {
-        text-align: left;
+    .app-store-icon {
+        display: inline-block;
     }
 
     @include r(768) {
