@@ -32,6 +32,12 @@ const timezones = [
     "GMT",
     "Africa/Casablanca",
     "Atlantic/Canary",
+    "Europe/London",
+    'Pacific/Easter',
+    'Etc/GMT',
+    'Etc/UTC',
+    'Pacific/Chatham',
+    'America/Adak',
     "Europe/Belgrade",
     "Europe/Sarajevo",
     "Europe/Brussels",
@@ -82,8 +88,9 @@ const timezones = [
     "Pacific/Tongatapu"
 ];
 
+export const KNOWN_ZONES = timezones;
 
-const deprecatedTimezoneMap: { [deprecated: string]: string } = {
+export const deprecatedTimezoneMap: { [deprecated: string]: string } = {
     "Australia/ACT": "Australia/Sydney",
     "Australia/LHI": "Australia/Lord_Howe",
     "Australia/North": "Australia/Darwin",
@@ -114,12 +121,12 @@ const deprecatedTimezoneMap: { [deprecated: string]: string } = {
     "Egypt": "Africa/Cairo",
     "Eire": "Europe/Dublin",
     "EST": "America/Cancun",
-    "EST5EDT": "America/New_York.",
+    "EST5EDT": "America/New_York",
     "GB": "Europe/London",
     "GMT0": "Etc/GMT",
     "Greenwich": "Etc/GMT",
     "Hongkong": "Asia/Hong_Kong",
-    "HST": "Pacific/Honolulu.",
+    "HST": "Pacific/Honolulu",
     "Iceland": "Atlantic/Reykjavik",
     "Iran": "Asia/Tehran",
     "Israel": "Asia/Jerusalem",
@@ -150,16 +157,16 @@ const deprecatedTimezoneMap: { [deprecated: string]: string } = {
     "ROK": "Asia/Seoul",
     "Singapore": "Asia/Singapore",
     "Turkey": "Europe/Istanbul",
-    "UCT": "Etc/UCT",
+    "UCT": "Etc/UTC",
     "Universal": "Etc/UTC",
     "US/Alaska": "America/Anchorage",
     "US/Aleutian": "America/Adak",
     "US/Arizona": "America/Phoenix",
     "US/Central": "America/Chicago",
     "US/Eastern": "America/New_York",
-    "US/East-Indiana": "Indiana/Indianapolis",
+    "US/East-Indiana": "America/Indiana/Indianapolis",
     "US/Hawaii": "Pacific/Honolulu",
-    "US/Indiana-Starke": "Indiana/Knox",
+    "US/Indiana-Starke": "America/Indiana/Knox",
     "US/Michigan": "America/Detroit",
     "US/Mountain": "America/Denver",
     "US/Pacific": "America/Los_Angeles",
@@ -170,7 +177,7 @@ const deprecatedTimezoneMap: { [deprecated: string]: string } = {
     "Zulu": "Etc/UTC",
 };
 
-const i18n: { [key: string]: string } = {
+export const zoneToDisplayName: { [key: string]: string } = {
     "Etc/GMT+12": "International Date Line West",
     "Pacific/Midway": "Midway Island, Samoa",
     "Pacific/Honolulu": "Hawaii",
@@ -264,7 +271,7 @@ export const timezoneInfoList: ZoneInfo[] = luxonValidTimezones.map((zoneName) =
     const time = DateTime.local().setZone(zoneName);
     const offset = time.offset;
     const offsetDisplay = `GMT${time.toFormat("ZZ")}`;
-    const displayName: string = i18n[zoneName];
+    const displayName: string = zoneToDisplayName[zoneName];
 
     // if (!zoneMap[`${offset}`]) {
     //     zoneMap[`${offset}`] = [];
@@ -282,7 +289,7 @@ export const timezoneInfoList: ZoneInfo[] = luxonValidTimezones.map((zoneName) =
     return z2.offsetMinutes - z1.offsetMinutes
 });
 
-export const zonesByName: { [zoneName: string]: ZoneInfo } = timezoneInfoList.reduce((map: { [name: string]: ZoneInfo }, zone: ZoneInfo) => {
+export const zonesInfoByName: { [zoneName: string]: ZoneInfo } = timezoneInfoList.reduce((map: { [name: string]: ZoneInfo }, zone: ZoneInfo) => {
     map[zone.zoneName] = zone;
     return map;
 }, {});
@@ -304,7 +311,7 @@ export function findByZoneName(zoneInput?: string): ZoneInfo | undefined {
         return;
     }
 
-    const zoneInfo = zonesByName[zoneName];
+    const zoneInfo = zonesInfoByName[zoneName];
     if (zoneInfo) {
         return zoneInfo;
     }
@@ -317,23 +324,51 @@ export function findByZoneName(zoneInput?: string): ZoneInfo | undefined {
     logger.log("matched timezone: ", matchedTimeZone);
 
     if (matchedTimeZone) {
-        return zonesByName[matchedTimeZone];
+        return zonesInfoByName[matchedTimeZone];
     }
 
     return;
 }
 
+/**
+ * Is the GMT offset timezone the same as a UTC one?
+ */
+export function gmtIsUtc(z1: string, z2: string): boolean {
+    return (z1 === "Etc/GMT+0" || z1 === "Etc/GMT-0" || z1 === "Etc/UTC") && (z2 === "Etc/GMT+0" || z2 === "Etc/GMT-0" || z2 === "Etc/UTC")
+}
+
 export function isZoneSameTime(zone1: string, zone2: string): boolean {
     const d = new Date();
-    const zone1Parts = d.toLocaleTimeString('en-us', {
-        timeZone: zone1,
-        timeZoneName: 'short'
-    }).split(' ');
+    const z1 = getCanonicalName(zone1);
+    const z2 = getCanonicalName(zone2);
+    if (z1 === z2) {
+        return true
+    }
+    if (!z1 || !z2) {
+        logger.info(`Unable to determine canonical timezone for zones: ${zone1} = ${z1} | zone2 ${zone2} = ${z2}`);
+        return false
+    }
+    if (gmtIsUtc(z1, z2)) {
+        return true
+    }
+    if ((z1.startsWith("Etc/GMT") || z1 === "Etc/UTC") && (z2.startsWith("Etc/GMT") || z2 === "Etc/UTC")) {
+        return false
+    }
 
-    const zone2Parts = d.toLocaleTimeString('en-us', {
-        timeZoneName: 'short',
-        timeZone: zone2
-    }).split(' ');
+    try {
+        const zone1Parts = d.toLocaleTimeString('en-us', {
+            timeZone: zone1,
+            timeZoneName: 'short'
+        }).split(' ');
 
-    return zone1Parts[0] === zone2Parts[0] && zone1Parts[1] === zone2Parts[1];
+        const zone2Parts = d.toLocaleTimeString('en-us', {
+            timeZoneName: 'short',
+            timeZone: zone2
+        }).split(' ');
+
+        return zone1Parts[0] === zone2Parts[0] && zone1Parts[1] === zone2Parts[1];
+    } catch (error) {
+        logger.error(`Failed to parse timezone name returning false: zone1 ${zone1} = ${z1} | zone2 ${zone2} = ${z2}`);
+        return false;
+    }
 }

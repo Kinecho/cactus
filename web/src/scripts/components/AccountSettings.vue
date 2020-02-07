@@ -136,7 +136,7 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {findByZoneName, ZoneInfo} from '@web/timezones'
+    import {findByZoneName, ZoneInfo} from '@shared/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
     import {PageRoute} from '@shared/PageRoutes'
     import {FirebaseUser} from '@web/firebase'
