@@ -1,5 +1,4 @@
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
-import {getConfig} from "@admin/config/configService";
 import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
@@ -7,13 +6,14 @@ import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/ut
 import {DateObject} from "luxon";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
+import {CactusConfig} from "@shared/CactusConfig";
 
 const logger = new Logger("AdminPromptContentService");
-const config = getConfig();
+
 
 export default class AdminPromptContentService {
     protected static sharedInstance: AdminPromptContentService;
-
+    config: CactusConfig;
     flamelinkService: AdminFlamelinkService;
     schema = SchemaName.promptContent;
 
@@ -24,12 +24,13 @@ export default class AdminPromptContentService {
         return AdminPromptContentService.sharedInstance;
     }
 
-    static initialize() {
-        AdminPromptContentService.sharedInstance = new AdminPromptContentService();
+    static initialize(config: CactusConfig) {
+        AdminPromptContentService.sharedInstance = new AdminPromptContentService(config);
     }
 
-    constructor() {
+    constructor(config: CactusConfig) {
         this.flamelinkService = AdminFlamelinkService.getSharedInstance();
+        this.config = config;
     }
 
     async save(model: PromptContent): Promise<PromptContent | undefined> {
@@ -92,7 +93,7 @@ export default class AdminPromptContentService {
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
             logger.error("Failed to fetch content", error);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(config.app.serverName + ` | getPromptContentForDate():  Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\`\nOptions\n\`\`\`${options}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(this.config.app.serverName + ` | getPromptContentForDate():  Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\`\nOptions\n\`\`\`${options}\`\`\``);
             return undefined;
         }
     }

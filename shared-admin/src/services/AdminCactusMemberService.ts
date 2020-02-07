@@ -21,6 +21,7 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import * as admin from "firebase-admin";
 import Logger from "@shared/Logger";
 import DocumentReference = admin.firestore.DocumentReference;
+import {getValidTimezoneName} from "@shared/timezones";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -442,22 +443,23 @@ export default class AdminCactusMemberService {
 
         const {useDefault} = options;
         const beforeUTC = member.promptSendTimeUTC ? {...member.promptSendTimeUTC} : undefined;
-        
-        if (!member.timeZone) {
-            logger.log("Member's local timezone is unknown. Skipping!");
+        const memberTimezone = getValidTimezoneName(member.timeZone);
+        if (!memberTimezone) {
+            logger.log("Member's converted local timezone is unknown. Skipping!");
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
 
         // the member has a default promptSendTimeUTC and a timeZone 
         // but *not* a local promptSendTime
         // we can set their local promptSendTime and return
-        if (member.timeZone && 
+        if (memberTimezone &&
             member.promptSendTimeUTC &&
             !member.promptSendTime) {
 
             const localPromptSendTime = member.getLocalPromptSendTimeFromUTC();
             logger.log("Member's local promptSendTime is not set but UTC is. Setting from UTC.");
-            logger.log("Member's timezone is: " + member.timeZone);
+            logger.log("Member's set timezone is: " + member.timeZone);
+            logger.log("Member's converted valid timezone is: " + memberTimezone);
             logger.log("PromptSendTime calculated: ", JSON.stringify(localPromptSendTime));
             logger.log("Saving change...");
             await this.getCollectionRef().doc(member.id!).update({[CactusMember.Field.promptSendTime]: localPromptSendTime});
@@ -467,7 +469,7 @@ export default class AdminCactusMemberService {
 
         const afterUTC = getSendTimeUTC({
             forDate: new Date(),
-            timeZone: member.timeZone,
+            timeZone: memberTimezone,
             sendTime: member.promptSendTime
         });
 
@@ -499,5 +501,24 @@ export default class AdminCactusMemberService {
             logger.log("No changes, not saving");
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
+    }
+
+    /**
+     * Save a timezone to a member. If no valid timezone can be parsed, the timezone will be saved as null
+     * @param {CactusMember} member
+     * @param {string | null} timeZone
+     * @return {Promise<void>}
+     */
+    async saveTimeZone(member: CactusMember, timeZone?: string | null): Promise<CactusMember> {
+        const validTimezoneOrNull = getValidTimezoneName(timeZone) || null;
+        const memberId = member.id;
+        if (!memberId) {
+            logger.warn("No memberID found");
+            return member;
+        }
+
+        await this.getCollectionRef().doc(memberId).update({[CactusMember.Field.timeZone]: validTimezoneOrNull});
+        member.timeZone = validTimezoneOrNull;
+        return member;
     }
 }

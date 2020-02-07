@@ -4,6 +4,7 @@ import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";
+import {getValidTimezoneName} from "@shared/timezones";
 
 const logger = new Logger("DateUtil.ts");
 
@@ -313,12 +314,10 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
     }
 
     return streak;
-
 }
 
-
 export function getSendTimeUTC(options: { timeZone?: string | undefined | null, sendTime?: PromptSendTime | undefined, forDate?: Date }): PromptSendTime | undefined {
-    const timeZone = options.timeZone;
+    const timeZone = getValidTimezoneName(options.timeZone);
     if (!timeZone) {
         return;
     }

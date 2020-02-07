@@ -15,6 +15,7 @@ module.exports = {
         storageBucket: 'cactus-app-prod.appspot.com',
         messagingSenderId: '654981460803',
         appId: '1:654981460803:web:183ae7005e0dd805',
+        measurementId: "G-S2ETMEEEVJ"
     },
     __FLAMELINK_ENV_ID__: 'production',
     __FLAMELINK_FIREBASE_CONFIG__: {
@@ -26,6 +27,7 @@ module.exports = {
         storageBucket: 'cactus-app-prod.appspot.com',
         messagingSenderId: '654981460803',
         appId: '1:654981460803:web:183ae7005e0dd805',
+        measurementId: "G-S2ETMEEEVJ"
     },
     __STRIPE_CONFIG__: {
         apiKey: 'pk_live_5jwkYz17Bg1IKuXQvfnbmyGg', //this is the prod id. update for prod

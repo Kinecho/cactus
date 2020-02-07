@@ -13,7 +13,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Multiselect from "vue-multiselect"
-    import {findByZoneName, timezoneInfoList, ZoneInfo, zonesByName} from '@web/timezones'
+    import {findByZoneName, timezoneInfoList, ZoneInfo, zonesInfoByName} from '@shared/timezones'
     import 'vue-multiselect/dist/vue-multiselect.min.css'
     import Logger from "@shared/Logger";
     

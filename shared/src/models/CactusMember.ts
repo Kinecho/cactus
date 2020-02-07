@@ -3,6 +3,7 @@ import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
+import {getValidTimezoneName} from "@shared/timezones";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -51,6 +52,7 @@ export enum Field {
     stats_reflections = "reflections",
     activityStatus = "activityStatus",
     promptSendTime = "promptSendTime",
+    timeZone = "timeZone",
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
@@ -87,6 +89,7 @@ export default class CactusMember extends BaseModel {
     journalStatus = JournalStatus.NONE;
 
     fcmTokens?: string[];
+    firebaseInstanceIds?: string[];
     notificationSettings: NotificationSettings = {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
@@ -154,15 +157,21 @@ export default class CactusMember extends BaseModel {
 
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
-            hour: DateTime.utc().minus({ hours: 1 }).hour,
+            hour: DateTime.utc().minus({hours: 1}).hour,
             minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }
 
+    /**
+     * Use a "valid" timezone to create their local send prompt time preference
+     * @return {PromptSendTime | undefined}
+     */
     getLocalPromptSendTimeFromUTC(): PromptSendTime | undefined {
-        if (this.promptSendTimeUTC && this.timeZone) {
+        const tz = getValidTimezoneName(this.timeZone);
+        if (this.promptSendTimeUTC && tz) {
+
             const utcDateTime = DateTime.utc().set(this.promptSendTimeUTC);
-            const localDateTime = utcDateTime.setZone(this.timeZone);
+            const localDateTime = utcDateTime.setZone(tz);
 
             return {
                 hour: localDateTime.hour,
