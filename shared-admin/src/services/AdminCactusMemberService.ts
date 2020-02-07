@@ -502,4 +502,23 @@ export default class AdminCactusMemberService {
             return {updated: false, promptSendTimeUTC: beforeUTC}
         }
     }
+
+    /**
+     * Save a timezone to a member. If no valid timezone can be parsed, the timezone will be saved as null
+     * @param {CactusMember} member
+     * @param {string | null} timeZone
+     * @return {Promise<void>}
+     */
+    async saveTimeZone(member: CactusMember, timeZone?: string | null): Promise<CactusMember> {
+        const validTimezoneOrNull = getValidTimezoneName(timeZone) || null;
+        const memberId = member.id;
+        if (!memberId) {
+            logger.warn("No memberID found");
+            return member;
+        }
+
+        await this.getCollectionRef().doc(memberId).update({[CactusMember.Field.timeZone]: validTimezoneOrNull});
+        member.timeZone = validTimezoneOrNull;
+        return member;
+    }
 }
