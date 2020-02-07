@@ -82,6 +82,94 @@ const timezones = [
     "Pacific/Tongatapu"
 ];
 
+
+const deprecatedTimezoneMap: { [deprecated: string]: string } = {
+    "Australia/ACT": "Australia/Sydney",
+    "Australia/LHI": "Australia/Lord_Howe",
+    "Australia/North": "Australia/Darwin",
+    "Australia/NSW": "Australia/Sydney",
+    "Australia/Queensland": "Australia/Brisbane",
+    "Australia/South": "Australia/Adelaide",
+    "Australia/Tasmania": "Australia/Hobart",
+    "Australia/Victoria": "Australia/Melbourne",
+    "Australia/West": "Australia/Perth",
+    "Brazil/Acre": "America/Rio_Branco",
+    "Brazil/DeNoronha": "America/Noronha",
+    "Brazil/East": "America/Sao_Paulo",
+    "Brazil/West": "America/Manaus",
+    "Canada/Atlantic": "America/Halifax",
+    "Canada/Central": "America/Winnipeg",
+    "Canada/Eastern": "America/Toronto",
+    "Canada/Mountain": "America/Edmonton",
+    "Canada/Newfoundland": "America/St_Johns",
+    "Canada/Pacific": "America/Vancouver",
+    "Canada/Saskatchewan": "America/Regina",
+    "Canada/Yukon": "America/Whitehorse",
+    "CET": "Europe/Paris",
+    "Chile/Continental": "America/Santiago",
+    "Chile/EasterIsland": "Pacific/Easter",
+    "CST6CDT": "America/Chicago",
+    "Cuba": "America/Havana",
+    "EET": "Europe/Sofia",
+    "Egypt": "Africa/Cairo",
+    "Eire": "Europe/Dublin",
+    "EST": "America/Cancun",
+    "EST5EDT": "America/New_York.",
+    "GB": "Europe/London",
+    "GMT0": "Etc/GMT",
+    "Greenwich": "Etc/GMT",
+    "Hongkong": "Asia/Hong_Kong",
+    "HST": "Pacific/Honolulu.",
+    "Iceland": "Atlantic/Reykjavik",
+    "Iran": "Asia/Tehran",
+    "Israel": "Asia/Jerusalem",
+    "Jamaica": "America/Jamaica",
+    "Japan": "Asia/Tokyo",
+    "Kwajalein": "Pacific/Kwajalein",
+    "Libya": "Africa/Tripoli",
+    "MET": "Europe/Paris",
+    "GMT-0": "Etc/GMT",
+    "GB-Eire": "Europe/London",
+    "GMT+0": "Etc/GMT",
+    "Etc/Greenwich": "Etc/GMT",
+    "Etc/Universal": "Etc/UTC",
+    "Etc/Zulu": "Etc/UTC",
+    "Mexico/BajaNorte": "America/Tijuana",
+    "Mexico/BajaSur": "America/Mazatlan",
+    "Mexico/General": "America/Mexico_City",
+    "MST": "America/Phoenix",
+    "MST7MDT": "America/Denver",
+    "Navajo": "America/Denver",
+    "NZ": "Pacific/Auckland",
+    "NZ-CHAT": "Pacific/Chatham",
+    "Poland": "Europe/Warsaw",
+    "Portugal": "Europe/Lisbon",
+    "PRC": "Asia/Shanghai",
+    "PST8PDT": "America/Los_Angeles",
+    "ROC": "Asia/Taipei",
+    "ROK": "Asia/Seoul",
+    "Singapore": "Asia/Singapore",
+    "Turkey": "Europe/Istanbul",
+    "UCT": "Etc/UCT",
+    "Universal": "Etc/UTC",
+    "US/Alaska": "America/Anchorage",
+    "US/Aleutian": "America/Adak",
+    "US/Arizona": "America/Phoenix",
+    "US/Central": "America/Chicago",
+    "US/Eastern": "America/New_York",
+    "US/East-Indiana": "Indiana/Indianapolis",
+    "US/Hawaii": "Pacific/Honolulu",
+    "US/Indiana-Starke": "Indiana/Knox",
+    "US/Michigan": "America/Detroit",
+    "US/Mountain": "America/Denver",
+    "US/Pacific": "America/Los_Angeles",
+    "US/Pacific-New": "America/Los_Angeles",
+    "US/Samoa": "Pacific/Pago_Pago",
+    "WET": "Europe/Lisbon",
+    "W-SU": "Europe/Moscow",
+    "Zulu": "Etc/UTC",
+};
+
 const i18n: { [key: string]: string } = {
     "Etc/GMT+12": "International Date Line West",
     "Pacific/Midway": "Midway Island, Samoa",
@@ -199,11 +287,23 @@ export const zonesByName: { [zoneName: string]: ZoneInfo } = timezoneInfoList.re
     return map;
 }, {});
 
-
-export function findByZoneName(zoneName?: string): ZoneInfo | undefined {
+export function getCanonicalName(zoneName?: string): string | undefined {
     if (!zoneName) {
         return;
     }
+    const deprecatedName = deprecatedTimezoneMap[zoneName];
+    if (deprecatedName) {
+        return deprecatedName
+    }
+    return zoneName;
+}
+
+export function findByZoneName(zoneInput?: string): ZoneInfo | undefined {
+    const zoneName = getCanonicalName(zoneInput);
+    if (!zoneName) {
+        return;
+    }
+
     const zoneInfo = zonesByName[zoneName];
     if (zoneInfo) {
         return zoneInfo;
@@ -214,7 +314,7 @@ export function findByZoneName(zoneName?: string): ZoneInfo | undefined {
     const zoneNamesByRegion = timezones.filter(z => z.startsWith(region));
     logger.log("zone options", zoneNamesByRegion);
     const matchedTimeZone = zoneNamesByRegion.find(zone => isZoneSameTime(zone, zoneName));
-    logger.log("matched timezone: ", matchedTimeZone)
+    logger.log("matched timezone: ", matchedTimeZone);
 
     if (matchedTimeZone) {
         return zonesByName[matchedTimeZone];
