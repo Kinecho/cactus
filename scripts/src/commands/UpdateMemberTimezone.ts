@@ -62,6 +62,7 @@ export default class MemberSendTimeBackfill extends FirebaseCommand {
         const badTimezones = new Set<string>();
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize: 500,
+            pageDelay: 1000,
             onData: async members => {
                 const tasks = members.map(member => this.updateMemberJob(member));
                 const results = await Promise.all(tasks);
