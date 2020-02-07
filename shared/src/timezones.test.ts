@@ -137,4 +137,13 @@ describe("Get valid timezones", () => {
             expect(getValidTimezoneName(zone)).toEqual(zone)
         })
     });
+
+    test("display timezones", () => {
+        const displayZones = Object.keys(zoneToDisplayName);
+        displayZones.forEach(zone => {
+            console.log("checking displayZone", zone);
+            expect(getValidTimezoneName(zone)).toBeDefined();
+            expect(getValidTimezoneName(zone)).toEqual(zone)
+        })
+    });
 });

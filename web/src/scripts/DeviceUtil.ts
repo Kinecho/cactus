@@ -1,6 +1,7 @@
 import Logger from "@shared/Logger";
 import {Config} from "@web/config";
 import {AppType} from "@shared/models/ReflectionResponse";
+import {getValidTimezoneName} from "@shared/timezones";
 
 export const MOBILE_BREAKPOINT_PX = 600;
 const logger = new Logger("DeviceUtil");
@@ -15,11 +16,13 @@ export function getDeviceDimensions(): { height: number, width: number } {
 
 export function getDeviceTimeZone(): string | undefined {
     try {
-        const timezoneName = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        logger.info("device timezoneName", timezoneName);
-        return timezoneName
+        const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const validTimezone = getValidTimezoneName(deviceTimeZone);
+        logger.info(`Device Timezone = '${deviceTimeZone}'. Converted to valid timezone = '${validTimezone}'`);
+        return validTimezone
     } catch (e) {
         logger.error("Unable to fetch timezone from device. The 'Intl' API may not be supported");
+        return undefined
     }
 }
 
@@ -38,7 +41,7 @@ export function getUserAgent(): string {
 }
 
 export function isAndroidDevice(): boolean {
-    const expression = new RegExp("android","i");
+    const expression = new RegExp("android", "i");
     return expression.test(getUserAgent());
 }
 

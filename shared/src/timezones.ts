@@ -300,7 +300,7 @@ export const zonesInfoByName: { [zoneName: string]: ZoneInfo } = timezoneInfoLis
  * @param {string} zoneName
  * @return {string | undefined}
  */
-export function getCanonicalName(zoneName?: string): string | undefined {
+export function getCanonicalName(zoneName?: string|null): string | undefined {
     if (!zoneName) {
         return;
     }
@@ -316,7 +316,7 @@ export function getCanonicalName(zoneName?: string): string | undefined {
  * @param {string} zoneName
  * @return {string | undefined}
  */
-export function getValidTimezoneName(zoneName?: string): string|undefined {
+export function getValidTimezoneName(zoneName?: string|null): string|undefined {
     if (!zoneName) {
         return undefined;
     }

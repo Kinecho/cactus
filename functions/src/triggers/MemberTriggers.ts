@@ -9,6 +9,9 @@ import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
+import {getValidTimezoneName} from "@shared/timezones";
+import AdminSlackService from "@admin/services/AdminSlackService";
+
 const logger = new Logger("MemberTriggers");
 
 export const updatePromptSendTimeTrigger = functions.firestore
@@ -26,8 +29,21 @@ export const updatePromptSendTimeTrigger = functions.firestore
             return;
         }
 
+        // First, ensure the timezone is valid on the member, and if not, save it and return.
+        // The next trigger will run the sent time update.
+        const originalTz = memberAfter.timeZone || undefined;
+        const validTz = getValidTimezoneName(originalTz);
+        if (validTz && validTz !== originalTz) {
+            const message = `Updating ${memberAfter.email}'s timezone from '${originalTz}' to '${validTz}'.`;
+            logger.info(message);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage("[MemberTriggers.updatePromptSendTimeTrigger]" + message);
+            memberAfter.timeZone = validTz;
+            await afterSnapshot.ref.update({[CactusMember.Field.timeZone]: validTz});
+            return;
+        }
+
         const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(memberAfter);
-        logger.log(JSON.stringify(result, null, 2));        
+        logger.log(JSON.stringify(result, null, 2));
     });
 
 
