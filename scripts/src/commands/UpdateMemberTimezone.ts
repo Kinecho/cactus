@@ -62,7 +62,6 @@ export default class MemberSendTimeBackfill extends FirebaseCommand {
         const badTimezones = new Set<string>();
         await AdminCactusMemberService.getSharedInstance().getAllBatch({
             batchSize: 500,
-            pageDelay: 1000,
             onData: async members => {
                 const tasks = members.map(member => this.updateMemberJob(member));
                 const results = await Promise.all(tasks);
@@ -80,10 +79,11 @@ export default class MemberSendTimeBackfill extends FirebaseCommand {
             }
         });
 
-        console.log(`Processed ${totalProcessed} members`);
-        console.log(`Updated ${totalUpdated} members`);
-        console.log(`Skipped ${totalSkipped} members`);
-        console.log(`${badTimezones.size} Bad timezones updated: ${JSON.stringify(Array.from(badTimezones))}`);
+        console.log();
+        console.log(chalk.green(`Processed ${totalProcessed} members`));
+        console.log(chalk.green(`Updated ${totalUpdated} members`));
+        console.log(chalk.green(`Skipped ${totalSkipped} members`));
+        console.log(chalk.green(`${badTimezones.size} Bad timezones updated: ${JSON.stringify(Array.from(badTimezones))}`));
         return;
     }
 
