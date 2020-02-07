@@ -294,15 +294,40 @@ export const zonesInfoByName: { [zoneName: string]: ZoneInfo } = timezoneInfoLis
     return map;
 }, {});
 
+/**
+ * Gets the canonical name ofo a timezone if the provided timezone provided was known to be deprecated, otherwise returns the original input.
+ *
+ * @param {string} zoneName
+ * @return {string | undefined}
+ */
 export function getCanonicalName(zoneName?: string): string | undefined {
     if (!zoneName) {
         return;
     }
-    const deprecatedName = deprecatedTimezoneMap[zoneName];
-    if (deprecatedName) {
-        return deprecatedName
+    const canonicalFromDeprecated = deprecatedTimezoneMap[zoneName];
+    if (canonicalFromDeprecated) {
+        return canonicalFromDeprecated
     }
     return zoneName;
+}
+
+/**
+ * Get the valid name for a provided timezone input. If the timezone is not valid, or can not be mapped to a valid timezone, this returns undefined
+ * @param {string} zoneName
+ * @return {string | undefined}
+ */
+export function getValidTimezoneName(zoneName?: string): string|undefined {
+    if (!zoneName) {
+        return undefined;
+    }
+    const canonical = getCanonicalName(zoneName);
+    if (!canonical) {
+        return undefined;
+    }
+    if (DateTime.local().setZone(canonical).isValid) {
+        return canonical
+    }
+    return undefined;
 }
 
 export function findByZoneName(zoneInput?: string): ZoneInfo | undefined {

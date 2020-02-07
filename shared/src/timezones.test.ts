@@ -1,6 +1,6 @@
 import {
     deprecatedTimezoneMap, findByZoneName,
-    getCanonicalName, isZoneSameTime, KNOWN_ZONES,
+    getCanonicalName, getValidTimezoneName, isZoneSameTime, KNOWN_ZONES,
     luxonValidTimezones,
     timezoneInfoList,
     zoneToDisplayName
@@ -96,13 +96,45 @@ describe("Equal Zones", () => {
         expect(isZoneSameTime("UCT", "Etc/UTC")).toBeTruthy();
         expect(isZoneSameTime("UCT", "Etc/GMT+0")).toBeTruthy();
         expect(isZoneSameTime("Etc/UTC", "Etc/GMT-0")).toBeTruthy();
-        expect(isZoneSameTime( "Etc/GMT-0", "Etc/UTC")).toBeTruthy();
-        expect(isZoneSameTime( "Etc/GMT+0", "Etc/UTC")).toBeTruthy();
+        expect(isZoneSameTime("Etc/GMT-0", "Etc/UTC")).toBeTruthy();
+        expect(isZoneSameTime("Etc/GMT+0", "Etc/UTC")).toBeTruthy();
     });
 
     test("utc is not the same as gmt offsets", () => {
-        expect(isZoneSameTime( "Etc/GMT+10", "Etc/UTC")).toBeFalsy();
-        expect(isZoneSameTime( "Etc/GMT+01", "Etc/UTC")).toBeFalsy();
-        expect(isZoneSameTime( "Etc/UTC", "Etc/GMT+2")).toBeFalsy();
+        expect(isZoneSameTime("Etc/GMT+10", "Etc/UTC")).toBeFalsy();
+        expect(isZoneSameTime("Etc/GMT+01", "Etc/UTC")).toBeFalsy();
+        expect(isZoneSameTime("Etc/UTC", "Etc/GMT+2")).toBeFalsy();
     })
+});
+
+describe("Get valid timezones", () => {
+    test("Known invalid timezones", () => {
+        expect(getValidTimezoneName("BadZone")).toBeUndefined()
+    });
+
+    test("Known timezones", () => {
+        KNOWN_ZONES.forEach(zone => {
+            console.log("checking ", zone);
+            expect(getValidTimezoneName(zone)).toBeDefined();
+            expect(getValidTimezoneName(zone)).toEqual(getCanonicalName(zone))
+        })
+    });
+
+    test("Known deprecated timezones", () => {
+        const deprecatedZones = Object.keys(deprecatedTimezoneMap);
+        deprecatedZones.forEach(zone => {
+            console.log("checking ", zone);
+            expect(getValidTimezoneName(zone)).toBeDefined();
+            expect(getValidTimezoneName(zone)).toEqual(getCanonicalName(zone))
+        })
+    });
+
+    test("Known canonical timezones", () => {
+        const canonicalZones = Object.values(deprecatedTimezoneMap);
+        canonicalZones.forEach(zone => {
+            console.log("checking ", zone);
+            expect(getValidTimezoneName(zone)).toBeDefined();
+            expect(getValidTimezoneName(zone)).toEqual(zone)
+        })
+    });
 });
