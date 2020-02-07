@@ -16,6 +16,7 @@ module.exports = {
         storageBucket: 'cactus-app-stage.appspot.com',
         messagingSenderId: '88457335033',
         appId: '1:88457335033:web:e731bd6b336daeb6',
+        measurementId: "G-96M4JJCKBY"
     },
     //Stage uses the prod app for flamelink
     __FLAMELINK_ENV_ID__: "production",
@@ -27,6 +28,7 @@ module.exports = {
         storageBucket: 'cactus-app-stage.appspot.com',
         messagingSenderId: '88457335033',
         appId: '1:88457335033:web:e731bd6b336daeb6',
+        measurementId: "G-96M4JJCKBY"
     },
     __STRIPE_CONFIG__: {
         apiKey: 'pk_test_cFV6bK7YpxB2QrTRYOJie00B', //this is the test id. update for prod

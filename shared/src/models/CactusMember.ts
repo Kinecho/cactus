@@ -87,6 +87,7 @@ export default class CactusMember extends BaseModel {
     journalStatus = JournalStatus.NONE;
 
     fcmTokens?: string[];
+    firebaseInstanceIds?: string[];
     notificationSettings: NotificationSettings = {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
@@ -154,7 +155,7 @@ export default class CactusMember extends BaseModel {
 
     getDefaultPromptSendTimeUTC(): PromptSendTime {
         return {
-            hour: DateTime.utc().minus({ hours: 1 }).hour,
+            hour: DateTime.utc().minus({hours: 1}).hour,
             minute: DateUtil.getCurrentQuarterHour()
         } as PromptSendTime;
     }

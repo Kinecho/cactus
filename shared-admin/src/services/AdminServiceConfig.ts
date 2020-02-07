@@ -53,7 +53,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
-    AdminPromptContentService.initialize();
+    AdminPromptContentService.initialize(config);
 
 
     logger.log("Initializing Sentry");
