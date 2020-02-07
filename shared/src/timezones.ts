@@ -357,6 +357,10 @@ export function findByZoneName(zoneInput?: string): ZoneInfo | undefined {
 
 /**
  * Is the GMT offset timezone the same as a UTC one?
+ * This is to help catch/prevent/fix an issue when running unit tests on a node environment.
+ * It seems that the test runner environment didn't know how to parse timezones like Etc/GMT+10,
+ * although the browser does (most of the time).
+ * So this is some handling for those edge Etc/GMT and Etc/UTC cases.
  */
 export function gmtIsUtc(z1: string, z2: string): boolean {
     return (z1 === "Etc/GMT+0" || z1 === "Etc/GMT-0" || z1 === "Etc/UTC") && (z2 === "Etc/GMT+0" || z2 === "Etc/GMT-0" || z2 === "Etc/UTC")
