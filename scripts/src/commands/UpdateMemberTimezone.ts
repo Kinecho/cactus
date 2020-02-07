@@ -54,7 +54,7 @@ export default class MemberSendTimeBackfill extends FirebaseCommand {
     }
 
     async startAllJob(): Promise<void> {
-        console.log("Backfilling all ");
+        console.log("updating all members");
 
         let totalProcessed = 0;
         let totalUpdated = 0;
