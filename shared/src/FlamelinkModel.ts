@@ -6,6 +6,7 @@ const logger = new Logger("FlamelinkModel");
 
 export enum SchemaName {
     promptContent = "promptContent",
+    subscriptionProducts = "subscriptionProducts"
 }
 
 export interface FlamelinkMeta {
