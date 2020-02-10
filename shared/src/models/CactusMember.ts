@@ -4,6 +4,7 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
+import {isInTrial, MemberSubscription, SubscriptionTier} from "@shared/models/MemberSubscription";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -56,6 +57,8 @@ export enum Field {
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
+    subscription = "subscription",
+    subscriptionTier = "subscription.tier",
 }
 
 export interface PromptSendTime {
@@ -112,6 +115,8 @@ export default class CactusMember extends BaseModel {
     activityStatus?: {
         lastSeenOccurredAt?: Date
     } = {};
+
+    subscription?: MemberSubscription;
 
     prepareForFirestore(): any {
         super.prepareForFirestore();
@@ -179,5 +184,13 @@ export default class CactusMember extends BaseModel {
             } as PromptSendTime;
         }
         return;
+    }
+
+    get tier(): SubscriptionTier {
+        return this.subscription?.tier ?? SubscriptionTier.PLUS
+    }
+
+    isInTrial(): boolean {
+        return isInTrial(this.subscription)
     }
 }
