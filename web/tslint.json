@@ -133,7 +133,11 @@
         "trailing-comma": {
             "severity": "warning"
         },
-        "no-console": [true, "error"]
+        "no-console": [
+            true,
+            "error"
+        ]
     },
-    "defaultSeverity": "error"
+    "defaultSeverity": "error",
+    "jsRules": true
 }

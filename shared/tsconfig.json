@@ -11,6 +11,7 @@
         "target": "es2015",
         "baseUrl": ".",
         "rootDirs": ["src"],
+        "esModuleInterop": true,
         "paths": {
             "@shared/*": ["./src/*"]
         }

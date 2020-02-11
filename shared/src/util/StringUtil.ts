@@ -1,5 +1,5 @@
 import * as queryString from "query-string";
-import * as camelcase from "camelcase";
+import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
@@ -21,8 +21,7 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
-export function preventOrphanedWords<T>(input?: string, escapeCode: string = "\xa0"): string | undefined {
-    // noinspection SuspiciousTypeOfGuard
+export function preventOrphanedWords<T>(input?: T | string, escapeCode: string = "\xa0"): string | undefined | T {
     if (!input || typeof input !== "string") {
         return input;
     }
@@ -226,11 +225,11 @@ export function getProviderDisplayName(provider?: string): string {
 }
 
 export function titleCase(str: string | undefined): string {
-  if (str && str.length > 0) {
-      return str.toLowerCase().split(' ').map(function(word) {
-        return word.replace(word[0], word[0].toUpperCase());
-      }).join(' ');
-  } else { 
-      return '';
-  }
+    if (str && str.length > 0) {
+        return str.toLowerCase().split(' ').map(function (word) {
+            return word.replace(word[0], word[0].toUpperCase());
+        }).join(' ');
+    } else {
+        return '';
+    }
 }

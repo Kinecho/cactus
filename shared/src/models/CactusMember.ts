@@ -3,7 +3,6 @@ import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
-import {daysUntilDate} from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
 import {
     isInTrial,
@@ -206,7 +205,7 @@ export default class CactusMember extends BaseModel {
         if (!end) {
             return 0;
         }
-        return daysUntilDate(end);
+        return DateUtil.daysUntilDate(end);
     }
 
     get isInTrial(): boolean {
