@@ -25,7 +25,8 @@ export interface CactusConfig {
         audience_id: string,
         bridge_to_monday_segment_id: string,
         non_prompt_campaign_ids: string //this is a comma separated string
-        segment_id_daily_prompt: string,
+        segment_id_all_tiers: string,
+        segment_id_plus_tier: string,
         templates: {
             prompt_module_morning: string
         }
