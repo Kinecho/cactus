@@ -1,5 +1,12 @@
 import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import MailchimpService from "@admin/services/MailchimpService";
+import {ApiResponse} from "@shared/api/ApiTypes";
+import {
+    MergeField,
+    UpdateMergeFieldRequest
+} from "@shared/mailchimp/models/MailchimpTypes";
 import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
@@ -91,5 +98,49 @@ export default class AdminSubscriptionService {
             orderBy: CactusMember.Field.subscriptionTrialEndsAt,
             sortDirection: QuerySortDirection.asc
         })
+    }
+
+    async updateMailchimpListMember(options: { memberId: string }): Promise<ApiResponse> {
+        const mailchimpService = MailchimpService.getSharedInstance();
+        const {memberId} = options;
+        
+        if (!memberId) {
+            this.logger.warn("No memberId provided to updateMailchimpListMember function");
+            return {success: false, error: "No memberId provided"};
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+
+        if (!member?.email) {
+            this.logger.warn("No member could be found in the updateMailchimpListMember function");
+            return {success: false, error: "No member was found"};
+        }
+
+        const email = member.email;
+        const subscription = member.subscription;
+
+        if (!subscription) {
+            this.logger.warn("No subscription was found on cactus member " + member.email);
+            return {
+                success: false,
+                error: "No subscription was found on the member, can not update mailchimp."
+            }
+        }
+
+        const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
+        const isTrialing = member.isInTrial ? "YES" : "NO";
+        const trialDaysLeft = member.daysLeftInTrial;
+        
+        const mergeRequest: UpdateMergeFieldRequest = {
+            email,
+            mergeFields: {
+                [MergeField.SUB_TIER]: subscriptionTier,
+                [MergeField.IN_TRIAL]: isTrialing,
+                [MergeField.TDAYS_LEFT]: trialDaysLeft,
+            }
+        };
+
+        const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+        return mergeResponse;
     }
 }
