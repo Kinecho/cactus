@@ -3,6 +3,7 @@ import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
+import {daysUntilDate} from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
 import {
     isInTrial,
@@ -10,7 +11,6 @@ import {
     SubscriptionTier,
     subscriptionTierDisplayName
 } from "@shared/models/MemberSubscription";
-import {daysUntilDate} from "@shared/util/DateUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
