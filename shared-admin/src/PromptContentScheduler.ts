@@ -523,11 +523,19 @@ export default class PromptContentScheduler {
             to_name: '*|FNAME|* *|LNAME|*'
         };
 
+        const segmentId = this.mailchimpSegmentId();
+
         if (prompt?.campaign?.id) {
             logger.log("The campaign already exists on the ReflectionPrompt so we will update it");
 
             const updateRequest: UpdateCampaignRequest = {
                 settings: campaignSettings,
+                recipients: {
+                    list_id: config.audience_id,
+                    segment_opts: {
+                        saved_segment_id: Number(segmentId),
+                    }
+                },
             };
 
             try {
@@ -543,8 +551,7 @@ export default class PromptContentScheduler {
             }
         }
 
-        const segmentId = (!promptContent.subscriptionTiers || promptContent.subscriptionTiers.includes(SubscriptionTier.BASIC)) ? config.segment_id_all_tiers : config.segment_id_plus_tier;
-
+        // the campaign does not already exist so we will create it
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: {
@@ -593,5 +600,13 @@ export default class PromptContentScheduler {
         await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, {updatedBy: this.robotUserId});
         logger.log(chalk.blue(`Saved PromptContent with status ${promptContent.contentStatus}`));
         return;
+    }
+
+    mailchimpSegmentId(): string {
+        if (this.promptContent?.subscriptionTiers?.includes(SubscriptionTier.BASIC)) {
+            return this.config.mailchimp.segment_id_all_tiers;
+        } else {
+            return this.config.mailchimp.segment_id_plus_tier;
+        }
     }
 }
