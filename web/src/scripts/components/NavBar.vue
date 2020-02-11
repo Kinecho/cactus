@@ -410,8 +410,7 @@
         transition: transform .2s ease-in-out;
 
         @include r(600) {
-            margin-right: -2.4rem;
-            padding: 0 2.4rem;
+            padding-left: 2.4rem;
 
             &:after {
                 background-color: $green;
