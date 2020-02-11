@@ -30,6 +30,7 @@ import {
     UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import MailchimpService from "@admin/services/MailchimpService";
+import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {AxiosError} from "axios";
 import {PageRoute} from "@shared/PageRoutes";
@@ -542,12 +543,14 @@ export default class PromptContentScheduler {
             }
         }
 
+        const segmentId = (!promptContent.subscriptionTiers || promptContent.subscriptionTiers.includes(SubscriptionTier.BASIC)) ? config.segment_id_all_tiers : config.segment_id_plus_tier;
+
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: {
                 list_id: config.audience_id,
                 segment_opts: {
-                    saved_segment_id: Number(config.segment_id_daily_prompt),
+                    saved_segment_id: Number(segmentId),
                 }
             },
             settings: campaignSettings,
