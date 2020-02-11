@@ -224,7 +224,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
 /**
  * Create or update a mailchimp list member
  * @param {MailchimpSignupRequest} subscription
- * @return {Promise<{mailchimpListMember?: ListMember; error?: any}>}
+ * @return {Promise<{mailchimpListMember?: ListMember, error?: any}>}
  */
 async function upsertMailchimpSubscriber(subscription: MailchimpSignupRequest): Promise<{ mailchimpListMember?: ListMember, error?: any }> {
     const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
