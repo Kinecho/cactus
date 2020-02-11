@@ -205,7 +205,7 @@ export default class CactusMember extends BaseModel {
         if (!end) {
             return 0;
         }
-        return DateUtil.daysUntilDate(end);
+        return Math.max(DateUtil.daysUntilDate(end), 0);
     }
 
     get isInTrial(): boolean {

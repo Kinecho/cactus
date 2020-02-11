@@ -3,7 +3,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
-import * as prompts from "prompts";
+import prompts from "prompts";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";

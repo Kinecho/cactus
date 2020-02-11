@@ -5,6 +5,8 @@ export enum SubscriptionTier {
     PLUS = "PLUS"
 }
 
+export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
+
 export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
     if (isTrial) {
         return "Trial";

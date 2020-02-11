@@ -2,7 +2,7 @@ import {FirebaseCommand} from "@scripts/CommandTypes";
 import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
-import * as prompts from "prompts"
+import prompts from "prompts"
 import {Project} from "@scripts/config";
 import {isValidEmail} from "@shared/util/StringUtil";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";

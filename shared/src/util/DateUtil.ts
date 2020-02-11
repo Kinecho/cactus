@@ -1,6 +1,6 @@
 import {DateObject, DateTime, Duration, Interval} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
-import prettyMilliseconds from "pretty-ms";
+import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";

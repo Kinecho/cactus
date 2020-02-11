@@ -3,7 +3,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config"
-import * as prompts from "prompts"
+import prompts from "prompts"
 import {isValidEmail} from "@shared/util/StringUtil";
 import chalk from "chalk";
 import AdminUserService from "@admin/services/AdminUserService";

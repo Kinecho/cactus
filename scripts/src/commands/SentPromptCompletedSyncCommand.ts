@@ -7,7 +7,7 @@ import chalk from "chalk";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt from "@shared/models/SentPrompt";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import * as prompts from "prompts";
+import prompts from "prompts";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 

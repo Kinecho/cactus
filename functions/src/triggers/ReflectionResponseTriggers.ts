@@ -135,7 +135,7 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
- * @type {CloudFunction<DocumentSnapshot>}
+ * @type {DocumentSnapshot}
  */
 export const onReflectionResponseCreated = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
