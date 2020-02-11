@@ -63,7 +63,8 @@ const defaultTestConfig: CactusConfig = {
         audience_id: "testing",
         bridge_to_monday_segment_id: "1234",
         non_prompt_campaign_ids: "507974de98",
-        segment_id_daily_prompt: "13942",
+        segment_id_all_tiers: "12345",
+        segment_id_plus_tier: "12345",
         templates: {
             prompt_module_morning: "12345"
         }
