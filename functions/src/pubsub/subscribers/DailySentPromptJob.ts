@@ -58,7 +58,6 @@ export async function onPublish(message: Message, context: functions.EventContex
     await runJob(contentDate, sendDate, dryRun);
 }
 
-
 export async function runJob(contentDate: Date, sendDate?: Date | undefined, dryRun: boolean = false): Promise<JobResult> {
     try {
         const start = new Date();

@@ -7,21 +7,21 @@ import AdminFirestoreService, {
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
+    DEFAULT_PROMPT_SEND_TIME,
     Field,
     JournalStatus,
     NotificationStatus,
     PromptSendTime,
-    ReflectionStats,
-    DEFAULT_PROMPT_SEND_TIME
+    ReflectionStats
 } from "@shared/models/CactusMember";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import * as admin from "firebase-admin";
 import Logger from "@shared/Logger";
-import DocumentReference = admin.firestore.DocumentReference;
 import {getValidTimezoneName} from "@shared/timezones";
+import * as admin from "firebase-admin";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -521,4 +521,5 @@ export default class AdminCactusMemberService {
         member.timeZone = validTimezoneOrNull;
         return member;
     }
+
 }

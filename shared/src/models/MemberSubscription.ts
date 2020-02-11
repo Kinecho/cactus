@@ -54,6 +54,5 @@ export function trialEnded(subscription?: MemberSubscription): boolean {
     if (!subscription?.trial) {
         return false
     }
-
     return !subscription?.trial?.activatedAt && subscription?.trial?.endsAt.getTime() < Date.now();
 }

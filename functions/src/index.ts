@@ -26,6 +26,7 @@ import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
 import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
+import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -49,7 +50,7 @@ export const cloudFunctions = {
     unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
     memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
     customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
-
+    expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
 
     //auth triggers
     userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),

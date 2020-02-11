@@ -24,7 +24,10 @@ import AdminSocialActivityService from "@admin/services/AdminSocialActivityServi
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 import Logger from "@shared/Logger";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+
 const logger = new Logger("AdminServiceConfig");
+
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
     logger.log(chalk.green("initializing all services"));
     setTimestamp(timestampClass || admin.firestore.Timestamp);
@@ -50,6 +53,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSocialActivityService.initialize();
     AdminSocialConnectionService.initialize();
     AdminSocialConnectionRequestService.initialize();
+    AdminSubscriptionService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

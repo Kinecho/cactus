@@ -59,6 +59,7 @@ export enum Field {
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
     subscription = "subscription",
     subscriptionTier = "subscription.tier",
+    subscriptionTrialEndsAt = "subscription.trial.endsAt",
 }
 
 export interface PromptSendTime {
