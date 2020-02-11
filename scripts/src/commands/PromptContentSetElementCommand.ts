@@ -11,7 +11,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import PromptContent from "@shared/models/PromptContent";
 import chalk from "chalk";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
-import prompts from "prompts"
+import * as prompts from "prompts"
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 
 interface DataRow {

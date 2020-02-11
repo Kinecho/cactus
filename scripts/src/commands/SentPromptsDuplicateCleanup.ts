@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import {Collection} from "@shared/FirestoreBaseModels";
-import prompts from "prompts";
+import * as prompts from "prompts";
 import chalk from "chalk";
 import {getISODateTime} from "@shared/util/DateUtil";
 import Timestamp = admin.firestore.Timestamp;
