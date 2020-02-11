@@ -30,7 +30,9 @@ export interface MemberSubscription {
     }
 }
 
-export function createSubscription(trialDays: number = 7): MemberSubscription {
+export const DEFAULT_TRIAL_DAYS = 7;
+
+export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
     const startDate = new Date();
     const endDate = DateTime.fromJSDate(startDate).plus({days: trialDays}).toJSDate();
     return {

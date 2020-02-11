@@ -1,15 +1,17 @@
+import {SubscriptionTier} from "@shared/models/MemberSubscription";
 
 export interface SubscriptionFormLocation {
     page: string,
     formId: string,
 }
 
-export default class SubscriptionRequest {
+export default class SignupRequest {
     email: string;
     firstName?: string;
     lastName?: string;
     referredByEmail?: string;
     subscriptionLocation?: SubscriptionFormLocation;
+    subscriptionTier?: SubscriptionTier;
 
     constructor(email: string,){
         this.email = email;
@@ -32,8 +34,8 @@ export default class SubscriptionRequest {
     }
 
 
-    static fromData(body: any): SubscriptionRequest{
+    static fromData(body: any): SignupRequest{
         const data = body.data || body || {};
-        return data as SubscriptionRequest;
+        return data as SignupRequest;
     }
 }

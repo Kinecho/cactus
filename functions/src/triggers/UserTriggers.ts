@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import AdminUserService from "@admin/services/AdminUserService";
 import User from "@shared/models/User";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import MailchimpSignupRequest from "@shared/mailchimp/models/SignupRequest";
 import {destructureDisplayName, getProviderDisplayName} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -20,6 +20,7 @@ import PendingUser from "@shared/models/PendingUser";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminFirestoreService, {Transaction} from "@admin/services/AdminFirestoreService";
 import Logger from "@shared/Logger";
+import {getDefaultSubscription} from "@shared/models/MemberSubscription";
 const logger = new Logger("UserTriggers");
 const mailchimpService = MailchimpService.getSharedInstance();
 const slackService = AdminSlackService.getSharedInstance();
@@ -32,7 +33,7 @@ interface UserCheckResult {
     member?: CactusMember | undefined,
     user?: User | undefined,
     pendingUser?: PendingUser | undefined,
-    subscriptionToCreate?: SubscriptionRequest
+    subscriptionToCreate?: MailchimpSignupRequest
 }
 
 /**
@@ -148,7 +149,7 @@ interface CreateMemberOptions {
 /**
  * Set up and save a new Cactus member using a transaction
  * @param {CreateMemberOptions} options
- * @return {Promise<{member: CactusMember; subscription: SubscriptionRequest}>}
+ * @return {Promise<{member: CactusMember; subscription: MailchimpSignupRequest}>}
  */
 async function createCactusMember(options: CreateMemberOptions): Promise<{ member: CactusMember, mailchimpError?: any }> {
     const {user, pendingUser, transaction, email} = options;
@@ -166,13 +167,15 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.signupConfirmedAt = new Date();
     cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
+    cactusMember.subscription = getDefaultSubscription();
 
-    const subscription: SubscriptionRequest = new SubscriptionRequest(email);
-    subscription.lastName = lastName;
-    subscription.firstName = firstName;
-    subscription.referredByEmail = cactusMember.referredByEmail;
+    const mailchimpSubscriptionRequest: MailchimpSignupRequest = new MailchimpSignupRequest(email);
+    mailchimpSubscriptionRequest.lastName = lastName;
+    mailchimpSubscriptionRequest.firstName = firstName;
+    mailchimpSubscriptionRequest.referredByEmail = cactusMember.referredByEmail;
+    mailchimpSubscriptionRequest.subscriptionTier = cactusMember?.tier;
 
-    const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(subscription);
+    const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(mailchimpSubscriptionRequest);
     cactusMember.mailchimpListMember = mailchimpListMember;
 
     const savedMember = await AdminCactusMemberService.getSharedInstance().save(cactusMember, {transaction});
@@ -220,10 +223,10 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
 
 /**
  * Create or update a mailchimp list member
- * @param {SubscriptionRequest} subscription
+ * @param {MailchimpSignupRequest} subscription
  * @return {Promise<{mailchimpListMember?: ListMember; error?: any}>}
  */
-async function upsertMailchimpSubscriber(subscription: SubscriptionRequest): Promise<{ mailchimpListMember?: ListMember, error?: any }> {
+async function upsertMailchimpSubscriber(subscription: MailchimpSignupRequest): Promise<{ mailchimpListMember?: ListMember, error?: any }> {
     const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
     if (mailchimpResult.success) {
         let mailchimpMember = mailchimpResult.member;

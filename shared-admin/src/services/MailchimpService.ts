@@ -56,8 +56,8 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
+import MailchimpSubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
 import {CactusConfig} from "@shared/CactusConfig";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
@@ -896,16 +896,17 @@ export default class MailchimpService {
         }
     }
 
-    async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
+    async addSubscriber(subscription: SignupRequest, status = ListMemberStatus.pending): Promise<MailchimpSubscriptionResult> {
         const listMember = new MailchimpListMember(subscription.email);
         listMember.status = status;
         if (subscription.referredByEmail) {
             listMember.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
+            //TODO: Add the subscription tier merge field here
         }
 
         const url = `/lists/${this.audienceId}/members`;
 
-        const result = new SubscriptionResult();
+        const result = new MailchimpSubscriptionResult();
 
         try {
             const response = await this.request.post(url, listMember);
