@@ -86,6 +86,7 @@ export abstract class FirebaseCommand implements Command {
 
         const app = await this.getFirebaseApp();
         AdminFirestoreService.initialize(app, this.config);
+        AdminFirestoreService.Timestamp = admin.firestore.Timestamp;
         this.firestoreService = AdminFirestoreService.getSharedInstance();
         return this.firestoreService;
     }

@@ -291,7 +291,7 @@ export default class AdminFirestoreService {
                 orderBy: options.orderBy || BaseModelField.createdAt,
             }
         });
-        logger.log(`Fetched ${results.size} sentPrompts in batch ${batchNumber}`);
+        logger.log(`Fetched ${results.size} items in batch ${batchNumber}`);
         await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;

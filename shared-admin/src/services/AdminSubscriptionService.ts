@@ -2,9 +2,8 @@ import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admi
 import CactusMember from "@shared/models/CactusMember";
 import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {Collection} from "@shared/FirestoreBaseModels";
-import * as admin from "firebase-admin";
 import Logger from "@shared/Logger";
-import Timestamp = admin.firestore.Timestamp;
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -84,8 +83,13 @@ export default class AdminSubscriptionService {
 
     async getMembersToExpireTrial(options: GetBatchOptions<CactusMember>) {
         const query = this.firestoreService.getCollectionRef(Collection.members).where(CactusMember.Field.subscriptionTier, "in", [SubscriptionTier.PLUS])
-            .where(CactusMember.Field.subscriptionTrialEndsAt, "<=", Timestamp.now());
+            .where(CactusMember.Field.subscriptionTrialEndsAt, "<=", AdminFirestoreService.Timestamp.fromDate(new Date()));
 
-        await this.firestoreService.executeBatchedQuery({query, type: CactusMember, ...options})
+        await this.firestoreService.executeBatchedQuery({
+            query,
+            type: CactusMember, ...options,
+            orderBy: CactusMember.Field.subscriptionTrialEndsAt,
+            sortDirection: QuerySortDirection.asc
+        })
     }
 }

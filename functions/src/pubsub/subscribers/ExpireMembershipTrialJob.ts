@@ -7,6 +7,8 @@ import Logger from "@shared/Logger";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 
+const logger = new Logger("ExpireMembershipTrialJob");
+
 export async function onPublish(message: Message, context: functions.EventContext) {
     const job = new ExpireMembershipTrialJob();
     await job.expireAll();
@@ -26,7 +28,7 @@ export class ExpireMembershipTrialJob {
     endTime!: Date;
     numExpired: number = 0;
     numSkipped: number = 0;
-    logger = new Logger("ExpireMembershipTrialJob");
+
 
     async expireOne(options: { email?: string, memberId?: string }): Promise<void> {
         this.startTime = new Date();
@@ -51,7 +53,9 @@ export class ExpireMembershipTrialJob {
     async expireAll(): Promise<void> {
         try {
             this.startTime = new Date();
-            await AdminSubscriptionService.getSharedInstance().getMembersToExpireTrial({onData: this.handleMembersBatch})
+            await AdminSubscriptionService.getSharedInstance().getMembersToExpireTrial({
+                onData: (members, batchNumber) => this.handleMembersBatch(members, batchNumber)
+            })
 
         } catch (error) {
             this.errors.push("Failed to run job: " + error.message);
@@ -62,12 +66,13 @@ export class ExpireMembershipTrialJob {
     }
 
     async handleMembersBatch(members: CactusMember[], batchNumber: number): Promise<void> {
-        this.logger.info(`Processing batch ${batchNumber}`);
-        const tasks = members.map(this.expireMember);
+        logger.info(`Processing batch ${batchNumber}`);
+        const tasks = members.map(member => this.expireMember(member));
         await Promise.all(tasks);
     }
 
     async expireMember(member: CactusMember): Promise<void> {
+        logger.info("Expiring member", member.email);
         const expireResult = await AdminSubscriptionService.getSharedInstance().expireTrial(member);
         if (expireResult.success) {
             this.numExpired++;
