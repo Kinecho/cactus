@@ -1,3 +1,5 @@
+import {SubscriptionTier} from '@shared/models/MemberSubscription'
+import {SubscriptionTier} from '@shared/models/MemberSubscription'
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
@@ -22,12 +24,14 @@
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <section class="journalList">
+                        <upgrade-card class="journalListItem" v-if="showUpgradeCard"/>
                         <transition-group
                                 tag="div"
                                 appear
                                 v-bind:css="false"
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
+
                             <entry
                                     class="journalListItem"
                                     v-if="todayEntry && todayLoaded"
@@ -74,8 +78,12 @@
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
+    import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
+    import {SubscriptionTier} from "@shared/models/MemberSubscription";
+
     const logger = new Logger("JournalHome.vue");
+
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
         authUnsubscribe?: () => void,
@@ -88,7 +96,8 @@
         dataHasLoaded: boolean,
         todayUnsubscriber?: ListenerUnsubscriber,
         todayEntry?: JournalEntry,
-        todayLoaded: boolean
+        todayLoaded: boolean,
+        showUpgradeCard: boolean,
     }
 
     export default Vue.extend({
@@ -98,6 +107,7 @@
             AutoPromptContentModal,
             SkeletonCard,
             Spinner,
+            UpgradeCard: UpgradeSubscriptionJournalEntryCard,
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
@@ -128,7 +138,11 @@
 
                     // Query Flamelink for today's PromptContent and then back into a JournalEntry
                     if (this.cactusMember?.id) {
-                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
+                        const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
+                            systemDate: new Date(),
+                            subscriptionTier: tier
+                        });
 
                         if (todaysPromptContent?.promptId) {
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
@@ -143,14 +157,14 @@
                                         todayEntry = new JournalEntry(todaysPromptContent.promptId);
                                     }
 
-                                    if (todayEntry){
+                                    if (todayEntry) {
                                         todayEntry.delegate = {
                                             entryUpdated: entry => {
                                                 if (entry.allLoaded) {
                                                     this.todayLoaded = true;
                                                 }
                                             }
-                                        }
+                                        };
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
                                     } else {
@@ -158,8 +172,12 @@
                                     }
                                 }
                             });
+                        } else if (tier === SubscriptionTier.BASIC){
+                            this.showUpgradeCard = true;
+                            this.todayLoaded = true;
                         } else {
                             logger.error("Today's prompt could not be found for member");
+                            this.todayLoaded = true;
                         }
                     }
 
@@ -207,7 +225,8 @@
                 dataHasLoaded: false,
                 todayUnsubscriber: undefined,
                 todayEntry: undefined,
-                todayLoaded: false
+                todayLoaded: false,
+                showUpgradeCard: false,
             };
         },
         destroyed() {

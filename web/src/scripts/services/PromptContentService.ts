@@ -4,6 +4,7 @@ import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
 import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/MemberSubscription";
 
 const logger = new Logger("PromptContentService");
 
@@ -35,7 +36,12 @@ export default class PromptContentService {
         });
     }
 
-    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: {
+        subscriptionTier: SubscriptionTier
+        systemDate?: Date,
+        dateObject?: DateObject,
+        status?: ContentStatus
+    }): Promise<PromptContent | undefined> {
         try {
             const getOptions = getPromptContentForDateQueryOptions(options);
             if (!getOptions) {
