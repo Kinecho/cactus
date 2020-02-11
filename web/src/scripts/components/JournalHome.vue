@@ -1,5 +1,3 @@
-import {SubscriptionTier} from '@shared/models/MemberSubscription'
-import {SubscriptionTier} from '@shared/models/MemberSubscription'
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
