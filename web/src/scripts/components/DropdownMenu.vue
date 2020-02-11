@@ -24,7 +24,7 @@
                         v-on:[link.event]="link.onClick"
                         :key="`link_${index}`"
                         :class="{static: link.static, nonBreaking: makeTextNonBreaking}"
-                >{{link.title}}</a>
+                >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span></a>
                 <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
             </nav>
         </transition>
@@ -92,17 +92,18 @@
                         onClick: clickHandler(item.onClick),
                         event: item.onClick ? "click" : null,
                         static: item.static,
+                        badge: item.badge,
                     }
                 })
             }
         },
         methods: {
-            processTitle(input:string):string{
-              if (this.makeTextNonBreaking){
-                  return input.replace(/\s/g, "&nbsp;")
-              }  else {
-                  return input;
-              }
+            processTitle(input: string): string {
+                if (this.makeTextNonBreaking) {
+                    return input.replace(/\s/g, "&nbsp;")
+                } else {
+                    return input;
+                }
             },
             toggleMenu() {
                 this.menuOpen = !this.menuOpen;
@@ -214,6 +215,15 @@
 
             &.nonBreaking {
                 white-space: nowrap;
+            }
+
+            &.badge-label {
+                padding: .2rem .6rem;
+                border-radius: 2rem;
+                background-color: $green;
+                color: $darkestGreen;
+                display: inline-block;
+                position: unset;
             }
         }
     }

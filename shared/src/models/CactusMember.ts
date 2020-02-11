@@ -190,7 +190,7 @@ export default class CactusMember extends BaseModel {
         return this.subscription?.tier ?? SubscriptionTier.PLUS
     }
 
-    isInTrial(): boolean {
+    get isInTrial(): boolean {
         return isInTrial(this.subscription)
     }
 }

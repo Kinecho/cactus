@@ -70,6 +70,7 @@
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
+    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -163,6 +164,7 @@
                 const links: DropdownMenuLink[] = [{
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
+                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isInTrial)
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {

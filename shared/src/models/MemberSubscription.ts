@@ -1,11 +1,18 @@
-import {DateTime, Interval} from "luxon";
+import {DateTime} from "luxon";
 
 export enum SubscriptionTier {
     BASIC = "BASIC",
     PLUS = "PLUS"
 }
 
-export function subscriptionTierDisplayName(tier: SubscriptionTier): string {
+export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
+    if (isTrial) {
+        return "Trial";
+    }
+
+    if (!tier) {
+        return undefined;
+    }
     switch (tier) {
         case SubscriptionTier.BASIC:
             return "Basic";
@@ -16,7 +23,7 @@ export function subscriptionTierDisplayName(tier: SubscriptionTier): string {
 
 export interface MemberSubscription {
     tier: SubscriptionTier,
-    trial: {
+    trial?: {
         startedAt: Date,
         endsAt: Date,
         activatedAt?: Date
@@ -37,8 +44,16 @@ export function createSubscription(trialDays: number = 7): MemberSubscription {
 }
 
 export function isInTrial(subscription?: MemberSubscription): boolean {
-    if (!subscription) {
+    if (!subscription || !subscription.trial) {
         return false
     }
-    return subscription.trial.endsAt.getTime() > Date.now();
+    return !subscription.trial?.activatedAt && subscription.trial?.endsAt.getTime() > Date.now();
+}
+
+export function trialEnded(subscription?: MemberSubscription): boolean {
+    if (!subscription?.trial) {
+        return false
+    }
+
+    return !subscription?.trial?.activatedAt && subscription?.trial?.endsAt.getTime() < Date.now();
 }
