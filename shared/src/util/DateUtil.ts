@@ -1,4 +1,4 @@
-import {DateObject, DateTime, Duration} from "luxon";
+import {DateObject, DateTime, Duration, Interval} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
@@ -267,6 +267,12 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
     t = t.set({hour: 0, minute: 0, millisecond: 0, second: 0});
 
     return Math.round(t.diff(dt).as("day"))
+}
+
+export function daysUntilDate(date: Date): number {
+    const end = DateTime.fromJSDate(date);
+    const interval = Interval.fromDateTimes(DateTime.local(), end);
+    return interval.count("days")
 }
 
 export function atMidnight(date: Date): Date {

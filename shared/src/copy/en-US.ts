@@ -44,6 +44,8 @@ export default class EnglishCopy extends LocalizedCopy {
         ACCOUNT: "Account",
         EMAIL: "Email",
         EMAIL_ADDRESS: "Email Address",
+        SUBSCRIPTION: "Subscription",
+        TIER: "Tier",
         FIRST_NAME: "First Name",
         LAST_NAME: "Last Name",
         NOTIFICATIONS: "Notifications",
@@ -52,6 +54,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
         HOUR: "Hour",
         MINUTE: "Minute",
+        DAYS_LEFT_IN_TRIAL: "days left in trial",
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",

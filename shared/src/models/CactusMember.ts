@@ -4,7 +4,13 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
-import {isInTrial, MemberSubscription, SubscriptionTier} from "@shared/models/MemberSubscription";
+import {
+    isInTrial,
+    MemberSubscription,
+    SubscriptionTier,
+    subscriptionTierDisplayName
+} from "@shared/models/MemberSubscription";
+import {daysUntilDate} from "@shared/util/DateUtil";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -189,6 +195,18 @@ export default class CactusMember extends BaseModel {
 
     get tier(): SubscriptionTier {
         return this.subscription?.tier ?? SubscriptionTier.PLUS
+    }
+
+    get tierDisplayName(): string | undefined {
+        return subscriptionTierDisplayName(this.tier, this.isInTrial)
+    }
+
+    get daysLeftInTrial(): number {
+        const end = this.subscription?.trial?.endsAt;
+        if (!end) {
+            return 0;
+        }
+        return daysUntilDate(end);
     }
 
     get isInTrial(): boolean {

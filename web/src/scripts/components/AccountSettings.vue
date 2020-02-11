@@ -41,8 +41,15 @@
                             </label>
                             <p class="value">{{member.email}}</p>
                         </div>
+                    </div>
 
-
+                    <div class="settings-group subscription">
+                        <h3>{{copy.common.SUBSCRIPTION}}</h3>
+                        <div class="item">
+                            <label>{{copy.common.TIER}}</label>
+                            <p class="value">{{member.isInTrial ? `${member.daysLeftInTrial}
+                                ${copy.common.DAYS_LEFT_IN_TRIAL}` : member.tierDisplayName}}</p>
+                        </div>
                     </div>
 
                     <div class="settings-group notifications">
@@ -68,13 +75,15 @@
                                     {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
-                                    <button class="button small" @click="setToDeviceZone">{{copy.account.CONFIRM_UPDATE_TIMEZONE}}</button>
+                                    <button class="button small" @click="setToDeviceZone">
+                                        {{copy.account.CONFIRM_UPDATE_TIMEZONE}}
+                                    </button>
                                     <button class="button small secondary" @click="tzAlertDismissed = true">
                                         {{copy.account.CANCEL_UPDATE_TIMEZONE}}
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone" />
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone"/>
                         </div>
                     </div>
 
@@ -150,7 +159,7 @@
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
 
-    
+
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
@@ -228,9 +237,9 @@
         },
         computed: {
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || 
-                       this.member?.getLocalPromptSendTimeFromUTC() ||
-                       DEFAULT_PROMPT_SEND_TIME;
+                return this.member?.promptSendTime ||
+                    this.member?.getLocalPromptSendTimeFromUTC() ||
+                    DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;

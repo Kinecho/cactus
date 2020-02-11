@@ -38,14 +38,17 @@ export interface CommonCopy {
     ACCOUNT: string,
     EMAIL: string,
     EMAIL_ADDRESS: string,
+    TIER: string,
     TIME_ZONE: string,
     NOTIFICATIONS: string,
+    SUBSCRIPTION: string,
     REMOVE: string,
     LOADING: string,
     FIRST_NAME: string,
     LAST_NAME: string,
     HOUR: string,
     MINUTE: string,
+    DAYS_LEFT_IN_TRIAL: string,
 }
 
 export interface ElementCopy {
