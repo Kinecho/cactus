@@ -1,3 +1,4 @@
+import {SubscriptionTier} from '@shared/models/MemberSubscription'
 <template>
     <div class="accountContainer">
         <NavBar :isSticky="false"/>
@@ -49,6 +50,10 @@
                             <label>{{copy.common.TIER}}</label>
                             <p class="value">{{member.isInTrial ? `${member.daysLeftInTrial}
                                 ${copy.common.DAYS_LEFT_IN_TRIAL}` : member.tierDisplayName}}</p>
+                        </div>
+
+                        <div class="item" v-if="showUpgradeOption">
+                            <a :href="upgradeRoute" class="button btn primary">Upgrade</a>
                         </div>
                     </div>
 
@@ -136,9 +141,9 @@
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {
+        DEFAULT_PROMPT_SEND_TIME,
         NotificationStatus,
-        PromptSendTime,
-        DEFAULT_PROMPT_SEND_TIME
+        PromptSendTime
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
@@ -158,6 +163,7 @@
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
+    import {SubscriptionTier} from "@shared/models/MemberSubscription";
 
 
     const logger = new Logger("AccountSettings.vue");
@@ -186,7 +192,7 @@
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
-
+                    this.showUpgradeOption = member?.tier === SubscriptionTier.BASIC
                     if (!member) {
                         window.location.href = PageRoute.HOME;
                     }
@@ -215,6 +221,8 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
+            showUpgradeOption: boolean,
+            upgradeRoute: string,
         } {
             return {
                 authLoaded: false,
@@ -233,6 +241,8 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
+                showUpgradeOption: false,
+                upgradeRoute: PageRoute.PAYMENT_PLANS,
             }
         },
         computed: {

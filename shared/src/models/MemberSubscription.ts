@@ -47,6 +47,9 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
     if (!subscription || !subscription.trial) {
         return false
     }
+    if (subscription.tier === SubscriptionTier.BASIC) {
+        return false;
+    }
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt.getTime() > Date.now();
 }
 
