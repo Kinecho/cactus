@@ -7,16 +7,22 @@ import Vue from "vue"
 commonInit();
 
 new Vue({
-    el: "#app",
-    components: {
-        NavBar,
-        StandardFooter,
-        PremiumPricing,
-    },
+    el: "header",
     template: `
-        <div>
-            <NavBar/>
-            <PremiumPricing/>
-            <footer></footer><StandardFooter/>
-        </div>`
+        <NavBar/>`,
+    components: {NavBar}
+});
+
+new Vue({
+    el: "#premium-pricing",
+    template: `
+        <PremiumPricing/>`,
+    components: {PremiumPricing: PremiumPricing}
+});
+
+new Vue({
+    el: "footer",
+    template: `
+        <StandardFooter/>`,
+    components: {StandardFooter}
 });
