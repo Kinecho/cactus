@@ -4,7 +4,7 @@ import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentService");
 

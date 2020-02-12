@@ -2,45 +2,44 @@
     <div class="centered">
         <div id="tabs" class="tabset">
             <div class="tabs">
-                <a class="tab-label" v-on:click="activetab='1'" v-bind:class="[ activetab === '1' ? 'active' : '' ]" aria-controls="basic">Basic</a>
-                <a class="tab-label" v-on:click="activetab='2'" v-bind:class="[ activetab === '2' ? 'active' : '' ]" aria-controls="plus">Plus</a>
+                <template v-for="(productGroup, i) in productGroups">
+                    <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{(productGroup.productGroup && productGroup.productGroup.title) || productGroup.tierDisplayName}}</a>
+                </template>
             </div>
-            <!--            <template v-for="(product, i) in productGroups">-->
-            <!--                <input type="radio"-->
-            <!--                        name="tabset"-->
-            <!--                        :id="'product-tier-' + product.tier"-->
-            <!--                        :aria-controls="product.tier"-->
-            <!--                        :checked="!premiumDefault"/>-->
-            <!--                <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>-->
-            <!--                <product-group-->
-            <!--                        :productGroup="product"-->
-            <!--                        :key="product.tier"-->
-            <!--                        :id="`product-tier-${product.tier}`"-->
-            <!--                        :display-index="i"-->
-            <!--                        class="tabpanel"/>-->
-            <!--            </template>-->
+
             <div class="tabPanels">
-                <div class="tabContent basic-panel" v-bind:class="[ activetab === '1' ? 'active' : '' ]">
-                    <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>
-                    <p class="price">Free forever</p>
-                    <button class="secondary" disabled>Current Plan</button>
-                </div>
-                <div class="tabContent plus-panel" v-bind:class="[ activetab === '2' ? 'active' : '' ]">
-                    <p>Every day, there’s a new prompt waiting for&nbsp;you</p>
-                    <div class="flexContainer">
-                        <template v-for="plan in plans">
-                            <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
-                                <span>{{plan.name}}</span>
-                                <span>${{plan.price_dollars}}</span>
-                                <span>per {{plan.per}}</span>
-                            </div>
-                        </template>
-                    </div>
-                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;
-                        ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}
-                    </button>
-                    <p class="heart">Supports Cactus development</p>
-                </div>
+                <template v-for="(productGroup, i) in productGroups">
+                    <product-group
+                            :productGroup="productGroup"
+                            :key="productGroup.tier"
+                            :id="`product-tier-${productGroup.tier}`"
+                            :display-index="i"
+                            class="tabContent"
+                            :class="{active: activetab === i}"/>
+                </template>
+
+
+<!--                <div class="tabContent basic-panel" v-bind:class="[ activetab === '1' ? 'active' : '' ]">-->
+<!--                    <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>-->
+<!--                    <p class="price">Free forever</p>-->
+<!--                    <button class="secondary" disabled>Current Plan</button>-->
+<!--                </div>-->
+<!--                <div class="tabContent plus-panel" v-bind:class="[ activetab === '2' ? 'active' : '' ]">-->
+<!--                    <p>Every day, there’s a new prompt waiting for&nbsp;you</p>-->
+<!--                    <div class="flexContainer">-->
+<!--                        <template v-for="plan in plans">-->
+<!--                            <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">-->
+<!--                                <span>{{plan.name}}</span>-->
+<!--                                <span>${{plan.price_dollars}}</span>-->
+<!--                                <span>per {{plan.per}}</span>-->
+<!--                            </div>-->
+<!--                        </template>-->
+<!--                    </div>-->
+<!--                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;-->
+<!--                        ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}-->
+<!--                    </button>-->
+<!--                    <p class="heart">Supports Cactus development</p>-->
+<!--                </div>-->
             </div>
         </div>
     </div>
@@ -53,18 +52,16 @@
     import {PremiumPlan} from '@shared/types/PlanTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {startCheckout} from "@web/checkoutService";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {getQueryParam} from "@web/util";
     import {QueryParam} from "@shared/util/queryParams";
     import Logger from "@shared/Logger";
     import CopyService from "@shared/copy/CopyService";
-    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
-    import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
-    import {createSubscriptionProductGroup, SubscriptionProductGroup} from "@shared/util/SubscriptionProductUtil";
+    import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import {getDeviceDimensions} from "@web/DeviceUtil";
     import {debounce} from "debounce";
+    import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -104,10 +101,11 @@
             memberEmail: string | undefined,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             premiumDefault: boolean,
-            products: SubscriptionProduct[] | undefined,
+            productGroups: SubscriptionProductGroupEntry[],
+            productsLoaded: boolean,
             gridTemplateAreaStyle: string,
             debouncedResize: (() => any) | undefined
-            activetab: number[],
+            activetab: number,
         } {
 
             return {
@@ -117,15 +115,18 @@
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
                 premiumDefault: false,
-                products: undefined,
+                // products: undefined,
                 gridTemplateAreaStyle: "tabpanel1 tabpanel2",
                 debouncedResize: undefined,
-                activetab: [1, 2]
+                activetab: 0,
+                productsLoaded: false,
+                productGroups: [],
             }
         },
         async beforeMount() {
-            this.products = await SubscriptionProductService.sharedInstance.getAllForSale();
-            this.updateGridTemplateStyles();
+            this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
+            this.productsLoaded = true;
+            // this.updateGridTemplateStyles();
             this.debouncedResize = debounce(() => this.onResize());
             window.addEventListener('resize', this.debouncedResize);
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -149,30 +150,22 @@
                 window.removeEventListener('resize', this.debouncedResize);
             }
         },
-        computed: {
-
-            productsLoaded(): boolean {
-                return !!this.products;
-            },
-            productGroups(): SubscriptionProductGroup[] {
-                return createSubscriptionProductGroup(this.products || []);
-            }
-        },
+        computed: {},
         methods: {
             onResize() {
-                this.updateGridTemplateStyles();
+                // this.updateGridTemplateStyles();
             },
-            updateGridTemplateStyles() {
-                if (getDeviceDimensions().width > 768) {
-                    this.gridTemplateAreaStyle = `'${this.productGroups.map((g, i) => `tabpanel${i + 1}`).join(' ')}'`;
-                } else {
-                    let groups = this.productGroups.map(g => `product-tier-${g.tier}`).join(' ');
-                    let panels = this.productGroups.map(g => 'tabpanel').join(' ');
-                    this.gridTemplateAreaStyle = `"${groups}" "${panels}"`;
-                }
-
-                logger.info("Grid area template style", this.gridTemplateAreaStyle);
-            },
+            // updateGridTemplateStyles() {
+            //     if (getDeviceDimensions().width > 768) {
+            //         this.gridTemplateAreaStyle = `'${this.productGroups.map((g, i) => `tabpanel${i + 1}`).join(' ')}'`;
+            //     } else {
+            //         let groups = this.productGroups.map(g => `product-tier-${g.tier}`).join(' ');
+            //         let panels = this.productGroups.map(g => 'tabpanel').join(' ');
+            //         this.gridTemplateAreaStyle = `"${groups}" "${panels}"`;
+            //     }
+            //
+            //     logger.info("Grid area template style", this.gridTemplateAreaStyle);
+            // },
             // async purchaseSelectedPlan() {
             //     this.isProcessing = true;
             //     const planId = this.selectedPlan?.id;
@@ -275,6 +268,7 @@
                     color: $darkestGreen;
                 }
             }
+
             &:last-child {
                 border-radius: 0 1.2rem 0 0;
 
@@ -293,83 +287,9 @@
         }
     }
 
-    .tabContent {
-        display: none;
-        padding: 2.4rem 2.4rem 3.2rem;
-
-        &.active {
-            display: block;
-        }
-
-        @include r(768) {
-            border-radius: 0 0 1.6rem 1.6rem;
-            display: block;
-            flex-basis: 50%;
-            padding: 3.2rem;
-
-            &.basic-panel {
-                background-color: $white;
-                color: $darkestGreen;
-
-                ul {
-                    margin-bottom: 7.2rem;
-                }
-            }
-            &.plus-panel {
-                background-color: $dolphin;
-                color: $white;
-            }
-        }
-
-    //    h4 {
-    //        margin-bottom: 1.6rem;
-    //    }
-
-        button {
-            max-width: none;
-            white-space: nowrap;
-            width: 100%;
-        }
-    }
-
     .heart:before {
         background-image: url(assets/icons/heart.svg);
         height: 1.5rem;
     }
 
-    //.flexContainer {
-    //    display: flex;
-    //    margin-bottom: 2.4rem;
-    //    justify-content: space-between;
-
-    //    .planButton {
-    //        background-color: transparentize($white, .9);
-    //        border: 2px solid $darkestGreen;
-    //        border-radius: .8rem;
-    //        cursor: pointer;
-    //        font-size: 1.6rem;
-    //        padding: .8rem;
-    //        text-align: center;
-    //        width: 49%;
-
-    //        &.selected {
-    //            border-color: $green;
-    //            box-shadow: inset 0 0 0 .4rem $darkestGreen;
-    //        }
-
-    //        span {
-    //            display: block;
-
-    //            &:nth-child(1) {
-    //                font-size: 1.4rem;
-    //                letter-spacing: 1px;
-    //                text-transform: uppercase;
-    //            }
-
-    //            &:nth-child(2) {
-    //                font-size: 2rem;
-    //            }
-    //        }
-    //    }
-    //}
 </style>

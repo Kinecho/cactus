@@ -1,9 +1,12 @@
 import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {
-    createSubscriptionProductGroup,
+    createSubscriptionProductGroupEntries,
     getSubscriptionProductsByTierAndBillingPeriod
 } from "@shared/util/SubscriptionProductUtil";
+import SubscriptionProductGroup, {
+    SubscriptionProductGroupMap,
+    SubscriptionTier
+} from "@shared/models/SubscriptionProductGroup";
 
 function createProduct(name: string, tier: SubscriptionTier, period: BillingPeriod, price: number): SubscriptionProduct {
     const p = new SubscriptionProduct();
@@ -25,6 +28,21 @@ describe("product tier map", () => {
         yearly,
     ];
 
+    const groupBasic = new SubscriptionProductGroup();
+    groupBasic.subscriptionTier = SubscriptionTier.BASIC;
+    groupBasic.title = "Basic";
+    groupBasic.descriptionMarkdown = "Get occasional prompts";
+
+    const groupPlus = new SubscriptionProductGroup();
+    groupPlus.subscriptionTier = SubscriptionTier.PLUS;
+    groupPlus.title = "Plus";
+    groupPlus.descriptionMarkdown = "Daily prompts";
+
+    const productGroupsMap: SubscriptionProductGroupMap = {
+        [SubscriptionTier.BASIC]: groupBasic,
+        [SubscriptionTier.PLUS]: groupPlus,
+    };
+
     test("mapped correctly", () => {
         const map = getSubscriptionProductsByTierAndBillingPeriod(products);
         expect(map[SubscriptionTier.BASIC]?.never).toEqual(free);
@@ -36,13 +54,16 @@ describe("product tier map", () => {
     });
 
     test("groups created correctly", () => {
-        const groups = createSubscriptionProductGroup(products);
+        const groups = createSubscriptionProductGroupEntries(products, productGroupsMap);
 
         expect(groups.length).toEqual(2);
         expect(groups[0].tier).toEqual(SubscriptionTier.BASIC);
         expect(groups[0].products.length).toEqual(1);
+        expect(groups[0].productGroup).toEqual(groupBasic);
+
 
         expect(groups[1].tier).toEqual(SubscriptionTier.PLUS);
         expect(groups[1].products.length).toEqual(2);
+        expect(groups[1].productGroup).toEqual(groupPlus);
     });
 });

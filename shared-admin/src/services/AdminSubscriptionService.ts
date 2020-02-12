@@ -1,6 +1,6 @@
 import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {PremiumSubscriptionTiers, SubscriptionTier} from "@shared/models/MemberSubscription";
+import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ApiResponse} from "@shared/api/ApiTypes";
@@ -9,6 +9,7 @@ import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export interface ExpireTrialResult {
     member: CactusMember,

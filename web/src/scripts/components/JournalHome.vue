@@ -78,7 +78,7 @@
     import SentPrompt from "@shared/models/SentPrompt";
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
-    import {SubscriptionTier} from "@shared/models/MemberSubscription";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
     const logger = new Logger("JournalHome.vue");
 

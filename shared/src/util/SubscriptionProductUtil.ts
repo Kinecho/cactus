@@ -1,9 +1,12 @@
 import {
-    SubscriptionTier,
     subscriptionTierDisplayName,
     SubscriptionTierSortValue
 } from "@shared/models/MemberSubscription";
 import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
+import SubscriptionProductGroup, {
+    SubscriptionProductGroupMap,
+    SubscriptionTier
+} from "@shared/models/SubscriptionProductGroup";
 
 export type BillingPeriodProductMap = {
     [period in BillingPeriod]?: SubscriptionProduct
@@ -17,21 +20,23 @@ export type ProductTierBillingMap = {
     [tier in SubscriptionTier]?: BillingPeriodProductMap
 }
 
-export interface SubscriptionProductGroup {
+export interface SubscriptionProductGroupEntry {
     tier: SubscriptionTier;
     tierDisplayName?: string;
-    products: SubscriptionProduct[]
+    products: SubscriptionProduct[];
+    productGroup?: SubscriptionProductGroup;
 }
 
-export function createSubscriptionProductGroup(products: SubscriptionProduct[]): SubscriptionProductGroup[] {
+export function createSubscriptionProductGroupEntries(products: SubscriptionProduct[], groupMap: SubscriptionProductGroupMap): SubscriptionProductGroupEntry[] {
     const tierMap = getProductsByTier(products);
-    const groups: SubscriptionProductGroup[] = Object.keys(tierMap).map((key) => {
+    const groups: SubscriptionProductGroupEntry[] = Object.keys(tierMap).map((key) => {
         const tier = key as SubscriptionTier;
-        const group: SubscriptionProductGroup = {
+        const productGroup = groupMap[tier];
+        const group: SubscriptionProductGroupEntry = {
             tier,
             tierDisplayName: subscriptionTierDisplayName(tier),
             products: tierMap[tier] || [],
-
+            productGroup,
         };
         return group;
     });

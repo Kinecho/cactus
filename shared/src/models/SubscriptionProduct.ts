@@ -1,5 +1,5 @@
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum BillingPeriod {
     monthly = "monthly",
@@ -12,15 +12,6 @@ enum Fields {
     availableForSale = "availableForSale"
 }
 
-export interface ProductFeature {
-    descriptionMarkdown?: string
-    icon?: "heart" | "check",
-}
-
-export interface ProductSection {
-    title?: string
-    features?: ProductFeature[]
-}
 
 export default class SubscriptionProduct extends FlamelinkModel {
     readonly schema = SchemaName.subscriptionProducts;

@@ -30,11 +30,11 @@ import {
     UpdateCampaignRequest
 } from "@shared/mailchimp/models/CreateCampaignRequest";
 import MailchimpService from "@admin/services/MailchimpService";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {AxiosError} from "axios";
 import {PageRoute} from "@shared/PageRoutes";
 import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentScheduler");
 

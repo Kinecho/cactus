@@ -6,8 +6,8 @@ import Logger from "@shared/Logger";
 import {DateObject} from "luxon";
 import * as ContentTypes from '@flamelink/sdk-content-types';
 import * as AppTypes from "@flamelink/sdk-app-types";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
 import {QueryResult} from "@shared/types/FirestoreTypes";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("FlamelinkUtils");
 

@@ -1,20 +1,13 @@
 <template>
-    <section class="tab-panel" :class="['tier-' + productGroup.tier, `display-index-${displayIndex}`]" >
-        <h3 class="tab-header">{{tierName}}</h3>
-        <ul>
-            <li>Available on web, iOS, &amp;&nbsp;Android</li>
-            <li>Unlimited reflection notes</li>
-            <li>Daily reflection prompts</li>
-            <li>256-bit encryption on&nbsp;notes</li>
-            <li>Notifications via email &amp; push</li>
-            <li class="heart">Supports Cactus development</li>
-        </ul>
-        <h4>Coming Soon</h4>
-        <ul>
-            <li>Personalized prompts</li>
-            <li>Reminder scheduling</li>
-            <li>Backup to DayOne, Dropbox,&nbsp;&amp;&nbsp&nbsp;more</li>
-        </ul>
+    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+
+        <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
+
+        <template v-for="(section, index) in sections" v-if="showFeatures">
+            <h3 v-if="section.title">{{section.title}}</h3>
+            <features :features="section.features"/>
+        </template>
+
         <div class="flexContainer" v-if="productGroup.products.length > 1">
             <div v-for="product in productGroup.products"
                     class="planButton" :id="product.entryId"
@@ -29,27 +22,38 @@
         <button v-bind:disabled="isProcessing" :class="{secondary: selectedProduct.isFree}" @click="checkout">
             {{buttonText}}
         </button>
+        <div v-if="footer" class="group-footer" :class="{
+            [`icon`]: footer.icon,
+            [footer.icon]: footer.icon
+        }">
+            <markdown :source="footer.textMarkdown"/>
+        </div>
     </section>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {SubscriptionProductGroup} from "@shared/util/SubscriptionProductUtil";
+    import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
     import {startCheckout} from "@web/checkoutService";
+    import ProductFeatureList from "@components/ProductFeatureList.vue";
+    import {ProductGroupFooter, ProductSection} from "@shared/models/SubscriptionProductGroup";
+    import MarkdownText from "@components/MarkdownText.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
-        created() {
-
+        components: {
+            Features: ProductFeatureList,
+            Markdown: MarkdownText,
         },
         props: {
-            productGroup: {type: Object as () => SubscriptionProductGroup, required: true},
+            productGroup: {type: Object as () => SubscriptionProductGroupEntry, required: true},
             displayIndex: Number,
+            showFeatures: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -68,6 +72,12 @@
             tierName(): string | undefined {
                 return subscriptionTierDisplayName(this.productGroup.tier);
             },
+            footer(): ProductGroupFooter | undefined {
+                return this.productGroup.productGroup?.footer;
+            },
+            groupDescriptionMarkdown(): string | undefined {
+                return this.productGroup.productGroup?.descriptionMarkdown
+            },
             selectedPrice(): string {
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
@@ -77,6 +87,9 @@
                 } else {
                     return `${copy.checkout.UPGRADE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
+            },
+            sections(): ProductSection[] {
+                return this.productGroup.productGroup?.sections ?? [];
             }
         },
         methods: {
@@ -116,9 +129,54 @@
 
     }
 
-    .tab-panel {
+
+    .tabContent {
+        display: none;
+        padding: 2.4rem 2.4rem 3.2rem;
+
+        &.active {
+            display: block;
+        }
+
+        @include r(768) {
+            border-radius: 0 0 1.6rem 1.6rem;
+            display: block;
+            flex-basis: 50%;
+            padding: 3.2rem;
+
+            &.basic-panel {
+                background-color: $white;
+                color: $darkestGreen;
+
+                ul {
+                    margin-bottom: 7.2rem;
+                }
+            }
+            &.plus-panel {
+                background-color: $dolphin;
+                color: $white;
+            }
+        }
+
+        //    h4 {
+        //        margin-bottom: 1.6rem;
+        //    }
+
+        button {
+            max-width: none;
+            white-space: nowrap;
+            width: 100%;
+        }
+    }
+
+    .tabContent {
         grid-area: tabpanel;
         padding: 2.4rem 2.4rem 3.2rem;
+
+        .group-description {
+            margin-bottom: 2rem;
+            white-space: pre-line;
+        }
 
         @include r(768) {
             padding: 3.2rem;
@@ -232,6 +290,31 @@
                     &:nth-child(2) {
                         font-size: 2rem;
                     }
+                }
+            }
+        }
+
+        .group-footer {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            &.icon {
+                &:before, &.check:before {
+                    background-image: url(assets/images/check.svg);
+                    background-repeat: no-repeat;
+                    background-size: contain;
+                    content: "";
+                    display: inline-block;
+                    height: 1.3rem;
+                    margin-right: 1.6rem;
+                    width: 1.8rem;
+
+                }
+
+                &.heart:before {
+                    background-image: url(assets/icons/heart.svg);
+                    height: 1.5rem;
                 }
             }
         }
