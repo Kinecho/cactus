@@ -22,7 +22,7 @@
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <section class="journalList">
-                        <upgrade-card class="journalListItem" v-if="showUpgradeCard"/>
+                        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
                         <transition-group
                                 tag="div"
                                 appear
@@ -170,7 +170,7 @@
                                     }
                                 }
                             });
-                        } else if (tier === SubscriptionTier.BASIC){
+                        } else if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial){
                             this.showUpgradeCard = true;
                             this.todayLoaded = true;
                         } else {
