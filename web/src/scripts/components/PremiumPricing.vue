@@ -176,9 +176,7 @@
     }
 
     .tabset {
-        //background-color: $darkestGreen;
         border-radius: 1.2rem;
-        //color: $white;
         text-align: left;
 
         @include r(374) {
@@ -202,8 +200,8 @@
         display: flex;
 
         .tab-label {
-            // background-color: darken($darkestGreen, 5%);
-            // color: $white;
+            background-color: darken($dolphin, 5%);
+            color: $white;
             flex-basis: 50%;
             font-size: 2rem;
             font-weight: bold;
@@ -214,25 +212,27 @@
                 text-align: left;
             }
 
+            &.active {
+                background-color: $dolphin;
+            }
+
             &:first-child {
                 border-radius: 1.2rem 0 0 0;
 
                 @include r(768) {
                     background-color: $white;
                     border-radius: 1.2rem 1.2rem 0 0;
+                    color: $darkestGreen;
                 }
             }
             &:last-child {
                 border-radius: 0 1.2rem 0 0;
 
                 @include r(768) {
-                    background-color: $darkestGreen;
+                    background-color: $dolphin;
                     border-radius: 1.2rem 1.2rem 0 0;
+                    color: $white;
                 }
-            }
-
-            &.active {
-                //background-color: $darkestGreen;
             }
         }
     }
@@ -266,7 +266,8 @@
                 }
             }
             &.plus-panel {
-                background-color: $darkestGreen;
+                background-color: $dolphin;
+                color: $white;
             }
         }
 
