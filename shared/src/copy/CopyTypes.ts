@@ -112,6 +112,9 @@ export interface AccountCopy {
 export interface CheckoutCopy {
     SIGN_IN_TO_CONTINUE_CHECKOUT: string,
     UPGRADE: string,
+    CURRENT_PLAN: string,
+    MANAGE_MY_PLAN: string,
+    PURCHASE: string,
     BILLING_PERIOD: {
         [key in BillingPeriod]: string
     },

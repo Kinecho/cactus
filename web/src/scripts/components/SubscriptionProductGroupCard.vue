@@ -1,5 +1,5 @@
 <template>
-    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+    <section class="tabContent" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
 
         <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
 
@@ -19,8 +19,14 @@
                 <span class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</span>
             </div>
         </div>
-        <button v-bind:disabled="isProcessing" :class="{secondary: selectedProduct.isFree}" @click="checkout">
+        <button v-if="!isCurrentTier"
+                v-bind:disabled="isProcessing"
+                :class="{secondary: selectedProduct.isFree}"
+                @click="checkout">
             {{buttonText}}
+        </button>
+        <button class="button btn secondary no-loading" v-if="isCurrentTier" :disabled="true">
+            {{copy.checkout.CURRENT_PLAN}}
         </button>
         <div v-if="footer" class="group-footer" :class="{
             [`icon`]: footer.icon,
@@ -42,6 +48,8 @@
     import ProductFeatureList from "@components/ProductFeatureList.vue";
     import {ProductGroupFooter, ProductSection} from "@shared/models/SubscriptionProductGroup";
     import MarkdownText from "@components/MarkdownText.vue";
+    import {PageRoute} from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -53,13 +61,15 @@
         props: {
             productGroup: {type: Object as () => SubscriptionProductGroupEntry, required: true},
             displayIndex: Number,
-            showFeatures: {type: Boolean, default: false}
+            showFeatures: {type: Boolean, default: false},
+            member: {type: Object as () => CactusMember | undefined}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
             copy: LocalizedCopy,
             isProcessing: boolean,
             checkoutError: string | undefined,
+
         } {
             return {
                 selectedProduct: this.productGroup.products[0],
@@ -82,14 +92,26 @@
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
             buttonText(): string {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree) {
+                    return copy.checkout.MANAGE_MY_PLAN
+                }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE
                 } else {
-                    return `${copy.checkout.UPGRADE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
+                    return `${copy.checkout.PURCHASE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
             },
             sections(): ProductSection[] {
                 return this.productGroup.productGroup?.sections ?? [];
+            },
+            isNotCurrentTier(): boolean {
+                return this.signedIn && !this.isCurrentTier
+            },
+            isCurrentTier(): boolean {
+                return this.productGroup.tier === this.member?.tier;
+            },
+            signedIn(): boolean {
+                return !!this.member
             }
         },
         methods: {
@@ -97,12 +119,23 @@
                 return `$${(priceCents / 100).toFixed(2)}`.replace(".00", "");
             },
             isSelected(product: SubscriptionProduct): boolean {
-                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId;
+                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && !this.isCurrentTier;
             },
             async checkout() {
                 //todo
                 this.isProcessing = true;
+
                 const product = this.selectedProduct;
+
+                if (this.isNotCurrentTier) {
+                    this.goToAccount()
+                }
+
+                if (product.isFree && !this.signedIn) {
+                    this.goToSignup();
+                    return;
+                }
+
                 const stripePlanId = product.stripePlanId;
                 if (!stripePlanId) {
                     this.checkoutError = "The product does not have a plan id. Can not continue checkout";
@@ -111,6 +144,14 @@
                     return;
                 }
                 await startCheckout({stripePlanId})
+            },
+            goToAccount() {
+                this.isProcessing = false;
+                window.location.href = PageRoute.ACCOUNT;
+            },
+            goToSignup() {
+                this.isProcessing = false;
+                window.location.href = PageRoute.SIGNUP;
             },
         }
     })
