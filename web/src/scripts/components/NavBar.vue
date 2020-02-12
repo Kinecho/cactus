@@ -21,7 +21,7 @@
                     >{{copy.common.SIGN_UP}}</a>
                 </transition>
             </div>
-            <div class="navContainer" v-if="loggedIn">
+            <div class="navContainer" v-if="loggedIn && showLinks">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
                         Journal</title>
@@ -141,6 +141,7 @@
             showLogin: {type: Boolean, default: true},
             forceTransparent: {type: Boolean, default: false},
             loginRedirectUrl: String,
+            showLinks: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {

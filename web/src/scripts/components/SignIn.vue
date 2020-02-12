@@ -2,17 +2,17 @@
     <div class="centered">
         <div>
             <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
-            <p v-if="message">{{message}}</p>
+            <p v-if="message && !isPendingRedirect">{{message}}</p>
         </div>
         <div class="actions-container">
             <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
-            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
+            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn" color="light"/>
             <div class="divider" v-if="!isPendingRedirect">
                 <p class="message-container">Or choose from one of the following</p>
             </div>
         </div>
         <div id="third-party-logins">
-            <spinner v-if="firebaseUiLoading" :delay="1000"/>
+            <spinner v-if="firebaseUiLoading" :delay="1000" color="light"/>
             <div class="buttonContainer" id="signup-app"></div>
         </div>
     </div>
@@ -76,10 +76,14 @@
                     return false;
                 },
                 signInFailure: async (error: firebaseui.auth.AuthUIError) => {
-                    alert("Sign In Failure");
+                    // alert("Sign In Failure");
                     logger.error("Sign in failure", error);
+                    this.isPendingRedirect = false;
+                    this.isSigningIn = false;
                 },
                 uiShown: () => {
+                    logger.info("Firebase UI shown", ui);
+                    logger.info("UI Shown... is pending redirect? ", ui.isPendingRedirect());
                     this.firebaseUiLoading = false;
                 }
             });
@@ -87,7 +91,12 @@
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
                 logger.log("Is pending redirect.... need to log the user in");
+
+                this.checkForPendingUIInterval = window.setInterval(() => {
+                    this.checkPendingUI()
+                }, 500);
             }
+
             ui.start('#signup-app', config);
         },
         created() {
@@ -112,6 +121,7 @@
             if (this.memberListener) {
                 this.memberListener();
             }
+            window.clearInterval(this.checkForPendingUIInterval)
         },
         props: {
             showTitle: {
@@ -134,6 +144,7 @@
             authResult: firebase.auth.UserCredential | undefined,
             firebaseUiLoading: boolean,
             isSigningIn: boolean,
+            checkForPendingUIInterval: number | undefined,
         } {
             return {
                 commonCopy: copy.common,
@@ -149,11 +160,24 @@
                 authResult: undefined,
                 firebaseUiLoading: false,
                 isSigningIn: false,
+                checkForPendingUIInterval: undefined,
             }
         },
         computed: {
             _title(): string {
                 return this.title || copy.common.SIGN_UP
+            }
+        },
+        methods: {
+            checkPendingUI() {
+                //is the firebase UI loading, or is it showing sign in buttons?
+                if (this.isPendingRedirect) {
+                    const fbList = this.$el.querySelector(".firebaseui-card-content .firebaseui-idp-list");
+                    if (fbList) {
+                        this.isPendingRedirect = false;
+                        window.clearInterval(this.checkForPendingUIInterval)
+                    }
+                }
             }
         },
         watch: {
@@ -190,6 +214,7 @@
         .firebaseui-container {
             box-shadow: none;
             max-width: 50rem;
+            background-color: transparent;
 
             .mdl-progress.firebaseui-busy-indicator {
                 top: 25px;
