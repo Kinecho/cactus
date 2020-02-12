@@ -5,27 +5,27 @@
                 <a class="tab-label" v-on:click="activetab='1'" v-bind:class="[ activetab === '1' ? 'active' : '' ]" aria-controls="basic">Basic</a>
                 <a class="tab-label" v-on:click="activetab='2'" v-bind:class="[ activetab === '2' ? 'active' : '' ]" aria-controls="plus">Plus</a>
             </div>
-<!--            <template v-for="(product, i) in productGroups">-->
-<!--                <input type="radio"-->
-<!--                        name="tabset"-->
-<!--                        :id="'product-tier-' + product.tier"-->
-<!--                        :aria-controls="product.tier"-->
-<!--                        :checked="!premiumDefault"/>-->
-<!--                <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>-->
-<!--                <product-group-->
-<!--                        :productGroup="product"-->
-<!--                        :key="product.tier"-->
-<!--                        :id="`product-tier-${product.tier}`"-->
-<!--                        :display-index="i"-->
-<!--                        class="tabpanel"/>-->
-<!--            </template>-->
-            <div class="tab-panel">
-                <div v-if="activetab ==='1'" class="tabcontent">
+            <!--            <template v-for="(product, i) in productGroups">-->
+            <!--                <input type="radio"-->
+            <!--                        name="tabset"-->
+            <!--                        :id="'product-tier-' + product.tier"-->
+            <!--                        :aria-controls="product.tier"-->
+            <!--                        :checked="!premiumDefault"/>-->
+            <!--                <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>-->
+            <!--                <product-group-->
+            <!--                        :productGroup="product"-->
+            <!--                        :key="product.tier"-->
+            <!--                        :id="`product-tier-${product.tier}`"-->
+            <!--                        :display-index="i"-->
+            <!--                        class="tabpanel"/>-->
+            <!--            </template>-->
+            <div class="tabPanels">
+                <div class="tabContent basic-panel" v-bind:class="[ activetab === '1' ? 'active' : '' ]">
                     <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>
                     <p class="price">Free forever</p>
                     <button class="secondary" disabled>Current Plan</button>
                 </div>
-                <div v-if="activetab ==='2'" class="tabcontent">
+                <div class="tabContent plus-panel" v-bind:class="[ activetab === '2' ? 'active' : '' ]">
                     <p>Every day, there’s a new prompt waiting for&nbsp;you</p>
                     <div class="flexContainer">
                         <template v-for="plan in plans">
@@ -43,9 +43,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
-        <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault"> -->
     </div>
 </template>
 
@@ -229,9 +226,7 @@
     }
 
     .tabset {
-        background-color: $darkestGreen;
         border-radius: 1.2rem;
-        color: $white;
         text-align: left;
 
         @include r(374) {
@@ -255,52 +250,74 @@
         display: flex;
 
         .tab-label {
-            background-color: darken($darkestGreen, 5%);
+            background-color: darken($dolphin, 5%);
             color: $white;
-            flex-grow: 1;
+            flex-basis: 50%;
             font-size: 2rem;
             font-weight: bold;
             padding: 1.6rem;
             text-align: center;
 
-            &:first-child {
-                border-radius: 1.2rem 0 0 0;
-            }
-            &:last-child {
-                border-radius: 0 1.2rem 0 0;
-            }
-
-            &:hover {
-                background-color: darken($darkestGreen, 3%);
-                cursor: pointer;
+            @include r(768) {
+                text-align: left;
             }
 
             &.active {
-                background-color: $darkestGreen;
+                background-color: $dolphin;
+            }
+
+            &:first-child {
+                border-radius: 1.2rem 0 0 0;
+
+                @include r(768) {
+                    background-color: $white;
+                    border-radius: 1.2rem 1.2rem 0 0;
+                    color: $darkestGreen;
+                }
+            }
+            &:last-child {
+                border-radius: 0 1.2rem 0 0;
+
+                @include r(768) {
+                    background-color: $dolphin;
+                    border-radius: 1.2rem 1.2rem 0 0;
+                    color: $white;
+                }
             }
         }
-
     }
 
-    .tab-panel {
+    .tabPanels {
+        @include r(768) {
+            display: flex;
+        }
+    }
+
+    .tabContent {
+        display: none;
         padding: 2.4rem 2.4rem 3.2rem;
 
-        @include r(768) {
-    //        padding: 3.2rem;
+        &.active {
+            display: block;
+        }
 
-            &.free-panel {
-                align-self: end;
+        @include r(768) {
+            border-radius: 0 0 1.6rem 1.6rem;
+            display: block;
+            flex-basis: 50%;
+            padding: 3.2rem;
+
+            &.basic-panel {
                 background-color: $white;
-                border-radius: 1.8rem 0 0 0;
                 color: $darkestGreen;
 
                 ul {
                     margin-bottom: 7.2rem;
                 }
             }
-            &.premium-panel {
-                background-color: $darkestGreen;
-                border-radius: 1.8rem 1.8rem 0 0;
+            &.plus-panel {
+                background-color: $dolphin;
+                color: $white;
             }
         }
 
