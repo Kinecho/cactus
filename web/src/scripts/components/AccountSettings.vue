@@ -163,7 +163,7 @@ import {SubscriptionTier} from '@shared/models/MemberSubscription'
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
-    import {SubscriptionTier} from "@shared/models/MemberSubscription";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 
     const logger = new Logger("AccountSettings.vue");

@@ -7,9 +7,9 @@ import {getValidTimezoneName} from "@shared/timezones";
 import {
     isInTrial,
     MemberSubscription,
-    SubscriptionTier,
     subscriptionTierDisplayName
 } from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",

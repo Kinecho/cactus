@@ -90,7 +90,8 @@ export interface CactusConfig {
             magic_link: string,
             magic_link_new_user: string,
             invitation: string,
-            friend_request: string
+            friend_request: string,
+            trial_ending: string
         }
     },
     sheets: {

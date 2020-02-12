@@ -4,7 +4,7 @@ import {preventOrphanedWords} from "@shared/util/StringUtil";
 import {timestampToDate} from "@shared/util/FirestoreUtil";
 import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContent.ts");
 

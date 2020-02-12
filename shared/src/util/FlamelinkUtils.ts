@@ -6,7 +6,8 @@ import Logger from "@shared/Logger";
 import {DateObject} from "luxon";
 import * as ContentTypes from '@flamelink/sdk-content-types';
 import * as AppTypes from "@flamelink/sdk-app-types";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {QueryResult} from "@shared/types/FirestoreTypes";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("FlamelinkUtils");
 
@@ -16,6 +17,19 @@ export function fromFlamelinkData<T extends FlamelinkModel>(data: any, Type: { n
     const model = Object.assign(new Type(), data);
     model.updateFromData(data);
     return model;
+}
+
+export function fromFlamelinkQueryResults<T extends FlamelinkModel>(data: { [id: string]: any } | undefined, Type: { new(): T }): T[] {
+    if (!data) {
+        return [];
+    }
+    const values = Object.values(data);
+    return values.map(d => fromFlamelinkData(d, Type));
+}
+
+export function buildQueryResult<T extends FlamelinkModel>(raw: any | undefined, Type: { new(): T }): QueryResult<T> {
+    const results = fromFlamelinkQueryResults(raw, Type);
+    return {results, size: results.length}
 }
 
 export function hasImage(image: Image | undefined) {

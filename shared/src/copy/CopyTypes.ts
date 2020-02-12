@@ -1,3 +1,5 @@
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+
 export interface PronounCopy {
     YOU: string
 }
@@ -109,6 +111,13 @@ export interface AccountCopy {
 
 export interface CheckoutCopy {
     SIGN_IN_TO_CONTINUE_CHECKOUT: string,
+    UPGRADE: string,
+    BILLING_PERIOD: {
+        [key in BillingPeriod]: string
+    },
+    BILLING_PERIOD_PER: {
+        [key in BillingPeriod]: string
+    }
 }
 
 export abstract class LocalizedCopy {

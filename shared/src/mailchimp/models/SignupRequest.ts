@@ -1,4 +1,4 @@
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export interface SubscriptionFormLocation {
     page: string,

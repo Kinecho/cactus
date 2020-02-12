@@ -4,7 +4,7 @@ import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentService");
 
@@ -29,7 +29,7 @@ export default class PromptContentService {
     }
 
     getByPromptId(promptId: string): Promise<PromptContent | undefined> {
-        return this.flamelinkService.getByField({
+        return this.flamelinkService.getFirstByField({
             name: PromptContent.Fields.promptId,
             value: promptId,
             Type: PromptContent

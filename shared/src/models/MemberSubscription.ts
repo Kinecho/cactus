@@ -1,9 +1,11 @@
 import {DateTime} from "luxon";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
-export enum SubscriptionTier {
-    BASIC = "BASIC",
-    PLUS = "PLUS"
-}
+export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
+    [SubscriptionTier.BASIC]: 0,
+    [SubscriptionTier.PLUS]: 1,
+};
+
 
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
 
