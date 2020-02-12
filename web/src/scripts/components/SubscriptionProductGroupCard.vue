@@ -19,8 +19,14 @@
                 <span class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</span>
             </div>
         </div>
-        <button v-bind:disabled="isProcessing" :class="{secondary: selectedProduct.isFree}" @click="checkout">
+        <button v-if="!isCurrentTier"
+                v-bind:disabled="isProcessing"
+                :class="{secondary: selectedProduct.isFree}"
+                @click="checkout">
             {{buttonText}}
+        </button>
+        <button class="button btn secondary no-loading" v-if="isCurrentTier" :disabled="true">
+            {{copy.checkout.CURRENT_PLAN}}
         </button>
         <div v-if="footer" class="group-footer" :class="{
             [`icon`]: footer.icon,
@@ -42,6 +48,8 @@
     import ProductFeatureList from "@components/ProductFeatureList.vue";
     import {ProductGroupFooter, ProductSection} from "@shared/models/SubscriptionProductGroup";
     import MarkdownText from "@components/MarkdownText.vue";
+    import {PageRoute} from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -53,13 +61,15 @@
         props: {
             productGroup: {type: Object as () => SubscriptionProductGroupEntry, required: true},
             displayIndex: Number,
-            showFeatures: {type: Boolean, default: false}
+            showFeatures: {type: Boolean, default: false},
+            member: {type: Object as () => CactusMember | undefined}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
             copy: LocalizedCopy,
             isProcessing: boolean,
             checkoutError: string | undefined,
+
         } {
             return {
                 selectedProduct: this.productGroup.products[0],
@@ -82,6 +92,9 @@
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
             buttonText(): string {
+                if (this.isNotCurrentTier) {
+                    return copy.checkout.MANAGE_MY_PLAN
+                }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE
                 } else {
@@ -90,6 +103,15 @@
             },
             sections(): ProductSection[] {
                 return this.productGroup.productGroup?.sections ?? [];
+            },
+            isNotCurrentTier(): boolean {
+                return this.signedIn && !this.isCurrentTier
+            },
+            isCurrentTier(): boolean {
+                return this.productGroup.tier === this.member?.tier;
+            },
+            signedIn(): boolean {
+                return !!this.member
             }
         },
         methods: {
@@ -102,7 +124,18 @@
             async checkout() {
                 //todo
                 this.isProcessing = true;
+
                 const product = this.selectedProduct;
+
+                if (this.isNotCurrentTier) {
+                    this.goToAccount()
+                }
+
+                if (product.isFree && !this.signedIn) {
+                    this.goToSignup();
+                    return;
+                }
+
                 const stripePlanId = product.stripePlanId;
                 if (!stripePlanId) {
                     this.checkoutError = "The product does not have a plan id. Can not continue checkout";
@@ -111,6 +144,14 @@
                     return;
                 }
                 await startCheckout({stripePlanId})
+            },
+            goToAccount() {
+                this.isProcessing = false;
+                window.location.href = PageRoute.ACCOUNT;
+            },
+            goToSignup() {
+                this.isProcessing = false;
+                window.location.href = PageRoute.SIGNUP;
             },
         }
     })
@@ -299,6 +340,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+
             &.icon {
                 &:before, &.check:before {
                     background-image: url(assets/images/check.svg);

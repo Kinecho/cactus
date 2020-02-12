@@ -25,6 +25,8 @@ export default class EnglishCopy extends LocalizedCopy {
 
     checkout: CheckoutCopy = {
         UPGRADE: "Upgrade",
+        CURRENT_PLAN: "Current Plan",
+        MANAGE_MY_PLAN: "Manage My Plan",
         SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out.",
         BILLING_PERIOD: {
             [BillingPeriod.monthly]: "Monthly",
@@ -128,7 +130,7 @@ export default class EnglishCopy extends LocalizedCopy {
         DISPLAY_NAME: "Display Name",
         MEMBER_SINCE: "Member Since",
         AN_ANONYMOUS_USER: "An anonymous user",
-        SIGN_UP_FREE: "Sign up Free",
+        SIGN_UP_FREE: "Sign Up Free",
         magicLinkSuccess(email: string): string {
             return `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`
         }

@@ -16,6 +16,7 @@
                                 :id="`product-tier-${productGroup.tier}`"
                                 :display-index="i"
                                 class="tabContent"
+                                :member="member"
                                 :class="{active: activetab === i}"/>
                     </template>
                 </div>
