@@ -27,6 +27,7 @@ import socialEndpoints from "@api/endpoints/socialEndpoints";
 import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
+import {onPublish as syncTrailToMailchimpMembersJob} from "@api/pubsub/subscribers/SyncTrialMembersToMailchimpJob";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -51,7 +52,7 @@ export const cloudFunctions = {
     memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
     customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
     expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
-
+    syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
     //auth triggers
     userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
