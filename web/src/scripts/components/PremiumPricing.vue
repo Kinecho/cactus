@@ -1,55 +1,32 @@
 <template>
     <div class="centered">
-        <div id="tabs" class="tabset">
-            <div class="tabs">
-                <template v-for="(productGroup, i) in productGroups">
-                    <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{(productGroup.productGroup && productGroup.productGroup.title) || productGroup.tierDisplayName}}</a>
-                </template>
+        <transition appear name="fade-in">
+            <div id="tabs" class="tabset" v-if="productsLoaded">
+                <div class="tabs">
+                    <template v-for="(productGroup, i) in productGroups">
+                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{getGroupDisplayName(productGroup)}}</a>
+                    </template>
+                </div>
+
+                <div class="tabPanels">
+                    <template v-for="(productGroup, i) in productGroups">
+                        <product-group
+                                :productGroup="productGroup"
+                                :key="productGroup.tier"
+                                :id="`product-tier-${productGroup.tier}`"
+                                :display-index="i"
+                                class="tabContent"
+                                :class="{active: activetab === i}"/>
+                    </template>
+                </div>
             </div>
-
-            <div class="tabPanels">
-                <template v-for="(productGroup, i) in productGroups">
-                    <product-group
-                            :productGroup="productGroup"
-                            :key="productGroup.tier"
-                            :id="`product-tier-${productGroup.tier}`"
-                            :display-index="i"
-                            class="tabContent"
-                            :class="{active: activetab === i}"/>
-                </template>
-
-
-<!--                <div class="tabContent basic-panel" v-bind:class="[ activetab === '1' ? 'active' : '' ]">-->
-<!--                    <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>-->
-<!--                    <p class="price">Free forever</p>-->
-<!--                    <button class="secondary" disabled>Current Plan</button>-->
-<!--                </div>-->
-<!--                <div class="tabContent plus-panel" v-bind:class="[ activetab === '2' ? 'active' : '' ]">-->
-<!--                    <p>Every day, there’s a new prompt waiting for&nbsp;you</p>-->
-<!--                    <div class="flexContainer">-->
-<!--                        <template v-for="plan in plans">-->
-<!--                            <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">-->
-<!--                                <span>{{plan.name}}</span>-->
-<!--                                <span>${{plan.price_dollars}}</span>-->
-<!--                                <span>per {{plan.per}}</span>-->
-<!--                            </div>-->
-<!--                        </template>-->
-<!--                    </div>-->
-<!--                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;-->
-<!--                        ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}-->
-<!--                    </button>-->
-<!--                    <p class="heart">Supports Cactus development</p>-->
-<!--                </div>-->
-            </div>
-        </div>
+        </transition>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes';
-    import {PremiumPlan} from '@shared/types/PlanTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
@@ -59,8 +36,6 @@
     import CopyService from "@shared/copy/CopyService";
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
-    import {getDeviceDimensions} from "@web/DeviceUtil";
-    import {debounce} from "debounce";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -70,32 +45,8 @@
         components: {
             ProductGroup: SubscriptionProductGroupCard,
         },
-        props: {
-            plans: {
-                type: Array as () => PremiumPlan[],
-                required: false,
-                default: function () {
-                    return [
-                        {
-                            id: Config.stripe.monthlyPlanId,
-                            plan_param: 'm',
-                            name: 'Monthly',
-                            price_dollars: 2.99,
-                            per: 'month'
-                        },
-                        {
-                            id: Config.stripe.yearlyPlanId,
-                            plan_param: 'y',
-                            name: 'Annual',
-                            price_dollars: 29,
-                            per: 'year'
-                        }
-                    ]
-                }
-            }
-        },
+        props: {},
         data(): {
-            selectedPlan: PremiumPlan | undefined,
             isProcessing: boolean,
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
@@ -103,21 +54,14 @@
             premiumDefault: boolean,
             productGroups: SubscriptionProductGroupEntry[],
             productsLoaded: boolean,
-            gridTemplateAreaStyle: string,
-            debouncedResize: (() => any) | undefined
             activetab: number,
         } {
-
             return {
-                selectedPlan: this.plans[0],
                 isProcessing: false,
                 member: undefined,
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
                 premiumDefault: false,
-                // products: undefined,
-                gridTemplateAreaStyle: "tabpanel1 tabpanel2",
-                debouncedResize: undefined,
                 activetab: 0,
                 productsLoaded: false,
                 productGroups: [],
@@ -126,9 +70,6 @@
         async beforeMount() {
             this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
             this.productsLoaded = true;
-            // this.updateGridTemplateStyles();
-            this.debouncedResize = debounce(() => this.onResize());
-            window.addEventListener('resize', this.debouncedResize);
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
@@ -146,56 +87,17 @@
             }
         },
         beforeDestroy() {
-            if (this.debouncedResize) {
-                window.removeEventListener('resize', this.debouncedResize);
-            }
+
         },
         computed: {},
         methods: {
-            onResize() {
-                // this.updateGridTemplateStyles();
-            },
-            // updateGridTemplateStyles() {
-            //     if (getDeviceDimensions().width > 768) {
-            //         this.gridTemplateAreaStyle = `'${this.productGroups.map((g, i) => `tabpanel${i + 1}`).join(' ')}'`;
-            //     } else {
-            //         let groups = this.productGroups.map(g => `product-tier-${g.tier}`).join(' ');
-            //         let panels = this.productGroups.map(g => 'tabpanel').join(' ');
-            //         this.gridTemplateAreaStyle = `"${groups}" "${panels}"`;
-            //     }
-            //
-            //     logger.info("Grid area template style", this.gridTemplateAreaStyle);
-            // },
-            // async purchaseSelectedPlan() {
-            //     this.isProcessing = true;
-            //     const planId = this.selectedPlan?.id;
-            //     const member = this.member || undefined;
-            //     if (!member && planId) {
-            //         const successUrl = `${PageRoute.CHECKOUT}?${QueryParam.SUBSCRIPTION_PLAN}=${planId}`;
-            //         const path = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
-            //         logger.info("User is not logged in, sending to sign in page with checkout redirect success url");
-            //         window.location.href = path;
-            //         return;
-            //     }
-            //     if (planId) {
-            //         // configureStripe('checkout-button', planId);
-            //         const result = await startCheckout({member, stripePlanId: planId});
-            //         if (!result.isRedirecting) {
-            //             this.isProcessing = false;
-            //             //TODO: add more error handling - show a message if this fails
-            //         }
-            //     } else {
-            //         this.isProcessing = false;
-            //         alert('There was a problem. Please contact us at help@cactus.app.');
-            //     }
-            // },
-            // isSelectedPlan(plan: PremiumPlan) {
-            //     return plan == this.selectedPlan
-            // },
             goToSignup() {
                 window.location.href = PageRoute.SIGNUP;
+            },
+            getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
+                return entry.productGroup?.title ?? entry.tierDisplayName;
             }
-        },
+        }
 
     })
 </script>
