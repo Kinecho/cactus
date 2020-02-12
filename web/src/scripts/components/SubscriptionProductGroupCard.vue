@@ -1,5 +1,5 @@
 <template>
-    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+    <section class="tabContent" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
 
         <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
 
@@ -162,15 +162,6 @@
     @import "mixins";
     @import "variables";
 
-    .tier-PLUS {
-
-    }
-
-    .tier-BASIC {
-
-    }
-
-
     .tabContent {
         display: none;
         padding: 2.4rem 2.4rem 3.2rem;
@@ -199,10 +190,6 @@
             }
         }
 
-        //    h4 {
-        //        margin-bottom: 1.6rem;
-        //    }
-
         button {
             max-width: none;
             white-space: nowrap;
@@ -222,38 +209,6 @@
         @include r(768) {
             padding: 3.2rem;
 
-            &.tier-BASIC {
-                align-self: end;
-                background-color: $white;
-                border-radius: 1.8rem 0 0 0;
-                color: $darkestGreen;
-                /*grid-area: tabpanel1;*/
-
-                ul {
-                    margin-bottom: 7.2rem;
-                }
-            }
-            &.tier-PLUS {
-                background-color: $darkestGreen;
-                border-radius: 1.8rem 1.8rem 0 0;
-                /*grid-area: tabpanel2;*/
-            }
-
-            &.display-index-0 {
-                grid-area: tabpanel1;
-            }
-
-            &.display-index-1 {
-                grid-area: tabpanel2;
-            }
-
-            &.display-index-3 {
-                grid-area: tabpanel3;
-            }
-
-            &.display-index-4 {
-                grid-area: tabpanel4;
-            }
         }
         @include r(1140) {
             white-space: nowrap;
