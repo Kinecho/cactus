@@ -21,6 +21,9 @@ import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
 import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import CheckoutSession from "@shared/models/CheckoutSession";
+import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("checkoutApp");
 const config = getConfig();
@@ -199,7 +202,8 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
     }
 
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    if (!member) {
+    const memberId = member?.id;
+    if (!member || !memberId) {
         logger.info("No cactus member was found for the given userId: " + userId);
         res.sendStatus(401);
         return;
@@ -221,6 +225,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             payment_method_types: ['card'],
             success_url: successUrl,
             cancel_url: cancelUrl,
+            customer_email: member.email,
         };
 
         if (items && items.length > 0) {
@@ -268,6 +273,18 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         logger.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
         // @ts-ignore
         const session = await stripe.checkout.sessions.create(stripeOptions);
+        logger.info("Stripe session was created: " + JSON.stringify(session, null, 2));
+
+
+        const checkoutSession = CheckoutSession.stripe({
+            memberId: memberId,
+            email: member.email,
+            sessionId: session.id,
+            amount: chargeAmount,
+            raw: session,
+        });
+        const savedSession = await AdminCheckoutSessionService.getSharedInstance().save(checkoutSession);
+        logger.info("saved the checkout session to firestore: " + stringifyJSON(savedSession, 2));
 
         createResponse = {
             success: true,

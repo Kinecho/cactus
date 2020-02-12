@@ -161,7 +161,11 @@
                 }
                 if (planId) {
                     // configureStripe('checkout-button', planId);
-                    await startCheckout({member, stripePlanId: planId});
+                    const result = await startCheckout({member, stripePlanId: planId});
+                    if (!result.isRedirecting) {
+                        this.isProcessing = false;
+                        //TODO: add more error handling - show a message if this fails
+                    }
                 } else {
                     this.isProcessing = false;
                     alert('There was a problem. Please contact us at help@cactus.app.');

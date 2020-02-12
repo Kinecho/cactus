@@ -25,6 +25,7 @@ import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionS
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 import Logger from "@shared/Logger";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -54,6 +55,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSocialConnectionService.initialize();
     AdminSocialConnectionRequestService.initialize();
     AdminSubscriptionService.initialize();
+    AdminCheckoutSessionService.initialize();
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
