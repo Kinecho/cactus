@@ -153,7 +153,8 @@ const defaultTestConfig: CactusConfig = {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
             invitation: '1234invite',
-            friend_request: '1234fr'
+            friend_request: '1234fr',
+            trial_ending: '1234te'
         }
     },
     sheets: {
