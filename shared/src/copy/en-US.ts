@@ -10,6 +10,7 @@ import {
     PronounCopy,
     AccountCopy, CheckoutCopy,
 } from "@shared/copy/CopyTypes";
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
 
 export default class EnglishCopy extends LocalizedCopy {
     settings: LocaleSettings = {
@@ -23,7 +24,20 @@ export default class EnglishCopy extends LocalizedCopy {
     };
 
     checkout: CheckoutCopy = {
-        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out."
+        UPGRADE: "Upgrade",
+        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out.",
+        BILLING_PERIOD: {
+            [BillingPeriod.monthly]: "Monthly",
+            [BillingPeriod.yearly]: "Annual",
+            [BillingPeriod.once]: "One Time",
+            [BillingPeriod.never]: "Free",
+        },
+        BILLING_PERIOD_PER: {
+            [BillingPeriod.monthly]: "Month",
+            [BillingPeriod.yearly]: "Year",
+            [BillingPeriod.once]: "Once",
+            [BillingPeriod.never]: "Never",
+        }
     };
 
     account: AccountCopy = {

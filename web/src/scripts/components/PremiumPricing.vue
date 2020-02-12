@@ -1,63 +1,41 @@
 <template>
     <section class="premium">
-        <div class="centered">
-            <div class="textContainer">
-                <h2>Choose your Cactus</h2>
-                <p class="subtext">Free to use, better with&nbsp;Premium</p>
-            </div>
-            <div class="graphics">
-                <img class="blobGraphic" src="/assets/images/royalBlob.png" alt=""/>
-                <img class="arcGraphic" src="/assets/images/arc.svg" alt=""/>
-            </div>
-            <div class="tabset">
-                <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
-                <label class="tab-label free-tab" for="tab1">Free</label>
-                <section id="free" class="tab-panel free-panel">
-                    <h3 class="tab-header free-header">Free</h3>
-                    <ul>
-                        <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                        <li>Unlimited reflection notes</li>
-                        <li>Daily reflection prompts</li>
-                        <li>256-bit encryption on&nbsp;notes</li>
-                        <li>Notifications via email &amp;&nbsp;push</li>
-                    </ul>
-                    <button class="secondary" @click="goToSignup">Sign Up Free</button>
-                </section>
-
-                <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
-                <label class="tab-label premium-tab" for="tab2">Premium</label>
-                <section id="premium" class="tab-panel premium-panel">
-                    <h3 class="tab-header premium-header">Premium</h3>
-                    <ul>
-                        <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                        <li>Unlimited reflection notes</li>
-                        <li>Daily reflection prompts</li>
-                        <li>256-bit encryption on&nbsp;notes</li>
-                        <li>Notifications via email &amp; push</li>
-                        <li class="heart">Supports Cactus development</li>
-                    </ul>
-                    <h4>Coming Soon</h4>
-                    <ul>
-                        <li>Personalized prompts</li>
-                        <li>Reminder scheduling</li>
-                        <li>Backup to DayOne, Dropbox, &amp;&nbsp;more</li>
-                    </ul>
-                    <div class="flexContainer">
-                        <template v-for="plan in plans">
-                            <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
-                                <span>{{plan.name}}</span>
-                                <span>${{plan.price_dollars}}</span>
-                                <span>per {{plan.per}}</span>
-                            </div>
-                        </template>
-                    </div>
-                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;
-                        ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}
-                    </button>
-                </section>
-            </div>
+        <div class="products skeleton centered" v-if="!productsLoaded">
+            <h1>LOADING PRODUCTS</h1>
         </div>
+        <transition name="fade-in" appear>
+            <div class="centered" v-if="productsLoaded">
+                <div class="textContainer">
+                    <h2>Choose your Cactus</h2>
+                    <p class="subtext">Free to use, better with&nbsp;Premium</p>
+                </div>
+                <div class="graphics">
+                    <img class="blobGraphic" src="/assets/images/royalBlob.png" alt=""/>
+                    <img class="arcGraphic" src="/assets/images/arc.svg" alt=""/>
+                </div>
+                <div class="tabset" :style="{
+                    gridTemplateAreas: `${gridTemplateAreaStyle}`,
+                    gridTemplateColumns: `${100/productGroups.length}%`
+                }">
+                    <template v-for="(product, i) in productGroups">
+                        <input type="radio"
+                                name="tabset"
+                                :id="'product-tier-' + product.tier"
+                                :aria-controls="product.tier"
+                                :checked="!premiumDefault"/>
+                        <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>
+                        <product-group
+                                :productGroup="product"
+                                :key="product.tier"
+                                :id="`product-tier-${product.tier}`"
+                                :display-index="i"
+                                class="tabpanel"/>
+                    </template>
+                </div>
+            </div>
+        </transition>
     </section>
+
 </template>
 
 <script lang="ts">
@@ -73,13 +51,19 @@
     import {QueryParam} from "@shared/util/queryParams";
     import Logger from "@shared/Logger";
     import CopyService from "@shared/copy/CopyService";
+    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import SubscriptionProductService from "@web/services/SubscriptionProductService";
+    import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
+    import {createSubscriptionProductGroup, SubscriptionProductGroup} from "@shared/util/SubscriptionProductUtil";
+    import {getDeviceDimensions} from "@web/DeviceUtil";
+    import {debounce} from "debounce";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
 
     export default Vue.extend({
-        created() {
-
+        components: {
+            ProductGroup: SubscriptionProductGroupCard,
         },
         props: {
             plans: {
@@ -112,7 +96,11 @@
             memberEmail: string | undefined,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
             premiumDefault: boolean,
+            products: SubscriptionProduct[] | undefined,
+            gridTemplateAreaStyle: string,
+            debouncedResize: (() => any) | undefined
         } {
+
             return {
                 selectedPlan: this.plans[0],
                 isProcessing: false,
@@ -120,9 +108,16 @@
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
                 premiumDefault: false,
+                products: undefined,
+                gridTemplateAreaStyle: "tabpanel1 tabpanel2",
+                debouncedResize: undefined,
             }
         },
-        beforeMount() {
+        async beforeMount() {
+            this.products = await SubscriptionProductService.sharedInstance.getAllForSale();
+            this.updateGridTemplateStyles();
+            this.debouncedResize = debounce(() => this.onResize());
+            window.addEventListener('resize', this.debouncedResize);
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
@@ -131,7 +126,7 @@
                         this.memberEmail = this.member.email;
                     }
                 }
-            })
+            });
 
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 
@@ -139,41 +134,61 @@
                 this.premiumDefault = true;
             }
         },
-        destroyed() {
-
+        beforeDestroy() {
+            if (this.debouncedResize) {
+                window.removeEventListener('resize', this.debouncedResize);
+            }
         },
-        computed: {},
-        watch: {},
+        computed: {
+
+            productsLoaded(): boolean {
+                return !!this.products;
+            },
+            productGroups(): SubscriptionProductGroup[] {
+                return createSubscriptionProductGroup(this.products || []);
+            }
+        },
         methods: {
-            selectPlan(plan: PremiumPlan) {
-                this.selectedPlan = plan;
+            onResize() {
+                this.updateGridTemplateStyles();
             },
-            async purchaseSelectedPlan() {
-                this.isProcessing = true;
-                const planId = this.selectedPlan?.id;
-                const member = this.member || undefined;
-                if (!member && planId) {
-                    const successUrl = `${PageRoute.CHECKOUT}?${QueryParam.SUBSCRIPTION_PLAN}=${planId}`;
-                    const path = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
-                    logger.info("User is not logged in, sending to sign in page with checkout redirect success url");
-                    window.location.href = path;
-                    return;
-                }
-                if (planId) {
-                    // configureStripe('checkout-button', planId);
-                    const result = await startCheckout({member, stripePlanId: planId});
-                    if (!result.isRedirecting) {
-                        this.isProcessing = false;
-                        //TODO: add more error handling - show a message if this fails
-                    }
+            updateGridTemplateStyles() {
+                if (getDeviceDimensions().width > 768) {
+                    this.gridTemplateAreaStyle = `'${this.productGroups.map((g, i) => `tabpanel${i + 1}`).join(' ')}'`;
                 } else {
-                    this.isProcessing = false;
-                    alert('There was a problem. Please contact us at help@cactus.app.');
+                    let groups = this.productGroups.map(g => `product-tier-${g.tier}`).join(' ');
+                    let panels = this.productGroups.map(g => 'tabpanel').join(' ');
+                    this.gridTemplateAreaStyle = `"${groups}" "${panels}"`;
                 }
+
+                logger.info("Grid area template style", this.gridTemplateAreaStyle);
             },
-            isSelectedPlan(plan: PremiumPlan) {
-                return plan == this.selectedPlan
-            },
+            // async purchaseSelectedPlan() {
+            //     this.isProcessing = true;
+            //     const planId = this.selectedPlan?.id;
+            //     const member = this.member || undefined;
+            //     if (!member && planId) {
+            //         const successUrl = `${PageRoute.CHECKOUT}?${QueryParam.SUBSCRIPTION_PLAN}=${planId}`;
+            //         const path = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
+            //         logger.info("User is not logged in, sending to sign in page with checkout redirect success url");
+            //         window.location.href = path;
+            //         return;
+            //     }
+            //     if (planId) {
+            //         // configureStripe('checkout-button', planId);
+            //         const result = await startCheckout({member, stripePlanId: planId});
+            //         if (!result.isRedirecting) {
+            //             this.isProcessing = false;
+            //             //TODO: add more error handling - show a message if this fails
+            //         }
+            //     } else {
+            //         this.isProcessing = false;
+            //         alert('There was a problem. Please contact us at help@cactus.app.');
+            //     }
+            // },
+            // isSelectedPlan(plan: PremiumPlan) {
+            //     return plan == this.selectedPlan
+            // },
             goToSignup() {
                 window.location.href = PageRoute.SIGNUP;
             }
@@ -207,6 +222,10 @@
                 justify-content: center;
                 text-align: left;
             }
+        }
+
+        .products.skeleton {
+            min-height: 30rem;
         }
     }
 
@@ -271,8 +290,8 @@
         background-color: $darkestGreen;
         border-radius: 1.2rem 1.2rem 0 0;
         display: grid;
-        grid-template-areas: "tab1 tab2" "tabpanel tabpanel";
-        grid-template-columns: 50%;
+        //grid-template-areas: "tab1 tab2" "tabpanel tabpanel"; this comes the style attribute directly in code
+        //grid-template-columns: 50%; this is set in code now
         position: relative;
         text-align: left;
 
@@ -286,7 +305,7 @@
         }
         @include r(768) {
             background-color: transparent;
-            grid-template-areas: "tabpanel1 tabpanel2";
+            //            grid-template-areas: "tabpanel1 tabpanel2"; set in code
             min-width: 67rem;
         }
         @include r(960) {
@@ -371,70 +390,71 @@
         }
     }
 
-    .tab-panel {
-        grid-area: tabpanel;
-        padding: 2.4rem 2.4rem 3.2rem;
+    /*.tab-panel {*/
+    /*    grid-area: tabpanel;*/
+    /*}*/
+    //    padding: 2.4rem 2.4rem 3.2rem;
 
-        @include r(768) {
-            padding: 3.2rem;
+    //    @include r(768) {
+    //        padding: 3.2rem;
 
-            &.free-panel {
-                align-self: end;
-                background-color: $white;
-                border-radius: 1.8rem 0 0 0;
-                color: $darkestGreen;
-                grid-area: tabpanel1;
+    //        &.tier-BASIC {
+    //            align-self: end;
+    //            background-color: $white;
+    //            border-radius: 1.8rem 0 0 0;
+    //            color: $darkestGreen;
+    //            grid-area: tabpanel1;
 
-                ul {
-                    margin-bottom: 7.2rem;
-                }
-            }
-            &.premium-panel {
-                background-color: $darkestGreen;
-                border-radius: 1.8rem 1.8rem 0 0;
-                grid-area: tabpanel2;
-            }
-        }
-        @include r(1140) {
-            white-space: nowrap;
-        }
+    //            ul {
+    //                margin-bottom: 7.2rem;
+    //            }
+    //        }
+    //        &.tier-PLUS {
+    //            background-color: $darkestGreen;
+    //            border-radius: 1.8rem 1.8rem 0 0;
+    //            grid-area: tabpanel2;
+    //        }
+    //    }
+    //    @include r(1140) {
+    //        white-space: nowrap;
+    //    }
 
-        h4 {
-            margin-bottom: 1.6rem;
-        }
+    //    h4 {
+    //        margin-bottom: 1.6rem;
+    //    }
 
-        ul {
-            list-style: none;
-            margin: 0 0 4rem -.6rem;
-        }
+    //    ul {
+    //        list-style: none;
+    //        margin: 0 0 4rem -.6rem;
+    //    }
 
-        li {
-            margin-bottom: 1.2rem;
-            text-indent: -3.4rem;
+    //    li {
+    //        margin-bottom: 1.2rem;
+    //        text-indent: -3.4rem;
 
-            &:before {
-                background-image: url(assets/images/check.svg);
-                background-repeat: no-repeat;
-                background-size: contain;
-                content: "";
-                display: inline-block;
-                height: 1.3rem;
-                margin-right: 1.6rem;
-                width: 1.8rem;
-            }
+    //        &:before {
+    //            background-image: url(assets/images/check.svg);
+    //            background-repeat: no-repeat;
+    //            background-size: contain;
+    //            content: "";
+    //            display: inline-block;
+    //            height: 1.3rem;
+    //            margin-right: 1.6rem;
+    //            width: 1.8rem;
+    //        }
 
-            &.heart:before {
-                background-image: url(assets/icons/heart.svg);
-                height: 1.5rem;
-            }
-        }
+    //        &.heart:before {
+    //            background-image: url(assets/icons/heart.svg);
+    //            height: 1.5rem;
+    //        }
+    //    }
 
-        button {
-            max-width: none;
-            white-space: nowrap;
-            width: 100%;
-        }
-    }
+    //    button {
+    //        max-width: none;
+    //        white-space: nowrap;
+    //        width: 100%;
+    //    }
+    //}
 
     .enhance {
         background: linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat,
@@ -443,39 +463,39 @@
         padding-right: .2rem;
     }
 
-    .flexContainer {
-        display: flex;
-        margin-bottom: 2.4rem;
-        justify-content: space-between;
+    //.flexContainer {
+    //    display: flex;
+    //    margin-bottom: 2.4rem;
+    //    justify-content: space-between;
 
-        .planButton {
-            background-color: transparentize($white, .9);
-            border: 2px solid $darkestGreen;
-            border-radius: .8rem;
-            cursor: pointer;
-            font-size: 1.6rem;
-            padding: .8rem;
-            text-align: center;
-            width: 49%;
+    //    .planButton {
+    //        background-color: transparentize($white, .9);
+    //        border: 2px solid $darkestGreen;
+    //        border-radius: .8rem;
+    //        cursor: pointer;
+    //        font-size: 1.6rem;
+    //        padding: .8rem;
+    //        text-align: center;
+    //        width: 49%;
 
-            &.selected {
-                border-color: $green;
-                box-shadow: inset 0 0 0 .4rem $darkestGreen;
-            }
+    //        &.selected {
+    //            border-color: $green;
+    //            box-shadow: inset 0 0 0 .4rem $darkestGreen;
+    //        }
 
-            span {
-                display: block;
+    //        span {
+    //            display: block;
 
-                &:nth-child(1) {
-                    font-size: 1.4rem;
-                    letter-spacing: 1px;
-                    text-transform: uppercase;
-                }
+    //            &:nth-child(1) {
+    //                font-size: 1.4rem;
+    //                letter-spacing: 1px;
+    //                text-transform: uppercase;
+    //            }
 
-                &:nth-child(2) {
-                    font-size: 2rem;
-                }
-            }
-        }
-    }
+    //            &:nth-child(2) {
+    //                font-size: 2rem;
+    //            }
+    //        }
+    //    }
+    //}
 </style>

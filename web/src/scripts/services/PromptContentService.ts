@@ -29,7 +29,7 @@ export default class PromptContentService {
     }
 
     getByPromptId(promptId: string): Promise<PromptContent | undefined> {
-        return this.flamelinkService.getByField({
+        return this.flamelinkService.getFirstByField({
             name: PromptContent.Fields.promptId,
             value: promptId,
             Type: PromptContent

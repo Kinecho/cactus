@@ -5,6 +5,12 @@ export enum SubscriptionTier {
     PLUS = "PLUS"
 }
 
+export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
+    [SubscriptionTier.BASIC]: 0,
+    [SubscriptionTier.PLUS]: 1,
+};
+
+
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
 
 export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
