@@ -1,5 +1,5 @@
 <template>
-    <section class="tabContent" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
 
         <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
 
