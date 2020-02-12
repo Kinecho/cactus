@@ -11,7 +11,7 @@ import AdminSlackService, {
     SlackAttachmentField
 } from "@admin/services/AdminSlackService";
 import {buildPromptContentURL} from "@admin/util/StringUtil";
-import {formatDate, mailchimpTimeZone} from "@shared/util/DateUtil";
+import {formatDate, formatDateTime, mailchimpTimeZone} from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {
@@ -509,9 +509,12 @@ export default class PromptContentScheduler {
 
         const config = this.config.mailchimp;
         const promptContent = this.promptContent;
-        const sendDate = formatDate(promptContent.scheduledSendAt);
-        logger.log(chalk.red(`Mailchimp Send Date is formatted as: ${sendDate}`));
-        const campaignTitle = `${sendDate} - Daily - ${promptContent.getQuestion()}`;
+        const sendDateString = formatDateTime(promptContent.scheduledSendAt, {
+            format: "yyyy-LL-dd",
+            timezone: mailchimpTimeZone
+        });
+        logger.log(chalk.red(`Mailchimp Send Date is formatted as: ${sendDateString}`));
+        const campaignTitle = `${sendDateString} - Daily - ${promptContent.getQuestion()}`;
 
         const prompt = this.result.reflectionPrompt;
         const campaignSettings: CreateCampaignSettings = {
