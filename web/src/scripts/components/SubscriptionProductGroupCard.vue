@@ -119,7 +119,7 @@
                 return `$${(priceCents / 100).toFixed(2)}`.replace(".00", "");
             },
             isSelected(product: SubscriptionProduct): boolean {
-                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId;
+                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && !this.isCurrentTier;
             },
             async checkout() {
                 //todo
