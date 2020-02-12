@@ -2,17 +2,29 @@
 @import "~styles/variables";
 @import "~styles/common";
 
-.pageContainer {
-    background: url(assets/images/premiumBG.png) center top/115% no-repeat;
-
-    @include r(768) {
-        background-position: center -65rem;
-    }
-}
-
 .hero {
+    background: url(assets/images/plusBg.svg) center bottom/cover no-repeat;
     color: $white;
-    padding: 8rem 2.4rem;
+    padding: 4.8rem 2.4rem 16rem;
+
+    @include r(374) {
+        padding-bottom: 14rem;
+    }
+    @include r(600) {
+        background-size: 120% auto;
+    }
+    @include r(768) {
+        padding-bottom: 19rem;
+        padding-top: 6.4rem;
+    }
+    @include r(1024) {
+        padding-bottom: 26rem;
+    }
+    @include r(1500) {
+        background-size: 105% auto;
+        padding-bottom: 29rem;
+        padding-top: 8rem;
+    }
 
     h1 {
         margin-bottom: .4rem;
@@ -37,7 +49,12 @@ h2 {
 }
 
 .benefits {
-    padding: 6.4rem 2.4rem;
+    margin-top: -2.4rem;
+    padding: 0 2.4rem 6.4rem;
+
+    @include r(374) {
+        margin-top: 0;
+    }
 
     .flexContainer {
         @include r(768) {
