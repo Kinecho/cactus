@@ -1,41 +1,52 @@
 <template>
-    <section class="premium">
-        <div class="products skeleton centered" v-if="!productsLoaded">
-            <h1>LOADING PRODUCTS</h1>
-        </div>
-        <transition name="fade-in" appear>
-            <div class="centered" v-if="productsLoaded">
-                <div class="textContainer">
-                    <h2>Choose your Cactus</h2>
-                    <p class="subtext">Free to use, better with&nbsp;Premium</p>
+    <div class="centered">
+        <div id="tabs" class="tabset">
+            <div class="tabs">
+                <a class="tab-label" v-on:click="activetab='1'" v-bind:class="[ activetab === '1' ? 'active' : '' ]" aria-controls="basic">Basic</a>
+                <a class="tab-label" v-on:click="activetab='2'" v-bind:class="[ activetab === '2' ? 'active' : '' ]" aria-controls="plus">Plus</a>
+            </div>
+<!--            <template v-for="(product, i) in productGroups">-->
+<!--                <input type="radio"-->
+<!--                        name="tabset"-->
+<!--                        :id="'product-tier-' + product.tier"-->
+<!--                        :aria-controls="product.tier"-->
+<!--                        :checked="!premiumDefault"/>-->
+<!--                <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>-->
+<!--                <product-group-->
+<!--                        :productGroup="product"-->
+<!--                        :key="product.tier"-->
+<!--                        :id="`product-tier-${product.tier}`"-->
+<!--                        :display-index="i"-->
+<!--                        class="tabpanel"/>-->
+<!--            </template>-->
+            <div class="tab-panel">
+                <div v-if="activetab ==='1'" class="tabcontent">
+                    <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>
+                    <p class="price">Free forever</p>
+                    <button class="secondary" disabled>Current Plan</button>
                 </div>
-                <div class="graphics">
-                    <img class="blobGraphic" src="/assets/images/royalBlob.png" alt=""/>
-                    <img class="arcGraphic" src="/assets/images/arc.svg" alt=""/>
-                </div>
-                <div class="tabset" :style="{
-                    gridTemplateAreas: `${gridTemplateAreaStyle}`,
-                    gridTemplateColumns: `${100/productGroups.length}%`
-                }">
-                    <template v-for="(product, i) in productGroups">
-                        <input type="radio"
-                                name="tabset"
-                                :id="'product-tier-' + product.tier"
-                                :aria-controls="product.tier"
-                                :checked="!premiumDefault"/>
-                        <label class="tab-label" :for="`product-tier-${product.tier}`">{{product.tier}}</label>
-                        <product-group
-                                :productGroup="product"
-                                :key="product.tier"
-                                :id="`product-tier-${product.tier}`"
-                                :display-index="i"
-                                class="tabpanel"/>
-                    </template>
+                <div v-if="activetab ==='2'" class="tabcontent">
+                    <p>Every day, there’s a new prompt waiting for&nbsp;you</p>
+                    <div class="flexContainer">
+                        <template v-for="plan in plans">
+                            <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
+                                <span>{{plan.name}}</span>
+                                <span>${{plan.price_dollars}}</span>
+                                <span>per {{plan.per}}</span>
+                            </div>
+                        </template>
+                    </div>
+                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;
+                        ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}
+                    </button>
+                    <p class="heart">Supports Cactus development</p>
                 </div>
             </div>
-        </transition>
-    </section>
+        </div>
 
+        <!-- <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
+        <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault"> -->
+    </div>
 </template>
 
 <script lang="ts">
@@ -99,6 +110,7 @@
             products: SubscriptionProduct[] | undefined,
             gridTemplateAreaStyle: string,
             debouncedResize: (() => any) | undefined
+            activetab: number[],
         } {
 
             return {
@@ -111,6 +123,7 @@
                 products: undefined,
                 gridTemplateAreaStyle: "tabpanel1 tabpanel2",
                 debouncedResize: undefined,
+                activetab: [1, 2]
             }
         },
         async beforeMount() {
@@ -203,96 +216,22 @@
     @import "variables";
     @import "transitions";
 
-    .premium {
-        background: #1D7A81 url(assets/images/grainy.png);
-        color: $white;
-        padding: 4.8rem 0 0;
+    .centered {
+        overflow: hidden;
+        position: relative;
 
-        @include r(768) {
-            padding: 9rem 2.4rem 0;
-        }
-
-        .centered {
-            overflow: hidden;
-            position: relative;
-
-            @include r(960) {
-                display: flex;
-                flex-direction: row-reverse;
-                justify-content: center;
-                text-align: left;
-            }
-        }
-
-        .products.skeleton {
-            min-height: 30rem;
-        }
-    }
-
-    .textContainer {
         @include r(960) {
-            padding: 19rem 0 0 4.8rem;
-        }
-
-        h2 {
-            line-height: 1.1;
-            margin-bottom: .8rem;
-        }
-    }
-
-    .subtext {
-        padding: 0 2.4rem 2.4rem;
-
-        @include r(768) {
-            padding: 0 0 4rem;
-        }
-    }
-
-    .graphics {
-        bottom: -3rem;
-        left: 0;
-        position: absolute;
-        right: 0;
-
-        .blobGraphic {
-            bottom: 0;
-            right: -8rem;
-            position: absolute;
-
-            @include r(768) {
-                right: 0;
-            }
-            @include r(960) {
-                left: 51%;
-                right: auto;
-            }
-        }
-
-        .arcGraphic {
-            bottom: -12rem;
-            height: auto;
-            left: -2rem;
-            position: relative;
-            width: 95rem;
-
-            @include r(768) {
-                left: 0;
-                width: 109%;
-            }
-            @include r(960) {
-                top: 3rem;
-                width: 90%;
-            }
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            text-align: left;
         }
     }
 
     .tabset {
         background-color: $darkestGreen;
-        border-radius: 1.2rem 1.2rem 0 0;
-        display: grid;
-        //grid-template-areas: "tab1 tab2" "tabpanel tabpanel"; this comes the style attribute directly in code
-        //grid-template-columns: 50%; this is set in code now
-        position: relative;
+        border-radius: 1.2rem;
+        color: $white;
         text-align: left;
 
         @include r(374) {
@@ -305,7 +244,6 @@
         }
         @include r(768) {
             background-color: transparent;
-            //            grid-template-areas: "tabpanel1 tabpanel2"; set in code
             min-width: 67rem;
         }
         @include r(960) {
@@ -313,154 +251,73 @@
         }
     }
 
-    /* hide the radios, show the panels */
-    .tabset input[type="radio"] {
-        position: absolute;
-        left: -200vw;
+    .tabs {
+        display: flex;
 
-        @include r(768) {
-            display: none;
-        }
-    }
-
-    .tabset .tab-panel,
-    .tab-header {
-        display: none;
-
-        @include r(768) {
-            display: block;
-        }
-    }
-
-    .tabset > input:nth-of-type(1):checked ~ .tab-panel:nth-of-type(1),
-    .tabset > input:nth-of-type(2):checked ~ .tab-panel:nth-of-type(2) {
-        display: block;
-    }
-
-    .tab-label {
-        background-color: darken($darkestGreen, 5%);
-        cursor: pointer;
-        font-size: 2rem;
-        font-weight: bold;
-        padding: 1.6rem;
-        text-align: center;
-
-        &:nth-of-type(1) {
-            border-radius: 1.2rem 0 0 0;
-        }
-
-        &:nth-of-type(2) {
-            border-radius: 0 1.2rem 0 0;
-        }
-
-        @include r(768) {
-            display: none;
-        }
-    }
-
-    .tabset > .tab-label:hover {
-        background-color: darken($darkestGreen, 3%);
-    }
-
-    .tabset > input:focus + .tab-label,
-    .tabset > input:checked + .tab-label {
-        background-color: $darkestGreen;
-    }
-
-    .tab-header {
-        font-size: 2.4rem;
-        margin-bottom: 2.4rem;
-    }
-
-    .newStatus {
-        display: none;
-
-        @include r(600) {
-            background-color: $aqua;
-            border-radius: 2rem;
-            color: $darkestGreen;
-            display: inline-block;
-            font-size: 1.4rem;
+        .tab-label {
+            background-color: darken($darkestGreen, 5%);
+            color: $white;
+            flex-grow: 1;
+            font-size: 2rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            margin-left: .8rem;
-            padding: 0 .8rem;
-            text-transform: uppercase;
-            vertical-align: super;
+            padding: 1.6rem;
+            text-align: center;
+
+            &:first-child {
+                border-radius: 1.2rem 0 0 0;
+            }
+            &:last-child {
+                border-radius: 0 1.2rem 0 0;
+            }
+
+            &:hover {
+                background-color: darken($darkestGreen, 3%);
+                cursor: pointer;
+            }
+
+            &.active {
+                background-color: $darkestGreen;
+            }
         }
+
     }
 
-    /*.tab-panel {*/
-    /*    grid-area: tabpanel;*/
-    /*}*/
-    //    padding: 2.4rem 2.4rem 3.2rem;
+    .tab-panel {
+        padding: 2.4rem 2.4rem 3.2rem;
 
-    //    @include r(768) {
+        @include r(768) {
     //        padding: 3.2rem;
 
-    //        &.tier-BASIC {
-    //            align-self: end;
-    //            background-color: $white;
-    //            border-radius: 1.8rem 0 0 0;
-    //            color: $darkestGreen;
-    //            grid-area: tabpanel1;
+            &.free-panel {
+                align-self: end;
+                background-color: $white;
+                border-radius: 1.8rem 0 0 0;
+                color: $darkestGreen;
 
-    //            ul {
-    //                margin-bottom: 7.2rem;
-    //            }
-    //        }
-    //        &.tier-PLUS {
-    //            background-color: $darkestGreen;
-    //            border-radius: 1.8rem 1.8rem 0 0;
-    //            grid-area: tabpanel2;
-    //        }
-    //    }
-    //    @include r(1140) {
-    //        white-space: nowrap;
-    //    }
+                ul {
+                    margin-bottom: 7.2rem;
+                }
+            }
+            &.premium-panel {
+                background-color: $darkestGreen;
+                border-radius: 1.8rem 1.8rem 0 0;
+            }
+        }
 
     //    h4 {
     //        margin-bottom: 1.6rem;
     //    }
 
-    //    ul {
-    //        list-style: none;
-    //        margin: 0 0 4rem -.6rem;
-    //    }
+        button {
+            max-width: none;
+            white-space: nowrap;
+            width: 100%;
+        }
+    }
 
-    //    li {
-    //        margin-bottom: 1.2rem;
-    //        text-indent: -3.4rem;
-
-    //        &:before {
-    //            background-image: url(assets/images/check.svg);
-    //            background-repeat: no-repeat;
-    //            background-size: contain;
-    //            content: "";
-    //            display: inline-block;
-    //            height: 1.3rem;
-    //            margin-right: 1.6rem;
-    //            width: 1.8rem;
-    //        }
-
-    //        &.heart:before {
-    //            background-image: url(assets/icons/heart.svg);
-    //            height: 1.5rem;
-    //        }
-    //    }
-
-    //    button {
-    //        max-width: none;
-    //        white-space: nowrap;
-    //        width: 100%;
-    //    }
-    //}
-
-    .enhance {
-        background: linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat,
-        url(assets/images/grainy.png) repeat;
-        display: inline;
-        padding-right: .2rem;
+    .heart:before {
+        background-image: url(assets/icons/heart.svg);
+        height: 1.5rem;
     }
 
     //.flexContainer {

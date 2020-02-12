@@ -1,0 +1,95 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+
+.pageContainer {
+    background: url(assets/images/premiumBG.png) center top/115% no-repeat;
+
+    @include r(768) {
+        background-position: center -65rem;
+    }
+}
+
+.hero {
+    color: $white;
+    padding: 8rem 2.4rem;
+
+    h1 {
+        margin-bottom: .4rem;
+    }
+
+    .subtext {
+        margin-bottom: 2.4rem;
+        opacity: .8;
+
+        @include r(768) {
+            font-size: 2.4rem;
+        }
+    }
+
+    button {
+        min-width: 16rem;
+    }
+}
+
+h2 {
+    margin-bottom: 4rem;
+}
+
+.benefits {
+    padding: 6.4rem 2.4rem;
+
+    .flexContainer {
+        @include r(768) {
+            display: flex;
+        }
+    }
+
+    .benefit {
+        margin: 0 auto 4rem;
+        max-width: 28rem;
+
+        @include r(768) {
+            margin-bottom: 0;
+        }
+    }
+
+    .benefitIcon {
+        background-color: $beige;
+        border-radius: 50%;
+        display: inline-block;
+        height: 6.4rem;
+        margin-bottom: 1.6rem;
+        padding: 2rem;
+        position: relative;
+        vertical-align: middle;
+        width: 6.4rem;
+
+        &:before {
+            content: '';
+            display: block;
+            height: 6.4rem;
+            padding: 2rem;
+            position: absolute;
+            width: 6.4rem;
+        }
+    }
+
+    h3 {
+        font-size: 2.1rem;
+        margin-bottom: .8rem;
+    }
+
+    p {
+        opacity: .8;
+    }
+}
+
+.upgrade {
+    background: $beige;
+    padding: 4.8rem 0;
+
+    @include r(768) {
+        padding: 9rem 2.4rem;
+    }
+}
