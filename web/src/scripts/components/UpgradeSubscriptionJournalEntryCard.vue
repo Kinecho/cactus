@@ -47,10 +47,8 @@
             trialDaysLeftHeader(): string {
                 if (this.member?.daysLeftInTrial) {
                     const days = this.member?.daysLeftInTrial;
-                    if (days === 0) {
-                        return 'Your trial has ended';
-                    } else if (days === 1) {
-                        return 'Your trial ends today';
+                    if (days === 1) {
+                        return 'Trial ends today';
                     } else {
                         return days + ' days left';
                     }
