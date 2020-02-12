@@ -42,15 +42,16 @@ h2 {
     .flexContainer {
         @include r(768) {
             display: flex;
+            justify-content: center;
         }
     }
 
     .benefit {
-        margin: 0 auto 4rem;
+        margin: 0 auto 5.6rem;
         max-width: 28rem;
 
         @include r(768) {
-            margin-bottom: 0;
+            margin: 0 1.6rem;
         }
     }
 
@@ -77,6 +78,13 @@ h2 {
 
     p {
         opacity: .8;
+
+        @include r(768) {
+            font-size: 1.6rem;
+        }
+        @include r(960) {
+            font-size: 1.8rem;
+        }
     }
 }
 
