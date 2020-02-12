@@ -92,13 +92,13 @@
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
             buttonText(): string {
-                if (this.isNotCurrentTier) {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree) {
                     return copy.checkout.MANAGE_MY_PLAN
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE
                 } else {
-                    return `${copy.checkout.UPGRADE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
+                    return `${copy.checkout.PURCHASE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
             },
             sections(): ProductSection[] {
