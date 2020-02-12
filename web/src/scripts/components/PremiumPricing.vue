@@ -1,47 +1,19 @@
 <template>
     <section class="premium">
         <div class="centered">
-            <div class="textContainer">
-                <h2>Choose your Cactus</h2>
-                <p class="subtext">Free to use, better with&nbsp;Premium</p>
-            </div>
-            <div class="graphics">
-                <img class="blobGraphic" src="/assets/images/royalBlob.png" alt=""/>
-                <img class="arcGraphic" src="/assets/images/arc.svg" alt=""/>
-            </div>
             <div class="tabset">
                 <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
-                <label class="tab-label free-tab" for="tab1">Free</label>
+                <label class="tab-label free-tab" for="tab1">Basic</label>
                 <section id="free" class="tab-panel free-panel">
-                    <h3 class="tab-header free-header">Free</h3>
-                    <ul>
-                        <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                        <li>Unlimited reflection notes</li>
-                        <li>Daily reflection prompts</li>
-                        <li>256-bit encryption on&nbsp;notes</li>
-                        <li>Notifications via email &amp;&nbsp;push</li>
-                    </ul>
-                    <button class="secondary" @click="goToSignup">Sign Up Free</button>
+                    <p>Receive new prompts occasionally (~ once a&nbsp;week)</p>
+                    <p class="price">Free forever</p>
+                    <button class="secondary" disabled>Current Plan</button>
                 </section>
 
                 <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
-                <label class="tab-label premium-tab" for="tab2">Premium</label>
+                <label class="tab-label premium-tab" for="tab2">Plus</label>
                 <section id="premium" class="tab-panel premium-panel">
-                    <h3 class="tab-header premium-header">Premium</h3>
-                    <ul>
-                        <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                        <li>Unlimited reflection notes</li>
-                        <li>Daily reflection prompts</li>
-                        <li>256-bit encryption on&nbsp;notes</li>
-                        <li>Notifications via email &amp; push</li>
-                        <li class="heart">Supports Cactus development</li>
-                    </ul>
-                    <h4>Coming Soon</h4>
-                    <ul>
-                        <li>Personalized prompts</li>
-                        <li>Reminder scheduling</li>
-                        <li>Backup to DayOne, Dropbox, &amp;&nbsp;more</li>
-                    </ul>
+                    <p>Every day, there’s a new prompt waiting for&nbsp;you</p>
                     <div class="flexContainer">
                         <template v-for="plan in plans">
                             <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
@@ -54,6 +26,7 @@
                     <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;
                         ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}
                     </button>
+                    <p class="heart">Supports Cactus development</p>
                 </section>
             </div>
         </div>
@@ -189,12 +162,11 @@
     @import "transitions";
 
     .premium {
-        background: #1D7A81 url(assets/images/grainy.png);
-        color: $white;
-        padding: 4.8rem 0 0;
+        background: $beige;
+        padding: 4.8rem 0;
 
         @include r(768) {
-            padding: 9rem 2.4rem 0;
+            padding: 9rem 2.4rem;
         }
 
         .centered {
@@ -210,66 +182,9 @@
         }
     }
 
-    .textContainer {
-        @include r(960) {
-            padding: 19rem 0 0 4.8rem;
-        }
-
-        h2 {
-            line-height: 1.1;
-            margin-bottom: .8rem;
-        }
-    }
-
-    .subtext {
-        padding: 0 2.4rem 2.4rem;
-
-        @include r(768) {
-            padding: 0 0 4rem;
-        }
-    }
-
-    .graphics {
-        bottom: -3rem;
-        left: 0;
-        position: absolute;
-        right: 0;
-
-        .blobGraphic {
-            bottom: 0;
-            right: -8rem;
-            position: absolute;
-
-            @include r(768) {
-                right: 0;
-            }
-            @include r(960) {
-                left: 51%;
-                right: auto;
-            }
-        }
-
-        .arcGraphic {
-            bottom: -12rem;
-            height: auto;
-            left: -2rem;
-            position: relative;
-            width: 95rem;
-
-            @include r(768) {
-                left: 0;
-                width: 109%;
-            }
-            @include r(960) {
-                top: 3rem;
-                width: 90%;
-            }
-        }
-    }
-
     .tabset {
         background-color: $darkestGreen;
-        border-radius: 1.2rem 1.2rem 0 0;
+        border-radius: 1.2rem;
         display: grid;
         grid-template-areas: "tab1 tab2" "tabpanel tabpanel";
         grid-template-columns: 50%;
@@ -353,24 +268,6 @@
         margin-bottom: 2.4rem;
     }
 
-    .newStatus {
-        display: none;
-
-        @include r(600) {
-            background-color: $aqua;
-            border-radius: 2rem;
-            color: $darkestGreen;
-            display: inline-block;
-            font-size: 1.4rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            margin-left: .8rem;
-            padding: 0 .8rem;
-            text-transform: uppercase;
-            vertical-align: super;
-        }
-    }
-
     .tab-panel {
         grid-area: tabpanel;
         padding: 2.4rem 2.4rem 3.2rem;
@@ -395,38 +292,9 @@
                 grid-area: tabpanel2;
             }
         }
-        @include r(1140) {
-            white-space: nowrap;
-        }
 
         h4 {
             margin-bottom: 1.6rem;
-        }
-
-        ul {
-            list-style: none;
-            margin: 0 0 4rem -.6rem;
-        }
-
-        li {
-            margin-bottom: 1.2rem;
-            text-indent: -3.4rem;
-
-            &:before {
-                background-image: url(assets/images/check.svg);
-                background-repeat: no-repeat;
-                background-size: contain;
-                content: "";
-                display: inline-block;
-                height: 1.3rem;
-                margin-right: 1.6rem;
-                width: 1.8rem;
-            }
-
-            &.heart:before {
-                background-image: url(assets/icons/heart.svg);
-                height: 1.5rem;
-            }
         }
 
         button {
@@ -436,11 +304,9 @@
         }
     }
 
-    .enhance {
-        background: linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat,
-        url(assets/images/grainy.png) repeat;
-        display: inline;
-        padding-right: .2rem;
+    .heart:before {
+        background-image: url(assets/icons/heart.svg);
+        height: 1.5rem;
     }
 
     .flexContainer {
