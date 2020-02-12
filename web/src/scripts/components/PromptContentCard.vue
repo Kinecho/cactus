@@ -380,7 +380,7 @@
         computed: {
             shareableLinkParams(): {} | undefined {
                 if (this.shareableLinkUrl) {
-                    const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+                    const member = CactusMemberService.sharedInstance.currentMember;
                     const email = member && member.email;
                     return {
                         [QueryParam.REFERRED_BY_EMAIL]: email,

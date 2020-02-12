@@ -8,7 +8,7 @@ import {
     PromptCopy,
     ElementCopy,
     PronounCopy,
-    AccountCopy,
+    AccountCopy, CheckoutCopy,
 } from "@shared/copy/CopyTypes";
 
 export default class EnglishCopy extends LocalizedCopy {
@@ -20,7 +20,11 @@ export default class EnglishCopy extends LocalizedCopy {
     };
     pronouns: PronounCopy = {
         YOU: "you"
-    }
+    };
+
+    checkout: CheckoutCopy = {
+        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out."
+    };
 
     account: AccountCopy = {
         PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",

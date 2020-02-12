@@ -17,7 +17,8 @@ export interface CreateSessionRequest {
 export interface CreateSessionResponse {
     success: boolean,
     error?: any,
+    unauthorized?: boolean,
     sessionId?: string,
     amount?: number|null|undefined,
-    productId?:string,
+    planId?:string,
 }

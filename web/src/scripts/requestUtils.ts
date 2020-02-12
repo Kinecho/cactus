@@ -1,4 +1,4 @@
-import axios, {AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
 import {deserializeJson} from "@shared/util/ApiUtil";
@@ -56,3 +56,8 @@ function getInstance() {
 }
 
 export const request = getInstance();
+
+export function isAxiosError(error: any): error is AxiosError {
+    return error.isAxiosError
+
+}

@@ -15,7 +15,7 @@ export default class CactusMemberService {
 
     authUnsubscriber?: Unsubscribe;
     protected currentMemberUnsubscriber?: ListenerUnsubscriber;
-    protected currentMember?: CactusMember;
+    currentMember?: CactusMember;
     protected memberHasLoaded = false;
 
     constructor() {
@@ -102,9 +102,30 @@ export default class CactusMemberService {
         }
     }
 
-    getCurrentCactusMember(): CactusMember | undefined {
-        return this.currentMember;
+    /**
+     * Get the current cactus member. Will wait to fetch from database if the member hasn't loaded yet.
+     * @return {Promise<CactusMember | undefined>}
+     */
+    async getCurrentMember(): Promise<CactusMember | undefined> {
+        if (this.currentMember) {
+            return this.currentMember;
+        }
+
+        return new Promise<CactusMember | undefined>(resolve => {
+            const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
+                authUnsubscriber();
+                if (user) {
+                    const member = this.getByUserId(user.uid);
+                    resolve(member);
+                } else {
+                    resolve(undefined)
+                }
+            });
+        })
+
     }
+
+    // async awaitCurrentMember(): Promise<CactusMember|undefined>
 
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.members);

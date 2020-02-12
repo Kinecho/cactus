@@ -15,10 +15,13 @@ import AdminSlackService, {
     SlackAttachmentField,
     SlackMessage
 } from "@admin/services/AdminSlackService";
+import Logger from "@shared/Logger";
+import {getAuthUserId} from "@api/util/RequestUtil";
 import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
 import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
 import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
-import Logger from "@shared/Logger";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+
 const logger = new Logger("checkoutApp");
 const config = getConfig();
 
@@ -187,23 +190,32 @@ async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data:
  * To set a trial period, please pass the desired trial length as the value of the subscription_data.trial_period_days argument.
  */
 app.post("/sessions", async (req: express.Request, res: express.Response) => {
+    const userId = await getAuthUserId(req);
+
+    if (!userId) {
+        logger.info("You must be authenticated to create a checkout session.");
+        res.sendStatus(401);
+        return;
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    if (!member) {
+        logger.info("No cactus member was found for the given userId: " + userId);
+        res.sendStatus(401);
+        return;
+    }
+
     let createResponse: CreateSessionResponse;
-
+    res.contentType("application/json");
     try {
-        res.contentType("application/json");
-
         const sessionRequest = req.body as CreateSessionRequest;
-
-
         logger.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
 
         // const isPreorder = req.params
         const successUrl = sessionRequest.successUrl || "https://cactus.app/success";
         const cancelUrl = sessionRequest.cancelUrl || "https://cactus.app";
-        const preOrder = sessionRequest.preOrder || false;
         const planId = sessionRequest.planId;
         const items = sessionRequest.items;
-
 
         const stripeOptions: any = {
             payment_method_types: ['card'],
@@ -211,14 +223,11 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             cancel_url: cancelUrl,
         };
 
-
         if (items && items.length > 0) {
             stripeOptions.line_items = items;
         }
 
-
         let chargeAmount: number | undefined | null = 499;
-        let productId = planId;
         if (planId) {
             stripeOptions.subscription_data = {
                 items: [{
@@ -230,31 +239,31 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
                 const plan = await stripe.plans.retrieve(planId);
                 chargeAmount = plan.amount;
             } catch (error) {
-                logger.error("failed to retrive the plan");
+                logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+                createResponse = {
+                    success: false,
+                    error: `Unable to find plan '${planId}' in stripe. Can not complete checkout.`,
+                    planId
+                };
+                res.send(createResponse);
+                return;
             }
-        } else if (preOrder) {
-            productId = 'Cactus Journal';
-            stripeOptions.payment_intent_data = {
-                capture_method: 'manual',
+        } else {
+            logger.error(`No plan ID was given. Can not initialize session`);
+            createResponse = {
+                success: false,
+                error: `No plan ID was given. Can not initialize session`
             };
-
-            stripeOptions.line_items = [{
-                name: "Cactus Journal",
-                currency: 'USD',
-                amount: chargeAmount,
-                description: "You will be billed monthly. Pause or cancel anytime.",
-                quantity: 1,
-            }];
+            res.send(createResponse);
+            return;
         }
 
         const updatedSuccess = new URL(stripeOptions.success_url);
         updatedSuccess.searchParams.set(QueryParam.PURCHASE_AMOUNT, `${chargeAmount}`);
-        updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${productId}`);
+        updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${planId}`);
 
-
-        logger.log(chalk.blue("success url is", updatedSuccess.toString()))
+        logger.log(chalk.blue("success url is", updatedSuccess.toString()));
         stripeOptions.success_url = updatedSuccess.toString();
-
 
         logger.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
         // @ts-ignore
@@ -264,7 +273,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             success: true,
             sessionId: session.id,
             amount: chargeAmount,
-            productId,
+            planId,
         };
 
     } catch (error) {

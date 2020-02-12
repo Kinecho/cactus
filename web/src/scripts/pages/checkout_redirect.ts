@@ -1,5 +1,10 @@
 import "@styles/pages/checkout_redirect.scss"
-import {configureStripe, redirectToCheckoutWithPlanId, redirectToCheckoutWithSessionId} from "@web/checkoutService";
+import {
+    configureStripe,
+    redirectToCheckoutWithPlanId,
+    redirectToCheckoutWithSessionId,
+    startCheckout
+} from "@web/checkoutService";
 import {Config} from "@web/config";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
@@ -29,25 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     if (!planId) {
-        const request: CreateSessionRequest = {
-            successUrl: `${Config.domain}/success`,
-            cancelUrl: `${Config.domain}`,
-            preOrder: true,
-        };
-
-        setTimeout(async () => {
-            const error = await redirectToCheckoutWithSessionId(request);
-            if (error) {
-                showError("We were unable to send you to the checkout page. Please try again later.");
-            }
-        }, 1000);
+        logger.error("No plan id provided. show error message");
+        showError("It looks like this link is no longer valid. Please try again later.")
     } else {
         configureStripe('checkout-button', planId);
-        setTimeout(async () => {
-            await redirectToCheckoutWithPlanId(planId);
-        }, 1000)
+        await startCheckout({stripePlanId: planId});
     }
-
 
 });
 

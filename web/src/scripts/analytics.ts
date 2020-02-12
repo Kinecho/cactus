@@ -68,7 +68,7 @@ export function init() {
             environment: Config.env,
             integrations: sentryIntegrations,
             beforeSend(event: Sentry.Event): Promise<Sentry.Event | null> | Sentry.Event | null {
-                const email = CactusMemberService.sharedInstance.getCurrentCactusMember()?.email;
+                const email = CactusMemberService.sharedInstance.currentMember?.email;
                 if (email) {
                     const tags = event.tags || {};
                     tags["user.email"] = email;

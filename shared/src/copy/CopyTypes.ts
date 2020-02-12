@@ -70,6 +70,7 @@ export interface AuthenticationCopy {
     CONNECTED_ACCOUNTS: string,
     AN_ANONYMOUS_USER: string,
     SIGN_UP_FREE: string,
+
     magicLinkSuccess(email: string): string;
 
 }
@@ -106,6 +107,10 @@ export interface AccountCopy {
     EMAIL_NOTIFICATION_CHECKBOX_LABEL: string,
 }
 
+export interface CheckoutCopy {
+    SIGN_IN_TO_CONTINUE_CHECKOUT: string,
+}
+
 export abstract class LocalizedCopy {
     abstract pronouns: PronounCopy;
     abstract prompts: PromptCopy;
@@ -116,6 +121,7 @@ export abstract class LocalizedCopy {
     abstract error: ErrorCopy;
     abstract auth: AuthenticationCopy;
     abstract account: AccountCopy;
+    abstract checkout: CheckoutCopy;
 
     abstract exclamation(input?: string): string;
 }

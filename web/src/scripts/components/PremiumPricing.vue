@@ -51,7 +51,7 @@
                             </div>
                         </template>
                     </div>
-                    <button v-bind:disabled="isProcessing" @click="puchaseSelectedPlan">Upgrade &mdash;
+                    <button v-bind:disabled="isProcessing" @click="purchaseSelectedPlan">Upgrade &mdash;
                         ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}
                     </button>
                 </section>
@@ -67,12 +67,14 @@
     import {PremiumPlan} from '@shared/types/PlanTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
+    import {startCheckout} from "@web/checkoutService";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {getQueryParam} from "@web/util";
     import {QueryParam} from "@shared/util/queryParams";
     import Logger from "@shared/Logger";
+    import CopyService from "@shared/copy/CopyService";
 
+    const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
 
     export default Vue.extend({
@@ -109,7 +111,7 @@
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            premiumDefault: boolean
+            premiumDefault: boolean,
         } {
             return {
                 selectedPlan: this.plans[0],
@@ -117,7 +119,7 @@
                 member: undefined,
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
-                premiumDefault: false
+                premiumDefault: false,
             }
         },
         beforeMount() {
@@ -146,19 +148,20 @@
             selectPlan(plan: PremiumPlan) {
                 this.selectedPlan = plan;
             },
-            async puchaseSelectedPlan() {
+            async purchaseSelectedPlan() {
                 this.isProcessing = true;
                 const planId = this.selectedPlan?.id;
-                if (!this.member && planId) {
+                const member = this.member || undefined;
+                if (!member && planId) {
                     const successUrl = `${PageRoute.CHECKOUT}?${QueryParam.SUBSCRIPTION_PLAN}=${planId}`;
-                    const path = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent("Please sign in to continue checkout")}`;
+                    const path = `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
                     logger.info("User is not logged in, sending to sign in page with checkout redirect success url");
                     window.location.href = path;
                     return;
                 }
                 if (planId) {
-                    configureStripe('checkout-button', planId);
-                    await redirectToCheckoutWithPlanId(planId, this.memberEmail);
+                    // configureStripe('checkout-button', planId);
+                    await startCheckout({member, stripePlanId: planId});
                 } else {
                     this.isProcessing = false;
                     alert('There was a problem. Please contact us at help@cactus.app.');

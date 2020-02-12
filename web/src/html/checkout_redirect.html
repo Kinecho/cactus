@@ -33,15 +33,15 @@
     <section id="error-message" class="error hidden">
         <h1>Oops! Something went wrong</h1>
         <p class="message">We were unable to send you to the checkout page. Please try again later.</p>
-        <button role="link" onclick="goBack()">Go Back</button>
+        <a href="/home" class="button btn primary">Go Home</a>
     </section>
 </div>
 
 <!--Note: JS is included via webpack-->
 </body>
 <script>
-    function goBack(){
-        window.history.back();
+    function goBack() {
+        window.history.back()
     }
 </script>
 </html>
