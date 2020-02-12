@@ -121,22 +121,9 @@
     @import "mixins";
     @import "variables";
 
-    .tier-PLUS {
-
-    }
-
-    .tier-BASIC {
-
-    }
-
-
-    .tabContent {
+    .tab-content {
         display: none;
-        padding: 2.4rem 2.4rem 3.2rem;
-
-        &.active {
-            display: block;
-        }
+        padding: 0 2.4rem 3.2rem;
 
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
@@ -152,15 +139,20 @@
                     margin-bottom: 7.2rem;
                 }
             }
+
             &.plus-panel {
                 background-color: $dolphin;
                 color: $white;
             }
         }
 
-        //    h4 {
-        //        margin-bottom: 1.6rem;
-        //    }
+        &.active {
+            display: block;
+        }
+
+        h4 {
+            margin-bottom: 1.6rem;
+        }
 
         button {
             max-width: none;
@@ -169,69 +161,53 @@
         }
     }
 
-    .tabContent {
-        grid-area: tabpanel;
-        padding: 2.4rem 2.4rem 3.2rem;
+    .payment-period-per {
+        text-transform: lowercase;
+    }
 
-        .group-description {
-            margin-bottom: 2rem;
-            white-space: pre-line;
-        }
+    .flexContainer {
+        display: flex;
+        margin-bottom: 2.4rem;
+        justify-content: space-between;
 
-        @include r(768) {
-            padding: 3.2rem;
+        .planButton {
+            background-color: transparentize($white, .9);
+            border: 2px solid $darkestGreen;
+            border-radius: .8rem;
+            cursor: pointer;
+            font-size: 1.6rem;
+            padding: .8rem;
+            text-align: center;
+            width: 49%;
 
-            &.tier-BASIC {
-                align-self: end;
-                background-color: $white;
-                border-radius: 1.8rem 0 0 0;
-                color: $darkestGreen;
-                /*grid-area: tabpanel1;*/
+            &.selected {
+                border-color: $green;
+                box-shadow: inset 0 0 0 .4rem $darkestGreen;
+            }
 
-                ul {
-                    margin-bottom: 7.2rem;
+            span {
+                display: block;
+
+                &:nth-child(1) {
+                    font-size: 1.4rem;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                }
+
+                &:nth-child(2) {
+                    font-size: 2rem;
                 }
             }
-            &.tier-PLUS {
-                background-color: $darkestGreen;
-                border-radius: 1.8rem 1.8rem 0 0;
-                /*grid-area: tabpanel2;*/
-            }
-
-            &.display-index-0 {
-                grid-area: tabpanel1;
-            }
-
-            &.display-index-1 {
-                grid-area: tabpanel2;
-            }
-
-            &.display-index-3 {
-                grid-area: tabpanel3;
-            }
-
-            &.display-index-4 {
-                grid-area: tabpanel4;
-            }
         }
-        @include r(1140) {
-            white-space: nowrap;
-        }
+    }
 
-        h4 {
-            margin-bottom: 1.6rem;
-        }
-
-        ul {
-            list-style: none;
-            margin: 0 0 4rem -.6rem;
-        }
-
-        li {
-            margin-bottom: 1.2rem;
-            text-indent: -3.4rem;
-
-            &:before {
+    .group-footer {
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &.icon {
+            &:before, &.check:before {
                 background-image: url(assets/images/check.svg);
                 background-repeat: no-repeat;
                 background-size: contain;
@@ -240,82 +216,12 @@
                 height: 1.3rem;
                 margin-right: 1.6rem;
                 width: 1.8rem;
+
             }
 
             &.heart:before {
                 background-image: url(assets/icons/heart.svg);
                 height: 1.5rem;
-            }
-        }
-
-        button {
-            max-width: none;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        .payment-period-per {
-            text-transform: lowercase;
-        }
-
-        .flexContainer {
-            display: flex;
-            margin-bottom: 2.4rem;
-            justify-content: space-between;
-
-            .planButton {
-                background-color: transparentize($white, .9);
-                border: 2px solid $darkestGreen;
-                border-radius: .8rem;
-                cursor: pointer;
-                font-size: 1.6rem;
-                padding: .8rem;
-                text-align: center;
-                width: 49%;
-
-                &.selected {
-                    border-color: $green;
-                    box-shadow: inset 0 0 0 .4rem $darkestGreen;
-                }
-
-                span {
-                    display: block;
-
-                    &:nth-child(1) {
-                        font-size: 1.4rem;
-                        letter-spacing: 1px;
-                        text-transform: uppercase;
-                    }
-
-                    &:nth-child(2) {
-                        font-size: 2rem;
-                    }
-                }
-            }
-        }
-
-        .group-footer {
-            margin-top: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            &.icon {
-                &:before, &.check:before {
-                    background-image: url(assets/images/check.svg);
-                    background-repeat: no-repeat;
-                    background-size: contain;
-                    content: "";
-                    display: inline-block;
-                    height: 1.3rem;
-                    margin-right: 1.6rem;
-                    width: 1.8rem;
-
-                }
-
-                &.heart:before {
-                    background-image: url(assets/icons/heart.svg);
-                    height: 1.5rem;
-                }
             }
         }
     }

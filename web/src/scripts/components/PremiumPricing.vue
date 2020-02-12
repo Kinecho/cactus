@@ -15,7 +15,6 @@
                                 :key="productGroup.tier"
                                 :id="`product-tier-${productGroup.tier}`"
                                 :display-index="i"
-                                class="tabContent"
                                 :class="{active: activetab === i}"/>
                     </template>
                 </div>
@@ -127,7 +126,6 @@
         @include r(374) {
             margin: 0 2.4rem;
         }
-
         @include r(600) {
             margin: 0 auto;
             max-width: 90%;
@@ -143,42 +141,43 @@
 
     .tabs {
         display: flex;
+    }
 
-        .tab-label {
-            background-color: darken($dolphin, 5%);
-            color: $white;
-            flex-basis: 50%;
-            font-size: 2rem;
-            font-weight: bold;
-            padding: 1.6rem;
-            text-align: center;
+    .tab-label {
+        background-color: darken($dolphin, 5%);
+        color: $white;
+        flex-basis: 50%;
+        font-size: 2.4rem;
+        font-weight: bold;
+        padding: 1.6rem;
+        text-align: center;
+
+        @include r(768) {
+            padding: 2.4rem;
+            text-align: left;
+        }
+
+        &.active {
+            background-color: $dolphin;
+        }
+
+        &:first-child {
+            border-radius: 1.2rem 0 0 0;
 
             @include r(768) {
-                text-align: left;
+                background-color: $white;
+                border-radius: 1.2rem 1.2rem 0 0;
+                color: $darkestGreen;
             }
+        }
 
-            &.active {
+        &:last-child {
+            border-radius: 0 1.2rem 0 0;
+
+            @include r(768) {
                 background-color: $dolphin;
-            }
-
-            &:first-child {
-                border-radius: 1.2rem 0 0 0;
-
-                @include r(768) {
-                    background-color: $white;
-                    border-radius: 1.2rem 1.2rem 0 0;
-                    color: $darkestGreen;
-                }
-            }
-
-            &:last-child {
-                border-radius: 0 1.2rem 0 0;
-
-                @include r(768) {
-                    background-color: $dolphin;
-                    border-radius: 1.2rem 1.2rem 0 0;
-                    color: $white;
-                }
+                border-radius: 1.2rem 1.2rem 0 0;
+                color: $white;
             }
         }
     }
