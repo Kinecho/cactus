@@ -202,6 +202,10 @@
             &.tabsOnMobile {
                 background-color: $dolphin;
                 color: $white;
+                @include r(768) {
+                    background-color: $white;
+                    color: $darkestGreen;
+                }
             }
         }
 
@@ -239,6 +243,7 @@
     .actions {
         display: flex;
         flex-direction: column;
+
         .button {
             margin-bottom: 1.6rem;
         }

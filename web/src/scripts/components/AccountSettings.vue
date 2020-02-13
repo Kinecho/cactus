@@ -452,7 +452,7 @@
         flex-flow: column nowrap;
         min-height: 100vh;
         justify-content: space-between;
-
+        overflow: hidden;
         header, .centered {
             width: 100%;
         }
