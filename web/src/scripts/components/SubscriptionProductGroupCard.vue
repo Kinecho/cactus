@@ -203,6 +203,19 @@
         position: relative;
         text-align: left;
 
+        &:first-child:before {
+            background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+            bottom: -4rem;
+            content: "";
+            display: block;
+            height: 216px;
+            left: -28%;
+            overflow: hidden;
+            position: absolute;
+            width: 228px;
+            z-index: -1;
+        }
+
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
@@ -210,16 +223,7 @@
             padding: 0 2.4rem 3.2rem;
 
             &:first-child:before {
-                background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
                 bottom: -6rem;
-                content: "";
-                display: block;
-                height: 216px;
-                left: -28%;
-                overflow: hidden;
-                position: absolute;
-                width: 228px;
-                z-index: -1;
             }
 
             &.basic-panel {
@@ -261,9 +265,12 @@
 
     button:disabled {
         background-color: transparent;
+        color: transparentize($white, .4);
 
-        .plus-panel & {
-            color: transparentize($white, .4);
+        @include r(768) {
+            .basic-panel & {
+                color: transparentize($darkestGreen, .4);
+            }
         }
     }
 
