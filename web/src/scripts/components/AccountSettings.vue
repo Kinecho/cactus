@@ -45,17 +45,8 @@
 
                     <div class="settings-group subscription">
                         <h3>{{copy.common.SUBSCRIPTION}}</h3>
-                        <div class="item">
-                            <label>{{copy.common.TIER}}</label>
-                            <p class="value">{{member.isInTrial ? `${member.daysLeftInTrial}
-                                ${copy.common.DAYS_LEFT_IN_TRIAL}` : member.tierDisplayName}}</p>
-                        </div>
-
-                        <div class="item" v-if="showUpgradeOption">
-                            <a :href="upgradeRoute" class="button btn primary">Upgrade</a>
-                        </div>
-
-                        <upgrade/>
+                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!member.hasActiveSubscription"/>
+                        <manage-subscription v-else :member="member"/>
                     </div>
 
                     <div class="settings-group notifications">
@@ -164,8 +155,8 @@
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import PremiumPricing from "@components/PremiumPricing.vue";
+    import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -187,6 +178,7 @@
             SnackbarContent,
             TimePicker,
             Upgrade: PremiumPricing,
+            ManageSubscription: ManageActiveSubscription,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -194,7 +186,6 @@
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
-                    this.showUpgradeOption = member?.tier === SubscriptionTier.BASIC
                     if (!member) {
                         window.location.href = PageRoute.HOME;
                     }
@@ -223,7 +214,6 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
-            showUpgradeOption: boolean,
             upgradeRoute: string,
         } {
             return {
@@ -243,7 +233,6 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
-                showUpgradeOption: false,
                 upgradeRoute: PageRoute.PAYMENT_PLANS,
             }
         },
@@ -340,8 +329,8 @@
                 el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
                 el.style.top = `${el.offsetTop}px`;
-                el.style.width = width
-                el.style.height = height
+                el.style.width = width;
+                el.style.height = height;
             },
             addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
 
@@ -452,7 +441,7 @@
         flex-flow: column nowrap;
         min-height: 100vh;
         justify-content: space-between;
-
+        overflow: hidden;
         header, .centered {
             width: 100%;
         }

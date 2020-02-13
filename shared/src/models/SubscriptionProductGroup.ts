@@ -39,6 +39,7 @@ export default class SubscriptionProductGroup extends FlamelinkModel {
     title?: string;
     descriptionMarkdown?: string;
     sections: ProductSection[] = [];
+    trialUpgradeMarkdown?: string;
     footer?: ProductGroupFooter;
 
     constructor(data?: Partial<SubscriptionProductGroup>) {

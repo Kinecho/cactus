@@ -1,5 +1,5 @@
 <template>
-    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`, {tabsOnMobile}]">
 
         <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
 
@@ -19,15 +19,21 @@
                 <span class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</span>
             </div>
         </div>
-        <button v-if="!isCurrentTier"
-                v-bind:disabled="isProcessing"
-                :class="{secondary: selectedProduct.isFree}"
-                @click="checkout">
-            {{buttonText}}
-        </button>
-        <button class="button btn secondary no-loading" v-if="isCurrentTier" :disabled="true">
-            {{copy.checkout.CURRENT_PLAN}}
-        </button>
+
+        <div class="actions">
+            <button v-if="canPurchaseTier"
+                    v-bind:disabled="isProcessing"
+                    class="button primary"
+                    :class="{secondary: selectedProduct.isFree}"
+                    @click="checkout">
+                {{buttonText}}
+            </button>
+            <button class="button btn secondary no-loading" v-if="isCurrentTier && !isTrialingTier" :disabled="true">
+                {{copy.checkout.CURRENT_PLAN}}
+            </button>
+
+            <a :href="learnMorePath" v-if="showLearnMore" class="button btn secondary">{{copy.common.LEARN_MORE}}</a>
+        </div>
         <div v-if="footer" class="group-footer" :class="{
             [`icon`]: footer.icon,
             [footer.icon]: footer.icon
@@ -40,13 +46,13 @@
 <script lang="ts">
     import Vue from "vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
-    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import {isInTrial, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
     import {startCheckout} from "@web/checkoutService";
     import ProductFeatureList from "@components/ProductFeatureList.vue";
-    import {ProductGroupFooter, ProductSection} from "@shared/models/SubscriptionProductGroup";
+    import {ProductGroupFooter, ProductSection, SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import MarkdownText from "@components/MarkdownText.vue";
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
@@ -62,13 +68,16 @@
             productGroup: {type: Object as () => SubscriptionProductGroupEntry, required: true},
             displayIndex: Number,
             showFeatures: {type: Boolean, default: false},
-            member: {type: Object as () => CactusMember | undefined}
+            member: {type: Object as () => CactusMember | undefined},
+            tabsOnMobile: {type: Boolean, default: true},
+            learnMoreLinks: {type: Boolean, default: false},
         },
         data(): {
             selectedProduct: SubscriptionProduct,
             copy: LocalizedCopy,
             isProcessing: boolean,
             checkoutError: string | undefined,
+            learnMorePath: PageRoute,
 
         } {
             return {
@@ -76,6 +85,7 @@
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
+                learnMorePath: PageRoute.PAYMENT_PLANS,
             }
         },
         computed: {
@@ -86,17 +96,22 @@
                 return this.productGroup.productGroup?.footer;
             },
             groupDescriptionMarkdown(): string | undefined {
+                if (this.isTrialingTier && this.productGroup.productGroup?.trialUpgradeMarkdown) {
+                    return this.productGroup.productGroup?.trialUpgradeMarkdown
+                }
                 return this.productGroup.productGroup?.descriptionMarkdown
             },
             selectedPrice(): string {
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
             buttonText(): string {
-                if (this.isNotCurrentTier && this.selectedProduct.isFree) {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
                     return copy.checkout.MANAGE_MY_PLAN
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE
+                } else if (this.signedIn) {
+                    return `${copy.checkout.UPGRADE}`;
                 } else {
                     return `${copy.checkout.PURCHASE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
@@ -108,13 +123,22 @@
                 return this.signedIn && !this.isCurrentTier
             },
             isCurrentTier(): boolean {
-                return this.productGroup.tier === this.member?.tier && !this.member?.isInTrial;
+                return this.productGroup.tier === this.member?.tier;
             },
             isInTrial(): boolean {
-              return this.member?.isInTrial ?? false
+                return this.member?.isInTrial ?? false
+            },
+            isTrialingTier(): boolean {
+                return this.productGroup.tier === this.member?.tier && this.member?.isInTrial;
             },
             signedIn(): boolean {
                 return !!this.member
+            },
+            showLearnMore(): boolean {
+                return this.learnMoreLinks && this.member && this.canPurchaseTier && this.productGroup.tier !== SubscriptionTier.BASIC || false;
+            },
+            canPurchaseTier(): boolean {
+                return (!this.isCurrentTier || this.isTrialingTier ) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
             }
         },
         methods: {
@@ -122,7 +146,7 @@
                 return `$${(priceCents / 100).toFixed(2)}`.replace(".00", "");
             },
             isSelected(product: SubscriptionProduct): boolean {
-                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && !this.isCurrentTier;
+                return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
             },
             async checkout() {
                 //todo
@@ -167,15 +191,26 @@
 
     .tab-content {
         background-color: $dolphin;
-        border-radius: 0 0 1.6rem 1.6rem;
         color: $white;
-        display: none;
+        border-radius: 0 0 1.6rem 1.6rem;
         padding: 2.4rem 2.4rem 3.2rem;
 
+        &.basic-panel {
+            background-color: $white;
+            color: $darkestGreen;
+
+            &.tabsOnMobile {
+                background-color: $dolphin;
+                color: $white;
+                @include r(768) {
+                    background-color: $white;
+                    color: $darkestGreen;
+                }
+            }
+        }
 
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
-            display: block;
             flex-basis: 50%;
             padding: 0 2.4rem 3.2rem;
 
@@ -194,19 +229,25 @@
             }
         }
 
-        &.active {
-            display: block;
-        }
-
         h4 {
             margin-bottom: 1.6rem;
         }
 
-        button {
+        button, .button {
             max-width: none;
             white-space: nowrap;
             width: 100%;
         }
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+
+        .button {
+            margin-bottom: 1.6rem;
+        }
+
     }
 
     .group-description {

@@ -52,6 +52,8 @@ export interface CommonCopy {
     MINUTE: string,
     DAYS_LEFT: string,
     DAYS_LEFT_IN_TRIAL: string,
+    TRIAL: string,
+    LEARN_MORE: string,
 }
 
 export interface ElementCopy {
