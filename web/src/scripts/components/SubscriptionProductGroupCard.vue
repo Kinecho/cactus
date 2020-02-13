@@ -108,7 +108,10 @@
                 return this.signedIn && !this.isCurrentTier
             },
             isCurrentTier(): boolean {
-                return this.productGroup.tier === this.member?.tier;
+                return this.productGroup.tier === this.member?.tier && !this.member?.isInTrial;
+            },
+            isInTrial(): boolean {
+              return this.member?.isInTrial ?? false
             },
             signedIn(): boolean {
                 return !!this.member

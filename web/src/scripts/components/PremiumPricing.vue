@@ -4,7 +4,7 @@
             <div id="tabs" class="tabset" v-if="productsLoaded">
                 <div class="tabs">
                     <template v-for="(productGroup, i) in productGroups">
-                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{getGroupDisplayName(productGroup)}}</a>
+                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span></a>
                     </template>
                 </div>
 
@@ -89,14 +89,25 @@
         beforeDestroy() {
 
         },
-        computed: {},
+        computed: {
+            trialBadgeText(): string | undefined {
+                const member = this.member;
+                if (!member) {
+                    return undefined;
+                }
+                return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
+            }
+        },
         methods: {
             goToSignup() {
                 window.location.href = PageRoute.SIGNUP;
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;
-            }
+            },
+            showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
+                return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+            },
         }
 
     })
@@ -180,6 +191,13 @@
                 border-radius: 1.2rem 1.2rem 0 0;
                 color: $white;
             }
+        }
+
+        .trial-badge {
+            background-color: $darkestPink;
+            color: white;
+            padding: .4rem;
+            border-radius: 2rem;
         }
     }
 
