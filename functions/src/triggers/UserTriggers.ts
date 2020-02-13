@@ -209,7 +209,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
             existingCactusMember: !userCheckResult.isNewMember,
             errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
         });
-        await slackService.sendActivityNotification(slackMessage);
+        await slackService.sendSignupsMessage(slackMessage);
 
     } catch (error) {
         logger.error("Failed to run check for user transaction", error)
