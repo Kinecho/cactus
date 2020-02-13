@@ -1,10 +1,30 @@
 <template>
     <div class="centered">
         <transition appear name="fade-in">
-            <div id="tabs" class="tabset" v-if="productsLoaded">
+            <div class="flex-plans" v-if="productsLoaded && !tabsOnMobile">
+                <div v-for="(productGroup, i) in productGroups" class="plan-container">
+                        <span class="heading"
+                                aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
+                                v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                        </span>
+                    <product-group
+                            :productGroup="productGroup"
+                            :key="productGroup.tier"
+                            :tabs-on-mobile="tabsOnMobile"
+                            :id="`product-tier-${productGroup.tier}`"
+                            :display-index="i"
+                            :member="member"
+                            class="tabPanel"
+                            :class="{active: activetab === i}"/>
+                </div>
+            </div>
+            <div id="tabs" class="tabset" v-if="productsLoaded && tabsOnMobile">
                 <div class="tabs">
                     <template v-for="(productGroup, i) in productGroups">
-                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}" aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span></a>
+                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}"
+                                aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
+                                v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                        </a>
                     </template>
                 </div>
 
@@ -17,6 +37,7 @@
                                 :display-index="i"
                                 :member="member"
                                 class="tabPanel"
+                                :tabs-on-mobile="tabsOnMobile"
                                 :class="{active: activetab === i}"/>
                     </template>
                 </div>
@@ -46,7 +67,9 @@
         components: {
             ProductGroup: SubscriptionProductGroupCard,
         },
-        props: {},
+        props: {
+            tabsOnMobile: {type: Boolean, default: true}
+        },
         data(): {
             isProcessing: boolean,
             member: CactusMember | undefined | null,
@@ -121,7 +144,7 @@
     @import "transitions";
 
     .centered {
-        overflow: hidden;
+        //overflow: hidden;
         position: relative;
 
         @include r(960) {
@@ -157,7 +180,53 @@
         display: flex;
     }
 
-    .tab-label {
+    .flex-plans {
+        display: flex;
+
+        flex-direction: column;
+        @include r(768) {
+            flex-direction: row;
+        }
+
+        .heading {
+            display: flex;
+            background-color: $dolphin;
+            border-radius: 1.6rem 1.6rem 0 0;
+        }
+
+        .tabPanel {
+
+        }
+
+        .plan-container {
+            margin-bottom: 2rem;
+            @include shadowbox();
+
+            &:first-child {
+                .heading {
+                    background-color: $white;
+                    color: $darkestGreen;
+                }
+            }
+
+            &:last-child {
+                .heading {
+                    background-color: $dolphin;
+                    color: $white;
+                }
+            }
+
+            &:not(:last-child) {
+                margin-right: .5rem;
+            }
+
+            &:not(:first-child) {
+                margin-left: .5rem;
+            }
+        }
+    }
+
+    .tab-label, .heading {
         background-color: darken($dolphin, 5%);
         color: $white;
         flex-basis: 50%;
@@ -170,6 +239,16 @@
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
         }
+
+        .trial-badge {
+            background-color: $darkestPink;
+            color: white;
+            padding: .4rem;
+            border-radius: 2rem;
+        }
+    }
+
+    .tab-label {
 
         &.active {
             background-color: $dolphin;
@@ -193,13 +272,6 @@
                 border-radius: 1.6rem 1.6rem 0 0;
                 color: $white;
             }
-        }
-
-        .trial-badge {
-            background-color: $darkestPink;
-            color: white;
-            padding: .4rem;
-            border-radius: 2rem;
         }
     }
 

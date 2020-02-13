@@ -1,5 +1,5 @@
 <template>
-    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`]">
+    <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`, tabsOnMobile]">
 
         <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
 
@@ -62,7 +62,8 @@
             productGroup: {type: Object as () => SubscriptionProductGroupEntry, required: true},
             displayIndex: Number,
             showFeatures: {type: Boolean, default: false},
-            member: {type: Object as () => CactusMember | undefined}
+            member: {type: Object as () => CactusMember | undefined},
+            tabsOnMobile: {type: Boolean, default: true},
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -173,14 +174,25 @@
 
     .tab-content {
         background-color: $dolphin;
-        border-radius: 0 0 1.6rem 1.6rem;
         color: $white;
+        border-radius: 0 0 1.6rem 1.6rem;
+
         /*display: none;*/
         padding: 2.4rem 2.4rem 3.2rem;
 
 
         &.active {
             /*display: block;*/
+        }
+
+        &.basic-panel {
+            background-color: $white;
+            color: $darkestGreen;
+
+            &.tabsOnMobile {
+                background-color: $dolphin;
+                color: $white;
+            }
         }
 
         @include r(768) {
