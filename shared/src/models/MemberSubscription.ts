@@ -1,17 +1,20 @@
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import CopyService from "@shared/copy/CopyService";
 
 export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
     [SubscriptionTier.BASIC]: 0,
     [SubscriptionTier.PLUS]: 1,
+    [SubscriptionTier.PREMIUM]: 2,
 };
 
 
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
 
 export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
+    const copy = CopyService.getSharedInstance().copy;
     if (isTrial) {
-        return "Trial";
+        return copy.common.TRIAL;
     }
 
     if (!tier) {
@@ -19,9 +22,11 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
     }
     switch (tier) {
         case SubscriptionTier.BASIC:
-            return "Basic";
+            return copy.checkout.TIER_BASIC;
         case SubscriptionTier.PLUS:
-            return "Plus"
+            return copy.checkout.TIER_PLUS;
+        case SubscriptionTier.PREMIUM:
+            return copy.checkout.TIER_PREMIUM;
     }
 }
 

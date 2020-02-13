@@ -15,7 +15,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
 
-    const copy = CopyService.getSharedInstance().copy
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         created() {

@@ -24,7 +24,8 @@ export interface ProductSection {
 
 export enum SubscriptionTier {
     BASIC = "BASIC",
-    PLUS = "PLUS"
+    PLUS = "PLUS",
+    PREMIUM = "PREMIUM",
 }
 
 export interface ProductGroupFooter {

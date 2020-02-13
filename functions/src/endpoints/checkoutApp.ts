@@ -1,6 +1,7 @@
 import * as express from "express";
 import * as cors from "cors";
-import * as Stripe from "stripe";
+import * as functions from "firebase-functions";
+import Stripe from "stripe";
 import {getConfig} from "@admin/config/configService";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import chalk from "chalk";
@@ -17,9 +18,9 @@ import AdminSlackService, {
 } from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import {getAuthUserId} from "@api/util/RequestUtil";
-import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
-import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
-import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
+// import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
+// import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
+// import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CheckoutSession from "@shared/models/CheckoutSession";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
@@ -28,18 +29,31 @@ import {stringifyJSON} from "@shared/util/ObjectUtil";
 const logger = new Logger("checkoutApp");
 const config = getConfig();
 
-const stripe = new Stripe(config.stripe.secret_key);
+const stripe = new Stripe(config.stripe.secret_key, {
+    apiVersion: '2019-12-03',
+});
 const app = express();
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: config.allowedOrigins}));
 
+function isFirebaseRequest(_req: any): _req is functions.https.Request {
+    return !!_req.rawBody;
+}
+
 app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
     // const mailchimpService = MailchimpService.getSharedInstance();
+    if (isFirebaseRequest(req)) {
+        console.log("raw body", req.rawBody);
+        // sripe.webhooks.constructEvent(req.rawBody, signa)
+        // config.stripe.secret_key
+    }
+
     const slackService = AdminSlackService.getSharedInstance();
     try {
-        const event = req.body as Stripe.events.IEvent;
-        const data = event.data.object as Stripe.checkouts.sessions.ICheckoutSession;
+
+        const event = req.body as Stripe.Event;
+        const data = event.data.object as Stripe.Checkout.Session;
 
         // Handle the pre-order use case. This can probably be deleted.
         const paymentIntent = data.payment_intent;
@@ -52,16 +66,17 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             res.sendStatus(intentResult.statusCode)
             return
         } else {
-            const [firstItem] = data.display_items;
+            const [firstItem] = data.display_items || [];
             const attachments: SlackAttachment[] = [];
             const fields: SlackAttachmentField[] = [];
 
             const customerEmail = data.customer_email || "unknown";
             if (firstItem) {
-                fields.push({title: "Amount", value: (firstItem.amount / 100).toFixed(2), short: true});
+                const amount = firstItem.amount ?? 0;
+                fields.push({title: "Amount", value: (amount / 100).toFixed(2), short: true});
                 const item = firstItem as any;
                 if (item.plan) {
-                    const subItem = item as Stripe.subscriptionItems.ISubscriptionItem;
+                    const subItem = item as Stripe.SubscriptionItem;
                     if (subItem.plan.interval) {
                         fields.push({title: "Interval", value: subItem.plan.interval, short: true});
                     }
@@ -100,7 +115,7 @@ interface PaymentIntentResult {
     statusCode: number;
 }
 
-async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data: ICheckoutSession): Promise<PaymentIntentResult> {
+async function handlePaymentIntent(paymentIntent: string | Stripe.PaymentIntent, data: Stripe.Checkout.Session): Promise<PaymentIntentResult> {
     try {
         // const data = event.data.object;
         let customerId: string | undefined;
@@ -127,7 +142,7 @@ async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data:
                 invoice_settings: {
                     default_payment_method: paymentMethodId,
                 }
-            } as ICustomerUpdateOptions;
+            } as Stripe.CustomerUpdateParams;
 
             const updateResponse = await stripe.customers.update(customerId, updateData); //Force the update options to comply to typescript :(
             email = updateResponse.email;
@@ -221,7 +236,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         const planId = sessionRequest.planId;
         const items = sessionRequest.items;
 
-        const stripeOptions: any = {
+        const stripeOptions: Stripe.Checkout.SessionCreateParams = {
             payment_method_types: ['card'],
             success_url: successUrl,
             cancel_url: cancelUrl,
