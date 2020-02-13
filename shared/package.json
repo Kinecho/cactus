@@ -14,6 +14,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@flamelink/sdk-app-types": "latest",
+    "@flamelink/sdk-content-types": "latest",
     "@google-cloud/pubsub": "^0.30.1",
     "@sendgrid/mail": "^6.4.0",
     "@slack/client": "^5.0.1",
@@ -30,9 +32,7 @@
     "pretty-ms": "^5.0.0",
     "qs": "^6.7.0",
     "query-string": "^6.8.2",
-    "stripe": "^7.3.0",
-    "@flamelink/sdk-content-types": "latest",
-    "@flamelink/sdk-app-types": "latest"
+    "stripe": "^8.17.0"
   },
   "devDependencies": {
     "@firebase/testing": "^0.11.5",
@@ -43,7 +43,6 @@
     "@types/luxon": "^1.15.1",
     "@types/md5": "^2.1.33",
     "@types/qs": "^6.5.3",
-    "@types/stripe": "^6.30.3",
     "jest": "^24.8.0",
     "jest-junit": "^6.4.0",
     "ts-jest": "^24.1.0",

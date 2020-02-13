@@ -124,6 +124,9 @@ export interface CheckoutCopy {
     BILLING_PERIOD_PER: {
         [key in BillingPeriod]: string
     }
+    TIER_BASIC: string,
+    TIER_PLUS: string,
+    TIER_PREMIUM: string,
 }
 
 export abstract class LocalizedCopy {

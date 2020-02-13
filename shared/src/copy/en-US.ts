@@ -40,7 +40,10 @@ export default class EnglishCopy extends LocalizedCopy {
             [BillingPeriod.yearly]: "Year",
             [BillingPeriod.once]: "Once",
             [BillingPeriod.never]: "Never",
-        }
+        },
+        TIER_BASIC: "Basic",
+        TIER_PLUS: "Plus",
+        TIER_PREMIUM: "Premium",
     };
 
     account: AccountCopy = {

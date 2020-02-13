@@ -917,7 +917,7 @@ export default class MailchimpService {
         }
     }
 
-    async getMemberByEmail(email?: string): Promise<ListMember | undefined> {
+    async getMemberByEmail(email?: string | null): Promise<ListMember | undefined> {
         if (!email) {
             return undefined;
         }
