@@ -3,6 +3,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
+                <upgrade-banner :member="member" />
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
@@ -136,6 +137,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
     import Logger from "@shared/Logger";
@@ -151,7 +153,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             MagicLink,
             PromptContentCard,
             ElementDescriptionModal,
-            InputNameModal
+            InputNameModal,
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
