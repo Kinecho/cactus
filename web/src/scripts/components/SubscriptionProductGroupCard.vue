@@ -86,6 +86,9 @@
                 return this.productGroup.productGroup?.footer;
             },
             groupDescriptionMarkdown(): string | undefined {
+                if (this.isTrialingTier && this.productGroup.productGroup?.trialUpgradeMarkdown) {
+                    return this.productGroup.productGroup?.trialUpgradeMarkdown
+                }
                 return this.productGroup.productGroup?.descriptionMarkdown
             },
             selectedPrice(): string {
@@ -111,7 +114,10 @@
                 return this.productGroup.tier === this.member?.tier && !this.member?.isInTrial;
             },
             isInTrial(): boolean {
-              return this.member?.isInTrial ?? false
+                return this.member?.isInTrial ?? false
+            },
+            isTrialingTier(): boolean {
+                return this.productGroup.tier === this.member?.tier && this.member?.isInTrial;
             },
             signedIn(): boolean {
                 return !!this.member
