@@ -245,6 +245,14 @@
         }
     }
 
+    button:disabled {
+        background-color: transparent;
+
+        .plus-panel & {
+            color: transparentize($white, .4);
+        }
+    }
+
     .actions {
         display: flex;
         flex-direction: column;
