@@ -1,7 +1,7 @@
 <template>
     <div class="centered">
         <transition appear name="fade-in">
-            <div class="flex-plans" v-if="loaded && !tabsOnMobile">
+            <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
                 <div v-for="(productGroup, i) in groupEntries" class="plan-container">
                         <span class="heading"
                                 aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
@@ -19,7 +19,7 @@
                             :class="{active: activetab === i}"/>
                 </div>
             </div>
-            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
+            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
                 <div class="tabs">
                     <template v-for="(productGroup, i) in groupEntries">
                         <a class="tab-label"
@@ -47,6 +47,9 @@
                     </template>
                 </div>
             </div>
+            <div class="android-app" v-if="isAndroidApp">
+                To learn more, visit <strong>cactus.app</strong> in any web&nbsp;browser.
+            </div>
         </transition>
     </div>
 </template>
@@ -65,6 +68,7 @@
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {isAndroidApp} from '@web/DeviceUtil'
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -142,6 +146,10 @@
                     return undefined;
                 }
                 return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
+            },
+            isAndroidApp(): boolean {
+                console.log('Is android app?');
+                return isAndroidApp();
             }
         },
         methods: {
