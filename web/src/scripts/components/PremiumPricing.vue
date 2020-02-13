@@ -148,7 +148,6 @@
                 return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
             },
             isAndroidApp(): boolean {
-                console.log('Is android app?');
                 return isAndroidApp();
             }
         },
