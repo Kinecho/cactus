@@ -178,29 +178,20 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     }
 
     .tabset {
-        border-radius: 1.6rem;
-        margin: 0 .8rem;
-        text-align: left;
+        margin: 0 auto;
+        max-width: 48rem;
 
-        @include r(374) {
-            margin: 0 2.4rem;
-        }
-        @include r(600) {
-            margin: 0 auto;
-            max-width: 90%;
-        }
         @include r(768) {
-            background-color: transparent;
-            min-width: 67rem;
-        }
-        @include r(960) {
-            margin: 0;
+            max-width: none;
+            min-width: 80rem;
         }
     }
 
     .tabs {
         display: flex;
         justify-content: center;
+        position: relative;
+        z-index: 1;
     }
 
     .flex-plans {
@@ -257,6 +248,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         display: flex;
 
         @include r(768) {
+            margin: 0 1.6rem;
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
         }
@@ -279,7 +271,11 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     .tab-label {
 
         &.active {
-            background-color: $dolphin;
+            background: $dolphin url(assets/images/grainy.png) repeat;
+
+            @include r(768) {
+                background-image: none;
+            }
         }
 
         &:first-child {
@@ -296,7 +292,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
             border-radius: 0 1.6rem 0 0;
 
             @include r(768) {
-                background-color: $dolphin;
+                background: $dolphin url(assets/images/grainy.png) repeat;
                 border-radius: 1.6rem 1.6rem 0 0;
                 color: $white;
             }
@@ -309,17 +305,17 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         @include r(768) {
             display: flex;
         }
+    }
 
-        .tabPanel {
-            display: none;
+    .tabPanel {
+        display: none;
 
-            @include r(768) {
-                display: block;
-            }
+        @include r(768) {
+            display: block;
+        }
 
-            &.active {
-                display: block;
-            }
+        &.active {
+            display: block;
         }
     }
 
