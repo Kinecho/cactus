@@ -14,9 +14,9 @@
                     :aria-controls="product.displayName"
                     @click="selectedProduct = product"
                     :class="{selected: isSelected(product)}">
-                <span>{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</span>
-                <span>{{formatPrice(product.priceCentsUsd)}}</span>
-                <span class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</span>
+                <div class="cadence">{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</div>
+                <div class="planPrice">{{formatPrice(product.priceCentsUsd)}}</div>
+                <div class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</div>
             </div>
         </div>
 
@@ -256,44 +256,41 @@
         margin-bottom: 2.4rem;
     }
 
-    .payment-period-per {
-        text-transform: lowercase;
-    }
-
     .flexContainer {
         display: flex;
         margin-bottom: 2.4rem;
         justify-content: space-between;
+    }
 
-        .planButton {
-            background-color: transparentize($white, .9);
-            border: 2px solid $darkestGreen;
-            border-radius: .8rem;
-            cursor: pointer;
-            font-size: 1.6rem;
-            padding: .8rem;
-            text-align: center;
-            width: 49%;
+    .planButton {
+        background-color: transparentize($white, .9);
+        border: 2px solid $dolphin;
+        border-radius: .8rem;
+        cursor: pointer;
+        font-size: 1.6rem;
+        padding: .8rem;
+        text-align: center;
+        width: 49%;
 
-            &.selected {
-                border-color: $green;
-                box-shadow: inset 0 0 0 .4rem $darkestGreen;
-            }
-
-            span {
-                display: block;
-
-                &:nth-child(1) {
-                    font-size: 1.4rem;
-                    letter-spacing: 1px;
-                    text-transform: uppercase;
-                }
-
-                &:nth-child(2) {
-                    font-size: 2rem;
-                }
-            }
+        &.selected {
+            border-color: $green;
+            box-shadow: inset 0 0 0 .4rem $dolphin;
         }
+    }
+
+    .cadence {
+        font-size: 1.4rem;
+        letter-spacing: 1px;
+        opacity: .8;
+        text-transform: uppercase;
+    }
+
+    .planPrice {
+        font-size: 2rem;
+    }
+
+    .payment-period-per {
+        text-transform: lowercase;
     }
 
     .group-footer {
