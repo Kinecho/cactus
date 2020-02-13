@@ -210,6 +210,20 @@ export const onReflectionResponseCreated = functions.firestore
                 })
             }
 
+            if (member?.subscription?.tier) {
+                const trialDaysLeft = member?.daysLeftInTrial;
+                let daysLeftText = '';
+
+                if (trialDaysLeft && trialDaysLeft > 0) {
+                    daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
+                }
+
+                fields.push({
+                    title: "Subscription",
+                    value: `${member.subscription.tier}${daysLeftText}`
+                })
+            }
+
             const reflectionText = reflectionResponse.content.text || "";
             const wordCount = getWordCount(reflectionText);
             const didJournal = (wordCount > 0 ? 'Yes' : 'No');
