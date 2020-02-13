@@ -199,7 +199,7 @@
         top: 4rem;
         z-index: 100;
 
-        a, span {
+        a {
             background-color: transparent;
             color: $white;
             display: block;
@@ -216,16 +216,12 @@
             &.nonBreaking {
                 white-space: nowrap;
             }
-
-            &.badge-label {
-                padding: .2rem .6rem;
-                border-radius: 2rem;
-                background-color: $green;
-                color: $darkestGreen;
-                display: inline-block;
-                position: unset;
-            }
         }
+    }
+
+    .badge-label {
+        @include trialBadge;
+        margin-left: .4rem;
     }
 
     .static {

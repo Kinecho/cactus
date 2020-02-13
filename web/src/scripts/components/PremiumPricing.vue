@@ -285,7 +285,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         &:only-child {
             border-radius: 1.6rem 1.6rem 0 0;
             flex-basis: 100%;
-            padding-bottom: 0;
+            padding-bottom: .8rem;
             text-align: left;
 
             @include r(768) {
@@ -295,15 +295,8 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     }
 
     .trial-badge {
-        background-color: transparentize($royal, .4);
-        border-radius: 2rem;
-        display: inline-block;
-        font-size: 1.4rem;
-        letter-spacing: 1px;
-        margin-left: .8rem;
-        padding: .4rem .8rem;
-        text-transform: uppercase;
-        vertical-align: text-bottom;
+        @include trialBadge;
+        vertical-align: text-top;
     }
 
     .tabPanels {
