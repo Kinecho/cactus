@@ -13,7 +13,7 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <div class="settings-group profile">
-                        <h3>Personal Info</h3>
+                        <h2>Personal Info</h2>
                         <div class="item" v-if="memberSince">
                             <label class="label">
                                 {{copy.auth.MEMBER_SINCE}}
@@ -44,13 +44,13 @@
                     </div>
 
                     <div class="settings-group subscription">
-                        <h3>{{copy.common.SUBSCRIPTION}}</h3>
+                        <h2>{{copy.common.SUBSCRIPTION}}</h2>
                         <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!member.hasActiveSubscription"/>
                         <manage-subscription v-else :member="member"/>
                     </div>
 
                     <div class="settings-group notifications">
-                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
+                        <h2>{{copy.common.NOTIFICATIONS}}</h2>
                         <div class="item">
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         </div>
@@ -85,7 +85,7 @@
                     </div>
 
                     <div class="settings-group profile" v-if="providers.length > 0">
-                        <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
+                        <h2>{{copy.auth.CONNECTED_ACCOUNTS}}</h2>
                         <div class="item" v-if="showProviders">
                             <div v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
@@ -430,7 +430,7 @@
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -458,12 +458,10 @@
         margin-bottom: 3.2rem;
     }
 
-    h3 {
-        margin-bottom: 2.4rem;
-    }
-
-    h3 {
+    h2 {
         color: $royal;
+        font-size: 2.4rem;
+        margin-bottom: 2.4rem;
     }
 
     .label {
@@ -483,7 +481,7 @@
     }
 
     .settings-group {
-        margin-bottom: 4.8rem;
+        margin-bottom: 6.4rem;
     }
 
     .provider-info {

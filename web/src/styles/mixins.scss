@@ -292,6 +292,12 @@ $widthDesktop: $widthXL;
     box-shadow: none;
     color: $darkestGreen;
     padding: 1.2rem 2.4rem;
+
+    @include r(600) {
+        &:hover:enabled {
+            background-color: transparentize($lightestGreen, .6);
+        }
+    }
 }
 
 @mixin tertiaryButton() {
@@ -344,7 +350,6 @@ $widthDesktop: $widthXL;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
-
   text-decoration: none;
 
   @include r(768) {
@@ -391,6 +396,16 @@ $widthDesktop: $widthXL;
 
   &.secondary {
     @include secondaryButton;
+
+    &.onDark {
+        background: transparent;
+        border-color: transparentize($white, .8);
+        color: $white;
+
+        &:hover {
+            background-color: transparentize($white, .8);
+        }
+    }
   }
 
   &.tertiary {

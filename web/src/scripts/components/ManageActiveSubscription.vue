@@ -1,7 +1,7 @@
 import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 <template>
     <div v-if="member.hasActiveSubscription">
-        <h4 class="tier">{{tierName}}</h4>
+        <h3 class="tier">{{tierName}}</h3>
         <p>Your next bill is for XX on XX/XX/XXXX</p>
 
         <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
@@ -53,6 +53,15 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     @import "common";
     @import "mixins";
     @import "variables";
+
+    h3 {
+        margin-bottom: .8rem;
+    }
+
+    p {
+        margin-bottom: 1.6rem;
+        opacity: .8;
+    }
 
 
 </style>

@@ -34,7 +34,7 @@
                 {{copy.checkout.CURRENT_PLAN}}
             </button>
 
-            <a :href="learnMorePath" v-if="showLearnMore" class="button btn secondary">{{copy.common.LEARN_MORE}}</a>
+            <a :href="learnMorePath" v-if="showLearnMore" class="button btn secondary onDark">{{copy.common.LEARN_MORE}}</a>
         </div>
         <div v-if="footer" class="group-footer" :class="{
             [`icon`]: footer.icon,
@@ -274,11 +274,11 @@
         }
     }
 
-    .actions {
-        display: flex;
-        flex-direction: column;
+    .actions .button {
+        display: block;
+        margin-bottom: .8rem;
 
-        .button {
+        & + .button {
             margin-bottom: 1.6rem;
         }
     }
