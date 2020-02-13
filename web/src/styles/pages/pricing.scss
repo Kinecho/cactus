@@ -51,13 +51,38 @@ h2 {
 
 .benefits {
     margin-top: -2.4rem;
+    overflow: hidden;
     padding: 0 2.4rem 6.4rem;
+    position: relative;
+
+    &:before {
+        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+        background-position: right bottom, right top;
+        background-repeat: no-repeat;
+        background-size: 240px 275px, 225px 310px;
+        content: "";
+        display: block;
+        height: 324px;
+        position: absolute;
+        right: -20rem;
+        bottom: 14%;
+        width: 300px;
+    }
 
     @include r(374) {
         margin-top: 0;
     }
+    @include r(600) {
+        &:before {
+            right: -10rem;
+        }
+    }
     @include r(768) {
         padding-bottom: 10rem;
+
+        &:before {
+            display: none;
+        }
     }
 
     .flexContainer {
@@ -111,8 +136,8 @@ h2 {
 
 .upgrade {
     background: $beige;
-    position: relative;
     padding: 4.8rem .8rem;
+    position: relative;
 
     .centered {
         z-index: 1;
