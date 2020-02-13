@@ -46,7 +46,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
-    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import {isInTrial, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import SubscriptionProduct from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
@@ -105,7 +105,7 @@
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
             buttonText(): string {
-                if (this.isNotCurrentTier && this.selectedProduct.isFree) {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
                     return copy.checkout.MANAGE_MY_PLAN
                 }
                 if (this.selectedProduct.isFree) {
@@ -138,7 +138,7 @@
                 return this.learnMoreLinks && this.member && this.canPurchaseTier && this.productGroup.tier !== SubscriptionTier.BASIC || false;
             },
             canPurchaseTier(): boolean {
-                return !this.isCurrentTier || this.isTrialingTier
+                return (!this.isCurrentTier || this.isTrialingTier ) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
             }
         },
         methods: {

@@ -1,8 +1,9 @@
+import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 <template>
     <div class="centered">
         <transition appear name="fade-in">
-            <div class="flex-plans" v-if="productsLoaded && !tabsOnMobile">
-                <div v-for="(productGroup, i) in productGroups" class="plan-container">
+            <div class="flex-plans" v-if="loaded && !tabsOnMobile">
+                <div v-for="(productGroup, i) in groupEntries" class="plan-container">
                         <span class="heading"
                                 aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
                                 v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
@@ -19,18 +20,21 @@
                             :class="{active: activetab === i}"/>
                 </div>
             </div>
-            <div id="tabs" class="tabset" v-if="productsLoaded && tabsOnMobile">
+            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
                 <div class="tabs">
-                    <template v-for="(productGroup, i) in productGroups">
-                        <a class="tab-label" @click.prevent="activetab = i" v-bind:class="{active: activetab === i}"
-                                aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
-                                v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                    <template v-for="(productGroup, i) in groupEntries">
+                        <a class="tab-label"
+                                @click.prevent="activetab = i"
+                                v-bind:class="{active: activetab === i}"
+                                aria-controls="basic">
+                            {{getGroupDisplayName(productGroup)}}
+                            <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                         </a>
                     </template>
                 </div>
 
                 <div class="tabPanels">
-                    <template v-for="(productGroup, i) in productGroups">
+                    <template v-for="(productGroup, i) in groupEntries">
                         <product-group
                                 :productGroup="productGroup"
                                 :key="productGroup.tier"
@@ -61,6 +65,7 @@
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -75,6 +80,7 @@
         },
         data(): {
             isProcessing: boolean,
+            memberLoaded: boolean,
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
@@ -84,6 +90,7 @@
             activetab: number,
         } {
             return {
+                memberLoaded: false,
                 isProcessing: false,
                 member: undefined,
                 memberEmail: undefined,
@@ -95,17 +102,19 @@
             }
         },
         async beforeMount() {
-            this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
-            this.productsLoaded = true;
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
-
+                    this.memberLoaded = true;
                     if (this.member?.email) {
                         this.memberEmail = this.member.email;
                     }
                 }
             });
+
+            this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
+            this.productsLoaded = true;
 
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 
@@ -117,6 +126,17 @@
 
         },
         computed: {
+            loaded(): boolean {
+                return this.memberLoaded && this.productsLoaded
+            },
+            groupEntries(): SubscriptionProductGroupEntry[] {
+                return this.productGroups.filter(e => {
+                    if (!this.member){
+                        return true
+                    }
+                    return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
+                })
+            },
             trialBadgeText(): string | undefined {
                 const member = this.member;
                 if (!member) {
@@ -181,6 +201,7 @@
 
     .tabs {
         display: flex;
+        justify-content: center;
     }
 
     .flex-plans {
@@ -238,6 +259,7 @@
         padding: 1.6rem;
         text-align: center;
         align-items: center;
+        display: flex;
         @include r(768) {
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
@@ -286,6 +308,7 @@
     }
 
     .tabPanels {
+        justify-content: center;
         @include r(768) {
             display: flex;
         }
