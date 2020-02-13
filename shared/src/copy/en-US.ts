@@ -75,6 +75,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
         HOUR: "Hour",
         MINUTE: "Minute",
+        DAYS_LEFT: "days left",
         DAYS_LEFT_IN_TRIAL: "days left in trial",
     };
     navigation: NavigationCopy = {

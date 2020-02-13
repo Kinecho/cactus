@@ -1,4 +1,3 @@
-import {SubscriptionTier} from '@shared/models/MemberSubscription'
 <template>
     <div class="accountContainer">
         <NavBar :isSticky="false"/>
@@ -55,6 +54,8 @@ import {SubscriptionTier} from '@shared/models/MemberSubscription'
                         <div class="item" v-if="showUpgradeOption">
                             <a :href="upgradeRoute" class="button btn primary">Upgrade</a>
                         </div>
+
+                        <upgrade/>
                     </div>
 
                     <div class="settings-group notifications">
@@ -164,7 +165,7 @@ import {SubscriptionTier} from '@shared/models/MemberSubscription'
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-
+    import PremiumPricing from "@components/PremiumPricing.vue";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -185,6 +186,7 @@ import {SubscriptionTier} from '@shared/models/MemberSubscription'
             ProviderIcon,
             SnackbarContent,
             TimePicker,
+            Upgrade: PremiumPricing,
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
