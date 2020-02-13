@@ -195,20 +195,6 @@
         border-radius: 0 0 1.6rem 1.6rem;
         padding: 2.4rem 2.4rem 3.2rem;
 
-        &.basic-panel {
-            background-color: $white;
-            color: $darkestGreen;
-
-            &.tabsOnMobile {
-                background-color: $dolphin;
-                color: $white;
-                @include r(768) {
-                    background-color: $white;
-                    color: $darkestGreen;
-                }
-            }
-        }
-
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
@@ -224,8 +210,23 @@
             }
 
             &.plus-panel {
-                background-color: $dolphin;
+                background: $dolphin url(assets/images/grainy.png) repeat;
                 color: $white;
+            }
+        }
+
+        &.basic-panel {
+            background-color: $white;
+            color: $darkestGreen;
+
+            &.tabsOnMobile {
+                background: $dolphin url(assets/images/grainy.png) repeat;
+                color: $white;
+
+                @include r(768) {
+                    background: $white;
+                    color: $darkestGreen;
+                }
             }
         }
 
@@ -247,7 +248,6 @@
         .button {
             margin-bottom: 1.6rem;
         }
-
     }
 
     .group-description {

@@ -167,7 +167,6 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     @import "transitions";
 
     .centered {
-        //overflow: hidden;
         position: relative;
 
         @include r(960) {
@@ -206,8 +205,8 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 
     .flex-plans {
         display: flex;
-
         flex-direction: column;
+
         @include r(768) {
             flex-direction: row;
         }
@@ -216,10 +215,6 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
             display: flex;
             background-color: $dolphin;
             border-radius: 1.6rem 1.6rem 0 0;
-        }
-
-        .tabPanel {
-
         }
 
         .plan-container {
@@ -260,6 +255,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         text-align: center;
         align-items: center;
         display: flex;
+
         @include r(768) {
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
@@ -309,12 +305,14 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 
     .tabPanels {
         justify-content: center;
+
         @include r(768) {
             display: flex;
         }
 
         .tabPanel {
             display: none;
+
             @include r(768) {
                 display: block;
             }
