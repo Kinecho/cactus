@@ -82,7 +82,7 @@ export default class AdminSubscriptionService {
         if (member?.email) {
             await AdminSendgridService.getSharedInstance().sendTrialEnding({
                 toEmail: member.email,
-                firstName: member?.firstName ? member.firstName : undefined,
+                firstName: member?.firstName,
                 link: `${getHostname()}${PageRoute.PAYMENT_PLANS}`
             });
         }
