@@ -200,6 +200,7 @@
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
         padding: 2.4rem 2.4rem 3.2rem;
+        position: relative;
         text-align: left;
 
         @include r(768) {
@@ -207,6 +208,19 @@
             flex-basis: 50%;
             margin: 0 1.6rem;
             padding: 0 2.4rem 3.2rem;
+
+            &:first-child:before {
+                background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+                bottom: -6rem;
+                content: "";
+                display: block;
+                height: 216px;
+                left: -28%;
+                overflow: hidden;
+                position: absolute;
+                width: 228px;
+                z-index: -1;
+            }
 
             &.basic-panel {
                 background: $white none;

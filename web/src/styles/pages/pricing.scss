@@ -114,11 +114,15 @@ h2 {
     position: relative;
     padding: 4.8rem .8rem;
 
+    .centered {
+        z-index: 1;
+    }
+
     @include r(374) {
         padding: 4.8rem 2.4rem;
     }
     @include r(768) {
-        padding: 9rem .8rem;
+        padding: 9rem .8rem 11rem;
 
         &:before {
             background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
