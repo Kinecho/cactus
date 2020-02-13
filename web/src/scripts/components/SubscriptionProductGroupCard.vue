@@ -8,6 +8,8 @@
             <features :features="section.features"/>
         </template>
 
+        <div v-if="productGroup.products.length == 1" class="freePrice">Free</div>
+
         <div class="flexContainer" v-if="productGroup.products.length > 1">
             <div v-for="product in productGroup.products"
                     class="planButton" :id="product.entryId"
@@ -285,8 +287,14 @@
         text-transform: uppercase;
     }
 
-    .planPrice {
+    .planPrice,
+    .freePrice {
         font-size: 2rem;
+    }
+
+    .freePrice {
+        height: 9rem;
+        margin-bottom: 2.4rem;
     }
 
     .payment-period-per {
