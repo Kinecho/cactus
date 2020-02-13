@@ -16,6 +16,7 @@
                                 :id="`product-tier-${productGroup.tier}`"
                                 :display-index="i"
                                 :member="member"
+                                class="tabPanel"
                                 :class="{active: activetab === i}"/>
                     </template>
                 </div>
@@ -205,6 +206,17 @@
     .tabPanels {
         @include r(768) {
             display: flex;
+        }
+
+        .tabPanel {
+            display: none;
+            @include r(768) {
+                display: block;
+            }
+
+            &.active {
+                display: block;
+            }
         }
     }
 

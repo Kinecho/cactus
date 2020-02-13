@@ -175,13 +175,17 @@
         background-color: $dolphin;
         border-radius: 0 0 1.6rem 1.6rem;
         color: $white;
-        display: none;
+        /*display: none;*/
         padding: 2.4rem 2.4rem 3.2rem;
 
 
+        &.active {
+            /*display: block;*/
+        }
+
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
-            display: block;
+            /*display: block;*/
             flex-basis: 50%;
             padding: 0 2.4rem 3.2rem;
 
@@ -198,10 +202,6 @@
                 background-color: $dolphin;
                 color: $white;
             }
-        }
-
-        &.active {
-            display: block;
         }
 
         h4 {
