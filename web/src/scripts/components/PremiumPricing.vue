@@ -242,7 +242,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         flex-basis: 50%;
         font-size: 2.4rem;
         font-weight: bold;
-        padding: 1.6rem;
+        padding: 1.6rem 2.4rem;
         text-align: center;
 
         @include r(768) {
@@ -279,6 +279,17 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
                 background: $dolphin url(assets/images/grainy.png) repeat;
                 border-radius: 1.6rem 1.6rem 0 0;
                 color: $white;
+            }
+        }
+
+        &:only-child {
+            border-radius: 1.6rem 1.6rem 0 0;
+            flex-basis: 100%;
+            padding-bottom: 0;
+            text-align: left;
+
+            @include r(768) {
+                flex-basis: 50%;
             }
         }
     }
