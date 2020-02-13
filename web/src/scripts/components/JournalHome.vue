@@ -1,6 +1,7 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -22,7 +23,6 @@
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <section class="journalList">
-                        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
                         <transition-group
                                 tag="div"
                                 appear
