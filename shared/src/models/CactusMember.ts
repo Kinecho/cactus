@@ -4,11 +4,7 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
-import {
-    isInTrial,
-    MemberSubscription,
-    subscriptionTierDisplayName
-} from "@shared/models/MemberSubscription";
+import {isInTrial, MemberSubscription, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
@@ -210,5 +206,9 @@ export default class CactusMember extends BaseModel {
 
     get isInTrial(): boolean {
         return isInTrial(this.subscription)
+    }
+
+    get hasActiveSubscription(): boolean {
+        return !this.isInTrial && this.tier !== SubscriptionTier.BASIC
     }
 }
