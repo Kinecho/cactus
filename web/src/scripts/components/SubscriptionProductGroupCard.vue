@@ -163,14 +163,18 @@
     @import "variables";
 
     .tab-content {
+        background-color: $dolphin;
+        border-radius: 0 0 1.6rem 1.6rem;
+        color: $white;
         display: none;
-        padding: 0 2.4rem 3.2rem;
+        padding: 2.4rem 2.4rem 3.2rem;
+
 
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             display: block;
             flex-basis: 50%;
-            padding: 3.2rem;
+            padding: 0 2.4rem 3.2rem;
 
             &.basic-panel {
                 background-color: $white;
@@ -200,6 +204,10 @@
             white-space: nowrap;
             width: 100%;
         }
+    }
+
+    .group-description {
+        margin-bottom: 2.4rem;
     }
 
     .payment-period-per {
@@ -243,26 +251,22 @@
     }
 
     .group-footer {
-        margin-top: 1rem;
-        display: flex;
         align-items: center;
+        display: flex;
+        font-size: 1.4rem;
         justify-content: center;
-        &.icon {
-            &:before, &.check:before {
-                background-image: url(assets/images/check.svg);
-                background-repeat: no-repeat;
-                background-size: contain;
-                content: "";
-                display: inline-block;
-                height: 1.3rem;
-                margin-right: 1.6rem;
-                width: 1.8rem;
+        margin-top: 1.6rem;
 
+        &.icon {
+            &:before {
+                content: "";
+                margin-right: .6rem;
             }
 
             &.heart:before {
-                background-image: url(assets/icons/heart.svg);
-                height: 1.5rem;
+                background: url(assets/icons/heart.svg) no-repeat;
+                height: 1.4rem;
+                width: 1.6rem;
             }
         }
     }

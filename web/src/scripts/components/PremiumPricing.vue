@@ -121,7 +121,8 @@
     }
 
     .tabset {
-        border-radius: 1.2rem;
+        border-radius: 1.6rem;
+        margin: 0 .8rem;
         text-align: left;
 
         @include r(374) {
@@ -154,7 +155,7 @@
         text-align: center;
 
         @include r(768) {
-            padding: 2.4rem;
+            padding: 2.4rem 2.4rem .8rem;
             text-align: left;
         }
 
@@ -163,21 +164,21 @@
         }
 
         &:first-child {
-            border-radius: 1.2rem 0 0 0;
+            border-radius: 1.6rem 0 0 0;
 
             @include r(768) {
                 background-color: $white;
-                border-radius: 1.2rem 1.2rem 0 0;
+                border-radius: 1.6rem 1.6rem 0 0;
                 color: $darkestGreen;
             }
         }
 
         &:last-child {
-            border-radius: 0 1.2rem 0 0;
+            border-radius: 0 1.6rem 0 0;
 
             @include r(768) {
                 background-color: $dolphin;
-                border-radius: 1.2rem 1.2rem 0 0;
+                border-radius: 1.6rem 1.6rem 0 0;
                 color: $white;
             }
         }
@@ -187,11 +188,6 @@
         @include r(768) {
             display: flex;
         }
-    }
-
-    .heart:before {
-        background-image: url(assets/icons/heart.svg);
-        height: 1.5rem;
     }
 
 </style>
