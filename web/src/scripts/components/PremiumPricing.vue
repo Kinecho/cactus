@@ -27,7 +27,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
                                 @click.prevent="activetab = i"
                                 v-bind:class="{active: activetab === i}"
                                 aria-controls="basic">
-                            {{getGroupDisplayName(productGroup)}}
+                            {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
                             <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                         </a>
                     </template>
@@ -142,7 +142,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
                 if (!member) {
                     return undefined;
                 }
-                return `${copy.common.TRIAL} - ${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
+                return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
             }
         },
         methods: {
@@ -244,27 +244,11 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         font-weight: bold;
         padding: 1.6rem;
         text-align: center;
-        align-items: center;
-        display: flex;
 
         @include r(768) {
             margin: 0 1.6rem;
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
-        }
-
-        .trial-badge {
-            background-color: $magenta;
-            color: white;
-            padding: .2rem 1rem;
-            border-radius: 2rem;
-            font-size: 1.6rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-left: 1rem;
-            text-transform: uppercase;
         }
     }
 
@@ -297,6 +281,18 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
                 color: $white;
             }
         }
+    }
+
+    .trial-badge {
+        background-color: transparentize($royal, .4);
+        border-radius: 2rem;
+        display: inline-block;
+        font-size: 1.4rem;
+        letter-spacing: 1px;
+        margin-left: .8rem;
+        padding: .4rem .8rem;
+        text-transform: uppercase;
+        vertical-align: text-bottom;
     }
 
     .tabPanels {
