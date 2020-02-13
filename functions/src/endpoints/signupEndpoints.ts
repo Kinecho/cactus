@@ -46,7 +46,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
     if (!email) {
         logger.error("No email was provided for the signup endpoint");
-        await AdminSlackService.getSharedInstance().sendActivityMessage({
+        await AdminSlackService.getSharedInstance().sendSignupsMessage({
             text: `Magic Link endpoint called with no email in payload.`
         });
 
@@ -178,7 +178,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     attachments.push({
         fields,
     });
-    await AdminSlackService.getSharedInstance().sendActivityMessage({
+    await AdminSlackService.getSharedInstance().sendSignupsMessage({
         text: `${email} triggered the Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
         attachments: attachments
     });
@@ -360,7 +360,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             });
         }
 
-        await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+        await AdminSlackService.getSharedInstance().sendSignupsMessage(message);
         resp.sendStatus(204);
     } catch (error) {
         logger.error("An unexpected error occurred while processing the login-event");
