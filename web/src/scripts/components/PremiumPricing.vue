@@ -15,6 +15,7 @@
                             :display-index="i"
                             :member="member"
                             class="tabPanel"
+                            :learnMoreLinks="learnMoreLinks"
                             :class="{active: activetab === i}"/>
                 </div>
             </div>
@@ -38,6 +39,7 @@
                                 :member="member"
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
+                                :learnMoreLinks="learnMoreLinks"
                                 :class="{active: activetab === i}"/>
                     </template>
                 </div>
@@ -68,7 +70,8 @@
             ProductGroup: SubscriptionProductGroupCard,
         },
         props: {
-            tabsOnMobile: {type: Boolean, default: true}
+            tabsOnMobile: {type: Boolean, default: true},
+            learnMoreLinks: {type: Boolean, default: false},
         },
         data(): {
             isProcessing: boolean,
@@ -119,7 +122,7 @@
                 if (!member) {
                     return undefined;
                 }
-                return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
+                return `${copy.common.TRIAL} - ${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
             }
         },
         methods: {
@@ -234,17 +237,24 @@
         font-weight: bold;
         padding: 1.6rem;
         text-align: center;
-
+        align-items: center;
         @include r(768) {
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
         }
 
         .trial-badge {
-            background-color: $darkestPink;
+            background-color: $magenta;
             color: white;
-            padding: .4rem;
+            padding: .2rem 1rem;
             border-radius: 2rem;
+            font-size: 1.6rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-left: 1rem;
+            text-transform: uppercase;
         }
     }
 

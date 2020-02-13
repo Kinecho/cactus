@@ -55,7 +55,7 @@
                             <a :href="upgradeRoute" class="button btn primary">Upgrade</a>
                         </div>
 
-                        <upgrade :tabs-on-mobile="false"/>
+                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true"/>
                     </div>
 
                     <div class="settings-group notifications">
