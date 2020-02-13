@@ -4,10 +4,9 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         <transition appear name="fade-in">
             <div class="flex-plans" v-if="loaded && !tabsOnMobile">
                 <div v-for="(productGroup, i) in groupEntries" class="plan-container">
-                        <span class="heading"
-                                aria-controls="basic">{{getGroupDisplayName(productGroup)}}<span class="trial-badge"
-                                v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
-                        </span>
+                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">{{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                        <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                    </div>
                     <product-group
                             :productGroup="productGroup"
                             :key="productGroup.tier"
@@ -15,9 +14,8 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
                             :id="`product-tier-${productGroup.tier}`"
                             :display-index="i"
                             :member="member"
-                            class="tabPanel"
-                            :learnMoreLinks="learnMoreLinks"
-                            :class="{active: activetab === i}"/>
+                            :class="[`tabPanel`, {active: activetab === i}]"
+                            :learnMoreLinks="learnMoreLinks"/>
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
@@ -194,49 +192,65 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         z-index: 1;
     }
 
+    .heading {
+        border-radius: 1.6rem 1.6rem 0 0;
+        font-size: 2.4rem;
+        font-weight: bold;
+        padding: 2.4rem 2.4rem .8rem;
+        position: relative;
+        text-align: left;
+        z-index: 1;
+
+        &.basic {
+            background-color: $white;
+            color: $darkestGreen;
+        }
+
+        &.plus {
+            background: $dolphin url(assets/images/grainy.png) repeat;
+            color: $white;
+        }
+    }
+
     .flex-plans {
         display: flex;
         flex-direction: column;
 
         @include r(768) {
             flex-direction: row;
-        }
-
-        .heading {
-            display: flex;
-            background-color: $dolphin;
-            border-radius: 1.6rem 1.6rem 0 0;
+            justify-content: space-between;
+            width: 100%;
         }
 
         .plan-container {
-            margin-bottom: 2rem;
-            @include shadowbox();
+            max-width: 40rem;
 
-            &:first-child {
-                .heading {
-                    background-color: $white;
-                    color: $darkestGreen;
+            @include r(768) {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .tab-content {
+                display: block;
+                margin: 0 0 2.4rem;
+
+                @include r(768) {
+                    flex-grow: 1;
+                    margin-bottom: 0;
+                }
+
+                &.basic-panel {
+                    background-image: none;
                 }
             }
+        }
 
-            &:last-child {
-                .heading {
-                    background-color: $dolphin;
-                    color: $white;
-                }
-            }
-
-            &:not(:last-child) {
-                margin-right: .5rem;
-            }
-
-            &:not(:first-child) {
-                margin-left: .5rem;
-            }
+        .basic-panel button:disabled {
+            color: transparentize($darkestGreen, .4);
         }
     }
 
-    .tab-label, .heading {
+    .tab-label {
         background-color: darken($dolphin, 5%);
         color: $white;
         flex-basis: 50%;
@@ -250,9 +264,6 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
             padding: 2.4rem 2.4rem .8rem;
             text-align: left;
         }
-    }
-
-    .tab-label {
 
         &.active {
             background: $dolphin url(assets/images/grainy.png) repeat;
