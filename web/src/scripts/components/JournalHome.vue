@@ -170,12 +170,13 @@
                                     }
                                 }
                             });
-                        } else if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial){
-                            this.showUpgradeCard = true;
-                            this.todayLoaded = true;
                         } else {
                             logger.error("Today's prompt could not be found for member");
                             this.todayLoaded = true;
+                        }
+
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial){
+                            this.showUpgradeCard = true;
                         }
                     }
 
