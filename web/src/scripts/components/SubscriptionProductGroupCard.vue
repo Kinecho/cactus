@@ -274,6 +274,10 @@
         }
     }
 
+    .flex-plans .basic-panel .actions .button:disabled {
+        color: transparentize($darkestGreen, .4);
+    }
+
     .actions .button {
         display: block;
         margin-bottom: .8rem;
