@@ -2,6 +2,7 @@ import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admi
 import CactusMember from "@shared/models/CactusMember";
 import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ApiResponse} from "@shared/api/ApiTypes";
 import {MergeField, OperationStatus, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
@@ -10,6 +11,8 @@ import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import {getHostname} from "@admin/config/configService";
+import {PageRoute} from "@shared/PageRoutes";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -74,6 +77,15 @@ export default class AdminSubscriptionService {
             this.updateSubscriptionTier({memberId, tier: SubscriptionTier.BASIC}),
             this.updateMailchimpListMember({member})
         ]);
+
+        // notify them by email
+        if (member?.email) {
+            await AdminSendgridService.getSharedInstance().sendTrialEnding({
+                toEmail: member.email,
+                firstName: member?.firstName ? member.firstName : undefined,
+                link: `${getHostname()}${PageRoute.PAYMENT_PLANS}`
+            });
+        }
 
         return {
             success: updateSuccess && (mailchimpResponse.success ?? false),

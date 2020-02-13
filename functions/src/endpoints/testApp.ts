@@ -12,6 +12,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
@@ -192,6 +193,27 @@ app.get("/member-send-time", async (req, resp) => {
     logger.log('Found a member:');
     logger.log(member);
     const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
+    return resp.send(result || "none")
+});
+
+app.get("/expire-trial", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+    const result = await AdminSubscriptionService.getSharedInstance().expireTrial(member);
     return resp.send(result || "none")
 });
 
