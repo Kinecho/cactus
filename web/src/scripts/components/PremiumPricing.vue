@@ -1,4 +1,3 @@
-import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 <template>
     <div class="centered">
         <transition appear name="fade-in">
