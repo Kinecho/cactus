@@ -21,7 +21,6 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptURL} from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
-import {getWordCount} from "@shared/util/StringUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("ReflectionResponseTriggers");
@@ -223,16 +222,6 @@ export const onReflectionResponseCreated = functions.firestore
                     value: `${member.subscription.tier}${daysLeftText}`
                 })
             }
-
-            const reflectionText = reflectionResponse.content.text || "";
-            const wordCount = getWordCount(reflectionText);
-            const didJournal = (wordCount > 0 ? 'Yes' : 'No');
-
-            fields.push({
-                title: "Reflection Info",
-                value: `Journaled: ${didJournal}`
-            });
-
 
             if (prompt && prompt.question) {
                 let contentLink = prompt.question;
