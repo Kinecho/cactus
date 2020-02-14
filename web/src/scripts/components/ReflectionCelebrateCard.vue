@@ -288,7 +288,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections, member);
+                this.streakDays = ReflectionResponseService.getCurrentDayStreak(reflections, member);
 
                 // this.elementAccumulations = anonymousAccumulations;
             },
