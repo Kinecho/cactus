@@ -97,7 +97,7 @@
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
                 premiumDefault: false,
-                activetab: 0,
+                activetab: 1,
                 productsLoaded: false,
                 productGroups: [],
             }
