@@ -484,6 +484,11 @@
         margin-bottom: 6.4rem;
     }
 
+    .subscription .centered {
+        display: block;
+        text-align: left;
+    }
+
     .provider-info {
         align-items: center;
         background-color: lighten($lightestGreen, 9%);

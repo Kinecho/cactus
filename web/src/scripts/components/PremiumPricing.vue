@@ -336,4 +336,8 @@
         }
     }
 
+    .android-app {
+        font-size: 2rem;
+    }
+
 </style>
