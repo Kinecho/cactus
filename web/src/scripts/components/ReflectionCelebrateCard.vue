@@ -428,11 +428,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
     .successText {
         flex-grow: 1;
-        padding: 6.4rem 4rem;
+        padding: 4rem 4rem 6.4rem;
+
+        @include r(374) {
+            padding: 7.2rem 4rem 9.6rem;
+        }
+        @include r(600) {
+            padding: 6.4rem 4rem;
+        }
     }
 
     h2 {
         color: $magenta;
+        font-size: 3.2rem;
         margin-bottom: 2.4rem;
 
         @include r(600) {
@@ -471,7 +479,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
         align-items: flex-end;
         display: flex;
         justify-content: center;
-        margin: -13.6rem 0 2.4rem;
+        margin: -12rem 0 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .cactusContainer {
@@ -504,6 +516,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         display: flex;
         justify-content: center;
         margin-bottom: 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .metric {
