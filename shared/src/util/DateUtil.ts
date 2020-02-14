@@ -341,24 +341,27 @@ export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?
     let prevWeekEnd = startDateTime.endOf('week').minus({ weeks: 1 });
     let i = 0;
     let reflectionDateTime;
-    let weeksBack = 1;
+    let weeksWithoutReflection = 0;
 
     while(_dates[i]) {
         reflectionDateTime = DateTime.fromJSDate(_dates[i]);
         
+        // found a date in this week
         if (reflectionDateTime > prevWeekStart && 
-            reflectionDateTime < prevWeekEnd) { // found a date in this week
+            reflectionDateTime < prevWeekEnd) { 
             streak++;
             prevWeekStart = prevWeekStart.minus({ weeks: 1 });
             prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
+
+        // current date is before current week start
         } else if (reflectionDateTime < prevWeekStart) {
             prevWeekStart = prevWeekStart.minus({ weeks: 1 });
             prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
-            weeksBack++;
+            weeksWithoutReflection++;
         }
 
         // streak broken, return
-        if (weeksBack > 2) { 
+        if (weeksWithoutReflection > 1) { 
             return streak;
         }
 
