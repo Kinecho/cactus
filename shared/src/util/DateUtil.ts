@@ -349,10 +349,11 @@ export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?
         if (reflectionDateTime > prevWeekStart && 
             reflectionDateTime < prevWeekEnd) { // found a date in this week
             streak++;
-            weeksBack++;
             prevWeekStart = prevWeekStart.minus({ weeks: 1 });
             prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
         } else if (reflectionDateTime < prevWeekStart) {
+            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
+            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
             weeksBack++;
         } else {
             i++;
