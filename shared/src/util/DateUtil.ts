@@ -355,14 +355,14 @@ export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?
             prevWeekStart = prevWeekStart.minus({ weeks: 1 });
             prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
             weeksBack++;
-        } else {
-            i++;
         }
 
         // streak broken, return
         if (weeksBack > 2) { 
             return streak;
         }
+
+        i++;
     }
 
     return streak;
