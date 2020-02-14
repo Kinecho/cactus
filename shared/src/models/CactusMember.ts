@@ -28,6 +28,8 @@ export type NotificationSettings = {
 
 export interface ReflectionStats {
     currentStreakDays: number,
+    currentStreakWeeks: number,
+    currentStreakMonths: number,
     totalDurationMs: number,
     totalCount: number,
     elementAccumulation: ElementAccumulation

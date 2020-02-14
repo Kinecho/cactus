@@ -278,7 +278,7 @@ export function atMidnight(date: Date): Date {
  * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
  * @return {number}
  */
-export function getStreak(options: { dates: Date[], start?: Date, timeZone?: string }) {
+export function getStreakDays(options: { dates: Date[], start?: Date, timeZone?: string }) {
     const {dates = [], start = new Date(), timeZone} = options;
     let _dates = dates;
     if (_dates.length === 0) {
@@ -314,6 +314,24 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
     }
 
     return streak;
+}
+
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    return 0;
+}
+
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakMonths(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    return 0;
 }
 
 export function getSendTimeUTC(options: { timeZone?: string | undefined | null, sendTime?: PromptSendTime | undefined, forDate?: Date }): PromptSendTime | undefined {

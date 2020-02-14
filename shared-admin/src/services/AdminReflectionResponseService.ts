@@ -15,7 +15,7 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
-import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import {AxiosError} from "axios";
 import Logger from "@shared/Logger";
@@ -219,19 +219,17 @@ export default class AdminReflectionResponseService {
                 return
             }
 
-            if (!timeZone) {
-                // logger.log(`AdminReflectionResponseService.calculateStatsForMember: memberId = ${memberId} No timezone provided, will use default timezone`);
-            }
-
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
-            const streak = calculateStreak(reflections, {timeZone});
+            const {dayStreak, weekStreak, monthStreak} = calculateStreaks(reflections, {timeZone});
             const duration = calculateDurationMs(reflections);
 
             const elementAccumulation = getElementAccumulationCounts(reflections);
 
             return {
                 totalCount: reflections.length,
-                currentStreakDays: streak,
+                currentStreakDays: dayStreak,
+                currentStreakWeeks: weekStreak,
+                currentStreakMonths: monthStreak,
                 totalDurationMs: duration,
                 elementAccumulation: elementAccumulation
             };
