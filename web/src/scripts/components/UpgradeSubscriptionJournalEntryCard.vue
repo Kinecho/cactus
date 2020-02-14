@@ -67,7 +67,6 @@
     .upgradeJournal {
         color: $white;
         padding: 1.6rem 2.4rem;
-        position: relative;
 
         .centered {
             max-width: 58rem;
@@ -80,8 +79,6 @@
             @include r(960) {
                 background-size: 97% auto;
             }
-
-
 
             p {
                 font-size: 1.8rem;

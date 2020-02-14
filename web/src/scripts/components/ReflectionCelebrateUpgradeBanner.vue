@@ -1,12 +1,7 @@
 <template>
-    <div class="upgrade-wrapper" v-if="showUpgradeBanner">
-        <div class="upgrade-card">
-            <div class="upgrade">
-                <span>{{cta}}</span>
-                <a :href="upgradeRoute">Learn More</a>
-            </div>
-        </div>
-
+    <div class="celebrateUpgrade" v-if="showUpgradeBanner" @click="goToPricing">
+        {{cta}}
+        <a :href="upgradeRoute">Learn More</a>
     </div>
 </template>
 
@@ -15,7 +10,7 @@
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from '@shared/models/CactusMember';
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    
+
     export default Vue.extend({
         created() {
 
@@ -56,6 +51,11 @@
                 const tier = this.member?.tier ?? SubscriptionTier.PLUS;
                 return (tier === SubscriptionTier.BASIC || this.member?.isInTrial) ? true : false;
             }
+        },
+        methods: {
+            goToPricing() {
+                window.location.href = PageRoute.PAYMENT_PLANS;
+            },
         }
     })
 </script>
@@ -65,18 +65,17 @@
     @import "mixins";
     @import "variables";
 
-    .upgrade-card {
-        padding: 1.5rem;
-        background: #2c3c94 url(/assets/images/premiumBG.png) no-repeat;
+    .celebrateUpgrade {
+        background: $royal url(assets/images/plusBg.svg) center top/105% auto no-repeat;
         color: $white;
-        text-align: center;
-        margin: 0 auto;
-        a { 
-            color: $white;
-            margin-left: 1rem;
-            display: inline-block; 
+        cursor: pointer;
+        padding: 1.6rem 2.4rem;
+
+        a {
+            @include fancyLinkLight;
+            margin-left: .8rem;
+            white-space: nowrap;
         }
     }
 
 </style>
-
