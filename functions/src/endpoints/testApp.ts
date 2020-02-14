@@ -12,6 +12,7 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
@@ -194,6 +195,30 @@ app.get("/member-send-time", async (req, resp) => {
     const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
     return resp.send(result || "none")
 });
+
+
+app.get("/member-stats", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member?.id) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+
+    const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId: member.id, timeZone: member?.timeZone ? member.timeZone.toString() : undefined});
+    return resp.send(result || "none")
+});
+
 
 app.get("/content", async (req, resp) => {
     logger.log("Trying to fetch content");
