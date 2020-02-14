@@ -11,7 +11,7 @@ import AdminSlackService, {
     SlackAttachmentField
 } from "@admin/services/AdminSlackService";
 import {buildPromptContentURL} from "@admin/util/StringUtil";
-import {formatDate, mailchimpTimeZone} from "@shared/util/DateUtil";
+import {formatDateTime, mailchimpTimeZone} from "@shared/util/DateUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 import {
