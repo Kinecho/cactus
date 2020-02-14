@@ -377,7 +377,57 @@ export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?
  * @return {number}
  */
 export function getStreakMonths(options: { dates: Date[], start?: Date, timeZone?: string }) {
-    return 0;
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevMonthStart = startDateTime.startOf('month').minus({ months: 1 });
+    let prevMonthEnd = startDateTime.endOf('month').minus({ months: 1 });
+    let i = 0;
+    let reflectionDateTime;
+    let monthsWithoutReflection = 0;
+
+    while(_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+
+        // found a date in this week
+        if (reflectionDateTime > prevMonthStart && 
+            reflectionDateTime < prevMonthEnd) { 
+            streak++;
+            prevMonthStart = prevMonthStart.minus({ months: 1 });
+            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+
+        // current date is before current week start
+        } else if (reflectionDateTime < prevMonthStart) {
+            prevMonthStart = prevMonthStart.minus({ months: 1 });
+            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+            monthsWithoutReflection++;
+        }
+
+        // streak broken, return
+        if (monthsWithoutReflection > 1) { 
+            return streak;
+        }
+
+        i++;
+    }
+
+    return streak;
 }
 
 export function getSendTimeUTC(options: { timeZone?: string | undefined | null, sendTime?: PromptSendTime | undefined, forDate?: Date }): PromptSendTime | undefined {

@@ -9,6 +9,7 @@ import {
     getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
     getStreakDays,
     getStreakWeeks,
+    getStreakMonths,
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
@@ -420,6 +421,46 @@ describe("get streak weeks", () => {
             startTime.minus({days: 28}).toJSDate(),
         ];
         expect(getStreakWeeks({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+});
+
+
+describe("get streak months", () => {
+    test("empty list", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [];
+        expect(getStreakMonths({dates, start: startTime})).toEqual(0);
+    });
+
+    test("with today", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [
+            new Date(),
+        ];
+        expect(getStreakMonths({dates, start: startTime})).toEqual(1);
+    });
+
+    test("reflected on 15th day, and the previous month's 10th day", () => {
+        const startTime = DateTime.local(2020, 2, 15).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({month: 1}).minus({day: 5}).toJSDate(),
+        ];
+        expect(getStreakMonths({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+    test("reflected many times, but missed a month", () => {
+        const startTime = DateTime.local(2020, 2, 8).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({months: 1}).toJSDate(),
+            startTime.minus({months: 2}).toJSDate(),
+            startTime.minus({months: 3}).toJSDate(),
+            startTime.minus({months: 6}).toJSDate(),
+            startTime.minus({months: 7}).toJSDate(),
+        ];
+        expect(getStreakMonths({dates, start: startTime.toJSDate()})).toEqual(4);
     });
 
 });
