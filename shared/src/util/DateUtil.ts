@@ -19,10 +19,6 @@ export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
-// export function getDateForTimezone(timeZone: string, date: Date): Date {
-//     return DateTime.fromJSDate(date ).setZone(timeZone, {keepLocalTime: false}).toJSDate();
-// }
-
 export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {
     return DateTime.fromJSDate(date).setZone(timeZone).toObject()
 }
@@ -322,7 +318,53 @@ export function getStreakDays(options: { dates: Date[], start?: Date, timeZone?:
  * @return {number}
  */
 export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?: string }) {
-    return 0;
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevWeekStart = startDateTime.startOf('week').minus({ weeks: 1 });
+    let prevWeekEnd = startDateTime.endOf('week').minus({ weeks: 1 });
+    let i = 0;
+    let reflectionDateTime;
+    let weeksBack = 1;
+
+    while(_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+        
+        if (reflectionDateTime > prevWeekStart && 
+            reflectionDateTime < prevWeekEnd) { // found a date in this week
+            streak++;
+            weeksBack++;
+            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
+            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
+        } else if (reflectionDateTime < prevWeekStart) {
+            weeksBack++;
+        } else {
+            i++;
+        }
+
+        // streak broken, return
+        if (weeksBack > 2) { 
+            return streak;
+        }
+    }
+
+    return streak;
 }
 
 /**
