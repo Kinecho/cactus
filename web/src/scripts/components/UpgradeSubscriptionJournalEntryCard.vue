@@ -1,15 +1,15 @@
 <template>
     <div :class="[`upgradeJournal`, isTrialing ? 'upgrade' : 'basic']">
-        <template v-if="isTrialing">
+        <div class="centered" v-if="isTrialing">
             <h3>{{trialDaysLeftHeader}}</h3>
             <p>After your trial of Cactus Plus, new prompts will only occasionally be sent. Give your reflection practice momentum by receiving a fresh prompt, every day.</p>
             <a :href="upgradeRoute" class="btn button primary">Go Plus</a>
-        </template>
-        <template v-else>
+        </div>
+        <div class="centered" v-else>
             <h3>Cactus Plus</h3>
             <p>Give your reflection practice momentum by receiving a fresh prompt, every day.</p>
             <a :href="upgradeRoute" class="btn button primary">{{basicCTA}}</a>
-        </template>
+        </div>
     </div>
 </template>
 
@@ -65,16 +65,42 @@
     @import "variables";
 
     .upgradeJournal {
-        background-color: $royal;
         color: $white;
         padding: 1.6rem 2.4rem;
+        position: relative;
+
+        .centered {
+            max-width: 58rem;
+            text-align: left;
+        }
+
+        &.upgrade {
+            background: $royal url(assets/images/plusBg.svg) center top/140vw auto no-repeat;
+
+            @include r(960) {
+                background-size: 97% auto;
+            }
+
+
+
+            p {
+                font-size: 1.8rem;
+            }
+        }
 
         &.basic {
+            background: $royal url(assets/images/plusBg.svg) center top/130% auto no-repeat;
             width: 100%;
 
             @include r(960) {
+                background-size: 90% auto;
                 padding: .8rem;
                 text-align: center;
+
+                .centered {
+                    max-width: none;
+                    text-align: center;
+                }
 
                 h3, p {
                     display: inline;
@@ -90,22 +116,22 @@
                 }
             }
         }
-    }
 
-    h3 {
-        font-size: 2rem;
-        margin-bottom: .4rem;
-    }
+        h3 {
+            font-size: 2rem;
+            margin-bottom: .4rem;
+        }
 
-    p {
-        font-size: 1.6rem;
-        margin-bottom: 1.6rem;
-    }
+        p {
+            font-size: 1.6rem;
+            margin-bottom: 1.6rem;
+        }
 
-    a.button {
-        display: inline-block;
-        margin-bottom: .8rem;
-        min-width: 16rem;
+        a.button {
+            display: inline-block;
+            margin-bottom: .8rem;
+            min-width: 16rem;
+        }
     }
 
 </style>
