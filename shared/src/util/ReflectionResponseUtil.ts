@@ -3,7 +3,7 @@ import {getStreakDays, getStreakWeeks, getStreakMonths} from "@shared/util/DateU
 import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {CactusElement} from "@shared/models/CactusElement";
 
-interface StreakResult {
+export interface StreakResult {
     dayStreak: number,
     weekStreak: number,
     monthStreak: number

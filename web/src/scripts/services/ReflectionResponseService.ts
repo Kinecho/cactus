@@ -7,7 +7,7 @@ import CactusMember from "@shared/models/CactusMember";
 import {Config} from "@web/config";
 import {PageRoute} from "@shared/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {calculateStreaks} from "@shared/util/ReflectionResponseUtil";
+import {calculateStreaks, StreakResult} from "@shared/util/ReflectionResponseUtil";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("ReflectionResponseService");
@@ -264,7 +264,7 @@ export default class ReflectionResponseService {
         return totalDuration;
     }
 
-    static getCurrentDayStreak(reflections: ReflectionResponse[], member?: CactusMember): number {
-        return calculateStreaks(reflections, {timeZone: member?.timeZone || undefined}).dayStreak;
+    static getCurrentStreaks(reflections: ReflectionResponse[], member?: CactusMember): StreakResult {
+        return calculateStreaks(reflections, {timeZone: member?.timeZone || undefined});
     }
 }
