@@ -1,4 +1,5 @@
 import {
+    BillingPeriodSortOrder,
     subscriptionTierDisplayName,
     SubscriptionTierSortValue
 } from "@shared/models/MemberSubscription";
@@ -54,8 +55,15 @@ export function getProductsByTier(products: SubscriptionProduct[]): ProductTierM
         const list: SubscriptionProduct[] = map[tier] || [];
         list.push(product);
         map[tier] = list;
+        sortSubscriptionProductsByBillingPeriod(list);
         return map;
     }, {} as ProductTierMap);
+}
+
+export function sortSubscriptionProductsByBillingPeriod(products: SubscriptionProduct[]) {
+    products.sort((a, b) => {
+        return BillingPeriodSortOrder.indexOf(a.billingPeriod) - BillingPeriodSortOrder.indexOf(b.billingPeriod);
+    });
 }
 
 export function getSubscriptionProductsByTierAndBillingPeriod(products: SubscriptionProduct[]): ProductTierBillingMap {

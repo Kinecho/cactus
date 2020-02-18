@@ -7,8 +7,10 @@ export interface SubscriptionInvoice {
     amountCentsUsd?: number;
     periodStart_epoch_seconds?: number;
     periodEnd_epoch_seconds?: number;
+    nextPaymentDate_epoch_seconds?: number
     paid?: boolean;
     status?: InvoiceStatus;
+    stripeInvoiceId?: string;
 }
 
 export enum CardBrand {

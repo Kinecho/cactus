@@ -30,12 +30,14 @@ export default class EnglishCopy extends LocalizedCopy {
         PURCHASE: "Purchase",
         SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out.",
         BILLING_PERIOD: {
+            [BillingPeriod.weekly]: "Weekly",
             [BillingPeriod.monthly]: "Monthly",
             [BillingPeriod.yearly]: "Annual",
             [BillingPeriod.once]: "One Time",
             [BillingPeriod.never]: "Free",
         },
         BILLING_PERIOD_PER: {
+            [BillingPeriod.weekly]: "Week",
             [BillingPeriod.monthly]: "Month",
             [BillingPeriod.yearly]: "Year",
             [BillingPeriod.once]: "Once",

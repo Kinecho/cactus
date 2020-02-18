@@ -1,6 +1,7 @@
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import CopyService from "@shared/copy/CopyService";
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
 
 export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
     [SubscriptionTier.BASIC]: 0,
@@ -8,6 +9,7 @@ export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } =
     [SubscriptionTier.PREMIUM]: 2,
 };
 
+export const BillingPeriodSortOrder: BillingPeriod[] = [BillingPeriod.never, BillingPeriod.once, BillingPeriod.weekly, BillingPeriod.monthly, BillingPeriod.yearly];
 
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
 
@@ -39,6 +41,11 @@ export interface SubscriptionTrial {
 export interface MemberSubscription {
     tier: SubscriptionTier,
     trial?: SubscriptionTrial,
+
+    /**
+     * The ID of the Cactus Subscription Product the member is subscribed to
+     */
+    subscriptionProductId?: string,
     stripeSubscriptionId?: string,
     // appleSubscriptionId?: string,
 }

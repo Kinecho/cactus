@@ -8,7 +8,7 @@
             <features :features="section.features"/>
         </template>
 
-        <div v-if="productGroup.products.length == 1" class="freePrice">Free</div>
+        <div v-if="isFree" class="freePrice">Free</div>
 
         <div class="flexContainer" v-if="productGroup.products.length > 1">
             <div v-for="product in productGroup.products"
@@ -106,6 +106,9 @@
             selectedPrice(): string {
                 return this.formatPrice(this.selectedProduct.priceCentsUsd)
             },
+            isFree(): boolean {
+                return this.selectedProduct?.isFree ?? false;
+            },
             buttonText(): string {
                 if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
                     return copy.checkout.MANAGE_MY_PLAN
@@ -140,7 +143,7 @@
                 return this.learnMoreLinks && this.member && this.canPurchaseTier && this.productGroup.tier !== SubscriptionTier.BASIC || false;
             },
             canPurchaseTier(): boolean {
-                return (!this.isCurrentTier || this.isTrialingTier ) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
+                return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
             }
         },
         methods: {
@@ -193,10 +196,9 @@
 
     .tab-content {
         background: $dolphin url(assets/images/grainy.png) repeat;
-        box-shadow:
-            0 11px 15px -7px rgba(0, 0, 0, .16),
-            0 24px 38px 3px rgba(0, 0, 0, .1),
-            0 9px 46px 8px rgba(0, 0, 0, .08);
+        box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
+        0 24px 38px 3px rgba(0, 0, 0, .1),
+        0 9px 46px 8px rgba(0, 0, 0, .08);
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
         padding: 2.4rem 1.6rem 3.2rem;
