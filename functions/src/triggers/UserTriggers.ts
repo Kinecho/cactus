@@ -13,7 +13,7 @@ import AdminSlackService, {
     AttachmentColor,
     SlackAttachment,
     SlackAttachmentField,
-    SlackMessage
+    ChatMessage
 } from "@admin/services/AdminSlackService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import PendingUser from "@shared/models/PendingUser";
@@ -212,7 +212,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
             existingCactusMember: !userCheckResult.isNewMember,
             errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
         });
-        await slackService.sendActivityNotification(slackMessage);
+        await slackService.sendSignupsMessage(slackMessage);
 
     } catch (error) {
         logger.error("Failed to run check for user transaction", error)
@@ -251,7 +251,7 @@ interface SlackMessageInput {
     errorAttachments: SlackAttachment[]
 }
 
-function createSlackMessage(args: SlackMessageInput): SlackMessage {
+function createSlackMessage(args: SlackMessageInput): ChatMessage {
     const {member, user, existingCactusMember, errorAttachments, pendingUser} = args;
 
     const fields: SlackAttachmentField[] = [];
@@ -259,10 +259,13 @@ function createSlackMessage(args: SlackMessageInput): SlackMessage {
     const attachments = [attachment, ...errorAttachments];
     attachment.title = `:wave: ${user.email || user.phoneNumber} has signed up `;
 
-    const slackMessage: SlackMessage = {};
+    const chatMessage: ChatMessage = {
+        text: ''
+    };
+
     if (!member) {
         attachments.push({title: `No member was found or created. UserId = ${user.uid}`, color: "danger"});
-        return slackMessage;
+        return chatMessage;
     }
 
 
@@ -301,9 +304,9 @@ function createSlackMessage(args: SlackMessageInput): SlackMessage {
         })
     }
 
-    slackMessage.attachments = attachments;
+    chatMessage.attachments = attachments;
     attachment.ts = `${(new Date()).getTime() / 1000}`;
-    return slackMessage;
+    return chatMessage;
 }
 
 

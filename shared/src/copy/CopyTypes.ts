@@ -20,6 +20,8 @@ export interface PromptCopy {
     SECONDS: string,
     MINUTES: string,
     DAY_STREAK: string,
+    WEEK_STREAK: string,
+    MONTH_STREAK: string,
     GO_HOME: string,
     SIGN_UP_MESSAGE: string,
     SHARE_YOUR_NOTE: string,

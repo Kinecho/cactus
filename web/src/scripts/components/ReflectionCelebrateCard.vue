@@ -46,7 +46,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                                 {{durationLabel}}
                             </p>
                         </section>
-                        <section class="metric">
+                        <section class="metric" v-if="currentStreak == 'days'">
                             <div class="label">
                                 <transition name="fade-in" mode="out-in" appear>
                                     <span v-if="streakDays !== undefined">{{streakDays}}</span>
@@ -55,6 +55,28 @@ import {LocalStorageKey} from '@web/services/StorageService'
                             </div>
                             <p v-show="streakDays !== undefined">
                                 {{promptCopy.DAY_STREAK}}
+                            </p>
+                        </section>
+                        <section class="metric" v-if="currentStreak == 'weeks'">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
+                                    <spinner v-if="streakWeeks === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakWeeks !== undefined">
+                                {{promptCopy.WEEK_STREAK}}
+                            </p>
+                        </section>
+                        <section class="metric" v-if="currentStreak == 'months'">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
+                                    <spinner v-if="streakMonths === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakMonths !== undefined">
+                                {{promptCopy.MONTH_STREAK}}
                             </p>
                         </section>
                     </div>
@@ -168,7 +190,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         this.setDurationMs(member.stats.reflections.totalDurationMs);
                         this.reflectionCount = member.stats.reflections.totalCount;
                         this.streakDays = member.stats.reflections.currentStreakDays;
+                        this.streakWeeks = member.stats.reflections.currentStreakWeeks;
+                        this.streakMonths = member.stats.reflections.currentStreakMonths;
                         this.elementAccumulations = member.stats.reflections.elementAccumulation;
+                        this.selectStreak();
                     } else {
                         //this will calculate stats if the member doesn't have the new stats object
                         //Or, if the user is anonymous/not logged in.
@@ -192,6 +217,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
+            streakWeeks: number | undefined,
+            streakMonths: number | undefined,
             elementAccumulations: ElementAccumulation | undefined,
             loading: boolean,
             authLoaded: boolean,
@@ -207,11 +234,14 @@ import {LocalStorageKey} from '@web/services/StorageService'
             cactusModalElement: string | undefined,
             inputNameModalVisible: boolean,
             sawInputNameModal: boolean,
+            currentStreak: 'days' | 'weeks' | 'months'
         } {
             return {
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
+                streakWeeks: undefined,
+                streakMonths: undefined,
                 elementAccumulations: undefined,
                 loading: true,
                 loggedIn: false,
@@ -226,7 +256,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
                 inputNameModalVisible: false,
-                sawInputNameModal: false
+                sawInputNameModal: false,
+                currentStreak: 'days'
             }
         },
         destroyed() {
@@ -291,9 +322,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections, member);
-
-                // this.elementAccumulations = anonymousAccumulations;
+                const {dayStreak, weekStreak, monthStreak} = ReflectionResponseService.getCurrentStreaks(reflections, member);
+                this.streakDays = dayStreak;
+                this.streakWeeks = weekStreak;
+                this.streakMonths = monthStreak;
+                this.selectStreak();
             },
             setDurationMs(totalDuration: number) {
                 if (totalDuration < (60 * 1000)) {
@@ -375,6 +408,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     'event_category': "prompt_content",
                     'event_action': "clicked_share_note"
                 });
+            },
+            selectStreak() {
+                this.currentStreak = 'days';
+                
+                if (this.streakDays && this.streakWeeks && this.streakMonths) {
+                    if (this.streakDays > 1) {
+                        this.currentStreak = 'days';
+                    } else if (this.streakWeeks > 1) {
+                        this.currentStreak = 'weeks';
+                    } else if (this.streakWeeks == 1 && this.streakMonths > 1) {
+                        this.currentStreak = 'months';
+                    }
+                }
             }
         }
     })
