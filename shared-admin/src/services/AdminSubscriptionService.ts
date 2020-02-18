@@ -345,9 +345,11 @@ export default class AdminSubscriptionService {
                 defaultPaymentMethod,
                 periodStart_epoch_seconds: stripeInvoice.period_start,
                 periodEnd_epoch_seconds: stripeInvoice.period_end,
+                nextPaymentDate_epoch_seconds: stripeInvoice.next_payment_attempt || undefined,
                 paid: stripeInvoice.paid,
+                stripeInvoiceId: stripeInvoice.id,
             };
-            this.logger.info("Built invoice object", stringifyJSON(invoice, 2))
+            this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
 
         } catch (error) {

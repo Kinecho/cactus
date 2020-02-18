@@ -55,7 +55,7 @@
         },
         computed: {
             nextBillingDate(): string | undefined {
-                const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.periodStart_epoch_seconds;
+                const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.nextPaymentDate_epoch_seconds;
                 if (nextDateSeconds) {
                     return formatDate(new Date(nextDateSeconds * 1000), copy.settings.dates.shortFormat)
                 }

@@ -2,6 +2,7 @@ import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum BillingPeriod {
+    weekly = "weekly",
     monthly = "monthly",
     yearly = "yearly",
     once = "once",
@@ -13,7 +14,6 @@ enum Fields {
     stripePlanId = "stripe.planId",
     appleProductId = "apple.productId",
 }
-
 
 export default class SubscriptionProduct extends FlamelinkModel {
     readonly schema = SchemaName.subscriptionProducts;

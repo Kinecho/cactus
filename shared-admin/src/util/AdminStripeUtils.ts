@@ -190,4 +190,5 @@ export function convertPaymentMethod(stripeMethod: Stripe.PaymentMethod, default
             card: convertCard(stripeCard),
         };
     }
+    return;
 }
