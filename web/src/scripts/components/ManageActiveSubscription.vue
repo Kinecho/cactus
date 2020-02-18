@@ -1,37 +1,40 @@
 <template>
 
     <div v-if="member.hasActiveSubscription">
-        <div v-if="subscriptionDetailsLoading">
-            LOADING
+        <div v-if="subscriptionDetailsLoading" class="loading-container">
+            <spinner message="Loading Subscription Details"/>
         </div>
-        <h3 class="tier">{{tierName}}</h3>
-        <h3 v-if="billingPeriod">{{billingPeriod}}</h3>
-        <p v-if="!subscriptionDetailsLoading">Your next bill is for {{nextBillAmount}} on {{nextBillingDate}}</p>
-        <div class="card-info">
-            <svg width="20px" height="16px" viewBox="0 0 20 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>credit_card</title>
-                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                    <g id="Outlined" transform="translate(-306.000000, -246.000000)">
-                        <g id="Action" transform="translate(100.000000, 100.000000)">
-                            <g id="Outlined-/-Action-/-credit_card" transform="translate(204.000000, 142.000000)">
-                                <g>
-                                    <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
-                                    <path d="M20,4 L4,4 C2.89,4 2.01,4.89 2.01,6 L2,18 C2,19.11 2.89,20 4,20 L20,20 C21.11,20 22,19.11 22,18 L22,6 C22,4.89 21.11,4 20,4 Z M20,18 L4,18 L4,12 L20,12 L20,18 Z M20,8 L4,8 L4,6 L20,6 L20,8 Z" id="🔹-Icon-Color" fill="#1D1D1D"></path>
+        <div v-else>
+            <h3 class="tier">{{tierName}}</h3>
+            <h3 v-if="billingPeriod">{{billingPeriod}}</h3>
+            <p v-if="!subscriptionDetailsLoading">Your next bill is for {{nextBillAmount}} on {{nextBillingDate}}</p>
+            <div class="card-info">
+                <svg width="20px" height="16px" viewBox="0 0 20 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <title>credit_card</title>
+                    <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                        <g id="Outlined" transform="translate(-306.000000, -246.000000)">
+                            <g id="Action" transform="translate(100.000000, 100.000000)">
+                                <g id="Outlined-/-Action-/-credit_card" transform="translate(204.000000, 142.000000)">
+                                    <g>
+                                        <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
+                                        <path d="M20,4 L4,4 C2.89,4 2.01,4.89 2.01,6 L2,18 C2,19.11 2.89,20 4,20 L20,20 C21.11,20 22,19.11 22,18 L22,6 C22,4.89 21.11,4 20,4 Z M20,18 L4,18 L4,12 L20,12 L20,18 Z M20,8 L4,8 L4,6 L20,6 L20,8 Z" id="🔹-Icon-Color" fill="#1D1D1D"></path>
+                                    </g>
                                 </g>
                             </g>
                         </g>
                     </g>
-                </g>
-            </svg>
-            <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
-            <span class="last4" v-if="last4">&bull;&bull;&bull;&bull;{{last4}}</span>
-            <span class="wallet" v-if="digitalWallet && digitalWallet.displayName">{{digitalWallet.displayName}}</span>
-        </div>
-        <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
+                </svg>
+                <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
+                <span class="last4" v-if="last4">&bull;&bull;&bull;&bull;{{last4}}</span>
+                <span class="wallet" v-if="digitalWallet && digitalWallet.displayName">{{digitalWallet.displayName}}</span>
+            </div>
+            <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
 
-        <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
-            <downgrade-form slot="body" :member="member"/>
-        </modal>
+            <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
+                <downgrade-form slot="body" :member="member"/>
+            </modal>
+
+        </div>
 
     </div>
 
@@ -53,6 +56,7 @@
         getBrandDisplayName,
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
+    import Spinner from "@components/Spinner.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -60,6 +64,7 @@
         components: {
             Modal,
             DowngradeForm: DowngradeSubscriptionForm,
+            Spinner,
         },
         props: {
             member: {type: Object as () => CactusMember, required: true}
@@ -149,5 +154,10 @@
         opacity: .8;
     }
 
+    .loading-container {
+        align-items: flex-start;
+        justify-content: flex-start;
+        display: flex;
+    }
 
 </style>
