@@ -61,8 +61,10 @@
     import MarkdownText from "@components/MarkdownText.vue";
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
+    import Logger from "@shared/Logger";
 
     const copy = CopyService.getSharedInstance().copy;
+    const logger = new Logger("SubscriptionProductGroupCard");
 
     export default Vue.extend({
         components: {
@@ -86,7 +88,7 @@
 
         } {
             return {
-                selectedProduct: this.productGroup.products[0],
+                selectedProduct: this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || this.productGroup.products[0],
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
