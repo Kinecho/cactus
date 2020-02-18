@@ -19,6 +19,9 @@
                 <div class="cadence">{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</div>
                 <div class="planPrice">{{formatPrice(product.priceCentsUsd)}}</div>
                 <div class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</div>
+                <div class="savings" v-if="product.savingsCopy">
+                    {{product.savingsCopy}}
+                </div>
             </div>
         </div>
 
@@ -334,6 +337,12 @@
 
     .payment-period-per {
         text-transform: lowercase;
+    }
+
+    .savings {
+        margin: 1rem 0 0;
+        text-transform: uppercase;
+        color: $darkGreen;
     }
 
     .group-footer {
