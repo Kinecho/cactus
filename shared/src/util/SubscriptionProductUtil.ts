@@ -26,6 +26,7 @@ export interface SubscriptionProductGroupEntry {
     tierDisplayName?: string;
     products: SubscriptionProduct[];
     productGroup?: SubscriptionProductGroup;
+    defaultSelectedPeriod?: BillingPeriod | undefined;
 }
 
 export function createSubscriptionProductGroupEntries(products: SubscriptionProduct[], groupMap: SubscriptionProductGroupMap): SubscriptionProductGroupEntry[] {
@@ -38,6 +39,7 @@ export function createSubscriptionProductGroupEntries(products: SubscriptionProd
             tierDisplayName: subscriptionTierDisplayName(tier),
             products: tierMap[tier] || [],
             productGroup,
+            defaultSelectedPeriod: productGroup?.defaultSelectedPeriod
         };
         return group;
     });

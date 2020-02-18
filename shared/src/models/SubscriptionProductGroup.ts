@@ -1,4 +1,6 @@
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+
 
 enum Fields {
     subscriptionTier = "subscriptionTier",
@@ -39,6 +41,7 @@ export default class SubscriptionProductGroup extends FlamelinkModel {
     subscriptionTier!: SubscriptionTier;
     title?: string;
     descriptionMarkdown?: string;
+    defaultSelectedPeriod?: BillingPeriod;
     sections: ProductSection[] = [];
     trialUpgradeMarkdown?: string;
     footer?: ProductGroupFooter;
