@@ -77,6 +77,8 @@ export default class EnglishCopy extends LocalizedCopy {
         SECONDS: "Seconds",
         MINUTES: "Minutes",
         DAY_STREAK: "Day Streak",
+        WEEK_STREAK: "Week Streak",
+        MONTH_STREAK: "Month Streak",
         GO_HOME: "Go Home",
         SIGN_UP_MESSAGE: "Sign Up to Keep it Going",
         SHARE_YOUR_NOTE: "Share Your Note",
