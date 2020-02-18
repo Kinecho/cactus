@@ -26,6 +26,8 @@ import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConn
 import Logger from "@shared/Logger";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
+import AdminPaymentService from "@admin/services/AdminPaymentService";
+import StripeWebhookService from "@admin/services/StripeWebhookService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -56,6 +58,8 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSocialConnectionRequestService.initialize();
     AdminSubscriptionService.initialize();
     AdminCheckoutSessionService.initialize();
+    AdminPaymentService.initialize();
+    StripeWebhookService.initialize(config);
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

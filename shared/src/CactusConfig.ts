@@ -61,6 +61,10 @@ export interface CactusConfig {
     stripe: {
         api_key: string,
         secret_key: string,
+        webhook_signing_secrets: {
+            checkout_session_completed: string,
+            main: string,
+        }
     },
     backups_config: {
         analytics_project_id: string,

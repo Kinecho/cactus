@@ -33,7 +33,8 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
     if (config.isEmulator) {
         config.app.environment = "dev";
         config.web.domain = "localhost:8080";
-        config.web.protocol = 'http'
+        config.web.protocol = 'http';
+        // config.stripe.webhook_signing_secrets.main = 'whsec_CQrDcQTFgTr01NtFT4vNI5HawMGX9oHs';
     } else {
         config.web.protocol = 'https'
     }
@@ -101,7 +102,11 @@ const defaultTestConfig: CactusConfig = {
     },
     stripe: {
         api_key: "test_api_key",
-        secret_key: "test_secret_key"
+        secret_key: "test_secret_key",
+        webhook_signing_secrets: {
+            checkout_session_completed: "test_secret_key",
+            main: "main_test_secret",
+        }
     },
     dynamic_links: {
         domain: "cactus-app-stage.web.app",

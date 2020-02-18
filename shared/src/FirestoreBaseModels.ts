@@ -18,6 +18,7 @@ export enum Collection {
     socialConnectionRequests = "socialConnectionRequests",
     flamelink_content = "fl_content",
     checkoutSessions = "checkoutSessions",
+    payments = "payments",
 }
 
 export interface FirestoreIdentifiable {

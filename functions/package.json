@@ -10,13 +10,13 @@
         "deploy:stage:func": "func() { npx firebase deploy -P stage --only functions:\"$1\"; }; func",
         "deploy:prod": "firebase deploy --only functions -P prod",
         "deploy:prod:func": "func() { npx firebase deploy -P prod --only functions:\"$1\"; }; func",
-        "emulator:start": "firebase emulators:start --only functions",
+        "_emulator:start": "firebase emulators:start --only functions --inspect-functions=9229",
         "lint": "tslint --project tsconfig.json",
         "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
         "logs": "firebase functions:log",
         "ngrok": "ngrok http -subdomain=cactuslocal 5000",
         "serve": "npm run config:get && npm run build && IS_EMULATOR=true firebase serve --only functions",
-        "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions",
+        "emulate:funcs": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions --inspect-functions=9229",
         "emulate:funcs:db": "npm run config:get && npm run build && IS_EMULATOR=true firebase emulators:start --only functions,firestore",
         "emulate:db": "firebase emulators:start --only firestore",
         "shell": "npm run build && firebase functions:shell",
@@ -25,7 +25,8 @@
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
         "test:ci": "FIRESTORE_EMULATOR_HOST=localhost:5005 TZ=America/Denver JEST_JUNIT_OUTPUT=reports/tests/jest/results.xml jest --silent --ci --coverageDirectory reports/coverage --coverage --runInBand --reporters=default --reporters=jest-junit",
         "test:watch": "jest --watch",
-        "watch": "tsc -w"
+        "watch": "tsc -w",
+        "stripe:listen": "stripe listen --forward-to localhost:5000/cactus-app-stage/us-central1/checkout/stripe/webhooks/main"
     },
     "engines": {
         "node": "10"
@@ -37,6 +38,7 @@
         "@admin": "lib/shared-admin/src"
     },
     "dependencies": {
+        "@firebase/app": "^0.5.4",
         "@google-cloud/bigquery": "^4.1.4",
         "@google-cloud/pubsub": "^0.30.1",
         "@google-cloud/storage": "^3.0.2",
@@ -77,7 +79,7 @@
         "uuid": "^3.3.2"
     },
     "devDependencies": {
-        "@firebase/testing": "^0.11.5",
+        "@firebase/testing": "^0.16.9",
         "@google-cloud/functions-emulator": "^1.0.0-beta.6",
         "@types/busboy": "^0.2.3",
         "@types/cors": "^2.8.5",
@@ -91,7 +93,7 @@
         "@types/uuid": "^3.4.5",
         "firebase": "^7.7.0",
         "firebase-functions-test": "^0.1.6",
-        "firebase-tools": "^7.12.1",
+        "firebase-tools": "^7.13.0",
         "jest": "^24.8.0",
         "jest-junit": "^6.4.0",
         "ts-jest": "^24.1.0",

@@ -25,6 +25,9 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CheckoutSession from "@shared/models/CheckoutSession";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import StripeWebhookService from "@admin/services/StripeWebhookService";
+
+const bodyParser = require('body-parser');
 
 const logger = new Logger("checkoutApp");
 const config = getConfig();
@@ -41,12 +44,48 @@ function isFirebaseRequest(_req: any): _req is functions.https.Request {
     return !!_req.rawBody;
 }
 
+app.get("/", async (req: express.Request, res: express.Response) => {
+    const index = 8;
+    res.send("totally different...." + index);
+});
+
+app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), async (req: express.Request, res: express.Response) => {
+    if (!isFirebaseRequest(req)) {
+        logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
+        res.sendStatus(204);
+        return
+    }
+
+    const event = StripeWebhookService.getSharedInstance().getSignedEvent({
+        request: req,
+        webhookSigningKey: config.stripe.webhook_signing_secrets.main
+    });
+    if (!event) {
+        logger.error("Unable to construct the signed stripe event");
+        res.sendStatus(400);
+        return;
+    }
+
+    const result = await StripeWebhookService.getSharedInstance().handleEvent(event);
+
+    res.status(result.statusCode).send(result.body);
+
+    return;
+});
+
+/**
+ * @Deprecated - please use the new /stripe/webhooks/main endpoint instead.
+ */
 app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
     // const mailchimpService = MailchimpService.getSharedInstance();
     if (isFirebaseRequest(req)) {
         console.log("raw body", req.rawBody);
         // sripe.webhooks.constructEvent(req.rawBody, signa)
         // config.stripe.secret_key
+        // const isValid = await getSignedStripeEvent({
+        //     request: req,
+        //     webhookSigningKey: config.stripe.webhook_signing_secrets.checkout_session_completed
+        // })
     }
 
     const slackService = AdminSlackService.getSharedInstance();
@@ -63,7 +102,7 @@ app.post("/webhooks/sessions/completed", async (req: express.Request, res: expre
             if (intentResult.error) {
                 logger.log("error processing payment intent", intentResult.error);
             }
-            res.sendStatus(intentResult.statusCode)
+            res.sendStatus(intentResult.statusCode);
             return
         } else {
             const [firstItem] = data.display_items || [];
