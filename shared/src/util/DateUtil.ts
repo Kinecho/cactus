@@ -19,10 +19,6 @@ export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
-// export function getDateForTimezone(timeZone: string, date: Date): Date {
-//     return DateTime.fromJSDate(date ).setZone(timeZone, {keepLocalTime: false}).toJSDate();
-// }
-
 export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {
     return DateTime.fromJSDate(date).setZone(timeZone).toObject()
 }
@@ -284,7 +280,7 @@ export function atMidnight(date: Date): Date {
  * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
  * @return {number}
  */
-export function getStreak(options: { dates: Date[], start?: Date, timeZone?: string }) {
+export function getStreakDays(options: { dates: Date[], start?: Date, timeZone?: string }) {
     const {dates = [], start = new Date(), timeZone} = options;
     let _dates = dates;
     if (_dates.length === 0) {
@@ -316,6 +312,124 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
         if (diff > 0 && diff < 2) {
             streak++;
         }
+        i++;
+    }
+
+    return streak;
+}
+
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevWeekStart = startDateTime.startOf('week').minus({ weeks: 1 });
+    let prevWeekEnd = startDateTime.endOf('week').minus({ weeks: 1 });
+    let i = 0;
+    let reflectionDateTime;
+    let weeksWithoutReflection = 0;
+
+    while(_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+        
+        // found a date in this week
+        if (reflectionDateTime > prevWeekStart && 
+            reflectionDateTime < prevWeekEnd) { 
+            streak++;
+            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
+            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
+
+        // current date is before current week start
+        } else if (reflectionDateTime < prevWeekStart) {
+            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
+            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
+            weeksWithoutReflection++;
+        }
+
+        // streak broken, return
+        if (weeksWithoutReflection > 1) { 
+            return streak;
+        }
+
+        i++;
+    }
+
+    return streak;
+}
+
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakMonths(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevMonthStart = startDateTime.startOf('month').minus({ months: 1 });
+    let prevMonthEnd = startDateTime.endOf('month').minus({ months: 1 });
+    let i = 0;
+    let reflectionDateTime;
+    let monthsWithoutReflection = 0;
+
+    while(_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+
+        // found a date in this week
+        if (reflectionDateTime > prevMonthStart && 
+            reflectionDateTime < prevMonthEnd) { 
+            streak++;
+            prevMonthStart = prevMonthStart.minus({ months: 1 });
+            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+
+        // current date is before current week start
+        } else if (reflectionDateTime < prevMonthStart) {
+            prevMonthStart = prevMonthStart.minus({ months: 1 });
+            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+            monthsWithoutReflection++;
+        }
+
+        // streak broken, return
+        if (monthsWithoutReflection > 1) { 
+            return streak;
+        }
+
         i++;
     }
 
