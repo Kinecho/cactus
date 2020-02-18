@@ -308,7 +308,7 @@
         font-size: 1.6rem;
         padding: .8rem;
         text-align: center;
-        width: 49%;
+        width: 32%;
 
         &.selected {
             border-color: $green;
@@ -317,7 +317,7 @@
     }
 
     .cadence {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         letter-spacing: 1px;
         opacity: .8;
         text-transform: uppercase;
@@ -334,6 +334,7 @@
     }
 
     .payment-period-per {
+        font-size: 1.4rem;
         text-transform: lowercase;
     }
 
