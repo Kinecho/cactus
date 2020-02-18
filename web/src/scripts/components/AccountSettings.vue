@@ -92,6 +92,16 @@
                         </div>
                     </div>
 
+                    <div class="settings-group delete">
+                        <h3>{{copy.account.DELETE_ACCOUNT}}</h3>
+                        <div class="item">
+                            <button class="red tertiary remove">
+                                <img src="assets/images/trash.svg" alt=""/>
+                                {{copy.account.PERMANENTLY_DELETE_ACCOUNT}}
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="stickyButtons" v-if="changesToSave === true">
                         <button @click="save">Save Changes</button>
                         <button @click="reloadPage" class="secondary">Cancel</button>

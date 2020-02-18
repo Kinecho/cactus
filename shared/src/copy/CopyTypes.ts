@@ -47,7 +47,7 @@ export interface CommonCopy {
     FIRST_NAME: string,
     LAST_NAME: string,
     HOUR: string,
-    MINUTE: string,
+    MINUTE: string
 }
 
 export interface ElementCopy {
@@ -103,6 +103,8 @@ export interface AccountCopy {
     CONFIRM_UPDATE_TIMEZONE: string,
     CANCEL_UPDATE_TIMEZONE: string,
     EMAIL_NOTIFICATION_CHECKBOX_LABEL: string,
+    DELETE_ACCOUNT: string,
+    PERMANENTLY_DELETE_ACCOUNT: string
 }
 
 export abstract class LocalizedCopy {
