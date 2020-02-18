@@ -3,6 +3,11 @@ import * as functions from "firebase-functions";
 import Stripe from "stripe";
 import Logger from "@shared/Logger";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import {getDefaultSubscription, getDefaultTrial} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -64,13 +69,43 @@ export default class StripeWebhookService {
         }
     }
 
-    async handleCheckoutEvent(event: Stripe.Event): Promise<WebhookResponse> {
+    async handleCheckoutSessionCompletedEvent(event: Stripe.Event): Promise<WebhookResponse> {
         const session = event.data.object as Stripe.Checkout.Session;
         const sessionId = session.id;
         if (!sessionId) {
             return {statusCode: 400, body: "No session ID was found"};
         }
-        return {statusCode: 200, body: "Message was accepted but not processed yet"};
+
+        const pendingSession = await AdminCheckoutSessionService.getSharedInstance().getByStripeSessionId(sessionId);
+        if (!pendingSession) {
+            logger.error("Failed to process payment, no pending session found for sessionID" + sessionId);
+            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:boom: Failed to process payment, no pending session found for sessionID = \`${sessionId}\`\n\n\`\`\`${JSON.stringify(event, null, 2)}\`\`\``);
+            return {
+                statusCode: 204,
+                body: "No `cactus.pendingSession` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
+            }
+        }
+        const memberId = pendingSession.memberId;
+        if (!memberId) {
+            return {
+                statusCode: 204,
+                body: "No `memberId` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
+            }
+        }
+        const cactusMember = await AdminCactusMemberService.getSharedInstance().getById(pendingSession.memberId);
+        if (!cactusMember) {
+            return {
+                statusCode: 204,
+                body: "No `memberId` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
+            }
+        }
+        const subscription = cactusMember.subscription ?? getDefaultSubscription();
+        subscription.tier = SubscriptionTier.PLUS;
+        (subscription.trial || getDefaultTrial()).activatedAt = new Date();
+
+        await AdminCactusMemberService.getSharedInstance().save(cactusMember, {setUpdatedAt: false});
+
+        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${subscription.tier}`};
     };
 
     async handleCustomerCreatedEvent(event: Stripe.Event): Promise<WebhookResponse> {
@@ -84,7 +119,7 @@ export default class StripeWebhookService {
 
             switch (type) {
                 case 'checkout.session.completed':
-                    response = await this.handleCheckoutEvent(event);
+                    response = await this.handleCheckoutSessionCompletedEvent(event);
                     break;
                 case 'customer.created':
                     response = await this.handleCustomerCreatedEvent(event);

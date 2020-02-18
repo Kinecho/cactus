@@ -2,25 +2,13 @@ import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
 import Stripe from "stripe";
-import {getConfig} from "@admin/config/configService";
+import {getConfig, getHostname} from "@admin/config/configService";
 import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
 import chalk from "chalk";
 import {QueryParam} from "@shared/util/queryParams";
 import {URL} from "url";
-import MailchimpService from "@admin/services/MailchimpService";
-import {JournalStatus} from "@shared/models/CactusMember";
-import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminSlackService, {
-    ChatMessage,
-    SlackAttachment,
-    SlackAttachmentField,
-    SlackMessage
-} from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import {getAuthUserId} from "@api/util/RequestUtil";
-// import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
-// import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
-// import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CheckoutSession from "@shared/models/CheckoutSession";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
@@ -49,6 +37,10 @@ app.get("/", async (req: express.Request, res: express.Response) => {
     res.send("totally different...." + index);
 });
 
+/**
+ * Main entry to handle stripe webhooks. We should send all webhook event types to this single endpoint
+ * and the StripeWebhookService will handle (or not) the given event type.
+ */
 app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), async (req: express.Request, res: express.Response) => {
     if (!isFirebaseRequest(req)) {
         logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
@@ -62,182 +54,16 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
     });
     if (!event) {
         logger.error("Unable to construct the signed stripe event");
-        res.sendStatus(400);
+        res.status(400).send("Unable to parse the stripe event. Perhaps it wasn't able verify the signature? ");
         return;
     }
 
     const result = await StripeWebhookService.getSharedInstance().handleEvent(event);
-
-    res.status(result.statusCode).send(result.body);
+    logger.info("Processed webhook event: ", result.type);
+    res.status(result.statusCode).send(result);
 
     return;
 });
-
-/**
- * @Deprecated - please use the new /stripe/webhooks/main endpoint instead.
- */
-app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
-    // const mailchimpService = MailchimpService.getSharedInstance();
-    if (isFirebaseRequest(req)) {
-        console.log("raw body", req.rawBody);
-        // sripe.webhooks.constructEvent(req.rawBody, signa)
-        // config.stripe.secret_key
-        // const isValid = await getSignedStripeEvent({
-        //     request: req,
-        //     webhookSigningKey: config.stripe.webhook_signing_secrets.checkout_session_completed
-        // })
-    }
-
-    const slackService = AdminSlackService.getSharedInstance();
-    try {
-
-        const event = req.body as Stripe.Event;
-        const data = event.data.object as Stripe.Checkout.Session;
-
-        // Handle the pre-order use case. This can probably be deleted.
-        const paymentIntent = data.payment_intent;
-        if (paymentIntent) {
-            logger.log("Handing payment intent");
-            const intentResult = await handlePaymentIntent(paymentIntent, data);
-            if (intentResult.error) {
-                logger.log("error processing payment intent", intentResult.error);
-            }
-            res.sendStatus(intentResult.statusCode);
-            return
-        } else {
-            const [firstItem] = data.display_items || [];
-            const attachments: SlackAttachment[] = [];
-            const fields: SlackAttachmentField[] = [];
-
-            const customerEmail = data.customer_email || "unknown";
-            if (firstItem) {
-                const amount = firstItem.amount ?? 0;
-                fields.push({title: "Amount", value: (amount / 100).toFixed(2), short: true});
-                const item = firstItem as any;
-                if (item.plan) {
-                    const subItem = item as Stripe.SubscriptionItem;
-                    if (subItem.plan.interval) {
-                        fields.push({title: "Interval", value: subItem.plan.interval, short: true});
-                    }
-                    if (subItem.plan.nickname) {
-                        fields.push({title: "Plan", value: subItem.plan.nickname});
-                    }
-
-                }
-
-            }
-            attachments.push({fields});
-            const message: ChatMessage = {
-                text: `:moneybag: ${customerEmail} completed a purchase!`,
-                attachments,
-            };
-            await AdminSlackService.getSharedInstance().sendActivityMessage(message)
-        }
-
-
-        logger.log(chalk.blue(JSON.stringify(data, null, 2)));
-        return res.sendStatus(204);
-    } catch (error) {
-        const msg: SlackMessage = {
-            text: `:rotating_light: Failed to process Stripe Payment Complete webhook event.\n\`${error}\`\n\`\`\`${JSON.stringify(req.body, null, 2)}\`\`\``,
-
-        };
-        await slackService.sendActivityNotification(msg);
-        res.status(500);
-        res.send("Unable to process session: " + error);
-        return;
-    }
-});
-
-interface PaymentIntentResult {
-    error?: any;
-    statusCode: number;
-}
-
-async function handlePaymentIntent(paymentIntent: string | Stripe.PaymentIntent, data: Stripe.Checkout.Session): Promise<PaymentIntentResult> {
-    try {
-        // const data = event.data.object;
-        let customerId: string | undefined;
-        if (typeof data.customer === "string") {
-            customerId = data.customer
-        } else {
-            customerId = data.customer?.id
-        }
-
-        let paymentIntentId: string;
-        if (typeof paymentIntent === "string") {
-            paymentIntentId = paymentIntent
-        } else {
-            paymentIntentId = paymentIntent.id
-        }
-
-
-        let email = data.customer_email;
-        const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        const slackService = AdminSlackService.getSharedInstance();
-        if (intent && customerId) {
-            const paymentMethodId = intent.payment_method;
-            const updateData = {
-                invoice_settings: {
-                    default_payment_method: paymentMethodId,
-                }
-            } as Stripe.CustomerUpdateParams;
-
-            const updateResponse = await stripe.customers.update(customerId, updateData); //Force the update options to comply to typescript :(
-            email = updateResponse.email;
-
-            //Notify slack that payment was successful
-            await slackService.sendActivityNotification(`:moneybag: Successfully processed pre-order for ${email}!`);
-
-            //Update mailchimp member, if they exist, if not, send scary slack message
-            const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(email);
-            logger.log("Mailchimp member", mailchimpMember);
-            if (email && mailchimpMember) {
-                const tagUpdateResponse = await MailchimpService.getSharedInstance().updateTags({
-                    tags: [{
-                        name: TagName.JOURNAL_PREMIUM,
-                        status: TagStatus.ACTIVE
-                    }], email
-                });
-                if (!tagUpdateResponse.success) {
-                    await slackService.sendActivityNotification(`:rotating-light: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}\nError: \`${tagUpdateResponse.error ? tagUpdateResponse.error.title : tagUpdateResponse.unknownError}\``);
-                }
-
-                const mergeFieldUpdateResponse = await MailchimpService.getSharedInstance().updateMergeFields({
-                    mergeFields: {JNL_STATUS: JournalStatus.PREMIUM},
-                    email
-                });
-                if (!mergeFieldUpdateResponse.success) {
-                    await slackService.sendActivityNotification(`:rotating-light: Failed update merge field ${MergeField.JNL_STATUS} to ${TagName.JOURNAL_PREMIUM} for Mailchimp member ${email}\nError: \`${mergeFieldUpdateResponse.error ? mergeFieldUpdateResponse.error.title : mergeFieldUpdateResponse.unknownError}\``);
-                }
-
-            } else {
-                await slackService.sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);
-            }
-
-            logger.log("Update response", JSON.stringify(updateResponse, null, 2));
-
-            return {statusCode: 204, error: undefined}
-        } else {
-            const msg: SlackMessage = {
-                text: `:rotating_light: No customerId or payment intent found on payload. Unable to process payment webhook.\n*Event Payload:*\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``,
-            };
-            await slackService.sendActivityNotification(msg);
-            return {statusCode: 204, error: undefined}
-        }
-    } catch (error) {
-        const msg: SlackMessage = {
-            text: `:rotating_light: Failed to process Stripe Payment Complete webhook event.\n\`${error}\`\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``,
-
-        };
-        await AdminSlackService.getSharedInstance().sendActivityNotification(msg);
-
-        return {
-            statusCode: 500,
-            error: error
-        };
-    }
-}
 
 /**
  * Get a session ID for stripe checkout
@@ -269,9 +95,8 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
         const sessionRequest = req.body as CreateSessionRequest;
         logger.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
 
-        // const isPreorder = req.params
-        const successUrl = sessionRequest.successUrl || "https://cactus.app/success";
-        const cancelUrl = sessionRequest.cancelUrl || "https://cactus.app";
+        const successUrl = sessionRequest.successUrl || `${getHostname()}/success`;
+        const cancelUrl = sessionRequest.cancelUrl || `${getHostname()}/pricing`;
         const planId = sessionRequest.planId;
         const items = sessionRequest.items;
 
@@ -280,6 +105,7 @@ app.post("/sessions", async (req: express.Request, res: express.Response) => {
             success_url: successUrl,
             cancel_url: cancelUrl,
             customer_email: member.email,
+
         };
 
         if (items && items.length > 0) {

@@ -13,6 +13,12 @@ export interface StripeCheckoutSession {
     raw?: any,
 }
 
+enum Fields {
+    stripeSessionId = "stripe.sessionId",
+    memberId = "memberId",
+
+}
+
 /**
  * An object that represents a Checkout session that may or may not have completed a purchase.
  * This allows us to link up past sessions with members that complete purchases later.
@@ -22,6 +28,7 @@ export default class CheckoutSession extends BaseModel {
     memberId!: string;
     memberEmail?: string;
     stripe?: StripeCheckoutSession;
+    static Fields = Fields;
 
 
     static stripe(args: {

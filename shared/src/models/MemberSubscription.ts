@@ -30,27 +30,34 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
     }
 }
 
+export interface SubscriptionTrial {
+    startedAt: Date,
+    endsAt: Date,
+    activatedAt?: Date
+}
+
 export interface MemberSubscription {
     tier: SubscriptionTier,
-    trial?: {
-        startedAt: Date,
-        endsAt: Date,
-        activatedAt?: Date
-    }
+    trial?: SubscriptionTrial
 }
 
 export const DEFAULT_TRIAL_DAYS = 7;
 
 export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
+    return {
+        tier: SubscriptionTier.PLUS,
+        trial: getDefaultTrial(trialDays)
+    }
+}
+
+
+export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): SubscriptionTrial {
     const startDate = new Date();
     const endDate = DateTime.fromJSDate(startDate).plus({days: trialDays}).toJSDate();
     return {
-        tier: SubscriptionTier.PLUS,
-        trial: {
-            startedAt: startDate,
-            endsAt: endDate,
-            activatedAt: undefined,
-        }
+        startedAt: startDate,
+        endsAt: endDate,
+        activatedAt: undefined,
     }
 }
 

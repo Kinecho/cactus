@@ -156,7 +156,7 @@
 
                 const product = this.selectedProduct;
 
-                if (this.isNotCurrentTier) {
+                if (this.isCurrentTier || this.isInTrial) {
                     this.goToAccount()
                 }
 
