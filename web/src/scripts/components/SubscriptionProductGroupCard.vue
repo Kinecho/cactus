@@ -199,7 +199,7 @@
             0 9px 46px 8px rgba(0, 0, 0, .08);
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
-        padding: 2.4rem 2.4rem 3.2rem;
+        padding: 2.4rem 1.6rem 3.2rem;
         position: relative;
         text-align: left;
 
@@ -216,6 +216,9 @@
             z-index: -1;
         }
 
+        @include r(374) {
+            padding: 2.4rem 2.4rem 3.2rem;
+        }
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
