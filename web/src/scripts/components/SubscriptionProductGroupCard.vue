@@ -19,6 +19,9 @@
                 <div class="cadence">{{copy.checkout.BILLING_PERIOD[product.billingPeriod]}}</div>
                 <div class="planPrice">{{formatPrice(product.priceCentsUsd)}}</div>
                 <div class="payment-period-per">per {{copy.checkout.BILLING_PERIOD_PER[product.billingPeriod]}}</div>
+                <div class="savings" v-if="product.savingsCopy">
+                    {{product.savingsCopy}}
+                </div>
             </div>
         </div>
 
@@ -201,7 +204,7 @@
         0 9px 46px 8px rgba(0, 0, 0, .08);
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
-        padding: 2.4rem 2.4rem 3.2rem;
+        padding: 2.4rem 1.6rem 3.2rem;
         position: relative;
         text-align: left;
 
@@ -218,6 +221,9 @@
             z-index: -1;
         }
 
+        @include r(374) {
+            padding: 2.4rem 2.4rem 3.2rem;
+        }
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
@@ -307,7 +313,7 @@
         font-size: 1.6rem;
         padding: .8rem;
         text-align: center;
-        width: 49%;
+        width: 32%;
 
         &.selected {
             border-color: $green;
@@ -316,7 +322,7 @@
     }
 
     .cadence {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         letter-spacing: 1px;
         opacity: .8;
         text-transform: uppercase;
@@ -333,7 +339,19 @@
     }
 
     .payment-period-per {
+        font-size: 1.4rem;
         text-transform: lowercase;
+    }
+
+    .savings {
+        background-color: transparentize($royal, .4);
+        border-radius: 0 0 .8rem .8rem;
+        font-size: 1.4rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin: .8rem -.8rem -.8rem;
+        padding: .4rem .8rem;
+        text-transform: uppercase;
     }
 
     .group-footer {
