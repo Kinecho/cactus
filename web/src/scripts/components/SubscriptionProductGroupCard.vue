@@ -204,7 +204,7 @@
         0 9px 46px 8px rgba(0, 0, 0, .08);
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
-        padding: 2.4rem 2.4rem 3.2rem;
+        padding: 2.4rem 1.6rem 3.2rem;
         position: relative;
         text-align: left;
 
@@ -221,6 +221,9 @@
             z-index: -1;
         }
 
+        @include r(374) {
+            padding: 2.4rem 2.4rem 3.2rem;
+        }
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
@@ -310,7 +313,7 @@
         font-size: 1.6rem;
         padding: .8rem;
         text-align: center;
-        width: 49%;
+        width: 32%;
 
         &.selected {
             border-color: $green;
@@ -319,7 +322,7 @@
     }
 
     .cadence {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
         letter-spacing: 1px;
         opacity: .8;
         text-transform: uppercase;
@@ -336,6 +339,7 @@
     }
 
     .payment-period-per {
+        font-size: 1.4rem;
         text-transform: lowercase;
     }
 
