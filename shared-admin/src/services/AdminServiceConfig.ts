@@ -28,6 +28,7 @@ import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -56,7 +57,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSocialActivityService.initialize();
     AdminSocialConnectionService.initialize();
     AdminSocialConnectionRequestService.initialize();
-    AdminSubscriptionService.initialize();
+    AdminSubscriptionService.initialize(config);
     AdminCheckoutSessionService.initialize();
     AdminPaymentService.initialize();
     StripeWebhookService.initialize(config);
@@ -64,6 +65,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
     AdminPromptContentService.initialize(config);
+    AdminSubscriptionProductService.initialize();
 
 
     logger.log("Initializing Sentry");

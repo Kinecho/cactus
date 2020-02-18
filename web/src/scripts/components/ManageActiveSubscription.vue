@@ -1,8 +1,11 @@
-import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
 <template>
+
     <div v-if="member.hasActiveSubscription">
+        <div v-if="subscriptionDetailsLoading">
+            LOADING
+        </div>
         <h3 class="tier">{{tierName}}</h3>
-        <p>Your next bill is for XX on XX/XX/XXXX</p>
+        <p v-if="!subscriptionDetailsLoading">Your next bill is for {{nextBillAmount}} on {{nextBillingDate}}</p>
 
         <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
 
@@ -11,6 +14,7 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         </modal>
 
     </div>
+
 </template>
 
 <script lang="ts">
@@ -20,21 +24,53 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     import Modal from "@components/Modal.vue";
     import DowngradeSubscriptionForm from "@components/DowngradeSubscriptionForm.vue";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {getSubscriptionDetails} from "@web/checkoutService";
+    import {formatDate} from "@shared/util/DateUtil";
+    import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+    import CopyService from "@shared/copy/CopyService";
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
-          Modal,
-          DowngradeForm: DowngradeSubscriptionForm,
+            Modal,
+            DowngradeForm: DowngradeSubscriptionForm,
         },
         props: {
             member: {type: Object as () => CactusMember, required: true}
         },
         data(): {
             showDowngradeModal: boolean,
+            subscriptionDetailsLoading: boolean,
+            subscriptionDetails: SubscriptionDetails | undefined,
         } {
-            return {showDowngradeModal: false}
+            return {
+                showDowngradeModal: false,
+                subscriptionDetailsLoading: false,
+                subscriptionDetails: undefined,
+            }
+        },
+        beforeMount(): void {
+            this.fetchSubscriptionDetails();
         },
         computed: {
+            nextBillingDate(): string | undefined {
+                const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.periodStart_epoch_seconds;
+                if (nextDateSeconds) {
+                    return formatDate(new Date(nextDateSeconds * 1000), copy.settings.dates.shortFormat)
+                }
+                return;
+            },
+            nextBillAmount(): string | undefined {
+                const amount = this.subscriptionDetails?.upcomingInvoice?.amountCentsUsd;
+                if (!amount) {
+                    return;
+                }
+                if (amount % 100 === 0) {
+                    return `$${amount / 100}`;
+                }
+                return `$${(amount / 100).toFixed(2)}`
+            },
             tierName(): string | undefined {
                 return subscriptionTierDisplayName(this.member.tier)
             },
@@ -44,7 +80,16 @@ import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
         }, methods: {
             async downgrade() {
                 this.showDowngradeModal = true;
-            }
+            },
+            async fetchSubscriptionDetails() {
+                if (!this.member || !this.member.hasActiveSubscription) {
+                    this.subscriptionDetails = undefined;
+                    return;
+                }
+                this.subscriptionDetailsLoading = true;
+                this.subscriptionDetails = await getSubscriptionDetails();
+                this.subscriptionDetailsLoading = false;
+            },
         }
     })
 </script>

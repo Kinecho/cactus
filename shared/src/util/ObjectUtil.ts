@@ -1,12 +1,16 @@
 import Logger from "@shared/Logger";
 
-const logger = new Logger("ObjectUtil.ts")
+const logger = new Logger("ObjectUtil.ts");
 
-export function isNonEmptyObject(input: any): boolean {
+export function isNonEmptyObject(input: any): input is Object {
     if (isNull(input)) {
         return false;
     }
     return typeof (input) === "object" && !Array.isArray(input) && Object.keys(input).length > 0;
+}
+
+export function hasIdField(input: any): input is { id: any, [key: string]: any } {
+    return isNonEmptyObject(input) && input.hasOwnProperty("id") && ((<any>input).id ?? false)
 }
 
 export function isArray(input: any) {
@@ -26,6 +30,14 @@ export function isNotNull(input: any): boolean {
 
 export function isDate(input: any) {
     return isNotNull(input) && input instanceof Date;
+}
+
+export function isString(input: any): input is string {
+    try {
+        return isNotNull(input) && typeof (input) === "string";
+    } catch {
+        return false;
+    }
 }
 
 export function isNumber(input: any) {

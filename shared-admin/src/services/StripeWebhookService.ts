@@ -8,6 +8,10 @@ import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getDefaultSubscription, getDefaultTrial} from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import AdminPaymentService from "@admin/services/AdminPaymentService";
+import Payment from "@shared/models/Payment";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import {getCustomerId, getStripeId} from "@admin/util/AdminStripeUtils";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -93,23 +97,48 @@ export default class StripeWebhookService {
             }
         }
         const cactusMember = await AdminCactusMemberService.getSharedInstance().getById(pendingSession.memberId);
+        // const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(pendingSession)
         if (!cactusMember) {
             return {
                 statusCode: 204,
                 body: "No `memberId` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
             }
         }
+
+        const stripePlanId = pendingSession?.stripe?.planId;
+        if (!stripePlanId) {
+            return {
+                statusCode: 204,
+                body: "No `stripe.planId` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
+            }
+        }
+
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByStripePlanId({
+            planId: stripePlanId,
+            onlyAvailableForSale: false
+        });
+
         const subscription = cactusMember.subscription ?? getDefaultSubscription();
         subscription.tier = SubscriptionTier.PLUS;
-        (subscription.trial || getDefaultTrial()).activatedAt = new Date();
+        subscription.stripeSubscriptionId = getStripeId(session.subscription);
 
+        (subscription.trial || getDefaultTrial()).activatedAt = new Date();
+        cactusMember.stripeCustomerId = getCustomerId(session.customer);
+
+        const payment = Payment.fromStripeCheckoutSession({
+            memberId,
+            session,
+            subscriptionProductId: subscriptionProduct?.entryId
+        });
+
+        await AdminPaymentService.getSharedInstance().save(payment);
         await AdminCactusMemberService.getSharedInstance().save(cactusMember, {setUpdatedAt: false});
 
         return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${subscription.tier}`};
     };
 
     async handleCustomerCreatedEvent(event: Stripe.Event): Promise<WebhookResponse> {
-        return {statusCode: 400, body: "Not implemented"};
+        return {statusCode: 200, body: "Not implemented"};
     }
 
     async handleEvent(event: Stripe.Event): Promise<WebhookResponse> {

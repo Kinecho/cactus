@@ -12,6 +12,7 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import {PageRoute} from "@shared/PageRoutes";
 import CopyService from "@shared/copy/CopyService";
 import StripeCheckoutOptions = stripe.StripeClientCheckoutOptions;
+import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
@@ -246,3 +247,18 @@ export function configureStripe(checkoutButtonId: string, planId: string = Confi
     });
 }
 
+export async function getSubscriptionDetails(): Promise<SubscriptionDetails | undefined> {
+    try {
+        if (!CactusMemberService.sharedInstance.currentMember?.hasActiveSubscription) {
+            return;
+        }
+        return (await request.get(Endpoint.subscriptionDetails, {headers: {...await getAuthHeaders()}})).data;
+    } catch (error) {
+        if (isAxiosError(error)) {
+            logger.error(`failed to fetch subscription details: ${error.response?.status}`, error.response?.data);
+        } else {
+            logger.error("Failed to fetch subscription details. ", error)
+        }
+        return;
+    }
+}

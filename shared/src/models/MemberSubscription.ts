@@ -38,7 +38,9 @@ export interface SubscriptionTrial {
 
 export interface MemberSubscription {
     tier: SubscriptionTier,
-    trial?: SubscriptionTrial
+    trial?: SubscriptionTrial,
+    stripeSubscriptionId?: string,
+    // appleSubscriptionId?: string,
 }
 
 export const DEFAULT_TRIAL_DAYS = 7;

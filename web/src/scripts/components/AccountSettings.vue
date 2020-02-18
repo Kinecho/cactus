@@ -157,6 +157,8 @@
     import Logger from "@shared/Logger";
     import PremiumPricing from "@components/PremiumPricing.vue";
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
+    import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+    import {getSubscriptionDetails} from "@web/checkoutService";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -215,6 +217,7 @@
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
             upgradeRoute: string,
+
         } {
             return {
                 authLoaded: false,
@@ -234,6 +237,7 @@
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
                 upgradeRoute: PageRoute.PAYMENT_PLANS,
+
             }
         },
         computed: {
@@ -442,6 +446,7 @@
         min-height: 100vh;
         justify-content: space-between;
         overflow: hidden;
+
         header, .centered {
             width: 100%;
         }

@@ -9,7 +9,9 @@ export enum BillingPeriod {
 }
 
 enum Fields {
-    availableForSale = "availableForSale"
+    availableForSale = "availableForSale",
+    stripePlanId = "stripe.planId",
+    appleProductId = "apple.productId",
 }
 
 

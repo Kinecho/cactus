@@ -16,7 +16,7 @@ export default class EnglishCopy extends LocalizedCopy {
     settings: LocaleSettings = {
         dates: {
             longFormat: "LLLL d, yyyy",
-            shortFormat: "L/d/yy",
+            shortFormat: "L/d/yyyy",
         }
     };
     pronouns: PronounCopy = {

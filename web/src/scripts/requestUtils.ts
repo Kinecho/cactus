@@ -19,6 +19,7 @@ export enum Endpoint {
     notifyFriendRequest = "social/notify-friend-request",
     activityFeed = "social/activity-feed",
     activityFeedSummary = "social/activity-feed-summary",
+    subscriptionDetails = "checkout/subscription-details",
 }
 
 export function initializeAxios(): AxiosInstance {
