@@ -1,7 +1,7 @@
 <template>
     <div class="container">
-        <h2>We're sorry to see you go!</h2>
-        <p>Please send us an email at help@cactus.app and we'll be happy to assist you</p>
+        <h2>You've downgraded to Basic.</h2>
+        <p>In the future, Cactus will not charge your payment method again. If you have questions or feedback, we'd love to hear from you.</p>
         <div class="actions">
             <a :href="`mailto:help@cactus.appp?subject=${subject}&body=${body}`" class="button primary" target="_blank">Send Email</a>
         </div>
@@ -54,6 +54,8 @@
         padding: 4rem;
         background-color: $darkestGreen;
         color: white;
+        max-width: 65rem;
+        text-align: center;
 
         .actions {
             margin-top: 3rem;
