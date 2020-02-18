@@ -16,6 +16,8 @@ import {stringifyJSON} from "@shared/util/ObjectUtil";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 const bodyParser = require('body-parser');
 
@@ -202,8 +204,16 @@ app.get("/subscription-details", async (req: express.Request, resp: express.Resp
     // const memberId = member.id!;
     const upcomingInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({member});
 
+    let subscriptionProduct: SubscriptionProduct | undefined;
+    const subscriptionProductId = member.subscription?.subscriptionProductId;
+    if (subscriptionProductId) {
+        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId)
+    }
+
+
     const subscriptionDetails: SubscriptionDetails = {
         upcomingInvoice: upcomingInvoice,
+        subscriptionProduct,
     };
 
     logger.info(`Subscription details for member ${member.email}: ${stringifyJSON(subscriptionDetails, 2)}`)

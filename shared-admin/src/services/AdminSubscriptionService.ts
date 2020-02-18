@@ -338,6 +338,9 @@ export default class AdminSubscriptionService {
             let defaultPaymentMethod: PaymentMethod | undefined;
             if (isStripePaymentMethod(stripeInvoice.default_payment_method)) {
                 defaultPaymentMethod = convertPaymentMethod(stripeInvoice.default_payment_method);
+            } else if (stripeCustomerId) {
+                this.logger.info("attempting to fetch customer's default payment method");
+                defaultPaymentMethod = await this.getDefaultStripeInvoicePaymentMethod(stripeCustomerId);
             }
             const invoice: SubscriptionInvoice = {
                 status: getInvoiceStatusFromStripeStatus(stripeInvoice.status),

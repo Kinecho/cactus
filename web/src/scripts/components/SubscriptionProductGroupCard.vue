@@ -344,9 +344,14 @@
     }
 
     .savings {
-        margin: 1rem 0 0;
+        background-color: transparentize($royal, .4);
+        border-radius: 0 0 .8rem .8rem;
+        font-size: 1.4rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        margin: .8rem -.8rem -.8rem;
+        padding: .4rem .8rem;
         text-transform: uppercase;
-        color: $darkGreen;
     }
 
     .group-footer {
