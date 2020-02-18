@@ -31,7 +31,7 @@ export enum SubscriptionTier {
 export interface ProductGroupFooter {
     textMarkdown?: string
     icon: IconType
-};
+}
 
 export default class SubscriptionProductGroup extends FlamelinkModel {
     readonly schema = SchemaName.subscriptionProductGroups;
@@ -48,7 +48,5 @@ export default class SubscriptionProductGroup extends FlamelinkModel {
         if (data) {
             Object.assign(this, data);
         }
-
     }
-
 }
