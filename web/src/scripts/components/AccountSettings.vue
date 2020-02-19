@@ -93,11 +93,10 @@
                     </div>
 
                     <div class="settings-group delete">
-                        <h3>{{copy.account.DELETE_ACCOUNT}}</h3>
                         <div class="item">
                             <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
                                 <img src="assets/images/trash.svg" alt=""/>
-                                {{copy.account.PERMANENTLY_DELETE_ACCOUNT}}
+                                {{copy.account.DELETE_ACCOUNT}}
                             </button>
                         </div>
                     </div>
@@ -165,7 +164,7 @@
     import Logger from "@shared/Logger";
 
 
-    
+
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
@@ -246,7 +245,7 @@
         },
         computed: {
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || 
+                return this.member?.promptSendTime ||
                        this.member?.getLocalPromptSendTimeFromUTC() ||
                        DEFAULT_PROMPT_SEND_TIME;
             },
@@ -492,6 +491,11 @@
 
     .settings-group {
         margin-bottom: 4.8rem;
+
+        &.delete {
+            border-top: $lightestGreen 1px solid;
+            padding-top: 4.8rem;
+        }
     }
 
     .provider-info {

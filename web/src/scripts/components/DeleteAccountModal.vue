@@ -5,13 +5,13 @@
             v-if="member"
     >
         <div slot="body" class="modalContainer">
-            <h2>Are you sure?</h2>
-            <p>This action is <strong>irreversable</strong> and will permanently delete on your Cactus data, including all your typed journal entries. If you are 100% sure, type the e-mail address associated with your account to unlock the delete button.</p>
+            <h2>Are you sure you want to permanently delete your Cactus account?</h2>
+            <p>This action is <strong>irreversable</strong> and will remove all of your Cactus data, including your journal entries. Enter the email address associated with your account to continue.</p>
             <div class="item">
-                <label for="emailConfirm" class="label">Type Account Email Address</label>
+                <label for="emailConfirm" class="label">Account Email Address</label>
                 <input v-model="confirmedEmail" type="text" name="emailConfirm">
             </div>
-            <button :disabled="isDeleting" class="item delete" v-if="isConfirmed" @click="deleteAccount">Delete Account</button>
+            <button :disabled="isDeleting" class="delete" v-if="isConfirmed" @click="deleteAccount">Delete my Account</button>
         </div>
     </modal>
 </template>
@@ -74,7 +74,7 @@
                     if (result.success) {
                         logger.log("Delete success");
                         await logout();
-                    } 
+                    }
                     this.isDeleting = false;
                     this.$emit('close');
                 }
@@ -91,16 +91,19 @@
 
     .modalContainer {
         @include shadowbox;
-        min-height: 34rem;
         padding: 3.2rem;
     }
 
     h2 {
-        margin-top: 1.6rem;
+        color: $red;
+        font-size: 2.4rem;
+        line-height: 1.3;
+        margin-bottom: .8rem;
+        padding-right: 4.8rem;
     }
 
     p {
-        margin-bottom: 3.2rem;
+        margin-bottom: 2.4rem;
         opacity: .8;
     }
 
@@ -120,8 +123,13 @@
         width: 100%;
     }
 
-    .save {
-        min-width: 16rem;
+    .delete {
+        background-color: $red;
+        display: block;
+
+        &:hover:enabled {
+            background-color: darken($red, 5%);
+        }
     }
 
 </style>
