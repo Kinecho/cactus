@@ -2,6 +2,10 @@
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <div class="upgrade-confirmation" v-if="upgradeConfirmed">
+            <h3>Upgraded to Cactus Plus!</h3>
+            <p>Questions? Feedback? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
+        </div>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -79,6 +83,8 @@
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {QueryParam} from "@shared/util/queryParams";
+    import {getQueryParam} from "@web/util";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -275,6 +281,10 @@
             isSticky(): boolean {
                 return false;
             },
+            upgradeConfirmed(): boolean {
+                const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+                return upgradeQueryParam === 'success';
+            }
         }
     })
 </script>
@@ -309,6 +319,14 @@
 
     section .heading {
         text-align: center;
+    }
+
+    .upgrade-confirmation {
+        max-width: 60rem;
+        margin: 5rem auto;
+        padding: 2rem;
+        border: 1px solid $darkGreen;
+        border-radius: 12px;
     }
 
     .section-container {
