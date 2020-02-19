@@ -463,7 +463,7 @@
 
     .centered.content {
         flex-grow: 1;
-        max-width: 70rem;
+        max-width: 80rem;
         padding: 6.4rem 2.4rem;
         text-align: left;
     }
