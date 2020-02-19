@@ -18,7 +18,7 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
 import {
     convertPaymentMethod,
-    getInvoiceStatusFromStripeStatus,
+    getInvoiceStatusFromStripeStatus, getStripeId,
     isStripePaymentMethod
 } from "@admin/util/AdminStripeUtils";
 
@@ -293,6 +293,26 @@ export default class AdminSubscriptionService {
         }
     }
 
+    async updateStripeCustomer(customerId: string, settings: Stripe.CustomerUpdateParams): Promise<Stripe.Customer | undefined> {
+        try {
+            return await this.stripe.customers.update(customerId, settings);
+        } catch (error) {
+            this.logger.error(`Failed to update stripe customer ${customerId}`, error);
+            return;
+        }
+    }
+
+    async updateStripeSubscriptionDefaultPaymentMethod(subscriptionId: string, paymentMethodId: string): Promise<Stripe.Subscription | undefined> {
+        try {
+            return await this.stripe.subscriptions.update(subscriptionId, {
+                default_payment_method: paymentMethodId,
+            })
+        } catch (error) {
+            this.logger.error(`Failed to update the default payment method in subscription ${subscriptionId}`, error);
+            return;
+        }
+    }
+
     async getDefaultStripeSourceId(customerId: string): Promise<string | undefined> {
         const customer = await this.getStripeCustomer(customerId);
         if (!customer) {
@@ -346,6 +366,30 @@ export default class AdminSubscriptionService {
         }
     }
 
+    async getDefaultPaymentMethodFromStripeInvoice(invoice: Stripe.Invoice): Promise<Stripe.PaymentMethod | undefined> {
+        const stripeCustomerId: string | null = isString(invoice.customer) ? invoice.customer : invoice.customer.id;
+        if (isStripePaymentMethod(invoice.default_payment_method)) {
+            return invoice.default_payment_method
+        }
+        const subscription = isString(invoice.subscription) ? await this.getStripeSubscription(invoice.subscription) : invoice.subscription;
+        const subPaymentMethod = subscription?.default_payment_method;
+        if (isStripePaymentMethod(subPaymentMethod)) {
+            return subPaymentMethod;
+        }
+        const subPaymentMethodId = getStripeId(subPaymentMethod);
+        if (subPaymentMethodId) {
+            return await this.getStripePaymentMethod(subPaymentMethodId);
+        }
+        if (stripeCustomerId) {
+            this.logger.info("attempting to fetch customer's default payment method");
+            const customer = await this.getStripeCustomer(stripeCustomerId, ["invoice_settings.default_payment_method"]);
+            const invoiceSettingsPaymentMethod = customer?.invoice_settings?.default_payment_method;
+            if (isStripePaymentMethod(invoiceSettingsPaymentMethod)) {
+                return invoiceSettingsPaymentMethod;
+            }
+        }
+        return;
+    }
 
     async getUpcomingStripeInvoice(options: { customerId?: string, subscriptionId?: string }): Promise<SubscriptionInvoice | undefined> {
         const {customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId} = options;
@@ -357,36 +401,19 @@ export default class AdminSubscriptionService {
             const stripeInvoice = await this.stripe.invoices.retrieveUpcoming({
                 customer: stripeCustomerId,
                 subscription: stripeSubscriptionId,
-                expand: ["default_payment_method"]
+                expand: ["default_payment_method", "subscription.default_payment_method"]
             });
             if (!stripeInvoice) {
                 this.logger.info("No upcoming invoices found.");
                 return undefined;
             }
 
-            //TODO: This needs to be refactored out to its own method
-            let defaultPaymentMethod: PaymentMethod | undefined;
-            if (isStripePaymentMethod(stripeInvoice.default_payment_method)) {
-                defaultPaymentMethod = convertPaymentMethod(stripeInvoice.default_payment_method);
-            } else if (stripeSubscriptionId) {
-                const stripeSubscription = await this.getStripeSubscription(stripeSubscriptionId);
-                const subPaymentMethod = stripeSubscription?.default_payment_method;
-                if (isStripePaymentMethod(subPaymentMethod)) {
-                    defaultPaymentMethod = convertPaymentMethod(subPaymentMethod);
-                } else if (isString(subPaymentMethod)) {
-                    const pm = await this.getStripePaymentMethod(subPaymentMethod)
-                    if (isStripePaymentMethod(pm)) {
-                        defaultPaymentMethod = convertPaymentMethod(pm);
-                    }
-                }
-            } else if (stripeCustomerId) {
-                this.logger.info("attempting to fetch customer's default payment method");
-                defaultPaymentMethod = await this.getDefaultStripeInvoicePaymentMethod(stripeCustomerId);
-            }
+            const stripePaymentMethod = await this.getDefaultPaymentMethodFromStripeInvoice(stripeInvoice);
+
             const invoice: SubscriptionInvoice = {
                 status: getInvoiceStatusFromStripeStatus(stripeInvoice.status),
                 amountCentsUsd: stripeInvoice.total,
-                defaultPaymentMethod,
+                defaultPaymentMethod: convertPaymentMethod(stripePaymentMethod),
                 periodStart_epoch_seconds: stripeInvoice.period_start,
                 periodEnd_epoch_seconds: stripeInvoice.period_end,
                 nextPaymentDate_epoch_seconds: stripeInvoice.next_payment_attempt || undefined,
@@ -450,6 +477,19 @@ export default class AdminSubscriptionService {
             }
         }
         return member;
+    }
+
+    async fetchStripeSetupIntent(setupIntentId?: string): Promise<Stripe.SetupIntent | undefined> {
+        if (!setupIntentId) {
+            return;
+        }
+
+        try {
+            return await this.stripe.setupIntents.retrieve(setupIntentId);
+        } catch (error) {
+            this.logger.error(`Failed to fetch setup intent with id ${setupIntentId}`);
+            return;
+        }
     }
 
     async fetchStripePlan(planId?: string): Promise<Stripe.Plan | undefined> {

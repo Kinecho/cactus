@@ -179,7 +179,10 @@ export function buildPaymentMethodFromCard(stripeCard: Stripe.Card): PaymentMeth
     };
 }
 
-export function convertPaymentMethod(stripeMethod: Stripe.PaymentMethod, defaultSourceId?: string | undefined): PaymentMethod | undefined {
+export function convertPaymentMethod(stripeMethod?: Stripe.PaymentMethod, defaultSourceId?: string | undefined): PaymentMethod | undefined {
+    if (!stripeMethod) {
+        return;
+    }
     const stripeCard = stripeMethod.card;
     if (!stripeCard) {
         return undefined;

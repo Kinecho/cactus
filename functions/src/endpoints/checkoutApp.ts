@@ -3,7 +3,12 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import Stripe from "stripe";
 import {getConfig, getHostname} from "@admin/config/configService";
-import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
+import {
+    CreateSessionRequest,
+    CreateSessionResponse,
+    CreateSetupSubscriptionSessionRequest,
+    CreateSetupSubscriptionSessionResponse
+} from "@shared/api/CheckoutTypes";
 import {QueryParam} from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
 import {getAuthUserId} from "@api/util/RequestUtil";
@@ -19,6 +24,7 @@ import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {appendQueryParams} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
+import {PageRoute} from "@shared/PageRoutes";
 
 const bodyParser = require('body-parser');
 
@@ -63,7 +69,7 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
         return;
     }
 
-    const result = await StripeWebhookService.getSharedInstance().handleEvent(event);
+    const result = await StripeWebhookService.getSharedInstance().handleWebhookEvent(event);
     logger.info("Processed webhook event: ", result.type);
     res.status(result.statusCode).send(result);
 
@@ -71,13 +77,70 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
 });
 
 /**
- * Get a session ID for stripe checkout
+ * Get a sessionID to setup a subscription
+ */
+app.post("/sessions/setup-subscription", async (req: express.Request, res: express.Response) => {
+    const userId = await getAuthUserId(req);
+
+    const response: CreateSetupSubscriptionSessionResponse = {success: false};
+    if (!userId) {
+        logger.info("You must be authenticated to create a checkout session.");
+        response.error = "You must be logged in to create a checkout session";
+        res.status(401).send(response);
+        return;
+    }
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        response.error = "You must have a member associated with your account to create a checkout session";
+        res.status(403).send(response);
+        return;
+    }
+
+    const stripeSubscriptionId = member?.subscription?.stripeSubscriptionId;
+    const stripeCustomerId = member?.stripeCustomerId;
+    if (!stripeSubscriptionId || !stripeCustomerId) {
+        response.error = "member does not have all of the required stripe fields: subscription, customerId";
+        res.status(400).send(response);
+        return;
+    }
+    const {successUrl, cancelUrl} = req.body as CreateSetupSubscriptionSessionRequest;
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'setup',
+            customer_email: member.email || undefined,
+            setup_intent_data: {
+                metadata: {
+                    memberId: memberId,
+                    customerId: stripeCustomerId,
+                    subscriptionId: stripeSubscriptionId,
+                }
+            },
+            success_url: successUrl || `${getHostname()}${PageRoute.ACCOUNT}?${QueryParam.MESSAGE}=${encodeURIComponent("Your payment settings have been successfully updated.")}`,
+            cancel_url: cancelUrl || `${getHostname()}${PageRoute.ACCOUNT}`,
+        });
+        response.sessionId = session.id;
+        response.success = true;
+        res.send(response);
+        return;
+    } catch (error) {
+        logger.error("Failed to create stripe session", error);
+        response.error = "Unable to create stripe session";
+        response.success = false;
+        res.send(response);
+        return;
+    }
+});
+
+/**
+ * Get a session ID for stripe checkout. Requires authentication.
  *
  * Note: Unlike sessions created via the Client integration,
  * sessions created via the Server integration do not support creating subscriptions with trial_period_days set at the Plan level.
  * To set a trial period, please pass the desired trial length as the value of the subscription_data.trial_period_days argument.
  */
-app.post("/sessions", async (req: express.Request, res: express.Response) => {
+app.post("/sessions/create-subscription", async (req: express.Request, res: express.Response) => {
     try {
         const userId = await getAuthUserId(req);
 

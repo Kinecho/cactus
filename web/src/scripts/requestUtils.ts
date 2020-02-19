@@ -9,7 +9,7 @@ export enum Endpoint {
     mailchimp = "mailchimp",
     inbound = "inbound",
     checkout = "checkout",
-    checkoutSessions = "checkout/sessions",
+    checkoutSessions = "checkout/sessions/create-subscription",
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
     updateSubscriberStatus = "mailchimp/status",
@@ -20,6 +20,7 @@ export enum Endpoint {
     activityFeed = "social/activity-feed",
     activityFeedSummary = "social/activity-feed-summary",
     subscriptionDetails = "checkout/subscription-details",
+    subscriptionSetup = "checkout/sessions/setup-subscription"
 }
 
 export function initializeAxios(): AxiosInstance {

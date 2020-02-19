@@ -1,6 +1,11 @@
 import {Config} from "@web/config";
 import {QueryParam} from "@shared/util/queryParams";
-import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
+import {
+    CreateSessionRequest,
+    CreateSessionResponse,
+    CreateSetupSubscriptionSessionRequest,
+    CreateSetupSubscriptionSessionResponse
+} from "@shared/api/CheckoutTypes";
 import {Endpoint, getAuthHeaders, isAxiosError, request} from "@web/requestUtils";
 import {gtag} from "@web/analytics";
 import Logger from "@shared/Logger";
@@ -136,6 +141,14 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
     return {isLoggedIn: true, isRedirecting: true};
 }
 
+export async function startStripeCheckoutSession(sessionId: string): Promise<{ error?: any }> {
+    const response = await stripe.redirectToCheckout({sessionId});
+    if (response.error) {
+        logger.error("Failed to send to checkout", response.error);
+    }
+    return response;
+}
+
 export async function getSubscriptionDetails(): Promise<SubscriptionDetails | undefined> {
     try {
         if (!CactusMemberService.sharedInstance.currentMember?.hasActiveSubscription) {
@@ -149,5 +162,20 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetails | un
             logger.error("Failed to fetch subscription details. ", error)
         }
         return;
+    }
+}
+
+export async function getUpdatePaymentMethodSession(data: CreateSetupSubscriptionSessionRequest): Promise<CreateSetupSubscriptionSessionResponse> {
+    try {
+        const response = await request.post(Endpoint.subscriptionSetup, data, {headers: {...await getAuthHeaders()}});
+        logger.info("Fetched update payment method session response", response.data);
+        return response.data;
+    } catch (error) {
+        if (isAxiosError(error)) {
+            logger.error("Failed to get session", error.response?.data);
+        } else {
+            logger.error("Failed to get session", error);
+        }
+        return {error: "Unable to fetch session", success: false};
     }
 }

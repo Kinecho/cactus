@@ -30,6 +30,8 @@
             </div>
             <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
 
+            <button class="secondary button" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">Update Payment Method</button>
+
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
                 <downgrade-form slot="body" :member="member"/>
             </modal>
@@ -47,7 +49,12 @@
     import Modal from "@components/Modal.vue";
     import DowngradeSubscriptionForm from "@components/DowngradeSubscriptionForm.vue";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {getSubscriptionDetails} from "@web/checkoutService";
+    import {
+        getSubscriptionDetails,
+        getUpdatePaymentMethodSession,
+        redirectToStripeCheckout,
+        startCheckout, startStripeCheckoutSession
+    } from "@web/checkoutService";
     import {formatDate} from "@shared/util/DateUtil";
     import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
     import CopyService from "@shared/copy/CopyService";
@@ -73,11 +80,13 @@
             showDowngradeModal: boolean,
             subscriptionDetailsLoading: boolean,
             subscriptionDetails: SubscriptionDetails | undefined,
+            loadingUpdatePaymentMethod: boolean,
         } {
             return {
                 showDowngradeModal: false,
                 subscriptionDetailsLoading: false,
                 subscriptionDetails: undefined,
+                loadingUpdatePaymentMethod: false,
             }
         },
         beforeMount(): void {
@@ -136,6 +145,25 @@
                 this.subscriptionDetails = await getSubscriptionDetails();
                 this.subscriptionDetailsLoading = false;
             },
+            handleError(error: string): void {
+                //todo: handle error
+            },
+            async updatePaymentMethod() {
+                this.loadingUpdatePaymentMethod = true;
+                const sessionResponse = await getUpdatePaymentMethodSession({});
+                if (!sessionResponse.success || !sessionResponse.sessionId) {
+                    this.handleError("Unable to update payment method at this time. Please try again later.");
+                    this.loadingUpdatePaymentMethod = false;
+                    return;
+                }
+                const redirectResponse = await startStripeCheckoutSession(sessionResponse.sessionId);
+                if (redirectResponse.error) {
+                    this.handleError("Unable to update payment method at this time. Please try again later.");
+                    this.loadingUpdatePaymentMethod = false
+                    return;
+                }
+                // this.loadingUpdatePaymentMethod = true
+            }
         }
     })
 </script>

@@ -12,3 +12,14 @@ export interface CreateSessionResponse {
     sessionId?: string,
     amount?: number|null|undefined,
 }
+
+export interface CreateSetupSubscriptionSessionRequest {
+    successUrl?: string,
+    cancelUrl?: string,
+}
+
+export interface CreateSetupSubscriptionSessionResponse {
+    success: boolean,
+    sessionId?: string,
+    error?: string,
+}
