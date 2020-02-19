@@ -21,7 +21,7 @@ import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
 import {appendQueryParams} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import {PageRoute} from "@shared/PageRoutes";
@@ -64,6 +64,15 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
         webhookSigningKey: config.stripe.webhook_signing_secrets.main
     });
     if (!event) {
+        const stripeType = req.body?.type || "unknown";
+        const slackPayload = {body: req.body, headers: req.headers};
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            data: stringifyJSON(slackPayload, 2),
+            fileType: "json",
+            message: `:stripe: \`${stripeType}\` webhook failed. No event was parsed from the body. Perhaps the signature was invalid?`,
+            filename: `stripe-failed-webhook-${stripeType.replace(".", "-")}-${(new Date()).toISOString()}.json`,
+            channel: ChannelName.engineering
+        });
         logger.error("Unable to construct the signed stripe event");
         res.status(400).send("Unable to parse the stripe event. Perhaps it wasn't able verify the signature? ");
         return;
