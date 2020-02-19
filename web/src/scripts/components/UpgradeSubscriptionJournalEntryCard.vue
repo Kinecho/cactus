@@ -43,7 +43,7 @@
             trialDaysLeftHeader(): string {
                 if (this.member?.daysLeftInTrial) {
                     const days = this.member?.daysLeftInTrial;
-                    return CopyService.getSharedInstance().getTrialDaysLeft(days);
+                    return CopyService.getSharedInstance().getTrialDaysLeftLong(days, true);
                 }
                 return '';
             },

@@ -41,11 +41,18 @@ export default class CopyService {
         }
     }
 
-    getTrialDaysLeft(days: number): string {
+    getTrialDaysLeftShort(days: number, useEndsToday: boolean = false): string {
         if (days === 1) {
-            return this.copy.common.TRIAL_ENDS_TODAY;
+            return useEndsToday ? this.copy.common.TRIAL_ENDS_TODAY : `${days} ${this.copy.common.DAY_LEFT}`;
         } else {
-            return `${days} ${this.copy.common.DAYS_LEFT}`;
+            return `${days} ${this.copy.common.DAYS_LEFT_IN_TRIAL}`;
+        }
+    }
+    getTrialDaysLeftLong(days: number, useEndsToday: boolean = false): string {
+        if (days === 1) {
+            return useEndsToday ? this.copy.common.TRIAL_ENDS_TODAY : `${days} ${this.copy.common.DAY_LEFT_IN_TRIAL}`;
+        } else {
+            return `${days} ${this.copy.common.DAYS_LEFT_IN_TRIAL}`;
         }
     }
 }
