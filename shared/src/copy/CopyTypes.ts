@@ -58,6 +58,7 @@ export interface CommonCopy {
     DAYS_LEFT_IN_TRIAL: string,
     DAY_LEFT_IN_TRIAL: string,
     TRIAL_ENDS_TODAY: string,
+    ENDS_TODAY: string,
     TRIAL: string,
     LEARN_MORE: string,
 }
