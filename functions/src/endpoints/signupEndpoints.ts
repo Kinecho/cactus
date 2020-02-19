@@ -265,6 +265,11 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId)
         ]);
 
+        const trialStartedAt = member?.subscription?.trial?.startedAt;
+        const trialEndAt = member?.subscription?.trial?.endsAt;
+        logger.info("typeof trial.startedAt = ",  typeof (trialStartedAt));
+        logger.info("typeof trial.endAt = ",  typeof (trialEndAt));
+
         if (!user) {
             resp.status(400).send({message: `Unable to find a user for userId ${userId}`});
             return;
