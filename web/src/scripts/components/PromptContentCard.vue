@@ -105,9 +105,9 @@
 
             <!--    START Invite Friend  -->
             <prompt-content-card-invite-friend
-                v-if="processedContent.invite"
-                @skip="next()"
-                @disableNavigation="disableNavigation()" />
+                    v-if="processedContent.invite"
+                    @skip="next()"
+                    @disableNavigation="disableNavigation()"/>
             <!--    END Invite Friend    -->
 
             <!--    START Grow -->
@@ -298,13 +298,12 @@
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
     import Logger from "@shared/Logger";
-    import {gtag} from "@web/analytics"
+    import {gtag} from "@web/analytics";
+    import MarkdownText from "@components/MarkdownText.vue"
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
     const copy = CopyService.getSharedInstance().copy;
-
-    // Vue.use(VueSimpleMarkdown);
 
     export default Vue.extend({
         components: {
@@ -317,7 +316,7 @@
             PromptContentCardElements,
             PromptContentCardInviteFriend,
             ElementDescriptionModal,
-            MarkdownText: () => import("@components/MarkdownText.vue")
+            MarkdownText,
         },
         props: {
             content: {

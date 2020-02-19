@@ -45,7 +45,7 @@ export default class CopyService {
         if (days === 1) {
             return useEndsToday ? this.copy.common.TRIAL_ENDS_TODAY : `${days} ${this.copy.common.DAY_LEFT}`;
         } else {
-            return `${days} ${this.copy.common.DAYS_LEFT_IN_TRIAL}`;
+            return `${days} ${this.copy.common.DAYS_LEFT}`;
         }
     }
     getTrialDaysLeftLong(days: number, useEndsToday: boolean = false): string {
