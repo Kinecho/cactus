@@ -173,14 +173,14 @@
                     return;
                 }
 
-                const stripePlanId = product.stripePlanId;
-                if (!stripePlanId) {
-                    this.checkoutError = "The product does not have a plan id. Can not continue checkout";
+                const subscriptionProductId = product.entryId;
+                if (!subscriptionProductId) {
+                    this.checkoutError = "The product does not have an entry id. Can not continue checkout";
                     console.log(this.checkoutError);
                     this.isProcessing = false;
                     return;
                 }
-                await startCheckout({stripePlanId})
+                await startCheckout({subscriptionProductId})
             },
             goToAccount() {
                 this.isProcessing = false;

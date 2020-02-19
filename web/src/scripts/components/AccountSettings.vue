@@ -45,8 +45,8 @@
 
                     <div class="settings-group subscription">
                         <h2>{{copy.common.SUBSCRIPTION}}</h2>
-                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!member.hasActiveSubscription"/>
-                        <manage-subscription v-else :member="member"/>
+                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!hasActiveSubscription"/>
+                        <manage-subscription v-if="hasActiveSubscription" :member="member"/>
                     </div>
 
                     <div class="settings-group notifications">
@@ -157,8 +157,6 @@
     import Logger from "@shared/Logger";
     import PremiumPricing from "@components/PremiumPricing.vue";
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
-    import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
-    import {getSubscriptionDetails} from "@web/checkoutService";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -241,6 +239,9 @@
             }
         },
         computed: {
+            hasActiveSubscription(): boolean {
+                return this.member?.hasActiveSubscription ?? false;
+            },
             promptSendTime(): PromptSendTime {
                 return this.member?.promptSendTime ||
                     this.member?.getLocalPromptSendTimeFromUTC() ||

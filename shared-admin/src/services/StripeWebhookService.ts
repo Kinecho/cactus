@@ -120,11 +120,12 @@ export default class StripeWebhookService {
 
         const subscription = cactusMember.subscription ?? getDefaultSubscription();
         subscription.tier = SubscriptionTier.PLUS;
+        subscription.subscriptionProductId = subscriptionProduct?.entryId;
         subscription.stripeSubscriptionId = getStripeId(session.subscription);
 
         (subscription.trial || getDefaultTrial()).activatedAt = new Date();
         cactusMember.stripeCustomerId = getCustomerId(session.customer);
-
+        cactusMember.subscription = subscription;
         const payment = Payment.fromStripeCheckoutSession({
             memberId,
             session,

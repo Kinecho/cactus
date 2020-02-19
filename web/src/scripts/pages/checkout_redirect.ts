@@ -1,14 +1,7 @@
 import "@styles/pages/checkout_redirect.scss"
-import {
-    configureStripe,
-    redirectToCheckoutWithPlanId,
-    redirectToCheckoutWithSessionId,
-    startCheckout
-} from "@web/checkoutService";
-import {Config} from "@web/config";
+import {startCheckout} from "@web/checkoutService";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
-import {CreateSessionRequest} from "@shared/api/CheckoutTypes";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 
@@ -19,26 +12,13 @@ commonInit();
 document.addEventListener('DOMContentLoaded', async () => {
     logger.log("checkout monthly loaded");
 
+    const subscriptionProductId = getQueryParam(QueryParam.SUBSCRIPTION_PRODUCT_ID);
 
-    const productParam = getQueryParam(QueryParam.SUBSCRIPTION_PLAN);
-
-    let planId: string | undefined = undefined;
-
-    if (productParam && productParam.toLowerCase() === "y") {
-        planId = Config.stripe.yearlyPlanId;
-    } else if (productParam && productParam.toLowerCase() === "m") {
-        planId = Config.stripe.monthlyPlanId;
-    } else if (productParam) {
-        planId = productParam;
-    }
-
-
-    if (!planId) {
+    if (!subscriptionProductId) {
         logger.error("No plan id provided. show error message");
         showError("It looks like this link is no longer valid. Please try again later.")
     } else {
-        configureStripe('checkout-button', planId);
-        await startCheckout({stripePlanId: planId});
+        await startCheckout({subscriptionProductId: subscriptionProductId});
     }
 
 });

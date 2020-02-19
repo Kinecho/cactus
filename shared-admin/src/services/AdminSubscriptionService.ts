@@ -377,4 +377,49 @@ export default class AdminSubscriptionService {
 
         return invoice;
     }
+
+    /**
+     * Create and save a stripe customer to a cactus member object.
+     * If the stripe customer already exists on the cactus member,
+     * this method will immediately return the provided cactus member.
+     *
+     * @param {CactusMember} member
+     * @return {Promise<CactusMember>}
+     */
+    async addStripeCustomerToMember(member: CactusMember): Promise<CactusMember> {
+        const memberId = member.id;
+        if (!member.stripeCustomerId && memberId) {
+            try {
+                this.logger.info(`Creating stripe customer for ${member.email}`);
+                const customer = await this.stripe.customers.create({
+                    email: member.email,
+                    name: member.getFullName(),
+                    metadata: {
+                        "memberId": memberId,
+                        "userId": member.userId ?? "",
+                    }
+                });
+                member.stripeCustomerId = customer.id;
+                this.logger.info(`Successfully created stripe customer ${customer.id} for cactus member ${member.email}`);
+
+                return await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false})
+            } catch (error) {
+                this.logger.error(`Error while creating stripe customer for member ${member.email}`, error);
+                return member;
+            }
+        }
+        return member;
+    }
+
+    async fetchStripePlan(planId?: string): Promise<Stripe.Plan | undefined> {
+        if (!planId) {
+            return undefined;
+        }
+        try {
+            return await this.stripe.plans.retrieve(planId);
+        } catch (error) {
+            this.logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+            return;
+        }
+    }
 }

@@ -1,16 +1,7 @@
 export interface CreateSessionRequest {
+    subscriptionProductId: string,
     successUrl?: string,
     cancelUrl?: string,
-    preOrder?: boolean,
-    planId?: string,
-    items?: [{
-        name: string,
-        currency: string,
-        amount: number,
-        quantity: number,
-        description?: string,
-        images?: string[],
-    }]
 }
 
 
@@ -20,5 +11,4 @@ export interface CreateSessionResponse {
     unauthorized?: boolean,
     sessionId?: string,
     amount?: number|null|undefined,
-    planId?:string,
 }
