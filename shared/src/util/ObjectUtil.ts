@@ -104,7 +104,7 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * @return {any}
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
-    if (depth >= 10) {
+    if (depth >= 100) {
         logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
         return input;
     }
@@ -163,8 +163,8 @@ export function stringifyJSON(input: any, space?: number): string {
         }
         return value;
     }
-
-    return JSON.stringify(input, replacer, space);
+    const copy = Object.assign({}, input);
+    return JSON.stringify(copy, replacer, space);
 }
 
 export function chunkArray<T>(list: T[], batchSize: number): (T[])[] {
