@@ -158,7 +158,7 @@ app.post("/sessions/create-subscription", async (req: express.Request, res: expr
         }
         const {
             subscriptionProductId,
-            successUrl = `${getHostname()}/success`,
+            successUrl = `${getHostname()}/home?${QueryParam.UPGRADE_SUCCESS}=success`,
             cancelUrl = `${getHostname()}/pricing`
         } = req.body as CreateSessionRequest;
 
