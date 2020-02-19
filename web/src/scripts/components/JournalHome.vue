@@ -5,12 +5,15 @@
         <snackbar-content
             class="upgrade-confirmation"
             v-if="upgradeConfirmed"
-            text="Upgraded to Cactus Plus! Questions? Feedback? Email us at help@cactus.app"
             :closeable="true"
             :key="upgrade"
             :autoHide="false"
-            color="success"
-        />
+            color="successAlt">
+            <div slot="text" class="centered">
+                <h3>Welcome to Cactus Plus!</h3>
+                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+            </div>
+        </snackbar-content>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -329,11 +332,26 @@
     }
 
     .upgrade-confirmation {
-        max-width: 65rem;
-        margin: 5rem auto;
-        padding: 3rem 2rem;
-        border-radius: 12px;
+        border-radius: 0;
         display: block;
+        padding: 3.2rem 2.4rem;
+
+        .centered {
+            max-width: 64rem;
+        }
+
+        h3 {
+            font-size: 2.4rem;
+            margin-bottom: .4rem;
+        }
+
+        p {
+            opacity: .9;
+        }
+
+        a {
+            @include fancyLinkLight;
+        }
     }
 
     .section-container {

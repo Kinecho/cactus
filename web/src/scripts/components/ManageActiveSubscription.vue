@@ -6,8 +6,7 @@
         </div>
         <div v-else>
             <h3 class="tier">{{tierName}}<button @click="downgrade" class="button tertiary small changePlan">Change Plan</button></h3>
-            <h3 v-if="billingPeriod">{{billingPeriod}}</h3>
-            <p v-if="!subscriptionDetailsLoading">Your next bill is for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
+            <p v-if="!subscriptionDetailsLoading">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
             <div class="card-info">
                 <img class="ccIcon" src="assets/icons/creditCard.svg" alt="" />
                 <div class="cardDetails">
