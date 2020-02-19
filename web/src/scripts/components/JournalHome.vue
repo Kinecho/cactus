@@ -2,10 +2,15 @@
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
-        <div class="upgrade-confirmation" v-if="upgradeConfirmed">
-            <h3>Upgraded to Cactus Plus!</h3>
-            <p>Questions? Feedback? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a></p>
-        </div>
+        <snackbar-content
+            class="upgrade-confirmation"
+            v-if="upgradeConfirmed"
+            text="Upgraded to Cactus Plus! Questions? Feedback? Email us at help@cactus.app"
+            :closeable="true"
+            :key="upgrade"
+            :autoHide="false"
+            color="success"
+        />
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -85,6 +90,7 @@
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import {QueryParam} from "@shared/util/queryParams";
     import {getQueryParam} from "@web/util";
+    import SnackbarContent from "@components/SnackbarContent.vue";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -112,6 +118,7 @@
             SkeletonCard,
             Spinner,
             UpgradeCard: UpgradeSubscriptionJournalEntryCard,
+            SnackbarContent
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
@@ -322,11 +329,11 @@
     }
 
     .upgrade-confirmation {
-        max-width: 60rem;
+        max-width: 65rem;
         margin: 5rem auto;
-        padding: 2rem;
-        border: 1px solid $darkGreen;
+        padding: 3rem 2rem;
         border-radius: 12px;
+        display: block;
     }
 
     .section-container {
