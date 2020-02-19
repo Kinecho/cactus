@@ -504,12 +504,7 @@
     }
 
     .provider-info {
-        align-items: center;
-        background-color: lighten($lightestGreen, 9%);
-        border-radius: .8rem;
-        display: flex;
-        padding: .4rem 1.6rem;
-        width: 100%;
+        @include accountBox;
 
         &:hover {
             background-color: $lightestGreen;
