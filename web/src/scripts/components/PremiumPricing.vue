@@ -143,7 +143,7 @@
                 if (!member) {
                     return undefined;
                 }
-                return `${member.daysLeftInTrial} ${copy.common.DAYS_LEFT}`
+                return CopyService.getSharedInstance().getTrialDaysLeft(member.daysLeftInTrial);
             },
             isAndroidApp(): boolean {
                 return isAndroidApp();

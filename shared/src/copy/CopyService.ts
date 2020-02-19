@@ -41,6 +41,13 @@ export default class CopyService {
         }
     }
 
+    getTrialDaysLeft(days: number): string {
+        if (days === 1) {
+            return this.copy.common.TRIAL_ENDS_TODAY;
+        } else {
+            return `${days} ${this.copy.common.DAYS_LEFT}`;
+        }
+    }
 }
 
 

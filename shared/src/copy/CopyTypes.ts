@@ -54,7 +54,10 @@ export interface CommonCopy {
     HOUR: string,
     MINUTE: string,
     DAYS_LEFT: string,
+    DAY_LEFT: string,
     DAYS_LEFT_IN_TRIAL: string,
+    DAY_LEFT_IN_TRIAL: string,
+    TRIAL_ENDS_TODAY: string,
     TRIAL: string,
     LEARN_MORE: string,
 }

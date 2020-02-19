@@ -2,7 +2,8 @@
     <div :class="[`upgradeJournal`, isTrialing ? 'upgrade' : 'basic']">
         <div class="centered" v-if="isTrialing">
             <h3>{{trialDaysLeftHeader}}</h3>
-            <p>After your trial of Cactus Plus, new prompts will only occasionally be sent. Give your reflection practice momentum by receiving a fresh prompt, every day.</p>
+            <p>After your trial of Cactus Plus, new prompts will only occasionally be sent. Give your reflection
+                practice momentum by receiving a fresh prompt, every day.</p>
             <a :href="upgradeRoute" class="btn button primary">Go Plus</a>
         </div>
         <div class="centered" v-else>
@@ -17,14 +18,16 @@
     import Vue from "vue";
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from '@shared/models/CactusMember';
+    import CopyService from "@shared/copy/CopyService";
 
+    const copy = CopyService.getSharedInstance().copy
     export default Vue.extend({
         created() {
 
         },
         props: {
-            member: { type: CactusMember },
-            hasPromptToday: { type: Boolean }
+            member: {type: CactusMember},
+            hasPromptToday: {type: Boolean}
         },
         data(): {
             upgradeRoute: string
@@ -40,11 +43,7 @@
             trialDaysLeftHeader(): string {
                 if (this.member?.daysLeftInTrial) {
                     const days = this.member?.daysLeftInTrial;
-                    if (days === 1) {
-                        return 'Trial ends today';
-                    } else {
-                        return days + ' days left';
-                    }
+                    return CopyService.getSharedInstance().getTrialDaysLeft(days);
                 }
                 return '';
             },
