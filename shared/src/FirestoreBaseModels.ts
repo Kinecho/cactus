@@ -77,7 +77,8 @@ export abstract class BaseModel implements FirestoreIdentifiable {
 
     toJSON(removeKeys = ["collection"]): any {
         try {
-            const data = convertDateToJSON(this);
+            const copy = Object.assign({}, this);
+            const data = convertDateToJSON(copy);
             const keysToRemove = Array.isArray(removeKeys) ? removeKeys : ["collection"];
             if (keysToRemove && Array.isArray(keysToRemove) && data) {
                 keysToRemove.forEach(key => {
