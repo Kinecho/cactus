@@ -28,9 +28,12 @@
                 <span class="last4" v-if="last4">&bull;&bull;&bull;&bull;{{last4}}</span>
                 <span class="wallet" v-if="digitalWallet && digitalWallet.displayName">{{digitalWallet.displayName}}</span>
             </div>
-            <button @click="downgrade" class="button secondary small">Downgrade to {{basicTierName}}</button>
 
-            <button class="secondary button" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">Update Payment Method</button>
+            <button class="secondary button small" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
+                Update Payment Method
+            </button>
+
+            <button @click="downgrade" class="button tertiary small">Downgrade to {{basicTierName}}</button>
 
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
                 <downgrade-form slot="body" :member="member"/>
@@ -64,6 +67,7 @@
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
+    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -145,24 +149,31 @@
                 this.subscriptionDetails = await getSubscriptionDetails();
                 this.subscriptionDetailsLoading = false;
             },
-            handleError(error: string): void {
+            handleError(error: SnackbarMessage): void {
                 //todo: handle error
+                this.$emit("error", error);
             },
             async updatePaymentMethod() {
                 this.loadingUpdatePaymentMethod = true;
                 const sessionResponse = await getUpdatePaymentMethodSession({});
                 if (!sessionResponse.success || !sessionResponse.sessionId) {
-                    this.handleError("Unable to update payment method at this time. Please try again later.");
+                    this.handleError({
+                        message: "Unable to update payment method at this time. Please try again later.",
+                        color: "danger"
+                    });
                     this.loadingUpdatePaymentMethod = false;
                     return;
                 }
                 const redirectResponse = await startStripeCheckoutSession(sessionResponse.sessionId);
                 if (redirectResponse.error) {
-                    this.handleError("Unable to update payment method at this time. Please try again later.");
-                    this.loadingUpdatePaymentMethod = false
+                    this.handleError({
+                        message: "Unable to update payment method at this time. Please try again later.",
+                        color: "danger"
+                    });
+                    this.loadingUpdatePaymentMethod = false;
                     return;
                 }
-                // this.loadingUpdatePaymentMethod = true
+                this.loadingUpdatePaymentMethod = true;
             }
         }
     })

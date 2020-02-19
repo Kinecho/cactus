@@ -46,7 +46,7 @@
                     <div class="settings-group subscription">
                         <h2>{{copy.common.SUBSCRIPTION}}</h2>
                         <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!hasActiveSubscription"/>
-                        <manage-subscription v-if="hasActiveSubscription" :member="member"/>
+                        <manage-subscription v-if="hasActiveSubscription" :member="member" @error="addSnackbar"/>
                     </div>
 
                     <div class="settings-group notifications">
@@ -150,13 +150,15 @@
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import SnackbarContent from "@components/SnackbarContent.vue";
+    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
     import PremiumPricing from "@components/PremiumPricing.vue";
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
+    import {getQueryParam, removeQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -180,7 +182,14 @@
             Upgrade: PremiumPricing,
             ManageSubscription: ManageActiveSubscription,
         },
-        created() {
+        mounted(): void {
+            const message = getQueryParam(QueryParam.MESSAGE);
+            if (message) {
+                this.addSnackbar({message, timeoutMs: 10000, closeable: true});
+                removeQueryParam(QueryParam.MESSAGE);
+            }
+        },
+        beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member, user}) => {
                     this.member = member;
@@ -337,8 +346,7 @@
                 el.style.width = width;
                 el.style.height = height;
             },
-            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
-
+            addSnackbar(message: SnackbarMessage): string {
                 const id = uuid();
                 if (typeof message === "string") {
                     this.snackbars.push({id, message: message, autoHide: true});
