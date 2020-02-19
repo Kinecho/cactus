@@ -11,7 +11,7 @@
                 <label for="emailConfirm" class="label">Type Account Email Address</label>
                 <input v-model="confirmedEmail" type="text" name="emailConfirm">
             </div>
-            <button class="item delete" v-if="isConfirmed" @click="deleteAccount">Delete Account</button>
+            <button :disabled="isDeleting" class="item delete" v-if="isConfirmed" @click="deleteAccount">Delete Account</button>
         </div>
     </modal>
 </template>
@@ -23,6 +23,8 @@
     import CactusMemberService from '@web/services/CactusMemberService';
     import CactusMember from '@shared/models/CactusMember';
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import {deleteCurrentUserPermanently} from '@web/user';
+    import {logout} from '@web/auth'
     import Logger from "@shared/Logger";
     const logger = new Logger("DeleteAccountModal.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -49,12 +51,14 @@
         data(): {
             member: CactusMember | undefined | null,
             memberUnsubscriber: ListenerUnsubscriber | undefined,
-            confirmedEmail: string
+            confirmedEmail: string,
+            isDeleting: boolean
         } {
             return {
                member: undefined,
                memberUnsubscriber: undefined,
-               confirmedEmail: ''
+               confirmedEmail: '',
+               isDeleting: false
             }
         },
         computed: {
@@ -65,8 +69,13 @@
         methods: {
             async deleteAccount() {
                 if (this.member?.email === this.confirmedEmail) {
-                    // delete the user record here
-                    logger.log("Delete success");
+                    this.isDeleting = true;
+                    const result = await deleteCurrentUserPermanently();
+                    if (result.success) {
+                        logger.log("Delete success");
+                        await logout();
+                    } 
+                    this.isDeleting = false;
                     this.$emit('close');
                 }
             },
