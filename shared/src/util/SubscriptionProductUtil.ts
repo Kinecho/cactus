@@ -8,6 +8,7 @@ import SubscriptionProductGroup, {
     SubscriptionProductGroupMap,
     SubscriptionTier
 } from "@shared/models/SubscriptionProductGroup";
+import {CardBrand, WalletType} from "@shared/models/SubscriptionTypes";
 
 export type BillingPeriodProductMap = {
     [period in BillingPeriod]?: SubscriptionProduct
@@ -26,6 +27,7 @@ export interface SubscriptionProductGroupEntry {
     tierDisplayName?: string;
     products: SubscriptionProduct[];
     productGroup?: SubscriptionProductGroup;
+    defaultSelectedPeriod?: BillingPeriod | undefined;
 }
 
 export function createSubscriptionProductGroupEntries(products: SubscriptionProduct[], groupMap: SubscriptionProductGroupMap): SubscriptionProductGroupEntry[] {
@@ -38,6 +40,7 @@ export function createSubscriptionProductGroupEntries(products: SubscriptionProd
             tierDisplayName: subscriptionTierDisplayName(tier),
             products: tierMap[tier] || [],
             productGroup,
+            defaultSelectedPeriod: productGroup?.defaultSelectedPeriod
         };
         return group;
     });
@@ -75,4 +78,64 @@ export function getSubscriptionProductsByTierAndBillingPeriod(products: Subscrip
         map[tier] = tierMap;
         return map;
     }, {} as ProductTierBillingMap)
+}
+
+
+export function getBrandDisplayName(brand?: CardBrand): string | undefined {
+    let displayName: string | undefined = undefined;
+    switch (brand) {
+        case CardBrand.american_express:
+            displayName = "American Express";
+            break;
+        case CardBrand.mastercard:
+            displayName = "MasterCard";
+            break;
+        case CardBrand.diners_club:
+            displayName = "Diners Club";
+            break;
+        case CardBrand.discover:
+            displayName = "Discover";
+            break;
+        case CardBrand.jcb:
+            displayName = "JCB";
+            break;
+        case CardBrand.union_pay:
+            displayName = "UnionPay";
+            break;
+        case CardBrand.visa:
+            displayName = "Visa";
+            break;
+        case CardBrand.unknown:
+            displayName = undefined;
+            break;
+        default:
+            displayName = undefined;
+            break;
+    }
+    return displayName;
+}
+
+export interface DigitalWalletDetails {
+    displayName?: string;
+    icon?: string;
+    type: WalletType;
+}
+
+export function getDigitalWalletDetails(walletType?: WalletType): DigitalWalletDetails | undefined {
+    switch (walletType) {
+        case WalletType.amex_express_checkout:
+            return {displayName: "Amex Express Checkout", type: walletType};
+        case WalletType.apple_pay:
+            return {displayName: "ApplePay", type: walletType};
+        case WalletType.google_pay:
+            return {displayName: "GooglePay", type: walletType};
+        case WalletType.masterpass:
+            return {displayName: "Masterpass", type: walletType};
+        case WalletType.samsung_pay:
+            return {displayName: "Samsung Pay", type: walletType};
+        case WalletType.visa_checkout:
+            return {displayName: "Visa Checkout", type: walletType};
+        default:
+            return undefined;
+    }
 }

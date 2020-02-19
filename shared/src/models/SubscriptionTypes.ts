@@ -1,5 +1,8 @@
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+
 export interface SubscriptionDetails {
     upcomingInvoice?: SubscriptionInvoice,
+    subscriptionProduct?: SubscriptionProduct,
 }
 
 export interface SubscriptionInvoice {

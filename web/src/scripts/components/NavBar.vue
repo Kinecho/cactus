@@ -2,24 +2,27 @@
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
-            <div v-if="displayLoginButton || displaySignupButton" class="anonLinks">
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displayLoginButton"
-                            class="login"
-                            :href="loginHref"
-                            @click.prevent="goToLogin"
-                            type="link"
-                    >{{copy.common.LOG_IN}}</a>
-                </transition>
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displaySignupButton"
-                            data-test="signup-button"
-                            class="jump-to-form button small"
-                            :href="signupHref"
-                            @click.prevent="goToSignup"
-                            type="button"
-                    >{{copy.common.SIGN_UP}}</a>
-                </transition>
+            <div v-if="" class="anonLinks ">
+                <a v-if="showPricing"
+                        class="pricing"
+                        :href="pricingHref"
+                        type="link"
+                ><span class="">{{copy.common.PRICING}}</span></a>
+                <a v-if="displayLoginButton"
+                        class="login "
+                        :href="loginHref"
+                        @click.prevent="goToLogin"
+                        type="link"
+                >
+                    <span class="">{{copy.common.LOG_IN}}</span>
+                </a>
+                <a v-if="displaySignupButton"
+                        data-test="signup-button"
+                        class="jump-to-form button small"
+                        :href="signupHref"
+                        @click.prevent="goToSignup"
+                        type="button"
+                >{{copy.common.SIGN_UP}}</a>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
@@ -85,7 +88,8 @@
         hidden: boolean,
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
-        activityBadgeCount: number
+        activityBadgeCount: number,
+        pricingHref: PageRoute,
     }
 
     export default Vue.extend({
@@ -131,6 +135,7 @@
             this.memberProfileUnsubscriber?.();
         },
         props: {
+            showPricing: {type: Boolean, default: false},
             showSignup: {type: Boolean, default: false},
             signOutRedirectUrl: String,
             redirectOnSignOut: Boolean,
@@ -155,6 +160,7 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
+                pricingHref: PageRoute.PAYMENT_PLANS,
             }
         },
         computed: {
@@ -269,11 +275,11 @@
         }
     }
 
-    .login {
+    .login, .pricing {
         font-size: 1.6rem;
         text-decoration: none;
         transition: background-color .2s ease-in-out;
-
+        margin: 0 1rem;
         @include r(600) {
             font-size: 1.8rem;
 
@@ -286,6 +292,13 @@
                     background-color: $lightGreen;
                 }
             }
+        }
+    }
+
+    .pricing {
+        display: none;
+        @include r(600) {
+            display: unset
         }
     }
 

@@ -10,7 +10,7 @@ export function isNonEmptyObject(input: any): input is Object {
 }
 
 export function hasIdField(input: any): input is { id: any, [key: string]: any } {
-    return isNonEmptyObject(input) && input.hasOwnProperty("id") && ((<any>input).id ?? false)
+    return isNonEmptyObject(input) && input.hasOwnProperty("id") && (input.id ?? false)
 }
 
 export function isArray(input: any) {
@@ -99,6 +99,8 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * This will delete undefined keys in objects
  * @param {any} input
  * @param {(value: any) => Promise<void>} transform
+ * @param {number} depth how deep the transform can go before exiting
+ * @param {string} [forKey] the key that is being transformed currently. Mostly for logging purposes.
  * @return {any}
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {

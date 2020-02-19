@@ -3,10 +3,13 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import Stripe from "stripe";
 import {getConfig, getHostname} from "@admin/config/configService";
-import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
-import chalk from "chalk";
+import {
+    CreateSessionRequest,
+    CreateSessionResponse,
+    CreateSetupSubscriptionSessionRequest,
+    CreateSetupSubscriptionSessionResponse
+} from "@shared/api/CheckoutTypes";
 import {QueryParam} from "@shared/util/queryParams";
-import {URL} from "url";
 import Logger from "@shared/Logger";
 import {getAuthUserId} from "@api/util/RequestUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -16,6 +19,12 @@ import {stringifyJSON} from "@shared/util/ObjectUtil";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import {appendQueryParams} from "@shared/util/StringUtil";
+import CactusMember from "@shared/models/CactusMember";
+import {PageRoute} from "@shared/PageRoutes";
 
 const bodyParser = require('body-parser');
 
@@ -60,7 +69,7 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
         return;
     }
 
-    const result = await StripeWebhookService.getSharedInstance().handleEvent(event);
+    const result = await StripeWebhookService.getSharedInstance().handleWebhookEvent(event);
     logger.info("Processed webhook event: ", result.type);
     res.status(result.statusCode).send(result);
 
@@ -68,120 +77,198 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
 });
 
 /**
- * Get a session ID for stripe checkout
+ * Get a sessionID to setup a subscription
+ */
+app.post("/sessions/setup-subscription", async (req: express.Request, res: express.Response) => {
+    const userId = await getAuthUserId(req);
+
+    const response: CreateSetupSubscriptionSessionResponse = {success: false};
+    if (!userId) {
+        logger.info("You must be authenticated to create a checkout session.");
+        response.error = "You must be logged in to create a checkout session";
+        res.status(401).send(response);
+        return;
+    }
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        response.error = "You must have a member associated with your account to create a checkout session";
+        res.status(403).send(response);
+        return;
+    }
+
+    const stripeSubscriptionId = member?.subscription?.stripeSubscriptionId;
+    const stripeCustomerId = member?.stripeCustomerId;
+    if (!stripeSubscriptionId || !stripeCustomerId) {
+        response.error = "member does not have all of the required stripe fields: subscription, customerId";
+        res.status(400).send(response);
+        return;
+    }
+    const {successUrl, cancelUrl} = req.body as CreateSetupSubscriptionSessionRequest;
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'setup',
+            customer_email: member.email || undefined,
+            setup_intent_data: {
+                metadata: {
+                    memberId: memberId,
+                    customerId: stripeCustomerId,
+                    subscriptionId: stripeSubscriptionId,
+                }
+            },
+            success_url: successUrl || `${getHostname()}${PageRoute.ACCOUNT}?${QueryParam.MESSAGE}=${encodeURIComponent("Your payment settings have been successfully updated.")}`,
+            cancel_url: cancelUrl || `${getHostname()}${PageRoute.ACCOUNT}`,
+        });
+        response.sessionId = session.id;
+        response.success = true;
+        res.send(response);
+        return;
+    } catch (error) {
+        logger.error("Failed to create stripe session", error);
+        response.error = "Unable to create stripe session";
+        response.success = false;
+        res.send(response);
+        return;
+    }
+});
+
+/**
+ * Get a session ID for stripe checkout. Requires authentication.
  *
  * Note: Unlike sessions created via the Client integration,
  * sessions created via the Server integration do not support creating subscriptions with trial_period_days set at the Plan level.
  * To set a trial period, please pass the desired trial length as the value of the subscription_data.trial_period_days argument.
  */
-app.post("/sessions", async (req: express.Request, res: express.Response) => {
-    const userId = await getAuthUserId(req);
-
-    if (!userId) {
-        logger.info("You must be authenticated to create a checkout session.");
-        res.sendStatus(401);
-        return;
-    }
-
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    const memberId = member?.id;
-    if (!member || !memberId) {
-        logger.info("No cactus member was found for the given userId: " + userId);
-        res.sendStatus(401);
-        return;
-    }
-
-    let createResponse: CreateSessionResponse;
-    res.contentType("application/json");
+app.post("/sessions/create-subscription", async (req: express.Request, res: express.Response) => {
     try {
-        const sessionRequest = req.body as CreateSessionRequest;
-        logger.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
+        const userId = await getAuthUserId(req);
 
-        const successUrl = sessionRequest.successUrl || `${getHostname()}/success`;
-        const cancelUrl = sessionRequest.cancelUrl || `${getHostname()}/pricing`;
-        const planId = sessionRequest.planId;
-        const items = sessionRequest.items;
-
-        const stripeOptions: Stripe.Checkout.SessionCreateParams = {
-            payment_method_types: ['card'],
-            success_url: successUrl,
-            cancel_url: cancelUrl,
-            customer_email: member.stripeCustomerId ? undefined : member.email,
-            customer: member.stripeCustomerId
-        };
-
-        if (items && items.length > 0) {
-            stripeOptions.line_items = items;
+        if (!userId) {
+            logger.info("You must be authenticated to create a checkout session.");
+            res.status(401).send({unauthorized: true});
+            return;
         }
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            logger.info("No cactus member was found for the given userId: " + userId);
+            res.status(401).send({unauthorized: true});
+            return;
+        }
+        const {
+            subscriptionProductId,
+            successUrl = `${getHostname()}/success`,
+            cancelUrl = `${getHostname()}/pricing`
+        } = req.body as CreateSessionRequest;
 
-        let chargeAmount: number | undefined | null = 499;
-        if (planId) {
-            stripeOptions.subscription_data = {
-                items: [{
-                    plan: planId
-                }]
-            };
-
-            try {
-                const plan = await stripe.plans.retrieve(planId);
-                chargeAmount = plan.amount;
-            } catch (error) {
-                logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
-                createResponse = {
-                    success: false,
-                    error: `Unable to find plan '${planId}' in stripe. Can not complete checkout.`,
-                    planId
-                };
-                res.send(createResponse);
-                return;
-            }
-        } else {
-            logger.error(`No plan ID was given. Can not initialize session`);
-            createResponse = {
-                success: false,
-                error: `No plan ID was given. Can not initialize session`
-            };
-            res.send(createResponse);
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId);
+        if (!subscriptionProduct) {
+            res.status(400).send({message: "Unable to find a subscription product with the entryId " + subscriptionProductId});
             return;
         }
 
-        const updatedSuccess = new URL(stripeOptions.success_url);
-        updatedSuccess.searchParams.set(QueryParam.PURCHASE_AMOUNT, `${chargeAmount}`);
-        updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${planId}`);
+        if (!subscriptionProduct.availableForSale) {
+            logger.warn(`Member tried to buy a subscription product that is not available for sale. Member: ${member.email}, SubscriptionProductId: ${subscriptionProductId}`);
+            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`Member tried to buy a subscription product that is not available for sale. Member: ${member.email}, SubscriptionProductId: ${subscriptionProductId}`)
+            return res.status(404).send({message: "The product you are looking for could not be found"});
+        }
 
-        logger.log(chalk.blue("success url is", updatedSuccess.toString()));
-        stripeOptions.success_url = updatedSuccess.toString();
+        await AdminSubscriptionService.getSharedInstance().addStripeCustomerToMember(member);
 
-        logger.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
-        // @ts-ignore
-        const session = await stripe.checkout.sessions.create(stripeOptions);
+        const {createOptions, plan, error} = await buildStripeSubscriptionCheckoutSessionOptions({
+            successUrl,
+            cancelUrl,
+            member,
+            subscriptionProduct
+        });
+
+        if (error || !(createOptions && plan)) {
+            const errorResponse: CreateSessionResponse = {
+                error: error || "Unable to build a checkout response",
+                success: false
+            };
+            res.status(400).send(errorResponse);
+            return;
+        }
+
+        const chargeAmount = plan.amount;
+        const session = await stripe.checkout.sessions.create(createOptions);
         logger.info("Stripe session was created: " + JSON.stringify(session, null, 2));
 
-        const checkoutSession = CheckoutSession.stripe({
+        const cactusCheckoutSession = CheckoutSession.stripe({
             memberId: memberId,
             email: member.email,
             sessionId: session.id,
             amount: chargeAmount,
-            planId,
+            planId: plan.id,
             raw: session,
         });
 
-        const savedSession = await AdminCheckoutSessionService.getSharedInstance().save(checkoutSession);
+        const savedSession = await AdminCheckoutSessionService.getSharedInstance().save(cactusCheckoutSession);
         logger.info("saved the checkout session to firestore: " + stringifyJSON(savedSession, 2));
 
-        createResponse = {
+        const createResponse: CreateSessionResponse = {
             success: true,
             sessionId: session.id,
             amount: chargeAmount,
-            planId,
         };
-
+        return res.send(createResponse);
     } catch (error) {
         logger.error("failed to load stripe checkout", error);
-        createResponse = {success: false, error: "Unable to load the checkout page"};
+        const createResponse: CreateSessionResponse = {success: false, error: "Unable to load the checkout page"};
+        return res.send(createResponse);
     }
-    return res.send(createResponse);
+
 });
+
+async function buildStripeSubscriptionCheckoutSessionOptions(options: {
+    subscriptionProduct: SubscriptionProduct,
+    member: CactusMember,
+    successUrl: string,
+    cancelUrl: string
+}): Promise<{ createOptions?: Stripe.Checkout.SessionCreateParams, error?: string, plan?: Stripe.Plan }> {
+    const {subscriptionProduct, member, successUrl, cancelUrl} = options;
+    const planId = subscriptionProduct.stripePlanId;
+    const subscriptionProductId = subscriptionProduct.entryId;
+    const memberId = member.id;
+
+    if (!planId) {
+        logger.error(`No plan ID was given. Can not initialize session`);
+        return {error: "No plan ID was found on the subscription Product"};
+    }
+
+    const plan = await AdminSubscriptionService.getSharedInstance().fetchStripePlan(planId);
+    if (!plan) {
+        logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+        return {error: `Unable to find plan '${planId}' in stripe. Can not complete checkout.`};
+    }
+
+    const chargeAmount = plan.amount;
+    const updatedSuccessUrl = appendQueryParams(successUrl, {
+        [QueryParam.PURCHASE_AMOUNT]: `${chargeAmount}`,
+        [QueryParam.SUBSCRIPTION_PRODUCT_ID]: `${subscriptionProductId}`,
+    });
+
+    const stripeOptions: Stripe.Checkout.SessionCreateParams = {
+        payment_method_types: ['card'],
+        success_url: updatedSuccessUrl,
+        cancel_url: cancelUrl,
+        customer_email: member.stripeCustomerId ? undefined : member.email,
+        customer: member.stripeCustomerId,
+        metadata: {
+            memberId: `${memberId}`,
+            subscriptionProductId: `${subscriptionProductId}`,
+        },
+        subscription_data: {
+            items: [{
+                plan: planId
+            }]
+        }
+    };
+    logger.info("Successfully constructed stripe checkout options", stringifyJSON(stripeOptions, 2));
+    return {createOptions: stripeOptions, plan};
+}
 
 /**
  * @type {SubscriptionDetails}
@@ -202,8 +289,16 @@ app.get("/subscription-details", async (req: express.Request, resp: express.Resp
     // const memberId = member.id!;
     const upcomingInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({member});
 
+    let subscriptionProduct: SubscriptionProduct | undefined;
+    const subscriptionProductId = member.subscription?.subscriptionProductId;
+    if (subscriptionProductId) {
+        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId)
+    }
+
+
     const subscriptionDetails: SubscriptionDetails = {
         upcomingInvoice: upcomingInvoice,
+        subscriptionProduct,
     };
 
     logger.info(`Subscription details for member ${member.email}: ${stringifyJSON(subscriptionDetails, 2)}`)

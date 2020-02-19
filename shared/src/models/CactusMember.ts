@@ -4,7 +4,12 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
-import {isInTrial, MemberSubscription, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+import {
+    getDefaultSubscription,
+    isInTrial,
+    MemberSubscription,
+    subscriptionTierDisplayName
+} from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
@@ -124,7 +129,7 @@ export default class CactusMember extends BaseModel {
         lastSeenOccurredAt?: Date
     } = {};
 
-    subscription?: MemberSubscription;
+    subscription?: MemberSubscription = getDefaultSubscription();
     stripe?: MemberStripeDetails = {};
 
     prepareForFirestore(): any {
@@ -196,7 +201,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get tier(): SubscriptionTier {
-        return this.subscription?.tier ?? SubscriptionTier.PLUS
+        return this.subscription?.tier ?? SubscriptionTier.BASIC
     }
 
     get tierDisplayName(): string | undefined {
@@ -216,7 +221,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get hasActiveSubscription(): boolean {
-        return !this.isInTrial && this.tier !== SubscriptionTier.BASIC
+        return !!this.subscription && !this.isInTrial && this.tier !== SubscriptionTier.BASIC
     }
 
     set stripeCustomerId(customerId: string | undefined) {

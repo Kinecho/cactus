@@ -11,7 +11,9 @@ import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Payment from "@shared/models/Payment";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import {getCustomerId, getStripeId} from "@admin/util/AdminStripeUtils";
+import {getCustomerId, getStripeId, isStripeSubscription} from "@admin/util/AdminStripeUtils";
+import {destructureDisplayName, isBlank} from "@shared/util/StringUtil";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -25,6 +27,8 @@ export interface WebhookResponse {
  * Handle stripe webhook events
  * Event types currently being sent:
  *  - checkout.session.completed
+ *  - customer.updated
+ *  - customer.created
  *
  *  Events to send in the future:
  *  - product.created
@@ -39,8 +43,6 @@ export interface WebhookResponse {
  *  - customer.source.created
  *  - customer.card.created
  *  - customer.bank_account.created
- *  - customer.updated
- *  - customer.created
  *  - subscription_schedule.expiring
  *  - customer.subscription.updated
  *  - customer.subscription.deleted
@@ -75,10 +77,80 @@ export default class StripeWebhookService {
 
     async handleCheckoutSessionCompletedEvent(event: Stripe.Event): Promise<WebhookResponse> {
         const session = event.data.object as Stripe.Checkout.Session;
+        switch (session.mode) {
+            case "payment":
+                return {statusCode: 204, body: "Payment checkout is not supported. Nothing happened."};
+            case "setup":
+                return this.handleSetupSessionCompleted(session);
+            case "subscription":
+                return this.handleSubscriptionCheckoutSessionCompleted(session);
+            default:
+                return {statusCode: 204, body: "session mode not supported."};
+        }
+    }
+
+    /**
+     * Handle session setup completed. This allows for changing payment methods.
+     * Expects metadata to be present such as subscriptionId and customerId and memberId
+     * @param {Stripe.Checkout.Session} session
+     * @return {Promise<WebhookResponse>}
+     */
+    async handleSetupSessionCompleted(session: Stripe.Checkout.Session): Promise<WebhookResponse> {
+        if (session.mode !== "setup") {
+            return {
+                statusCode: 400,
+                body: `"Expected session mode to be \"setup\" but instead got \"${session.mode}\""`
+            };
+        }
+
+        const setupIntentId = getStripeId(session.setup_intent);
+        if (!setupIntentId) {
+            return {statusCode: 200, body: "No metadata was present. Can not process request"};
+        }
+
+        const setupIntent = await AdminSubscriptionService.getSharedInstance().fetchStripeSetupIntent(setupIntentId);
+        if (!setupIntentId) {
+            return {
+                statusCode: 200,
+                body: `Unable to fetch setupIntent for ID ${setupIntentId}. Can not process request`
+            };
+        }
+        const {subscriptionId, customerId} = setupIntent?.metadata ?? {} as { [key: string]: string | undefined };
+        const paymentMethodId = getStripeId(setupIntent?.payment_method);
+        if (!paymentMethodId || !customerId) {
+            return {
+                statusCode: 200,
+                body: `Not all required data was found on the setup intent. Can not process request. paymentMethodId = ${paymentMethodId} | subscriptionId = ${subscriptionId} | customerId = ${customerId}`
+            };
+        }
+
+        try {
+            const attachedPaymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, {customer: customerId});
+            logger.info(`Attached payment method to customer ${customerId}: ${stringifyJSON(attachedPaymentMethod)}`);
+            const updatedCustomer = await AdminSubscriptionService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethodId}})
+            logger.info(`Updated customer ${updatedCustomer?.id} with invoice settings ${stringifyJSON(updatedCustomer?.invoice_settings)}`);
+            if (subscriptionId) {
+                await AdminSubscriptionService.getSharedInstance().updateStripeSubscriptionDefaultPaymentMethod(subscriptionId, paymentMethodId);
+            }
+        } catch (error) {
+            logger.error(`Failed to attach payment method to customerId ${customerId}`, error);
+        }
+
+        return {statusCode: 200, body: "Updated payment method on subscription and customer"};
+    }
+
+    async handleSubscriptionCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<WebhookResponse> {
+        if (session.mode !== "subscription") {
+            return {
+                statusCode: 400,
+                body: `"Expected session mode to be \"subscription\" but instead got \"${session.mode}\""`
+            };
+        }
         const sessionId = session.id;
         if (!sessionId) {
             return {statusCode: 400, body: "No session ID was found"};
         }
+        logger.info(stringifyJSON(session, 2));
 
         const pendingSession = await AdminCheckoutSessionService.getSharedInstance().getByStripeSessionId(sessionId);
         if (!pendingSession) {
@@ -97,7 +169,6 @@ export default class StripeWebhookService {
             }
         }
         const cactusMember = await AdminCactusMemberService.getSharedInstance().getById(pendingSession.memberId);
-        // const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(pendingSession)
         if (!cactusMember) {
             return {
                 statusCode: 204,
@@ -117,14 +188,27 @@ export default class StripeWebhookService {
             planId: stripePlanId,
             onlyAvailableForSale: false
         });
+        const customerId = getCustomerId(session.customer);
+        const stripeSubscriptionId = getStripeId(session.subscription);
+        const stripeSubscription = await AdminSubscriptionService.getSharedInstance().getStripeSubscription(stripeSubscriptionId);
+        if (isStripeSubscription(stripeSubscription) && customerId) {
+            const paymentMethod = getStripeId(stripeSubscription.default_payment_method);
+            if (paymentMethod) {
+                logger.info("Update default payment method on customer");
+                await AdminSubscriptionService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethod}})
+            }
+        }
 
-        const subscription = cactusMember.subscription ?? getDefaultSubscription();
-        subscription.tier = SubscriptionTier.PLUS;
-        subscription.stripeSubscriptionId = getStripeId(session.subscription);
+        const cactusSubscription = cactusMember.subscription ?? getDefaultSubscription();
+        cactusSubscription.tier = SubscriptionTier.PLUS;
+        cactusSubscription.subscriptionProductId = subscriptionProduct?.entryId || session.metadata?.subscriptionProductId;
+        cactusSubscription.stripeSubscriptionId = stripeSubscriptionId;
 
-        (subscription.trial || getDefaultTrial()).activatedAt = new Date();
-        cactusMember.stripeCustomerId = getCustomerId(session.customer);
-
+        const trial = (cactusSubscription.trial || getDefaultTrial());
+        trial.activatedAt = new Date();
+        cactusSubscription.trial = trial;
+        cactusMember.subscription = cactusSubscription;
+        cactusMember.stripeCustomerId = customerId;
         const payment = Payment.fromStripeCheckoutSession({
             memberId,
             session,
@@ -134,14 +218,54 @@ export default class StripeWebhookService {
         await AdminPaymentService.getSharedInstance().save(payment);
         await AdminCactusMemberService.getSharedInstance().save(cactusMember, {setUpdatedAt: false});
 
-        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${subscription.tier}`};
+        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${cactusSubscription.tier}`};
     };
 
-    async handleCustomerCreatedEvent(event: Stripe.Event): Promise<WebhookResponse> {
-        return {statusCode: 200, body: "Not implemented"};
+    async handleCustomerEvent(event: Stripe.Event): Promise<WebhookResponse> {
+        const customer = event.data.object as Stripe.Customer;
+        const memberId = customer.metadata.memberId;
+        if (!memberId) {
+            return {statusCode: 200, body: "No member ID found in the metadata, nothing to sync up"};
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        if (!member) {
+            return {statusCode: 200, body: `No cactus member found with ID ${memberId}. Nothing to sync up`};
+        }
+
+        let hasChanges = false;
+        const {firstName, lastName} = destructureDisplayName(customer.name);
+        if (isBlank(member.firstName) && !isBlank(firstName)) {
+            hasChanges = true;
+            member.firstName = firstName;
+        }
+
+        if (isBlank(member.lastName) && !isBlank(lastName)) {
+            hasChanges = true;
+            member.lastName = lastName;
+        }
+
+        if (isBlank(member.stripeCustomerId)) {
+            member.stripeCustomerId = customer.id;
+            hasChanges = true;
+        }
+
+        if (hasChanges) {
+            logger.info(`Updating cactus member\n ${stringifyJSON(member, 2)}`);
+            await AdminCactusMemberService.getSharedInstance().save(member)
+        }
+
+        return {statusCode: 200, body: `Updated cactus member with new values? ${hasChanges}`};
     }
 
-    async handleEvent(event: Stripe.Event): Promise<WebhookResponse> {
+    /**
+     * Main entry point to handle Stripe webhook events.
+     * This method will dispatch the event to the handlers responsible for the specific event type.
+     *
+     * @param {Stripe.Event} event
+     * @return {Promise<WebhookResponse>}
+     */
+    async handleWebhookEvent(event: Stripe.Event): Promise<WebhookResponse> {
         let response: WebhookResponse = {statusCode: 400, body: "Event type not handled"};
         const type = event.type;
         try {
@@ -150,8 +274,9 @@ export default class StripeWebhookService {
                 case 'checkout.session.completed':
                     response = await this.handleCheckoutSessionCompletedEvent(event);
                     break;
+                case 'customer.updated':
                 case 'customer.created':
-                    response = await this.handleCustomerCreatedEvent(event);
+                    response = await this.handleCustomerEvent(event);
                     break;
                 default:
                     logger.warn(`Stripe checkout event type ${type} not handled\n`, stringifyJSON(event, 2));

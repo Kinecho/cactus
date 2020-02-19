@@ -266,9 +266,9 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
 }
 
 export function daysUntilDate(date: Date): number {
-    const end = DateTime.fromJSDate(date);
+    const end = DateTime.fromJSDate(date).set({hour: 0});
     const interval = Interval.fromDateTimes(DateTime.local(), end);
-    return interval.count("days")
+    return interval.count("days") - 1
 }
 
 export function atMidnight(date: Date): Date {

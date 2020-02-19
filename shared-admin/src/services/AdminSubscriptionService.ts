@@ -18,7 +18,7 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
 import {
     convertPaymentMethod,
-    getInvoiceStatusFromStripeStatus,
+    getInvoiceStatusFromStripeStatus, getStripeId,
     isStripePaymentMethod
 } from "@admin/util/AdminStripeUtils";
 
@@ -293,6 +293,26 @@ export default class AdminSubscriptionService {
         }
     }
 
+    async updateStripeCustomer(customerId: string, settings: Stripe.CustomerUpdateParams): Promise<Stripe.Customer | undefined> {
+        try {
+            return await this.stripe.customers.update(customerId, settings);
+        } catch (error) {
+            this.logger.error(`Failed to update stripe customer ${customerId}`, error);
+            return;
+        }
+    }
+
+    async updateStripeSubscriptionDefaultPaymentMethod(subscriptionId: string, paymentMethodId: string): Promise<Stripe.Subscription | undefined> {
+        try {
+            return await this.stripe.subscriptions.update(subscriptionId, {
+                default_payment_method: paymentMethodId,
+            })
+        } catch (error) {
+            this.logger.error(`Failed to update the default payment method in subscription ${subscriptionId}`, error);
+            return;
+        }
+    }
+
     async getDefaultStripeSourceId(customerId: string): Promise<string | undefined> {
         const customer = await this.getStripeCustomer(customerId);
         if (!customer) {
@@ -318,6 +338,59 @@ export default class AdminSubscriptionService {
         return;
     }
 
+    async getStripePaymentMethod(paymentMethodId?: string): Promise<Stripe.PaymentMethod | undefined> {
+        if (!paymentMethodId) {
+            return;
+        }
+        try {
+            return await this.stripe.paymentMethods.retrieve(paymentMethodId);
+        } catch (error) {
+            this.logger.error("Unable to fetch payment method with id ", paymentMethodId);
+            return;
+        }
+    }
+
+
+    async getStripeSubscription(subscriptionId?: string): Promise<Stripe.Subscription | undefined> {
+        if (!subscriptionId) {
+            return undefined;
+        }
+
+        try {
+            const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {expand: ["default_payment_method"]});
+            this.logger.info("retrieved striped subscription", stringifyJSON(subscription, 2));
+            return subscription
+        } catch (error) {
+            this.logger.error("Failed to fetch stripe subscription with id", subscriptionId)
+            return undefined;
+        }
+    }
+
+    async getDefaultPaymentMethodFromStripeInvoice(invoice: Stripe.Invoice): Promise<Stripe.PaymentMethod | undefined> {
+        const stripeCustomerId: string | null = isString(invoice.customer) ? invoice.customer : invoice.customer.id;
+        if (isStripePaymentMethod(invoice.default_payment_method)) {
+            return invoice.default_payment_method
+        }
+        const subscription = isString(invoice.subscription) ? await this.getStripeSubscription(invoice.subscription) : invoice.subscription;
+        const subPaymentMethod = subscription?.default_payment_method;
+        if (isStripePaymentMethod(subPaymentMethod)) {
+            return subPaymentMethod;
+        }
+        const subPaymentMethodId = getStripeId(subPaymentMethod);
+        if (subPaymentMethodId) {
+            return await this.getStripePaymentMethod(subPaymentMethodId);
+        }
+        if (stripeCustomerId) {
+            this.logger.info("attempting to fetch customer's default payment method");
+            const customer = await this.getStripeCustomer(stripeCustomerId, ["invoice_settings.default_payment_method"]);
+            const invoiceSettingsPaymentMethod = customer?.invoice_settings?.default_payment_method;
+            if (isStripePaymentMethod(invoiceSettingsPaymentMethod)) {
+                return invoiceSettingsPaymentMethod;
+            }
+        }
+        return;
+    }
+
     async getUpcomingStripeInvoice(options: { customerId?: string, subscriptionId?: string }): Promise<SubscriptionInvoice | undefined> {
         const {customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId} = options;
         if (!stripeCustomerId && !stripeSubscriptionId) {
@@ -328,21 +401,19 @@ export default class AdminSubscriptionService {
             const stripeInvoice = await this.stripe.invoices.retrieveUpcoming({
                 customer: stripeCustomerId,
                 subscription: stripeSubscriptionId,
-                expand: ["default_payment_method"]
+                expand: ["default_payment_method", "subscription.default_payment_method"]
             });
             if (!stripeInvoice) {
                 this.logger.info("No upcoming invoices found.");
                 return undefined;
             }
 
-            let defaultPaymentMethod: PaymentMethod | undefined;
-            if (isStripePaymentMethod(stripeInvoice.default_payment_method)) {
-                defaultPaymentMethod = convertPaymentMethod(stripeInvoice.default_payment_method);
-            }
+            const stripePaymentMethod = await this.getDefaultPaymentMethodFromStripeInvoice(stripeInvoice);
+
             const invoice: SubscriptionInvoice = {
                 status: getInvoiceStatusFromStripeStatus(stripeInvoice.status),
                 amountCentsUsd: stripeInvoice.total,
-                defaultPaymentMethod,
+                defaultPaymentMethod: convertPaymentMethod(stripePaymentMethod),
                 periodStart_epoch_seconds: stripeInvoice.period_start,
                 periodEnd_epoch_seconds: stripeInvoice.period_end,
                 nextPaymentDate_epoch_seconds: stripeInvoice.next_payment_attempt || undefined,
@@ -373,5 +444,63 @@ export default class AdminSubscriptionService {
         //TODO: Handle for fetching invoices from Apple, Google, etc
 
         return invoice;
+    }
+
+    /**
+     * Create and save a stripe customer to a cactus member object.
+     * If the stripe customer already exists on the cactus member,
+     * this method will immediately return the provided cactus member.
+     *
+     * @param {CactusMember} member
+     * @return {Promise<CactusMember>}
+     */
+    async addStripeCustomerToMember(member: CactusMember): Promise<CactusMember> {
+        const memberId = member.id;
+        if (!member.stripeCustomerId && memberId) {
+            try {
+                this.logger.info(`Creating stripe customer for ${member.email}`);
+                const customer = await this.stripe.customers.create({
+                    email: member.email,
+                    name: member.getFullName(),
+                    metadata: {
+                        "memberId": memberId,
+                        "userId": member.userId ?? "",
+                    }
+                });
+                member.stripeCustomerId = customer.id;
+                this.logger.info(`Successfully created stripe customer ${customer.id} for cactus member ${member.email}`);
+
+                return await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false})
+            } catch (error) {
+                this.logger.error(`Error while creating stripe customer for member ${member.email}`, error);
+                return member;
+            }
+        }
+        return member;
+    }
+
+    async fetchStripeSetupIntent(setupIntentId?: string): Promise<Stripe.SetupIntent | undefined> {
+        if (!setupIntentId) {
+            return;
+        }
+
+        try {
+            return await this.stripe.setupIntents.retrieve(setupIntentId);
+        } catch (error) {
+            this.logger.error(`Failed to fetch setup intent with id ${setupIntentId}`);
+            return;
+        }
+    }
+
+    async fetchStripePlan(planId?: string): Promise<Stripe.Plan | undefined> {
+        if (!planId) {
+            return undefined;
+        }
+        try {
+            return await this.stripe.plans.retrieve(planId);
+        } catch (error) {
+            this.logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+            return;
+        }
     }
 }

@@ -1,4 +1,6 @@
 import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+
 
 enum Fields {
     subscriptionTier = "subscriptionTier",
@@ -31,7 +33,7 @@ export enum SubscriptionTier {
 export interface ProductGroupFooter {
     textMarkdown?: string
     icon: IconType
-};
+}
 
 export default class SubscriptionProductGroup extends FlamelinkModel {
     readonly schema = SchemaName.subscriptionProductGroups;
@@ -39,6 +41,7 @@ export default class SubscriptionProductGroup extends FlamelinkModel {
     subscriptionTier!: SubscriptionTier;
     title?: string;
     descriptionMarkdown?: string;
+    defaultSelectedPeriod?: BillingPeriod;
     sections: ProductSection[] = [];
     trialUpgradeMarkdown?: string;
     footer?: ProductGroupFooter;
@@ -48,7 +51,5 @@ export default class SubscriptionProductGroup extends FlamelinkModel {
         if (data) {
             Object.assign(this, data);
         }
-
     }
-
 }

@@ -28,7 +28,7 @@ export default class EnglishCopy extends LocalizedCopy {
         CURRENT_PLAN: "Current Plan",
         MANAGE_MY_PLAN: "Manage My Plan",
         PURCHASE: "Purchase",
-        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please sign up or log in to continue check out.",
+        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please log in to continue the upgrade process.",
         BILLING_PERIOD: {
             [BillingPeriod.weekly]: "Weekly",
             [BillingPeriod.monthly]: "Monthly",
@@ -63,6 +63,7 @@ export default class EnglishCopy extends LocalizedCopy {
         SIGN_UP: "Sign Up",
         SUBMIT: "Submit",
         SIGNING_IN: "Signing In",
+        PRICING: "Pricing",
         LOG_OUT: "Log Out",
         ENTER_YOUR_EMAIL_ADDRESS: "Enter your email address",
         WELCOME: "Welcome",
@@ -81,7 +82,10 @@ export default class EnglishCopy extends LocalizedCopy {
         HOUR: "Hour",
         MINUTE: "Minute",
         DAYS_LEFT: "days left",
+        DAY_LEFT: "day left",
         DAYS_LEFT_IN_TRIAL: "days left in trial",
+        DAY_LEFT_IN_TRIAL: "day left in trial",
+        TRIAL_ENDS_TODAY: "Trial ends today",
         LEARN_MORE: "Learn More",
         TRIAL: "Trial",
     };
