@@ -11,8 +11,8 @@ export enum BillingPeriod {
 
 enum Fields {
     availableForSale = "availableForSale",
-    stripePlanId = "stripe.planId",
-    appleProductId = "apple.productId",
+    stripePlanId = "stripePlanId",
+    appleProductId = "appleProductId",
 }
 
 export default class SubscriptionProduct extends FlamelinkModel {

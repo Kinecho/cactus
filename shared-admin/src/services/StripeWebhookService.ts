@@ -79,6 +79,7 @@ export default class StripeWebhookService {
         if (!sessionId) {
             return {statusCode: 400, body: "No session ID was found"};
         }
+        logger.info(stringifyJSON(session, 2));
 
         const pendingSession = await AdminCheckoutSessionService.getSharedInstance().getByStripeSessionId(sessionId);
         if (!pendingSession) {
@@ -118,14 +119,21 @@ export default class StripeWebhookService {
             onlyAvailableForSale: false
         });
 
-        const subscription = cactusMember.subscription ?? getDefaultSubscription();
-        subscription.tier = SubscriptionTier.PLUS;
-        subscription.subscriptionProductId = subscriptionProduct?.entryId;
-        subscription.stripeSubscriptionId = getStripeId(session.subscription);
+        const stripeSubscriptionId = getStripeId(session.subscription);
+        // const stripeSubscription = await this.getStripeSubscription(stripeSubscriptionId);
 
-        (subscription.trial || getDefaultTrial()).activatedAt = new Date();
+
+
+        const cactusSubscription = cactusMember.subscription ?? getDefaultSubscription();
+        cactusSubscription.tier = SubscriptionTier.PLUS;
+        cactusSubscription.subscriptionProductId = subscriptionProduct?.entryId || session.metadata?.subscriptionProductId;
+        cactusSubscription.stripeSubscriptionId = stripeSubscriptionId;
+
+        const trial = (cactusSubscription.trial || getDefaultTrial());
+        trial.activatedAt = new Date();
+        cactusSubscription.trial = trial;
+        cactusMember.subscription = cactusSubscription;
         cactusMember.stripeCustomerId = getCustomerId(session.customer);
-        cactusMember.subscription = subscription;
         const payment = Payment.fromStripeCheckoutSession({
             memberId,
             session,
@@ -135,7 +143,7 @@ export default class StripeWebhookService {
         await AdminPaymentService.getSharedInstance().save(payment);
         await AdminCactusMemberService.getSharedInstance().save(cactusMember, {setUpdatedAt: false});
 
-        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${subscription.tier}`};
+        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${cactusSubscription.tier}`};
     };
 
     async handleCustomerCreatedEvent(event: Stripe.Event): Promise<WebhookResponse> {

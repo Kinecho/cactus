@@ -318,6 +318,35 @@ export default class AdminSubscriptionService {
         return;
     }
 
+    async getStripePaymentMethod(paymentMethodId?: string): Promise<Stripe.PaymentMethod | undefined> {
+        if (!paymentMethodId) {
+            return;
+        }
+        try {
+            return await this.stripe.paymentMethods.retrieve(paymentMethodId);
+        } catch (error) {
+            this.logger.error("Unable to fetch payment method with id ", paymentMethodId);
+            return;
+        }
+    }
+
+
+    async getStripeSubscription(subscriptionId?: string): Promise<Stripe.Subscription | undefined> {
+        if (!subscriptionId) {
+            return undefined;
+        }
+
+        try {
+            const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {expand: ["default_payment_method"]});
+            this.logger.info("retrieved striped subscription", stringifyJSON(subscription, 2));
+            return subscription
+        } catch (error) {
+            this.logger.error("Failed to fetch stripe subscription with id", subscriptionId)
+            return undefined;
+        }
+    }
+
+
     async getUpcomingStripeInvoice(options: { customerId?: string, subscriptionId?: string }): Promise<SubscriptionInvoice | undefined> {
         const {customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId} = options;
         if (!stripeCustomerId && !stripeSubscriptionId) {
@@ -335,9 +364,21 @@ export default class AdminSubscriptionService {
                 return undefined;
             }
 
+            //TODO: This needs to be refactored out to its own method
             let defaultPaymentMethod: PaymentMethod | undefined;
             if (isStripePaymentMethod(stripeInvoice.default_payment_method)) {
                 defaultPaymentMethod = convertPaymentMethod(stripeInvoice.default_payment_method);
+            } else if (stripeSubscriptionId) {
+                const stripeSubscription = await this.getStripeSubscription(stripeSubscriptionId);
+                const subPaymentMethod = stripeSubscription?.default_payment_method;
+                if (isStripePaymentMethod(subPaymentMethod)) {
+                    defaultPaymentMethod = convertPaymentMethod(subPaymentMethod);
+                } else if (isString(subPaymentMethod)) {
+                    const pm = await this.getStripePaymentMethod(subPaymentMethod)
+                    if (isStripePaymentMethod(pm)) {
+                        defaultPaymentMethod = convertPaymentMethod(pm);
+                    }
+                }
             } else if (stripeCustomerId) {
                 this.logger.info("attempting to fetch customer's default payment method");
                 defaultPaymentMethod = await this.getDefaultStripeInvoicePaymentMethod(stripeCustomerId);
