@@ -100,7 +100,7 @@ export default class AdminSlackService {
 
         this.appNotificationsWebhookUrl = config.slack.webhooks.cactus_activity;
         this.cactusActivityWebhook = new IncomingWebhook(this.appNotificationsWebhookUrl);
-        this.web = new WebClient(config.slack.app.oauth_access_token);
+        this.web = new WebClient(config.slack.app.bot_user_access_token);
     }
 
 
@@ -198,13 +198,30 @@ export default class AdminSlackService {
             channel: channelId
         };
 
-        const response = await this.web.chat.postMessage(slackMessage);
-        if (response.ok) {
-            return;
-        }
-
-        if (response.error) {
-            logger.error("Failed to post slack message", response.error);
+        try {
+            const response = await this.web.chat.postMessage(slackMessage);
+            if (response.ok) {
+                return;
+            }
+        } catch (error) {
+            logger.error(`Failed to send message to channel ${channelId}`, error);
+            if (error.data.error === "not_in_channel") {
+                console.log("Attempting to join channel and retry the message");
+                const joined = await this.joinChannel(channelId);
+                if (joined) {
+                    try {
+                        await this.web.chat.postMessage(slackMessage);
+                        return;
+                    } catch (error) {
+                        logger.error("Still can't send message. not trying again");
+                        return;
+                    }
+                } else {
+                    logger.error(`was unable to join channel ${channelId}, not retrying`, JSON.stringify(error, null, 2));
+                }
+            } else {
+                logger.error(`Failed to send slack message to ${channelId}`, error);
+            }
         }
     }
 
@@ -218,39 +235,70 @@ export default class AdminSlackService {
         }
     }
 
+
     async sendMessage(channelName: ChannelName, message: string | ChatMessage) {
-        try {
-            let chatMessage: ChatMessage;
-            const channel = this.getChannel(channelName);
-            if (!channel) {
-                throw new Error("Unable to find the chanel for the ChannelName: " + channelName);
-            }
-
-            if (typeof message === "string") {
-                chatMessage = {
-                    text: message,
-                }
-            } else {
-                chatMessage = message;
-            }
-
-            const slackMessage: ChatPostMessageArguments = {
-                ...chatMessage,
-                channel: channel
-            };
-
-            const response = await this.web.chat.postMessage(slackMessage);
-            if (response.ok) {
-                return;
-            }
-
-            if (response.error) {
-                logger.error("Failed to post slack message", response.error);
-            }
-
-        } catch (error) {
-            logger.error(`Failed to send slack message to ${channelName}`, error);
+        const channel = this.getChannel(channelName);
+        if (!channel) {
+            logger.error("Unable to find the chanel for the ChannelName: " + channelName);
+            return;
         }
+        await this.sendArbitraryMessage(channel, message);
+        // let chatMessage: ChatMessage;
+        //
+        //
+        // if (typeof message === "string") {
+        //     chatMessage = {
+        //         text: message,
+        //     }
+        // } else {
+        //     chatMessage = message;
+        // }
+        //
+        // const slackMessage: ChatPostMessageArguments = {
+        //     ...chatMessage,
+        //     channel: channel
+        // };
+        //
+        // try {
+        //     const response = await this.web.chat.postMessage(slackMessage);
+        //     if (response.ok) {
+        //         return;
+        //     }
+        //     if (response.error) {
+        //         logger.error("Failed to post slack message", response.error);
+        //     }
+        //
+        // } catch (error) {
+        //     if (error.data.error === "not_in_channel") {
+        //         console.log("Attempting to join channel and retry the message");
+        //         const joined = await this.joinChannel(channel);
+        //         if (joined) {
+        //             try {
+        //                 await this.web.chat.postMessage(slackMessage);
+        //                 return;
+        //             } catch (error) {
+        //                 logger.error("Still can't send message. not trying again");
+        //                 return;
+        //             }
+        //         } else {
+        //             logger.error(`was unable to join channel ${channelName}, not retrying`, JSON.stringify(error, null, 2));
+        //         }
+        //     } else {
+        //         logger.error(`Failed to send slack message to ${channelName}`, error);
+        //     }
+        //
+        // }
+    }
+
+    async joinChannel(channel: string): Promise<boolean> {
+        try {
+            await this.web.channels.join({name: channel});
+            return true;
+        } catch (error) {
+            logger.error("Failed to join channel", error);
+            return false;
+        }
+
     }
 
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
@@ -303,4 +351,23 @@ export default class AdminSlackService {
         }
     }
 
+    async uploadTextSnippet(options: {
+        data: string,
+        channel: ChannelName,
+        filename: string,
+        fileType?: string | undefined
+        title?: string
+        message?: string,
+    }) {
+        const {data, channel, filename, fileType, title, message} = options;
+        return this.web.files.upload({
+            channels: this.getChannel(channel),
+            content: data,
+            filetype: fileType,
+            title,
+            filename: filename,
+            initial_comment: message,
+        })
+    }
 }
+

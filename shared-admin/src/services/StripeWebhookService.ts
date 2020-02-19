@@ -70,7 +70,7 @@ export default class StripeWebhookService {
             const sig = request.header('stripe-signature') || "";
             return this.stripe.webhooks.constructEvent(request.rawBody, sig, webhookSigningKey);
         } catch (error) {
-            logger.error("Failed to construct stripe webhook event", error);
+            logger.error("Failed to construct stripe webhook event", error.message);
             return undefined;
         }
     }
