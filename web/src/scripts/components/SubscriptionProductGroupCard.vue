@@ -336,7 +336,7 @@
     }
 
     .freePrice {
-        height: 9rem;
+        height: 11.3rem;
         margin-bottom: 2.4rem;
     }
 
