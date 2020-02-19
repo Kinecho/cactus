@@ -86,6 +86,7 @@ export default class EnglishCopy extends LocalizedCopy {
         DAYS_LEFT_IN_TRIAL: "days left in trial",
         DAY_LEFT_IN_TRIAL: "day left in trial",
         TRIAL_ENDS_TODAY: "Trial ends today",
+        ENDS_TODAY: "Ends today",
         LEARN_MORE: "Learn More",
         TRIAL: "Trial",
     };
