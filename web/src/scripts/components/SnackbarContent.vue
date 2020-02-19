@@ -122,6 +122,11 @@
             color: $white;
         }
 
+        &.successAlt {
+            background: $darkerGreen url(assets/images/grainy.png) repeat;
+            color: $white;
+        }
+
         &.danger {
             background-color: $darkestPink;
             color: $white;
