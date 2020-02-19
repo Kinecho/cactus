@@ -202,10 +202,14 @@
         border-radius: 1.6rem 1.6rem 0 0;
         font-size: 2.4rem;
         font-weight: bold;
-        padding: 2.4rem 2.4rem .8rem;
+        padding: 2.4rem 1.6rem .8rem;
         position: relative;
         text-align: left;
         z-index: 1;
+
+        @include r(374) {
+            padding: 2.4rem 2.4rem .8rem;
+        }
 
         &.basic {
             background-color: $white;
@@ -221,7 +225,11 @@
     .flex-plans {
         display: flex;
         flex-direction: column;
+        margin: 0 -1.6rem;
 
+        @include r(374) {
+            margin: 0;
+        }
         @include r(768) {
             flex-direction: row;
             justify-content: space-between;
@@ -233,16 +241,22 @@
 
             @include r(768) {
                 display: flex;
+                flex-basis: 49%;
                 flex-direction: column;
             }
 
             .tab-content {
                 display: block;
                 margin: 0 0 2.4rem;
+                padding: 0 1.6rem 2.4rem;
 
+                @include r(374) {
+                    padding: 0 2.4rem 2.4rem;
+                }
                 @include r(768) {
                     flex-grow: 1;
                     margin-bottom: 0;
+                    padding: 1.6rem 2.4rem 2.4rem;
                 }
 
                 &.basic-panel {
@@ -300,11 +314,16 @@
         }
 
         &:only-child {
+            background: $dolphin url(assets/images/grainy.png) repeat;
             border-radius: 1.6rem 1.6rem 0 0;
             flex-basis: 100%;
+            padding-left: 1.6rem;
             padding-bottom: .8rem;
             text-align: left;
 
+            @include r(374) {
+                padding-left: 2.4rem;
+            }
             @include r(768) {
                 flex-basis: 50%;
             }
@@ -326,6 +345,11 @@
 
     .tabPanel {
         display: none;
+
+        &:only-child {
+            display: block;
+            padding-top: .8rem;
+        }
 
         @include r(768) {
             display: block;
