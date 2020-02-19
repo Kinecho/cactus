@@ -33,6 +33,7 @@ export interface CommonCopy {
     SIGN_UP: string,
     SIGNING_IN: string,
     LOG_IN: string,
+    PRICING: string,
     NEXT: string,
     SUBMIT: string,
     LOG_OUT: string,

@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     setupNavigation({
+        showPricing: true,
         stickyNav: true,
         showSignupButton: true,
         largeLogoOnDesktop: true,

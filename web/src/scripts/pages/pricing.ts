@@ -10,7 +10,7 @@ commonInit();
 new Vue({
     el: "header",
     template: `
-        <NavBar/>`,
+        <NavBar :show-signup="true" :show-login="true" :show-links="true"/>`,
     components: {NavBar}
 });
 
