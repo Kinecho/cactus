@@ -13,11 +13,6 @@ module.exports = {
         "path": "/signup",
         "name": "sign_up"
     },
-    "payment_success": {
-        "title": "Payment Success",
-        "path": "/success",
-        "name": "payment_success"
-    },
     "payment_cancel": {
         "title": "Payment Canceled",
         "path": "/cancel",
