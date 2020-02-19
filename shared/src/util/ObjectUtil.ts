@@ -163,7 +163,8 @@ export function stringifyJSON(input: any, space?: number): string {
         }
         return value;
     }
-    const copy = Object.assign({}, input);
+
+    const copy = isNonEmptyObject(input) ? Object.assign({}, input) : input;
     return JSON.stringify(copy, replacer, space);
 }
 
