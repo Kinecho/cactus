@@ -1,7 +1,7 @@
 <template>
     <div class="container">
-        <h2>You've downgraded to Basic.</h2>
-        <p>In the future, Cactus will not charge your payment method again. If you have questions or feedback, we'd love to hear from you.</p>
+        <h2>Want to Downgrade?</h2>
+        <p>Tap the "Send Email" button below to generate a request by email to downgrade. We will process requests within 24 hours.</p>
         <div class="actions">
             <a :href="`mailto:help@cactus.appp?subject=${subject}&body=${body}`" class="button primary" target="_blank">Send Email</a>
         </div>
