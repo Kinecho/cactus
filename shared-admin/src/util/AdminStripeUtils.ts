@@ -27,6 +27,18 @@ export function getStripeId(input: string | Object | null | undefined): string |
     return undefined;
 }
 
+export function isStripeSubscription(subscription: Stripe.Subscription | string | null | undefined): subscription is Stripe.Subscription {
+    if (isNull(subscription)) {
+        return false;
+    }
+
+    if (isString(subscription)) {
+        return false;
+    }
+
+    return !!subscription?.id;
+}
+
 export function isCustomer(customer: Stripe.Customer | string | null | undefined): customer is Stripe.Customer {
     if (isNull(customer)) {
         return false;

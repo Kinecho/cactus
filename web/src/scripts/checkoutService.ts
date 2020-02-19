@@ -72,6 +72,7 @@ export function getSignUpStripeCheckoutUrl(options: { subscriptionProductId: str
 }
 
 export function sendToLoginForCheckout(options: { subscriptionProductId: string }) {
+    logger.warn("Sending to login before checkout can occur");
     window.location.href = getSignUpStripeCheckoutUrl(options);
 }
 
@@ -92,7 +93,7 @@ export async function startCheckout(options: {
     };
 
     if (!member && subscriptionProductId) {
-        logger.info("User is not logged in, sending to sign in page with checkout redirect success url");
+        logger.warn("User is not logged in, sending to sign in page with checkout redirect success url");
         sendToLoginForCheckout({subscriptionProductId});
         result.isRedirecting = true;
     } else if (member && subscriptionProductId) {
@@ -111,8 +112,10 @@ export async function startCheckout(options: {
  */
 export async function redirectToStripeCheckout(options: { subscriptionProductId: string, member: CactusMember }): Promise<CheckoutRedirectResult> {
     const {subscriptionProductId, member} = options;
+    await CactusMemberService.sharedInstance.getCurrentMember(); //just to ensure we don't prematurely redirect away - this waits for the auth to load at least once
     const sessionResponse = await createStripeSession({subscriptionProductId});
     if (sessionResponse.unauthorized === true) {
+        logger.warn("User is not logged in while attempting ot create stripe session. Can not check out - sending back to sign in page");
         sendToLoginForCheckout({subscriptionProductId});
         return {isLoggedIn: false, isRedirecting: true};
     }

@@ -11,7 +11,7 @@ import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Payment from "@shared/models/Payment";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import {getCustomerId, getStripeId} from "@admin/util/AdminStripeUtils";
+import {getCustomerId, getStripeId, isStripeSubscription} from "@admin/util/AdminStripeUtils";
 import {destructureDisplayName, isBlank} from "@shared/util/StringUtil";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
@@ -188,10 +188,16 @@ export default class StripeWebhookService {
             planId: stripePlanId,
             onlyAvailableForSale: false
         });
-
+        const customerId = getCustomerId(session.customer);
         const stripeSubscriptionId = getStripeId(session.subscription);
-        // const stripeSubscription = await this.getStripeSubscription(stripeSubscriptionId);
-
+        const stripeSubscription = await AdminSubscriptionService.getSharedInstance().getStripeSubscription(stripeSubscriptionId);
+        if (isStripeSubscription(stripeSubscription) && customerId) {
+            const paymentMethod = getStripeId(stripeSubscription.default_payment_method);
+            if (paymentMethod) {
+                logger.info("Update default payment method on customer");
+                await AdminSubscriptionService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethod}})
+            }
+        }
 
         const cactusSubscription = cactusMember.subscription ?? getDefaultSubscription();
         cactusSubscription.tier = SubscriptionTier.PLUS;
@@ -202,7 +208,7 @@ export default class StripeWebhookService {
         trial.activatedAt = new Date();
         cactusSubscription.trial = trial;
         cactusMember.subscription = cactusSubscription;
-        cactusMember.stripeCustomerId = getCustomerId(session.customer);
+        cactusMember.stripeCustomerId = customerId;
         const payment = Payment.fromStripeCheckoutSession({
             memberId,
             session,

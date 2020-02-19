@@ -45,12 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
     setupJumpToForm();
 });
 
-new Vue({
-    el: "#premium-pricing",
-    template: `
-        <PremiumPricing/>`,
-    components: {PremiumPricing: PremiumPricing}
-});
+// new Vue({
+//     el: "#premium-pricing",
+//     template: `
+//         <PremiumPricing/>`,
+//     components: {PremiumPricing: PremiumPricing}
+// });
 
 new Vue({
     el: "#app-store",
