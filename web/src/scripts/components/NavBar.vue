@@ -3,11 +3,6 @@
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
             <div v-if="" class="anonLinks ">
-                <a v-if="showPricing"
-                        class="pricing"
-                        :href="pricingHref"
-                        type="link"
-                ><span class="">{{copy.common.PRICING}}</span></a>
                 <a v-if="displayLoginButton"
                         class="login "
                         :href="loginHref"
@@ -89,7 +84,6 @@
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
         activityBadgeCount: number,
-        pricingHref: PageRoute,
     }
 
     export default Vue.extend({
@@ -135,7 +129,6 @@
             this.memberProfileUnsubscriber?.();
         },
         props: {
-            showPricing: {type: Boolean, default: false},
             showSignup: {type: Boolean, default: false},
             signOutRedirectUrl: String,
             redirectOnSignOut: Boolean,
@@ -160,7 +153,6 @@
                 activityBadgeCount: StorageService.getNumber(LocalStorageKey.activityBadgeCount, 0)!,
                 memberProfileUnsubscriber: undefined,
                 memberProfile: undefined,
-                pricingHref: PageRoute.PAYMENT_PLANS,
             }
         },
         computed: {
@@ -275,7 +267,7 @@
         }
     }
 
-    .login, .pricing {
+    .login {
         font-size: 1.6rem;
         text-decoration: none;
         transition: background-color .2s ease-in-out;
@@ -292,13 +284,6 @@
                     background-color: $lightGreen;
                 }
             }
-        }
-    }
-
-    .pricing {
-        display: none;
-        @include r(600) {
-            display: unset
         }
     }
 
