@@ -17,7 +17,7 @@
 
     const DEFAULT_DURATION_MS = 5000;
 
-    export type SnackbarColor = 'success' | 'warning' | 'danger' | "info" | "default";
+    export type SnackbarColor = 'success' | 'successAlt' | 'warning' | 'danger' | "info" | "default";
     export type SnackbarMessage =
         | string
         | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: SnackbarColor }
