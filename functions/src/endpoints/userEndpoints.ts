@@ -2,7 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import {getConfig} from "@admin/config/configService";
 import AdminUserService from "@admin/services/AdminUserService";
-import {getAuthUserId} from "@api/util/RequestUtil";
+import {getAuthUser} from "@api/util/RequestUtil";
 import * as functions from "firebase-functions";
 import Logger from "@shared/Logger";
 
@@ -14,9 +14,9 @@ const config = getConfig();
 app.use(cors({origin: config.allowedOrigins}));
 
 app.post("/delete-permanently", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const requestUserId = await getAuthUserId(req);
+    const requestUser = await getAuthUser(req);
     
-    if (!requestUserId) {
+    if (!requestUser?.uid) {
         logger.log("No auth user was found on the request");
         resp.sendStatus(401);
         return
@@ -33,7 +33,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
         return
     }
 
-    if (!user || user.id !== requestUserId) {
+    if (!user || user.id !== requestUser.uid) {
         logger.log("User not authorized");
         resp.sendStatus(401);
         return
