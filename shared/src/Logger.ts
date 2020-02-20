@@ -1,5 +1,4 @@
 //tslint:disable:no-console
-import chalk from "chalk";
 
 export default class Logger {
     fileName: string;
@@ -38,7 +37,9 @@ export default class Logger {
     }
 
     debug(...args: [any?, ...any[]]) {
-        console.debug.apply(console, [chalk.blue(this.prefix), ...this.parseArgs(args)]);
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.debug.apply(console, a);
     }
 
     log(...args: [any?, ...any[]]) {
@@ -48,7 +49,7 @@ export default class Logger {
     info(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.info.apply(console, a as any);
+        console.info.apply(console, a);
     }
 
     warn(...args: [any?, ...any[]]) {
