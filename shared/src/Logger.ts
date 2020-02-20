@@ -16,27 +16,51 @@ export default class Logger {
     }
 
     protected get prefix(): string {
-        return `[${this.serverName ? `${this.serverName}.` : ""}${this.fileName}] ${this.getDateString()} |`
+        return `${this.getDateString()} [${this.serverName ? `${this.serverName}.` : ""}${this.fileName}]`
     }
 
-    debug(...args: any[]) {
-        console.debug.apply(this, [chalk.blue(this.prefix), ...args]);
+    protected isNonEmptyObject(input: any): input is Object {
+        if (input === undefined || input === null || !input) {
+            return false;
+        }
+        return typeof (input) === "object" && !Array.isArray(input) && Object.keys(input).length > 0;
     }
 
-    log(...args: any[]) {
+    protected copy(input: any): any {
+        if (this.isNonEmptyObject(input)) {
+            return Object.assign({}, input);
+        }
+        return input;
+    }
+
+    protected parseArgs(...args: any[]) {
+        return args.map(arg => this.copy(arg))
+    }
+
+    debug(...args: [any?, ...any[]]) {
+        console.debug.apply(console, [chalk.blue(this.prefix), ...this.parseArgs(args)]);
+    }
+
+    log(...args: [any?, ...any[]]) {
         this.info(...args);
     }
 
-    info(...args: any[]) {
-        console.log.apply(this, [this.prefix, ...args]);
+    info(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.info.apply(console, a as any);
     }
 
-    warn(...args: any[]) {
-        console.warn.apply(this, [chalk.yellow(this.prefix), ...args]);
+    warn(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.warn.apply(console, a);
     }
 
-    error(...args: any[]) {
-        console.error.apply(this, [chalk.red(this.prefix), ...args]);
+    error(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.error.apply(console, a);
     }
 
     getDateString(): string {

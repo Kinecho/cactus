@@ -27,10 +27,14 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
+                        logger.log("[memberService constructor callback] BEFORE LOGGING member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
                         logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        await this.updateMemberSettingsIfNeeded(member)
+                        logger.log("[memberService instance constructor callback] member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
+                        if (member) {
+                            await this.updateMemberSettingsIfNeeded(member)
+                        }
                     }
                 })
             } else {
@@ -74,7 +78,9 @@ export default class CactusMemberService {
         }
 
         if (doSave) {
-            logger.log("Updating member settings");
+            logger.log("[update settings if needed] member trial started at type of = ", typeof (member.subscription?.trial?.startedAt))
+            logger.log("Updating member settings for member", member);
+
             await this.save(member)
         }
 
@@ -168,6 +174,7 @@ export default class CactusMemberService {
             if (user) {
                 memberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: (member) => {
+                        logger.log("[observeCurrentMember] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
                         options.onData({user: user, member: member})
                     }
                 })

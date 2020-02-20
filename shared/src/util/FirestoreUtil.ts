@@ -153,7 +153,15 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
 }
 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
+    logger.info("FromFirestoreData | rawData: ", data);
+    logger.info("FromFirestoreData | rawData.subscription.trial.startedAt = : ", data?.subscription?.trial?.startedAt);
+    logger.info("FromFirestoreData | rawData.subscription.trial.startedAt typeof : ", typeof (data?.subscription?.trial?.startedAt));
     const transformed = convertTimestampToDate(data);
+
+    logger.info("FromFirestoreData | transformed: ", transformed);
+    logger.info("FromFirestoreData | transformed.subscription.trial.startedAt = : ", transformed?.subscription?.trial?.startedAt);
+    logger.info("FromFirestoreData | transformed.subscription.trial.startedAt typeof : ", typeof (transformed?.subscription?.trial?.startedAt));
+
     const model = new Type();
     const t = Object.assign(model, transformed) as T;
     t.prepareFromFirestore(data);

@@ -126,6 +126,7 @@ export async function sendLoginEvent(args: {
             onData: async ({member}) => {
                 if (member) {
                     try {
+                        logger.log("[auth.sendLoginEvent] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
                         logger.log("Got cactus member, can send login event", member);
                         unsubscriber();
                         let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);

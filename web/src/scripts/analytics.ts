@@ -60,7 +60,7 @@ export function init() {
     });
 
     const sentryIntegrations = [];
-    if (!Config.isDev) {
+    if (!Config.isDev || true) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
         Sentry.init({
             dsn: Config.sentry.dsn,
