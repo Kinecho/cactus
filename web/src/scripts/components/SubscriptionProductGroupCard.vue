@@ -29,7 +29,7 @@
             <div class="error" v-if="checkoutError">{{checkoutError}}</div>
             <button v-if="canPurchaseTier"
                     v-bind:disabled="isProcessing"
-                    class="button primary"
+                    class="button primary loading-white"
                     :class="{secondary: selectedProduct.isFree}"
                     @click="checkout">
                 {{buttonText}}
@@ -289,7 +289,6 @@
     button:disabled {
         background-color: transparent;
         color: transparentize($white, .4);
-
         @include r(768) {
             .basic-panel & {
                 color: transparentize($darkestGreen, .4);
