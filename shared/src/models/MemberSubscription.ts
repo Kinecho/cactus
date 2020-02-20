@@ -11,7 +11,7 @@ export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } =
 
 export const BillingPeriodSortOrder: BillingPeriod[] = [BillingPeriod.never, BillingPeriod.once, BillingPeriod.weekly, BillingPeriod.monthly, BillingPeriod.yearly];
 
-export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS];
+export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS, SubscriptionTier.PREMIUM];
 
 export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
     const copy = CopyService.getSharedInstance().copy;
@@ -71,12 +71,16 @@ export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): Subscri
 }
 
 export function isInTrial(subscription?: MemberSubscription): boolean {
+    if (!subscription) {
+        return true;
+    }
     if (!subscription?.trial?.endsAt) {
         return false
     }
-    if (subscription.tier === SubscriptionTier.BASIC) {
+    if (!PremiumSubscriptionTiers.includes(subscription.tier) || subscription.tier === SubscriptionTier.BASIC) {
         return false;
     }
+
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt.getTime() > Date.now();
 }
 

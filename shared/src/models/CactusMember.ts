@@ -4,12 +4,7 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
-import {
-    getDefaultSubscription,
-    isInTrial,
-    MemberSubscription,
-    subscriptionTierDisplayName
-} from "@shared/models/MemberSubscription";
+import {isInTrial, MemberSubscription, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
@@ -68,6 +63,7 @@ export enum Field {
     subscription = "subscription",
     subscriptionTier = "subscription.tier",
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
+    subscriptionStripeId = "subscription.stripeSubscriptionId",
 }
 
 export interface PromptSendTime {
@@ -129,7 +125,7 @@ export default class CactusMember extends BaseModel {
         lastSeenOccurredAt?: Date
     } = {};
 
-    subscription?: MemberSubscription = getDefaultSubscription();
+    subscription?: MemberSubscription;
     stripe?: MemberStripeDetails = {};
 
     prepareForFirestore(): any {
@@ -201,7 +197,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get tier(): SubscriptionTier {
-        return this.subscription?.tier ?? SubscriptionTier.BASIC
+        return this.subscription?.tier ?? SubscriptionTier.PLUS
     }
 
     get tierDisplayName(): string | undefined {

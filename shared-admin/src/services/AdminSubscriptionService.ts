@@ -18,7 +18,8 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
 import {
     convertPaymentMethod,
-    getInvoiceStatusFromStripeStatus, getStripeId,
+    getInvoiceStatusFromStripeStatus,
+    getStripeId,
     isStripePaymentMethod
 } from "@admin/util/AdminStripeUtils";
 
@@ -87,7 +88,7 @@ export default class AdminSubscriptionService {
         subscription.tier = SubscriptionTier.BASIC;
 
         const [updateSuccess, mailchimpResponse] = await Promise.all([
-            this.updateSubscriptionTier({memberId, tier: SubscriptionTier.BASIC}),
+            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC}),
             this.updateMailchimpListMember({member})
         ]);
 
@@ -162,14 +163,31 @@ export default class AdminSubscriptionService {
      * @param {{memberId: string, tier: SubscriptionTier}} options
      * @return {Promise<boolean>} true if the operation was successful
      */
-    async updateSubscriptionTier(options: { memberId: string, tier: SubscriptionTier }): Promise<boolean> {
+    async saveSubscriptionTier(options: { memberId: string, tier: SubscriptionTier }): Promise<boolean> {
         const {memberId, tier} = options;
         try {
             const ref = this.membersCollection.doc(memberId);
             await ref.update({[CactusMember.Field.subscriptionTier]: tier});
             return true;
         } catch (error) {
-            this.logger.error("Unable to set the subscription tier on member " + memberId);
+            this.logger.error("Unable to set the subscription tier on member " + memberId, error);
+            return false;
+        }
+    }
+
+    /**
+     * Set a stripeSubscriptionId on a cactus member. Passing null will save it as null.
+     * @param {{memberId: string, tier: SubscriptionTier}} options
+     * @return {Promise<boolean>} true if the operation was successful
+     */
+    async saveStripeSubscriptionId(options: { memberId: string, subscriptionId: string | null }): Promise<boolean> {
+        const {memberId, subscriptionId} = options;
+        try {
+            const ref = this.membersCollection.doc(memberId);
+            await ref.update({[CactusMember.Field.subscriptionStripeId]: subscriptionId});
+            return true;
+        } catch (error) {
+            this.logger.error("Unable to set the stripe subscriptionId on member " + memberId, error);
             return false;
         }
     }
@@ -419,6 +437,7 @@ export default class AdminSubscriptionService {
                 nextPaymentDate_epoch_seconds: stripeInvoice.next_payment_attempt || undefined,
                 paid: stripeInvoice.paid,
                 stripeInvoiceId: stripeInvoice.id,
+                stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
@@ -431,6 +450,7 @@ export default class AdminSubscriptionService {
 
     async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
+        const memberId = member.id;
         const stripeCustomerId = member.stripeCustomerId;
         const stripeSubscriptionId = member.subscription?.stripeSubscriptionId;
 
@@ -440,6 +460,12 @@ export default class AdminSubscriptionService {
                 customerId: stripeCustomerId,
                 subscriptionId: stripeSubscriptionId
             });
+
+            //If the member didn't have their subscriptionId saved on their member object, go ahead and update it now.
+            if (!stripeSubscriptionId && invoice?.stripeSubscriptionId && memberId) {
+                this.logger.info(`Setting the stripe subscription ID (${stripeSubscriptionId}) on the cactus member ${memberId}`);
+                await this.saveStripeSubscriptionId({memberId: memberId, subscriptionId: invoice.stripeSubscriptionId})
+            }
         }
         //TODO: Handle for fetching invoices from Apple, Google, etc
 

@@ -14,6 +14,7 @@ export interface SubscriptionInvoice {
     paid?: boolean;
     status?: InvoiceStatus;
     stripeInvoiceId?: string;
+    stripeSubscriptionId?: string;
 }
 
 export enum CardBrand {

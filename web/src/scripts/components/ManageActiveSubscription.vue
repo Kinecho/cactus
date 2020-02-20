@@ -4,22 +4,33 @@
         <div v-if="subscriptionDetailsLoading" class="loading-container">
             <spinner message="Loading subscription details..."/>
         </div>
+
         <div v-else>
-            <h3 class="tier">{{tierName}}<button @click="downgrade" class="button tertiary small changePlan">Change Plan</button></h3>
-            <p v-if="!subscriptionDetailsLoading">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
-            <div class="card-info">
-                <img class="ccIcon" src="assets/icons/creditCard.svg" alt="" />
-                <div class="cardDetails">
-                    <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
-                    <span class="last4" v-if="last4">ending in {{last4}}</span>
-                    <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">{{digitalWallet.displayName}}</p>
-                </div>
-                <button class="tertiary button updateBtn" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
-                    <img class="penIcon" src="assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod" />
-                    <span class="btnText" v-if="!loadingUpdatePaymentMethod">Update</span>
-                    <span class="btnText loading" v-if="loadingUpdatePaymentMethod">Loading...</span>
-                </button>
+            <h3 class="tier">{{tierName}}
+                <button @click="downgrade" class="button tertiary small changePlan">Change Plan</button>
+            </h3>
+            <div v-if="error" class="error">
+                {{error}}
             </div>
+            <template v-if="!error">
+                <p v-if="!subscriptionDetailsLoading">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is
+                    for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
+                <div class="card-info">
+                    <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
+                    <div class="cardDetails">
+                        <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
+                        <span class="last4" v-if="last4">ending in {{last4}}</span>
+                        <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">
+                            {{digitalWallet.displayName}}</p>
+                    </div>
+                    <button class="tertiary button updateBtn" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
+                        <img class="penIcon" src="assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod"/>
+                        <span class="btnText" v-if="!loadingUpdatePaymentMethod">Update</span>
+                        <span class="btnText loading" v-if="loadingUpdatePaymentMethod">Loading...</span>
+                    </button>
+                </div>
+            </template>
+
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
                 <downgrade-form slot="body" :member="member"/>
             </modal>
@@ -50,6 +61,7 @@
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
     import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
+    import {isString} from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -67,12 +79,14 @@
             subscriptionDetailsLoading: boolean,
             subscriptionDetails: SubscriptionDetails | undefined,
             loadingUpdatePaymentMethod: boolean,
+            error: string | undefined,
         } {
             return {
                 showDowngradeModal: false,
                 subscriptionDetailsLoading: false,
                 subscriptionDetails: undefined,
                 loadingUpdatePaymentMethod: false,
+                error: undefined,
             }
         },
         beforeMount(): void {
@@ -127,8 +141,14 @@
                     this.subscriptionDetails = undefined;
                     return;
                 }
+                this.error = undefined;
                 this.subscriptionDetailsLoading = true;
                 this.subscriptionDetails = await getSubscriptionDetails();
+                if (!this.subscriptionDetails) {
+                    this.error = "Unable to load your subscription details. Please try again later";
+                } else {
+                    this.error = undefined;
+                }
                 this.subscriptionDetailsLoading = false;
             },
             handleError(error: SnackbarMessage): void {
