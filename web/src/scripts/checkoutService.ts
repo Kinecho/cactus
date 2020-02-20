@@ -57,6 +57,7 @@ export async function createStripeSession(options: { subscriptionProductId: stri
 export interface CheckoutRedirectResult {
     isRedirecting: boolean,
     isLoggedIn: boolean,
+    success: boolean
 }
 
 /**
@@ -90,6 +91,7 @@ export async function startCheckout(options: {
     const result: CheckoutRedirectResult = {
         isRedirecting: false,
         isLoggedIn: !!member,
+        success: true,
     };
 
     if (!member && subscriptionProductId) {
@@ -117,13 +119,13 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
     if (sessionResponse.unauthorized === true) {
         logger.warn("User is not logged in while attempting ot create stripe session. Can not check out - sending back to sign in page");
         sendToLoginForCheckout({subscriptionProductId});
-        return {isLoggedIn: false, isRedirecting: true};
+        return {isLoggedIn: false, isRedirecting: true, success: true};
     }
 
     const sessionId = sessionResponse.sessionId;
     if (!sessionId) {
         logger.error("Unable to get the session id, return error", sessionResponse);
-        return {isLoggedIn: true, isRedirecting: false}
+        return {isLoggedIn: true, isRedirecting: false, success: false}
     }
 
     gtag('event', 'begin_checkout', {
@@ -138,10 +140,10 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
         // If `redirectToCheckout` fails due to a browser or network
         // error, display the localized error message to your customer.
         logger.error("Failed to redirect to stripe checkout", result.error);
-        return {isRedirecting: false, isLoggedIn: true};
+        return {isRedirecting: false, isLoggedIn: true, success: true};
     }
 
-    return {isLoggedIn: true, isRedirecting: true};
+    return {isLoggedIn: true, isRedirecting: true, success: true};
 }
 
 export async function startStripeCheckoutSession(sessionId: string): Promise<{ error?: any }> {

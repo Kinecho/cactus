@@ -25,6 +25,7 @@ export default class SubscriptionProduct extends FlamelinkModel {
     stripePlanId?: string;
     availableForSale: boolean = false;
     subscriptionTier: SubscriptionTier = SubscriptionTier.PLUS;
+    savingsCopy?: string;
 
     constructor(data?: Partial<SubscriptionProduct>) {
         super(data);

@@ -26,6 +26,7 @@
         </div>
 
         <div class="actions">
+            <div class="error" v-if="checkoutError">{{checkoutError}}</div>
             <button v-if="canPurchaseTier"
                     v-bind:disabled="isProcessing"
                     class="button primary"
@@ -62,6 +63,7 @@
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
+    import {stringifyJSON} from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("SubscriptionProductGroupCard");
@@ -180,7 +182,14 @@
                     this.isProcessing = false;
                     return;
                 }
-                await startCheckout({subscriptionProductId})
+                const checkoutResult = await startCheckout({subscriptionProductId});
+                if (!checkoutResult.success) {
+                    logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
+                    this.checkoutError = "Unable to load checkout. Please try again later";
+                    this.isProcessing = false;
+                } else {
+                    this.checkoutError = undefined;
+                }
             },
             goToAccount() {
                 this.isProcessing = false;
@@ -294,6 +303,20 @@
 
         & + .button {
             margin-bottom: 1.6rem;
+        }
+    }
+
+    .actions .error {
+        text-align: center;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.8rem;
+        background: $darkestPink url(assets/images/sadCactusPatternWhiteTransparent.svg);
+        background-size: 430px;
+        color: white;
+
+        img {
+            fill: $lightPink;
         }
     }
 
