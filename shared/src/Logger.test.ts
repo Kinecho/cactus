@@ -19,7 +19,7 @@ test("log outputs all params as expected", () => {
     logger.getDateString = () => DATE_STRING;
     logger.info("message", "second");
     expect(console.log).toHaveBeenCalledTimes((1));
-    expect(console.log).toHaveBeenCalledWith(`[LoggerTest] ${DATE_STRING} |`, "message", "second");
+    expect(console.log).toHaveBeenCalledWith(`${DATE_STRING} [LoggerTest]`, "message", "second");
 });
 
 test("prints objects", () => {
@@ -27,7 +27,7 @@ test("prints objects", () => {
     logger.getDateString = () => DATE_STRING;
     logger.info({key: "value"});
     expect(console.log).toHaveBeenCalledTimes((1));
-    expect(console.log).toHaveBeenCalledWith(`[LoggerTest] ${DATE_STRING} |`, {key: "value"});
+    expect(console.log).toHaveBeenCalledWith(`${DATE_STRING} [LoggerTest]`, {key: "value"});
 });
 
 test("warning", () => {

@@ -18,24 +18,6 @@ export default class Logger {
         return `${this.getDateString()} [${this.serverName ? `${this.serverName}.` : ""}${this.fileName}]`
     }
 
-    protected isNonEmptyObject(input: any): input is Object {
-        if (input === undefined || input === null || !input) {
-            return false;
-        }
-        return typeof (input) === "object" && !Array.isArray(input) && Object.keys(input).length > 0;
-    }
-
-    protected copy(input: any): any {
-        if (this.isNonEmptyObject(input)) {
-            return Object.assign({}, input);
-        }
-        return input;
-    }
-
-    protected parseArgs(...args: any[]) {
-        return args.map(arg => this.copy(arg))
-    }
-
     debug(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
@@ -49,7 +31,7 @@ export default class Logger {
     info(...args: [any?, ...any[]]) {
         const a: any = [].slice.call(arguments, 0);
         a.unshift(this.prefix);
-        console.info.apply(console, a);
+        console.log.apply(console, a);
     }
 
     warn(...args: [any?, ...any[]]) {
