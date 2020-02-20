@@ -15,8 +15,9 @@
                     <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">{{digitalWallet.displayName}}</p>
                 </div>
                 <button class="tertiary button updateBtn" @click="updatePaymentMethod" :disabled="loadingUpdatePaymentMethod">
-                    <img class="penIcon" src="assets/images/pen.svg" alt="" />
-                    <span class="btnText">Update</span>
+                    <img class="penIcon" src="assets/images/pen.svg" alt="" v-if="!loadingUpdatePaymentMethod" />
+                    <span class="btnText" v-if="!loadingUpdatePaymentMethod">Update</span>
+                    <span class="btnText loading" v-if="loadingUpdatePaymentMethod">Loading...</span>
                 </button>
             </div>
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
@@ -209,6 +210,10 @@
         &:hover {
             background: transparent;
         }
+
+        &:disabled:before {
+            margin-top: 0;
+        }
     }
 
     .btnText {
@@ -216,6 +221,10 @@
 
         @include r(374) {
             display: block;
+        }
+
+        &.loading {
+            color: $lightText;
         }
     }
 
