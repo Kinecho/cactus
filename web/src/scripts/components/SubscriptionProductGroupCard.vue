@@ -310,17 +310,12 @@
     }
 
     .actions .error {
+        background: lighten($red, 20%) url(assets/images/sadCactusPatternWhiteTransparent.svg);
+        border-radius: .8rem;
+        color: $dolphin;
+        margin-bottom: 1.6rem;
+        padding: 1.6rem;
         text-align: center;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        border-radius: 0.8rem;
-        background: $darkestPink url(assets/images/sadCactusPatternWhiteTransparent.svg);
-        background-size: 430px;
-        color: white;
-
-        img {
-            fill: $lightPink;
-        }
     }
 
     .group-description {
