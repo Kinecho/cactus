@@ -91,6 +91,7 @@
 
     .modalContainer {
         @include shadowbox;
+        max-width: 64rem;
         padding: 3.2rem;
     }
 
