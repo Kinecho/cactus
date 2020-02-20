@@ -98,6 +98,15 @@
                         </div>
                     </div>
 
+                    <div class="settings-group delete">
+                        <div class="item">
+                            <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
+                                <img src="assets/images/trash.svg" alt=""/>
+                                {{copy.account.DELETE_ACCOUNT}}
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="stickyButtons" v-if="changesToSave === true">
                         <button @click="save">Save Changes</button>
                         <button @click="reloadPage" class="secondary">Cancel</button>
@@ -105,6 +114,9 @@
 
                 </div>
             </transition>
+            <delete-account-modal
+                :showModal="deleteAccountModalVisible"
+                @close="deleteAccountModalVisible = false" />
             <div class="snackbar-container">
 
                 <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
@@ -149,6 +161,7 @@
     import {getProviderDisplayName} from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
+    import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
@@ -181,6 +194,7 @@
             TimePicker,
             Upgrade: PremiumPricing,
             ManageSubscription: ManageActiveSubscription,
+            DeleteAccountModal
         },
         mounted(): void {
             const message = getQueryParam(QueryParam.MESSAGE);
@@ -225,6 +239,7 @@
             tzAlertDismissed: boolean,
             upgradeRoute: string,
 
+            deleteAccountModalVisible: boolean
         } {
             return {
                 authLoaded: false,
@@ -244,7 +259,7 @@
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
                 upgradeRoute: PageRoute.PAYMENT_PLANS,
-
+                deleteAccountModalVisible: false
             }
         },
         computed: {
@@ -496,6 +511,11 @@
 
     .settings-group {
         margin-bottom: 6.4rem;
+
+        &.delete {
+            border-top: $lightestGreen 1px solid;
+            padding-top: 4.8rem;
+        }
     }
 
     .subscription .centered {
@@ -626,6 +646,10 @@
                 flex-grow: 0;
             }
         }
+    }
+
+    .modal-wrapper {
+        max-width: 60rem;
     }
 
 </style>

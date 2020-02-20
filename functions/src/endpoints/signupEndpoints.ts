@@ -257,7 +257,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         const fields: SlackAttachmentField[] = [];
 
         const attachments: SlackAttachment[] = [];
-        const message: ChatMessage = {text: "A user has logged in.", attachments};
+        const message: ChatMessage = {text: "A user has logged in.", attachments, didSignup: false};
 
 
         const [user, member] = await Promise.all([
@@ -308,6 +308,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         if (isNewUser && member) {
             message.text = `${appType ? getAppEmoji(appType) : ""}  ${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
+            message.didSignup = true;
             await AdminUserService.getSharedInstance().setReferredByEmail({
                 userId,
                 referredByEmail: referredByEmail || undefined
@@ -367,7 +368,11 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             });
         }
 
-        await AdminSlackService.getSharedInstance().sendSignupsMessage(message);
+        if (message.didSignup) {
+            await AdminSlackService.getSharedInstance().sendSignupsMessage(message);
+        } else {
+            await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+        }
         resp.sendStatus(204);
     } catch (error) {
         logger.error("An unexpected error occurred while processing the login-event");

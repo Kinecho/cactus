@@ -55,6 +55,8 @@ export default class EnglishCopy extends LocalizedCopy {
         CANCEL_UPDATE_TIMEZONE: "No, don't update",
         CONFIRM_UPDATE_TIMEZONE: "Yes, update timezone",
         EMAIL_NOTIFICATION_CHECKBOX_LABEL: "Receive an email when a new prompt is ready",
+        PERMANENTLY_DELETE_ACCOUNT: "Permanently Delete Account...",
+        DELETE_ACCOUNT: "Delete Cactus Account"
     };
 
     common: CommonCopy = {

@@ -24,6 +24,7 @@ import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
+import userEndpoints from "@api/endpoints/userEndpoints";
 import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
@@ -38,6 +39,7 @@ export const cloudFunctions = {
     slack: functions.https.onRequest(slackEndpoints),
     signup: functions.https.onRequest(signupEndpoints),
     social: functions.https.onRequest(socialEndpoints),
+    user: functions.https.onRequest(userEndpoints),
     test: functions.https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
 

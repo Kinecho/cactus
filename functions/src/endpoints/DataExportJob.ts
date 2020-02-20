@@ -44,39 +44,30 @@ export const latestBigQueryExportFileName = "latest-prefix.txt";
  */
 export async function exportFirestoreToBigQuery() {
     // await slackService.sendEngineeringMessage(`*BigQuery Ingest* Starting Job`);
-
     const collectionIds = await getCollectionIds();
-    logger.log("collectionIds", collectionIds);
+    logger.log("fetched collection IDs from Firestore. collectionIds", JSON.stringify(collectionIds));
 
     const startTime = new Date();
-    const attachments: SlackAttachment[] = [
-        // {
-        //     text: `Collection IDs:\n \`\`\`${collectionIds.join(", ")}\`\`\``,
-        //     color: AttachmentColor.info,
-        //     ts: `${(new Date()).getTime() / 1000}`
-        // }
-    ];
+    const attachments: SlackAttachment[] = [];
     const slackMessage = {
         text: `*BigQuery Ingest* Finished`,
         attachments,
     };
 
     try {
-        const [
-            bigQueryOperation
-        ] = await Promise.all([
-            exportForBigQuery(collectionIds)
-        ]);
-
-        // attachments.push(
-        //     buildOperationAttachment("Firestore Export to Analytics", bigQueryOperation.operation, formatDuration(startTime, bigQueryOperation.endTime), bigQueryOperation.error),
-        // );
+        logger.info("Starting the export of firestore data via `exportForBigQuery`");
+        const [bigQueryOperation] = await Promise.all([exportForBigQuery(collectionIds)]);
+        const exportEndTime = Date.now();
+        logger.info(`exportForBigQuery finished after ${exportEndTime - startTime.getTime()}`);
 
         if (bigQueryOperation.nextPrefix) {
+            logger.info(`Starting the bigQueryIngest task for nextPrefix = ${bigQueryOperation.nextPrefix}`);
             const ingestStartTime = new Date();
             try {
                 const bigueryResults = await bigqueryIngestFirestore(bigQueryOperation.nextPrefix);
                 const ingestEndTime = new Date();
+                logger.info(`bigqueryIngestFirestore job finished after ${formatDuration(ingestStartTime, ingestEndTime)}`);
+
                 const flatResults: IJob[] = [];
                 bigueryResults.forEach(resultsList => flatResults.push(...resultsList));
                 const processedResults = flatResults.map(r => {
@@ -95,12 +86,9 @@ export async function exportFirestoreToBigQuery() {
                         color: "warning"
                     })
                 }
-                // attachments.push({
-                //     text: `*BigQuery Ingest* completed successfully after ${formatDuration(ingestStartTime, ingestEndTime)}\nJob Results:\n\`\`\`\n${JSON.stringify(processedResults, null, 2)}\n\`\`\``,
-                //     color: "good"
-                // })
             } catch (bigqueryError) {
                 const ingestEndTime = new Date();
+                logger.error(`bigqueryIngestFirestore errored after ${formatDuration(ingestStartTime, ingestEndTime)}`, bigqueryError);
                 attachments.push({
                     text: `:warning: Big Query Ingest failed after ${formatDuration(ingestStartTime, ingestEndTime)}\n\`\`\`${JSON.stringify(bigqueryError)}\`\`\``,
                     color: "warning"
@@ -136,9 +124,15 @@ export async function backupFirestore(): Promise<void> {
     }
 }
 
+/**
+ * This pull the data from storage and uploads/ingests it into biquery. The file in storage is identified with the bucketPrefix that is passed in
+ * @param {string} bucketPrefix - the idenfifier used to find the correct firestore backup in Cloud Storage
+ * @return {Promise<bigquery.IJob[][]>}
+ */
 export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJob[][]> {
     let latestPrefix: string | undefined = bucketPrefix;
-
+    logger.info("Starting the bigqueryIngestFirstore job. This pull the data from storage and uploads/ingests it into biquery");
+    const jobStartTime = Date.now();
     const collectionIds = await getCollectionIds();
 
     const projectId = bigQueryServiceAccount.project_id;
@@ -153,13 +147,14 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
 
     if (!latestPrefix) {
         logger.log("Prefix not found on message, trying to read it from file in Storage");
+        const readStartTime = Date.now();
         const tmpPrefixFilePath = `/tmp/${latestBigQueryExportFileName}`;
         await storage.bucket(bigqueryImportBucketName)
             .file(latestBigQueryExportFileName)
             .download({destination: tmpPrefixFilePath});
-
         latestPrefix = await readFile(tmpPrefixFilePath, "utf8");
-        logger.log("got latest prefix from file", latestPrefix);
+        const readEndTime = Date.now();
+        logger.log(`got latest prefix (${latestPrefix}) from file in Cloud Storage after ${readEndTime - readStartTime}ms`);
     }
 
     if (!latestPrefix) {
@@ -171,20 +166,20 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
     collectionIds.forEach(collectionId => {
         try {
             const filename = `${latestPrefix}/all_namespaces/kind_${collectionId}/all_namespaces_kind_${collectionId}.export_metadata`;
-
             const tableId = snakeCase(collectionId);
-            logger.log("starting the import for fileName ", filename, "into table", tableId);
+            logger.log(`TableID: ${tableId}: starting the import from fileName "${filename}"`);
             // Loads data from a Google Cloud Storage file into the table
             const job = new Promise<JobMetadataResponse>(async resolve => {
+                const jobStart = Date.now();
                 const jobResult = await bigquery
                     .dataset(datasetId)
                     .table(tableId)
                     .load(storage.bucket(bigqueryImportBucketName).file(filename), metadata);
-                logger.log(`Finished import task for ${tableId}. Jobs Results:`);
-                jobResult.forEach(r => {
-                    logger.log(`[${tableId}] finished job - id=${r.id} | status=${r.status}`);
+                const jobEnd = Date.now();
+                const jobMessages = jobResult.map(r => {
+                    return `[${tableId}] finished job - id=${r.id} | status=${JSON.stringify(r.status)}`;
                 });
-
+                logger.log(`Finished import task for ${tableId} after ${jobEnd - jobStart}ms. Jobs Results:\n ${JSON.stringify(jobMessages, null, 2)}`);
                 resolve(jobResult);
             });
 
@@ -196,13 +191,8 @@ export async function bigqueryIngestFirestore(bucketPrefix?: string): Promise<IJ
     });
 
     const taskResults = await Promise.all(importTasks);
-    // taskResults.forEach((jobs, index) => {
-    //     jobs.forEach(job => {
-    //         logger.log(`finished job #${index} - id=${job.id} | status=${job.status}`);
-    //     })
-    // });
-
-    logger.log(`finished all ${taskResults.length} import tasks`);
+    const jobEndTime = Date.now();
+    logger.log(`finished all ${taskResults.length} import tasks after ${jobEndTime - jobStartTime}ms`);
     return taskResults;
 
 }
@@ -263,7 +253,13 @@ async function exportForBackup(): Promise<{ operation?: Operation, endTime: Date
     }
 }
 
+/**
+ *
+ * @param {string[]} collectionIds - the collection IDs to export from firestore
+ * @return {Promise<{operation?: Operation, endTime: Date, error?: any, nextPrefix?: string}>}
+ */
 async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?: Operation, endTime: Date, error?: any, nextPrefix?: string }> {
+    const startTime = Date.now();
     // const operation = await initializeBackup(serviceAccount.project_id, backupsConfig.bigquery_import_bucket, collectionIds);
     const analyticsProjectId = backupsConfig.analytics_project_id;
 
@@ -276,10 +272,12 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
         const storage = new Storage({projectId: analyticsProjectId, credentials: firestoreServiceAccount});
         const bucket = storage.bucket(backupsConfig.bigquery_import_bucket);
         const tmpFilePath = `/tmp/${latestBigQueryExportFileName}`;
+        logger.info(`Starting uploading file "${tmpFilePath}" with nextPrefix: "${nextPrefix}" to bucket ${backupsConfig.bigquery_import_bucket}`);
         await writeFile(tmpFilePath, nextPrefix);
         await bucket.upload(tmpFilePath);
+        logger.info(`Finished uploading file "${tmpFilePath}" with nextPrefix: "${nextPrefix}" to bucket ${backupsConfig.bigquery_import_bucket} after ${Date.now() - startTime}ms`)
     } catch (error) {
-        logger.error("Failed to upload new prefix for bigquery export file to storage", error)
+        logger.error(`Failed to upload new prefix for bigquery export file to storage. Duration: ${Date.now() - startTime}ms`, error);
         return {endTime: new Date(), error}
     }
 
@@ -288,7 +286,7 @@ async function exportForBigQuery(collectionIds: string[]): Promise<{ operation?:
         collectionIds);
 
     if (!operation) {
-        return {endTime: new Date(), error: initError || {message: "Failed to initialize bigqury export operation"}}
+        return {endTime: new Date(), error: initError || {message: "Failed to initialize bigquery export operation"}}
     }
 
 
@@ -365,7 +363,7 @@ function buildExportUrl(projectId: string): string {
 }
 
 
-async function getCollectionIds() {
+async function getCollectionIds(): Promise<string[]> {
     const collections = await firestoreService.listCollections();
     return collections.map(collection => collection.id);
 }

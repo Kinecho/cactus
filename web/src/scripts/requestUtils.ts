@@ -19,6 +19,7 @@ export enum Endpoint {
     notifyFriendRequest = "social/notify-friend-request",
     activityFeed = "social/activity-feed",
     activityFeedSummary = "social/activity-feed-summary",
+    userDeletePermanently = "user/delete-permanently",
     subscriptionDetails = "checkout/subscription-details",
     subscriptionSetup = "checkout/sessions/setup-subscription"
 }
