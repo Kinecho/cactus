@@ -59,8 +59,8 @@ export function init() {
 
     });
 
-    const sentryIntegrations = [];
-    if (!Config.isDev || true) {
+    const sentryIntegrations: any[] = []; //using any because it doesn't look like sentry's Integration interface is exported
+    if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
         Sentry.init({
             dsn: Config.sentry.dsn,

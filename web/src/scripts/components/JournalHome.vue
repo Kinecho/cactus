@@ -207,7 +207,6 @@
                                 this.dataHasLoaded = true;
                             },
                             updateAll: (entries) => {
-                                logger.log("got entries in journal home", entries);
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
