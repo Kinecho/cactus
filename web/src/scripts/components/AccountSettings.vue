@@ -92,6 +92,15 @@
                         </div>
                     </div>
 
+                    <div class="settings-group delete">
+                        <div class="item">
+                            <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
+                                <img src="assets/images/trash.svg" alt=""/>
+                                {{copy.account.DELETE_ACCOUNT}}
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="stickyButtons" v-if="changesToSave === true">
                         <button @click="save">Save Changes</button>
                         <button @click="reloadPage" class="secondary">Cancel</button>
@@ -99,6 +108,9 @@
 
                 </div>
             </transition>
+            <delete-account-modal
+                :showModal="deleteAccountModalVisible"
+                @close="deleteAccountModalVisible = false" />
             <div class="snackbar-container">
 
                 <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
@@ -143,6 +155,7 @@
     import {getProviderDisplayName} from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
+    import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
     import SnackbarContent from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
@@ -150,7 +163,8 @@
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
 
-    
+
+
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
@@ -170,6 +184,7 @@
             ProviderIcon,
             SnackbarContent,
             TimePicker,
+            DeleteAccountModal
         },
         created() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -206,6 +221,7 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
+            deleteAccountModalVisible: boolean
         } {
             return {
                 authLoaded: false,
@@ -224,11 +240,12 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
+                deleteAccountModalVisible: false
             }
         },
         computed: {
             promptSendTime(): PromptSendTime {
-                return this.member?.promptSendTime || 
+                return this.member?.promptSendTime ||
                        this.member?.getLocalPromptSendTimeFromUTC() ||
                        DEFAULT_PROMPT_SEND_TIME;
             },
@@ -474,6 +491,11 @@
 
     .settings-group {
         margin-bottom: 4.8rem;
+
+        &.delete {
+            border-top: $lightestGreen 1px solid;
+            padding-top: 4.8rem;
+        }
     }
 
     .provider-info {
@@ -604,6 +626,10 @@
                 flex-grow: 0;
             }
         }
+    }
+
+    .modal-wrapper {
+        max-width: 60rem;
     }
 
 </style>
