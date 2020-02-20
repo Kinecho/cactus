@@ -71,7 +71,7 @@ export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): Subscri
 }
 
 export function isInTrial(subscription?: MemberSubscription): boolean {
-    if (!subscription || !subscription.trial) {
+    if (!subscription?.trial?.endsAt) {
         return false
     }
     if (subscription.tier === SubscriptionTier.BASIC) {
@@ -81,7 +81,7 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
 }
 
 export function trialEnded(subscription?: MemberSubscription): boolean {
-    if (!subscription?.trial) {
+    if (!subscription?.trial?.endsAt) {
         return false
     }
     return !subscription?.trial?.activatedAt && subscription?.trial?.endsAt.getTime() < Date.now();
