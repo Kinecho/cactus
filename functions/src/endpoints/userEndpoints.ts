@@ -1,5 +1,6 @@
 import * as express from "express";
 import * as cors from "cors";
+import {getConfig} from "@admin/config/configService";
 import AdminUserService from "@admin/services/AdminUserService";
 import {getAuthUserId} from "@api/util/RequestUtil";
 import * as functions from "firebase-functions";
@@ -7,13 +8,10 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("userEndpoints");
 const app = express();
-// const config = getConfig();
-// Automatically allow cross-origin requests
+const config = getConfig();
 
-// TODO: This didn't setup the CORS with allowedOrigins because we
-// expect this to get hit from HTML links in emails and stuff. Maybe we should still do it. Not sure
-// Neil Poulin, 2020-01-08
-app.use(cors({origin: true}));
+// Automatically allow cross-origin requests
+app.use(cors({origin: config.allowedOrigins}));
 
 app.post("/delete-permanently", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUserId = await getAuthUserId(req);
