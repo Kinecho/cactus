@@ -70,7 +70,7 @@
             async deleteAccount() {
                 if (this.member?.email === this.confirmedEmail) {
                     this.isDeleting = true;
-                    const result = await deleteCurrentUserPermanently();
+                    const result = await deleteCurrentUserPermanently(this.confirmedEmail);
                     if (result.success) {
                         logger.log("Delete success");
                         await logout();

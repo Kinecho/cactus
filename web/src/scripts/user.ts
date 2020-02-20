@@ -10,7 +10,7 @@ import {
 
 const logger = new Logger("social.ts");
 
-export async function deleteCurrentUserPermanently(): Promise<DeleteUserResponse> {
+export async function deleteCurrentUserPermanently(email: string): Promise<DeleteUserResponse> {
     const currentUser = getAuth().currentUser;
 
     if (!currentUser?.email) {
@@ -19,10 +19,10 @@ export async function deleteCurrentUserPermanently(): Promise<DeleteUserResponse
             error: "Current user is not logged in.",
             message: "Current user is not logged in."
         }
-    } else {
+    } else if (currentUser?.email === email) {
         logger.log("current user", currentUser);
         const requestOptions: DeleteUserRequest = {
-            email: currentUser.email
+            email
         };
 
         try {
@@ -36,6 +36,11 @@ export async function deleteCurrentUserPermanently(): Promise<DeleteUserResponse
                 message: "Failed to send invitation",
                 error: e
             }
+        }
+    } else {
+        return {
+            success: false,
+            message: "Could not delete - invalid user / email"
         }
     }
 }
