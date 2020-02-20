@@ -28,15 +28,15 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 
     const user = await AdminUserService.getSharedInstance().getByEmail(email);
 
-    if (!user?.email) {
-        logger.log("User not found");
-        resp.sendStatus(404);
-        return
-    }
-
     if (!user || user.id !== requestUser.uid) {
         logger.log("User not authorized");
         resp.sendStatus(403);
+        return
+    }
+
+    if (!user?.email) {
+        logger.log("User has no email address");
+        resp.sendStatus(409);
         return
     }
 
