@@ -14,6 +14,8 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import {PageRoute} from "@shared/PageRoutes";
 import CopyService from "@shared/copy/CopyService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+import {removeQueryParam} from "@web/util";
+import {appendQueryParams, stripQueryParams} from "@shared/util/StringUtil";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
@@ -30,7 +32,10 @@ export async function createStripeSession(options: { subscriptionProductId: stri
         return {success: false, error: "You must be logged in to create a session", unauthorized: true};
     }
 
+    const cancelUrl = `${stripQueryParams(window.location.href).url}`;
+
     const sessionRequest: CreateSessionRequest = {
+        cancelUrl,
         subscriptionProductId,
     };
     try {

@@ -117,11 +117,15 @@
                 return this.selectedProduct?.isFree ?? false;
             },
             buttonText(): string {
+                if (this.isProcessing) {
+                    return copy.common.LOADING;
+                }
+
                 if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
-                    return copy.checkout.MANAGE_MY_PLAN
+                    return copy.checkout.MANAGE_MY_PLAN;
                 }
                 if (this.selectedProduct.isFree) {
-                    return copy.auth.SIGN_UP_FREE
+                    return copy.auth.SIGN_UP_FREE;
                 } else if (this.signedIn) {
                     return `${copy.checkout.UPGRADE}`;
                 } else {
