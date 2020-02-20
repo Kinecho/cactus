@@ -3,6 +3,7 @@ import * as cors from "cors";
 import {getConfig} from "@admin/config/configService";
 import AdminUserService from "@admin/services/AdminUserService";
 import {getAuthUser} from "@api/util/RequestUtil";
+import {DeleteUserRequest} from "@shared/api/UserEndpointTypes";
 import * as functions from "firebase-functions";
 import Logger from "@shared/Logger";
 
@@ -23,7 +24,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
     }
 
     const payload = req.body;
-    const {email} = payload;
+    const {email} = payload as DeleteUserRequest;
 
     const user = await AdminUserService.getSharedInstance().getByEmail(email);
 

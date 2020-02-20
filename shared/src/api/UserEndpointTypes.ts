@@ -1,5 +1,4 @@
 import {ApiResponse} from "@shared/api/ApiTypes";
-import {AppType} from "@shared/models/ReflectionResponse";
 
 export interface DeleteUserRequest {
     email: string,
