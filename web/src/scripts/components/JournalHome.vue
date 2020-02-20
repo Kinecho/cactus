@@ -6,7 +6,7 @@
             class="upgrade-confirmation"
             v-if="upgradeConfirmed"
             :closeable="true"
-            :key="upgrade"
+            key="upgrade-confirmation"
             :autoHide="false"
             color="successAlt">
             <div slot="text" class="centered">
