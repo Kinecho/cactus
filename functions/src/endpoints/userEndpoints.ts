@@ -36,7 +36,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 
     if (!user || user.id !== requestUser.uid) {
         logger.log("User not authorized");
-        resp.sendStatus(401);
+        resp.sendStatus(403);
         return
     }
 
