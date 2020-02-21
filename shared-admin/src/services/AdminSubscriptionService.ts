@@ -1,7 +1,6 @@
 import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {MemberSubscription} from "@shared/models/MemberSubscription";
-import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+import {MemberSubscription, PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
