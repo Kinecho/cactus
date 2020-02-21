@@ -4,8 +4,7 @@ import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
-import {ApiResponse} from "@shared/api/ApiTypes";
-import {MergeField, OperationStatus, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
+import {OperationStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -87,7 +86,7 @@ export default class AdminSubscriptionService {
 
         subscription.tier = SubscriptionTier.BASIC;
 
-        const [updateSuccess, mailchimpResponse] = await Promise.all([
+        const [updateSuccess] = await Promise.all([
             this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC})
         ]);
 
@@ -101,9 +100,9 @@ export default class AdminSubscriptionService {
         }
 
         return {
-            success: updateSuccess && (mailchimpResponse.success ?? false),
+            success: updateSuccess,
             member,
-            error: mailchimpResponse.error || updateSuccess ? undefined : "unable to update the cactus member's subscription tier",
+            error: updateSuccess ? undefined : "unable to update the cactus member's subscription tier",
         }
     }
 
