@@ -248,6 +248,8 @@ export default class AdminSubscriptionService {
             query = query.limit(options.limit);
         }
 
+        query = query.orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
+
         const result = await this.firestoreService.executeQuery(query, CactusMember, options);
         return result.results;
         // await this.firestoreService.executeBatchedQuery({

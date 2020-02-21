@@ -24,8 +24,8 @@ export default class SyncTrialToMailchimp extends FirebaseCommand {
     }
 
     async doit(): Promise<void> {
-        const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch({batchNumber: 0});
-        console.log(chalk.blue(stringifyJSON(result)));
+        const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch({batchNumber: 0, batchSize: 2});
+        console.log(chalk.blue(stringifyJSON(result, 2)));
 
         const {again} = await prompts({
             message: "Run it again?",
