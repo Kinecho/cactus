@@ -224,6 +224,78 @@ export default class AdminSubscriptionService {
         })
     }
 
+    createUpdateMergeFieldRequest(member: CactusMember): UpdateMergeFieldRequest | undefined {
+        if (!member?.email) {
+            this.logger.warn("No member could be found in the updateMailchimpListMember function");
+            return undefined;
+        }
+
+        const email = member.email;
+        const subscription = member.subscription;
+
+        if (!subscription) {
+            this.logger.warn("No subscription was found on cactus member " + member.email);
+            return undefined
+        }
+
+        const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
+        const isTrialing = member.isInTrial ? "YES" : "NO";
+        const trialDaysLeft = member.daysLeftInTrial;
+
+        const mergeFieldRequest: UpdateMergeFieldRequest = {
+            email,
+            mergeFields: {
+                [MergeField.SUB_TIER]: subscriptionTier,
+                [MergeField.IN_TRIAL]: isTrialing,
+                [MergeField.TDAYS_LEFT]: trialDaysLeft,
+            }
+        };
+        return mergeFieldRequest
+    }
+
+    async updateMailchimpListMember(options: { memberId?: string, member?: CactusMember }): Promise<ApiResponse> {
+        const mailchimpService = MailchimpService.getSharedInstance();
+        const {memberId} = options;
+        let {member} = options;
+
+        if (!memberId || !member) {
+            this.logger.warn("No memberId provided to updateMailchimpListMember function");
+            return {success: false, error: "No member or memberId provided"};
+        }
+
+        if (!member && memberId) {
+            member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        }
+
+        if (!member) {
+            this.logger.warn("No member was found");
+            return {success: false, error: "No member was found"};
+        }
+
+        const email = member?.email;
+        const subscription = member?.subscription;
+
+        if (!email) {
+            this.logger.warn("No member could be found in the updateMailchimpListMember function");
+            return {success: false, error: "No member was found"};
+        }
+
+        if (!subscription) {
+            this.logger.warn("No subscription was found on cactus member " + email);
+            return {
+                success: false,
+                error: "No subscription was found on the member, can not update mailchimp."
+            }
+        }
+
+        const mergeFieldRequest = this.createUpdateMergeFieldRequest(member);
+        if (!mergeFieldRequest) {
+            this.logger.warn("Unable to create an updateMergeFieldRequest");
+            return {success: false, error: "Unable to create an updatedMergeFieldRequest"};
+        }
+        return await mailchimpService.updateMergeFields(mergeFieldRequest);
+    }
+
     async getStripeCustomer(customerId: string, expand?: string[]): Promise<Stripe.Customer | undefined> {
         try {
             const customer = await this.stripe.customers.retrieve(customerId, {expand});
