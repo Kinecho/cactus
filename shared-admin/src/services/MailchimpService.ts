@@ -1074,11 +1074,11 @@ export default class MailchimpService {
             return true;
         }
 
-        if (member?.subscription?.trial &&
-               (mailchimpMember?.merge_fields[MergeField.TDAYS_LEFT] !== member.daysLeftInTrial.toString() ||
-                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isInTrial ? 'YES' : 'NO'))
-           ) {
-            return true;
+        if (member?.subscription?.trial) {
+            if (mailchimpMember?.merge_fields[MergeField.TDAYS_LEFT] !== member.daysLeftInTrial.toString() ||
+                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isInTrial ? 'YES' : 'NO')) {
+                return true;
+            }
         }
 
         return false;
