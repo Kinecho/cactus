@@ -84,7 +84,6 @@ export const updateMemberProfileTrigger = functions.firestore
         try {
             //update mailchimp, if needed
             const email = member?.email;
-            const subscription = member?.subscription;
             const needsNameUpdate = MailchimpService.getSharedInstance().needsNameUpdate(member);
             const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
 
@@ -93,7 +92,7 @@ export const updateMemberProfileTrigger = functions.firestore
                 [MergeField.LNAME]: member.lastName || "",
             };
 
-            const subscriptionMergeFields = AdminSubscriptionService.getSharedInstance().mergeFieldValues(member, subscription);
+            const subscriptionMergeFields = AdminSubscriptionService.getSharedInstance().mergeFieldValues(member);
 
             const mergeFieldsToUpdate = {...nameMergeFields, ...subscriptionMergeFields};
 

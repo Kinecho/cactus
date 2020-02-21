@@ -1,6 +1,6 @@
 import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {MemberSubscription, PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -247,16 +247,17 @@ export default class AdminSubscriptionService {
 
         const mergeFieldRequest: UpdateMergeFieldRequest = {
             email,
-            mergeFields: this.mergeFieldValues(member, subscription)
+            mergeFields: this.mergeFieldValues(member)
         };
         return mergeFieldRequest
     }
 
-    mergeFieldValues(member?: CactusMember, subscription?: MemberSubscription): SubscriptionMergeFields {
-        if (!member || !subscription) {
+    mergeFieldValues(member?: CactusMember): SubscriptionMergeFields {
+        if (!member || !member.subscription) {
             return {};
         }
 
+        const subscription = member.subscription;
         const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
         const isTrialing = member.isInTrial ? "YES" : "NO";
         const trialDaysLeft = member.daysLeftInTrial;
