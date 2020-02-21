@@ -1,6 +1,7 @@
 import AdminFirestoreService, {
     CollectionReference,
-    GetBatchOptions, GetOptions,
+    GetBatchOptions,
+    GetOptions,
     Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
@@ -40,7 +41,7 @@ export interface ExpireTrialResult {
     error?: string
 }
 
-interface   MailchimpSyncSubscriberResult {
+interface MailchimpSyncSubscriberResult {
     membersProcessed: number,
     numSuccessUpdates: number,
     numFailedUpdates: number,
