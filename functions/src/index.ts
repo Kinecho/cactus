@@ -28,7 +28,7 @@ import userEndpoints from "@api/endpoints/userEndpoints";
 import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
-import {onPublish as syncTrailToMailchimpMembersJob} from "@api/pubsub/subscribers/SyncTrialMembersToMailchimpJob";
+import {onPublish as syncTrailToMailchimpMembersJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 
 export const cloudFunctions = {
     //API Endpoints

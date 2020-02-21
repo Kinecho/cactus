@@ -1,4 +1,8 @@
-import AdminFirestoreService, {CollectionReference, GetBatchOptions} from "@admin/services/AdminFirestoreService";
+import AdminFirestoreService, {
+    CollectionReference,
+    GetBatchOptions, GetOptions,
+    Timestamp
+} from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
 import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -22,6 +26,13 @@ import {
     getStripeId,
     isStripePaymentMethod
 } from "@admin/util/AdminStripeUtils";
+import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
+
+export interface GetMembersInTrialOptions extends GetOptions {
+    lastMemberId?: string,
+    lastCreatedAtMs?: number,
+    limit?: number,
+}
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -29,11 +40,13 @@ export interface ExpireTrialResult {
     error?: string
 }
 
-interface MailchimpSyncSubscriberResult {
+interface   MailchimpSyncSubscriberResult {
     membersProcessed: number,
     numSuccessUpdates: number,
     numFailedUpdates: number,
     totalDuration: number,
+    lastCreatedAt?: Date,
+    lastMemberId?: string,
 }
 
 export default class AdminSubscriptionService {
@@ -121,7 +134,25 @@ export default class AdminSubscriptionService {
         return requests;
     }
 
-    async syncTrialingMemberWithMailchimp(): Promise<MailchimpSyncSubscriberResult> {
+    async syncTrialingMemberWithMailchimpBatch(job: SyncTrialMembersToMailchimpJob): Promise<MailchimpSyncSubscriberResult> {
+        const batchNumber = job.batchNumber;
+        this.logger.info(`syncTrialingMemberWithMailchimpBatch: Starting batch ${batchNumber}`);
+
+        const members = await this.getMembersInTrial({
+            lastMemberId: job.lastMemberId,
+            lastCreatedAtMs: job.lastCreatedAtMs,
+            limit: job.batchSize,
+        });
+
+        this.logger.info(`Processing ${members.length} in batch #${job.batchNumber}`);
+
+        const result = await this.syncMembersWithMailchimp(members);
+
+        this.logger.info(`Finished batch #${batchNumber} in ${result.totalDuration}ms`);
+        return result;
+    }
+
+    async syncMembersWithMailchimp(members: CactusMember[]): Promise<MailchimpSyncSubscriberResult> {
         const jobStart = Date.now();
         const result: MailchimpSyncSubscriberResult = {
             membersProcessed: 0,
@@ -129,32 +160,30 @@ export default class AdminSubscriptionService {
             numSuccessUpdates: 0,
             totalDuration: 0
         };
-        await this.getMembersInTrial({
-            onData: async (members, batchNumber) => {
-                const start = Date.now();
-                this.logger.info(`Processing ${members.length} in batch #${batchNumber}`);
-                members.forEach(m => this.logger.info("Processing member", m.email));
-                result.membersProcessed += members.length;
-                const requests = this.createMergeFieldRequests(members);
-                if (requests.length > 0) {
-                    this.logger.info(`Submitting ${requests.length} update merge tag jobs to the bulk update job\n${stringifyJSON(requests, 2)}`);
-                    const batchRequests = await MailchimpService.getSharedInstance().bulkUpdateMergeFields(requests);
-                    const batchResponses = await MailchimpService.getSharedInstance().waitForBatchJobs(batchRequests);
-                    const failedResponses = batchResponses.filter(r => r.response?.status !== OperationStatus.finished);
-                    if (failedResponses.length > 0) {
-                        this.logger.error("Some batches failed: ", stringifyJSON(failedResponses));
-                        result.numFailedUpdates += failedResponses.length;
-                    }
-                    const numSuccess = batchResponses.length - failedResponses.length;
-                    result.numSuccessUpdates += numSuccess;
-                    this.logger.info("successful batches: ", numSuccess);
-                }
-                const end = Date.now();
-                this.logger.info(`Finished batch #${batchNumber} in ${end - start}ms`);
+        members.forEach(m => this.logger.info("Processing member", m.email));
+        result.membersProcessed += members.length;
+        const requests = this.createMergeFieldRequests(members);
+        if (requests.length > 0) {
+            this.logger.info(`Submitting ${requests.length} update merge tag jobs to the bulk update job\n${stringifyJSON(requests, 2)}`);
+            const batchRequests = await MailchimpService.getSharedInstance().bulkUpdateMergeFields(requests);
+            const batchResponses = await MailchimpService.getSharedInstance().waitForBatchJobs(batchRequests);
+            const failedResponses = batchResponses.filter(r => r.response?.status !== OperationStatus.finished);
+            if (failedResponses.length > 0) {
+                this.logger.error("Some batches failed: ", stringifyJSON(failedResponses));
+                result.numFailedUpdates += failedResponses.length;
             }
-        });
-        const jobEnd = Date.now();
-        result.totalDuration = jobEnd - jobStart;
+            const numSuccess = batchResponses.length - failedResponses.length;
+            result.numSuccessUpdates += numSuccess;
+            this.logger.info("successful batches: ", numSuccess);
+            const jobEnd = Date.now();
+            result.totalDuration = jobEnd - jobStart;
+        }
+        if (members.length > 0) {
+            const lastMember = members[members.length - 1];
+            result.lastMemberId = lastMember.id;
+            result.lastCreatedAt = lastMember.createdAt;
+        }
+
         return result;
     }
 
@@ -197,19 +226,36 @@ export default class AdminSubscriptionService {
      * @param {GetBatchOptions<CactusMember>} options
      * @return {Promise<void>}
      */
-    async getMembersInTrial(options: GetBatchOptions<CactusMember>,) {
+    async getMembersInTrial(options: GetMembersInTrialOptions): Promise<CactusMember[]> {
         const endDate = new Date();
-        const query = this.firestoreService.getCollectionRef(Collection.members)
+        let query = this.firestoreService.getCollectionRef(Collection.members)
             .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
             .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate));
 
-        await this.firestoreService.executeBatchedQuery({
-            query,
-            type: CactusMember,
-            ...options,
-            orderBy: CactusMember.Field.subscriptionTrialEndsAt,
-            sortDirection: QuerySortDirection.asc
-        })
+        if (options.lastMemberId) {
+            const memberSnapshot = await this.firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
+            if (memberSnapshot) {
+                query = query.startAfter(memberSnapshot);
+            } else if (options.lastCreatedAtMs) {
+                query = query.startAfter(Timestamp.fromMillis(options.lastCreatedAtMs))
+            }
+        } else if (options.lastCreatedAtMs) {
+            query = query.startAfter(Timestamp.fromMillis(options.lastCreatedAtMs))
+        }
+
+        if (options.limit) {
+            query = query.limit(options.limit);
+        }
+
+        const result = await this.firestoreService.executeQuery(query, CactusMember, options);
+        return result.results;
+        // await this.firestoreService.executeBatchedQuery({
+        //     query,
+        //     type: CactusMember,
+        //     ...options,
+        //     orderBy: CactusMember.Field.subscriptionTrialEndsAt,
+        //     sortDirection: QuerySortDirection.asc
+        // })
     }
 
     async getMembersToExpireTrial(options: GetBatchOptions<CactusMember>) {

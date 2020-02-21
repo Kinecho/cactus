@@ -516,9 +516,9 @@ export default class MailchimpService {
             while (status !== OperationStatus.finished || (checkCount * checkInterval) > timeoutLimit) {
                 await new Promise((innerResolve) => {
                     setTimeout(async () => {
-                        logger.log("Checking for batch status");
+                        // logger.log("Checking for batch status");
                         completedBatch = await MailchimpService.getSharedInstance().getBatchStatus(batchResponse);
-                        logger.log("Batch status check returned status", completedBatch.status);
+                        // logger.log("Batch status check returned status", completedBatch.status);
                         checkCount++;
                         status = completedBatch.status;
                         innerResolve();
