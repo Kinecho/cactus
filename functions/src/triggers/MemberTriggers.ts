@@ -84,24 +84,26 @@ export const updateMemberProfileTrigger = functions.firestore
         try {
             //update mailchimp, if needed
             const email = member?.email;
+            const needsNameUpdate = MailchimpService.getSharedInstance().needsUpdate(member);
+            const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
 
-            if (email && MailchimpService.getSharedInstance().needsNameUpdate(member)) {
-                const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
-                    email: email,
-                    mergeFields: {
-                        [MergeField.FNAME]: member.firstName || "",
-                        [MergeField.LNAME]: member.lastName || "",
-                    }
-                });
-                logger.log("Update name mailchimp merge fields response:", mailchimpResponse);
-            }
+            const subscriptionTier = member?.subscription?.tier || SubscriptionTier.BASIC;
+            const isTrialing = member.isInTrial ? "YES" : "NO";
+            const trialDaysLeft = member.daysLeftInTrial;
 
-            if (email && MailchimpService.getSharedInstance().needsSubscriptionUpdate(member)) {
-                const subscriptionMergeFieldRequest = AdminSubscriptionService.getSharedInstance().createUpdateMergeFieldRequest(member);
-                
-                if (subscriptionMergeFieldRequest) {
-                    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields(subscriptionMergeFieldRequest);
-                    logger.log("Update subscription mailchimp merge fields response:", mailchimpResponse);
+            if (email) {
+                if (needsNameUpdate || needsSubscriptionUpdate) {
+                    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
+                        email: email,
+                        mergeFields: {
+                            [MergeField.FNAME]: member.firstName || "",
+                            [MergeField.LNAME]: member.lastName || "",
+                            [MergeField.SUB_TIER]: subscriptionTier,
+                            [MergeField.IN_TRIAL]: isTrialing,
+                            [MergeField.TDAYS_LEFT]: trialDaysLeft,
+                        }
+                    });
+                    logger.log("Update mailchimp merge fields response:", mailchimpResponse);    
                 }
             }
         } catch (error) {
