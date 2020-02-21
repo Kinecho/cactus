@@ -12,12 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const amount = getQueryParam(QueryParam.PURCHASE_AMOUNT);
 
-    const itemId = getQueryParam(QueryParam.PURCHASE_ITEM_ID);
+    const subscriptionProductId = getQueryParam(QueryParam.SUBSCRIPTION_PRODUCT_ID);
 
     gtag('event', 'purchase', {
         value: amount,
         currency: 'USD',
-        items: [itemId]
+        items: [subscriptionProductId]
     });
 
 

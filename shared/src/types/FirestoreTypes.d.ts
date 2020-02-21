@@ -64,7 +64,7 @@ declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> 
     queryName?: string,
 }
 
-declare interface QueryResult<T extends BaseModel> {
+declare interface QueryResult<T> {
     results: T[],
     size: number,
     error?: any,

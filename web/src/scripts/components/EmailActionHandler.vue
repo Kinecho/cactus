@@ -77,10 +77,6 @@
             this.continueUrl = continueUrl || PageRoute.JOURNAL_HOME;
             this.lang = lang;
 
-
-            debugger;
-
-
             switch (mode) {
                 case EmailActionMode.recoverEmail:
                     await this.handleRecoverEmail();

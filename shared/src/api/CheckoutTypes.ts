@@ -1,23 +1,25 @@
 export interface CreateSessionRequest {
+    subscriptionProductId: string,
     successUrl?: string,
     cancelUrl?: string,
-    preOrder?: boolean,
-    planId?: string,
-    items?: [{
-        name: string,
-        currency: string,
-        amount: number,
-        quantity: number,
-        description?: string,
-        images?: string[],
-    }]
 }
 
 
 export interface CreateSessionResponse {
     success: boolean,
     error?: any,
+    unauthorized?: boolean,
     sessionId?: string,
     amount?: number|null|undefined,
-    productId?:string,
+}
+
+export interface CreateSetupSubscriptionSessionRequest {
+    successUrl?: string,
+    cancelUrl?: string,
+}
+
+export interface CreateSetupSubscriptionSessionResponse {
+    success: boolean,
+    sessionId?: string,
+    error?: string,
 }

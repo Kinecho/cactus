@@ -1,5 +1,4 @@
 //tslint:disable:no-console
-import chalk from "chalk";
 
 export default class Logger {
     fileName: string;
@@ -16,27 +15,35 @@ export default class Logger {
     }
 
     protected get prefix(): string {
-        return `[${this.serverName ? `${this.serverName}.` : ""}${this.fileName}] ${this.getDateString()} |`
+        return `${this.getDateString()} [${this.serverName ? `${this.serverName}.` : ""}${this.fileName}]`
     }
 
-    debug(...args: any[]) {
-        console.debug.apply(this, [chalk.blue(this.prefix), ...args]);
+    debug(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.debug.apply(console, a);
     }
 
-    log(...args: any[]) {
+    log(...args: [any?, ...any[]]) {
         this.info(...args);
     }
 
-    info(...args: any[]) {
-        console.log.apply(this, [this.prefix, ...args]);
+    info(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.log.apply(console, a);
     }
 
-    warn(...args: any[]) {
-        console.warn.apply(this, [chalk.yellow(this.prefix), ...args]);
+    warn(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.warn.apply(console, a);
     }
 
-    error(...args: any[]) {
-        console.error.apply(this, [chalk.red(this.prefix), ...args]);
+    error(...args: [any?, ...any[]]) {
+        const a: any = [].slice.call(arguments, 0);
+        a.unshift(this.prefix);
+        console.error.apply(console, a);
     }
 
     getDateString(): string {

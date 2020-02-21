@@ -1,4 +1,4 @@
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import {getAllQueryParams, getQueryParam} from "@web/util";
 import {AdditionalUserInfo, FirebaseUser, FirebaseUserCredential, getAuth, initializeFirebase,} from "@web/firebase";
 
@@ -89,7 +89,7 @@ export function getAnonymousReflectionResponseIds(): string[] {
     return anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [];
 }
 
-export async function sendEmailLinkSignIn(subscription: SubscriptionRequest): Promise<EmailLinkSignupResult> {
+export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
@@ -126,6 +126,7 @@ export async function sendLoginEvent(args: {
             onData: async ({member}) => {
                 if (member) {
                     try {
+                        logger.log("[auth.sendLoginEvent] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
                         logger.log("Got cactus member, can send login event", member);
                         unsubscriber();
                         let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);

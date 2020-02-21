@@ -185,6 +185,7 @@ export default class FirestoreService {
         return this.observeQuery(originalQuery, Type, {
             onData: (results: T[]) => {
                 const [first] = results;
+                logger.log("[observe first] not sure if it's a m ember but here we go ", typeof ((first as any)?.subscription?.trial?.startedAt));
                 options.onData(first);
             }
         });

@@ -185,3 +185,17 @@ $slow: 1.5s;
     //transform: scaleX(1);
   }
 }
+
+
+.crossfade-leave-active,
+.crossfade-enter-active {
+  transition: 1.2s;
+}
+
+.crossfade-enter {
+  opacity: 0;
+}
+
+.crossfade-leave-to {
+  opacity: 0;
+}

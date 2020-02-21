@@ -1,6 +1,19 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <snackbar-content
+            class="upgrade-confirmation"
+            v-if="upgradeConfirmed"
+            :closeable="true"
+            key="upgrade-confirmation"
+            :autoHide="false"
+            color="successAlt">
+            <div slot="text" class="centered">
+                <h3>Welcome to Cactus Plus!</h3>
+                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+            </div>
+        </snackbar-content>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -28,6 +41,7 @@
                                 v-bind:css="false"
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
+
                             <entry
                                     class="journalListItem"
                                     v-if="todayEntry && todayLoaded"
@@ -74,8 +88,15 @@
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
+    import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {QueryParam} from "@shared/util/queryParams";
+    import {getQueryParam} from "@web/util";
+    import SnackbarContent from "@components/SnackbarContent.vue";
+
     const logger = new Logger("JournalHome.vue");
+
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
         authUnsubscribe?: () => void,
@@ -88,7 +109,8 @@
         dataHasLoaded: boolean,
         todayUnsubscriber?: ListenerUnsubscriber,
         todayEntry?: JournalEntry,
-        todayLoaded: boolean
+        todayLoaded: boolean,
+        showUpgradeCard: boolean,
     }
 
     export default Vue.extend({
@@ -98,6 +120,8 @@
             AutoPromptContentModal,
             SkeletonCard,
             Spinner,
+            UpgradeCard: UpgradeSubscriptionJournalEntryCard,
+            SnackbarContent
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
@@ -128,7 +152,11 @@
 
                     // Query Flamelink for today's PromptContent and then back into a JournalEntry
                     if (this.cactusMember?.id) {
-                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({systemDate: new Date()});
+                        const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
+                            systemDate: new Date(),
+                            subscriptionTier: tier
+                        });
 
                         if (todaysPromptContent?.promptId) {
                             this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
@@ -143,14 +171,14 @@
                                         todayEntry = new JournalEntry(todaysPromptContent.promptId);
                                     }
 
-                                    if (todayEntry){
+                                    if (todayEntry) {
                                         todayEntry.delegate = {
                                             entryUpdated: entry => {
                                                 if (entry.allLoaded) {
                                                     this.todayLoaded = true;
                                                 }
                                             }
-                                        }
+                                        };
                                         todayEntry.start();
                                         this.todayEntry = todayEntry;
                                     } else {
@@ -160,6 +188,11 @@
                             });
                         } else {
                             logger.error("Today's prompt could not be found for member");
+                            this.todayLoaded = true;
+                        }
+
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial){
+                            this.showUpgradeCard = true;
                         }
                     }
 
@@ -174,7 +207,6 @@
                                 this.dataHasLoaded = true;
                             },
                             updateAll: (entries) => {
-                                logger.log("got entries in journal home", entries);
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
@@ -207,7 +239,8 @@
                 dataHasLoaded: false,
                 todayUnsubscriber: undefined,
                 todayEntry: undefined,
-                todayLoaded: false
+                todayLoaded: false,
+                showUpgradeCard: false,
             };
         },
         destroyed() {
@@ -257,6 +290,10 @@
             isSticky(): boolean {
                 return false;
             },
+            upgradeConfirmed(): boolean {
+                const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+                return upgradeQueryParam === 'success';
+            }
         }
     })
 </script>
@@ -291,6 +328,29 @@
 
     section .heading {
         text-align: center;
+    }
+
+    .upgrade-confirmation {
+        border-radius: 0;
+        display: block;
+        padding: 3.2rem 2.4rem;
+
+        .centered {
+            max-width: 64rem;
+        }
+
+        h3 {
+            font-size: 2.4rem;
+            margin-bottom: .4rem;
+        }
+
+        p {
+            opacity: .9;
+        }
+
+        a {
+            @include fancyLinkLight;
+        }
     }
 
     .section-container {

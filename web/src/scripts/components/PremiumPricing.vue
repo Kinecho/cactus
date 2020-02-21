@@ -1,169 +1,165 @@
 <template>
-  <section class="premium">
-      <div class="centered">
-        <div class="textContainer">
-            <h2>Choose your Cactus</h2>
-            <p class="subtext">Free to use, better with&nbsp;Premium</p>
-        </div>
-        <div class="graphics">
-            <img class="blobGraphic" src="/assets/images/royalBlob.png" alt="" />
-            <img class="arcGraphic" src="/assets/images/arc.svg" alt="" />
-        </div>
-        <div class="tabset">
-            <input type="radio" name="tabset" id="tab1" aria-controls="free" :checked="!premiumDefault">
-            <label class="tab-label free-tab" for="tab1">Free</label>
-            <section id="free" class="tab-panel free-panel">
-                <h3 class="tab-header free-header">Free</h3>
-                <ul>
-                    <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                    <li>Unlimited reflection notes</li>
-                    <li>Daily reflection prompts</li>
-                    <li>256-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email &amp;&nbsp;push</li>
-                </ul>
-                <button class="secondary" @click="goToSignup">Sign Up Free</button>
-            </section>
-
-            <input type="radio" name="tabset" id="tab2" aria-controls="premium" :checked="premiumDefault">
-            <label class="tab-label premium-tab" for="tab2">Premium</label>
-            <section id="premium" class="tab-panel premium-panel">
-                <h3 class="tab-header premium-header">Premium</h3>
-                <ul>
-                    <li>Available on web, iOS, &amp;&nbsp;Android</li>
-                    <li>Unlimited reflection notes</li>
-                    <li>Daily reflection prompts</li>
-                    <li>256-bit encryption on&nbsp;notes</li>
-                    <li>Notifications via email &amp; push</li>
-                    <li class="heart">Supports Cactus development</li>
-                </ul>
-                <h4>Coming Soon</h4>
-                <ul>
-                    <li>Personalized prompts</li>
-                    <li>Reminder scheduling</li>
-                    <li>Backup to DayOne, Dropbox, &amp;&nbsp;more</li>
-                </ul>
-                <div class="flexContainer">
-                <template v-for="plan in plans">
-                    <div class="planButton" :id="plan.id" :aria-controls="plan.name" @click="selectPlan(plan)" :class="{selected: isSelectedPlan(plan)}">
-                        <span>{{plan.name}}</span>
-                        <span>${{plan.price_dollars}}</span>
-                        <span>per {{plan.per}}</span>
+    <div class="centered">
+        <transition appear name="fade-in">
+            <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
+                <div v-for="(productGroup, i) in groupEntries" class="plan-container">
+                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">{{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                        <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                     </div>
-                </template>
+                    <product-group
+                            :productGroup="productGroup"
+                            :key="productGroup.tier"
+                            :tabs-on-mobile="tabsOnMobile"
+                            :id="`product-tier-${productGroup.tier}`"
+                            :display-index="i"
+                            :member="member"
+                            :class="[`tabPanel`, {active: activetab === i}]"
+                            :learnMoreLinks="learnMoreLinks"/>
                 </div>
-                <button v-bind:disabled="isProcessing" @click="puchaseSelectedPlan">Upgrade &mdash; ${{selectedPlan.price_dollars}} / {{selectedPlan.per}}</button>
-            </section>
-        </div>
-      </div>
-  </section>
+            </div>
+            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
+                <div class="tabs">
+                    <template v-for="(productGroup, i) in groupEntries">
+                        <a class="tab-label"
+                                @click.prevent="activetab = i"
+                                v-bind:class="{active: activetab === i}"
+                                aria-controls="basic">
+                            {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                            <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                        </a>
+                    </template>
+                </div>
+
+                <div class="tabPanels">
+                    <template v-for="(productGroup, i) in groupEntries">
+                        <product-group
+                                :productGroup="productGroup"
+                                :key="productGroup.tier"
+                                :id="`product-tier-${productGroup.tier}`"
+                                :display-index="i"
+                                :member="member"
+                                class="tabPanel"
+                                :tabs-on-mobile="tabsOnMobile"
+                                :learnMoreLinks="learnMoreLinks"
+                                :class="{active: activetab === i}"/>
+                    </template>
+                </div>
+            </div>
+            <div class="android-app" v-if="isAndroidApp">
+                To learn more, visit <strong>cactus.app</strong> in any web&nbsp;browser.
+            </div>
+        </transition>
+    </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes';
-    import {PremiumPlan} from '@shared/types/PlanTypes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {configureStripe, redirectToCheckoutWithPlanId} from "@web/checkoutService";
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {getQueryParam} from "@web/util";
     import {QueryParam} from "@shared/util/queryParams";
+    import Logger from "@shared/Logger";
+    import CopyService from "@shared/copy/CopyService";
+    import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
+    import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
+    import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {isAndroidApp} from '@web/DeviceUtil'
 
+    const copy = CopyService.getSharedInstance().copy;
+    const logger = new Logger("PremiumPricing");
 
     export default Vue.extend({
-        created() {
-
+        components: {
+            ProductGroup: SubscriptionProductGroupCard,
         },
         props: {
-          plans: {
-                type: Array as () => PremiumPlan[],
-                required: false,
-                default: function() {
-                  return [
-                          {
-                            id: Config.stripe.monthlyPlanId,
-                            plan_param: 'm',
-                            name: 'Monthly',
-                            price_dollars: 2.99,
-                            per: 'month'
-                          },
-                          {
-                            id: Config.stripe.yearlyPlanId,
-                            plan_param: 'y',
-                            name: 'Annual',
-                            price_dollars: 29,
-                            per: 'year'
-                          }
-                        ]
-                }
-          }
+            tabsOnMobile: {type: Boolean, default: true},
+            learnMoreLinks: {type: Boolean, default: false},
         },
         data(): {
-          selectedPlan: PremiumPlan | undefined,
-          isProcessing: boolean,
-          member: CactusMember | undefined | null,
-          memberEmail: string | undefined,
-          memberUnsubscriber: ListenerUnsubscriber | undefined,
-          premiumDefault: boolean
+            isProcessing: boolean,
+            memberLoaded: boolean,
+            member: CactusMember | undefined | null,
+            memberEmail: string | undefined,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
+            premiumDefault: boolean,
+            productGroups: SubscriptionProductGroupEntry[],
+            productsLoaded: boolean,
+            activetab: number,
         } {
             return {
-              selectedPlan: this.plans[0],
-              isProcessing: false,
-              member: undefined,
-              memberEmail: undefined,
-              memberUnsubscriber: undefined,
-              premiumDefault: false
+                memberLoaded: false,
+                isProcessing: false,
+                member: undefined,
+                memberEmail: undefined,
+                memberUnsubscriber: undefined,
+                premiumDefault: false,
+                activetab: 1,
+                productsLoaded: false,
+                productGroups: [],
             }
         },
-        beforeMount() {
+        async beforeMount() {
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     this.member = member;
-
+                    this.memberLoaded = true;
                     if (this.member?.email) {
-                      this.memberEmail = this.member.email;
+                        this.memberEmail = this.member.email;
                     }
                 }
-            })
+            });
+
+            this.productGroups = await SubscriptionProductGroupService.sharedInstance.getSortedProductGroupEntries();
+            this.productsLoaded = true;
 
             const prem = getQueryParam(QueryParam.PREMIUM_DEFAULT);
 
             if (prem) {
-              this.premiumDefault = true;
+                this.premiumDefault = true;
             }
         },
-        destroyed() {
+        beforeDestroy() {
 
         },
         computed: {
-
-        },
-        watch: {
-
-        },
-        methods: {
-            selectPlan(plan: PremiumPlan) {
-              this.selectedPlan = plan;
+            loaded(): boolean {
+                return this.memberLoaded && this.productsLoaded
             },
-            async puchaseSelectedPlan() {
-              this.isProcessing = true;
-
-              if (this.selectedPlan && this.selectedPlan.id) {
-                configureStripe('checkout-button', this.selectedPlan.id);
-                await redirectToCheckoutWithPlanId(this.selectedPlan.id, this.memberEmail);
-              } else {
-                this.isProcessing = false;
-                alert('There was a problem. Please contact us at help@cactus.app.');
-              }
+            groupEntries(): SubscriptionProductGroupEntry[] {
+                return this.productGroups.filter(e => {
+                    if (!this.member){
+                        return true
+                    }
+                    return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
+                })
             },
-            isSelectedPlan(plan: PremiumPlan) {
-              return plan == this.selectedPlan
+            trialBadgeText(): string | undefined {
+                const member = this.member;
+                if (!member) {
+                    return undefined;
+                }
+                return CopyService.getSharedInstance().getTrialDaysLeftShort(member.daysLeftInTrial, true);
             },
-            goToSignup() {
-              window.location.href = PageRoute.SIGNUP;
+            isAndroidApp(): boolean {
+                return isAndroidApp();
             }
         },
+        methods: {
+            goToSignup() {
+                window.location.href = PageRoute.SIGNUP;
+            },
+            getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
+                return entry.productGroup?.title ?? entry.tierDisplayName;
+            },
+            showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
+                return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+            },
+        }
 
     })
 </script>
@@ -174,292 +170,198 @@
     @import "variables";
     @import "transitions";
 
-    .premium {
-        background: #1D7A81 url(assets/images/grainy.png);
-        color: $white;
-        padding: 4.8rem 0 0;
+    .centered {
+        position: relative;
+
+        @include r(960) {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            text-align: left;
+        }
+    }
+
+    .tabset {
+        margin: 0 auto;
+        max-width: 48rem;
 
         @include r(768) {
-            padding: 9rem 2.4rem 0;
+            max-width: none;
+            min-width: 80rem;
+        }
+    }
+
+    .tabs {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .heading {
+        border-radius: 1.6rem 1.6rem 0 0;
+        font-size: 2.4rem;
+        font-weight: bold;
+        padding: 2.4rem 1.6rem .8rem;
+        position: relative;
+        text-align: left;
+        z-index: 1;
+
+        @include r(374) {
+            padding: 2.4rem 2.4rem .8rem;
         }
 
-        .centered {
-            overflow: hidden;
-            position: relative;
+        &.basic {
+            background-color: $white;
+            color: $darkestGreen;
+        }
 
-            @include r(960) {
+        &.plus {
+            background: $dolphin url(assets/images/grainy.png) repeat;
+            color: $white;
+        }
+    }
+
+    .flex-plans {
+        display: flex;
+        flex-direction: column;
+        margin: 0 -1.6rem;
+
+        @include r(374) {
+            margin: 0;
+        }
+        @include r(768) {
+            flex-direction: row;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .plan-container {
+            max-width: 40rem;
+
+            @include r(768) {
                 display: flex;
-                flex-direction: row-reverse;
-                justify-content: center;
-                text-align: left;
+                flex-basis: 49%;
+                flex-direction: column;
+            }
+
+            .tab-content {
+                display: block;
+                margin: 0 0 2.4rem;
+                padding: 0 1.6rem 2.4rem;
+
+                @include r(374) {
+                    padding: 0 2.4rem 2.4rem;
+                }
+                @include r(768) {
+                    flex-grow: 1;
+                    margin-bottom: 0;
+                    padding: 1.6rem 2.4rem 2.4rem;
+                }
+
+                &.basic-panel {
+                    background-image: none;
+                }
+            }
+        }
+
+        .basic-panel button:disabled {
+            color: transparentize($darkestGreen, .4);
+        }
+    }
+
+    .tab-label {
+        background-color: darken($dolphin, 5%);
+        color: $white;
+        flex-basis: 50%;
+        font-size: 2.4rem;
+        font-weight: bold;
+        padding: 1.6rem 2.4rem;
+        text-align: center;
+
+        @include r(768) {
+            margin: 0 1.6rem;
+            padding: 2.4rem 2.4rem .8rem;
+            text-align: left;
+        }
+
+        &.active {
+            background: $dolphin url(assets/images/grainy.png) repeat;
+
+            @include r(768) {
+                background-image: none;
+            }
+        }
+
+        &:first-child {
+            border-radius: 1.6rem 0 0 0;
+
+            @include r(768) {
+                background-color: $white;
+                border-radius: 1.6rem 1.6rem 0 0;
+                color: $darkestGreen;
+            }
+        }
+
+        &:last-child {
+            border-radius: 0 1.6rem 0 0;
+
+            @include r(768) {
+                background: $dolphin url(assets/images/grainy.png) repeat;
+                border-radius: 1.6rem 1.6rem 0 0;
+                color: $white;
+            }
+        }
+
+        &:only-child {
+            background: $dolphin url(assets/images/grainy.png) repeat;
+            border-radius: 1.6rem 1.6rem 0 0;
+            flex-basis: 100%;
+            padding-left: 1.6rem;
+            padding-bottom: .8rem;
+            text-align: left;
+
+            @include r(374) {
+                padding-left: 2.4rem;
+            }
+            @include r(768) {
+                flex-basis: 50%;
             }
         }
     }
 
-    .textContainer {
-        @include r(960) {
-            padding: 19rem 0 0 4.8rem;
-        }
+    .trial-badge {
+        @include trialBadge;
+        vertical-align: text-top;
+    }
 
-        h2 {
-            line-height: 1.1;
-            margin-bottom: .8rem;
+    .tabPanels {
+        justify-content: center;
+
+        @include r(768) {
+            display: flex;
         }
     }
 
-      .subtext {
-          padding: 0 2.4rem 2.4rem;
+    .tabPanel {
+        display: none;
 
-          @include r(768) {
-              padding: 0 0 4rem;
-          }
-      }
+        &:only-child {
+            display: block;
+            padding-top: .8rem;
+        }
 
-      .graphics {
-          bottom: -3rem;
-          left: 0;
-          position: absolute;
-          right: 0;
+        @include r(768) {
+            display: block;
+        }
 
-          .blobGraphic {
-              bottom: 0;
-              right: -8rem;
-              position: absolute;
+        &.active {
+            display: block;
+        }
+    }
 
-              @include r(768) {
-                  right: 0;
-              }
-              @include r(960) {
-                  left: 51%;
-                  right: auto;
-              }
-          }
+    .android-app {
+        font-size: 2rem;
+    }
 
-          .arcGraphic {
-              bottom: -12rem;
-              height: auto;
-              left: -2rem;
-              position: relative;
-              width: 95rem;
-
-              @include r(768) {
-                  left: 0;
-                  width: 109%;
-              }
-              @include r(960) {
-                  top: 3rem;
-                  width: 90%;
-              }
-          }
-      }
-
-      .tabset {
-          background-color: $darkestGreen;
-          border-radius: 1.2rem 1.2rem 0 0;
-          display: grid;
-          grid-template-areas:
-              "tab1 tab2"
-              "tabpanel tabpanel";
-          grid-template-columns: 50%;
-          position: relative;
-          text-align: left;
-
-          @include r(374) {
-              margin: 0 2.4rem;
-          }
-
-          @include r(600) {
-              margin: 0 auto;
-              max-width: 90%;
-          }
-          @include r(768) {
-              background-color: transparent;
-              grid-template-areas: "tabpanel1 tabpanel2";
-              min-width: 67rem;
-          }
-          @include r(960) {
-              margin: 0;
-          }
-      }
-
-      /* hide the radios, show the panels */
-      .tabset input[type="radio"] {
-          position: absolute;
-          left: -200vw;
-
-          @include r(768) {
-              display: none;
-          }
-      }
-      .tabset .tab-panel,
-      .tab-header {
-          display: none;
-
-          @include r(768) {
-              display: block;
-          }
-      }
-      .tabset > input:nth-of-type(1):checked ~ .tab-panel:nth-of-type(1),
-      .tabset > input:nth-of-type(2):checked ~ .tab-panel:nth-of-type(2) {
-          display: block;
-      }
-
-      .tab-label {
-          background-color: darken($darkestGreen, 5%);
-          cursor: pointer;
-          font-size: 2rem;
-          font-weight: bold;
-          padding: 1.6rem;
-          text-align: center;
-
-          &:nth-of-type(1) {
-              border-radius: 1.2rem 0 0 0;
-          }
-          &:nth-of-type(2) {
-              border-radius: 0 1.2rem 0 0;
-          }
-
-          @include r(768) {
-              display: none;
-          }
-      }
-
-      .tabset > .tab-label:hover {
-          background-color: darken($darkestGreen, 3%);
-      }
-      .tabset > input:focus + .tab-label,
-      .tabset > input:checked + .tab-label {
-          background-color: $darkestGreen;
-      }
-
-      .tab-header {
-          font-size: 2.4rem;
-          margin-bottom: 2.4rem;
-      }
-
-      .newStatus {
-          display: none;
-
-          @include r(600) {
-              background-color: $aqua;
-              border-radius: 2rem;
-              color: $darkestGreen;
-              display: inline-block;
-              font-size: 1.4rem;
-              font-weight: bold;
-              letter-spacing: 1px;
-              margin-left: .8rem;
-              padding: 0 .8rem;
-              text-transform: uppercase;
-              vertical-align: super;
-          }
-      }
-
-      .tab-panel {
-          grid-area: tabpanel;
-          padding: 2.4rem 2.4rem 3.2rem;
-
-          @include r(768) {
-              padding: 3.2rem;
-
-              &.free-panel {
-                  align-self: end;
-                  background-color: $white;
-                  border-radius: 1.8rem 0 0 0;
-                  color: $darkestGreen;
-                  grid-area: tabpanel1;
-
-                  ul {
-                      margin-bottom: 7.2rem;
-                  }
-              }
-              &.premium-panel {
-                  background-color: $darkestGreen;
-                  border-radius: 1.8rem 1.8rem 0 0;
-                  grid-area: tabpanel2;
-              }
-          }
-          @include r(1140) {
-              white-space: nowrap;
-          }
-
-          h4 {
-              margin-bottom: 1.6rem;
-          }
-
-          ul {
-              list-style: none;
-              margin: 0 0 4rem -.6rem;
-          }
-
-          li {
-              margin-bottom: 1.2rem;
-              text-indent: -3.4rem;
-
-              &:before {
-                  background-image: url(assets/images/check.svg);
-                  background-repeat: no-repeat;
-                  background-size: contain;
-                  content: "";
-                  display: inline-block;
-                  height: 1.3rem;
-                  margin-right: 1.6rem;
-                  width: 1.8rem;
-              }
-
-              &.heart:before {
-                background-image: url(assets/icons/heart.svg);
-                height: 1.5rem;
-              }
-          }
-
-          button {
-              max-width: none;
-              white-space: nowrap;
-              width: 100%;
-          }
-      }
-
-      .enhance {
-          background:
-            linear-gradient(transparentize($royal, .4), transparentize($royal, .4)) 0 90%/100% .8rem no-repeat,
-            url(assets/images/grainy.png) repeat;
-          display: inline;
-          padding-right: .2rem;
-      }
-
-      .flexContainer {
-          display: flex;
-          margin-bottom: 2.4rem;
-          justify-content: space-between;
-
-          .planButton {
-              background-color: transparentize($white, .9);
-              border: 2px solid $darkestGreen;
-              border-radius: .8rem;
-              cursor: pointer;
-              font-size: 1.6rem;
-              padding: .8rem;
-              text-align: center;
-              width: 49%;
-
-              &.selected {
-                  border-color: $green;
-                  box-shadow: inset 0 0 0 .4rem $darkestGreen;
-              }
-
-              span {
-                  display: block;
-
-                  &:nth-child(1) {
-                      font-size: 1.4rem;
-                      letter-spacing: 1px;
-                      text-transform: uppercase;
-                  }
-                  &:nth-child(2) {
-                      font-size: 2rem;
-                  }
-              }
-          }
-      }
 </style>

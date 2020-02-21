@@ -1,10 +1,11 @@
 import {getFlamelink} from "@web/firebase";
 import flamelink from "flamelink/app";
 import FlamelinkModel from "@shared/FlamelinkModel";
-import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
-import {IGetOptions} from "@shared/types/FirestoreTypes";
+import {buildQueryResult, fromFlamelinkData, fromFlamelinkQueryResults} from "@shared/util/FlamelinkUtils";
+import {IGetOptions, QueryResult} from "@shared/types/FirestoreTypes";
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("FlamelinkService");
 
@@ -17,6 +18,8 @@ export interface EntryObserverOptions<IModel extends FlamelinkModel> extends IGe
     onData: (model?: IModel, error?: any) => void | Promise<void>,
     populate?: PopulateOptions
 }
+
+export type FlamelinkValue = string | number | boolean;
 
 export default class FlamelinkService {
     flamelink: flamelink.app.App;
@@ -98,7 +101,7 @@ export default class FlamelinkService {
         });
     }
 
-    async getByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
+    async getFirstByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
         const {name, value, Type} = args;
 
         const type = new Type();
@@ -120,6 +123,28 @@ export default class FlamelinkService {
         }
         return;
     }
+
+
+    async getAllWhere<T extends FlamelinkModel>(args: { name: string, value: FlamelinkValue, Type: { new(): T } }): Promise<QueryResult<T>> {
+        const {name, value, Type} = args;
+
+        const type = new Type();
+        const schema = type.schema;
+
+        try {
+            const raw: { [entryId: string]: any } = await this.content.getByField({
+                field: name,
+                value,
+                schemaKey: schema
+            });
+            return buildQueryResult(raw, Type);
+        } catch (error) {
+            logger.error("Error fetching data from flamelink content", error);
+            return {results: [], error: error, size: 0}
+        }
+
+    }
+
 
     observeByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
         const {name, value, Type} = args;
@@ -153,5 +178,17 @@ export default class FlamelinkService {
                 options.onData(model);
             }
         });
+    }
+
+    async getAll<T extends FlamelinkModel>(Type: { new(): T }): Promise<QueryResult<T>> {
+        try {
+            const type = new Type();
+            const schemaKey = type.schema;
+
+            const raw = await this.content.get({schemaKey});
+            return buildQueryResult(raw, Type);
+        } catch (error) {
+            return {error, results: [], size: 0}
+        }
     }
 }

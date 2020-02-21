@@ -1,4 +1,4 @@
-import axios, {AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance} from "axios";
 import {Config} from "@web/config";
 import {getAuth} from "@web/firebase";
 import {deserializeJson} from "@shared/util/ApiUtil";
@@ -9,7 +9,7 @@ export enum Endpoint {
     mailchimp = "mailchimp",
     inbound = "inbound",
     checkout = "checkout",
-    checkoutSessions = "checkout/sessions",
+    checkoutSessions = "checkout/sessions/create-subscription",
     signupEmailStatus = "signup/email-status",
     sendMagicLink = "signup/magic-link",
     updateSubscriberStatus = "mailchimp/status",
@@ -19,7 +19,9 @@ export enum Endpoint {
     notifyFriendRequest = "social/notify-friend-request",
     activityFeed = "social/activity-feed",
     activityFeedSummary = "social/activity-feed-summary",
-    userDeletePermanently = "user/delete-permanently"
+    userDeletePermanently = "user/delete-permanently",
+    subscriptionDetails = "checkout/subscription-details",
+    subscriptionSetup = "checkout/sessions/setup-subscription"
 }
 
 export function initializeAxios(): AxiosInstance {
@@ -57,3 +59,8 @@ function getInstance() {
 }
 
 export const request = getInstance();
+
+export function isAxiosError(error: any): error is AxiosError {
+    return error.isAxiosError
+
+}

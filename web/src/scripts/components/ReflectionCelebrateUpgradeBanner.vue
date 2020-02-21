@@ -1,0 +1,81 @@
+<template>
+    <div class="celebrateUpgrade" v-if="showUpgradeBanner" @click="goToPricing">
+        {{cta}}
+        <a :href="upgradeRoute">Learn More</a>
+    </div>
+</template>
+
+<script lang="ts">
+    import Vue from "vue";
+    import {PageRoute} from "@shared/PageRoutes";
+    import CactusMember from '@shared/models/CactusMember';
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+
+    export default Vue.extend({
+        created() {
+
+        },
+        props: {
+            member: { type: CactusMember }
+        },
+        data(): {
+            upgradeRoute: string
+        } {
+            return {
+                upgradeRoute: PageRoute.PAYMENT_PLANS
+            }
+        },
+        computed: {
+            isTrialing(): boolean {
+                return this.member?.isInTrial;
+            },
+            trialDaysLeftHeader(): string {
+                if (this.member?.daysLeftInTrial) {
+                    const days = this.member?.daysLeftInTrial;
+                    if (days === 1) {
+                        return 'Free access ends today';
+                    } else {
+                        return days + ' days of free access remaining';
+                    }
+                }
+                return '';
+            },
+            cta(): string {
+                if (this.isTrialing) {
+                    return this.trialDaysLeftHeader;
+                } else {
+                    return "Get daily prompts";
+                }
+            },
+            showUpgradeBanner(): boolean {
+                const tier = this.member?.tier ?? SubscriptionTier.PLUS;
+                return (tier === SubscriptionTier.BASIC || this.member?.isInTrial) ? true : false;
+            }
+        },
+        methods: {
+            goToPricing() {
+                window.location.href = PageRoute.PAYMENT_PLANS;
+            },
+        }
+    })
+</script>
+
+<style lang="scss" scoped>
+    @import "common";
+    @import "mixins";
+    @import "variables";
+
+    .celebrateUpgrade {
+        background: $royal url(assets/images/plusBg.svg) center top/105% auto no-repeat;
+        color: $white;
+        cursor: pointer;
+        padding: 1.6rem 2.4rem;
+
+        a {
+            @include fancyLinkLight;
+            margin-left: .8rem;
+            white-space: nowrap;
+        }
+    }
+
+</style>

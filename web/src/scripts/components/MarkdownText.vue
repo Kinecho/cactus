@@ -1,6 +1,6 @@
 
 <template>
-    <vue-simple-markdown :source="source"/>
+    <vue-simple-markdown :source="source" class="md_wrapper"/>
 </template>
 
 <script lang="ts">
@@ -20,4 +20,7 @@
     @import "mixins";
     @import "variables";
 
+    .md_wrapper {
+        white-space: pre-line;
+    }
 </style>

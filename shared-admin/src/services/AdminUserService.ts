@@ -167,10 +167,10 @@ export default class AdminUserService {
             const {userId, referredByEmail} = args;
             await this.getCollectionRef().doc(userId).set({[User.Field.referredByEmail]: referredByEmail}, {
                 merge: true,
-                mergeFields: [User.Field.referredByEmail]
+                // mergeFields: [User.Field.referredByEmail]
             });
         } catch (e) {
-            logger.error("Failed to update referred by email");
+            logger.error("Failed to update referred by email", e);
         }
 
     }

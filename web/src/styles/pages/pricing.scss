@@ -1,0 +1,194 @@
+@import "~styles/mixins";
+@import "~styles/variables";
+@import "~styles/common";
+
+.hero {
+    background: url(assets/images/plusBg.svg) center bottom/cover no-repeat;
+    color: $white;
+    overflow: hidden;
+    padding: 4.8rem 2.4rem 16rem;
+    position: relative;
+
+    &:before {
+        background: url(assets/images/crossesBlue.svg) 0 0/228px 216px no-repeat;
+        content: "";
+        display: block;
+        height: 216px;
+        left: 46%;
+        margin: 0 auto;
+        position: absolute;
+        right: 0;
+        top: -16rem;
+        width: 228px;
+    }
+
+    @include r(374) {
+        padding-bottom: 16rem;
+        padding-top: 6.4rem;
+    }
+    @include r(600) {
+        background-size: 120% auto;
+    }
+    @include r(768) {
+        padding-bottom: 19rem;
+
+        &:before {
+            left: 53%;
+        }
+    }
+    @include r(1024) {
+        padding-bottom: 30rem;
+        padding-top: 8rem;
+
+        &:before {
+            top: -13rem;
+        }
+    }
+    @include r(1500) {
+        background-size: 105% auto;
+    }
+
+    h1 {
+        margin-bottom: .4rem;
+    }
+
+    .subtext {
+        margin-bottom: 2.4rem;
+        opacity: .9;
+
+        @include r(768) {
+            font-size: 2.4rem;
+        }
+    }
+
+    .button {
+        display: inline-block;
+        min-width: 16rem;
+    }
+}
+
+h2 {
+    margin-bottom: 4rem;
+}
+
+.benefits {
+    margin-top: -2.4rem;
+    overflow: hidden;
+    padding: 0 2.4rem 6.4rem;
+    position: relative;
+
+    &:before {
+        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+        background-position: right bottom, right top;
+        background-repeat: no-repeat;
+        background-size: 240px 275px, 225px 310px;
+        content: "";
+        display: block;
+        height: 324px;
+        position: absolute;
+        right: -20rem;
+        bottom: 14%;
+        width: 300px;
+    }
+
+    @include r(374) {
+        margin-top: 0;
+    }
+    @include r(600) {
+        &:before {
+            right: -10rem;
+        }
+    }
+    @include r(768) {
+        padding-bottom: 10rem;
+
+        &:before {
+            display: none;
+        }
+    }
+
+    .flexContainer {
+        @include r(768) {
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .benefit {
+        margin: 0 auto 5.6rem;
+        max-width: 28rem;
+
+        @include r(768) {
+            margin: 0 1.6rem;
+        }
+    }
+
+    .benefitIcon {
+        align-items: center;
+        background-color: $beige;
+        border-radius: 50%;
+        display: flex;
+        height: 6.4rem;
+        justify-content: center;
+        margin: 0 auto 1.6rem;
+        width: 6.4rem;
+
+        img {
+            height: 2.4rem;
+            width: 2.4rem;
+        }
+    }
+
+    h3 {
+        font-size: 2.1rem;
+        margin-bottom: .8rem;
+    }
+
+    p {
+        opacity: .8;
+
+        @include r(768) {
+            font-size: 1.6rem;
+        }
+        @include r(960) {
+            font-size: 1.8rem;
+        }
+    }
+}
+
+.upgrade {
+    background: $beige;
+    padding: 4.8rem .4rem;
+    position: relative;
+
+    .centered {
+        z-index: 1;
+    }
+
+    @include r(374) {
+        padding: 4.8rem 2.4rem;
+    }
+    @include r(768) {
+        padding: 9rem .8rem 11rem;
+
+        &:before {
+            background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+            background-position: right bottom, right top;
+            background-repeat: no-repeat;
+            background-size: 240px 275px, 225px 310px;
+            content: "";
+            display: block;
+            height: 324px;
+            overflow: hidden;
+            position: absolute;
+            right: 0;
+            top: -4.8rem;
+            width: 300px;
+        }
+    }
+    @include r(960) {
+        &:before {
+            background-size: 300px 275px, 225px 310px;
+        }
+    }
+}

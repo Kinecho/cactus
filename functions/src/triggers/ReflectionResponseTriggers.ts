@@ -134,7 +134,7 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
- * @type {CloudFunction<DocumentSnapshot>}
+ * @type {DocumentSnapshot}
  */
 export const onReflectionResponseCreated = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
@@ -206,6 +206,20 @@ export const onReflectionResponseCreated = functions.firestore
                 fields.push({
                     title: "SentPrompt created",
                     value: `${sentPrompt.id}`
+                })
+            }
+
+            if (member?.subscription?.tier) {
+                const trialDaysLeft = member?.daysLeftInTrial;
+                let daysLeftText = '';
+
+                if (trialDaysLeft && trialDaysLeft > 0) {
+                    daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
+                }
+
+                fields.push({
+                    title: "Subscription",
+                    value: `${member.subscription.tier}${daysLeftText}`
                 })
             }
 

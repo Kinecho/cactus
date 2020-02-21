@@ -1,8 +1,9 @@
 import * as queryString from "query-string";
-import * as camelcase from "camelcase";
+import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
+import {isNumber} from "@shared/util/ObjectUtil";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -21,8 +22,7 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
-export function preventOrphanedWords<T>(input?: string, escapeCode: string = "\xa0"): string | undefined {
-    // noinspection SuspiciousTypeOfGuard
+export function preventOrphanedWords<T>(input?: T | string, escapeCode: string = "\xa0"): string | undefined | T {
     if (!input || typeof input !== "string") {
         return input;
     }
@@ -226,11 +226,43 @@ export function getProviderDisplayName(provider?: string): string {
 }
 
 export function titleCase(str: string | undefined): string {
-  if (str && str.length > 0) {
-      return str.toLowerCase().split(' ').map(function(word) {
-        return word.replace(word[0], word[0].toUpperCase());
-      }).join(' ');
-  } else { 
-      return '';
-  }
+    if (str && str.length > 0) {
+        return str.toLowerCase().split(' ').map(function (word) {
+            return word.replace(word[0], word[0].toUpperCase());
+        }).join(' ');
+    } else {
+        return '';
+    }
+}
+
+export const StringTransforms = {
+    stringOrUndefined: (input: string): string | undefined => {
+        return isBlank(input) ? undefined : input;
+    },
+
+    numberOrUndefined: (input: string): number | undefined => {
+        return isNumber(input) ? undefined : Number(input);
+    },
+
+    booleanOrUndefined: (input: string): boolean | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        return input.toLowerCase().startsWith("t");
+    },
+
+    dateOrUndefined: (input: string): Date | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        try {
+            const date = new Date(input);
+
+            return date;
+
+        } catch (error) {
+            return undefined;
+        }
+
+    }
 }

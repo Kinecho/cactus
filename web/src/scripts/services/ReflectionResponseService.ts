@@ -78,7 +78,7 @@ export default class ReflectionResponseService {
         response.responseMedium = medium;
         response.createdAt = new Date();
         response.updatedAt = new Date();
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
 
         if (cactusMember) {
             response.userId = cactusMember.userId;
@@ -97,7 +97,7 @@ export default class ReflectionResponseService {
     }
 
     static populateMemberFields(response: ReflectionResponse): ReflectionResponse {
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
 
         if (cactusMember) {
             response.userId = cactusMember.userId;
@@ -113,7 +113,7 @@ export default class ReflectionResponseService {
     }
 
     static createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
         if (!cactusMember) {
             logger.log("Unable to get cactus member");
             return;
@@ -243,7 +243,7 @@ export default class ReflectionResponseService {
     }
 
     async getAllReflections(): Promise<ReflectionResponse[]> {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const member = CactusMemberService.sharedInstance.currentMember;
         if (!member) {
             logger.warn("ReflectionResponseService.getTotalReflectionDurationMsL No current cactus member found");
             return [];

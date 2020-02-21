@@ -15,7 +15,6 @@ const logger = new Logger("social.ts");
 
 export async function sendInvite(contact: EmailContact, message: string): Promise<InvitationResponse> {
     const currentUser = getAuth().currentUser;
-
     if (!currentUser) {
         return {
             success: false,

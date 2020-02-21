@@ -2,26 +2,24 @@
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
-            <div v-if="displayLoginButton || displaySignupButton" class="anonLinks">
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displayLoginButton"
-                            class="login"
-                            :href="loginHref"
-                            @click.prevent="goToLogin"
-                            type="link"
-                    >{{copy.common.LOG_IN}}</a>
-                </transition>
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displaySignupButton"
-                            data-test="signup-button"
-                            class="jump-to-form button small"
-                            :href="signupHref"
-                            @click.prevent="goToSignup"
-                            type="button"
-                    >{{copy.common.SIGN_UP}}</a>
-                </transition>
+            <div v-if="" class="anonLinks ">
+                <a v-if="displayLoginButton"
+                        class="login "
+                        :href="loginHref"
+                        @click.prevent="goToLogin"
+                        type="link"
+                >
+                    <span class="">{{copy.common.LOG_IN}}</span>
+                </a>
+                <a v-if="displaySignupButton"
+                        data-test="signup-button"
+                        class="jump-to-form button small"
+                        :href="signupHref"
+                        @click.prevent="goToSignup"
+                        type="button"
+                >{{copy.common.SIGN_UP}}</a>
             </div>
-            <div class="navContainer" v-if="loggedIn">
+            <div class="navContainer" v-if="loggedIn && showLinks">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
                         Journal</title>
@@ -70,6 +68,7 @@
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
+    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -84,7 +83,7 @@
         hidden: boolean,
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
-        activityBadgeCount: number
+        activityBadgeCount: number,
     }
 
     export default Vue.extend({
@@ -140,6 +139,7 @@
             showLogin: {type: Boolean, default: true},
             forceTransparent: {type: Boolean, default: false},
             loginRedirectUrl: String,
+            showLinks: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {
@@ -163,6 +163,7 @@
                 const links: DropdownMenuLink[] = [{
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
+                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isInTrial)
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
@@ -270,7 +271,7 @@
         font-size: 1.6rem;
         text-decoration: none;
         transition: background-color .2s ease-in-out;
-
+        margin: 0 1rem;
         @include r(600) {
             font-size: 1.8rem;
 

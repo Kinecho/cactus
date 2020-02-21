@@ -1,12 +1,16 @@
 import Logger from "@shared/Logger";
 
-const logger = new Logger("ObjectUtil.ts")
+const logger = new Logger("ObjectUtil.ts");
 
-export function isNonEmptyObject(input: any): boolean {
+export function isNonEmptyObject(input: any): input is Object {
     if (isNull(input)) {
         return false;
     }
     return typeof (input) === "object" && !Array.isArray(input) && Object.keys(input).length > 0;
+}
+
+export function hasIdField(input: any): input is { id: any, [key: string]: any } {
+    return isNonEmptyObject(input) && input.hasOwnProperty("id") && (input.id ?? false)
 }
 
 export function isArray(input: any) {
@@ -26,6 +30,14 @@ export function isNotNull(input: any): boolean {
 
 export function isDate(input: any) {
     return isNotNull(input) && input instanceof Date;
+}
+
+export function isString(input: any): input is string {
+    try {
+        return isNotNull(input) && typeof (input) === "string";
+    } catch {
+        return false;
+    }
 }
 
 export function isNumber(input: any) {
@@ -87,10 +99,12 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * This will delete undefined keys in objects
  * @param {any} input
  * @param {(value: any) => Promise<void>} transform
+ * @param {number} depth how deep the transform can go before exiting
+ * @param {string} [forKey] the key that is being transformed currently. Mostly for logging purposes.
  * @return {any}
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
-    if (depth >= 10) {
+    if (depth >= 100) {
         logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${depth}. Key = ${forKey || "rootKey"} Returning witihout processing`);
         return input;
     }
@@ -150,7 +164,8 @@ export function stringifyJSON(input: any, space?: number): string {
         return value;
     }
 
-    return JSON.stringify(input, replacer, space);
+    const copy = isNonEmptyObject(input) ? Object.assign({}, input) : input;
+    return JSON.stringify(copy, replacer, space);
 }
 
 export function chunkArray<T>(list: T[], batchSize: number): (T[])[] {

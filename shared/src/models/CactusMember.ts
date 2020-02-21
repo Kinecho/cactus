@@ -4,6 +4,8 @@ import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
+import {isInTrial, MemberSubscription, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -58,6 +60,10 @@ export enum Field {
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
+    subscription = "subscription",
+    subscriptionTier = "subscription.tier",
+    subscriptionTrialEndsAt = "subscription.trial.endsAt",
+    subscriptionStripeId = "subscription.stripeSubscriptionId",
 }
 
 export interface PromptSendTime {
@@ -68,6 +74,10 @@ export interface PromptSendTime {
 export type QuarterHour = 0 | 15 | 30 | 45;
 
 export const DEFAULT_PROMPT_SEND_TIME: PromptSendTime = {hour: 2, minute: 45};
+
+export interface MemberStripeDetails {
+    customerId?: string,
+}
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
@@ -114,6 +124,9 @@ export default class CactusMember extends BaseModel {
     activityStatus?: {
         lastSeenOccurredAt?: Date
     } = {};
+
+    subscription?: MemberSubscription;
+    stripe?: MemberStripeDetails = {};
 
     prepareForFirestore(): any {
         super.prepareForFirestore();
@@ -181,5 +194,39 @@ export default class CactusMember extends BaseModel {
             } as PromptSendTime;
         }
         return;
+    }
+
+    get tier(): SubscriptionTier {
+        return this.subscription?.tier ?? SubscriptionTier.PLUS
+    }
+
+    get tierDisplayName(): string | undefined {
+        return subscriptionTierDisplayName(this.tier, this.isInTrial)
+    }
+
+    get daysLeftInTrial(): number {
+        const end = this.subscription?.trial?.endsAt;
+        if (!end) {
+            return 0;
+        }
+        return Math.max(DateUtil.daysUntilDate(end), 0);
+    }
+
+    get isInTrial(): boolean {
+        return isInTrial(this.subscription)
+    }
+
+    get hasActiveSubscription(): boolean {
+        return !!this.subscription && !this.isInTrial && this.tier !== SubscriptionTier.BASIC
+    }
+
+    set stripeCustomerId(customerId: string | undefined) {
+        const stripeDetails: MemberStripeDetails = this.stripe || {};
+        stripeDetails.customerId = customerId;
+        this.stripe = stripeDetails;
+    }
+
+    get stripeCustomerId(): string | undefined {
+        return this.stripe?.customerId;
     }
 }

@@ -3,6 +3,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
+                <upgrade-banner :member="member" />
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
@@ -158,6 +159,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
     import Logger from "@shared/Logger";
@@ -173,7 +175,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             MagicLink,
             PromptContentCard,
             ElementDescriptionModal,
-            InputNameModal
+            InputNameModal,
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -471,11 +474,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
     .successText {
         flex-grow: 1;
-        padding: 6.4rem 4rem;
+        padding: 4rem 4rem 6.4rem;
+
+        @include r(374) {
+            padding: 7.2rem 4rem 9.6rem;
+        }
+        @include r(600) {
+            padding: 6.4rem 4rem;
+        }
     }
 
     h2 {
         color: $magenta;
+        font-size: 3.2rem;
         margin-bottom: 2.4rem;
 
         @include r(600) {
@@ -514,7 +525,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
         align-items: flex-end;
         display: flex;
         justify-content: center;
-        margin: -13.6rem 0 2.4rem;
+        margin: -12rem 0 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .cactusContainer {
@@ -547,6 +562,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         display: flex;
         justify-content: center;
         margin-bottom: 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .metric {

@@ -12,7 +12,7 @@
     import Vue from "vue";
     import {isValidEmail} from '@shared/util/StringUtil'
     import {sendEmailLinkSignIn} from "@web/auth"
-    import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest"
+    import SignupRequest from "@shared/mailchimp/models/SignupRequest"
     import {addModal, getQueryParam, showModal} from "@web/util"
     import {QueryParam} from "@shared/util/queryParams"
     import StorageService, {LocalStorageKey} from "@web/services/StorageService"
@@ -68,7 +68,7 @@
 
                 try {
 
-                    const subscription = new SubscriptionRequest(email);
+                    const subscription = new SignupRequest(email);
                     subscription.subscriptionLocation = {page: window.location.pathname, formId: "MagicLinkInput"};
 
                     let referredByEmail: string | undefined = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS) || undefined;

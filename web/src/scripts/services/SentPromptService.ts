@@ -76,7 +76,7 @@ export default class SentPromptService {
     }
 
     async getSentPrompt(promptId: string): Promise<SentPrompt | undefined> {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const member = CactusMemberService.sharedInstance.currentMember;
         if (!member) {
             logger.warn("Unable to get current member. Can not delete the sentQuestion");
             return;
@@ -165,7 +165,7 @@ export default class SentPromptService {
     }
 
     async getPrompts(options: { limit?: number, cursor?: QueryCursor }): Promise<SentPrompt[]> {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const member = CactusMemberService.sharedInstance.currentMember;
         if (!member) {
             return [];
         }

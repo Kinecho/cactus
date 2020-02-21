@@ -1,5 +1,5 @@
 import "firebase/functions"
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag, fireSignupEvent} from "@web/analytics";
@@ -22,10 +22,10 @@ const logger = new Logger("mailchimp.ts");
 
 /**
  *
- * @param {SubscriptionRequest} subscription
+ * @param {SignupRequest} subscription
  * @return {Promise<SubscriptionResult>}
  */
-export async function submitEmail(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
+export async function submitEmail(subscription: SignupRequest): Promise<SubscriptionResult> {
     // subscription.as
     logger.log("submitting subscription", subscription);
 
@@ -115,7 +115,7 @@ export function configureLoginForm(formId: string) {
 
         try {
 
-            const subscription = new SubscriptionRequest(emailAddress);
+            const subscription = new SignupRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
@@ -268,7 +268,7 @@ export function configureMailchimpSignupForm(formId: string) {
 
         try {
 
-            const subscription = new SubscriptionRequest(emailAddress);
+            const subscription = new SignupRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);

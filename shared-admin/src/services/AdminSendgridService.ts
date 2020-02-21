@@ -2,7 +2,8 @@ import {CactusConfig} from "@shared/CactusConfig";
 import * as sgMail from "@sendgrid/mail";
 import {MagicLinkEmail, 
         InvitationEmail, 
-        FriendRequestEmail} from "@admin/services/SendgridServiceTypes";
+        FriendRequestEmail,
+        TrialEndingEmail} from "@admin/services/SendgridServiceTypes";
 import Logger from "@shared/Logger";
 
 // declare type MailService = sgMail.MailService;
@@ -159,6 +160,38 @@ export default class AdminSendgridService {
                 logger.error("Failed to send Invitation email", error.response.body);
             } else {
                 logger.error("Failed to send Invitation email", error);
+            }
+            return false;
+        }
+
+    }
+
+    async sendTrialEnding(options: TrialEndingEmail): Promise<boolean> {
+
+        try {
+            const mailParams = {
+                to: options.toEmail,
+                from: {name: "Ryan at Cactus", email: "ryan@cactus.app"},
+                templateId: this.config.sendgrid.template_ids.trial_ending,
+                categories: ["TrialEnding"],
+                dynamicTemplateData: {
+                    firstName: options.firstName,
+                    link: options.link
+                }
+            };
+
+            logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
+
+            await sgMail.send(mailParams);
+
+            logger.log("Sendgrid email sent successfully");
+            return true;
+
+        } catch (error) {
+            if (error.response && error.response.body) {
+                logger.error("Failed to send TrialEnding email", error.response.body);
+            } else {
+                logger.error("Failed to send TrialEnding email", error);
             }
             return false;
         }

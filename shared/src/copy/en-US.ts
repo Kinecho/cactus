@@ -8,19 +8,45 @@ import {
     PromptCopy,
     ElementCopy,
     PronounCopy,
-    AccountCopy,
+    AccountCopy, CheckoutCopy,
 } from "@shared/copy/CopyTypes";
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
 
 export default class EnglishCopy extends LocalizedCopy {
     settings: LocaleSettings = {
         dates: {
             longFormat: "LLLL d, yyyy",
-            shortFormat: "L/d/yy",
+            shortFormat: "L/d/yyyy",
         }
     };
     pronouns: PronounCopy = {
         YOU: "you"
-    }
+    };
+
+    checkout: CheckoutCopy = {
+        UPGRADE: "Upgrade",
+        CURRENT_PLAN: "Current Plan",
+        MANAGE_MY_PLAN: "Manage My Plan",
+        PURCHASE: "Purchase",
+        SIGN_IN_TO_CONTINUE_CHECKOUT: "Please log in to continue the upgrade process.",
+        BILLING_PERIOD: {
+            [BillingPeriod.weekly]: "Weekly",
+            [BillingPeriod.monthly]: "Monthly",
+            [BillingPeriod.yearly]: "Annual",
+            [BillingPeriod.once]: "One Time",
+            [BillingPeriod.never]: "Free",
+        },
+        BILLING_PERIOD_PER: {
+            [BillingPeriod.weekly]: "Week",
+            [BillingPeriod.monthly]: "Month",
+            [BillingPeriod.yearly]: "Year",
+            [BillingPeriod.once]: "Once",
+            [BillingPeriod.never]: "Never",
+        },
+        TIER_BASIC: "Basic",
+        TIER_PLUS: "Plus",
+        TIER_PREMIUM: "Premium",
+    };
 
     account: AccountCopy = {
         PREFERRED_NOTIFICATION_TIME: "What time would you like to be notified?",
@@ -39,6 +65,7 @@ export default class EnglishCopy extends LocalizedCopy {
         SIGN_UP: "Sign Up",
         SUBMIT: "Submit",
         SIGNING_IN: "Signing In",
+        PRICING: "Pricing",
         LOG_OUT: "Log Out",
         ENTER_YOUR_EMAIL_ADDRESS: "Enter your email address",
         WELCOME: "Welcome",
@@ -46,6 +73,8 @@ export default class EnglishCopy extends LocalizedCopy {
         ACCOUNT: "Account",
         EMAIL: "Email",
         EMAIL_ADDRESS: "Email Address",
+        SUBSCRIPTION: "Subscription",
+        TIER: "Tier",
         FIRST_NAME: "First Name",
         LAST_NAME: "Last Name",
         NOTIFICATIONS: "Notifications",
@@ -54,6 +83,14 @@ export default class EnglishCopy extends LocalizedCopy {
         LOADING: "Loading",
         HOUR: "Hour",
         MINUTE: "Minute",
+        DAYS_LEFT: "days left",
+        DAY_LEFT: "day left",
+        DAYS_LEFT_IN_TRIAL: "days left in trial",
+        DAY_LEFT_IN_TRIAL: "day left in trial",
+        TRIAL_ENDS_TODAY: "Trial ends today",
+        ENDS_TODAY: "Ends today",
+        LEARN_MORE: "Learn More",
+        TRIAL: "Trial",
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",
@@ -111,7 +148,7 @@ export default class EnglishCopy extends LocalizedCopy {
         DISPLAY_NAME: "Display Name",
         MEMBER_SINCE: "Member Since",
         AN_ANONYMOUS_USER: "An anonymous user",
-        SIGN_UP_FREE: "Sign up Free",
+        SIGN_UP_FREE: "Sign Up Free",
         magicLinkSuccess(email: string): string {
             return `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`
         }

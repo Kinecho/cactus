@@ -34,7 +34,7 @@ import {
     MailchimpApiError,
     MemberActivityListResponse,
     MemberUnsubscribeReport,
-    MergeField,
+    MergeField, OperationStatus,
     PaginationParameters,
     SearchMembersOptions,
     SearchMembersResult,
@@ -56,14 +56,20 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
 import * as md5 from "md5";
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
-import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
+import MailchimpSubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
 import {CactusConfig} from "@shared/CactusConfig";
 import {UpdateStatusRequest, UpdateStatusResponse} from "@shared/mailchimp/models/UpdateStatusTypes";
 import Logger from "@shared/Logger";
+import {chunkArray} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("MailchimpService");
+
+interface BatchCreateResult {
+    timedOut: boolean,
+    response?: BatchCreateResponse | undefined
+}
 
 interface MailchimpAuth {
     username: string,
@@ -432,6 +438,35 @@ export default class MailchimpService {
         return response.data;
     }
 
+
+    /**
+     * Submit up to 500 bulk requests
+     * @param {UpdateMergeFieldRequest[]} mergeRequests
+     * @return {Promise<BatchCreateResponse>}
+     */
+    async bulkUpdateMergeFields(mergeRequests: UpdateMergeFieldRequest[]): Promise<BatchCreateResponse[]> {
+        const chunks = chunkArray(mergeRequests, 500);
+        const batchTasks: Promise<BatchCreateResponse>[] = chunks.map(batchRequests => {
+            const operations: BatchOperation[] = batchRequests.map(mergeRequest => {
+                return {
+                    method: "PATCH",
+                    path: this.getMemberUrlForEmail(mergeRequest.email),
+                    body: {
+                        merge_fields: mergeRequest.mergeFields
+                    }
+                }
+            });
+
+            const job: BatchOperationsRequest = {
+                operations,
+            };
+            return this.submitBatchJob(job);
+        });
+        logger.info(`bulkUpdateMergeFields: Submitted ${batchTasks.length}`);
+
+        return Promise.all(batchTasks);
+    }
+
     async bulkUpdateTags(tagRequests: UpdateTagsRequest[]): Promise<BatchCreateResponse> {
         const operations: BatchOperation[] = tagRequests.map(t => {
             return {
@@ -470,6 +505,37 @@ export default class MailchimpService {
         return response.data;
     }
 
+    async waitForBatch(batchResponse: BatchCreateResponse): Promise<BatchCreateResult> {
+        const checkInterval = 2000;
+        return new Promise<BatchCreateResult>(async (resolve) => {
+            let status = batchResponse.status;
+            let checkCount = 0;
+            let completedBatch: BatchCreateResponse | undefined = undefined;
+            const timeoutLimit = 60 * 5 * 1000;
+            //using a while loop will pause execution in-line, so once the while loop finishes, we will have waited for the response
+            while (status !== OperationStatus.finished || (checkCount * checkInterval) > timeoutLimit) {
+                await new Promise((innerResolve) => {
+                    setTimeout(async () => {
+                        logger.log("Checking for batch status");
+                        completedBatch = await MailchimpService.getSharedInstance().getBatchStatus(batchResponse);
+                        logger.log("Batch status check returned status", completedBatch.status);
+                        checkCount++;
+                        status = completedBatch.status;
+                        innerResolve();
+                    }, checkInterval)
+                })
+
+            }
+            const didTimeOut = checkCount * checkInterval > timeoutLimit && status !== OperationStatus.finished;
+            resolve({timedOut: didTimeOut, response: completedBatch});
+            return;
+        });
+    }
+
+    async waitForBatchJobs(jobs: BatchCreateResponse[]): Promise<BatchCreateResult[]> {
+        return await Promise.all(jobs.map(job => this.waitForBatch(job)));
+    }
+
     async updateMemberStatus(updateRequest: UpdateStatusRequest): Promise<UpdateStatusResponse> {
         const memberId = getMemberIdFromEmail(updateRequest.email);
         logger.log("Updating member status with patch", updateRequest);
@@ -477,8 +543,7 @@ export default class MailchimpService {
         try {
             const response = await this.request.patch(`/lists/${this.audienceId}/members/${memberId}?exclude_fields=_links`, {
                 status: updateRequest.status
-            },);
-
+            });
 
             const listMember: ListMember = response.data;
 
@@ -852,7 +917,7 @@ export default class MailchimpService {
         }
     }
 
-    async getMemberByEmail(email?: string): Promise<ListMember | undefined> {
+    async getMemberByEmail(email?: string | null): Promise<ListMember | undefined> {
         if (!email) {
             return undefined;
         }
@@ -896,16 +961,17 @@ export default class MailchimpService {
         }
     }
 
-    async addSubscriber(subscription: SubscriptionRequest, status = ListMemberStatus.pending): Promise<SubscriptionResult> {
+    async addSubscriber(subscription: SignupRequest, status = ListMemberStatus.pending): Promise<MailchimpSubscriptionResult> {
         const listMember = new MailchimpListMember(subscription.email);
         listMember.status = status;
         if (subscription.referredByEmail) {
             listMember.addMergeField(MergeField.REF_EMAIL, subscription.referredByEmail);
+            //TODO: Add the subscription tier merge field here
         }
 
         const url = `/lists/${this.audienceId}/members`;
 
-        const result = new SubscriptionResult();
+        const result = new MailchimpSubscriptionResult();
 
         try {
             const response = await this.request.post(url, listMember);

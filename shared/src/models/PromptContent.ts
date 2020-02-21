@@ -4,6 +4,7 @@ import {preventOrphanedWords} from "@shared/util/StringUtil";
 import {timestampToDate} from "@shared/util/FirestoreUtil";
 import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -187,6 +188,7 @@ export enum PromptContentFields {
     cactusElement = "cactusElement",
     scheduledSendAt = "scheduledSendAt",
     contentStatus = "contentStatus",
+    subscriptionTiers = "subscriptionTiers",
 }
 
 export default class PromptContent extends FlamelinkModel {
@@ -204,6 +206,7 @@ export default class PromptContent extends FlamelinkModel {
     errorMessage?: string;
     topic?: string;
     shareReflectionCopy_md?: string;
+    subscriptionTiers: SubscriptionTier[] = [];
 
     constructor(data?: Partial<PromptContent>) {
         super(data);
@@ -251,7 +254,7 @@ export default class PromptContent extends FlamelinkModel {
         return;
     }
 
-    getPreviewText(): string|undefined {
+    getPreviewText(): string | undefined {
         const [first] = (this.content || []);
         return first?.text;
     }

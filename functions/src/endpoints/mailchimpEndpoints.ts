@@ -1,7 +1,7 @@
 // import * as functions from "firebase-functions"
 import * as express from "express";
 import * as cors from "cors";
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import SubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import ApiError from "@shared/api/ApiError";
 import {writeToFile} from "@api/util/FileUtil";
@@ -95,7 +95,7 @@ app.post("/", async (req: express.Request, res: express.Response) => {
     const mailchimpService = MailchimpService.getSharedInstance();
     const slackService = AdminSlackService.getSharedInstance();
     logger.log("request params", req.body);
-    const subscription = SubscriptionRequest.fromData(req.body);
+    const subscription = SignupRequest.fromData(req.body);
     res.contentType("application/json");
 
 

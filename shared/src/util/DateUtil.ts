@@ -1,4 +1,4 @@
-import {DateObject, DateTime, Duration} from "luxon";
+import {DateObject, DateTime, Duration, Interval} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
@@ -265,6 +265,16 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
     return Math.round(t.diff(dt).as("day"))
 }
 
+export function daysUntilDate(date: Date): number {
+    const end = DateTime.fromJSDate(date).set({hour: 0});
+    const interval = Interval.fromDateTimes(DateTime.local(), end);
+    const days = interval.count("days") - 1
+    if (Number.isNaN(days)) {
+        return 0;
+    }
+    return days;
+}
+
 export function atMidnight(date: Date): Date {
     return DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0}).toJSDate();
 }
@@ -337,31 +347,31 @@ export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?
     if (timeZone) {
         startDateTime = startDateTime.setZone(timeZone);
     }
-    let prevWeekStart = startDateTime.startOf('week').minus({ weeks: 1 });
-    let prevWeekEnd = startDateTime.endOf('week').minus({ weeks: 1 });
+    let prevWeekStart = startDateTime.startOf('week').minus({weeks: 1});
+    let prevWeekEnd = startDateTime.endOf('week').minus({weeks: 1});
     let i = 0;
     let reflectionDateTime;
     let weeksWithoutReflection = 0;
 
-    while(_dates[i]) {
+    while (_dates[i]) {
         reflectionDateTime = DateTime.fromJSDate(_dates[i]);
-        
-        // found a date in this week
-        if (reflectionDateTime > prevWeekStart && 
-            reflectionDateTime < prevWeekEnd) { 
-            streak++;
-            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
-            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
 
-        // current date is before current week start
+        // found a date in this week
+        if (reflectionDateTime > prevWeekStart &&
+            reflectionDateTime < prevWeekEnd) {
+            streak++;
+            prevWeekStart = prevWeekStart.minus({weeks: 1});
+            prevWeekEnd = prevWeekEnd.minus({weeks: 1});
+
+            // current date is before current week start
         } else if (reflectionDateTime < prevWeekStart) {
-            prevWeekStart = prevWeekStart.minus({ weeks: 1 });
-            prevWeekEnd = prevWeekEnd.minus({ weeks: 1 });
+            prevWeekStart = prevWeekStart.minus({weeks: 1});
+            prevWeekEnd = prevWeekEnd.minus({weeks: 1});
             weeksWithoutReflection++;
         }
 
         // streak broken, return
-        if (weeksWithoutReflection > 1) { 
+        if (weeksWithoutReflection > 1) {
             return streak;
         }
 
@@ -396,31 +406,31 @@ export function getStreakMonths(options: { dates: Date[], start?: Date, timeZone
     if (timeZone) {
         startDateTime = startDateTime.setZone(timeZone);
     }
-    let prevMonthStart = startDateTime.startOf('month').minus({ months: 1 });
-    let prevMonthEnd = startDateTime.endOf('month').minus({ months: 1 });
+    let prevMonthStart = startDateTime.startOf('month').minus({months: 1});
+    let prevMonthEnd = startDateTime.endOf('month').minus({months: 1});
     let i = 0;
     let reflectionDateTime;
     let monthsWithoutReflection = 0;
 
-    while(_dates[i]) {
+    while (_dates[i]) {
         reflectionDateTime = DateTime.fromJSDate(_dates[i]);
 
         // found a date in this week
-        if (reflectionDateTime > prevMonthStart && 
-            reflectionDateTime < prevMonthEnd) { 
+        if (reflectionDateTime > prevMonthStart &&
+            reflectionDateTime < prevMonthEnd) {
             streak++;
-            prevMonthStart = prevMonthStart.minus({ months: 1 });
-            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+            prevMonthStart = prevMonthStart.minus({months: 1});
+            prevMonthEnd = prevMonthEnd.minus({months: 1});
 
-        // current date is before current week start
+            // current date is before current week start
         } else if (reflectionDateTime < prevMonthStart) {
-            prevMonthStart = prevMonthStart.minus({ months: 1 });
-            prevMonthEnd = prevMonthEnd.minus({ months: 1 });
+            prevMonthStart = prevMonthStart.minus({months: 1});
+            prevMonthEnd = prevMonthEnd.minus({months: 1});
             monthsWithoutReflection++;
         }
 
         // streak broken, return
-        if (monthsWithoutReflection > 1) { 
+        if (monthsWithoutReflection > 1) {
             return streak;
         }
 

@@ -13,7 +13,7 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <div class="settings-group profile">
-                        <h3>Personal Info</h3>
+                        <h2>Personal Info</h2>
                         <div class="item" v-if="memberSince">
                             <label class="label">
                                 {{copy.auth.MEMBER_SINCE}}
@@ -41,12 +41,16 @@
                             </label>
                             <p class="value">{{member.email}}</p>
                         </div>
+                    </div>
 
-
+                    <div class="settings-group subscription">
+                        <h2>{{copy.common.SUBSCRIPTION}}</h2>
+                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!hasActiveSubscription"/>
+                        <manage-subscription v-if="hasActiveSubscription" :member="member" @error="addSnackbar"/>
                     </div>
 
                     <div class="settings-group notifications">
-                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
+                        <h2>{{copy.common.NOTIFICATIONS}}</h2>
                         <div class="item">
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                         </div>
@@ -68,18 +72,20 @@
                                     {{copy.account.UPDATE_TIMEZONE_TO}} <b>{{deviceTimezoneName}}</b>?
                                 </p>
                                 <div class="tz-actions">
-                                    <button class="button small" @click="setToDeviceZone">{{copy.account.CONFIRM_UPDATE_TIMEZONE}}</button>
+                                    <button class="button small" @click="setToDeviceZone">
+                                        {{copy.account.CONFIRM_UPDATE_TIMEZONE}}
+                                    </button>
                                     <button class="button small secondary" @click="tzAlertDismissed = true">
                                         {{copy.account.CANCEL_UPDATE_TIMEZONE}}
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone" />
+                            <timezone-picker @change="tzSelected" v-bind:value="member.timeZone" v-if="member.timeZone"/>
                         </div>
                     </div>
 
                     <div class="settings-group profile" v-if="providers.length > 0">
-                        <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
+                        <h2>{{copy.auth.CONNECTED_ACCOUNTS}}</h2>
                         <div class="item" v-if="showProviders">
                             <div v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
@@ -139,9 +145,9 @@
     import Footer from "@components/StandardFooter.vue";
     import Spinner from "@components/Spinner.vue";
     import CactusMember, {
+        DEFAULT_PROMPT_SEND_TIME,
         NotificationStatus,
-        PromptSendTime,
-        DEFAULT_PROMPT_SEND_TIME
+        PromptSendTime
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
@@ -157,13 +163,15 @@
     import CopyService from "@shared/copy/CopyService";
     import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import SnackbarContent from "@components/SnackbarContent.vue";
+    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
-
-
+    import PremiumPricing from "@components/PremiumPricing.vue";
+    import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
+    import {getQueryParam, removeQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -184,15 +192,23 @@
             ProviderIcon,
             SnackbarContent,
             TimePicker,
+            Upgrade: PremiumPricing,
+            ManageSubscription: ManageActiveSubscription,
             DeleteAccountModal
         },
-        created() {
+        mounted(): void {
+            const message = getQueryParam(QueryParam.MESSAGE);
+            if (message) {
+                this.addSnackbar({message, timeoutMs: 10000, closeable: true});
+                removeQueryParam(QueryParam.MESSAGE);
+            }
+        },
+        beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member, user}) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
-
                     if (!member) {
                         window.location.href = PageRoute.HOME;
                     }
@@ -221,6 +237,8 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
+            upgradeRoute: string,
+
             deleteAccountModalVisible: boolean
         } {
             return {
@@ -240,14 +258,18 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
+                upgradeRoute: PageRoute.PAYMENT_PLANS,
                 deleteAccountModalVisible: false
             }
         },
         computed: {
+            hasActiveSubscription(): boolean {
+                return this.member?.hasActiveSubscription ?? false;
+            },
             promptSendTime(): PromptSendTime {
                 return this.member?.promptSendTime ||
-                       this.member?.getLocalPromptSendTimeFromUTC() ||
-                       DEFAULT_PROMPT_SEND_TIME;
+                    this.member?.getLocalPromptSendTimeFromUTC() ||
+                    DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -336,11 +358,10 @@
                 el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
                 el.style.top = `${el.offsetTop}px`;
-                el.style.width = width
-                el.style.height = height
+                el.style.width = width;
+                el.style.height = height;
             },
-            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
-
+            addSnackbar(message: SnackbarMessage): string {
                 const id = uuid();
                 if (typeof message === "string") {
                     this.snackbars.push({id, message: message, autoHide: true});
@@ -437,7 +458,7 @@
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -448,6 +469,7 @@
         flex-flow: column nowrap;
         min-height: 100vh;
         justify-content: space-between;
+        overflow: hidden;
 
         header, .centered {
             width: 100%;
@@ -456,7 +478,7 @@
 
     .centered.content {
         flex-grow: 1;
-        max-width: 70rem;
+        max-width: 80rem;
         padding: 6.4rem 2.4rem;
         text-align: left;
     }
@@ -465,12 +487,10 @@
         margin-bottom: 3.2rem;
     }
 
-    h3 {
-        margin-bottom: 2.4rem;
-    }
-
-    h3 {
+    h2 {
         color: $royal;
+        font-size: 2.4rem;
+        margin-bottom: 2.4rem;
     }
 
     .label {
@@ -490,7 +510,7 @@
     }
 
     .settings-group {
-        margin-bottom: 4.8rem;
+        margin-bottom: 6.4rem;
 
         &.delete {
             border-top: $lightestGreen 1px solid;
@@ -498,13 +518,13 @@
         }
     }
 
+    .subscription .centered {
+        display: block;
+        text-align: left;
+    }
+
     .provider-info {
-        align-items: center;
-        background-color: lighten($lightestGreen, 9%);
-        border-radius: .8rem;
-        display: flex;
-        padding: .4rem 1.6rem;
-        width: 100%;
+        @include accountBox;
 
         &:hover {
             background-color: $lightestGreen;

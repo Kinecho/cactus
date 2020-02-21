@@ -34,6 +34,7 @@ import {DateTime} from "luxon";
 import {AxiosError} from "axios";
 import {PageRoute} from "@shared/PageRoutes";
 import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContentScheduler");
 
@@ -522,11 +523,19 @@ export default class PromptContentScheduler {
             to_name: '*|FNAME|* *|LNAME|*'
         };
 
+        const segmentId = this.mailchimpSegmentId();
+
         if (prompt?.campaign?.id) {
             logger.log("The campaign already exists on the ReflectionPrompt so we will update it");
 
             const updateRequest: UpdateCampaignRequest = {
                 settings: campaignSettings,
+                recipients: {
+                    list_id: config.audience_id,
+                    segment_opts: {
+                        saved_segment_id: Number(segmentId),
+                    }
+                },
             };
 
             try {
@@ -542,12 +551,13 @@ export default class PromptContentScheduler {
             }
         }
 
+        // the campaign does not already exist so we will create it
         const campaignRequest: CreateCampaignRequest = {
             type: CampaignType.regular,
             recipients: {
                 list_id: config.audience_id,
                 segment_opts: {
-                    saved_segment_id: Number(config.segment_id_daily_prompt),
+                    saved_segment_id: Number(segmentId),
                 }
             },
             settings: campaignSettings,
@@ -590,5 +600,13 @@ export default class PromptContentScheduler {
         await AdminFlamelinkService.getSharedInstance().updateRaw(promptContent, {updatedBy: this.robotUserId});
         logger.log(chalk.blue(`Saved PromptContent with status ${promptContent.contentStatus}`));
         return;
+    }
+
+    mailchimpSegmentId(): string {
+        if (this.promptContent?.subscriptionTiers?.includes(SubscriptionTier.BASIC)) {
+            return this.config.mailchimp.segment_id_all_tiers;
+        } else {
+            return this.config.mailchimp.segment_id_plus_tier;
+        }
     }
 }

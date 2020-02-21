@@ -154,6 +154,7 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
     const transformed = convertTimestampToDate(data);
+
     const model = new Type();
     const t = Object.assign(model, transformed) as T;
     t.prepareFromFirestore(data);

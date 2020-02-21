@@ -33,7 +33,8 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
     if (config.isEmulator) {
         config.app.environment = "dev";
         config.web.domain = "localhost:8080";
-        config.web.protocol = 'http'
+        config.web.protocol = 'http';
+        // config.stripe.webhook_signing_secrets.main = 'whsec_CQrDcQTFgTr01NtFT4vNI5HawMGX9oHs';
     } else {
         config.web.protocol = 'https'
     }
@@ -63,7 +64,8 @@ const defaultTestConfig: CactusConfig = {
         audience_id: "testing",
         bridge_to_monday_segment_id: "1234",
         non_prompt_campaign_ids: "507974de98",
-        segment_id_daily_prompt: "13942",
+        segment_id_all_tiers: "12345",
+        segment_id_plus_tier: "12345",
         templates: {
             prompt_module_morning: "12345"
         }
@@ -100,7 +102,11 @@ const defaultTestConfig: CactusConfig = {
     },
     stripe: {
         api_key: "test_api_key",
-        secret_key: "test_secret_key"
+        secret_key: "test_secret_key",
+        webhook_signing_secrets: {
+            checkout_session_completed: "test_secret_key",
+            main: "main_test_secret",
+        }
     },
     dynamic_links: {
         domain: "cactus-app-stage.web.app",
@@ -152,7 +158,8 @@ const defaultTestConfig: CactusConfig = {
             magic_link: "1234",
             magic_link_new_user: '1234ra',
             invitation: '1234invite',
-            friend_request: '1234fr'
+            friend_request: '1234fr',
+            trial_ending: '1234te'
         }
     },
     sheets: {

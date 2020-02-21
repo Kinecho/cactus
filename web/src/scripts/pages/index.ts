@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     setupNavigation({
+        showPricing: true,
         stickyNav: true,
         showSignupButton: true,
         largeLogoOnDesktop: true,
@@ -44,12 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
     setupJumpToForm();
 });
 
-new Vue({
-    el: "#premium-pricing",
-    template: `
-        <PremiumPricing/>`,
-    components: {PremiumPricing: PremiumPricing}
-});
+// new Vue({
+//     el: "#premium-pricing",
+//     template: `
+//         <PremiumPricing/>`,
+//     components: {PremiumPricing: PremiumPricing}
+// });
 
 new Vue({
     el: "#app-store",

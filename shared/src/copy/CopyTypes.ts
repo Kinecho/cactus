@@ -1,3 +1,5 @@
+import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+
 export interface PronounCopy {
     YOU: string
 }
@@ -31,6 +33,7 @@ export interface CommonCopy {
     SIGN_UP: string,
     SIGNING_IN: string,
     LOG_IN: string,
+    PRICING: string,
     NEXT: string,
     SUBMIT: string,
     LOG_OUT: string,
@@ -40,14 +43,24 @@ export interface CommonCopy {
     ACCOUNT: string,
     EMAIL: string,
     EMAIL_ADDRESS: string,
+    TIER: string,
     TIME_ZONE: string,
     NOTIFICATIONS: string,
+    SUBSCRIPTION: string,
     REMOVE: string,
     LOADING: string,
     FIRST_NAME: string,
     LAST_NAME: string,
     HOUR: string,
-    MINUTE: string
+    MINUTE: string,
+    DAYS_LEFT: string,
+    DAY_LEFT: string,
+    DAYS_LEFT_IN_TRIAL: string,
+    DAY_LEFT_IN_TRIAL: string,
+    TRIAL_ENDS_TODAY: string,
+    ENDS_TODAY: string,
+    TRIAL: string,
+    LEARN_MORE: string,
 }
 
 export interface ElementCopy {
@@ -69,6 +82,7 @@ export interface AuthenticationCopy {
     CONNECTED_ACCOUNTS: string,
     AN_ANONYMOUS_USER: string,
     SIGN_UP_FREE: string,
+
     magicLinkSuccess(email: string): string;
 
 }
@@ -107,6 +121,23 @@ export interface AccountCopy {
     PERMANENTLY_DELETE_ACCOUNT: string
 }
 
+export interface CheckoutCopy {
+    SIGN_IN_TO_CONTINUE_CHECKOUT: string,
+    UPGRADE: string,
+    CURRENT_PLAN: string,
+    MANAGE_MY_PLAN: string,
+    PURCHASE: string,
+    BILLING_PERIOD: {
+        [key in BillingPeriod]: string
+    },
+    BILLING_PERIOD_PER: {
+        [key in BillingPeriod]: string
+    }
+    TIER_BASIC: string,
+    TIER_PLUS: string,
+    TIER_PREMIUM: string,
+}
+
 export abstract class LocalizedCopy {
     abstract pronouns: PronounCopy;
     abstract prompts: PromptCopy;
@@ -117,6 +148,7 @@ export abstract class LocalizedCopy {
     abstract error: ErrorCopy;
     abstract auth: AuthenticationCopy;
     abstract account: AccountCopy;
+    abstract checkout: CheckoutCopy;
 
     abstract exclamation(input?: string): string;
 }
