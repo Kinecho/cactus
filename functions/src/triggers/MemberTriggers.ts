@@ -11,7 +11,7 @@ import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("MemberTriggers");
 
@@ -84,7 +84,7 @@ export const updateMemberProfileTrigger = functions.firestore
         try {
             //update mailchimp, if needed
             const email = member?.email;
-            const needsNameUpdate = MailchimpService.getSharedInstance().needsUpdate(member);
+            const needsNameUpdate = MailchimpService.getSharedInstance().needsNameUpdate(member);
             const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
 
             const subscriptionTier = member?.subscription?.tier || SubscriptionTier.BASIC;
