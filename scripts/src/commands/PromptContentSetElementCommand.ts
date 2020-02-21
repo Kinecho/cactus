@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import {CactusElement} from "@shared/models/CactusElement";
-import csv from "csvtojson"
+import * as csv from "csvtojson"
 import * as path from "path";
 import helpers from "@scripts/helpers";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
