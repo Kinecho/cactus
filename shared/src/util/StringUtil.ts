@@ -3,6 +3,7 @@ import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
+import {isNumber} from "@shared/util/ObjectUtil";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -231,5 +232,37 @@ export function titleCase(str: string | undefined): string {
         }).join(' ');
     } else {
         return '';
+    }
+}
+
+export const StringTransforms = {
+    stringOrUndefined: (input: string): string | undefined => {
+        return isBlank(input) ? undefined : input;
+    },
+
+    numberOrUndefined: (input: string): number | undefined => {
+        return isNumber(input) ? undefined : Number(input);
+    },
+
+    booleanOrUndefined: (input: string): boolean | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        return input.toLowerCase().startsWith("t");
+    },
+
+    dateOrUndefined: (input: string): Date | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        try {
+            const date = new Date(input);
+
+            return date;
+
+        } catch (error) {
+            return undefined;
+        }
+
     }
 }
