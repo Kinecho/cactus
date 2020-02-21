@@ -155,7 +155,7 @@ export default class StripeWebhookService {
         const pendingSession = await AdminCheckoutSessionService.getSharedInstance().getByStripeSessionId(sessionId);
         if (!pendingSession) {
             logger.error("Failed to process payment, no pending session found for sessionID" + sessionId);
-            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:boom: Failed to process payment, no pending session found for sessionID = \`${sessionId}\`\n\n\`\`\`${JSON.stringify(event, null, 2)}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:boom: Failed to process payment, no pending session found for sessionID = \`${sessionId}\`\n\n\`\`\`${JSON.stringify(session, null, 2)}\`\`\``);
             return {
                 statusCode: 204,
                 body: "No `cactus.pendingSession` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
