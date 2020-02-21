@@ -5,7 +5,7 @@ import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
-import {OperationStatus} from "@shared/mailchimp/models/MailchimpTypes";
+import {OperationStatus, MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -17,7 +17,6 @@ import Stripe from "stripe";
 import {CactusConfig} from "@shared/CactusConfig";
 import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
-import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
 import {
     convertPaymentMethod,
     getInvoiceStatusFromStripeStatus,
