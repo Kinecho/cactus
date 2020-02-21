@@ -88,8 +88,7 @@ export default class AdminSubscriptionService {
         subscription.tier = SubscriptionTier.BASIC;
 
         const [updateSuccess, mailchimpResponse] = await Promise.all([
-            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC}),
-            this.updateMailchimpListMember({member})
+            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC})
         ]);
 
         // notify them by email
