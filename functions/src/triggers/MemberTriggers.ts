@@ -11,6 +11,7 @@ import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 const logger = new Logger("MemberTriggers");
 
@@ -81,13 +82,10 @@ export const updateMemberProfileTrigger = functions.firestore
         }
 
         try {
-            //update mailchimp
-            const mailchimpMember = member.mailchimpListMember;
-            const email = member.email || mailchimpMember?.email_address;
-            if (!email) {
-                return;
-            }
-            if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
+            //update mailchimp, if needed
+            const email = member?.email;
+
+            if (email && MailchimpService.getSharedInstance().needsNameUpdate(member)) {
                 const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
                     email: email,
                     mergeFields: {
@@ -95,7 +93,16 @@ export const updateMemberProfileTrigger = functions.firestore
                         [MergeField.LNAME]: member.lastName || "",
                     }
                 });
-                logger.log("Update mailchimp merge fields response:", mailchimpResponse);
+                logger.log("Update name mailchimp merge fields response:", mailchimpResponse);
+            }
+
+            if (email && MailchimpService.getSharedInstance().needsSubscriptionUpdate(member)) {
+                const subscriptionMergeFieldRequest = AdminSubscriptionService.getSharedInstance().createUpdateMergeFieldRequest(member);
+                
+                if (subscriptionMergeFieldRequest) {
+                    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields(subscriptionMergeFieldRequest);
+                    logger.log("Update subscription mailchimp merge fields response:", mailchimpResponse);
+                }
             }
         } catch (error) {
             logger.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
