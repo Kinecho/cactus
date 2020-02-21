@@ -35,10 +35,11 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
 export interface SubscriptionTrial {
     startedAt: Date,
     endsAt: Date,
-    activatedAt?: Date
+    activatedAt?: Date|null
 }
 
 export interface MemberSubscription {
+    legacyConversion?: boolean
     tier: SubscriptionTier,
     trial?: SubscriptionTrial,
 
@@ -56,6 +57,15 @@ export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): 
     return {
         tier: SubscriptionTier.PLUS,
         trial: getDefaultTrial(trialDays)
+    }
+}
+
+export function getDefaultSubscriptionWithEndDate(endDate: Date): MemberSubscription {
+    const trial = getDefaultTrial();
+    trial.endsAt = endDate;
+    return {
+        tier: SubscriptionTier.PLUS,
+        trial
     }
 }
 
