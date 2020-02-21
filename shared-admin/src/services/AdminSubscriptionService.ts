@@ -67,6 +67,10 @@ export default class AdminSubscriptionService {
     }
 
     async expireTrial(member: CactusMember): Promise<ExpireTrialResult> {
+        if (!member.isInTrial) {
+            return {success: false, error: "Member is not currently in a trial", member};
+        }
+
         const memberId = member.id;
         if (!memberId) {
             return {
