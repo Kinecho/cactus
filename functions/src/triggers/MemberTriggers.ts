@@ -11,7 +11,7 @@ import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import AdminSlackService from "@admin/services/AdminSlackService";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 const logger = new Logger("MemberTriggers");
 
@@ -84,24 +84,24 @@ export const updateMemberProfileTrigger = functions.firestore
         try {
             //update mailchimp, if needed
             const email = member?.email;
+            const subscription = member?.subscription;
             const needsNameUpdate = MailchimpService.getSharedInstance().needsNameUpdate(member);
             const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
 
-            const subscriptionTier = member?.subscription?.tier || SubscriptionTier.BASIC;
-            const isTrialing = member.isInTrial ? "YES" : "NO";
-            const trialDaysLeft = member.daysLeftInTrial;
+            const nameMergeFields = {
+                [MergeField.FNAME]: member.firstName || "",
+                [MergeField.LNAME]: member.lastName || "",
+            };
+
+            const subscriptionMergeFields = AdminSubscriptionService.getSharedInstance().mergeFieldValues(member, subscription);
+
+            const mergeFieldsToUpdate = {...nameMergeFields, ...subscriptionMergeFields};
 
             if (email) {
                 if (needsNameUpdate || needsSubscriptionUpdate) {
                     const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
                         email: email,
-                        mergeFields: {
-                            [MergeField.FNAME]: member.firstName || "",
-                            [MergeField.LNAME]: member.lastName || "",
-                            [MergeField.SUB_TIER]: subscriptionTier,
-                            [MergeField.IN_TRIAL]: isTrialing,
-                            [MergeField.TDAYS_LEFT]: trialDaysLeft,
-                        }
+                        mergeFields: mergeFieldsToUpdate
                     });
                     logger.log("Update mailchimp merge fields response:", mailchimpResponse);    
                 }
