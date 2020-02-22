@@ -341,7 +341,7 @@ export default class AdminUserService {
             })
         }
 
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+        await AdminSlackService.getSharedInstance().sendDeletionMessage({
             text: "",
             attachments,
         });
