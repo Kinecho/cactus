@@ -2,7 +2,7 @@
     <div :class="[`upgradeJournal`, isTrialing ? 'upgrade' : 'basic']">
         <div class="centered" v-if="isTrialing">
             <h3>{{trialDaysLeftHeader}}</h3>
-            <p>After your trial of Cactus Plus, new prompts will only occasionally be sent. Give your reflection
+            <p>After your trial of Cactus Plus, you'll continue to get free prompts, but only occasionally. Give your reflection
                 practice momentum by receiving a fresh prompt, every day.</p>
             <a :href="upgradeRoute" class="btn button primary">Go Plus</a>
         </div>
