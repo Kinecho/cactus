@@ -219,7 +219,7 @@ export const onReflectionResponseCreated = functions.firestore
 
                 fields.push({
                     title: "Subscription",
-                    value: `${member.tierDisplayName()}${daysLeftText}`
+                    value: `${member.tierDisplayName}${daysLeftText}`
                 })
             }
 
