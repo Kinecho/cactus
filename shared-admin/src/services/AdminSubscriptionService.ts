@@ -39,7 +39,7 @@ interface MailchimpSyncSubscriberResult {
 export interface SubscriptionMergeFields {
     [MergeField.SUB_TIER]?: string,
     [MergeField.IN_TRIAL]?: string,
-    [MergeField.TDAYS_LEFT]?: number
+    [MergeField.TDAYS_LEFT]?: number | string
 }
 
 export default class AdminSubscriptionService {
@@ -264,7 +264,7 @@ export default class AdminSubscriptionService {
         const subscription = member.subscription;
         const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
         const isTrialing = member.isInTrial ? "YES" : "NO";
-        const trialDaysLeft = member.daysLeftInTrial;
+        const trialDaysLeft = member.isInTrial ? member.daysLeftInTrial : '';
 
         const mergeFields = {
             [MergeField.SUB_TIER]: subscriptionTier,
