@@ -49,7 +49,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
         resp.sendStatus(500);
         return
     }
-
+    resp.status(200).send(result);
     return;
 });
 
