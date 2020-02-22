@@ -94,7 +94,7 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt.getTime() > Date.now();
 }
 
-export function trialEnded(subscription?: MemberSubscription): boolean {
+export function trialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
     if (!subscription?.trial?.endsAt) {
         return false
     }

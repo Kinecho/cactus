@@ -1,4 +1,4 @@
-import {SubscriptionTrial, trialEnded} from "@shared/models/MemberSubscription";
+import {SubscriptionTrial, trialEndedWithoutActivation} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
@@ -9,7 +9,7 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEnded(subscription)).toBeTruthy();
+        expect(trialEndedWithoutActivation(subscription)).toBeTruthy();
     });
 
     test("Trial activated", () => {
@@ -19,7 +19,7 @@ describe("trialEnded tests", () => {
             activatedAt: DateTime.local().minus({days: 2}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEnded(subscription)).toBeFalsy();
+        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 
     test("Trial not ended", () => {
@@ -28,6 +28,6 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().plus({days: 1}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEnded(subscription)).toBeFalsy();
+        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 })
