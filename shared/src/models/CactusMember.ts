@@ -221,7 +221,7 @@ export default class CactusMember extends BaseModel {
         return isInTrial(this.subscription)
     }
 
-    get isTrialExpired(): boolean {
+    get trialEnded(): boolean {
         return trialEnded(this.subscription)
     }
 
