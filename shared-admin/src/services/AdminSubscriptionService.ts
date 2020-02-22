@@ -264,7 +264,7 @@ export default class AdminSubscriptionService {
         const subscription = member.subscription;
         const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
         const isTrialing = member.isInTrial ? "YES" : "NO";
-        const trialDaysLeft = member.isInTrial ? member.daysLeftInTrial : '';
+        const trialDaysLeft = member.daysLeftInTrial > 0 ? member.daysLeftInTrial : "";
 
         const mergeFields = {
             [MergeField.SUB_TIER]: subscriptionTier,
