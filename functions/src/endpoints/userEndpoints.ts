@@ -48,10 +48,14 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
         resp.status(200).send({success: true});
         return;
     } catch(e) {
-        logger.log("Error");
+        logger.log("Error", e);
         resp.sendStatus(500);
         return
     }
+       
+    // don't expect to ever get here but just in case
+    resp.sendStatus(500);
+    return;
 });
 
 export default app
