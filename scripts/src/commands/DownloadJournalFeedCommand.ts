@@ -18,7 +18,8 @@ import {exec} from "child_process";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 
 interface UserInput {
-    email: string
+    email: string,
+    redactResponses: boolean,
 }
 
 interface JournalEntry {
@@ -42,6 +43,10 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
     feed: JournalEntry[] = [];
     userInput!: UserInput;
 
+    get redactResponses(): boolean {
+        return this.userInput?.redactResponses ?? true
+    }
+
     protected async run(app: admin.app.App, firestoreService: AdminFirestoreService, config: CactusConfig): Promise<void> {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
@@ -50,6 +55,10 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
             name: "email",
             message: "Member Email Address",
             type: "text"
+        }, {
+            name: "redactResponses",
+            message: "Redact user reflections?",
+            type: "confirm"
         }]);
         console.log("Got user input", userInput);
         this.userInput = userInput;
@@ -103,7 +112,6 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
     }
 
     async buildFeed(memberId: string): Promise<JournalEntry[]> {
-
         const responseTask = AdminReflectionResponseService.getSharedInstance().getResponsesForMember(memberId);
         const sentPromptsTask = AdminSentPromptService.getSharedInstance().getAllForCactusMemberId(memberId);
 
@@ -134,7 +142,11 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
                 return previous
             }
             const characterCount = (response.content.text && response.content.text.length) || 0;
-            response.content = {text: `redacted. Original Length was ${characterCount}`};
+
+            if (this.redactResponses) {
+                response.content = {text: `redacted. Original Length was ${characterCount}`};
+            }
+
             const list = previous[promptId] || [];
             list.push(response);
             previous[promptId] = list;
