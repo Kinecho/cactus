@@ -1,7 +1,8 @@
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
 import FlamelinkService, {EntryObserverOptions} from "@web/services/FlamelinkService";
-import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("SubscriptionProductService");
 export default class SubscriptionProductService {
@@ -27,5 +28,10 @@ export default class SubscriptionProductService {
             Type: SubscriptionProduct
         });
         return result.results;
+    }
+
+    async getByTierPeriod(tier: SubscriptionTier, period: BillingPeriod): Promise<SubscriptionProduct | undefined> {
+        const products = await this.getAllForSale();
+        return products.find(product => product.billingPeriod == period && product.subscriptionTier == tier);
     }
 }

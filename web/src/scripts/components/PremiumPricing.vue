@@ -67,7 +67,7 @@
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
-    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
     import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import {isAndroidApp} from '@web/DeviceUtil'
@@ -169,16 +169,15 @@
             },
             async getPreSelectedProduct() {
                 const preSelectedProductEntryId = getQueryParam(QueryParam.SELECTED_PRODUCT);
-                const preSelectedTier = getQueryParam(QueryParam.SELECTED_TIER);
-                const preSelectedPeriod = getQueryParam(QueryParam.SELECTED_PERIOD);
+                const preSelectedTier = SubscriptionTier[getQueryParam(QueryParam.SELECTED_TIER) as keyof typeof SubscriptionTier];
+                const preSelectedPeriod = BillingPeriod[getQueryParam(QueryParam.SELECTED_PERIOD) as keyof typeof BillingPeriod];
 
                 if (preSelectedProductEntryId) {
                     const product = await SubscriptionProductService.sharedInstance.getByEntryId(preSelectedProductEntryId);
-                    logger.log('HELLO')
-                    logger.log(product);
                     return product;
                 } else if (preSelectedTier && preSelectedPeriod) {
-                    // tbd
+                    const product = await SubscriptionProductService.sharedInstance.getByTierPeriod(preSelectedTier, preSelectedPeriod);
+                    return product;
                 }
 
                 return undefined;
