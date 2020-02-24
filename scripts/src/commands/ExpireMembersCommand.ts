@@ -7,7 +7,7 @@ import * as prompts from "prompts";
 import {ExpireMembershipTrialJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
 
 interface UserInput {
-    email: string,
+    email?: string|undefined,
     expireAll: boolean,
 }
 
@@ -33,7 +33,7 @@ export default class ExpireMembersCommand extends FirebaseCommand {
                 name: "email",
                 message: "Email Address",
                 type: (prev: boolean) => prev ? null : "text"
-            }]);
+            }]) as UserInput;
         console.log("Got user input", userInput);
         this.userInput = userInput;
 

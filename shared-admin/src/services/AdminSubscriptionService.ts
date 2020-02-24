@@ -293,10 +293,11 @@ export default class AdminSubscriptionService {
             .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
             .where(CactusMember.Field.subscriptionTrialEndsAt, "<=", AdminFirestoreService.Timestamp.fromDate(new Date()));
 
-        await this.firestoreService.executeBatchedQuery({
+        await this.firestoreService.executeBatchedQuery<CactusMember>({
             query,
             type: CactusMember,
-            ...options,
+            onData: options.onData,
+            batchSize: options.batchSize,
             orderBy: CactusMember.Field.subscriptionTrialEndsAt,
             sortDirection: QuerySortDirection.asc
         })
