@@ -14,7 +14,8 @@
                             :display-index="i"
                             :member="member"
                             :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks"/>
+                            :learnMoreLinks="learnMoreLinks"
+                            :preSelectedProductEntryId="preSelectedProductEntryId" />
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
@@ -41,7 +42,8 @@
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}"/>
+                                :class="{active: activetab === i}"
+                                :preSelectedProductEntryId="preSelectedProductEntryId"/>
                     </template>
                 </div>
             </div>
@@ -89,6 +91,7 @@
             productGroups: SubscriptionProductGroupEntry[],
             productsLoaded: boolean,
             activetab: number,
+            preSelectedProductEntryId: string | undefined
         } {
             return {
                 memberLoaded: false,
@@ -100,6 +103,7 @@
                 activetab: 1,
                 productsLoaded: false,
                 productGroups: [],
+                preSelectedProductEntryId: undefined
             }
         },
         async beforeMount() {
@@ -121,6 +125,12 @@
 
             if (prem) {
                 this.premiumDefault = true;
+            }
+
+            const preSelectedProductEntryId = getQueryParam(QueryParam.SELECTED_PRODUCT);
+
+            if (preSelectedProductEntryId) {
+                this.preSelectedProductEntryId = preSelectedProductEntryId;
             }
         },
         beforeDestroy() {

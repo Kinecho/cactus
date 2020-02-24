@@ -63,6 +63,7 @@
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
+    import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import {stringifyJSON} from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -80,6 +81,7 @@
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
+            preSelectedProductEntryId: String,
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -95,6 +97,14 @@
                 isProcessing: false,
                 checkoutError: undefined,
                 learnMorePath: PageRoute.PAYMENT_PLANS,
+            }
+        },
+        async beforeMount() {
+            if (this.preSelectedProductEntryId) {
+                const product = await SubscriptionProductService.sharedInstance.getByEntryId(this.preSelectedProductEntryId);
+                if (product) {
+                    this.selectedProduct = product;
+                }
             }
         },
         computed: {
