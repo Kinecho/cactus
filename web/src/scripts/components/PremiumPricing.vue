@@ -14,8 +14,7 @@
                             :display-index="i"
                             :member="member"
                             :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks"
-                            :preSelectedProduct="preSelectedProduct" />
+                            :learnMoreLinks="learnMoreLinks" />
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
@@ -42,8 +41,7 @@
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}"
-                                :preSelectedProduct="preSelectedProduct"/>
+                                :class="{active: activetab === i}" />
                     </template>
                 </div>
             </div>
@@ -93,7 +91,6 @@
             productGroups: SubscriptionProductGroupEntry[],
             productsLoaded: boolean,
             activetab: number,
-            preSelectedProduct: SubscriptionProduct | undefined
         } {
             return {
                 memberLoaded: false,
@@ -105,7 +102,6 @@
                 activetab: 1,
                 productsLoaded: false,
                 productGroups: [],
-                preSelectedProduct: undefined
             }
         },
         async beforeMount() {
@@ -128,8 +124,6 @@
             if (prem) {
                 this.premiumDefault = true;
             }
-
-            this.preSelectedProduct = await this.getPreSelectedProduct();
         },
         beforeDestroy() {
 
@@ -166,21 +160,6 @@
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
                 return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
-            },
-            async getPreSelectedProduct() {
-                const preSelectedProductEntryId = getQueryParam(QueryParam.SELECTED_PRODUCT);
-                const preSelectedTier = SubscriptionTier[getQueryParam(QueryParam.SELECTED_TIER) as keyof typeof SubscriptionTier];
-                const preSelectedPeriod = BillingPeriod[getQueryParam(QueryParam.SELECTED_PERIOD) as keyof typeof BillingPeriod];
-
-                if (preSelectedProductEntryId) {
-                    const product = await SubscriptionProductService.sharedInstance.getByEntryId(preSelectedProductEntryId);
-                    return product;
-                } else if (preSelectedTier && preSelectedPeriod) {
-                    const product = await SubscriptionProductService.sharedInstance.getByTierPeriod(preSelectedTier, preSelectedPeriod);
-                    return product;
-                }
-
-                return undefined;
             }
         }
 
