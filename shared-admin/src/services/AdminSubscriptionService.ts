@@ -9,8 +9,7 @@ import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
-import {ApiResponse} from "@shared/api/ApiTypes";
-import {MergeField, OperationStatus, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
+import {OperationStatus, MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -21,6 +20,7 @@ import {PageRoute} from "@shared/PageRoutes";
 import Stripe from "stripe";
 import {CactusConfig} from "@shared/CactusConfig";
 import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
+import {ApiResponse} from "@shared/api/ApiTypes";
 import {
     convertPaymentMethod,
     getInvoiceStatusFromStripeStatus,
@@ -48,6 +48,12 @@ interface MailchimpSyncSubscriberResult {
     totalDuration: number,
     lastCreatedAt?: Date,
     lastMemberId?: string,
+}
+
+export interface SubscriptionMergeFields {
+    [MergeField.SUB_TIER]?: string,
+    [MergeField.IN_TRIAL]?: string,
+    [MergeField.TDAYS_LEFT]?: number | string
 }
 
 export default class AdminSubscriptionService {
@@ -81,6 +87,10 @@ export default class AdminSubscriptionService {
     }
 
     async expireTrial(member: CactusMember): Promise<ExpireTrialResult> {
+        if (!member.trialEnded) {
+            return {success: false, error: "Member does not have an expired trial", member};
+        }
+
         const memberId = member.id;
         if (!memberId) {
             return {
@@ -101,9 +111,8 @@ export default class AdminSubscriptionService {
 
         subscription.tier = SubscriptionTier.BASIC;
 
-        const [updateSuccess, mailchimpResponse] = await Promise.all([
-            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC}),
-            this.updateMailchimpListMember({member})
+        const [updateSuccess] = await Promise.all([
+            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC})
         ]);
 
         // notify them by email
@@ -116,9 +125,9 @@ export default class AdminSubscriptionService {
         }
 
         return {
-            success: updateSuccess && (mailchimpResponse.success ?? false),
+            success: updateSuccess,
             member,
-            error: mailchimpResponse.error || updateSuccess ? undefined : "unable to update the cactus member's subscription tier",
+            error: updateSuccess ? undefined : "unable to update the cactus member's subscription tier",
         }
     }
 
@@ -289,19 +298,30 @@ export default class AdminSubscriptionService {
             return undefined
         }
 
-        const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
-        const isTrialing = member.isInTrial ? "YES" : "NO";
-        const trialDaysLeft = member.daysLeftInTrial;
-
         const mergeFieldRequest: UpdateMergeFieldRequest = {
             email,
-            mergeFields: {
-                [MergeField.SUB_TIER]: subscriptionTier,
-                [MergeField.IN_TRIAL]: isTrialing,
-                [MergeField.TDAYS_LEFT]: trialDaysLeft,
-            }
+            mergeFields: this.mergeFieldValues(member)
         };
         return mergeFieldRequest
+    }
+
+    mergeFieldValues(member?: CactusMember): SubscriptionMergeFields {
+        if (!member || !member.subscription) {
+            return {};
+        }
+
+        const subscription = member.subscription;
+        const subscriptionTier = subscription.tier || SubscriptionTier.BASIC;
+        const isTrialing = member.isInTrial ? "YES" : "NO";
+        const trialDaysLeft = member.daysLeftInTrial > 0 ? member.daysLeftInTrial : "";
+
+        const mergeFields = {
+            [MergeField.SUB_TIER]: subscriptionTier,
+            [MergeField.IN_TRIAL]: isTrialing,
+            [MergeField.TDAYS_LEFT]: trialDaysLeft,    
+        }
+
+        return mergeFields;
     }
 
     async updateMailchimpListMember(options: { memberId?: string, member?: CactusMember }): Promise<ApiResponse> {

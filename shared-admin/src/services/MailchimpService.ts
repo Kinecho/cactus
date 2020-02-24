@@ -55,6 +55,7 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import MailchimpListMember from "@shared/mailchimp/models/MailchimpListMember";
+import CactusMember from "@shared/models/CactusMember";
 import * as md5 from "md5";
 import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import MailchimpSubscriptionResult, {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
@@ -1044,6 +1045,43 @@ export default class MailchimpService {
             } : error);
             return undefined;
         }
+    }
+
+    needsNameUpdate(member: CactusMember): boolean {
+        const mailchimpMember = member.mailchimpListMember;
+        const email = member.email || mailchimpMember?.email_address;
+        if (!email || !member) {
+            return false;
+        }
+
+        if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || 
+            mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
+            return true;
+        }
+
+        return false;
+    }
+
+    needsSubscriptionUpdate(member: CactusMember): boolean {
+        const mailchimpMember = member.mailchimpListMember;
+        const email = member.email || mailchimpMember?.email_address;
+        if (!email || !member) {
+            return false;
+        }
+
+        if (member?.subscription &&
+            mailchimpMember?.merge_fields[MergeField.SUB_TIER] !== member.subscription.tier) {
+            return true;
+        }
+
+        if (member?.subscription?.trial) {
+            if (mailchimpMember?.merge_fields[MergeField.TDAYS_LEFT] !== member.daysLeftInTrial.toString() ||
+                mailchimpMember?.merge_fields[MergeField.IN_TRIAL] !== (member.isInTrial ? 'YES' : 'NO')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 

@@ -33,9 +33,9 @@
                 if (this.member?.daysLeftInTrial) {
                     const days = this.member?.daysLeftInTrial;
                     if (days === 1) {
-                        return 'Free access ends today';
+                        return 'Free access to Plus ends today';
                     } else {
-                        return days + ' days of free access remaining';
+                        return days + ' days left of free Cactus Plus access';
                     }
                 }
                 return '';

@@ -11,6 +11,7 @@ import UserRecord = admin.auth.UserRecord;
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 const logger = new Logger("MemberTriggers");
 
@@ -81,21 +82,28 @@ export const updateMemberProfileTrigger = functions.firestore
         }
 
         try {
-            //update mailchimp
-            const mailchimpMember = member.mailchimpListMember;
-            const email = member.email || mailchimpMember?.email_address;
-            if (!email) {
-                return;
-            }
-            if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
-                const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
-                    email: email,
-                    mergeFields: {
-                        [MergeField.FNAME]: member.firstName || "",
-                        [MergeField.LNAME]: member.lastName || "",
-                    }
-                });
-                logger.log("Update mailchimp merge fields response:", mailchimpResponse);
+            //update mailchimp, if needed
+            const email = member?.email;
+            const needsNameUpdate = MailchimpService.getSharedInstance().needsNameUpdate(member);
+            const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
+
+            const nameMergeFields = {
+                [MergeField.FNAME]: member.firstName || "",
+                [MergeField.LNAME]: member.lastName || "",
+            };
+
+            const subscriptionMergeFields = AdminSubscriptionService.getSharedInstance().mergeFieldValues(member);
+
+            const mergeFieldsToUpdate = {...nameMergeFields, ...subscriptionMergeFields};
+
+            if (email) {
+                if (needsNameUpdate || needsSubscriptionUpdate) {
+                    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
+                        email: email,
+                        mergeFields: mergeFieldsToUpdate
+                    });
+                    logger.log("Update mailchimp merge fields response:", mailchimpResponse);    
+                }
             }
         } catch (error) {
             logger.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
