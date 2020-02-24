@@ -53,10 +53,12 @@
     import Vue from "vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import {isInTrial, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
-    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
     import {startCheckout} from "@web/checkoutService";
+    import {getQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
     import ProductFeatureList from "@components/ProductFeatureList.vue";
     import {ProductGroupFooter, ProductSection, SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import MarkdownText from "@components/MarkdownText.vue";
@@ -79,7 +81,7 @@
             showFeatures: {type: Boolean, default: false},
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
-            learnMoreLinks: {type: Boolean, default: false},
+            learnMoreLinks: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -90,12 +92,15 @@
 
         } {
             return {
-                selectedProduct: this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || this.productGroup.products[0],
+                selectedProduct: this.productGroup.products[0],
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
                 learnMorePath: PageRoute.PAYMENT_PLANS,
             }
+        },
+        beforeMount() {
+            this.selectedProduct = this.getSelectedProduct();
         },
         computed: {
             tierName(): string | undefined {
@@ -155,7 +160,16 @@
             },
             canPurchaseTier(): boolean {
                 return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
-            }
+            },
+            preSelectedProductEntryId(): string | null {
+                return getQueryParam(QueryParam.SELECTED_PRODUCT);
+            },
+            preSelectedProductTier(): string | null {
+                return getQueryParam(QueryParam.SELECTED_TIER);
+            },
+            preSelectedProductBillingPeriod(): string | null {
+                return getQueryParam(QueryParam.SELECTED_PERIOD);
+            },
         },
         methods: {
             formatPrice(priceCents: number): string {
@@ -163,6 +177,23 @@
             },
             isSelected(product: SubscriptionProduct): boolean {
                 return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
+            },
+            getSelectedProduct(): SubscriptionProduct {
+                return this.getPreSelectedProduct() || 
+                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
+                    this.productGroup.products[0];
+            },
+            getPreSelectedProduct(): SubscriptionProduct | undefined {
+                const tier = SubscriptionTier[this.preSelectedProductTier as keyof typeof SubscriptionTier];
+                const period = BillingPeriod[this.preSelectedProductBillingPeriod as keyof typeof BillingPeriod];
+
+                if (this.preSelectedProductEntryId) {
+                    return this.productGroup.products.find(product => product.entryId == this.preSelectedProductEntryId);
+                } else if (tier && period) {
+                    return this.productGroup.products.find(product => product.billingPeriod == period && product.subscriptionTier == tier);
+                }
+
+                return undefined;
             },
             async checkout() {
                 //todo

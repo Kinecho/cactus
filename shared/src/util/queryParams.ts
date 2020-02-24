@@ -27,6 +27,9 @@ export enum QueryParam {
     UNSUBSCRIBE_SUCCESS = "unsub_success",
     ALREADY_UNSUBSCRIBED = "is_unsubbed",
     PREMIUM_DEFAULT = 'prem',
+    SELECTED_PRODUCT = 'productId',
+    SELECTED_TIER = "tier",
+    SELECTED_PERIOD = "period",
     SOURCE_APP = "source-app",
     USE_PROMPT_ID = "prompt",
     UPGRADE_SUCCESS = "upgrade"
