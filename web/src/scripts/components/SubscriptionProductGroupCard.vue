@@ -63,7 +63,6 @@
     import {PageRoute} from "@shared/PageRoutes";
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
-    import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import {stringifyJSON} from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
@@ -81,10 +80,9 @@
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
-            preSelectedProductEntryId: String,
+            preSelectedProduct: {type: Object as () => SubscriptionProduct | undefined},
         },
         data(): {
-            selectedProduct: SubscriptionProduct,
             copy: LocalizedCopy,
             isProcessing: boolean,
             checkoutError: string | undefined,
@@ -92,19 +90,10 @@
 
         } {
             return {
-                selectedProduct: this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || this.productGroup.products[0],
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
                 learnMorePath: PageRoute.PAYMENT_PLANS,
-            }
-        },
-        async beforeMount() {
-            if (this.preSelectedProductEntryId) {
-                const product = await SubscriptionProductService.sharedInstance.getByEntryId(this.preSelectedProductEntryId);
-                if (product) {
-                    this.selectedProduct = product;
-                }
             }
         },
         computed: {
@@ -165,6 +154,11 @@
             },
             canPurchaseTier(): boolean {
                 return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
+            },
+            selectedProduct(): SubscriptionProduct {
+                return this.preSelectedProduct || 
+                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
+                    this.productGroup.products[0];
             }
         },
         methods: {

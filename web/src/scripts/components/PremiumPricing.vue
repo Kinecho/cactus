@@ -15,7 +15,7 @@
                             :member="member"
                             :class="[`tabPanel`, {active: activetab === i}]"
                             :learnMoreLinks="learnMoreLinks"
-                            :preSelectedProductEntryId="preSelectedProductEntryId" />
+                            :preSelectedProduct="preSelectedProduct" />
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
@@ -43,7 +43,7 @@
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
                                 :class="{active: activetab === i}"
-                                :preSelectedProductEntryId="preSelectedProductEntryId"/>
+                                :preSelectedProduct="preSelectedProduct"/>
                     </template>
                 </div>
             </div>
@@ -67,6 +67,8 @@
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
+    import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+    import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import {isAndroidApp} from '@web/DeviceUtil'
 
@@ -91,7 +93,7 @@
             productGroups: SubscriptionProductGroupEntry[],
             productsLoaded: boolean,
             activetab: number,
-            preSelectedProductEntryId: string | undefined
+            preSelectedProduct: SubscriptionProduct | undefined
         } {
             return {
                 memberLoaded: false,
@@ -103,7 +105,7 @@
                 activetab: 1,
                 productsLoaded: false,
                 productGroups: [],
-                preSelectedProductEntryId: undefined
+                preSelectedProduct: undefined
             }
         },
         async beforeMount() {
@@ -127,11 +129,7 @@
                 this.premiumDefault = true;
             }
 
-            const preSelectedProductEntryId = getQueryParam(QueryParam.SELECTED_PRODUCT);
-
-            if (preSelectedProductEntryId) {
-                this.preSelectedProductEntryId = preSelectedProductEntryId;
-            }
+            this.preSelectedProduct = await this.getPreSelectedProduct();
         },
         beforeDestroy() {
 
@@ -169,6 +167,22 @@
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
                 return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
             },
+            async getPreSelectedProduct() {
+                const preSelectedProductEntryId = getQueryParam(QueryParam.SELECTED_PRODUCT);
+                const preSelectedTier = getQueryParam(QueryParam.SELECTED_TIER);
+                const preSelectedPeriod = getQueryParam(QueryParam.SELECTED_PERIOD);
+
+                if (preSelectedProductEntryId) {
+                    const product = await SubscriptionProductService.sharedInstance.getByEntryId(preSelectedProductEntryId);
+                    logger.log('HELLO')
+                    logger.log(product);
+                    return product;
+                } else if (preSelectedTier && preSelectedPeriod) {
+                    // tbd
+                }
+
+                return undefined;
+            }
         }
 
     })
