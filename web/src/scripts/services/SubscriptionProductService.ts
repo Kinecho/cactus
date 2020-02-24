@@ -29,9 +29,4 @@ export default class SubscriptionProductService {
         });
         return result.results;
     }
-
-    async getByTierPeriod(tier: SubscriptionTier, period: BillingPeriod): Promise<SubscriptionProduct | undefined> {
-        const products = await this.getAllForSale();
-        return products.find(product => product.billingPeriod == period && product.subscriptionTier == tier);
-    }
 }
