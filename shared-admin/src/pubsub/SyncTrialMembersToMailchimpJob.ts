@@ -48,7 +48,7 @@ export async function onPublish(message: Message, context: functions.EventContex
         };
 
         nextJobId = await submitJob(nextJob);
-        logger.info("Submitted job with ID ", jobId);
+        logger.info("Submitted job with ID ", nextJobId);
     }
 
     const slackContent = {
