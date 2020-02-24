@@ -1,8 +1,7 @@
 import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
 import FlamelinkService, {EntryObserverOptions} from "@web/services/FlamelinkService";
-import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("SubscriptionProductService");
 export default class SubscriptionProductService {
