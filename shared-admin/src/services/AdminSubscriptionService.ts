@@ -202,7 +202,6 @@ export default class AdminSubscriptionService {
 
             result.numSuccessUpdates += batchAgg.success;
             result.numFailedUpdates += batchAgg.failed;
-            result.membersProcessed += batchAgg.total;
             this.logger.info("successful operations in batches: ", result.numSuccessUpdates);
             this.logger.info("failed operations: ", result.numFailedUpdates);
             const jobEnd = Date.now();
