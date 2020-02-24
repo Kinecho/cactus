@@ -83,6 +83,7 @@
             preSelectedProduct: {type: Object as () => SubscriptionProduct | undefined},
         },
         data(): {
+            selectedProduct: SubscriptionProduct,
             copy: LocalizedCopy,
             isProcessing: boolean,
             checkoutError: string | undefined,
@@ -90,6 +91,7 @@
 
         } {
             return {
+                selectedProduct: this.getSelectedProduct(),
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
@@ -154,13 +156,13 @@
             },
             canPurchaseTier(): boolean {
                 return (!this.isCurrentTier || this.isTrialingTier) && (!this.signedIn || this.productGroup.tier !== SubscriptionTier.BASIC)
-            },
-            selectedProduct(): SubscriptionProduct {
-                return this.preSelectedProduct || 
-                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
-                    this.productGroup.products[0];
             }
         },
+        watch: {
+            preSelectedProduct() {
+                this.selectedProduct = this.getSelectedProduct();
+            }
+        }
         methods: {
             formatPrice(priceCents: number): string {
                 return `$${(priceCents / 100).toFixed(2)}`.replace(".00", "");
@@ -168,6 +170,11 @@
             isSelected(product: SubscriptionProduct): boolean {
                 return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
             },
+            getSelectedProduct(): SubscriptionProduct {
+                return this.preSelectedProduct || 
+                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
+                    this.productGroup.products[0];
+            }
             async checkout() {
                 //todo
                 this.isProcessing = true;
