@@ -14,7 +14,7 @@
                             :display-index="i"
                             :member="member"
                             :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks"/>
+                            :learnMoreLinks="learnMoreLinks" />
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
@@ -41,7 +41,7 @@
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}"/>
+                                :class="{active: activetab === i}" />
                     </template>
                 </div>
             </div>
@@ -158,7 +158,7 @@
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
                 return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
-            },
+            }
         }
 
     })
