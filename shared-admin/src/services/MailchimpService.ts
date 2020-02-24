@@ -458,14 +458,17 @@ export default class MailchimpService {
                 }
             });
 
+
             const job: BatchOperationsRequest = {
                 operations,
             };
             return this.submitBatchJob(job);
         });
-        logger.info(`bulkUpdateMergeFields: Submitted ${batchTasks.length}`);
 
-        return Promise.all(batchTasks);
+        const results = Promise.all(batchTasks);
+        logger.info(`bulkUpdateMergeFields: Submitted ${mergeRequests.length} mailchimp merge field updates requests in ${batchTasks.length} batch call`);
+
+        return results;
     }
 
     async bulkUpdateTags(tagRequests: UpdateTagsRequest[]): Promise<BatchCreateResponse> {
@@ -517,9 +520,9 @@ export default class MailchimpService {
             while (status !== OperationStatus.finished || (checkCount * checkInterval) > timeoutLimit) {
                 await new Promise((innerResolve) => {
                     setTimeout(async () => {
-                        logger.log("Checking for batch status");
+                        // logger.log("Checking for batch status");
                         completedBatch = await MailchimpService.getSharedInstance().getBatchStatus(batchResponse);
-                        logger.log("Batch status check returned status", completedBatch.status);
+                        // logger.log("Batch status check returned status", completedBatch.status);
                         checkCount++;
                         status = completedBatch.status;
                         innerResolve();
@@ -1054,7 +1057,7 @@ export default class MailchimpService {
             return false;
         }
 
-        if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || 
+        if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName ||
             mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
             return true;
         }

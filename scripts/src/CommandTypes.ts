@@ -67,7 +67,6 @@ export abstract class FirebaseCommand implements Command {
         console.log("initializing all services");
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
-
         console.group(chalk.yellow(`${this.name} Logs:`));
 
         await this.run(app, firestoreService, config);

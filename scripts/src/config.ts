@@ -52,13 +52,20 @@ export async function getAdmin(project: Project, opts: ConfigOptions = DefaultOp
     return app;
 }
 
+export async function getAdminCredential(project: Project): Promise<admin.credential.Credential|undefined> {
+    // let funcConfig = functions.config();
+    const serviceAccount = await import(`${helpers.projectRoot}/applicationCredentials_${project}`);
+    return admin.credential.cert(serviceAccount);
+}
+
 async function getAdminConfig(project: Project, opts: ConfigOptions = DefaultOptions) {
     const config = await firebaseTools.setup.web({project: project});
     if (opts && opts.useAdmin) {
         try {
             // let funcConfig = functions.config();
-            const serviceAccount = await import(`${helpers.projectRoot}/applicationCredentials_${project}`);
-            const credential = admin.credential.cert(serviceAccount);
+            // const serviceAccount = await import(`${helpers.projectRoot}/applicationCredentials_${project}`);
+            // const credential = admin.credential.cert(serviceAccount);
+            const credential = await getAdminCredential(project);
             config.credential = credential;
         } catch (e) {
             console.error(e);
