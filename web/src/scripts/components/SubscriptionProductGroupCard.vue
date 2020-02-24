@@ -91,12 +91,15 @@
 
         } {
             return {
-                selectedProduct: this.getSelectedProduct(),
+                selectedProduct: this.productGroup.products[0],
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
                 learnMorePath: PageRoute.PAYMENT_PLANS,
             }
+        },
+        beforeMount() {
+            this.selectedProduct = this.getSelectedProduct();
         },
         computed: {
             tierName(): string | undefined {
@@ -162,7 +165,7 @@
             preSelectedProduct() {
                 this.selectedProduct = this.getSelectedProduct();
             }
-        }
+        },
         methods: {
             formatPrice(priceCents: number): string {
                 return `$${(priceCents / 100).toFixed(2)}`.replace(".00", "");
@@ -174,7 +177,7 @@
                 return this.preSelectedProduct || 
                     this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
                     this.productGroup.products[0];
-            }
+            },
             async checkout() {
                 //todo
                 this.isProcessing = true;
