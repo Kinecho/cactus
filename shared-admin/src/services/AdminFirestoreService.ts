@@ -14,7 +14,7 @@ export import Transaction = firebaseAdmin.firestore.Transaction;
 export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 
-export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
+export type QueryCursor = string | number | DocumentSnapshot | Timestamp | any;
 
 const logger = new Logger("AdminFirestoreService");
 

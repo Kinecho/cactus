@@ -458,14 +458,17 @@ export default class MailchimpService {
                 }
             });
 
+
             const job: BatchOperationsRequest = {
                 operations,
             };
             return this.submitBatchJob(job);
         });
-        logger.info(`bulkUpdateMergeFields: Submitted ${batchTasks.length}`);
 
-        return Promise.all(batchTasks);
+        const results = Promise.all(batchTasks);
+        logger.info(`bulkUpdateMergeFields: Submitted ${mergeRequests.length} mailchimp merge field updates requests in ${batchTasks.length} batch call`);
+
+        return results;
     }
 
     async bulkUpdateTags(tagRequests: UpdateTagsRequest[]): Promise<BatchCreateResponse> {
@@ -1054,7 +1057,7 @@ export default class MailchimpService {
             return false;
         }
 
-        if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || 
+        if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName ||
             mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
             return true;
         }

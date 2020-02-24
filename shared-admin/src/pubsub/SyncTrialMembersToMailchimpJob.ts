@@ -39,24 +39,15 @@ export async function onPublish(message: Message, context: functions.EventContex
     }
 
     const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch(job);
-
-    let nextJob: SyncTrialMembersToMailchimpJob | undefined;
     let nextJobId: string | undefined;
+    const nextJob = AdminSubscriptionService.getSharedInstance().buildNextMailchimpSyncJob(result, job);
 
-    if (result.lastMemberId) {
-        nextJob = {
-            lastMemberId: result.lastMemberId,
-            lastCreatedAtMs: result.lastCreatedAt?.getTime(),
-            batchNumber: (job.batchNumber || 0) + 1,
-            batchSize: job.batchSize
-        };
-
+    if (nextJob) {
         nextJobId = await submitJob(nextJob);
         logger.info("Submitted job with ID ", nextJobId);
     }
 
     const slackContent = {
-        batchSize,
         result,
         nextJob,
         nextJobMessageId: nextJobId

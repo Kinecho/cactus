@@ -4,7 +4,7 @@ import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import * as prompts from "prompts";
-import {submitJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 export default class SyncTrialToMailchimp extends FirebaseCommand {
     name = "Sync Trial To Mailchimp";
@@ -15,20 +15,23 @@ export default class SyncTrialToMailchimp extends FirebaseCommand {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
 
-        return new Promise(async resolve => {
-            await this.doit();
-        })
+        await this.doit();
 
-
-        // return;
+        return;
     }
 
     async doit(): Promise<void> {
-
-        const job = {batchNumber: 0, batchSize: 2};
-        await submitJob(job);
-        // const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch(job);
-        // console.log(chalk.blue(stringifyJSON(result, 2)));
+        const {batchSize} = await prompts({type: "number", message: "batch size", name: "batchSize"});
+        const job = {batchNumber: 0, batchSize};
+        let result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch(job);
+        console.log("First job finished. Result", JSON.stringify(result, null, 2));
+        let nextJob = AdminSubscriptionService.getSharedInstance().buildNextMailchimpSyncJob(result, job);
+        while (nextJob) {
+            console.log("Submitting next job", JSON.stringify(nextJob, null, 2));
+            result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch(nextJob);
+            nextJob = AdminSubscriptionService.getSharedInstance().buildNextMailchimpSyncJob(result, nextJob)
+        }
+        console.log("done with jobs");
 
         const {again} = await prompts({
             message: "Run it again?",
