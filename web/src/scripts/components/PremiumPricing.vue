@@ -65,8 +65,6 @@
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
-    import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
-    import SubscriptionProductService from "@web/services/SubscriptionProductService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import {isAndroidApp} from '@web/DeviceUtil'
 
