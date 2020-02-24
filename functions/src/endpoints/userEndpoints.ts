@@ -5,6 +5,7 @@ import AdminUserService from "@admin/services/AdminUserService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import {DeleteUserRequest} from "@shared/api/UserEndpointTypes";
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("userEndpoints");
@@ -41,16 +42,16 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
     }
 
     logger.log('Permanently deleting user... ', user.id);
-    const result = await AdminUserService.getSharedInstance().deleteAllDataPermanently({ email: user.email });
-    logger.log('Delete results ', result);
-
-    if (!result?.success) {
+    try {
+        await admin.auth().deleteUser(user.id);
+        logger.log('Deleted!');
+        resp.status(200).send({success: true});
+        return;
+    } catch(e) {
         logger.log("Error");
         resp.sendStatus(500);
         return
     }
-    resp.status(200).send(result);
-    return;
 });
 
 export default app
