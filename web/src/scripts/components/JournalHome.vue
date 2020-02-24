@@ -1,7 +1,7 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
-        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
         <snackbar-content
             class="upgrade-confirmation"
             v-if="upgradeConfirmed"
@@ -25,7 +25,7 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && dataHasLoaded" :key="'empty'">
+                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
                         <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
@@ -191,7 +191,7 @@
                             this.todayLoaded = true;
                         }
 
-                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial){
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial) {
                             this.showUpgradeCard = true;
                         }
                     }
@@ -293,6 +293,12 @@
             upgradeConfirmed(): boolean {
                 const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
                 return upgradeQueryParam === 'success';
+            },
+            showOnboardingPrompt(): boolean {
+                return (this.loggedIn && 
+                    this.loginReady && 
+                    this.dataHasLoaded && 
+                    this.journalEntries.length === 0)
             }
         }
     })
