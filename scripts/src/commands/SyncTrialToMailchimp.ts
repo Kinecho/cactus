@@ -3,10 +3,8 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import * as admin from "firebase-admin";
 import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
-import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
-import chalk from "chalk";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
 import * as prompts from "prompts";
+import {submitJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 
 export default class SyncTrialToMailchimp extends FirebaseCommand {
     name = "Sync Trial To Mailchimp";
@@ -17,15 +15,20 @@ export default class SyncTrialToMailchimp extends FirebaseCommand {
         const project = this.project || Project.STAGE;
         console.log("Using project", project);
 
+        return new Promise(async resolve => {
+            await this.doit();
+        })
 
-        await this.doit();
 
-        return;
+        // return;
     }
 
     async doit(): Promise<void> {
-        const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch({batchNumber: 0, batchSize: 2});
-        console.log(chalk.blue(stringifyJSON(result, 2)));
+
+        const job = {batchNumber: 0, batchSize: 2};
+        await submitJob(job);
+        // const result = await AdminSubscriptionService.getSharedInstance().syncTrialingMemberWithMailchimpBatch(job);
+        // console.log(chalk.blue(stringifyJSON(result, 2)));
 
         const {again} = await prompts({
             message: "Run it again?",
@@ -35,9 +38,9 @@ export default class SyncTrialToMailchimp extends FirebaseCommand {
 
         if (again) {
             await this.doit();
-            return;
+            // return;
         }
-        return Promise.resolve();
+        // return Promise.resolve();
     }
 
 }

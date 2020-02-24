@@ -240,7 +240,8 @@ export default class AdminSubscriptionService {
         const endDate = new Date();
         let query = this.firestoreService.getCollectionRef(Collection.members)
             .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
-            .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate));
+            .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate))
+            .orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
 
         if (options.lastMemberId) {
             const memberSnapshot = await this.firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
@@ -257,7 +258,6 @@ export default class AdminSubscriptionService {
             query = query.limit(options.limit);
         }
 
-        query = query.orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
 
         const result = await this.firestoreService.executeQuery(query, CactusMember, options);
         return result.results;
@@ -318,7 +318,7 @@ export default class AdminSubscriptionService {
         const mergeFields = {
             [MergeField.SUB_TIER]: subscriptionTier,
             [MergeField.IN_TRIAL]: isTrialing,
-            [MergeField.TDAYS_LEFT]: trialDaysLeft,    
+            [MergeField.TDAYS_LEFT]: trialDaysLeft,
         }
 
         return mergeFields;

@@ -29,6 +29,7 @@ import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionSer
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import {PubSubService} from "@admin/pubsub/PubSubService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -38,6 +39,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Firestore
     AdminFirestoreService.initialize(app, config);
+
+    //PubSub
+    PubSubService.initialize(config);
 
     //model services
     AdminSendgridService.initialize(config);

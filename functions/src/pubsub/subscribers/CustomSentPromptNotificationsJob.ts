@@ -11,7 +11,7 @@ import {isSendTimeWindow} from "@shared/util/NotificationUtil";
 import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import {convertDateToSendTimeUTC, getSendTimeUTC} from "@shared/util/DateUtil";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("CustomSentPromptNotificationsJob");
@@ -147,7 +147,14 @@ export async function runCustomNotificationJob(job: CustomNotificationJob): Prom
     const trimmedResult = {...result};
     delete trimmedResult.memberResults;
     const endJobTime = (new Date()).getTime();
-    await AdminSlackService.getSharedInstance().sendDataLogMessage(`:calling: Custom Sent Prompt Notification Job finished in ${endJobTime - jobStartTime}ms. results \n\`\`\`${JSON.stringify(trimmedResult, null, 2)}\`\`\``);
+    await AdminSlackService.getSharedInstance().uploadTextSnippet({
+        message: `:calling: Custom Sent Prompt Notification Job finished in ${endJobTime - jobStartTime}ms.`,
+        data: `${JSON.stringify(trimmedResult, null, 2)}`,
+        title: `Custom Send Time for h${sendTimeUTC.hour} m${sendTimeUTC.minute}`,
+        filename: `custom-sent-prompt-${sendTimeUTC.hour}-${sendTimeUTC.minute}.json`,
+        fileType: "json",
+        channel: ChannelName.data_log,
+    });
     return result;
 }
 
