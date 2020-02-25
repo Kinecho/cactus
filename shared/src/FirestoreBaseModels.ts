@@ -19,6 +19,7 @@ export enum Collection {
     flamelink_content = "fl_content",
     checkoutSessions = "checkoutSessions",
     payments = "payments",
+    emailLogs = "emailLogs",
 }
 
 export interface FirestoreIdentifiable {

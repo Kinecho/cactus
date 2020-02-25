@@ -1,3 +1,5 @@
+import {SendgridTemplate} from "@shared/models/EmailLog";
+
 export interface ServiceAccountCredentials {
     project_id: string,
     token_uri: string,
@@ -12,12 +14,13 @@ export interface ServiceAccountCredentials {
 }
 
 export type EnvironmentType = "test" | "dev" | "prod" | "stage"
+export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
 
 export interface CactusConfig {
     isEmulator: boolean,
-    allowedOrigins: (string|RegExp)[],
+    allowedOrigins: (string | RegExp)[],
     app: {
-        serverName: string|undefined
+        serverName: string | undefined
         environment: EnvironmentType
     },
     mailchimp: {
@@ -90,13 +93,7 @@ export interface CactusConfig {
     },
     sendgrid: {
         api_key: string,
-        template_ids: {
-            magic_link: string,
-            magic_link_new_user: string,
-            invitation: string,
-            friend_request: string,
-            trial_ending: string
-        }
+        template_ids: SendgridTemplateConfig,
     },
     sheets: {
         client_id: string,

@@ -173,3 +173,25 @@ export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' |
 
 export type QueryWhere = [string, WhereFilterOp, any];
 export type QueryWhereClauses = QueryWhere[];
+
+export function removeDuplicates<T extends BaseModel>(models: T[]): T[] {
+    const map: { [id: string]: T } = {};
+
+    models.reduce((agg, model) => {
+        const id = model.id;
+        if (!id) {
+            return agg;
+        }
+        if (!agg[id]) {
+            agg[id] = model;
+        }
+        return agg;
+    }, map);
+
+    return Object.values(map);
+}
+
+export function flattenUnique<T extends BaseModel>(nestedModels: T[][]): T[] {
+    const flat = ([] as T[]).concat(...nestedModels);
+    return removeDuplicates(flat);
+}

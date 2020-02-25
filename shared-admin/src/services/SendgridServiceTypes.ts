@@ -21,6 +21,7 @@ export interface FriendRequestEmail {
 
 export interface TrialEndingEmail {
     toEmail: string,
+    memberId?: string,
     link: string,
     firstName: string | undefined
 }

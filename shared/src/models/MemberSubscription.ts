@@ -97,8 +97,14 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt > new Date();
 }
 
+/**
+ * Check if this subscription is in a premium status with an expired trial that has not been activated
+ * @param {MemberSubscription} subscription
+ * @return {boolean}
+ */
 export function trialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
-    if (!subscription?.trial?.endsAt) {
+    const tier = subscription?.tier;
+    if (!subscription?.trial?.endsAt || !tier || !PremiumSubscriptionTiers.includes(tier)) {
         return false
     }
     return !subscription?.trial?.activatedAt && subscription?.trial?.endsAt.getTime() < Date.now();

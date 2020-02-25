@@ -6,7 +6,7 @@ import AdminFirestoreService, {
 import CactusMember from "@shared/models/CactusMember";
 import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService, {GetMembersBatchOptions} from "@admin/services/AdminCactusMemberService";
-import AdminSendgridService from "@admin/services/AdminSendgridService";
+import AdminSendgridService, {SendEmailResult} from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
@@ -31,7 +31,8 @@ import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMa
 export interface ExpireTrialResult {
     member: CactusMember,
     success: boolean,
-    error?: string
+    error?: string,
+    emailSendResult?: SendEmailResult,
 }
 
 export interface ExpireMembersJob extends MemberBatchJob {
@@ -122,19 +123,22 @@ export default class AdminSubscriptionService {
         ]);
 
 
-        //TODO: Should we put this in a trigger, or should we otherwise figure out how to bulk send this?
-        // notify them by email
+        let emailSendResult: SendEmailResult | undefined;
+        //Note; the AdminSendgridService manages the logic for preventing duplicate sends.
         if (member?.email) {
-            await AdminSendgridService.getSharedInstance().sendTrialEnding({
+            emailSendResult = await AdminSendgridService.getSharedInstance().sendTrialEnding({
                 toEmail: member.email,
+                memberId: member.id,
                 firstName: member?.firstName,
                 link: `${getHostname()}${PageRoute.PAYMENT_PLANS}`
             });
+            this.logger.info(`Email send result... did send = ${emailSendResult.didSend}`);
         }
 
         return {
             success: updateSuccess,
             member,
+            emailSendResult,
             error: updateSuccess ? undefined : "unable to update the cactus member's subscription tier",
         }
     }
