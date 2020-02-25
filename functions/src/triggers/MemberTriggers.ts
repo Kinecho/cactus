@@ -20,7 +20,7 @@ const logger = new Logger("MemberTriggers");
  * Ensure a member's subscription info is correct
  */
 export const updateSubscriptionDetailsTrigger = functions.firestore
-    .document(`${Collection.members}/{memberId`)
+    .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change) => {
         if (!change.after) {
             logger.info("no \"after\" was found on the change. not doing anything");
@@ -58,7 +58,7 @@ export const updateSubscriptionDetailsTrigger = functions.firestore
 
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
-    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+    .onWrite(async (change, context: functions.EventContext) => {
         logger.log("Starting update prompt send time trigger");
         const afterSnapshot = change.after;
         if (!afterSnapshot) {
