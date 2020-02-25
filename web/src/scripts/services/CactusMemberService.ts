@@ -5,7 +5,6 @@ import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
 import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
 import Logger from "@shared/Logger";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {Config} from "@web/config";
 
 const logger = new Logger("CactusMemberService");
 

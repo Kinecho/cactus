@@ -69,6 +69,7 @@ export enum Field {
     subscriptionTier = "subscription.tier",
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
+    subscriptionActivated = "subscription.activated",
 }
 
 export interface PromptSendTime {
@@ -221,7 +222,7 @@ export default class CactusMember extends BaseModel {
         return isInTrial(this.subscription)
     }
 
-    get trialEnded(): boolean {
+    get trialEndedWithoutActivation(): boolean {
         return trialEndedWithoutActivation(this.subscription)
     }
 

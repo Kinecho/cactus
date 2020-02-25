@@ -95,7 +95,7 @@ export default class AdminFirestoreService {
         this.config = config;
     }
 
-    getCollectionRef(collectionName: Collection): CollectionReference {
+    getCollectionRef(collectionName: Collection) {
         return this.firestore.collection(collectionName);
     }
 

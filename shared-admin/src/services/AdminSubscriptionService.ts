@@ -1,12 +1,11 @@
 import AdminFirestoreService, {
     CollectionReference,
     GetBatchOptions,
-    QueryOptions,
     Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
 import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
-import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminCactusMemberService, {GetMembersBatchOptions} from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/MailchimpTypes";
@@ -29,16 +28,22 @@ import {
 } from "@admin/util/AdminStripeUtils";
 import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 
-export interface GetMembersInTrialOptions extends QueryOptions {
-    lastMemberId?: string,
-    lastCreatedAtMs?: number,
-    limit?: number,
-}
-
 export interface ExpireTrialResult {
     member: CactusMember,
     success: boolean,
     error?: string
+}
+
+export interface ExpireMembersJob extends MemberBatchJob {
+    lastTrialEndsAt?: number
+}
+
+export const DEFAULT_JOB_BATCH_SIZE = 500;
+
+export interface MemberBatchJob {
+    lastMemberId?: string,
+    batchSize: number,
+    batchNumber: number,
 }
 
 interface MailchimpSyncSubscriberResult {
@@ -46,7 +51,7 @@ interface MailchimpSyncSubscriberResult {
     numSuccessUpdates: number,
     numFailedUpdates: number,
     totalDuration: number,
-    lastCreatedAt?: Date,
+    lastTrialEndsAt?: Date,
     batchSize?: number,
     lastMemberId?: string,
 }
@@ -88,7 +93,7 @@ export default class AdminSubscriptionService {
     }
 
     async expireTrial(member: CactusMember): Promise<ExpireTrialResult> {
-        if (!member.trialEnded) {
+        if (!member.trialEndedWithoutActivation) {
             return {success: false, error: "Member does not have an expired trial", member};
         }
 
@@ -113,9 +118,11 @@ export default class AdminSubscriptionService {
         subscription.tier = SubscriptionTier.BASIC;
 
         const [updateSuccess] = await Promise.all([
-            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC})
+            this.saveSubscriptionTier({memberId, tier: SubscriptionTier.BASIC, isActivated: false})
         ]);
 
+
+        //TODO: Should we put this in a trigger, or should we otherwise figure out how to bulk send this?
         // notify them by email
         if (member?.email) {
             await AdminSendgridService.getSharedInstance().sendTrialEnding({
@@ -149,9 +156,9 @@ export default class AdminSubscriptionService {
         if (result.lastMemberId) {
             return {
                 lastMemberId: result.lastMemberId,
-                lastCreatedAtMs: result.lastCreatedAt?.getTime(),
-                batchNumber: (previousJob?.batchNumber || 0) + 1,
-                batchSize: previousJob?.batchSize
+                lastTrialEndedMs: result.lastTrialEndsAt?.getTime(),
+                batchNumber: (previousJob?.batchNumber ?? 0) + 1,
+                batchSize: previousJob?.batchSize ?? DEFAULT_JOB_BATCH_SIZE
             };
 
             // nextJobId = await submitJob(nextJob);
@@ -164,11 +171,7 @@ export default class AdminSubscriptionService {
         const batchNumber = job.batchNumber;
         this.logger.info(`syncTrialingMemberWithMailchimpBatch: Starting batch ${batchNumber}`);
 
-        const members = await this.getMembersInTrial({
-            lastMemberId: job.lastMemberId,
-            lastCreatedAtMs: job.lastCreatedAtMs,
-            limit: job.batchSize,
-        });
+        const members = await this.getMembersInTrial(job);
 
         this.logger.info(`Processing ${members.length} members in batch #${job.batchNumber}`);
 
@@ -210,7 +213,7 @@ export default class AdminSubscriptionService {
         if (members.length > 0) {
             const lastMember = members[members.length - 1];
             result.lastMemberId = lastMember.id;
-            result.lastCreatedAt = lastMember.createdAt;
+            result.lastTrialEndsAt = lastMember.subscription?.trial?.endsAt;
         }
 
         return result;
@@ -221,11 +224,14 @@ export default class AdminSubscriptionService {
      * @param {{memberId: string, tier: SubscriptionTier}} options
      * @return {Promise<boolean>} true if the operation was successful
      */
-    async saveSubscriptionTier(options: { memberId: string, tier: SubscriptionTier }): Promise<boolean> {
-        const {memberId, tier} = options;
+    async saveSubscriptionTier(options: { memberId: string, tier: SubscriptionTier, isActivated: boolean }): Promise<boolean> {
+        const {memberId, tier, isActivated} = options;
         try {
             const ref = this.membersCollection.doc(memberId);
-            await ref.update({[CactusMember.Field.subscriptionTier]: tier});
+            await ref.update({
+                [CactusMember.Field.subscriptionTier]: tier,
+                [CactusMember.Field.subscriptionActivated]: isActivated,
+            });
             return true;
         } catch (error) {
             this.logger.error("Unable to set the subscription tier on member " + memberId, error);
@@ -252,45 +258,76 @@ export default class AdminSubscriptionService {
 
     /**
      * Get all members that are currently in a trial period.
-     * @param {GetBatchOptions<CactusMember>} options
+     * @param {SyncTrialMembersToMailchimpJob} job - the job to use to create the request
      * @return {Promise<void>}
      */
-    async getMembersInTrial(options: GetMembersInTrialOptions): Promise<CactusMember[]> {
-        this.logger.info("Get members in trial with options", stringifyJSON(options, 2));
-        const endDate = new Date();
-        const query = this.firestoreService.getCollectionRef(Collection.members)
-            .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
-            .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate));
-        // .orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
+    async getMembersInTrial(job: SyncTrialMembersToMailchimpJob): Promise<CactusMember[]> {
 
-        let startAfter;
-        if (options.lastMemberId) {
-            const memberSnapshot = await this.firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
-            if (memberSnapshot) {
-                startAfter = memberSnapshot
-            } else if (options.lastCreatedAtMs) {
-                startAfter = Timestamp.fromMillis(options.lastCreatedAtMs)
-            }
-        } else if (options.lastCreatedAtMs) {
-            startAfter = Timestamp.fromMillis(options.lastCreatedAtMs)
-        }
+        const options: GetMembersBatchOptions = {
+            lastMemberId: job.lastMemberId,
+            lastCursor: job.lastTrialEndedMs ? Timestamp.fromMillis(job.lastTrialEndedMs) : undefined,
+            limit: job.batchSize,
+            orderBy: CactusMember.Field.subscriptionTrialEndsAt,
+            sortDirection: QuerySortDirection.asc,
+            where: [
+                [CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers],
+                [CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.now()]
+            ]
+        };
 
-        if (startAfter || options.limit) {
-            options.pagination = {
-                startAfter,
-                limit: options.limit ?? 500,
-                orderBy: CactusMember.Field.subscriptionTrialEndsAt,
-                sortDirection: QuerySortDirection.asc,
-            };
-            // this.logger.info("Set pagination options", stringifyJSON(options.pagination, 2))
-        }
-        const result = await this.firestoreService.executeQuery(query, CactusMember, options);
-        return result.results;
+        return AdminCactusMemberService.getSharedInstance().getMembersBatch(options);
+
+        //deprecated method below
+        // this.logger.info("Get members in trial with options", stringifyJSON(options, 2));
+        // const endDate = new Date();
+        // const query = this.firestoreService.getCollectionRef(Collection.members)
+        //     .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
+        //     .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate));
+        // // .orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
+        //
+        // let startAfter = options.lastCursor;
+        // if (options.lastMemberId) {
+        //     const memberSnapshot = await this.firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
+        //     if (memberSnapshot) {
+        //         startAfter = memberSnapshot
+        //     }
+        // }
+        //
+        // if (startAfter || options.limit) {
+        //     options.pagination = {
+        //         startAfter,
+        //         limit: options.limit ?? 500,
+        //         orderBy: CactusMember.Field.subscriptionTrialEndsAt,
+        //         sortDirection: QuerySortDirection.asc,
+        //     };
+        //     // this.logger.info("Set pagination options", stringifyJSON(options.pagination, 2))
+        // }
+        // const result = await this.firestoreService.executeQuery(query, CactusMember, options);
+        // return result.results;
+    }
+
+    async getMembersTrialEndedNotActivated(job: ExpireMembersJob): Promise<CactusMember[]> {
+        const options: GetMembersBatchOptions = {
+            lastMemberId: job.lastMemberId,
+            lastCursor: job.lastTrialEndsAt ? Timestamp.fromMillis(job.lastTrialEndsAt) : undefined,
+            limit: job.batchSize,
+            orderBy: CactusMember.Field.subscriptionTrialEndsAt,
+            sortDirection: QuerySortDirection.asc,
+            where: [
+                [CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers],
+                [CactusMember.Field.subscriptionTrialEndsAt, "<=", AdminFirestoreService.Timestamp.now()],
+                [CactusMember.Field.subscriptionActivated, "==", false]
+            ]
+        };
+
+        return AdminCactusMemberService.getSharedInstance().getMembersBatch(options);
+
     }
 
     async getMembersToExpireTrial(options: GetBatchOptions<CactusMember>) {
         const query = this.firestoreService.getCollectionRef(Collection.members)
             .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
+            .where(CactusMember.Field.subscriptionActivated, "==", false)
             .where(CactusMember.Field.subscriptionTrialEndsAt, "<=", AdminFirestoreService.Timestamp.fromDate(new Date()));
 
         await this.firestoreService.executeBatchedQuery<CactusMember>({

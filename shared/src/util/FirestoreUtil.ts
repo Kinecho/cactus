@@ -167,3 +167,9 @@ export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T 
     model.decodeJSON(json);
     return model;
 }
+
+export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' |
+    'in' | 'array-contains-any';
+
+export type QueryWhere = [string, WhereFilterOp, any];
+export type QueryWhereClauses = QueryWhere[];

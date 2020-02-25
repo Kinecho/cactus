@@ -25,7 +25,11 @@ import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
 import userEndpoints from "@api/endpoints/userEndpoints";
-import {updateMemberProfileTrigger, updatePromptSendTimeTrigger} from "@api/triggers/MemberTriggers";
+import {
+    updateMemberProfileTrigger,
+    updatePromptSendTimeTrigger,
+    updateSubscriptionDetailsTrigger
+} from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
 import {onPublish as syncTrailToMailchimpMembersJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
@@ -67,4 +71,5 @@ export const cloudFunctions = {
     updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
     updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
     publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
+    updateSubscriptionDetailsTrigger,
 };

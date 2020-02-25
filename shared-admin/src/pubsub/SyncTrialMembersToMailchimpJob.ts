@@ -1,6 +1,6 @@
 import {Message} from "firebase-functions/lib/providers/pubsub";
 import * as functions from "firebase-functions";
-import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import AdminSubscriptionService, {MemberBatchJob} from "@admin/services/AdminSubscriptionService";
 import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import Logger from "@shared/Logger";
@@ -9,11 +9,11 @@ import {PubSubService} from "@admin/pubsub/PubSubService";
 
 const logger = new Logger("SyncTrialMembersToMailchimpJob");
 
-export interface SyncTrialMembersToMailchimpJob {
+export interface SyncTrialMembersToMailchimpJob extends MemberBatchJob {
     lastMemberId?: string;
-    lastCreatedAtMs?: number,
-    batchSize?: number;
-    batchNumber?: number;
+    lastTrialEndedMs?: number,
+    batchSize: number;
+    batchNumber: number;
 }
 
 export async function submitJob(job: SyncTrialMembersToMailchimpJob): Promise<string | undefined> {

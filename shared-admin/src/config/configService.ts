@@ -5,6 +5,10 @@ import {CactusConfig} from "@shared/CactusConfig";
 let _config: CactusConfig;
 let _testConfigOverrides: Partial<CactusConfig> = {};
 
+export function setConfig(config: CactusConfig) {
+    _config = config;
+}
+
 export function getConfig(): CactusConfig {
     //used for testing purposes
     const env = getEnvironment();
