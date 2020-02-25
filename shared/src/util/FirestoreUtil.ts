@@ -88,7 +88,7 @@ export function convertDateToJSON(input: any): any {
 
     return transformObjectSync(copy, (value) => {
         if (isDate(value)) {
-            return (value as Date).getTime();
+            return value.getTime();
         }
         return value;
     })
