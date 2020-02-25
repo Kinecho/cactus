@@ -8,6 +8,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {PubSubService} from "@admin/pubsub/PubSubService";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {DEFAULT_BATCH_SIZE} from "@admin/services/AdminFirestoreService";
+import {toTimestampMs} from "@shared/util/DateUtil";
 
 const logger = new Logger("ExpireMembershipTrialJob");
 
@@ -108,7 +109,7 @@ export class ExpireMembershipTrialJob {
         const nextJob: ExpireMembersJob = {
             batchNumber: job.batchNumber + 1,
             batchSize: job.batchSize,
-            lastTrialEndsAt: this.lastMember?.subscription?.trial?.endsAt?.getTime(),
+            lastTrialEndsAt: toTimestampMs(this.lastMember?.subscription?.trial?.endsAt),
             lastMemberId: this.lastMember?.id,
         };
         logger.info("Created next job", stringifyJSON(nextJob, 2));

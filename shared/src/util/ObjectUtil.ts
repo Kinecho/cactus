@@ -28,7 +28,7 @@ export function isNotNull(input: any): boolean {
     return !isNull(input);
 }
 
-export function isDate(input: any) {
+export function isDate(input: any): input is Date {
     return isNotNull(input) && input instanceof Date;
 }
 
@@ -40,7 +40,7 @@ export function isString(input: any): input is string {
     }
 }
 
-export function isNumber(input: any) {
+export function isNumber(input: any): input is Number {
     try {
         const number = Number(input);
         return isNotNull(number) && typeof (input) === "number";
