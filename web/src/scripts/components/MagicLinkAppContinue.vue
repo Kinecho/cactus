@@ -4,7 +4,7 @@
         <div class="centered">
             <section class="hasApp">
                 <h2>Continue on the app</h2>
-                <p>Finish logging in to your {{sourceAppDescription}} device</p>
+                <p>Finish logging in to your {{sourceAppDescription}} app</p>
                 <div class="actions">
                     <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
                 </div>
