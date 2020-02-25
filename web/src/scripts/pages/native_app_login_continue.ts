@@ -4,7 +4,7 @@ import Vue from "vue";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 
-const logger = new Logger("ios_login_continue.ts");
+const logger = new Logger("native_app_login_continue.ts");
 commonInit();
 
 new Vue({

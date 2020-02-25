@@ -43,7 +43,7 @@ module.exports = {
         "path": "/auth-actions",
         "name": "email_action"
     },
-    "authenticate_action": {
+    "email_action": {
         "title": "Email Action",
         "path": "/authenticate-actions",
         "name": "email_action"
@@ -102,10 +102,10 @@ module.exports = {
         "includeInDev": true,
         "name": "unsubscribe_confirmed"
     },
-    "ios_login_continue": {
-        "title": "iOS Login",
-        "path": "/ios-login-continue",
-        "name": "ios_login_continue"
+    "native_app_login_continue": {
+        "title": "App Login",
+        "path": "/app-login-continue",
+        "name": "native_app_login_continue"
     },
     "android_welcome": {
         "title": "Welcome",

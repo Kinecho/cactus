@@ -104,9 +104,9 @@ export async function handleEmailLinkSignIn(error?: string): Promise<EmailLinkSi
     const appSource = getQueryParam(QueryParam.SOURCE_APP) as SourceApp;
     const isSignIn = getAuth().isSignInWithEmailLink(window.location.href);
 
-    if (isSignIn && appSource === SourceApp.ios) {
-        logger.log("Source App is ios and is magic link");
-        window.location.replace(`${PageRoute.IOS_MAGIC_LINK_LOGIN}`);
+    if (isSignIn && (appSource === SourceApp.ios || appSource === SourceApp.android)) {
+        logger.log("Source App is iOS or Android and is magic link");
+        window.location.replace(`${PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN}`);
 
     }
 
