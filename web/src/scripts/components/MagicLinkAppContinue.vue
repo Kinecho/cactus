@@ -4,14 +4,15 @@
         <div class="centered">
             <section class="hasApp">
                 <h2>Continue on the app</h2>
-                <p>Finish logging in to your device</p>
+                <p>Finish logging in to your {{sourceAppDescription}} device</p>
                 <div class="actions">
                     <a :href="deepLink" class="button primary" title="Sign In To App">Open Cactus</a>
                 </div>
             </section>
-            <section class="needsApp" v-if="true">
+            <section class="needsApp" v-if="sourceApp">
                 <h3>Need to install Cactus?</h3>
-                <AppStoreIcon />
+                <AppStoreIcon v-if="sourceApp == 'ios'" />
+                <PlayStoreIcon v-if="sourceApp == 'android'" />
             </section>
 
         </div>
@@ -21,17 +22,24 @@
 <script lang="ts">
     import Vue from "vue";
     import {Config} from '@web/config';
-    import {getAllQueryParams} from '@web/util';
+    import {getAllQueryParams, getQueryParam} from '@web/util';
+    import {QueryParam} from "@shared/util/queryParams";
     import {appendQueryParams} from '@shared/util/StringUtil';
     import NavBar from "@components/NavBar.vue";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
+    import PlayStoreIcon from "@components/PlayStoreIcon.vue";
+    import {SourceApp} from "@shared/api/SignupEndpointTypes";
     import Logger from "@shared/Logger";
+    import CopyService from "@shared/copy/CopyService";
 
     const logger = new Logger("MagicLinkAppContinue.vue");
+    const copy = CopyService.getSharedInstance().copy;
+
     export default Vue.extend({
         components: {
             NavBar,
-            AppStoreIcon
+            AppStoreIcon,
+            PlayStoreIcon
         },
         created() {
             logger.log("magic link app continue");
@@ -44,6 +52,25 @@
                 const base = `${Config.appCustomScheme}://auth-actions`;
                 let params = getAllQueryParams(self.link);
                 return appendQueryParams(base, params);
+            },
+            sourceApp(): SourceApp | undefined {
+                const param = getQueryParam(QueryParam.SOURCE_APP);
+                if (param && param === SourceApp.android) {
+                    return SourceApp.android;
+                } else if (param === SourceApp.ios) {
+                    return SourceApp.ios;
+                } else {
+                    return undefined;
+                }
+            },
+            sourceAppDescription(): string | undefined {
+                if (this.sourceApp === SourceApp.ios) {
+                    return copy.common.IOS;
+                } else if (this.sourceApp === SourceApp.android) {
+                    return copy.common.ANDROID;
+                } else {
+                    return undefined;
+                }
             }
         }
     })
@@ -89,6 +116,11 @@
             h3 {
                 color: $magenta;
                 margin-bottom: 1.6rem;
+            }
+
+            .play-store-icon {
+                margin: 0 auto;
+                display: inline-block;
             }
         }
     }

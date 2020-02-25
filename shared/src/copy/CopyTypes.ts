@@ -61,6 +61,8 @@ export interface CommonCopy {
     ENDS_TODAY: string,
     TRIAL: string,
     LEARN_MORE: string,
+    IOS: string,
+    ANDROID: string
 }
 
 export interface ElementCopy {

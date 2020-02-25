@@ -91,6 +91,8 @@ export default class EnglishCopy extends LocalizedCopy {
         ENDS_TODAY: "Ends today",
         LEARN_MORE: "Learn More",
         TRIAL: "Trial",
+        IOS: "iOS",
+        ANDROID: "Android"
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",
