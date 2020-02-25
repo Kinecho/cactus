@@ -35,14 +35,14 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
 export interface SubscriptionTrial {
     startedAt: Date,
     endsAt: Date,
-    activatedAt?: Date|null
+    activatedAt?: Date | null
 }
 
 export interface MemberSubscription {
     legacyConversion?: boolean
     tier: SubscriptionTier,
     trial?: SubscriptionTrial,
-
+    activated?: boolean,
     /**
      * The ID of the Cactus Subscription Product the member is subscribed to
      */
@@ -56,6 +56,7 @@ export const DEFAULT_TRIAL_DAYS = 7;
 export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
     return {
         tier: SubscriptionTier.PLUS,
+        activated: false,
         trial: getDefaultTrial(trialDays)
     }
 }
@@ -64,7 +65,9 @@ export function getDefaultSubscriptionWithEndDate(endDate: Date): MemberSubscrip
     const trial = getDefaultTrial();
     trial.endsAt = endDate;
     return {
+        legacyConversion: false,
         tier: SubscriptionTier.PLUS,
+        activated: false,
         trial
     }
 }
@@ -94,8 +97,14 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
     return !subscription.trial?.activatedAt && subscription.trial?.endsAt > new Date();
 }
 
-export function trialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
-    if (!subscription?.trial?.endsAt) {
+/**
+ * Check if this subscription is in a premium status with an expired trial that has not been activated
+ * @param {MemberSubscription} subscription
+ * @return {boolean}
+ */
+export function premiumTrialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
+    const tier = subscription?.tier;
+    if (!subscription?.trial?.endsAt || !tier || !PremiumSubscriptionTiers.includes(tier)) {
         return false
     }
     return !subscription?.trial?.activatedAt && subscription?.trial?.endsAt.getTime() < Date.now();

@@ -13,7 +13,7 @@ import {
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
-    numDaysAgoFromMidnights,
+    numDaysAgoFromMidnights, toTimestampMs,
 } from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
@@ -676,4 +676,23 @@ describe("Flamelink to and from", () => {
         expect(getFlamelinkDateStringInDenver(date)).toEqual(flamelinkIso)
 
     })
+});
+
+describe("toTimestampMs", () => {
+    test("null -> undefined", () => {
+        expect(toTimestampMs(null)).toBeUndefined();
+    });
+
+    test("undefined -> undefined", () => {
+        expect(toTimestampMs(undefined)).toBeUndefined();
+    });
+
+    test("known Date -> number", () => {
+        const date = new Date(111111111111);
+        expect(toTimestampMs(date)).toEqual(111111111111);
+    });
+
+    test("number -> number", () => {
+        expect(toTimestampMs(111111111111)).toEqual(111111111111);
+    });
 })

@@ -8,7 +8,7 @@ import {
     isInTrial,
     MemberSubscription,
     subscriptionTierDisplayName,
-    trialEndedWithoutActivation
+    premiumTrialEndedWithoutActivation
 } from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
@@ -69,6 +69,7 @@ export enum Field {
     subscriptionTier = "subscription.tier",
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
+    subscriptionActivated = "subscription.activated",
 }
 
 export interface PromptSendTime {
@@ -221,8 +222,8 @@ export default class CactusMember extends BaseModel {
         return isInTrial(this.subscription)
     }
 
-    get trialEnded(): boolean {
-        return trialEndedWithoutActivation(this.subscription)
+    get premiumTrialEndedWithoutActivation(): boolean {
+        return premiumTrialEndedWithoutActivation(this.subscription)
     }
 
     get hasActiveSubscription(): boolean {

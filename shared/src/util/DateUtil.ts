@@ -5,6 +5,7 @@ import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
+import {isDate, isNull, isNumber} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("DateUtil.ts");
 
@@ -25,6 +26,19 @@ export function getDateObjectForTimezone(date: Date, timeZone: string): DateObje
 
 export function dateObjectToISODate(date: DateObject): string {
     return DateTime.fromObject(date).toISODate()
+}
+
+export function toTimestampMs(date: Date | undefined | number | null): number | undefined {
+    if (isNull(date)) {
+        return undefined;
+    }
+    if (isDate(date)) {
+        return date.getTime();
+    }
+    if (isNumber(date)) {
+        return Number(date);
+    }
+    return;
 }
 
 /**

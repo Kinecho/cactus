@@ -4,6 +4,7 @@ import AdminFirestoreService, {
     DefaultGetOptions,
     GetBatchOptions,
     GetOptions,
+    QueryOptions,
     SaveOptions
 } from "@admin/services/AdminFirestoreService";
 import CactusMember, {
@@ -21,6 +22,7 @@ import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import * as admin from "firebase-admin";
+import {QueryWhereClauses} from "@shared/util/FirestoreUtil";
 import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
@@ -31,6 +33,15 @@ export interface UpdateSendPromptUTCResult {
     updated: boolean,
     promptSendTimeUTC?: PromptSendTime,
     promptSendTime?: PromptSendTime
+}
+
+export interface GetMembersBatchOptions extends QueryOptions {
+    lastMemberId?: string,
+    lastCursor?: any,
+    limit?: number,
+    orderBy: string,
+    sortDirection: QuerySortDirection,
+    where?: QueryWhereClauses,
 }
 
 export default class AdminCactusMemberService {
@@ -520,6 +531,40 @@ export default class AdminCactusMemberService {
         await this.getCollectionRef().doc(memberId).update({[CactusMember.Field.timeZone]: validTimezoneOrNull});
         member.timeZone = validTimezoneOrNull;
         return member;
+    }
+
+    async getMembersBatch(options: GetMembersBatchOptions): Promise<CactusMember[]> {
+        // logger.info("Get members in batch with options", stringifyJSON(options, 2));
+
+        //build up the query using the passed in where clauses
+        let query: FirebaseFirestore.Query = firestoreService.getCollectionRef(Collection.members);
+        options.where?.forEach(w => {
+            const [field, op, value] = w;
+            query = query.where(field, op, value);
+        });
+
+        //set the default offset to be the last cursor value
+        let startAfter = options.lastCursor;
+
+        //try to get the snapshot of the latest user, so that we aren't relying on the single value.
+        //But, if this member no longer exists, we can still do the cursor based on the cursor value
+        if (options.lastMemberId) {
+            const memberSnapshot = await firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
+            if (memberSnapshot) {
+                startAfter = memberSnapshot
+            }
+        }
+
+        //set up pagination
+        options.pagination = {
+            startAfter,
+            limit: options.limit ?? 500,
+            orderBy: options.orderBy,
+            sortDirection: options.sortDirection,
+        };
+
+        const result = await firestoreService.executeQuery(query, CactusMember, options);
+        return result.results;
     }
 
 }

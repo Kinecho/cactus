@@ -88,7 +88,7 @@ export function convertDateToJSON(input: any): any {
 
     return transformObjectSync(copy, (value) => {
         if (isDate(value)) {
-            return (value as Date).getTime();
+            return value.getTime();
         }
         return value;
     })
@@ -166,4 +166,32 @@ export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T 
     const model = new Type();
     model.decodeJSON(json);
     return model;
+}
+
+export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' |
+    'in' | 'array-contains-any';
+
+export type QueryWhere = [string, WhereFilterOp, any];
+export type QueryWhereClauses = QueryWhere[];
+
+export function removeDuplicates<T extends BaseModel>(models: T[]): T[] {
+    const map: { [id: string]: T } = {};
+
+    models.reduce((agg, model) => {
+        const id = model.id;
+        if (!id) {
+            return agg;
+        }
+        if (!agg[id]) {
+            agg[id] = model;
+        }
+        return agg;
+    }, map);
+
+    return Object.values(map);
+}
+
+export function flattenUnique<T extends BaseModel>(nestedModels: T[][]): T[] {
+    const flat = ([] as T[]).concat(...nestedModels);
+    return removeDuplicates(flat);
 }

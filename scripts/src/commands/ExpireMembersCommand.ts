@@ -5,9 +5,10 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import * as prompts from "prompts";
 import {ExpireMembershipTrialJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
+import {ExpireMembersJob} from "@admin/services/AdminSubscriptionService";
 
 interface UserInput {
-    email?: string|undefined,
+    email?: string | undefined,
     expireAll: boolean,
 }
 
@@ -37,15 +38,30 @@ export default class ExpireMembersCommand extends FirebaseCommand {
         console.log("Got user input", userInput);
         this.userInput = userInput;
 
-        const job = new ExpireMembershipTrialJob();
+
         if (userInput.expireAll) {
-            await job.expireAll()
+            // await job.expireAllDangerously()
+            let payload: ExpireMembersJob | undefined = {
+                batchSize: 100,
+                batchNumber: 0,
+            };
+
+            while (payload) {
+                job = new ExpireMembershipTrialJob();
+                await job.expireBatch(payload);
+                await job.sendDataLogMessage();
+                payload = job.createNextBatchJob();
+                console.log("result");
+                console.log(job.getResult());
+
+            }
         } else {
+            let job = new ExpireMembershipTrialJob();
             await job.expireOne({email: userInput.email});
+            console.log("result");
+            console.log(job.getResult());
         }
 
-        console.log("result");
-        console.log(job.getResult());
 
         return;
     }

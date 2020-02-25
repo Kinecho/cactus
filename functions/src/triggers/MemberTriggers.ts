@@ -15,6 +15,47 @@ import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 
 const logger = new Logger("MemberTriggers");
 
+
+/**
+ * Ensure a member's subscription info is correct
+ */
+export const updateSubscriptionDetailsTrigger = functions.firestore
+    .document(`${Collection.members}/{memberId`)
+    .onWrite(async (change) => {
+        if (!change.after) {
+            logger.info("no \"after\" was found on the change. not doing anything");
+            return;
+        }
+
+        const member = fromDocumentSnapshot(change.after, CactusMember);
+        if (!member) {
+            logger.info("No member was able to be built from the document snapshot. Returning");
+            return;
+        }
+
+        const subscription = member.subscription;
+        if (!subscription) {
+            logger.info("Member doesn't have a subscription, not doing anything");
+            return;
+        }
+        let needsSave = false;
+        const hasActivatedDate = !!subscription.trial?.activatedAt;
+        if (hasActivatedDate && !subscription.activated) {
+            logger.info(`setting ${member.email} subscription to activated = true`);
+            subscription.activated = true;
+            needsSave = true;
+        } else if (!hasActivatedDate && subscription.activated === true) {
+            subscription.activated = false;
+            logger.info(`setting ${member.email} subscription to activated = false`);
+            needsSave = true;
+        }
+
+        if (needsSave) {
+            await AdminCactusMemberService.getSharedInstance().save(member);
+        }
+
+    });
+
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
@@ -102,7 +143,7 @@ export const updateMemberProfileTrigger = functions.firestore
                         email: email,
                         mergeFields: mergeFieldsToUpdate
                     });
-                    logger.log("Update mailchimp merge fields response:", mailchimpResponse);    
+                    logger.log("Update mailchimp merge fields response:", mailchimpResponse);
                 }
             }
         } catch (error) {

@@ -6,6 +6,7 @@ import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {CactusConfig} from "@shared/CactusConfig";
 import {initializeServices} from "@admin/services/AdminServiceConfig";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
+import {setConfig} from "@admin/config/configService";
 
 const prompts = require("prompts");
 
@@ -67,6 +68,7 @@ export abstract class FirebaseCommand implements Command {
         console.log("initializing all services");
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
+        setConfig(config);
         console.group(chalk.yellow(`${this.name} Logs:`));
 
         await this.run(app, firestoreService, config);

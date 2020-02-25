@@ -24,14 +24,14 @@ interface ExecuteCommandPrompt {
     runNow: boolean
 }
 
-interface MemberResult {
+export interface MemberResult {
     error?: string,
     createdSubscription?: boolean,
     fixedSubscription?: boolean,
     legacyUpgrade?: boolean,
 }
 
-interface MemberBatchResult {
+export interface MemberBatchResult {
     batchNumber: number,
     numSubscriptionsCreated: number,
     numFixed: number,
@@ -39,7 +39,7 @@ interface MemberBatchResult {
     numLegacyUpgrade: number,
 }
 
-interface TotalResult {
+export interface TotalResult {
     numSubscriptionsCreated: number,
     numSkipped: number,
     numFixed: number,
@@ -128,9 +128,10 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
         console.log("Using project", project);
 
 
-        const subMap = await this.parseLegacySubscribers();
-        this.logger.info("Legacy Subscriber Map: ", JSON.stringify(subMap, null, 2));
-        this.legacySubscribers = subMap;
+        //NOTE: Not processing legacy subscribers
+        // const subMap = await this.parseLegacySubscribers();
+        // this.logger.info("Legacy Subscriber Map: ", JSON.stringify(subMap, null, 2));
+        // this.legacySubscribers = subMap;
 
 
         console.log("Using date func", Object.values(subMap)[0].start?.getTime());
@@ -238,6 +239,11 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
      * @return {boolean} true if handled, false if not
      */
     async handleLegacySubscriber(member: CactusMember, batch: FirebaseFirestore.WriteBatch): Promise<MemberResult | undefined> {
+        //NOTE: not processing legacy subscribers
+        if (member.subscription?.legacyConversion === true) {
+            return {fixedSubscription: false, createdSubscription: false, legacyUpgrade: false};
+        }
+
         const email = member.email;
         if (!email) {
             return;
@@ -257,7 +263,6 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
         const trial = sub.trial || getDefaultTrial();
 
         sub.tier = SubscriptionTier.PLUS;
-
         sub.stripeSubscriptionId = legacy.subscriptionId;
         member.stripeCustomerId = legacy.customerId;
         sub.subscriptionProductId = "LEGACY_IOS_APP";
@@ -301,6 +306,13 @@ export default class CreateDefaultSubscriptions extends FirebaseCommand {
                 } else if (!sub.trial.endsAt || !sub.trial.startedAt) {
                     sub.trial.endsAt = sub.trial.endsAt ?? this.trialEndsAt;
                     sub.trial.startedAt = sub.trial.startedAt ?? new Date();
+                    save = true;
+                }
+
+                const isActivated = !!sub.trial?.activatedAt;
+                if (isActivated !== sub.activated) {
+                    logger.info(`setting ${member.email} subscription to activated = ${isActivated}`);
+                    subscription.activated = isActivated;
                     save = true;
                 }
 
