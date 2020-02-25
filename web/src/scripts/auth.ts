@@ -9,7 +9,8 @@ import {
     EmailStatusResponse,
     LoginEvent,
     MagicLinkRequest,
-    MagicLinkResponse
+    MagicLinkResponse,
+    SourceApp
 } from "@shared/api/SignupEndpointTypes";
 import {QueryParam} from "@shared/util/queryParams";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
@@ -18,8 +19,7 @@ import CactusMemberService from "@web/services/CactusMemberService";
 import {fireConfirmedSignupEvent, fireSignupEvent} from "@web/analytics";
 import Logger from "@shared/Logger";
 import {getAppType, isAndroidApp} from "@web/DeviceUtil";
-import {SourceApp} from "@shared/api/SignupEndpointTypes";
-// export AuthProviders = firebase.auth
+
 const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
 
