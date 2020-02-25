@@ -17,7 +17,8 @@ import ReflectionResponse from "@shared/models/ReflectionResponse";
 import CactusMemberService from "@web/services/CactusMemberService";
 import {fireConfirmedSignupEvent, fireSignupEvent} from "@web/analytics";
 import Logger from "@shared/Logger";
-import {getAppType} from "@web/DeviceUtil";
+import {getAppType, isAndroidApp} from "@web/DeviceUtil";
+import {SourceApp} from "@shared/api/SignupEndpointTypes";
 // export AuthProviders = firebase.auth
 const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
@@ -98,6 +99,7 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
     }
 
     const landingParams = StorageService.getJSON(LocalStorageKey.landingQueryParams);
+    const sourceApp = isAndroidApp() ? SourceApp.android : SourceApp.web;
 
     logger.log("Setting redirect url for email link signup to be ", emailLinkRedirectUrl);
 
@@ -107,6 +109,7 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
         continuePath: emailLinkRedirectUrl,
         reflectionResponseIds: getAnonymousReflectionResponseIds(),
         queryParams: landingParams,
+        sourceApp: sourceApp
     });
     window.localStorage.setItem(LocalStorageKey.emailForSignIn, email);
 
