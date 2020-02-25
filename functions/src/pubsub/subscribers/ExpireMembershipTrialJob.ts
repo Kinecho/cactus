@@ -69,7 +69,7 @@ export class ExpireMembershipTrialJob {
                 email,
                 cactusMemberId: memberId
             });
-            if (member && member.trialEndedWithoutActivation) {
+            if (member && member.premiumTrialEndedWithoutActivation) {
                 await this.expireMember(member);
             } else {
                 this.errors.push(`No member found for options: ${stringifyJSON(options)}`);
@@ -136,7 +136,7 @@ export class ExpireMembershipTrialJob {
     }
 
     async expireMember(member: CactusMember): Promise<void> {
-        if (!member.trialEndedWithoutActivation) {
+        if (!member.premiumTrialEndedWithoutActivation) {
             logger.info(`member ${member.email} is not in trial, not expiring them`);
             return;
         }

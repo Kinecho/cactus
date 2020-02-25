@@ -8,7 +8,7 @@ import {
     isInTrial,
     MemberSubscription,
     subscriptionTierDisplayName,
-    trialEndedWithoutActivation
+    premiumTrialEndedWithoutActivation
 } from "@shared/models/MemberSubscription";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
@@ -222,8 +222,8 @@ export default class CactusMember extends BaseModel {
         return isInTrial(this.subscription)
     }
 
-    get trialEndedWithoutActivation(): boolean {
-        return trialEndedWithoutActivation(this.subscription)
+    get premiumTrialEndedWithoutActivation(): boolean {
+        return premiumTrialEndedWithoutActivation(this.subscription)
     }
 
     get hasActiveSubscription(): boolean {

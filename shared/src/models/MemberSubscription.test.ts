@@ -1,4 +1,4 @@
-import {MemberSubscription, SubscriptionTrial, trialEndedWithoutActivation} from "@shared/models/MemberSubscription";
+import {MemberSubscription, SubscriptionTrial, premiumTrialEndedWithoutActivation} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
@@ -9,7 +9,7 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEndedWithoutActivation(subscription)).toBeTruthy();
+        expect(premiumTrialEndedWithoutActivation(subscription)).toBeTruthy();
     });
 
     test("Trial activated", () => {
@@ -19,7 +19,7 @@ describe("trialEnded tests", () => {
             activatedAt: DateTime.local().minus({days: 2}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
+        expect(premiumTrialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 
     test("Trial not ended", () => {
@@ -28,7 +28,7 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().plus({days: 1}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.PLUS};
-        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
+        expect(premiumTrialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 
     test("tier is basic, trial has ended", () => {
@@ -37,7 +37,7 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
         const subscription = {trial, tier: SubscriptionTier.BASIC};
-        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
+        expect(premiumTrialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 
     test("tier is undefined, trial has ended", () => {
@@ -46,6 +46,6 @@ describe("trialEnded tests", () => {
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
         const subscription = {trial} as MemberSubscription;
-        expect(trialEndedWithoutActivation(subscription)).toBeFalsy();
+        expect(premiumTrialEndedWithoutActivation(subscription)).toBeFalsy();
     });
 });

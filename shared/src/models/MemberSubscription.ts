@@ -102,7 +102,7 @@ export function isInTrial(subscription?: MemberSubscription): boolean {
  * @param {MemberSubscription} subscription
  * @return {boolean}
  */
-export function trialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
+export function premiumTrialEndedWithoutActivation(subscription?: MemberSubscription): boolean {
     const tier = subscription?.tier;
     if (!subscription?.trial?.endsAt || !tier || !PremiumSubscriptionTiers.includes(tier)) {
         return false
