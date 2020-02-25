@@ -43,6 +43,11 @@ module.exports = {
         "path": "/auth-actions",
         "name": "email_action"
     },
+    "authenticate_action": {
+        "title": "Email Action",
+        "path": "/authenticate-actions",
+        "name": "email_action"
+    },
     "account_settings": {
         "title": "Account | Cactus",
         "path": "/account",
