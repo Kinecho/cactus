@@ -200,13 +200,15 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         } else {
             await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         }
 
