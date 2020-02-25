@@ -94,7 +94,7 @@ export default class AdminSubscriptionService {
     }
 
     async expireTrial(member: CactusMember): Promise<ExpireTrialResult> {
-        if (!member.premiumTrialEndedWithoutActivation) {
+        if (!member.needsTrialExpiration) {
             return {success: false, error: "Member does not have an expired trial", member};
         }
 
