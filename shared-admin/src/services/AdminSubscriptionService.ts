@@ -464,7 +464,6 @@ export default class AdminSubscriptionService {
         }
     }
 
-
     async getStripeSubscription(subscriptionId?: string): Promise<Stripe.Subscription | undefined> {
         if (!subscriptionId) {
             return undefined;
@@ -539,7 +538,7 @@ export default class AdminSubscriptionService {
             return invoice;
 
         } catch (error) {
-            this.logger.warn(`No upcoming invoice found for| customerId ${stripeCustomerId} | stripeSubscriptionId ${stripeSubscriptionId}`)
+            this.logger.warn(`No upcoming invoice found for| customerId ${stripeCustomerId} | stripeSubscriptionId ${stripeSubscriptionId}`);
             return undefined;
         }
     }
