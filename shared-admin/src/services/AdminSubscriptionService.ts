@@ -276,34 +276,6 @@ export default class AdminSubscriptionService {
         };
 
         return AdminCactusMemberService.getSharedInstance().getMembersBatch(options);
-
-        //deprecated method below
-        // this.logger.info("Get members in trial with options", stringifyJSON(options, 2));
-        // const endDate = new Date();
-        // const query = this.firestoreService.getCollectionRef(Collection.members)
-        //     .where(CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers)
-        //     .where(CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.fromDate(endDate));
-        // // .orderBy(CactusMember.Field.subscriptionTrialEndsAt, "asc");
-        //
-        // let startAfter = options.lastCursor;
-        // if (options.lastMemberId) {
-        //     const memberSnapshot = await this.firestoreService.getCollectionRef(Collection.members).doc(options.lastMemberId).get();
-        //     if (memberSnapshot) {
-        //         startAfter = memberSnapshot
-        //     }
-        // }
-        //
-        // if (startAfter || options.limit) {
-        //     options.pagination = {
-        //         startAfter,
-        //         limit: options.limit ?? 500,
-        //         orderBy: CactusMember.Field.subscriptionTrialEndsAt,
-        //         sortDirection: QuerySortDirection.asc,
-        //     };
-        //     // this.logger.info("Set pagination options", stringifyJSON(options.pagination, 2))
-        // }
-        // const result = await this.firestoreService.executeQuery(query, CactusMember, options);
-        // return result.results;
     }
 
     async getMembersTrialEndedNotActivated(job: ExpireMembersJob): Promise<CactusMember[]> {
@@ -321,7 +293,6 @@ export default class AdminSubscriptionService {
         };
 
         return AdminCactusMemberService.getSharedInstance().getMembersBatch(options);
-
     }
 
     async getMembersToExpireTrial(options: GetBatchOptions<CactusMember>) {
@@ -375,7 +346,7 @@ export default class AdminSubscriptionService {
             [MergeField.SUB_TIER]: subscriptionTier,
             [MergeField.IN_TRIAL]: isTrialing,
             [MergeField.TDAYS_LEFT]: trialDaysLeft,
-        }
+        };
 
         return mergeFields;
     }
