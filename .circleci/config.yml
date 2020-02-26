@@ -10,7 +10,7 @@ executors:
   cactus-web:
     working_directory: ~/project
     docker:
-      - image: circleci/node:8.17.0-browsers
+      - image: circleci/node:8.15.0-browsers
 aliases:
   ## Module Names
   - &root-module ""
