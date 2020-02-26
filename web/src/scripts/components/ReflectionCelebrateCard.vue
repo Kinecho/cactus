@@ -458,47 +458,53 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .successText {
+        color: $magenta;
         flex-grow: 1;
-        padding: 4rem 4rem 6.4rem;
+        font-size: 3.2rem;
+        padding: 4rem 2.4rem 2.4rem;
 
         @include r(374) {
-            padding: 7.2rem 4rem 9.6rem;
         }
         @include r(600) {
-            padding: 6.4rem 4rem;
         }
     }
 
-    h2 {
-        color: $magenta;
-        font-size: 3.2rem;
-        margin-bottom: 2.4rem;
+    .insightContainer {
+        @include shadowbox;
+        background: $dolphin url(assets/images/grainy.png);
+        color: $white;
+        margin: 0 auto 8rem;
+        max-width: 48rem;
+        padding: 2.4rem;
+        width: 93%;
 
         @include r(600) {
-            margin-bottom: 3.2rem;
+            margin: 0 3.2rem 8rem;
+            width: auto;
         }
 
-        &.green {
-            color: $darkestGreen;
-        }
-    }
-
-    .subtext {
-        margin: -1.6rem 0 .8rem;
-        opacity: .8;
-
-        .meaning, .element-name {
-            text-transform: lowercase;
+        h4 {
+            margin-bottom: .8rem;
+            opacity: .8;
         }
 
-        @include r(600) {
-            margin-top: -2.4rem;
+        p {
+            margin-bottom: 2.4rem;
         }
-    }
 
-    .front .illustration {
-        margin: 0 auto;
-        width: 90%;
+        button.secondary {
+            margin: 0;
+            width: 100%;
+
+            @include r(600) {
+                min-width: 60%;
+                width: auto;
+            }
+
+            &:hover {
+                background-color: $white;
+            }
+        }
     }
 
     .lowerContainer {
