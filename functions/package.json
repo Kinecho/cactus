@@ -31,7 +31,7 @@
         "stripe:listen": "stripe listen --forward-to localhost:5000/cactus-app-stage/us-central1/checkout/stripe/webhooks/main"
     },
     "engines": {
-        "node": "10"
+        "node": "8"
     },
     "main": "lib/functions/src/main.js",
     "_moduleAliases": {
