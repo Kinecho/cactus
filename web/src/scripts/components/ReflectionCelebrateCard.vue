@@ -103,16 +103,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         v-if="showTradeNote"
                         :content="sharingContentCard"
                         :response="reflectionResponse"/>
-                <div class="auth-card" v-else>
-                    <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
-                    <h2>Become a better version of yourself</h2>
-                    <p class="subtext">
-                        Questions to help you become more mindful and reflect on what makes you happy.
-                    </p>
-                    <div class="auth" v-if="authLoaded && !loggedIn">
-                        <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
-                    </div>
-                </div>
                 <div class="flexContainer">
                     <button @click="flipped = false" class="backBtn tertiary">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -409,7 +399,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             selectStreak() {
                 this.currentStreak = 'days';
-                
+
                 if (this.streakDays && this.streakWeeks && this.streakMonths) {
                     if (this.streakDays > 1) {
                         this.currentStreak = 'days';
@@ -444,9 +434,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
 
         &.flip-container .flipper {
-            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
-            // causing issues on safari
-
             @include r(600) {
                 background: transparent;
                 box-shadow: none;
