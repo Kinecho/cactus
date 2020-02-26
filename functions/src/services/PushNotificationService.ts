@@ -30,7 +30,7 @@ export default class PushNotificationService {
         const contentTiers = promptContent?.subscriptionTiers;
 
         if (memberTier && contentTiers && 
-            !contentTiers.includes(tier)) {
+            !contentTiers.includes(memberTier)) {
             return {attempted: false, notAvailbleToTier: true};
         }
 
