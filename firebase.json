@@ -118,8 +118,8 @@
         "destination": "/social_home.html"
       },
       {
-        "source": "/ios-login-continue",
-        "destination": "/ios_login_continue.html"
+        "source": "/app-login-continue",
+        "destination": "/app_login_continue.html"
       },
       {
         "source": "/pricing",
