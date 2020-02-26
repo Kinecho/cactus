@@ -4,13 +4,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
-                <div class="successText">
-                    <h2>{{celebrateText}}</h2>
-                    <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement">Today’s question focused on
-                        <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>,
-                        which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.
-                    </p>
+                <h2 class="successText">{{celebrateText}}</h2>
+                <div class="insightContainer">
+                    <h4>Daily Insight</h4>
+                    <p>Get insights about your daily reflections so that you learn more about yourself.</p>
+                    <button class="secondary">Reveal Insight</button>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
