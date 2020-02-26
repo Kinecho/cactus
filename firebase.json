@@ -1,7 +1,7 @@
 {
   "emulators": {
     "hosting": {
-      "port": "8888"
+      "port": "8080"
     },
     "firestore": {
       "port": "5005"

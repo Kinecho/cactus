@@ -116,9 +116,16 @@ module.exports = (config) => {
                         chunks: 'all',
                         cacheGroups: {
                             ...cssCacheGroups,
-                            defaultVendors: {
+                            vendors: {
                                 test: /[\\/]node_modules[\\/]/,
-                                name: "vendors",
+                                // name: "vendors",
+                                name(module, chunks, cacheGroupKey) {
+                                    const moduleFileName = module.identifier().split('/').reduceRight(item => encodeURIComponent(item))
+                                    const allChunksNames = chunks.map((item) => encodeURIComponent(item.name)).join('~')
+                                    const name = `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`
+                                    console.log(`vendor file name: ${name}`);
+                                    return name;
+                                },
                                 priority: 10,
                                 reuseExistingChunk: true,
                             },

@@ -21,7 +21,7 @@ const logger = new Logger("MemberTriggers");
  */
 export const updateSubscriptionDetailsTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
-    .onWrite(async (change) => {
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
         if (!change.after) {
             logger.info("no \"after\" was found on the change. not doing anything");
             return;
