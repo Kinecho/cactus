@@ -19,8 +19,6 @@ export function getAppSiteConfig(config: CactusConfig): AppleAppSiteAssociation 
                     appID: config.ios.app_id,
                     paths: [
                         "NOT /_/*",
-                        "/auth-actions",
-                        "/auth-actions/*",
                         "/reflection/*",
                         "/prompts/*",
                         "/home"

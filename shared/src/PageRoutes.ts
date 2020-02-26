@@ -11,6 +11,6 @@ export enum PageRoute {
     SOCIAL = "/activity",
     ACCOUNT = "/account",
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
-    IOS_MAGIC_LINK_LOGIN = "/ios-login-continue",
+    NATIVE_APP_MAGIC_LINK_LOGIN = "/app-login-continue",
     PAYMENT_PLANS = "/pricing",
 }

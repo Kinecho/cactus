@@ -1,7 +1,8 @@
 export interface MagicLinkEmail {
     email: string,
     link: string,
-    displayName?:string,
+    displayName?: string,
+    sourceApp?: string
 }
 
 export interface InvitationEmail {

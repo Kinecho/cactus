@@ -31,7 +31,7 @@
         "stripe:listen": "stripe listen --forward-to localhost:5000/cactus-app-stage/us-central1/checkout/stripe/webhooks/main"
     },
     "engines": {
-        "node": "10"
+        "node": "8"
     },
     "main": "lib/functions/src/main.js",
     "_moduleAliases": {
@@ -60,7 +60,7 @@
         "express": "^4.17.0",
         "express-formidable": "^1.2.0",
         "firebase-admin": "^8.9.2",
-        "firebase-functions": "^3.2.0",
+        "firebase-functions": "^3.3.0",
         "flamelink": "^1.0.0-alpha.28",
         "fs-extra": "^8.1.0",
         "get-urls": "^9.1.0",
@@ -85,7 +85,7 @@
         "@google-cloud/functions-emulator": "^1.0.0-beta.6",
         "@types/busboy": "^0.2.3",
         "@types/cors": "^2.8.5",
-        "@types/express": "^4.16.1",
+        "@types/express": "^4.17.2",
         "@types/jest": "^24.0.13",
         "@types/luxon": "^1.15.1",
         "@types/mailparser": "^2.4.0",
