@@ -119,7 +119,7 @@
       },
       {
         "source": "/app-login-continue",
-        "destination": "/app_login_continue.html"
+        "destination": "/native_app_login_continue.html"
       },
       {
         "source": "/pricing",
