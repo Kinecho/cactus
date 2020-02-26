@@ -5,10 +5,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
                 <h2 class="successText">{{celebrateText}}</h2>
-                <div class="insightContainer">
+                <div :class="['insightContainer', {revealed: insightRevealed}]">
                     <h4>Daily Insight</h4>
-                    <p>Get insights about your daily reflections so that you learn more about yourself.</p>
-                    <button class="secondary">Reveal Insight</button>
+                    <div class="insightIntro">
+                        <p>Get insights about your daily reflections so that you learn more about yourself.</p>
+                        <button class="secondary" @click="revealInsight">Reveal Insight</button>
+                    </div>
+                    <div class="insightContent">
+                        <p>You are amazing</p>
+                    </div>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
