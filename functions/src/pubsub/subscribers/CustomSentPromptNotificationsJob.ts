@@ -267,6 +267,15 @@ export async function processMember(args: { job: CustomNotificationJob, member?:
         return result;
     }
 
+    const memberTier = member.subscription?.tier;
+    const contentTiers = promptContent?.subscriptionTiers;
+
+    if (memberTier && contentTiers && 
+        !contentTiers.includes(memberTier)) {
+        errors.push("Member SubscriptionTier was not included in PromptContent tiers");
+        return result;
+    }
+
     const {sentPrompt, existed: sentPromptExisted, error: sentPromptError} = await getOrCreateSentPrompt({
         memberId,
         member,
