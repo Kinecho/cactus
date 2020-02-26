@@ -472,11 +472,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         flex-grow: 1;
         font-size: 3.2rem;
         padding: 4rem 2.4rem 2.4rem;
-
-        @include r(374) {
-        }
-        @include r(600) {
-        }
     }
 
     .insightContainer {
@@ -485,12 +480,36 @@ import {LocalStorageKey} from '@web/services/StorageService'
         color: $white;
         margin: 0 auto 8rem;
         max-width: 48rem;
+        min-height: 20rem; // to prevent bouncing around a bit
         padding: 2.4rem;
         width: 93%;
 
         @include r(600) {
             margin: 0 3.2rem 8rem;
             width: auto;
+        }
+
+        &.revealed {
+            background: $white none;
+            color: $darkestGreen;
+
+            .insightContent {
+                opacity: 1;
+                position: static;
+                transform: translate(0, 0);
+            }
+        }
+
+        &.revealed .insightIntro,
+        .insightContent {
+            opacity: 0;
+            position: absolute;
+            transform: translate(0, 3rem);
+        }
+
+        .insightContent,
+        .insightIntro {
+            transition: transform .1s ease-in, opacity .1s ease-in;
         }
 
         h4 {
