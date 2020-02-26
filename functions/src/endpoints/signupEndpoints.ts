@@ -178,10 +178,6 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     attachments.push({
         fields,
     });
-    await AdminSlackService.getSharedInstance().sendSignupsMessage({
-        text: `${email} triggered the Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
-        attachments: attachments
-    });
 
     const url = appendDomain(payload.continuePath, Config.web.domain);
     const sourceApp = payload.sourceApp || "web";
@@ -189,6 +185,11 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         handleCodeInApp: true,
         url,
     };
+
+    await AdminSlackService.getSharedInstance().sendSignupsMessage({
+        text: `${email} triggered the ${sourceApp} Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
+        attachments: attachments
+    });
 
     logger.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
@@ -200,13 +201,15 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         } else {
             await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         }
 

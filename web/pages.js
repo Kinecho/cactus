@@ -43,6 +43,11 @@ module.exports = {
         "path": "/auth-actions",
         "name": "email_action"
     },
+    "email_action": {
+        "title": "Email Action",
+        "path": "/authenticate-actions",
+        "name": "email_action"
+    },
     "account_settings": {
         "title": "Account | Cactus",
         "path": "/account",
@@ -97,10 +102,10 @@ module.exports = {
         "includeInDev": true,
         "name": "unsubscribe_confirmed"
     },
-    "ios_login_continue": {
-        "title": "iOS Login",
-        "path": "/ios-login-continue",
-        "name": "ios_login_continue"
+    "native_app_login_continue": {
+        "title": "App Login",
+        "path": "/app-login-continue",
+        "name": "native_app_login_continue"
     },
     "android_welcome": {
         "title": "Welcome",

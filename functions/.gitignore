@@ -9,6 +9,7 @@ reports/
 .runtimeconfig.json
 .runtimeconfig*
 
+package-lock.json
 
 # Typescript v1 declaration files
 typings/

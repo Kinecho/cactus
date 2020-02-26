@@ -15,6 +15,7 @@ export interface EmailStatusResponse extends ApiResponse {
 export enum SourceApp {
     web = "web",
     ios = "ios",
+    android = "android"
 }
 
 export interface MagicLinkRequest {
