@@ -214,6 +214,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
             flipped: boolean,
+            insightRevealed: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
             elementCopy: ElementCopy,
@@ -237,6 +238,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 authUnsubscriber: undefined,
                 member: undefined,
                 flipped: false,
+                insightRevealed: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
                 elementCopy: copy.elements,
@@ -360,6 +362,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.cactusModalVisible = true;
                 this.cactusModalElement = CactusElement[element];
                 this.disableNavigation()
+            },
+            revealInsight() {
+                this.insightRevealed = true;
             },
             tradeNote() {
                 this.trackShareTap();
