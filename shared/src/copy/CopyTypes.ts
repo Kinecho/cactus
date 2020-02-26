@@ -62,7 +62,9 @@ export interface CommonCopy {
     TRIAL: string,
     LEARN_MORE: string,
     IOS: string,
-    ANDROID: string
+    ANDROID: string,
+    VERIFY_IN_GMAIL: string,
+    VERIFY_GMAIL_URL: string
 }
 
 export interface ElementCopy {

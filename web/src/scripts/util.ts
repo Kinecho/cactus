@@ -149,6 +149,8 @@ export function addModal(modalId: string, options: {
     message?: string,
     imageUrl?: string,
     imageAlt?: string,
+    buttonCta?: string,
+    buttonUrl?: string,
     classNames?: string[],
     onClose?: () => void,
 }): HTMLDivElement {
@@ -180,6 +182,7 @@ export function addModal(modalId: string, options: {
     }
     let $title = null;
     let $message = null;
+    let $bottomButton = null;
 
     if (options.title) {
         $title = document.createElement("h2");
@@ -191,6 +194,15 @@ export function addModal(modalId: string, options: {
         $message = document.createElement("div");
         $message.innerText = options.message;
         $content.append($message);
+    }
+
+    if (options.buttonCta && options.buttonUrl) {
+        $bottomButton = document.createElement("a");
+        $bottomButton.innerText = options.buttonCta;
+        $bottomButton.href = options.buttonUrl;
+        $bottomButton.className = "button";
+        $bottomButton.target = "_blank";
+        $content.append($bottomButton);
     }
 
     const modal = document.createElement("div");
