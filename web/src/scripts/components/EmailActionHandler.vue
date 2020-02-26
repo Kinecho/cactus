@@ -95,7 +95,7 @@
                     logger.log("app source", sourceApp);
                     const isSignIn = getAuth().isSignInWithEmailLink(window.location.href);
 
-                    if (isSignIn && (sourceApp === SourceApp.ios || sourceApp === SourceApp.android)) {
+                    if (isSignIn && sourceApp === SourceApp.ios) {
                         let appUrl = `${PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN}`;
                         appUrl = appendQueryParams(appUrl, getAllQueryParams());
                         window.location.assign(appUrl);
