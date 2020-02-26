@@ -502,9 +502,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
         &.revealed .insightIntro,
         .insightContent {
+            left: 0;
+            margin: 0 auto;
             opacity: 0;
             position: absolute;
+            right: 0;
             transform: translate(0, 3rem);
+            width: 75%;
         }
 
         .insightContent,
