@@ -12,7 +12,26 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         <button class="secondary" @click="revealInsight">Reveal Insight</button>
                     </div>
                     <div class="insightContent">
-                        <p>You are amazing</p>
+                        <svg class="one" viewBox="0 0 100 100">
+                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
+                            <text x="50%" y="51%" text-anchor="middle">phish</text>
+                        </svg>
+                        <svg class="five" viewBox="0 0 100 100">
+                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
+                            <text x="50%" y="51%" text-anchor="middle">noodling</text>
+                        </svg>
+                        <svg class="two" viewBox="0 0 100 100">
+                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
+                            <text x="50%" y="51%" text-anchor="middle">myself</text>
+                        </svg>
+                        <svg class="four" viewBox="0 0 100 100">
+                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
+                            <text x="50%" y="51%" text-anchor="middle">cheer</text>
+                        </svg>
+                        <svg class="three" viewBox="0 0 100 100">
+                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
+                            <text x="50%" y="51%" text-anchor="middle">joy</text>
+                        </svg>
                     </div>
                 </div>
                 <div class="lowerContainer">
@@ -472,6 +491,22 @@ import {LocalStorageKey} from '@web/services/StorageService'
         flex-grow: 1;
         font-size: 3.2rem;
         padding: 4rem 2.4rem 2.4rem;
+    }
+
+    .one {
+        width: 3.2rem;
+    }
+    .two {
+        width: 4.8rem;
+    }
+    .three {
+        width: 6.4rem;
+    }
+    .four {
+        width: 8rem;
+    }
+    .five {
+        width: 9.6rem;
     }
 
     .insightContainer {
