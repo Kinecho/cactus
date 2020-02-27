@@ -12,25 +12,27 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         <button class="secondary" @click="revealInsight">Reveal Insight</button>
                     </div>
                     <div class="insightContent">
-                        <svg class="one" viewBox="0 0 100 100">
-                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
-                            <text x="50%" y="51%" text-anchor="middle">phish</text>
-                        </svg>
-                        <svg class="five" viewBox="0 0 100 100">
-                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
-                            <text x="50%" y="51%" text-anchor="middle">noodling</text>
-                        </svg>
-                        <svg class="two" viewBox="0 0 100 100">
-                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
-                            <text x="50%" y="51%" text-anchor="middle">myself</text>
-                        </svg>
-                        <svg class="four" viewBox="0 0 100 100">
-                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
-                            <text x="50%" y="51%" text-anchor="middle">cheer</text>
-                        </svg>
-                        <svg class="three" viewBox="0 0 100 100">
-                            <circle fill="#F0ECEA" cx="50" cy="50" r="50"/>
-                            <text x="50%" y="51%" text-anchor="middle">joy</text>
+                        <svg class="insightCluster" role="img" width="100%" height="368">
+                            <g class="one" style="transform: translate(80%,60%);">
+                                <circle fill="#F0ECEA" r="8%"/>
+                                <text style="font-size: 18px;" dominant-baseline="central" text-anchor="middle">phish</text>
+                            </g>
+                            <g class="two" style="transform: translate(21%,67%);">
+                                <circle fill="#0DADB1" r="11%"/>
+                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">myself</text>
+                            </g>
+                            <g class="three" style="transform: translate(19%,27%);">
+                                <circle fill="#6590ED" r="14%"/>
+                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">joy</text>
+                            </g>
+                            <g class="four" style="transform: translate(80%,23%);">
+                                <circle fill="#294FA3" r="17%"/>
+                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">cheer</text>
+                            </g>
+                            <g class="five" style="transform: translate(50%,50%);">
+                                <circle fill="#01214D" r="20%"/>
+                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">noodling</text>
+                            </g>
                         </svg>
                     </div>
                 </div>
@@ -493,20 +495,26 @@ import {LocalStorageKey} from '@web/services/StorageService'
         padding: 4rem 2.4rem 2.4rem;
     }
 
+    .insightCluster {
+        display: block;
+        font-size: 1.8rem;
+        width: 100%;
+    }
+
     .one {
-        width: 3.2rem;
+        transform: translate(0,0);
     }
     .two {
-        width: 4.8rem;
+        transform: translate(0,0);
     }
     .three {
-        width: 6.4rem;
+        transform: translate(0,0);
     }
     .four {
-        width: 8rem;
+        transform: translate(0,0);
     }
     .five {
-        width: 9.6rem;
+
     }
 
     .insightContainer {
@@ -532,6 +540,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 opacity: 1;
                 position: static;
                 transform: translate(0, 0);
+                width: 100%;
             }
         }
 
