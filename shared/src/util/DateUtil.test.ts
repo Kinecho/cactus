@@ -1,19 +1,26 @@
 import {
+    daysUntilDate,
     differenceInMinutes,
     formatDate,
     formatDateTime,
     formatDuration,
-    formatDurationAsTime, getCurrentQuarterHour,
+    formatDurationAsTime,
+    getCurrentQuarterHour,
     getDateAtMidnightDenver,
-    getDateObjectForTimezone, getFlamelinkDateStringInDenver,
-    getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
+    getDateObjectForTimezone,
+    getFlamelinkDateStringInDenver,
+    getMailchimpDateString,
+    getQuarterHourFromMinute,
+    getSendTimeUTC,
     getStreakDays,
-    getStreakWeeks,
     getStreakMonths,
+    getStreakWeeks,
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
-    numDaysAgoFromMidnights, toTimestampMs,
+    numDaysAgoFromMidnights,
+    plusDays,
+    toTimestampMs,
 } from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
@@ -695,4 +702,13 @@ describe("toTimestampMs", () => {
     test("number -> number", () => {
         expect(toTimestampMs(111111111111)).toEqual(111111111111);
     });
-})
+});
+
+describe("daysUntil test", () => {
+    test("check days until for various inputs", () => {
+        expect(daysUntilDate(plusDays(7))).toEqual(7);
+        expect(daysUntilDate(plusDays(3))).toEqual(3);
+        expect(daysUntilDate(plusDays(1))).toEqual(1);
+        expect(daysUntilDate(plusDays(0))).toEqual(0);
+    })
+});
