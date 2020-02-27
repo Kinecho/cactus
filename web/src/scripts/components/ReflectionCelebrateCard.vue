@@ -4,7 +4,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
-                <h2 class="successText">{{celebrateText}}</h2>
+                <h2 class="successText" v-if="!insightRevealed">{{celebrateText}}</h2>
                 <div :class="['insightContainer', {revealed: insightRevealed}]">
                     <h4>Daily Insight</h4>
                     <div class="insightIntro">
@@ -12,26 +12,70 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         <button class="secondary" @click="revealInsight">Reveal Insight</button>
                     </div>
                     <div class="insightContent">
-                        <svg class="insightCluster" role="img" width="100%" height="368">
-                            <g class="one" style="transform: translate(80%,60%);">
-                                <circle fill="#F0ECEA" r="8%"/>
-                                <text style="font-size: 18px;" dominant-baseline="central" text-anchor="middle">phish</text>
+                        <p>You used "moon" in 3 of your reflections this&nbsp;week.</p>
+                        <svg class="insightCluster" role="img" width="230" height="230">
+                            <g style="transform: translate(71%,73%);">
+                                <circle fill="#F0ECEA" r="3%"/>
                             </g>
-                            <g class="two" style="transform: translate(21%,67%);">
-                                <circle fill="#0DADB1" r="11%"/>
-                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">myself</text>
+                            <g style="transform: translate(78%,47%);">
+                                <circle fill="#F0ECEA" r="3%"/>
                             </g>
-                            <g class="three" style="transform: translate(19%,27%);">
-                                <circle fill="#6590ED" r="14%"/>
-                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">joy</text>
+                            <g style="transform: translate(61%,80%);">
+                                <circle fill="#F0ECEA" r="3%"/>
                             </g>
-                            <g class="four" style="transform: translate(80%,23%);">
-                                <circle fill="#294FA3" r="17%"/>
-                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">cheer</text>
+                            <g style="transform: translate(84%,27%);">
+                                <circle fill="#F0ECEA" r="3%"/>
                             </g>
-                            <g class="five" style="transform: translate(50%,50%);">
-                                <circle fill="#01214D" r="20%"/>
-                                <text style="fill: #fff; font-size: 18px;" dominant-baseline="central" text-anchor="middle">noodling</text>
+                            <g style="transform: translate(15%,75%);">
+                                <circle fill="#F0ECEA" r="3%"/>
+                            </g>
+                            <g style="transform: translate(3%,50%);">
+                                <circle fill="#F0ECEA" r="3%"/>
+                            </g>
+                            <g style="transform: translate(9%,18%);">
+                                <circle fill="#F0ECEA" r="3%"/>
+                            </g>
+                            <g style="transform: translate(58%,9%);">
+                                <circle fill="#F0ECEA" r="3%"/>
+                            </g>
+                            <g style="transform: translate(15%,35%);">
+                                <circle fill="#F0ECEA" r="12%"/>
+                            </g>
+                            <g style="transform: translate(62%,57%);">
+                                <circle fill="#F0ECEA" r="12%"/>
+                            </g>
+                            <g style="transform: translate(28%,75%);">
+                                <circle fill="#F0ECEA" r="6%"/>
+                            </g>
+                            <g style="transform: translate(71%,37%);">
+                                <circle fill="#F0ECEA" r="6%"/>
+                            </g>
+                            <g style="transform: translate(45%,6%);">
+                                <circle fill="#F0ECEA" r="6%"/>
+                            </g>
+                            <g class="element1 size3" style="transform: translate(46%,30%);">
+                                <circle r="16%"/>
+                                <text dominant-baseline="central" text-anchor="middle">moon</text>
+                            </g>
+                            <g class="element1 size1" style="transform: translate(24%,12%);">
+                                <circle r="10%"/>
+                                <text dominant-baseline="central" text-anchor="middle">earth</text>
+                            </g>
+                            <g class="element1 size1" style="transform: translate(46%,77%);">
+                                <circle r="10%"/>
+                                <text dominant-baseline="central" text-anchor="middle">Samantha</text>
+                            </g>
+                            <g class="element2 size1" style="transform: translate(36%,57%);">
+                                <circle r="10%"/>
+                                <text dominant-baseline="central" text-anchor="middle">sun</text>
+                            </g>
+                            <g class="element3 size1" style="transform: translate(71%,20%);">
+                                <circle r="10%"/>
+                                <text dominant-baseline="central" text-anchor="middle">anger</text>
+                            </g>
+                            <g class="element3 size1" style="transform: translate(15%,60%);">
+                                <circle r="10%"/>
+                                <text dominant-baseline="central" text-anchor="middle">light</text>
                             </g>
                         </svg>
                     </div>
@@ -496,25 +540,56 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .insightCluster {
-        display: block;
+    }
+
+    .element1 {
+        circle {
+            fill: $dolphin;
+        }
+        text {
+            fill: $white;
+        }
+    }
+    .element2 {
+        circle {
+            fill: $indigo;
+        }
+        text {
+            fill: $white;
+        }
+    }
+    .element3 {
+        circle {
+            fill: $purple;
+        }
+        text {
+            fill: $white;
+        }
+    }
+    .element4 {
+        circle {
+            fill: $darkestGreen;
+        }
+        text {
+            fill: $white;
+        }
+    }
+    .element5 {
+        circle {
+            fill: $royal;
+        }
+        text {
+            fill: $darkText;
+        }
+    }
+    .size1 {
+        font-size: 1.4rem;
+    }
+    .size2 {
+        font-size: 1.6rem;
+    }
+    .size3 {
         font-size: 1.8rem;
-        width: 100%;
-    }
-
-    .one {
-        transform: translate(0,0);
-    }
-    .two {
-        transform: translate(0,0);
-    }
-    .three {
-        transform: translate(0,0);
-    }
-    .four {
-        transform: translate(0,0);
-    }
-    .five {
-
     }
 
     .insightContainer {
@@ -535,6 +610,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
         &.revealed {
             background: $white none;
             color: $darkestGreen;
+            margin-top: 4rem;
 
             .insightContent {
                 opacity: 1;
