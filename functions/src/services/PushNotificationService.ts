@@ -26,6 +26,14 @@ export default class PushNotificationService {
             return {attempted: false, alreadyAnswered: true};
         }
 
+        const memberTier = member.subscription?.tier;
+        const contentTiers = promptContent?.subscriptionTiers;
+
+        if (memberTier && contentTiers && 
+            !contentTiers.includes(memberTier)) {
+            return {attempted: false, notAvailbleToTier: true};
+        }
+
         if (!sentPrompt.containsMedium(PromptSendMedium.PUSH)) {
             return await this.sendPromptNotification({
                 member,
