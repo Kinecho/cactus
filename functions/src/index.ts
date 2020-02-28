@@ -18,7 +18,7 @@ import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob"
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
-import {onDelete, transactionalOnCreate} from "@api/triggers/UserTriggers";
+import {onDelete} from "@api/triggers/UserTriggers";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
@@ -33,6 +33,7 @@ import {
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
 import {onPublish as syncTrailToMailchimpMembersJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
+import {transactionalOnCreate} from "@admin/AuthUserCreateJob";
 
 export const cloudFunctions = {
     //API Endpoints

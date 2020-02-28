@@ -10,6 +10,7 @@ import Logger from "@shared/Logger";
 import EmailLog, {EmailCategory, SendgridTemplate, TemplateData} from "@shared/models/EmailLog";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import {isGeneratedEmailAddress} from "@admin/util/StringUtil";
 
 export const SendgridHeaders = {
     MessageID: "x-message-id"
@@ -67,6 +68,15 @@ export default class AdminSendgridService {
         return this.config.sendgrid.template_ids[templateName];
     }
 
+    async sendMail(mailParams: any) {
+        const toAddress = mailParams?.to;
+        if (!isGeneratedEmailAddress(toAddress)) {
+            return await sgMail.send(mailParams);
+        } else {
+            throw new Error("Email address was generated and is not valid.");
+        }
+    }
+
     async sendMagicLink(options: MagicLinkEmail): Promise<boolean> {
         try {
             const params = {
@@ -80,7 +90,7 @@ export default class AdminSendgridService {
                 }
             };
             logger.log("Sending magic link email with params", params);
-            await sgMail.send(params);
+            await this.sendMail(params);
 
             logger.log("Sendgrid email sent successfully");
             return true
@@ -111,7 +121,7 @@ export default class AdminSendgridService {
 
             logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
-            await sgMail.send(mailParams);
+            await this.sendMail(mailParams);
 
             logger.log("Sendgrid email sent successfully");
             return true;
@@ -143,7 +153,7 @@ export default class AdminSendgridService {
 
             logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
-            await sgMail.send(mailParams);
+            await this.sendMail(mailParams);
 
             logger.log("Sendgrid email sent successfully");
             return true;
@@ -176,7 +186,7 @@ export default class AdminSendgridService {
 
             logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
-            await sgMail.send(mailParams);
+            await this.sendMail(mailParams);
 
             logger.log("Sendgrid email sent successfully");
             return true;
@@ -249,7 +259,7 @@ export default class AdminSendgridService {
         logger.log("Sending email with params", JSON.stringify(mailParams, null, 2));
 
         try {
-            const _response = await sgMail.send(mailParams);
+            const _response = await this.sendMail(mailParams);
             let response;
             if (Array.isArray(_response)) {
                 const [firstResponse] = _response;

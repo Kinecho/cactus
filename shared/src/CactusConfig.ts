@@ -21,7 +21,8 @@ export interface CactusConfig {
     allowedOrigins: (string | RegExp)[],
     app: {
         serverName: string | undefined
-        environment: EnvironmentType
+        environment: EnvironmentType,
+        fake_email_domain: string
     },
     mailchimp: {
         api_key: string,
