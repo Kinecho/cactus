@@ -6,7 +6,7 @@ import {gtag, fireSignupEvent} from "@web/analytics";
 import {addModal, getQueryParam, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
-import {isValidEmail} from "@shared/util/StringUtil";
+import {isValidEmail, isGmail} from "@shared/util/StringUtil";
 import {NotificationStatus} from "@shared/models/CactusMember";
 import {
     UnsubscribeRequest,
@@ -16,8 +16,10 @@ import {
 } from "@shared/mailchimp/models/UpdateStatusTypes";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {LocalStorageKey} from "@web/services/StorageService";
+import CopyService from '@shared/copy/CopyService'
 import Logger from "@shared/Logger";
 
+const copy = CopyService.getSharedInstance().copy;
 const logger = new Logger("mailchimp.ts");
 
 /**
@@ -151,6 +153,8 @@ export function configureLoginForm(formId: string) {
                     message,
                     imageUrl,
                     imageAlt: 'Email Signup Success!',
+                    buttonCta: isGmail(emailAddress) ? copy.common.VERIFY_IN_GMAIL : undefined,
+                    buttonUrl: isGmail(emailAddress) ? copy.common.VERIFY_GMAIL_URL : undefined
                 });
                 gtag('event', 'email_signup_success', {
                     event_category: "email_signup",

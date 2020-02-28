@@ -105,6 +105,10 @@ export function isValidEmail(input: string) {
     return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input);
 }
 
+export function isGmail(input: string) {
+    return /^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/.test(input);
+}
+
 export function destructureDisplayName(displayName?: string | null): { firstName?: string, middleName?: string, lastName?: string } {
     if (!displayName) {
         return {};
