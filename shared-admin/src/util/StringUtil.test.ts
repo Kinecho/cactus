@@ -74,6 +74,30 @@ describe("check if email is fake / generated", () => {
         const output = isGeneratedEmailAddress("scott@cactus.app");
         expect(output).toBe(false);
     });
+    test("invalid emailAddress space in it", () => {
+        const output = isGeneratedEmailAddress("scott @cactus.app");
+        expect(output).toBe(false);
+    });
+    test("invalid emailAddress leading space", () => {
+        const output = isGeneratedEmailAddress(" scott@cactus.app");
+        expect(output).toBe(false);
+    });
+    test("invalid emailAddress leading space", () => {
+        const output = isGeneratedEmailAddress(" scott@cactus.app");
+        expect(output).toBe(false);
+    });
+    test("invalid emailAddress trailing space", () => {
+        const output = isGeneratedEmailAddress("scott@cactus.app ");
+        expect(output).toBe(false);
+    });
+    test("invalid emailAddress camel case", () => {
+        const output = isGeneratedEmailAddress("ScOtTT@cacTus.app");
+        expect(output).toBe(false);
+    });
+    test("fake emailAddress camel case", () => {
+        const output = isGeneratedEmailAddress("scott@PRivate.Cactus.App");
+        expect(output).toBe(true);
+    });
     test("fake emailAddress", () => {
         const output = isGeneratedEmailAddress("scott@private.cactus.app");
         expect(output).toBe(true);

@@ -49,7 +49,9 @@ export function buildPromptURL(prompt?: ReflectionPrompt): string | undefined {
 
 export function isGeneratedEmailAddress(emailAddress: string, config: CactusConfig = getConfig()): boolean {
     if (emailAddress && config?.app?.fake_email_domain) {
-        return emailAddress.includes(config.app.fake_email_domain);
+        const domain = config.app.fake_email_domain.trim().toLowerCase();
+        const email = emailAddress.trim().toLowerCase();
+        return email.includes(domain);
     }
 
     return false;
