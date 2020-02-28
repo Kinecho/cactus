@@ -120,13 +120,15 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             if (user && !user.email && result?.user?.email) {
                 /* if the Firebase Auth User has no email, 
                    let's update it with the generated one */
-                admin.auth().updateUser(userId, {
-                  email: result.user.email
-                }).then(function() {
-                    logger.log('Successfully updated auth user email address.');
-                }).catch(function(error) {
+                try {
+                    await admin.auth().updateUser(userId, {
+                      email: result.user.email
+                    }).then(function() {
+                        logger.log('Successfully updated auth user email address.');
+                    })
+                } catch(error) {
                     logger.log('Could not update auth user email address', error);
-                })
+                }
             }
 
             logger.log(`Transaction returning ${email}, ${userId}...`, result);
