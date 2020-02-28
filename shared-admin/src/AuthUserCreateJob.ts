@@ -211,10 +211,11 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
            let's update it with the generated one */
         if (user?.uid && !user.email) {
             try {
-                userRecord = await admin.auth().updateUser(user.uid, {
-                  email: generateEmailAddressForUser(user.uid)
-                }).then(function() {
+                await admin.auth().updateUser(user.uid, {
+                  email: generateEmailAddressForUser(user)
+                }).then(function(updatedUserRecord) {
                     logger.log('Successfully updated auth user email address.');
+                    userRecord = updatedUserRecord;
                 })
             } catch(error) {
                 logger.log('Could not update auth user email address', error);
