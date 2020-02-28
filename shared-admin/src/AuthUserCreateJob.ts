@@ -61,7 +61,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             const user = await AdminUserService.getSharedInstance().getById(userId, {transaction});
             const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
                 userId,
-                email: userRecord.email
+                email: email
             }, {transaction});
 
             const result: UserCheckResult = {
@@ -78,6 +78,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
             //if there is no email, we can't continue.
             if (!email) {
+                logger.error("No email on auth user!", userRecord);
                 result.error = "No email found on the User Record. Can not set up member";
                 return result;
             }
@@ -118,17 +119,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             result.user = createUserResult.user;
 
             if (user && !user.email && result?.user?.email) {
-                /* if the Firebase Auth User has no email, 
-                   let's update it with the generated one */
-                try {
-                    await admin.auth().updateUser(userId, {
-                      email: result.user.email
-                    }).then(function() {
-                        logger.log('Successfully updated auth user email address.');
-                    })
-                } catch(error) {
-                    logger.log('Could not update auth user email address', error);
-                }
+                
             }
 
             logger.log(`Transaction returning ${email}, ${userId}...`, result);
@@ -179,7 +170,7 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.id = userId;
     cactusMember.createdAt = new Date();
     cactusMember.userId = user.uid;
-    cactusMember.email = email || generateEmailAddressForUser(user);
+    cactusMember.email = email;
     cactusMember.lastName = lastName;
     cactusMember.firstName = firstName;
     cactusMember.signupAt = new Date();
@@ -214,8 +205,23 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
     logger.log("Setting up user using new transactional method");
+    let userRecord = user;
     try {
-        const userCheckResult = await setupUserTransaction(user);
+        /* If the Firebase Auth User has no email, 
+           let's update it with the generated one */
+        if (user?.uid && !user.email) {
+            try {
+                userRecord = await admin.auth().updateUser(user.uid, {
+                  email: generateEmailAddressForUser(userId)
+                }).then(function() {
+                    logger.log('Successfully updated auth user email address.');
+                })
+            } catch(error) {
+                logger.log('Could not update auth user email address', error);
+            }
+        }
+
+        const userCheckResult = await setupUserTransaction(userRecord);
         logger.log("setupUserTransaction finished", userCheckResult);
 
         if (userCheckResult.pendingUser && userCheckResult.member && userCheckResult.user) {
@@ -232,7 +238,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
 
         const slackMessage = createSlackMessage({
             member: userCheckResult.member,
-            user: user,
+            user: userRecord,
             pendingUser: userCheckResult.pendingUser,
             existingCactusMember: !userCheckResult.isNewMember,
             errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
