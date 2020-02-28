@@ -1,4 +1,4 @@
-import {buildPromptURL, splitOnFirst} from '@admin/util/StringUtil'
+import {buildPromptURL, splitOnFirst, isGeneratedEmailAddress} from '@admin/util/StringUtil'
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {resetTestConfig, setTestConfig} from "@admin/config/configService";
 
@@ -60,6 +60,23 @@ describe("get prompt content url", () => {
 
         const output = buildPromptURL(input);
         expect(output).toEqual("https://mydomain.com/test/path")
+    });
+
+});
+
+
+describe("check if email is fake / generated", () => {
+    test("blank emailAddress", () => {
+        const output = isGeneratedEmailAddress("");
+        expect(output).toBe(false);
+    });
+    test("valid emailAddress", () => {
+        const output = isGeneratedEmailAddress("scott@cactus.app");
+        expect(output).toBe(false);
+    });
+    test("fake emailAddress", () => {
+        const output = isGeneratedEmailAddress("scott@private.cactus.app");
+        expect(output).toBe(true);
     });
 
 });
