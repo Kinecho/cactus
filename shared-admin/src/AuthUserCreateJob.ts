@@ -334,7 +334,7 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
 
 export function generateEmailAddressForUser(user: admin.auth.UserRecord): string | undefined {
     if (user?.uid && config.app.fake_email_domain) {
-        return user.uid + '@' + config.app.fake_email_domain;
+        return `${user.uid}@${config.app.fake_email_domain}`;
     }
 
     return undefined;
