@@ -117,6 +117,18 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
             result.user = createUserResult.user;
 
+            if (!user.email && result?.user?.email) {
+                /* if the Firebase Auth User has no email, 
+                   let's update it with the generated one */
+                admin.auth().updateUser(userId, {
+                  email: result.user.email
+                }).then(function() {
+                    logger.log('Successfully updated auth user email address.');
+                }).catch(function(error) {
+                    logger.log('Could not update auth user email address', error);
+                })
+            }
+
             logger.log(`Transaction returning ${email}, ${userId}...`, result);
             return result
         });
@@ -133,7 +145,7 @@ async function createCactusUser(options: { user: admin.auth.UserRecord, member: 
 
     const userModel = new User();
     userModel.createdAt = new Date();
-    userModel.email = user.email;
+    userModel.email = user.email || member.email;
     userModel.id = user.uid;
     userModel.phoneNumber = user.phoneNumber;
     userModel.providerIds = user.providerData.map(provider => provider.providerId);
