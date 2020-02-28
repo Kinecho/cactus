@@ -47,9 +47,8 @@ interface UserCheckResult {
  * @param {admin.auth.UserRecord} userRecord
  * @return {Promise<UserCheckResult>}
  */
-async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<UserCheckResult> {
+async function setupUserTransaction(userRecord: admin.auth.UserRecord, email: string | undefined): Promise<UserCheckResult> {
     const userId = userRecord.uid;
-    const email = userRecord.email;
 
     logger.log(`Starting signup process for ${email} userId = ${userId}`);
     try {
@@ -112,6 +111,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             const createUserResult = await createCactusUser({
                 user: userRecord,
                 member: createMemberResult.member,
+                email: email,
                 transaction
             });
             logger.log(`Cactus User created ${email}, userId = ${userId}`, createUserResult);
@@ -129,12 +129,12 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
     }
 }
 
-async function createCactusUser(options: { user: admin.auth.UserRecord, member: CactusMember, transaction: Transaction }): Promise<{ user: User }> {
-    const {user, member, transaction} = options;
+async function createCactusUser(options: { user: admin.auth.UserRecord, member: CactusMember, email: string, transaction: Transaction }): Promise<{ user: User }> {
+    const {user, member, transaction, email} = options;
 
     const userModel = new User();
     userModel.createdAt = new Date();
-    userModel.email = user.email || member.email;
+    userModel.email = email;
     userModel.id = user.uid;
     userModel.phoneNumber = user.phoneNumber;
     userModel.providerIds = user.providerData.map(provider => provider.providerId);
@@ -201,25 +201,10 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
     logger.log("Setting up user using new transactional method");
-    let userRecord = user;
-    try {
-        /* If the Firebase Auth User has no email, 
-           let's update it with the generated one */
-        if (user?.uid && !user.email) {
-            try {
-                await admin.auth().updateUser(user.uid, {
-                  email: generateEmailAddressForUser(user),
-                  emailVerified: true
-                }).then(function(updatedUserRecord) {
-                    logger.log('Successfully updated auth user email address.');
-                    userRecord = updatedUserRecord;
-                })
-            } catch(error) {
-                logger.log('Could not update auth user email address', error);
-            }
-        }
+    const email = user.email || generateEmailAddressForUser(user);
 
-        const userCheckResult = await setupUserTransaction(userRecord);
+    try {
+        const userCheckResult = await setupUserTransaction(user, email);
         logger.log("setupUserTransaction finished", userCheckResult);
 
         if (userCheckResult.pendingUser && userCheckResult.member && userCheckResult.user) {
@@ -236,7 +221,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
 
         const slackMessage = createSlackMessage({
             member: userCheckResult.member,
-            user: userRecord,
+            user: user,
             pendingUser: userCheckResult.pendingUser,
             existingCactusMember: !userCheckResult.isNewMember,
             errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
@@ -286,7 +271,7 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
     const fields: SlackAttachmentField[] = [];
     const attachment: SlackAttachment = {fields, color: AttachmentColor.success};
     const attachments = [attachment, ...errorAttachments];
-    attachment.title = `:wave: ${user.email || user.phoneNumber} has signed up `;
+    attachment.title = `:wave: ${member?.email || user.uid} has signed up `;
 
     const chatMessage: ChatMessage = {
         text: ''
