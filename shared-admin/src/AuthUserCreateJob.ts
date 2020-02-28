@@ -208,7 +208,8 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
         if (user?.uid && !user.email) {
             try {
                 await admin.auth().updateUser(user.uid, {
-                  email: generateEmailAddressForUser(user)
+                  email: generateEmailAddressForUser(user),
+                  emailVerified: true
                 }).then(function(updatedUserRecord) {
                     logger.log('Successfully updated auth user email address.');
                     userRecord = updatedUserRecord;
