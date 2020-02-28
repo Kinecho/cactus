@@ -118,10 +118,6 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
             result.user = createUserResult.user;
 
-            if (user && !user.email && result?.user?.email) {
-                
-            }
-
             logger.log(`Transaction returning ${email}, ${userId}...`, result);
             return result
         });
