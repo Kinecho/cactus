@@ -77,8 +77,8 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord, email: st
 
             //if there is no email, we can't continue.
             if (!email) {
-                logger.error("No email on auth user!", userRecord);
-                result.error = "No email found on the User Record. Can not set up member";
+                logger.error("No email was provided!", userRecord);
+                result.error = "No email passed. Can not set up member.";
                 return result;
             }
 
@@ -325,7 +325,7 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
 
 export function generateEmailAddressForUser(user: admin.auth.UserRecord): string | undefined {
     if (user?.uid && config.app.fake_email_domain) {
-        return `${user.uid}@${config.app.fake_email_domain}`;
+        return `${user.uid.trim()}@${config.app.fake_email_domain}`.trim().toLowerCase();
     }
 
     return undefined;
