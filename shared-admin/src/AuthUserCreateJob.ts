@@ -117,7 +117,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
             result.user = createUserResult.user;
 
-            if (!user.email && result?.user?.email) {
+            if (user && !user.email && result?.user?.email) {
                 /* if the Firebase Auth User has no email, 
                    let's update it with the generated one */
                 admin.auth().updateUser(userId, {
