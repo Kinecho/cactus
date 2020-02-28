@@ -58,6 +58,9 @@ export default class FindBadAuth extends FirebaseCommand {
 
     async processUsers(users: UserRecord[]) {
         users.forEach(u => {
+            if (!u.email) {
+                this.noEmailUsers.push(u);
+            }
             let noEmail = !!u.providerData.find(p => {
                 return isBlank(p.email)
             });
