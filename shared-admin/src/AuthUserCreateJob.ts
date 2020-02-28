@@ -21,10 +21,13 @@ import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTy
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import Logger from "@shared/Logger";
 import MailchimpService from "@admin/services/MailchimpService";
+import {getConfig} from "@admin/config/configService";
+import {isGeneratedEmailAddress} from "@admin/util/StringUtil";
 
 
 const mailchimpService = MailchimpService.getSharedInstance();
 const slackService = AdminSlackService.getSharedInstance();
+const config = getConfig();
 
 const logger = new Logger("AuthUserCreateJob");
 
@@ -162,7 +165,7 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.id = userId;
     cactusMember.createdAt = new Date();
     cactusMember.userId = user.uid;
-    cactusMember.email = email;
+    cactusMember.email = email || generateEmailAddressForUser(user);
     cactusMember.lastName = lastName;
     cactusMember.firstName = firstName;
     cactusMember.signupAt = new Date();
@@ -171,14 +174,20 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
     cactusMember.subscription = getDefaultSubscription();
 
-    const mailchimpSubscriptionRequest: MailchimpSignupRequest = new MailchimpSignupRequest(email);
-    mailchimpSubscriptionRequest.lastName = lastName;
-    mailchimpSubscriptionRequest.firstName = firstName;
-    mailchimpSubscriptionRequest.referredByEmail = cactusMember.referredByEmail;
-    mailchimpSubscriptionRequest.subscriptionTier = cactusMember?.tier;
+    let mailchimpErrorResult;
 
-    const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(mailchimpSubscriptionRequest);
-    cactusMember.mailchimpListMember = mailchimpListMember;
+    if (cactusMember.email && !isGeneratedEmailAddress(cactusMember.email)) {
+        const mailchimpSubscriptionRequest: MailchimpSignupRequest = new MailchimpSignupRequest(email);
+        mailchimpSubscriptionRequest.lastName = lastName;
+        mailchimpSubscriptionRequest.firstName = firstName;
+        mailchimpSubscriptionRequest.referredByEmail = cactusMember.referredByEmail;
+        mailchimpSubscriptionRequest.subscriptionTier = cactusMember?.tier;
+
+        const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(mailchimpSubscriptionRequest);
+        cactusMember.mailchimpListMember = mailchimpListMember;
+
+        mailchimpErrorResult = mailchimpError;
+    }
 
     const savedMember = await AdminCactusMemberService.getSharedInstance().save(cactusMember, {transaction});
 
@@ -186,7 +195,7 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
         throw new Error("Failed to save cactus member. No member returned")
     }
 
-    return {member: savedMember, mailchimpError: mailchimpError};
+    return {member: savedMember, mailchimpError: mailchimpErrorResult};
 }
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
@@ -310,3 +319,11 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
     attachment.ts = `${(new Date()).getTime() / 1000}`;
     return chatMessage;
 }
+
+export function generateEmailAddressForUser(user: admin.auth.UserRecord): string | undefined {
+    if (user?.uid && config.app.fake_email_domain) {
+        return user.uid + '@' + config.app.fake_email_domain;
+    }
+
+    return undefined;
+} 
