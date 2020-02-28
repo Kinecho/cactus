@@ -21,10 +21,13 @@ import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTy
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import Logger from "@shared/Logger";
 import MailchimpService from "@admin/services/MailchimpService";
+import {getConfig} from "@admin/config/configService";
+import {isGeneratedEmailAddress} from "@admin/util/StringUtil";
 
 
 const mailchimpService = MailchimpService.getSharedInstance();
 const slackService = AdminSlackService.getSharedInstance();
+const config = getConfig();
 
 const logger = new Logger("AuthUserCreateJob");
 
@@ -44,9 +47,8 @@ interface UserCheckResult {
  * @param {admin.auth.UserRecord} userRecord
  * @return {Promise<UserCheckResult>}
  */
-async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<UserCheckResult> {
+async function setupUserTransaction(userRecord: admin.auth.UserRecord, email: string | undefined): Promise<UserCheckResult> {
     const userId = userRecord.uid;
-    const email = userRecord.email;
 
     logger.log(`Starting signup process for ${email} userId = ${userId}`);
     try {
@@ -58,7 +60,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             const user = await AdminUserService.getSharedInstance().getById(userId, {transaction});
             const member = await AdminCactusMemberService.getSharedInstance().findCactusMember({
                 userId,
-                email: userRecord.email
+                email: email
             }, {transaction});
 
             const result: UserCheckResult = {
@@ -75,7 +77,8 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
 
             //if there is no email, we can't continue.
             if (!email) {
-                result.error = "No email found on the User Record. Can not set up member";
+                logger.error("No email was provided!", userRecord);
+                result.error = "No email passed. Can not set up member.";
                 return result;
             }
 
@@ -108,6 +111,7 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
             const createUserResult = await createCactusUser({
                 user: userRecord,
                 member: createMemberResult.member,
+                email: email,
                 transaction
             });
             logger.log(`Cactus User created ${email}, userId = ${userId}`, createUserResult);
@@ -125,12 +129,12 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord): Promise<
     }
 }
 
-async function createCactusUser(options: { user: admin.auth.UserRecord, member: CactusMember, transaction: Transaction }): Promise<{ user: User }> {
-    const {user, member, transaction} = options;
+async function createCactusUser(options: { user: admin.auth.UserRecord, member: CactusMember, email: string, transaction: Transaction }): Promise<{ user: User }> {
+    const {user, member, transaction, email} = options;
 
     const userModel = new User();
     userModel.createdAt = new Date();
-    userModel.email = user.email;
+    userModel.email = email;
     userModel.id = user.uid;
     userModel.phoneNumber = user.phoneNumber;
     userModel.providerIds = user.providerData.map(provider => provider.providerId);
@@ -171,14 +175,20 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
     cactusMember.subscription = getDefaultSubscription();
 
-    const mailchimpSubscriptionRequest: MailchimpSignupRequest = new MailchimpSignupRequest(email);
-    mailchimpSubscriptionRequest.lastName = lastName;
-    mailchimpSubscriptionRequest.firstName = firstName;
-    mailchimpSubscriptionRequest.referredByEmail = cactusMember.referredByEmail;
-    mailchimpSubscriptionRequest.subscriptionTier = cactusMember?.tier;
+    let mailchimpErrorResult;
 
-    const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(mailchimpSubscriptionRequest);
-    cactusMember.mailchimpListMember = mailchimpListMember;
+    if (cactusMember.email && !isGeneratedEmailAddress(cactusMember.email)) {
+        const mailchimpSubscriptionRequest: MailchimpSignupRequest = new MailchimpSignupRequest(email);
+        mailchimpSubscriptionRequest.lastName = lastName;
+        mailchimpSubscriptionRequest.firstName = firstName;
+        mailchimpSubscriptionRequest.referredByEmail = cactusMember.referredByEmail;
+        mailchimpSubscriptionRequest.subscriptionTier = cactusMember?.tier;
+
+        const {mailchimpListMember, error: mailchimpError} = await upsertMailchimpSubscriber(mailchimpSubscriptionRequest);
+        cactusMember.mailchimpListMember = mailchimpListMember;
+
+        mailchimpErrorResult = mailchimpError;
+    }
 
     const savedMember = await AdminCactusMemberService.getSharedInstance().save(cactusMember, {transaction});
 
@@ -186,13 +196,15 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
         throw new Error("Failed to save cactus member. No member returned")
     }
 
-    return {member: savedMember, mailchimpError: mailchimpError};
+    return {member: savedMember, mailchimpError: mailchimpErrorResult};
 }
 
 export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
     logger.log("Setting up user using new transactional method");
+    const email = user.email || generateEmailAddressForUser(user);
+
     try {
-        const userCheckResult = await setupUserTransaction(user);
+        const userCheckResult = await setupUserTransaction(user, email);
         logger.log("setupUserTransaction finished", userCheckResult);
 
         if (userCheckResult.pendingUser && userCheckResult.member && userCheckResult.user) {
@@ -259,7 +271,7 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
     const fields: SlackAttachmentField[] = [];
     const attachment: SlackAttachment = {fields, color: AttachmentColor.success};
     const attachments = [attachment, ...errorAttachments];
-    attachment.title = `:wave: ${user.email || user.phoneNumber} has signed up `;
+    attachment.title = `:wave: ${member?.email || user.uid} has signed up `;
 
     const chatMessage: ChatMessage = {
         text: ''
@@ -310,3 +322,11 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
     attachment.ts = `${(new Date()).getTime() / 1000}`;
     return chatMessage;
 }
+
+export function generateEmailAddressForUser(user: admin.auth.UserRecord): string | undefined {
+    if (user?.uid && config.app.fake_email_domain) {
+        return `${user.uid.trim()}@${config.app.fake_email_domain}`.trim().toLowerCase();
+    }
+
+    return undefined;
+} 

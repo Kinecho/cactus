@@ -77,6 +77,7 @@ const defaultTestConfig: CactusConfig = {
     app: {
         environment: "test",
         serverName: "test_env",
+        fake_email_domain: "private.cactus.app"
     },
     sentry: {
         api_token: "myapitoken",
