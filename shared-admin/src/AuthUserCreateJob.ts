@@ -4,7 +4,7 @@ import AdminSlackService, {
     SlackAttachment,
     SlackAttachmentField
 } from "@admin/services/AdminSlackService";
-import {destructureDisplayName, getProviderDisplayName} from "@shared/util/StringUtil";
+import {destructureDisplayName, getProviderDisplayName, isBlank} from "@shared/util/StringUtil";
 import {formatDate} from "@shared/util/DateUtil";
 import * as admin from "firebase-admin";
 import CactusMember from "@shared/models/CactusMember";
@@ -21,13 +21,8 @@ import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTy
 import {SubscriptionResultStatus} from "@shared/mailchimp/models/SubscriptionResult";
 import Logger from "@shared/Logger";
 import MailchimpService from "@admin/services/MailchimpService";
-import {getConfig} from "@admin/config/configService";
 import {isGeneratedEmailAddress} from "@admin/util/StringUtil";
-
-
-const mailchimpService = MailchimpService.getSharedInstance();
-const slackService = AdminSlackService.getSharedInstance();
-const config = getConfig();
+import {getConfig} from "@admin/config/configService";
 
 const logger = new Logger("AuthUserCreateJob");
 
@@ -44,10 +39,12 @@ interface UserCheckResult {
 
 /**
  * Using a transaction, create or update the User and CactusMember objects
- * @param {admin.auth.UserRecord} userRecord
+ * @param {admin.auth.UserRecord} options.userRecord
+ * @param {string|undefined} [options.email]
  * @return {Promise<UserCheckResult>}
  */
-async function setupUserTransaction(userRecord: admin.auth.UserRecord, email: string | undefined): Promise<UserCheckResult> {
+async function setupUserTransaction(options: { userRecord: admin.auth.UserRecord, email: string | undefined, useAuthDate: boolean }): Promise<UserCheckResult> {
+    const {userRecord, email, useAuthDate} = options;
     const userId = userRecord.uid;
 
     logger.log(`Starting signup process for ${email} userId = ${userId}`);
@@ -101,7 +98,13 @@ async function setupUserTransaction(userRecord: admin.auth.UserRecord, email: st
             }
 
             logger.log("\ncreating cactus member....");
-            const createMemberResult = await createCactusMember({user: userRecord, pendingUser, transaction, email});
+            const createMemberResult = await createCactusMember({
+                user: userRecord,
+                pendingUser,
+                transaction,
+                email,
+                useAuthDate
+            });
             logger.log(`Cactus Member created ${email}, userId = ${userId}, memberId = ${member && member.id}`, createMemberResult);
 
             result.member = createMemberResult.member;
@@ -149,7 +152,8 @@ interface CreateMemberOptions {
     user: admin.auth.UserRecord,
     email: string,
     pendingUser?: PendingUser | undefined,
-    transaction: Transaction
+    transaction: Transaction,
+    useAuthDate: boolean,
 }
 
 /**
@@ -158,18 +162,19 @@ interface CreateMemberOptions {
  * @return {Promise<{member: CactusMember; subscription: MailchimpSignupRequest}>}
  */
 async function createCactusMember(options: CreateMemberOptions): Promise<{ member: CactusMember, mailchimpError?: any }> {
-    const {user, pendingUser, transaction, email} = options;
+    const {user, pendingUser, transaction, email, useAuthDate} = options;
     const userId = user.uid;
     const displayName = user.displayName || "";
     const {firstName, lastName} = destructureDisplayName(displayName);
     const cactusMember = new CactusMember();
+    const authCreatedAt = useAuthDate && !isBlank(user.metadata.creationTime) ? new Date(user.metadata.creationTime) : undefined;
     cactusMember.id = userId;
-    cactusMember.createdAt = new Date();
+    cactusMember.createdAt = authCreatedAt ?? new Date();
     cactusMember.userId = user.uid;
     cactusMember.email = email;
     cactusMember.lastName = lastName;
     cactusMember.firstName = firstName;
-    cactusMember.signupAt = new Date();
+    cactusMember.signupAt = authCreatedAt ?? new Date();
     cactusMember.signupConfirmedAt = new Date();
     cactusMember.signupQueryParams = pendingUser ? pendingUser.queryParams : {};
     cactusMember.referredByEmail = pendingUser && pendingUser.referredByEmail;
@@ -199,12 +204,12 @@ async function createCactusMember(options: CreateMemberOptions): Promise<{ membe
     return {member: savedMember, mailchimpError: mailchimpErrorResult};
 }
 
-export async function transactionalOnCreate(user: admin.auth.UserRecord): Promise<void> {
+export async function transactionalOnCreate(user: admin.auth.UserRecord, useAuthDate = false): Promise<void> {
     logger.log("Setting up user using new transactional method");
     const email = user.email || generateEmailAddressForUser(user);
 
     try {
-        const userCheckResult = await setupUserTransaction(user, email);
+        const userCheckResult = await setupUserTransaction({userRecord: user, email, useAuthDate});
         logger.log("setupUserTransaction finished", userCheckResult);
 
         if (userCheckResult.pendingUser && userCheckResult.member && userCheckResult.user) {
@@ -226,7 +231,7 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
             existingCactusMember: !userCheckResult.isNewMember,
             errorAttachments: userCheckResult.error ? [{text: userCheckResult.error}] : []
         });
-        await slackService.sendSignupsMessage(slackMessage);
+        await AdminSlackService.getSharedInstance().sendSignupsMessage(slackMessage);
 
     } catch (error) {
         logger.error("Failed to run check for user transaction", error)
@@ -241,12 +246,12 @@ export async function transactionalOnCreate(user: admin.auth.UserRecord): Promis
  * @return {Promise<{mailchimpListMember?: ListMember, error?: any}>}
  */
 async function upsertMailchimpSubscriber(subscription: MailchimpSignupRequest): Promise<{ mailchimpListMember?: ListMember, error?: any }> {
-    const mailchimpResult = await mailchimpService.addSubscriber(subscription, ListMemberStatus.subscribed);
+    const mailchimpResult = await MailchimpService.getSharedInstance().addSubscriber(subscription, ListMemberStatus.subscribed);
     if (mailchimpResult.success) {
         let mailchimpMember = mailchimpResult.member;
 
         if (!mailchimpMember && mailchimpResult.status === SubscriptionResultStatus.existing_subscriber) {
-            mailchimpMember = await mailchimpService.getMemberByEmail(subscription.email);
+            mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(subscription.email);
         }
 
         // mailchimpListMember = mailchimpMember;
@@ -324,8 +329,8 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
 }
 
 export function generateEmailAddressForUser(user: admin.auth.UserRecord): string | undefined {
-    if (user?.uid && config.app.fake_email_domain) {
-        return `${user.uid.trim()}@${config.app.fake_email_domain}`.trim().toLowerCase();
+    if (user?.uid && getConfig().app.fake_email_domain) {
+        return `${user.uid.trim()}@${getConfig().app.fake_email_domain}`.trim().toLowerCase();
     }
 
     return undefined;
