@@ -10,7 +10,7 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {isValidEmail} from '@shared/util/StringUtil'
+    import {isValidEmail, isGmail} from '@shared/util/StringUtil'
     import {sendEmailLinkSignIn} from "@web/auth"
     import SignupRequest from "@shared/mailchimp/models/SignupRequest"
     import {addModal, getQueryParam, showModal} from "@web/util"
@@ -99,6 +99,8 @@
                             message,
                             imageUrl,
                             imageAlt: 'Email Signup Success!',
+                            buttonCta: isGmail(email) ? copy.common.VERIFY_IN_GMAIL : undefined,
+                            buttonUrl: isGmail(email) ? copy.common.VERIFY_GMAIL_URL : undefined
                         });
                         gtag('event', 'email_signup_success', {
                             event_category: "email_signup",

@@ -92,7 +92,9 @@ export default class EnglishCopy extends LocalizedCopy {
         LEARN_MORE: "Learn More",
         TRIAL: "Trial",
         IOS: "iOS",
-        ANDROID: "Android"
+        ANDROID: "Android",
+        VERIFY_IN_GMAIL: "Confirm in Gmail",
+        VERIFY_GMAIL_URL: "https://mail.google.com/mail/u/0/#search/from%3A%40cactus.app+in%3Aanywhere"
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",

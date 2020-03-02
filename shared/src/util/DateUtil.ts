@@ -282,7 +282,7 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
 export function daysUntilDate(date: Date): number {
     const end = DateTime.fromJSDate(date).set({hour: 0});
     const interval = Interval.fromDateTimes(DateTime.local(), end);
-    const days = interval.count("days") - 1
+    const days = interval.count("days") - 1;
     if (Number.isNaN(days)) {
         return 0;
     }

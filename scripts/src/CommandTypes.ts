@@ -57,12 +57,13 @@ export abstract class FirebaseCommand implements Command {
             }
         }
 
+        const app = await this.getFirebaseApp();
+
         const project = this.project || Project.STAGE;
         console.log("Fetching config for ", project);
         const config = await getCactusConfig(project);
         this.config = config;
 
-        const app = await this.getFirebaseApp();
         const firestoreService = await this.getFirestoreService();
 
         console.log("initializing all services");

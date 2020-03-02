@@ -69,8 +69,8 @@ export class ExpireMembershipTrialJob {
                 email,
                 cactusMemberId: memberId
             });
-            if (member && member.premiumTrialEndedWithoutActivation) {
-                await this.expireMember(member);
+            if (member && member.needsTrialExpiration) {
+                await this.expireMemberTrial(member);
             } else {
                 this.errors.push(`No member found for options: ${stringifyJSON(options)}`);
             }
@@ -131,12 +131,12 @@ export class ExpireMembershipTrialJob {
 
     async handleMembersBatch(members: CactusMember[], batchNumber: number): Promise<void> {
         logger.info(`Processing ${members.length} members in batch #${batchNumber}`);
-        const tasks = members.map(member => this.expireMember(member));
+        const tasks = members.map(member => this.expireMemberTrial(member));
         await Promise.all(tasks);
     }
 
-    async expireMember(member: CactusMember): Promise<void> {
-        if (!member.premiumTrialEndedWithoutActivation) {
+    async expireMemberTrial(member: CactusMember): Promise<void> {
+        if (!member.needsTrialExpiration) {
             logger.info(`member ${member.email} is not in trial, not expiring them`);
             return;
         }

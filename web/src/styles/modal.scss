@@ -54,6 +54,11 @@
     width: 100%;
   }
 
+  .button {
+    display: inline-block;
+    margin-top: 2rem;
+  }
+
   .modal-content {
     .error {
       color: red;
