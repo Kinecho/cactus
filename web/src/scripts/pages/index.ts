@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 const $isMobileDevice = document.getElementById("tryItHeader");
-if ($isMobileDevice) $isMobileDevice.classList.add(isAndroidDevice || isIosDevice ? "show" : "hide");
+if ($isMobileDevice) $isMobileDevice.classList.add((isAndroidDevice || isIosDevice) ? "show" : "hide");
 
 // new Vue({
 //     el: "#premium-pricing",
