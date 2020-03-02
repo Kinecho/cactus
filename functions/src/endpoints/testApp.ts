@@ -4,6 +4,7 @@ import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
 import {getOperation,} from "@api/endpoints/DataExportJob";
 import * as Sentry from "@sentry/node";
 import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import {getConfig} from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
@@ -275,6 +276,28 @@ app.get("/error", async (req, resp) => {
         Sentry.captureException(e);
         return resp.sendStatus(500);
     }
+});
+
+
+app.get("/language-entities", async (req, resp) => {
+    const text = req.query.text;
+
+    if (!text) { 
+        resp.status(404);
+        resp.send("No text found");
+        return;
+    }
+
+    //try {
+        const entities = await GoogleLanguageService.getSharedInstance().getEntities(text);
+        resp.send({
+            success: true,
+            data: entities
+        });
+
+    // } catch (e) {
+    //     resp.send({error: e});
+    // }
 });
 
 
