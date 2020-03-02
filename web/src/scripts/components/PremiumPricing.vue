@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="android-app" v-if="isAndroidApp">
-                To learn more, visit <strong>cactus.app</strong> in any web&nbsp;browser.
+                Questions? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a>.
             </div>
         </transition>
     </div>

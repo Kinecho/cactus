@@ -61,7 +61,7 @@ export const cloudFunctions = {
     expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
     syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
     //auth triggers
-    userCreatedTrigger: functions.auth.user().onCreate(transactionalOnCreate),
+    userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),
     userDeletedTrigger: functions.auth.user().onDelete(onDelete),
 
     //firestore triggers
