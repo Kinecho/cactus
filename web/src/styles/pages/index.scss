@@ -54,9 +54,17 @@
       justify-content: center;
     }
 
+    #tryItHeader {
+        margin-top: 2.4rem;
+
+        &.hide {
+            display: none;
+        }
+    }
+
     .app-store-icon,
     .play-store-icon {
-      margin-top: 2rem;
+      margin-top: 1.6rem;
     }
 
     @include r(768) {
