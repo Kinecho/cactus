@@ -21,8 +21,10 @@ export default class GoogleLanguageService {
     constructor(config: CactusConfig) {
         const credentials = config.language.service_account;
         const authCredentials = {
-            client_email: credentials.client_email, 
-            private_key: credentials.private_key
+            credentials: {
+                client_email: credentials.client_email, 
+                private_key: credentials.private_key
+            }
         };
         this.client = new language.LanguageServiceClient(authCredentials);
         this.config = config;
