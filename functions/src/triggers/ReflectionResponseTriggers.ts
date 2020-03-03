@@ -60,6 +60,16 @@ export const updateReflectionStatsTrigger = functions.firestore
         if (reflectionStats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
         }
+
+        const wordCloud = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({
+            memberId
+        });
+        if (wordCloud) {
+            await AdminCactusMemberService.getSharedInstance().setWordInsights({
+                memberId,
+                wordCloud: wordCloud
+            }); 
+        }
     });
 
 export const updateInsightWordsOnReflectionWrite = functions.firestore
