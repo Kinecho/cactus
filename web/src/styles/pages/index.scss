@@ -60,6 +60,10 @@
         &.hide {
             display: none;
         }
+
+        @include r(768) {
+          display: none;
+        }
     }
 
     .app-store-icon,
