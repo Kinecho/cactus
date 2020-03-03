@@ -5,80 +5,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
                 <h2 class="successText" v-if="!insightRevealed">{{celebrateText}}</h2>
-                <div :class="['insightContainer', {revealed: insightRevealed}]">
+                <div :class="['insightContainer', {revealed: insightRevealed}]" v-if="hasInsights">
                     <h4>Daily Insight</h4>
                     <div class="insightIntro">
                         <p>Get insights about your daily reflections so that you learn more about yourself.</p>
                         <button class="secondary" @click="revealInsight">Reveal Insight</button>
                     </div>
-                    <div class="insightContent">
-                        <p>You used "moon" in 3 of your reflections this&nbsp;week.</p>
-                        <svg class="insightCluster" role="img" width="230" height="230">
-                            <g style="transform: translate(71%,73%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(78%,47%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(61%,80%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(84%,27%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(15%,75%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(3%,50%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(9%,18%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(58%,9%);">
-                                <circle fill="#F0ECEA" r="3%"/>
-                            </g>
-                            <g style="transform: translate(15%,35%);">
-                                <circle fill="#F0ECEA" r="12%"/>
-                            </g>
-                            <g style="transform: translate(62%,57%);">
-                                <circle fill="#F0ECEA" r="12%"/>
-                            </g>
-                            <g style="transform: translate(28%,75%);">
-                                <circle fill="#F0ECEA" r="6%"/>
-                            </g>
-                            <g style="transform: translate(71%,37%);">
-                                <circle fill="#F0ECEA" r="6%"/>
-                            </g>
-                            <g style="transform: translate(45%,6%);">
-                                <circle fill="#F0ECEA" r="6%"/>
-                            </g>
-                            <g class="element1 size3" style="transform: translate(46%,30%);">
-                                <circle r="16%"/>
-                                <text dominant-baseline="central" text-anchor="middle">moon</text>
-                            </g>
-                            <g class="element1 size1" style="transform: translate(24%,12%);">
-                                <circle r="10%"/>
-                                <text dominant-baseline="central" text-anchor="middle">earth</text>
-                            </g>
-                            <g class="element1 size1" style="transform: translate(46%,77%);">
-                                <circle r="10%"/>
-                                <text dominant-baseline="central" text-anchor="middle">Samantha</text>
-                            </g>
-                            <g class="element2 size1" style="transform: translate(36%,57%);">
-                                <circle r="10%"/>
-                                <text dominant-baseline="central" text-anchor="middle">sun</text>
-                            </g>
-                            <g class="element3 size1" style="transform: translate(71%,20%);">
-                                <circle r="10%"/>
-                                <text dominant-baseline="central" text-anchor="middle">anger</text>
-                            </g>
-                            <g class="element3 size1" style="transform: translate(15%,60%);">
-                                <circle r="10%"/>
-                                <text dominant-baseline="central" text-anchor="middle">light</text>
-                            </g>
-                        </svg>
-                    </div>
+                    <div class="insightContent"></div>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -202,7 +135,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
     import {ElementAccumulation} from '@shared/models/ElementAccumulation'
-    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import ReflectionResponse, {InsightWord} from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
@@ -220,6 +153,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    import * as d3 from "d3";
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics"
 
@@ -360,6 +294,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     default:
                         return this.cactusElement
                 }
+            },
+            hasInsights(): boolean {
+                return this.member?.wordCloud ? true : false;
             }
         },
         methods: {
@@ -434,6 +371,79 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             revealInsight() {
+                var diameter = 375, //max size of the bubbles
+                    format   = d3.format(",d"),
+                    color    = d3.scaleLinear().domain([0,2])
+                               //@ts-ignore
+                               .range(["#f2ebe9", "#364fac", "#47445e"])
+                    //more color options: https://github.com/d3/d3-scale-chromatic
+
+                var bubble = d3.pack()
+                    .size([diameter, diameter])
+                    .padding(1.5);
+
+                var svg = d3.select(".insightContent")
+                    .append("svg")
+                    .attr("width", diameter)
+                    .attr("height", diameter)
+                    .attr("class", "bubble");
+
+                    if (this.member?.wordCloud) {
+                        const extras: InsightWord[] = [
+                            {word: "", frequency: Math.random()*.5},
+                            {word: "", frequency: Math.random()*.5},
+                            {word: "", frequency: Math.random()},
+                            {word: "", frequency: Math.random()},
+                            {word: "", frequency: Math.random()},
+                        ];
+                        var dataset = this.member.wordCloud.slice(0,7).concat(extras);
+
+                        //convert numerical values from strings to numbers
+                        // @ts-ignore
+                        var data = dataset.map(function(d){ d.value = +d["frequency"]; return d; });
+
+                        //Sets up a hierarchy of data object
+                        var root = d3.hierarchy({children:data})
+                        // @ts-ignore
+                          .sum(function(d) { return d.value; })
+                        // @ts-ignore
+                          .sort(function(a, b) { return b.value - a.value; });
+
+                        //Once we have hierarchal data, run bubble generator
+                        bubble(root);
+
+                        //setup the chart
+                        var bubbles = svg.selectAll(".bubble")
+                        // @ts-ignore
+                            .data(root.children)
+                            .enter();
+
+                        //create the bubbles
+                        bubbles.append("circle")
+                            .attr("class", "circle")
+                        // @ts-ignore
+                            .attr("r", function(d){ return d.r; })
+                        // @ts-ignore
+                            .attr("cx", function(d){ return d.x; })
+                        // @ts-ignore
+                            .attr("cy", function(d){ return d.y; })
+                        // @ts-ignore
+                            .style("fill", function(d) { return color(d.value); });
+
+                        //format the text for each bubble
+                        bubbles.append("text")
+                        // @ts-ignore
+                            .attr("x", function(d){ return d.x; })
+                        // @ts-ignore
+                            .attr("y", function(d){ return d.y + 5; })
+                            .attr("text-anchor", "middle")
+                        // @ts-ignore
+                            .text(function(d){ return d.data["word"]; })
+                            .style("fill","white")
+                            .style("font-family", "Helvetica Neue, Helvetica, Arial, san-serif")
+                        // @ts-ignore
+                            .style("font-size", "12px");
+                    }
                 this.insightRevealed = true;
             },
             tradeNote() {
