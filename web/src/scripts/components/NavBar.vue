@@ -17,7 +17,7 @@
                         :href="signupHref"
                         @click.prevent="goToSignup"
                         type="button"
-                >{{copy.common.SIGN_UP}}</a>
+                >{{copy.common.TRY_IT_FREE}}</a>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
