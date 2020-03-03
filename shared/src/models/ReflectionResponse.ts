@@ -25,8 +25,9 @@ export enum ResponseMedium {
 
 export interface InsightWord {
     word: string,
-    partOfSpeech: string
+    partOfSpeech?: string
     salience?: number
+    frequency?: number
 }
 
 export interface InsightWordsResult {

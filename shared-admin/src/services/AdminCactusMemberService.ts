@@ -15,6 +15,7 @@ import CactusMember, {
     PromptSendTime,
     ReflectionStats
 } from "@shared/models/CactusMember";
+import {InsightWord} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {getDateAtMidnightDenver, getDateFromISOString, getSendTimeUTC} from "@shared/util/DateUtil";
 import {ListMember, ListMemberStatus, MemberUnsubscribeReport, TagName} from "@shared/mailchimp/models/MailchimpTypes";
@@ -98,6 +99,26 @@ export default class AdminCactusMemberService {
             logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
         }
 
+    }
+
+    async setWordInsights(options: { memberId: string, wordCloud: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
+        const {memberId, wordCloud} = options;
+        const doc: DocumentReference = this.getCollectionRef().doc(memberId);
+        const data: Partial<CactusMember> = {
+            wordCloud: wordCloud
+        };
+        try {
+            if (queryOptions?.transaction) {
+                await queryOptions?.transaction.set(doc, data, {merge: true})
+            } else if (options.batch) {
+                options.batch.set(doc, data, {merge: true})
+            } else {
+                await doc.set(data, {merge: true});
+            }
+        } catch (error) {
+            logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
+        }
+        return;
     }
 
     async getByMailchimpMemberId(id?: string): Promise<CactusMember | undefined> {

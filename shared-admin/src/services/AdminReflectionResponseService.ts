@@ -1,5 +1,5 @@
 import AdminFirestoreService, {DeleteOptions, QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {ReflectionResponseField, InsightWord} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -233,6 +233,49 @@ export default class AdminReflectionResponseService {
                 totalDurationMs: duration,
                 elementAccumulation: elementAccumulation
             };
+        } catch (error) {
+            logger.error("Failed to calculate stats for memberId", options.memberId);
+            return undefined;
+        }
+
+    }
+
+    async aggregateWordInsightsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
+        try {
+            const {memberId} = options;
+            if (!memberId) {
+                logger.error("No memberId provided to calculate stats.");
+                return
+            }
+
+            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            let wordFrequencies: {[key: string]: number} = {};
+            let wordCloud: InsightWord[] = [];
+
+            if (reflections) {
+                reflections.forEach(reflection => {
+                    if (reflection.insights?.insightWords) {
+                        reflection.insights.insightWords.forEach(wordInsight => {
+                            if(wordFrequencies[wordInsight.word]) {
+                               wordFrequencies[wordInsight.word]++;
+                            } else {
+                               wordFrequencies[wordInsight.word] = 1;
+                            }
+                        });
+                    }
+                });
+            }
+
+            if (wordFrequencies) {
+                for (var word in wordFrequencies){
+                  wordCloud.push({
+                      word: word,
+                      frequency: wordFrequencies[word]
+                  });
+                }
+            }
+
+            return wordCloud;
         } catch (error) {
             logger.error("Failed to calculate stats for memberId", options.memberId);
             return undefined;

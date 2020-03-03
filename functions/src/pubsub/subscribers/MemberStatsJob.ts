@@ -71,6 +71,18 @@ async function handleMember(member: CactusMember, batch?: Batch): Promise<Member
                 batch: batch,
             });
         }
+
+        const wordCloud = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({
+            memberId
+        }, {queryName: `calculateMemberStats.${member.email}`});
+        if (wordCloud) {
+            await AdminCactusMemberService.getSharedInstance().setWordInsights({
+                memberId,
+                wordCloud: wordCloud,
+                batch: batch,
+            }); 
+        }
+
         result.success = true;
         result.error = undefined;
         return result;

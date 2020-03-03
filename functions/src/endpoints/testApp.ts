@@ -242,6 +242,28 @@ app.get("/member-stats", async (req, resp) => {
     return resp.send(result || "none")
 });
 
+app.get("/member-word-cloud", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member?.id) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+
+    const result = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({memberId: member.id});
+    return resp.send(result || "none")
+});
+
 app.get("/content", async (req, resp) => {
     logger.log("Trying to fetch content");
     const qDate = req.query.d;
@@ -342,7 +364,6 @@ app.get("/language-words", async (req, resp) => {
         });
     }
 });
-
 
 app.get("/sheets", async (req, resp) => {
     const config = getConfig();
