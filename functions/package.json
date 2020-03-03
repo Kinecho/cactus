@@ -78,7 +78,7 @@
         "pretty-ms": "^5.0.0",
         "query-string": "^6.7.0",
         "raw-body": "^2.4.0",
-        "stripe": "^8.17.0",
+        "stripe": "8.17.0",
         "uuid": "^3.3.2"
     },
     "devDependencies": {
