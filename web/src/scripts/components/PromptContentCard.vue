@@ -799,7 +799,7 @@
     }
 
     .link-container {
-        margin: 4rem 0;
+        margin: -1.6rem 0 6.4rem;
 
         a {
             display: inline-block;
