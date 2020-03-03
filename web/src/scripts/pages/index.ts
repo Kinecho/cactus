@@ -45,8 +45,11 @@ document.addEventListener('DOMContentLoaded', function () {
     setupJumpToForm();
 });
 
-const $isMobileDevice = document.getElementById("tryItHeader");
-if ($isMobileDevice) $isMobileDevice.classList.add((isAndroidDevice || isIosDevice) ? "show" : "hide");
+const $tryItHeader = document.getElementById("tryItHeader");
+const isMobileDevice = (isAndroidDevice() || isIosDevice());
+if ($tryItHeader) {
+    $tryItHeader.classList.add(isMobileDevice ? 'show' : 'hide');
+} 
 
 // new Vue({
 //     el: "#premium-pricing",
