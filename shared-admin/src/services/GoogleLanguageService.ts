@@ -10,6 +10,7 @@ export enum WordTypes {
 export interface InsightWord {
     word: string,
     partOfSpeech: string
+    salience?: number
 }
 
 export default class GoogleLanguageService {
@@ -49,8 +50,6 @@ export default class GoogleLanguageService {
             type: 'PLAIN_TEXT'
         };
         const entityResponse = await this.client.analyzeEntities({document: document});
-        console.log("got response!", entityResponse);
-
         return entityResponse;
     }
 
@@ -60,28 +59,43 @@ export default class GoogleLanguageService {
             type: 'PLAIN_TEXT'
         };
         const [result] = await this.client.analyzeSyntax({document: document});
-        console.log("got response!", result.tokens);
-
         return result.tokens;
     }
 
     async insightWords(text: string): Promise<InsightWord[]> {
         const tokens = await this.getSyntaxTokens(text);
+        const entities = await this.getEntities(text);
+
         let insightWords: InsightWord[] = [];
 
         if (tokens) {
             tokens.forEach((token: any) => {
                 if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
                     if (token.text?.content) {
-                        insightWords.push({
+                        let wordObj: InsightWord = {
                             word: token.text.content,
                             partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
-                        });
+                        };
+
+                        let salience = this.getSalience(wordObj.word, entities);
+                        if (salience) {
+                            wordObj.salience = salience; 
+                        }
+
+                        insightWords.push(wordObj);
                     }
                 }
             });
         }
         return insightWords;
+    }
+
+    getSalience(word: string, entities: []): number | undefined {
+        const found: any = entities.find(function(entity: any) {
+            console.log(entity.name);
+            return entity.name === word
+        });
+        return (found ? found.salience : undefined);
     }
 
 }
