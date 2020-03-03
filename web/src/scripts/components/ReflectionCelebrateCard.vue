@@ -153,7 +153,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
-    import * as d3 from "d3";
+    import {
+        pack as d3Pack,
+        scaleLinear as d3ScaleLinear,
+        format as d3Format,
+        hierarchy as d3Hierarchy,
+        select as d3Select
+    } from "d3";
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics"
 
@@ -372,17 +378,17 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             revealInsight() {
                 var diameter = 375, //max size of the bubbles
-                    format   = d3.format(",d"),
-                    color    = d3.scaleLinear().domain([0,2])
+                    format   = d3Format(",d"),
+                    color    = d3ScaleLinear().domain([0,2])
                                //@ts-ignore
                                .range(["#f2ebe9", "#364fac", "#47445e"])
                     //more color options: https://github.com/d3/d3-scale-chromatic
 
-                var bubble = d3.pack()
+                var bubble = d3Pack()
                     .size([diameter, diameter])
                     .padding(1.5);
 
-                var svg = d3.select(".insightContent")
+                var svg = d3Select(".insightContent")
                     .append("svg")
                     .attr("width", diameter)
                     .attr("height", diameter)
@@ -403,7 +409,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         var data = dataset.map(function(d){ d.value = +d["frequency"]; return d; });
 
                         //Sets up a hierarchy of data object
-                        var root = d3.hierarchy({children:data})
+                        var root = d3Hierarchy({children:data})
                         // @ts-ignore
                           .sum(function(d) { return d.value; })
                         // @ts-ignore
