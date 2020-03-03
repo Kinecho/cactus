@@ -288,16 +288,59 @@ app.get("/language-entities", async (req, resp) => {
         return;
     }
 
-    //try {
+    try {
         const entities = await GoogleLanguageService.getSharedInstance().getEntities(text);
         resp.send({
             success: true,
             data: entities
         });
+    } catch (e) {
+        resp.send({error: e});
+    }
+});
 
-    // } catch (e) {
-    //     resp.send({error: e});
-    // }
+
+app.get("/language-syntax", async (req, resp) => {
+    const text = req.query.text;
+
+    if (!text) { 
+        resp.status(404);
+        resp.send("No text found");
+        return;
+    }
+
+    try {
+        const entities = await GoogleLanguageService.getSharedInstance().getSyntaxTokens(text);
+        resp.send({
+            success: true,
+            data: entities
+        });
+    } catch (e) {
+        resp.send({error: e});
+    }
+});
+
+app.get("/language-words", async (req, resp) => {
+    const text = req.query.text;
+
+    if (!text) { 
+        resp.status(404);
+        resp.send("No text found");
+        return;
+    }
+
+    try {
+        const entities = await GoogleLanguageService.getSharedInstance().insightWords(text);
+        resp.send({
+            success: true,
+            data: entities
+        });
+    } catch (e) {
+        resp.send({
+            success: false,
+            error: e
+        });
+    }
 });
 
 
