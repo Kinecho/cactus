@@ -44,13 +44,13 @@ export default class GoogleLanguageService {
         this.tagsToKeep = ['NOUN','VERB','ADJ'];
     }
 
-    async getEntities(text: string): Promise<any> {
+    async getEntities(text: string): Promise<any[] | undefined> {
         const document = {
             content: text,
             type: 'PLAIN_TEXT'
         };
         const entityResponse = await this.client.analyzeEntities({document: document});
-        return entityResponse;
+        return entityResponse[0]?.entities;
     }
 
     async getSyntaxTokens(text: string): Promise<any> {
@@ -77,9 +77,11 @@ export default class GoogleLanguageService {
                             partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
                         };
 
-                        let salience = this.getSalience(wordObj.word, entities);
-                        if (salience) {
-                            wordObj.salience = salience; 
+                        if (entities) {
+                            let salience = this.getSalience(wordObj.word, entities);
+                            if (salience) {
+                                wordObj.salience = salience; 
+                            }
                         }
 
                         insightWords.push(wordObj);
@@ -87,14 +89,17 @@ export default class GoogleLanguageService {
                 }
             });
         }
+
+        // sort words by salience
+        if (insightWords.length > 1) {
+            insightWords.sort((a, b) => ((a.salience || 0) > (b.salience || 0)) ? -1 : 1)
+        }
+
         return insightWords;
     }
 
-    getSalience(word: string, entities: []): number | undefined {
-        const found: any = entities.find(function(entity: any) {
-            console.log(entity.name);
-            return entity.name === word
-        });
+    getSalience(word: string, entities: any[]): number | undefined {
+        const found = entities.find((entity: any) => entity.name === word);
         return (found ? found.salience : undefined);
     }
 
