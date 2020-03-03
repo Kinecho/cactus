@@ -17,6 +17,7 @@ import AdminReflectionResponseService from "@admin/services/AdminReflectionRespo
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptURL} from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
@@ -58,6 +59,40 @@ export const updateReflectionStatsTrigger = functions.firestore
         });
         if (reflectionStats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
+        }
+    });
+
+export const updateInsightWordsOnReflectionWrite = functions.firestore
+    .document(`${Collection.reflectionResponses}/{responseId}`)
+    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
+        logger.log("starting updateSentPromptOnReflectionWrite");
+        try {
+            const beforeSnapshot = change.before;
+            const afterSnapshot = change.after;
+            if (!afterSnapshot) {
+                logger.warn("No snapshot was found in the change event");
+                return;
+            }
+
+            const reflectionResponseBefore = fromDocumentSnapshot(beforeSnapshot, ReflectionResponse);
+            const reflectionResponseAfter = fromDocumentSnapshot(afterSnapshot, ReflectionResponse);
+            
+            if (!reflectionResponseAfter) {
+                logger.error(`Unable to de-serialize the reflection response for snapshot.id = ${afterSnapshot.id}`);
+                return;
+            }
+
+            // only run insights if there is content to run it for
+            if (reflectionResponseAfter.content?.text && 
+                reflectionResponseAfter.content.text !== reflectionResponseBefore?.content?.text) {
+                const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
+                if (insightsResult) {
+                    await afterSnapshot.ref.update({[ReflectionResponse.Field.insights]: insightsResult});
+                    return;
+                }
+            }            
+        } catch (error) {
+            logger.error("Failed to process the ReflectionResponse for insights.");
         }
     });
 

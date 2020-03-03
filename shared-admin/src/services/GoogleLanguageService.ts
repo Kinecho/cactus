@@ -1,16 +1,11 @@
 import language from "@google-cloud/language";
 import {CactusConfig} from "@shared/CactusConfig";
+import {InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
 
 export enum WordTypes {
     VERB = 'verb',
     NOUN = 'noun',
     ADJ = 'adjective'
-}
-
-export interface InsightWord {
-    word: string,
-    partOfSpeech: string
-    salience?: number
 }
 
 export default class GoogleLanguageService {
@@ -62,14 +57,14 @@ export default class GoogleLanguageService {
         return result.tokens;
     }
 
-    async insightWords(text: string): Promise<InsightWord[]> {
-        const tokens = await this.getSyntaxTokens(text);
+    async insightWords(text: string): Promise<InsightWordsResult> {
+        const syntaxTokens = await this.getSyntaxTokens(text);
         const entities = await this.getEntities(text);
 
         let insightWords: InsightWord[] = [];
 
-        if (tokens) {
-            tokens.forEach((token: any) => {
+        if (syntaxTokens) {
+            syntaxTokens.forEach((token: any) => {
                 if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
                     if (token.text?.content) {
                         let wordObj: InsightWord = {
@@ -95,7 +90,11 @@ export default class GoogleLanguageService {
             insightWords.sort((a, b) => ((a.salience || 0) > (b.salience || 0)) ? -1 : 1)
         }
 
-        return insightWords;
+        return {
+            insightWords: insightWords, 
+            syntaxRaw: syntaxTokens, 
+            entitiesRaw: entities
+        };
     }
 
     getSalience(word: string, entities: any[]): number | undefined {

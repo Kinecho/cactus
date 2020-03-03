@@ -23,6 +23,18 @@ export enum ResponseMedium {
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
 }
 
+export interface InsightWord {
+    word: string,
+    partOfSpeech: string
+    salience?: number
+}
+
+export interface InsightWordsResult {
+    insightWords: InsightWord[],
+    syntaxRaw?: any,
+    entitiesRaw?: any
+}
+
 export function getResponseMedium(options: { type: ResponseMediumType, app: AppType }): ResponseMedium {
     switch (options.type) {
         case ResponseMediumType.PROMPT:
@@ -136,7 +148,8 @@ export enum ReflectionResponseField {
     promptQuestion = "promptQuestion",
     reflectionDurationMs = "reflectionDurationMs",
     shared = "shared",
-    cactusElement = "cactusElement"
+    cactusElement = "cactusElement",
+    insights = "insights"
 }
 
 export default class ReflectionResponse extends BaseModel {
@@ -162,6 +175,7 @@ export default class ReflectionResponse extends BaseModel {
     unsharedAt?: Date;
     cactusElement?: CactusElement | null;
     reflectionDates: Date[] = [];
+    insights?: InsightWordsResult;
 
     /**
      * Only Add a date log if the new date is not within 10 minutes of an existing date
