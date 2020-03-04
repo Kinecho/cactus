@@ -6,14 +6,33 @@
                 <SocialActivityFeed :member="member"/>
             </div>
             <div class="no-friends emptyState" v-if="!loading && friends.length === 0">
-                <h1>No activity yet</h1>
-                <p>See what your friends are up to.</p>
-                <img class="graphic" src="assets/images/twoFriends.png" alt="Two friends welcoming you"/>
+                <div class="graphic">
+                    <SocialActivityCard
+                        avatarUrl="/assets/images/avatars/blobatar2.png"
+                        date="7 minutes ago"
+                        name="Mary Demoss"
+                        promptContentPath="https://cactus.app/prompts/zTVQbvum95ENWV2Do3xE"
+                        promptQuestion="Who energizes you?"/>
+                    <SocialActivityCard
+                        avatarUrl="/assets/images/avatars/blobatar1.png"
+                        date="8 hours ago"
+                        name="Aaron Nichols"
+                        promptContentPath="https://cactus.app/prompts/P0LRm37OKPBwCAHivbXG"
+                        promptQuestion="What helps you feel calm?"/>
+                    <SocialActivityCard
+                        avatarUrl="/assets/images/avatars/blobatar3.png"
+                        date="1 day ago"
+                        name="Patricia Smith"
+                        promptContentPath="https://cactus.app/prompts/cPOoU4Lfv6z3nEJ5YZoZ"
+                        promptQuestion="What are you grateful for this week?"/>
+                </div>
+                <h1>Mindful Friends</h1>
+                <p class="subtext">Your mindfulness journey is more effective when you share it with&nbsp;others.</p>
                 <a class="button primary wiggle" :href="friendsPath">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path fill="#fff" d="M12 14a5 5 0 015 5v2a1 1 0 01-2 0v-2a3 3 0 00-3-3H5a3 3 0 00-3 3v2a1 1 0 01-2 0v-2a5 5 0 015-5zm8-7a1 1 0 011 1l-.001 1.999L23 10a1 1 0 01.993.883L24 11a1 1 0 01-1 1l-2.001-.001L21 14a1 1 0 01-.883.993L20 15a1 1 0 01-1-1l-.001-2.001L17 12a1 1 0 01-.993-.883L16 11a1 1 0 011-1l1.999-.001L19 8a1 1 0 01.883-.993zM8.5 2a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/>
                     </svg>
-                    Add Friends
+                    Add a Friend
                 </a>
             </div>
         </div>
@@ -23,21 +42,23 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StandardFooter.vue";
-    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from '@shared/util/queryParams'
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
+    import {PageRoute} from "@shared/PageRoutes"
+    import {QueryParam} from '@shared/util/queryParams'
+    import NavBar from "@components/NavBar.vue";
+    import Footer from "@components/StandardFooter.vue";
+    import SocialActivityFeed from "@components/SocialActivityFeed.vue"
+    import SocialActivityCard from "@components/SocialActivityCard.vue"
 
     export default Vue.extend({
         components: {
             NavBar,
             Footer,
+            SocialActivityCard,
             SocialActivityFeed
         },
         data(): {
@@ -153,16 +174,21 @@
         align-items: center;
         display: flex;
         flex-direction: column;
-        padding: 6.4rem 2.4rem;
+        padding: 0 2.4rem 6.4rem;
+        text-align: center;
+
+        @include r(600) {
+            padding: 6.4rem 2.4rem 12rem;
+        }
 
         h1 {
             line-height: 1.2;
             margin-bottom: .4rem;
         }
 
-        p {
+        .subtext {
             margin: 0 auto 2.4rem;
-            max-width: 60rem;
+            max-width: 40rem;
             opacity: .8;
 
             @include r(768) {
@@ -171,9 +197,31 @@
         }
 
         .graphic {
-            margin-bottom: 3.2rem;
-            max-width: 48rem;
-            width: 90%;
+            margin: 1.6rem 0;
+            position: relative;
+
+            &:after {
+                background: linear-gradient(rgba(255,255,255,0), $white 90%);
+                bottom: 0;
+                content: '';
+                display: block;
+                height: 75%;
+                left: 0;
+                margin: 0 0 0 -2.4rem;
+                position: absolute;
+                width: calc(100% + 4.8rem);
+            }
+        }
+
+        .activityCard {
+            @include r(600) {
+                margin-bottom: 1.6rem;
+            }
+
+            &:last-of-type {
+                box-shadow: none;
+                margin-bottom: 0;
+            }
         }
 
         .button {

@@ -6,6 +6,7 @@ import {resetConsole} from "@scripts/util/ConsoleUtil";
 import {CactusConfig} from "@shared/CactusConfig";
 import {initializeServices} from "@admin/services/AdminServiceConfig";
 import {setTimestamp} from "@shared/util/FirestoreUtil";
+import {setConfig} from "@admin/config/configService";
 
 const prompts = require("prompts");
 
@@ -57,16 +58,18 @@ export abstract class FirebaseCommand implements Command {
         }
 
         const app = await this.getFirebaseApp();
-        const firestoreService = await this.getFirestoreService();
 
         const project = this.project || Project.STAGE;
         console.log("Fetching config for ", project);
         const config = await getCactusConfig(project);
         this.config = config;
+
+        const firestoreService = await this.getFirestoreService();
+
         console.log("initializing all services");
         initializeServices(config, app, admin.firestore.Timestamp, "scripts");
         setTimestamp(admin.firestore.Timestamp);
-
+        setConfig(config);
         console.group(chalk.yellow(`${this.name} Logs:`));
 
         await this.run(app, firestoreService, config);
@@ -84,7 +87,8 @@ export abstract class FirebaseCommand implements Command {
         }
 
         const app = await this.getFirebaseApp();
-        AdminFirestoreService.initialize(app);
+        AdminFirestoreService.initialize(app, this.config);
+        AdminFirestoreService.Timestamp = admin.firestore.Timestamp;
         this.firestoreService = AdminFirestoreService.getSharedInstance();
         return this.firestoreService;
     }

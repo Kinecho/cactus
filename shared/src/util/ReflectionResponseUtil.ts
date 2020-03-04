@@ -1,10 +1,15 @@
 import ReflectionResponse from "@shared/models/ReflectionResponse";
-import {getStreak} from "@shared/util/DateUtil";
+import {getStreakDays, getStreakWeeks, getStreakMonths} from "@shared/util/DateUtil";
 import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {CactusElement} from "@shared/models/CactusElement";
 
+export interface StreakResult {
+    dayStreak: number,
+    weekStreak: number,
+    monthStreak: number
+}
 
-export function calculateStreak(reflections: ReflectionResponse[], options: { start?: Date | undefined, timeZone?: string } = {}): number {
+export function calculateStreaks(reflections: ReflectionResponse[], options: { start?: Date | undefined, timeZone?: string } = {}): StreakResult {
     const {start, timeZone} = options;
     const unsortedDates: Date[] = [];
     // const dates = reflections.filter(r => !!r.createdAt).map(r => r.createdAt) as Date[];
@@ -21,7 +26,15 @@ export function calculateStreak(reflections: ReflectionResponse[], options: { st
 
     const dates = unsortedDates.sort((a, b) => b.getTime() - a.getTime());
 
-    return getStreak({dates, start, timeZone});
+    const dayStreak = getStreakDays({dates, start, timeZone});
+    const weekStreak = getStreakWeeks({dates, start, timeZone});
+    const monthStreak = getStreakMonths({dates, start, timeZone});
+
+    return {
+        dayStreak: dayStreak,
+        weekStreak: weekStreak,
+        monthStreak: monthStreak
+    }
 }
 
 export function calculateDurationMs(reflections: ReflectionResponse[]): number {

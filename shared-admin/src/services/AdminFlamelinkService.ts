@@ -8,6 +8,9 @@ import FlamelinkModel from "@shared/FlamelinkModel";
 import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
 import {convertDateToTimestamp} from "@shared/util/FirestoreUtil";
 import {Collection} from "@shared/FirestoreBaseModels";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("AdminFlamelinkService");
 
 export default class AdminFlamelinkService {
     protected static sharedInstance: AdminFlamelinkService;
@@ -29,13 +32,13 @@ export default class AdminFlamelinkService {
     }
 
     constructor(config: CactusConfig, app: admin.app.App) {
-        console.log("setting up flamelink service");
+        logger.log("setting up flamelink service");
 
         this.firebaseApp = app;
         this.firestore = app.firestore();
         this.flamelinkEnv = config.flamelink.environment_id;
 
-        console.log("starting flamelink app");
+        logger.log("starting flamelink app");
         this.flamelinkApp = flamelink({
             firebaseApp: app, // required
             // same options as above
@@ -44,7 +47,7 @@ export default class AdminFlamelinkService {
             precache: false// optional, default shown. Currently it only precaches "schemas" for better performance
 
         });
-        console.log("got flamelink app!");
+        logger.log("got flamelink app!");
 
         this.content = this.flamelinkApp.content;
     }
@@ -63,11 +66,11 @@ export default class AdminFlamelinkService {
         const entryId = model.entryId;
         const schemaKey = model.schema;
         if (!entryId) {
-            console.error("No entry ID found on model. Can not perform a raw update");
+            logger.error("No entry ID found on model. Can not perform a raw update");
             return;
         }
         const data = model.toFlamelinkData();
-        console.log(`Saving prompt prompt content raw with scheduledSendAt = ${data.scheduledSendAt}`);
+        logger.log(`Saving prompt prompt content raw with scheduledSendAt = ${data.scheduledSendAt}`);
         await this.firestore.runTransaction(async t => {
             const locale = await this.flamelinkApp.settings.getLocale();
             const query = this.firestore.collection(Collection.flamelink_content)
@@ -79,7 +82,7 @@ export default class AdminFlamelinkService {
             const snapshot = await t.get(query);
             const [entryDoc] = snapshot.docs;
             if (!entryDoc) {
-                console.error(`Unable to perform RawUpdate on flamelink model. No entry found for ${schemaKey} ${entryId}`);
+                logger.error(`Unable to perform RawUpdate on flamelink model. No entry found for ${schemaKey} ${entryId}`);
                 return;
             }
 
@@ -105,13 +108,13 @@ export default class AdminFlamelinkService {
         const data = model.toFlamelinkData();
         let saved: any;
         if (!model.entryId) {
-            console.log("Adding new Flamelink content");
+            logger.log("Adding new Flamelink content");
             saved = await this.content.add({
                 schemaKey: model.schema,
                 data: data,
             })
         } else {
-            console.log("Updating Flamelink content");
+            logger.log("Updating Flamelink content");
             saved = await this.content.update({
                 entryId: model.entryId,
                 schemaKey: model.schema,
@@ -120,7 +123,7 @@ export default class AdminFlamelinkService {
         }
 
         if (saved) {
-            // console.log(chalk.magenta(`AdminFlamelinkService.ts: setting fl_meta on saved model ${JSON.stringify(saved, null, 2)}`));
+            // logger.log(chalk.magenta(`AdminFlamelinkService.ts: setting fl_meta on saved model ${JSON.stringify(saved, null, 2)}`));
             model.updateFromData(saved);
         }
 
@@ -131,7 +134,7 @@ export default class AdminFlamelinkService {
     async getByEntryId<T extends FlamelinkModel>(id: string, Type: { new(): T }): Promise<T | undefined> {
         const type = new Type();
         const schema = type.schema;
-        console.log(`Fetching ${id} from ${schema}`);
+        logger.log(`Fetching ${id} from ${schema}`);
 
         const content = await this.flamelinkApp.content.get({entryId: id, schemaKey: schema});
         if (!content) {
@@ -141,11 +144,44 @@ export default class AdminFlamelinkService {
         return fromFlamelinkData(content, Type);
     }
 
+    async getWhereFields<T extends FlamelinkModel>(fields: { name: string, value: any }[], Type: { new(): T }): Promise<T | undefined> {
+        const type = new Type();
+        const schema = type.schema;
+        const filters = fields.map(({name, value}) => {
+            return [name, "==", value]
+        });
+
+        logger.log(`Fetching from ${schema} where ${JSON.stringify(filters, null, 2)}`);
+
+        const results = await this.flamelinkApp.content.get({
+            filters,
+            schemaKey: schema
+        });
+
+        if (!results) {
+            return undefined
+        }
+
+        let content = results;
+
+        const values = Object.values(results);
+        if (Array.isArray(values)) {
+            [content] = values;
+        }
+
+        if (!content) {
+            return undefined
+        }
+
+        // logger.log("content found in flamelink", JSON.stringify(content, null, 2))
+        return fromFlamelinkData(content, Type);
+    }
+
     async getByField<T extends FlamelinkModel>(opts: { name: string, value: any }, Type: { new(): T }): Promise<T | undefined> {
 
         const type = new Type();
         const schema = type.schema;
-        console.log(`Fetching from ${schema} where ${opts.name} = ${opts.value}`);
+        logger.log(`Fetching from ${schema} where ${opts.name} = ${opts.value}`);
 
 
         const results = await this.flamelinkApp.content.getByField({
@@ -169,9 +205,10 @@ export default class AdminFlamelinkService {
             return undefined
         }
 
-        // console.log("content found in flamelink", JSON.stringify(content, null, 2))
+        // logger.log("content found in flamelink", JSON.stringify(content, null, 2))
         return fromFlamelinkData(content, Type);
     }
+
 
     //used to do a partial update
     async update<T extends FlamelinkModel>(model: T, data: Partial<T>): Promise<void> {
@@ -179,7 +216,7 @@ export default class AdminFlamelinkService {
         const schema = model.schema;
         const entryId = model.entryId;
         if (!entryId) {
-            console.warn("No entry id found on model", model);
+            logger.warn("No entry id found on model", model);
             return
         }
         await this.flamelinkApp.content.update({
@@ -192,7 +229,7 @@ export default class AdminFlamelinkService {
     async getAll<T extends FlamelinkModel>(Type: { new(): T }): Promise<{ results: T[], error?: any }> {
         const type = new Type();
         const schema = type.schema;
-        console.log(`Fetching all from ${schema}`);
+        logger.log(`Fetching all from ${schema}`);
         try {
             const entries = await this.flamelinkApp.content.get({schemaKey: schema});
             if (!entries) {
@@ -206,7 +243,7 @@ export default class AdminFlamelinkService {
             return {results};
 
         } catch (error) {
-            console.error(`failed to get all ${schema} entries from flamelink`, error);
+            logger.error(`failed to get all ${schema} entries from flamelink`, error);
             return {results: [], error}
 
         }

@@ -1,11 +1,11 @@
-import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import {minusDays, minusHours, plusDays, plusHours} from "@shared/util/DateUtil";
 import {CactusElement} from "@shared/models/CactusElement";
 
 describe("calculate streak", () => {
     test("no reflections", () => {
-        const streak = calculateStreak([]);
+        const streak = calculateStreaks([]).dayStreak;
         expect(streak).toEqual(0);
     });
 
@@ -15,7 +15,7 @@ describe("calculate streak", () => {
         r1.createdAt = new Date();
         r1.updatedAt = new Date();
 
-        const streak = calculateStreak([r1]);
+        const streak = calculateStreaks([r1]).dayStreak;
         expect(streak).toEqual(1);
     });
 
@@ -36,7 +36,7 @@ describe("calculate streak", () => {
         const d1 = plusHours(1, created);
         r1.reflectionDates.push(d1);
 
-        const streak = calculateStreak([r1], {start: current});
+        const streak = calculateStreaks([r1], {start: current}).dayStreak;
         expect(streak).toEqual(1);
     });
 
@@ -57,7 +57,7 @@ describe("calculate streak", () => {
         const d1 = plusDays(1, created);
         r1.reflectionDates.push(d1);
 
-        const streak = calculateStreak([r1], {start: current});
+        const streak = calculateStreaks([r1], {start: current}).dayStreak;
         expect(streak).toEqual(2);
     });
 
@@ -83,7 +83,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d4);
 
-        const streak = calculateStreak([r1], {start: current});
+        const streak = calculateStreaks([r1], {start: current}).dayStreak;
         expect(streak).toEqual(5);
     });
 
@@ -107,7 +107,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d4);
 
-        const streak = calculateStreak([r1], {start: current});
+        const streak = calculateStreaks([r1], {start: current}).dayStreak;
         expect(streak).toEqual(6);
     });
 
@@ -130,10 +130,10 @@ describe("calculate streak", () => {
         r1.reflectionDates.push(d1, d2a, d2b, d4);
 
         //current date is d4, there is only one preceeding
-        expect(calculateStreak([r1], {start: plusHours(4, d4)})).toEqual(1);
+        expect(calculateStreaks([r1], {start: plusHours(4, d4)}).dayStreak).toEqual(1);
 
         //current date is the created date
-        expect(calculateStreak([r1], {start: created})).toEqual(2);
+        expect(calculateStreaks([r1], {start: created}).dayStreak).toEqual(2);
     });
 
     test("multiple reflections with various dates", () => {
@@ -161,7 +161,7 @@ describe("calculate streak", () => {
 
         const current = plusHours(4, d7);
 
-        const streak = calculateStreak([r1, r2], {start: current});
+        const streak = calculateStreaks([r1, r2], {start: current}).dayStreak;
         expect(streak).toEqual(7);
     });
 });
@@ -268,7 +268,7 @@ describe("calculate streak with timezone", () => {
         });
         const start = new Date(1576520560489);
 
-        const streak = calculateStreak(reflections, {start: start, timeZone});
+        const streak = calculateStreaks(reflections, {start: start, timeZone}).dayStreak;
         expect(streak).toEqual(7);
 
     });

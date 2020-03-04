@@ -35,12 +35,15 @@ declare var __FIRST_PROMPT_ID__: string;
 declare var __CLOUDSPONGE_KEY__: string;
 declare var __APP_STORE_URL__: string;
 declare var __MAILCHIMP_SIGNUP_FORM_URL__: string;
+declare var __PLAY_STORE_URL__: string;
+
 declare var __API_DOMAIN__: string;
 declare var __STRIPE_CONFIG__: StripeConfig;
 declare var __PUBLIC_DOMAIN__: string;
 declare var __FIREBASE_DYNAMIC_LINK__: FirebaseDynamicLinkConfig;
 declare var __SENTRY__: SentryConfig;
 declare var __SENTRY_VERSION__: string | undefined;
+declare var __BRANCH_LIVE_KEY__: string;
 
 declare var __BUILD_ENV__: string;
 export const Config = {
@@ -54,6 +57,7 @@ export const Config = {
     firstPromptId: __FIRST_PROMPT_ID__,
     cloudSpongeKey: __CLOUDSPONGE_KEY__,
     appStoreUrl: __APP_STORE_URL__,
+    playStoreUrl: __PLAY_STORE_URL__,
     apiDomain: __API_DOMAIN__,
     stripe: __STRIPE_CONFIG__,
     domain: __PUBLIC_DOMAIN__,
@@ -65,4 +69,6 @@ export const Config = {
     isProd: __BUILD_ENV__ === "prod",
     version: __SENTRY_VERSION__,
     mailchimpSignupFormUrl: __MAILCHIMP_SIGNUP_FORM_URL__,
+    androidUserAgent: "CactusAndroid",
+    branchLiveKey: __BRANCH_LIVE_KEY__,
 };

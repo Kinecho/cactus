@@ -23,13 +23,28 @@ import AdminMemberProfileService from "@admin/services/AdminMemberProfileService
 import AdminSocialActivityService from "@admin/services/AdminSocialActivityService";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
+import Logger from "@shared/Logger";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
+import AdminPaymentService from "@admin/services/AdminPaymentService";
+import StripeWebhookService from "@admin/services/StripeWebhookService";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import {PubSubService} from "@admin/pubsub/PubSubService";
+import AdminEmailLogService from "@admin/services/AdminEmailLogService";
+
+const logger = new Logger("AdminServiceConfig");
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
-    console.log(chalk.green("initializing all services"));
+    logger.log(chalk.green("initializing all services"));
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     //Firestore
-    AdminFirestoreService.initialize(app);
+    AdminFirestoreService.initialize(app, config);
+
+    //PubSub
+    PubSubService.initialize(config);
+
+    //model services
     AdminSendgridService.initialize(config);
     AdminSlackService.initialize(config);
     MailchimpService.initialize(config);
@@ -42,18 +57,24 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
     AdminEmailReplyService.initialize();
-    AdminSocialInviteService.initialize();
+    AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();
     AdminSocialActivityService.initialize();
     AdminSocialConnectionService.initialize();
     AdminSocialConnectionRequestService.initialize();
+    AdminSubscriptionService.initialize(config);
+    AdminCheckoutSessionService.initialize();
+    AdminPaymentService.initialize();
+    StripeWebhookService.initialize(config);
+    AdminEmailLogService.initialize(config);
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);
-    AdminPromptContentService.initialize();
+    AdminPromptContentService.initialize(config);
+    AdminSubscriptionProductService.initialize();
 
 
-    console.log("Initializing Sentry");
+    logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {
         dsn: config.sentry.functions_dsn,
         environment: config.app.environment,

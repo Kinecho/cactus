@@ -8,8 +8,10 @@ import AdminSlackService, {SlackAttachment, SlackResponseType} from "@admin/serv
 import {PubSub} from "@google-cloud/pubsub";
 import {PubSubTopic} from "@shared/types/PubSubTypes";
 import {getSlackHelpText, JobRequest, JobType, processJob} from "@api/pubsub/subscribers/SlackCommandJob";
+import Logger from "@shared/Logger";
+import {isBlank, isValidEmail} from "@shared/util/StringUtil";
 
-
+const logger = new Logger("slackEndpoints");
 const app = express();
 
 const config = getConfig();
@@ -52,9 +54,41 @@ const signatureHandler = (req: functions.https.Request | any, resp: functions.Re
 app.use(cors({origin: true}));
 app.use(signatureHandler);
 
+app.post("/commands/stats", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload: CommandPayload = req.body;
+    const payloadText = payload.text;
+    const [memberEmail, ...rest] = payloadText.split(" ").map(s => s.trim());
+    const immediate = rest.includes("immediate");
+    logger.info(`Getting stats for ${memberEmail}`);
+
+
+    if (isBlank(memberEmail) || !isValidEmail(memberEmail)) {
+        const attachments: SlackAttachment[] = [];
+        attachments.push({
+            text: "Please provide a a valid email address to get stats for. The command should be run like this: `/stats name@example.com",
+            color: "warning"
+        });
+
+        await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {
+            attachments,
+            response_type: SlackResponseType.ephemeral
+        });
+        resp.sendStatus(200);
+        return;
+    }
+
+    const job: JobRequest = {
+        type: JobType.memberStats,
+        payload: memberEmail,
+        slackResponseURL: payload.response_url,
+    };
+
+    await submitJobAndReturn({job, args: rest, immediate, response: resp});
+    return;
+});
 
 app.post("/commands", async (req: functions.https.Request | any, resp: functions.Response) => {
-    console.log("req", chalk.cyan(JSON.stringify(req.body, null, 2)));
+    logger.log("req", chalk.cyan(JSON.stringify(req.body, null, 2)));
 
     const payload: CommandPayload = req.body;
 
@@ -86,11 +120,8 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
     }
 
     if (!jobType) {
-
         const {intro, commands} = getSlackHelpText();
-
         const attachments: SlackAttachment[] = [];
-
         if (commandName.trim().length > 0) {
             attachments.unshift({
                 text: `Unknown command name: \`${commandName}\``,
@@ -120,29 +151,33 @@ app.post("/commands", async (req: functions.https.Request | any, resp: functions
         slackResponseURL: payload.response_url,
     };
 
-    console.log("Job built:", JSON.stringify(job, null, 2));
+    await submitJobAndReturn({job, args: rest, immediate, response: resp});
+    return;
+});
 
-    const slackCmdName = `${commandName} ${rest}`.trim();
+
+async function submitJobAndReturn(options: { job: JobRequest, immediate: boolean, response: functions.Response, args?: string[] }): Promise<void> {
+    const {job, immediate, response, args} = options;
+    logger.log("Job built:", JSON.stringify(job, null, 2));
+
+    const slackCmdName = `${job.type} ${args}`.trim();
     if (!immediate) {
-        console.log("Not immediate - sending to pubsub");
+        logger.log("Not immediate - sending to pubsub");
         const pubsub = new PubSub();
         await pubsub.topic(PubSubTopic.slack_command).publishJSON(job);
 
-        resp.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\``});
-        resp.end();
+        response.status(200).send({text: `:hourglass_flowing_sand: Processing Job \`${slackCmdName}\``});
+        response.end();
     } else {
-        console.warn("Processing slack command immediately");
+        logger.warn("Processing slack command immediately");
         try {
             await processJob(job);
         } catch (error) {
-            resp.status(200).send({text: `Error Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\`\n\`${error.message || error}\``});
+            response.status(200).send({text: `Error Processing Job \`${slackCmdName}\`: \n\`${JSON.stringify(job)}\`\n\`${JSON.stringify(error.message || error, null, 2)}\``});
         }
-
     }
-
-
     return;
-});
+}
 
 app.post("/actions", async (req: functions.https.Request | any, resp: functions.Response) => {
 
@@ -177,7 +212,7 @@ app.post("/actions", async (req: functions.https.Request | any, resp: functions.
     } = JSON.parse(req.body.payload);
 
     const callbackId: string | undefined = payload.callback_id;
-    console.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
+    logger.log('body: ', chalk.blue(JSON.stringify(payload, null, 2)));
     if (callbackId === 'get_mailchimp_member') {
         await AdminSlackService.getSharedInstance().sendToResponseUrl(payload.response_url, {text: "This doesnt do anything useful... yet"});
 

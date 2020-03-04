@@ -1,4 +1,5 @@
 import {
+    chunkArray,
     isArray,
     isDate,
     isNonEmptyObject,
@@ -306,7 +307,7 @@ describe("transformObjectSync", () => {
         });
         const input = {key: "value"};
         expect(transformObjectSync(input, transform)).toEqual(input);
-        expect(transform).toHaveBeenCalledTimes(3)
+        expect(transform).toHaveBeenCalledTimes(2)
     });
 
     test("single entry array", () => {
@@ -316,7 +317,7 @@ describe("transformObjectSync", () => {
         });
         const input = [{key: "value"}];
         expect(transformObjectSync(input, transform)).toEqual(input);
-        expect(transform).toHaveBeenCalledTimes(3)
+        expect(transform).toHaveBeenCalledTimes(2)
     });
 
     test("nested object", () => {
@@ -326,7 +327,7 @@ describe("transformObjectSync", () => {
         });
         const input = {key: "value", nested: {one: 1}};
         expect(transformObjectSync(input, transform)).toEqual(input);
-        expect(transform).toHaveBeenCalledTimes(7)
+        expect(transform).toHaveBeenCalledTimes(5)
     });
 
     test("nested object with array", () => {
@@ -336,7 +337,7 @@ describe("transformObjectSync", () => {
         });
         const input = {key: "value", nested: {one: 1, two: [{three: 3}]}};
         expect(transformObjectSync(input, transform)).toEqual(input);
-        expect(transform).toHaveBeenCalledTimes(11)
+        expect(transform).toHaveBeenCalledTimes(8)
     });
 
     test("nested object with array and a transform", () => {
@@ -354,7 +355,7 @@ describe("transformObjectSync", () => {
         const output = {key: "value", nested: {one: 2, two: [{three: 3}]}};
 
         expect(transformObjectSync(input, transform)).toEqual(output);
-        expect(transform).toHaveBeenCalledTimes(10)
+        expect(transform).toHaveBeenCalledTimes(8)
     });
 
     test("nested object with array and a transform to null", () => {
@@ -371,7 +372,7 @@ describe("transformObjectSync", () => {
         const output = {key: "value", two: null, nested: {one: null, two: [{three: 3}]}};
 
         expect(transformObjectSync(input, transform)).toEqual(output);
-        expect(transform).toHaveBeenCalledTimes(12)
+        expect(transform).toHaveBeenCalledTimes(9)
     });
 
     test("nested object with array and a transform to array", () => {
@@ -388,7 +389,7 @@ describe("transformObjectSync", () => {
         const output = {key: "value", two: null, nested: {one: [1, 2, 3, 4], two: [{three: 3}]}};
 
         expect(transformObjectSync(input, transform)).toEqual(output);
-        expect(transform).toHaveBeenCalledTimes(12)
+        expect(transform).toHaveBeenCalledTimes(9)
     });
 
     test("nested object - date to Timestamp", () => {
@@ -406,9 +407,9 @@ describe("transformObjectSync", () => {
         const input = {key: "value", two: null, nested: {date: date, two: [{three: 3}]}};
 
         const output = {key: "value", two: null, nested: {date: timestamp, two: [{three: 3}]}};
-
+        expect(transformObjectSync(date, (d) => d)).toEqual(date);
         expect(transformObjectSync(input, transform)).toEqual(output);
-        expect(transform).toHaveBeenCalledTimes(12)
+        expect(transform).toHaveBeenCalledTimes(9)
     });
 
     test("array object - date to Timestamp", () => {
@@ -451,11 +452,10 @@ describe("transformObjectSync", () => {
 
         const result = transformObjectSync(input, transform);
         expect(result).toEqual(output);
-        expect(transform).toHaveBeenCalledTimes(9)
+        expect(transform).toHaveBeenCalledTimes(8)
     });
 
     test("nested object with undefined is removed", () => {
-
 
         const transform = jest.fn((value: any) => {
             return value;
@@ -522,5 +522,30 @@ describe("stringifyJSON", () => {
     test("base firestore model", () => {
         const t = new TestModel();
         expect(stringifyJSON({models: [t]})).toEqual('{"models":[{"deleted":false}]}')
+    })
+});
+
+describe("split into chunks", () => {
+    test("empty array", () => {
+        expect(chunkArray([], 3)).toEqual([])
+    });
+
+
+    test("10 items in batch of 3", () => {
+        expect(chunkArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 3)).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10]])
+    });
+
+    test("10 items in batch of 20", () => {
+        expect(chunkArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 20)).toEqual([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]])
+    });
+
+    test("negative batch size", () => {
+        expect(() => chunkArray([1, 2], -3)).toThrow()
+    });
+
+    test("Batch with object type", () => {
+        const array: string[] = ["one", "two", "three", "four"];
+        expect(chunkArray(array, 2)).toEqual([["one", "two"], ["three", "four"]]);
+        expect(array).toBe(array)
     })
 });

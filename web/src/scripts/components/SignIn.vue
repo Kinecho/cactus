@@ -1,24 +1,20 @@
 <template>
-    <div>
-        <div class="centered">
-            <div>
-                <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
-                <p v-if="message">{{message}}</p>
-            </div>
-            <div class="actions-container">
-                <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
-                <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn"/>
-                <div class="divider" v-if="!isPendingRedirect">
-                    <p class="message-container">Or choose from one of the following</p>
-                </div>
-            </div>
-            <div id="third-party-logins">
-                <spinner v-if="firebaseUiLoading" :delay="1000"/>
-                <div class="buttonContainer" id="signup-app"></div>
+    <div class="centered">
+        <div>
+            <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
+            <p v-if="message && !isPendingRedirect">{{message}}</p>
+        </div>
+        <div class="actions-container">
+            <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
+            <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn" color="light"/>
+            <div class="divider" v-if="!isPendingRedirect">
+                <p class="message-container">Or choose from one of the following</p>
             </div>
         </div>
-        <img id="pinkBlob" src="assets/images/pinkBlob.svg" alt=""/>
-        <img id="yellowBlob1" src="assets/images/yellowNeedleBlob.svg" alt=""/>
+        <div id="third-party-logins">
+            <spinner v-if="firebaseUiLoading" :delay="1000" color="light"/>
+            <div class="buttonContainer" id="signup-app"></div>
+        </div>
     </div>
 </template>
 
@@ -28,7 +24,7 @@
     import CactusMember from '@shared/models/CactusMember'
     import {FirebaseUser} from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {getAuthUI, getAuthUIConfig, sendLoginEvent} from "@web/auth";
+    import {sendLoginEvent} from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
     import {PageRoute} from "@shared/PageRoutes"
     import {QueryParam} from "@shared/util/queryParams"
@@ -37,9 +33,12 @@
     import StorageService, {LocalStorageKey} from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
+    import Logger from "@shared/Logger";
+    import {getAuthUI, getAuthUIConfig} from "@web/authUi";
 
+    const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
-    console.log("Redirect url param is ", redirectUrlParam);
+    logger.log("Redirect url param is ", redirectUrlParam);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
         emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
@@ -69,33 +68,42 @@
                 emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
                     this.isSigningIn = true;
-                    console.log("Redirect URL is", redirectUrl);
-                    console.log("Need to handle auth redirect");
+                    logger.log("Redirect URL is", redirectUrl);
+                    logger.log("Need to handle auth redirect");
                     this.pendingRedirectUrl = redirectUrl;
                     this.authResult = authResult;
                     this.doRedirect = true;
                     return false;
                 },
                 signInFailure: async (error: firebaseui.auth.AuthUIError) => {
-                    alert("Sign In Failure");
-                    console.error("Sign in failure", error);
+                    // alert("Sign In Failure");
+                    logger.error("Sign in failure", error);
+                    this.isPendingRedirect = false;
+                    this.isSigningIn = false;
                 },
                 uiShown: () => {
+                    logger.info("Firebase UI shown", ui);
+                    logger.info("UI Shown... is pending redirect? ", ui.isPendingRedirect());
                     this.firebaseUiLoading = false;
                 }
             });
 
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
-                console.log("Is pending redirect.... need to log the user in");
+                logger.log("Is pending redirect.... need to log the user in");
+
+                this.checkForPendingUIInterval = window.setInterval(() => {
+                    this.checkPendingUI()
+                }, 500);
             }
+
             ui.start('#signup-app', config);
         },
         created() {
             const ui = getAuthUI();
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
-                console.log("Is pending redirect.... need to log the user in");
+                logger.log("Is pending redirect.... need to log the user in");
             }
 
             this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
@@ -113,6 +121,7 @@
             if (this.memberListener) {
                 this.memberListener();
             }
+            window.clearInterval(this.checkForPendingUIInterval)
         },
         props: {
             showTitle: {
@@ -135,6 +144,7 @@
             authResult: firebase.auth.UserCredential | undefined,
             firebaseUiLoading: boolean,
             isSigningIn: boolean,
+            checkForPendingUIInterval: number | undefined,
         } {
             return {
                 commonCopy: copy.common,
@@ -150,11 +160,24 @@
                 authResult: undefined,
                 firebaseUiLoading: false,
                 isSigningIn: false,
+                checkForPendingUIInterval: undefined,
             }
         },
         computed: {
             _title(): string {
                 return this.title || copy.common.SIGN_UP
+            }
+        },
+        methods: {
+            checkPendingUI() {
+                //is the firebase UI loading, or is it showing sign in buttons?
+                if (this.isPendingRedirect) {
+                    const fbList = this.$el.querySelector(".firebaseui-card-content .firebaseui-idp-list");
+                    if (fbList) {
+                        this.isPendingRedirect = false;
+                        window.clearInterval(this.checkForPendingUIInterval)
+                    }
+                }
             }
         },
         watch: {
@@ -167,7 +190,7 @@
                     try {
                         await sendLoginEvent(this.authResult)
                     } catch (e) {
-                        console.error("failed to log login event", e);
+                        logger.error("failed to log login event", e);
                     } finally {
                         window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
                     }
@@ -175,14 +198,11 @@
             }
         }
     })
-
-
 </script>
 
 <style lang="scss">
     @import "mixins";
     @import "variables";
-
 
     #signup-app {
         margin: 0 -24px 0;
@@ -194,6 +214,7 @@
         .firebaseui-container {
             box-shadow: none;
             max-width: 50rem;
+            background-color: transparent;
 
             .mdl-progress.firebaseui-busy-indicator {
                 top: 25px;
@@ -263,10 +284,7 @@
                 width: 30rem;
                 margin: 3rem auto;
             }
-
-
         }
-
     }
 </style>
 
@@ -274,7 +292,6 @@
     @import "common";
     @import "mixins";
     @import "variables";
-
 
     h1 {
         margin: 0;
@@ -296,10 +313,10 @@
     .centered {
         position: relative;
         z-index: 1;
-        padding: 2.4rem;
+        padding: 6.4rem 2.4rem 0;
 
         @include r(600) {
-            padding: 6.4rem 0;
+            padding: 12rem 0 0;
         }
     }
 
@@ -309,22 +326,4 @@
             font-size: 1.6rem;
         }
     }
-
-    #yellowBlob1 {
-        bottom: 3vh;
-        height: auto;
-        left: -180px;
-        position: absolute;
-        width: 360px;
-    }
-
-    #pinkBlob {
-        height: auto;
-        position: absolute;
-        right: -90px;
-        top: 24px;
-        transform: rotate(-165deg);
-        width: 180px;
-    }
-
 </style>

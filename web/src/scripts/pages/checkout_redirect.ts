@@ -1,67 +1,39 @@
 import "@styles/pages/checkout_redirect.scss"
-import {configureStripe, redirectToCheckoutWithPlanId, redirectToCheckoutWithSessionId} from "@web/checkoutService";
-import {Config} from "@web/config";
+import {startCheckout} from "@web/checkoutService";
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
-import {CreateSessionRequest} from "@shared/api/CheckoutTypes";
 import {commonInit} from "@web/common";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("checkout_redirect.ts");
+
 commonInit();
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("checkout monthly loaded");
+    logger.log("checkout monthly loaded");
 
+    const subscriptionProductId = getQueryParam(QueryParam.SUBSCRIPTION_PRODUCT_ID);
 
-    const productParam = getQueryParam(QueryParam.SUBSCRIPTION_PLAN);
-
-    let planId:string|undefined = undefined;
-
-    if (productParam && productParam.toLowerCase() === "y"){
-        planId = Config.stripe.yearlyPlanId;
-    } else if (productParam && productParam.toLowerCase() === "m"){
-        planId = Config.stripe.monthlyPlanId;
-    } else if (productParam){
-        planId = productParam;
-    }
-
-
-    if (!planId){
-        const request:CreateSessionRequest = {
-            successUrl: `${Config.domain}/success`,
-            cancelUrl: `${Config.domain}`,
-            preOrder: true,
-        };
-
-        setTimeout(async () => {
-            const error = await redirectToCheckoutWithSessionId(request);
-            if (error){
-                showError("We were unable to send you to the checkout page. Please try again later.");
-            }
-        }, 1000);
+    if (!subscriptionProductId) {
+        logger.error("No plan id provided. show error message");
+        showError("It looks like this link is no longer valid. Please try again later.")
     } else {
-        configureStripe('checkout-button', planId);
-        setTimeout(async () => {
-            await redirectToCheckoutWithPlanId(planId);
-        }, 1000)
+        await startCheckout({subscriptionProductId: subscriptionProductId});
     }
-
-
 
 });
 
 
-
-
-function showError( message:string) {
+function showError(message: string) {
     const $error = document.getElementById("error-message");
     const $loading = document.getElementById("loading-message");
 
 
-
-    if ($error){
+    if ($error) {
         $error.classList.toggle("hidden");
         $error.getElementsByClassName("message")[0].textContent = message;
     }
-    if ($loading){
+    if ($loading) {
         $loading.classList.toggle("hidden");
     }
 
@@ -70,6 +42,6 @@ function showError( message:string) {
 //enables hot reload
 if (module.hot) {
     module.hot.accept((error: any) => {
-        console.error("Error accepting hot reload", error);
+        logger.error("Error accepting hot reload", error);
     })
 }

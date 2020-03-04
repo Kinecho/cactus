@@ -1,39 +1,37 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
-            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" src="/assets/images/logo.svg" alt="Cactus logo"/></a>
-            <div v-if="displayLoginButton || displaySignupButton" class="anonLinks">
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displayLoginButton"
-                            class="login"
-                            :href="loginHref"
-                            @click.prevent="goToLogin"
-                            type="link"
-                    >{{copy.common.LOG_IN}}</a>
-                </transition>
-                <transition name="fade-in-slow" appear>
-                    <a v-if="displaySignupButton"
-                            data-test="signup-button"
-                            class="jump-to-form button small"
-                            :href="signupHref"
-                            @click.prevent="goToSignup"
-                            type="button"
-                    >{{copy.common.SIGN_UP}}</a>
-                </transition>
+            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
+            <div v-if="" class="anonLinks ">
+                <a v-if="displayLoginButton"
+                        class="login "
+                        :href="loginHref"
+                        @click.prevent="goToLogin"
+                        type="link"
+                >
+                    <span class="">{{copy.common.LOG_IN}}</span>
+                </a>
+                <a v-if="displaySignupButton"
+                        data-test="signup-button"
+                        class="jump-to-form button small"
+                        :href="signupHref"
+                        @click.prevent="goToSignup"
+                        type="button"
+                >{{copy.common.TRY_IT_FREE}}</a>
             </div>
-            <div class="navContainer" v-if="loggedIn">
+            <div class="navContainer" v-if="loggedIn && showLinks">
                 <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
                         Journal</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
-                    <span class="navLabel">Home</span>
+                    <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </a>
                 <a class="navbarLink" :href="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
-                    <span class="navLabel">Activity</span>
+                    <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
                 </a>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
@@ -69,7 +67,10 @@
     import StorageService, {LocalStorageKey} from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
+    import Logger from "@shared/Logger";
+    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
 
+    const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     declare interface NavBarData {
@@ -82,7 +83,7 @@
         hidden: boolean,
         memberProfile: MemberProfile | undefined,
         memberProfileUnsubscriber: ListenerUnsubscriber | undefined,
-        activityBadgeCount: number
+        activityBadgeCount: number,
     }
 
     export default Vue.extend({
@@ -134,9 +135,11 @@
             signupFormAnchorId: {type: String, default: "signupAnchor"},
             largeLogoOnDesktop: Boolean,
             isSticky: {type: Boolean, default: true},
+            whiteLogo: {type: Boolean, default: false},
             showLogin: {type: Boolean, default: true},
             forceTransparent: {type: Boolean, default: false},
             loginRedirectUrl: String,
+            showLinks: {type: Boolean, default: true},
         },
         data(): NavBarData {
             return {
@@ -160,6 +163,7 @@
                 const links: DropdownMenuLink[] = [{
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
+                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isInTrial)
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
@@ -205,11 +209,14 @@
             },
             socialHref(): string {
                 return PageRoute.SOCIAL;
+            },
+            logoSrc(): string {
+                return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
             }
         },
         methods: {
             async logout(): Promise<void> {
-                console.log('Logging out...');
+                logger.log('Logging out...');
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
@@ -230,7 +237,7 @@
                 if (content) content.scrollIntoView();
             },
             async updateActivityCount() {
-                console.log("Refreshing activity count");
+                logger.log("Refreshing activity count");
                 const member = this.member;
                 if (!member) {
                     return;
@@ -238,7 +245,7 @@
 
                 const activitySummary = await fetchActivityFeedSummary();
                 if (!activitySummary) {
-                    console.error("Failed to fetch activity summary");
+                    logger.error("Failed to fetch activity summary");
                     this.activityBadgeCount = 0;
                     return;
                 }
@@ -264,7 +271,7 @@
         font-size: 1.6rem;
         text-decoration: none;
         transition: background-color .2s ease-in-out;
-
+        margin: 0 1rem;
         @include r(600) {
             font-size: 1.8rem;
 
@@ -404,8 +411,7 @@
         transition: transform .2s ease-in-out;
 
         @include r(600) {
-            margin-right: -2.4rem;
-            padding: 0 2.4rem;
+            padding-left: 2.4rem;
 
             &:after {
                 background-color: $green;

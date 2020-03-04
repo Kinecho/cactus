@@ -1,6 +1,10 @@
 import NavBar from "@components/NavBar.vue";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("NavigationUtil");
 
 declare interface NavigationOptions {
+    showPricing?: boolean,
     showSignupButton?: boolean,
     showLoginButton?: boolean,
     redirectOnSignOut?: boolean,
@@ -17,14 +21,15 @@ export function setupNavigation(options: NavigationOptions) {
 
 
     if (!$nav && !$header) {
-        console.warn("Can not find the Vue root element for the nav bar. Not initializing");
+        logger.warn("Can not find the Vue root element for the nav bar. Not initializing");
         return;
     }
-    console.log("Found a navigation header element, initializing the nav bar");
+    logger.log("Found a navigation header element, initializing the nav bar");
 
     window.NavBar = new NavBar({
         el: ($nav || $header) as HTMLElement,
         propsData: {
+            showPricing: options.showPricing || false,
             showSignup: options.showSignupButton,
             redirectOnSignOut: options.redirectOnSignOut || false,
             signOutRedirectUrl: options.signOutRedirectUrl,

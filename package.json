@@ -3,10 +3,18 @@
     "version": "1.0.1",
     "description": "Cactus Monorepo",
     "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Kinecho/cactus.git"
+    },
     "scripts": {
         "test": "FIRESTORE_EMULATOR_HOST=localhost:5005 jest",
-        "update": "npm run install:api && npm run install:web && npm run install:shared && npm run install:scripts && npm run install:admin",
-        "install:all": "npm install & npm run install:api & npm run install:web & npm run install:shared & npm run install:scripts & npm run install:admin",
+        "update": "npm run rebuild:all && npm run install:all",
+        "install:all": "npm install && npm run install:package functions && npm run install:package web && npm run install:package shared && npm run install:package scripts && npm run install:package shared-admin",
+        "rebuild:all": "npm rebuild && npm run rebuild:package functions && npm run rebuild:package web && npm run rebuild:package shared && npm run rebuild:package scripts && npm run rebuild:package shared-admin",
+        "rebuild:func": "npm run rebuild:package functions",
+        "rebuild:package": "func() { echo \"rebuilding $1\"; npm --prefix \"${1}\" rebuild; }; func",
+        "install:package": "func() { echo \"installing $1\"; npm --prefix \"${1}\" install; }; func",
         "install:web": "npm --prefix \"web\" install",
         "install:admin": "npm --prefix \"shared-admin\" install",
         "install:api": "npm --prefix \"functions\" install",
@@ -26,10 +34,6 @@
         "add:all:dev": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save-dev;npm --prefix \"shared-admin\" install $1 --save-dev;npm --prefix \"functions\" install $1 --save-dev;npm --prefix \"shared\" install $1 --save-dev;npm --prefix \"scripts\" install $1 --save-dev; }; func",
         "add:all:prod": "func() { echo \"installing $1 $2\" ;npm --prefix \"web\" install $1 --save;npm --prefix \"shared-admin\" install $1 --save;npm --prefix \"functions\" install $1 --save;npm --prefix \"shared\" install $1 --save;npm --prefix \"scripts\" install $1 --save; }; func",
         "indexes:get": "firebase firestore:indexes > firestore.indexes.json"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Kinecho/cactus.git"
     },
     "author": {
         "name": "Neil Poulin",
@@ -54,7 +58,7 @@
         "vue2-touch-events": "^2.0.0"
     },
     "devDependencies": {
-        "firebase-tools": "^7.2.2",
+        "firebase-tools": "^7.12.1",
         "jest": "^24.8.0",
         "ts-jest": "^24.1.0",
         "ts-node": "^8.5.2",

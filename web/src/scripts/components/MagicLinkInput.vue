@@ -10,16 +10,18 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {isValidEmail} from '@shared/util/StringUtil'
+    import {isValidEmail, isGmail} from '@shared/util/StringUtil'
     import {sendEmailLinkSignIn} from "@web/auth"
-    import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest"
+    import SignupRequest from "@shared/mailchimp/models/SignupRequest"
     import {addModal, getQueryParam, showModal} from "@web/util"
     import {QueryParam} from "@shared/util/queryParams"
     import StorageService, {LocalStorageKey} from "@web/services/StorageService"
-    import {gtag} from "@web/analytics"
+    import {fireSignupEvent, gtag} from "@web/analytics"
     import CopyService from '@shared/copy/CopyService'
     import {CommonCopy} from '@shared/copy/CopyTypes'
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("MagicLinkInput.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -50,7 +52,7 @@
         },
         methods: {
             async submit(): Promise<void> {
-                console.log("MagicLinkInput.vue: submitting email");
+                logger.log("MagicLinkInput.vue: submitting email");
                 this.submitting = true;
                 let email = (this.email || "").toLowerCase().trim();
                 if (!email || email.trim().length === 0) {
@@ -66,7 +68,7 @@
 
                 try {
 
-                    const subscription = new SubscriptionRequest(email);
+                    const subscription = new SignupRequest(email);
                     subscription.subscriptionLocation = {page: window.location.pathname, formId: "MagicLinkInput"};
 
                     let referredByEmail: string | undefined = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS) || undefined;
@@ -97,13 +99,15 @@
                             message,
                             imageUrl,
                             imageAlt: 'Email Signup Success!',
+                            buttonCta: isGmail(email) ? copy.common.VERIFY_IN_GMAIL : undefined,
+                            buttonUrl: isGmail(email) ? copy.common.VERIFY_GMAIL_URL : undefined
                         });
                         gtag('event', 'email_signup_success', {
                             event_category: "email_signup",
                             event_label: `MagicLinkInput`
                         });
                         showModal(modalId);
-
+                        await fireSignupEvent();
                         this.email = "";
 
                     } else if (signupResult.error) {
@@ -126,7 +130,7 @@
                 } catch (error) {
                     const message = copy.error.SORRY_WE_ARE_HAVING_ISSUES;
                     this.$emit("sendError", {message});
-                    console.error("failed to process form", error);
+                    logger.error("failed to process form", error);
                     this.error = message;
                 } finally {
                     this.submitting = false;

@@ -15,8 +15,12 @@ import {
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
-import {calculateDurationMs, calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import {AxiosError} from "axios";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminReflectionResponseService");
 
 export interface ResetUserResponse {
     success: boolean
@@ -39,7 +43,7 @@ export default class AdminReflectionResponseService {
         if (AdminReflectionResponseService.sharedInstance) {
             return AdminReflectionResponseService.sharedInstance;
         }
-        console.error("no shared instance of AdminReflectionResponseService is yet available. Initializing it now (in the getter)");
+        logger.error("no shared instance of AdminReflectionResponseService is yet available. Initializing it now (in the getter)");
         return AdminReflectionResponseService.initialize();
 
     }
@@ -70,7 +74,7 @@ export default class AdminReflectionResponseService {
     async getResponseForCampaignId(memberId: string, campaignId: string): Promise<ReflectionResponse> {
         const collection = this.firestoreService.getCollectionRef(Collection.reflectionResponses);
         // collection.where()
-        console.log("getting response from collection", collection);
+        logger.log("getting response from collection", collection);
 
         throw new Error("Not implemented");
     }
@@ -98,7 +102,7 @@ export default class AdminReflectionResponseService {
         const mailchimpService = MailchimpService.getSharedInstance();
 
         if (!email) {
-            console.warn("No email provided to setLastJournalDate function");
+            logger.warn("No email provided to setLastJournalDate function");
             return {success: false, error: "No email provided"};
         }
 
@@ -118,49 +122,65 @@ export default class AdminReflectionResponseService {
     }
 
     static async resetUserReminder(email?: string): Promise<ResetUserResponse> {
-        const mailchimpService = MailchimpService.getSharedInstance();
-        const memberService = AdminCactusMemberService.getSharedInstance();
-        if (!email) {
-            console.warn("No email given provided to resetUserReminder function");
+        try {
+            const mailchimpService = MailchimpService.getSharedInstance();
+            const memberService = AdminCactusMemberService.getSharedInstance();
+            if (!email) {
+                logger.warn("No email given provided to resetUserReminder function");
+                return {
+                    success: false,
+                    unknownError: "No email provided to resetUser function",
+                    mergeResponse: {success: false},
+                    tagResponse: {success: false}
+                };
+            }
+
+            const lastReplyString = getMailchimpDateString();
+            const lastReplyDate = getDateFromISOString(lastReplyString);
+            const mergeRequest: UpdateMergeFieldRequest = {
+                email,
+                mergeFields: {
+                    [MergeField.LAST_REPLY]: lastReplyString
+                }
+            };
+
+            const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
+
+            const tagRequest: UpdateTagsRequest = {
+                email,
+                tags: [
+                    {
+                        name: TagName.NEEDS_ONBOARDING_REMINDER,
+                        status: TagStatus.INACTIVE
+                    },
+                ]
+            };
+
+            await memberService.updateLastReplyByEmail(email, lastReplyDate);
+
+            const tagResponse = await mailchimpService.updateTags(tagRequest);
+
+            return {
+                success: tagResponse.success && tagResponse.success,
+                tagResponse,
+                mergeResponse,
+                lastReplyString: lastReplyString
+            };
+        } catch (error) {
+            if (error.isAxiosError) {
+                const axiosError = error as AxiosError;
+                logger.error("Unexpected error occurred while resetting the user's reminder. API Error", axiosError.response?.data || axiosError.response)
+            } else {
+                logger.error("Unexpected error occurred while resetting the user's reminder", error);
+            }
+
             return {
                 success: false,
-                unknownError: "No email provided to resetUser function",
+                unknownError: error.isAxiosError ? error.response : error,
                 mergeResponse: {success: false},
                 tagResponse: {success: false}
-            };
-        }
-
-        const lastReplyString = getMailchimpDateString();
-        const lastReplyDate = getDateFromISOString(lastReplyString);
-        const mergeRequest: UpdateMergeFieldRequest = {
-            email,
-            mergeFields: {
-                [MergeField.LAST_REPLY]: lastReplyString
             }
-        };
-
-        const mergeResponse = await mailchimpService.updateMergeFields(mergeRequest);
-
-        const tagRequest: UpdateTagsRequest = {
-            email,
-            tags: [
-                {
-                    name: TagName.NEEDS_ONBOARDING_REMINDER,
-                    status: TagStatus.INACTIVE
-                },
-            ]
-        };
-
-        await memberService.updateLastReplyByEmail(email, lastReplyDate);
-
-        const tagResponse = await mailchimpService.updateTags(tagRequest);
-
-        return {
-            success: tagResponse.success && tagResponse.success,
-            tagResponse,
-            mergeResponse,
-            lastReplyString: lastReplyString
-        };
+        }
     }
 
     async getResponseSinceDate(date: Date): Promise<ReflectionResponse[]> {
@@ -173,46 +193,48 @@ export default class AdminReflectionResponseService {
 
             return results.results;
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return [];
         }
     }
 
     async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+        const queryOptions = options || {};
+        if (queryOptions.queryName) {
+            queryOptions.queryName = queryOptions.queryName + "_AdminReflectionResponseService.getResponsesForMember";
+        } else {
+            queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
+        }
+
         const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
         return result.results
     }
 
     async calculateStatsForMember(options: { memberId: string, timeZone?: string }, queryOptions?: QueryOptions): Promise<ReflectionStats | undefined> {
         try {
-            const {memberId} = options;
-            let timeZone = options.timeZone;
+            const {memberId, timeZone} = options;
             if (!memberId) {
-                console.error("No memberId provided to calculate stats.");
+                logger.error("No memberId provided to calculate stats.");
                 return
             }
 
-            if (!timeZone) {
-                console.log("AdminReflectionResponseService.calculateStatsForMember: No timezone provided, attempting to get it from the member");
-                const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-                timeZone = member?.timeZone || undefined;
-            }
-
             const reflections = await this.getResponsesForMember(memberId, queryOptions);
-            const streak = calculateStreak(reflections, {timeZone});
+            const {dayStreak, weekStreak, monthStreak} = calculateStreaks(reflections, {timeZone});
             const duration = calculateDurationMs(reflections);
 
             const elementAccumulation = getElementAccumulationCounts(reflections);
 
             return {
                 totalCount: reflections.length,
-                currentStreakDays: streak,
+                currentStreakDays: dayStreak,
+                currentStreakWeeks: weekStreak,
+                currentStreakMonths: monthStreak,
                 totalDurationMs: duration,
                 elementAccumulation: elementAccumulation
             };
         } catch (error) {
-            console.error("Failed to calculate stats for memberId", options.memberId);
+            logger.error("Failed to calculate stats for memberId", options.memberId);
             return undefined;
         }
 
@@ -232,7 +254,32 @@ export default class AdminReflectionResponseService {
             totalDeleted += idNumber;
         }
 
-        console.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
+        logger.log(`Permanently deleted ${totalDeleted} reflection responses for member ${member.email || member.id}`)
         return totalDeleted
+    }
+
+    async getAllBatch(options: {
+        batchSize?: number,
+        onData: (sentPrompts: ReflectionResponse[], batchNumber: number) => Promise<void>
+    }) {
+        logger.log("Getting batched result 1 for all members");
+        const query: FirebaseFirestore.Query = this.getCollectionRef();
+
+        // if (options.excludeCompleted === true) {
+        //     query = query.where(SentPromptField.completed, "==", false);
+        // }
+
+        // if (options.beforeDate) {
+        //     query = query.where(BaseModelField.createdAt, "<", toTimestamp(options.beforeDate))
+        // }
+
+        await AdminFirestoreService.getSharedInstance().executeBatchedQuery({
+            query,
+            type: ReflectionResponse,
+            onData: options.onData,
+            batchSize: options.batchSize,
+            sortDirection: QuerySortDirection.asc,
+            orderBy: BaseModelField.createdAt
+        })
     }
 }

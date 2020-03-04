@@ -35,8 +35,8 @@ declare interface Operation {
 
 declare interface IGetOptions {
     queryName?: string,
-    includeDeleted?: false,
-    onlyDeleted?: false,
+    includeDeleted?: boolean,
+    onlyDeleted?: boolean,
 }
 
 declare interface DocObserverOptions<IModel extends BaseModel> extends IGetOptions {
@@ -64,7 +64,7 @@ declare interface IQueryObserverOptions<IQueryCursor, IModel extends BaseModel> 
     queryName?: string,
 }
 
-declare interface QueryResult<T extends BaseModel> {
+declare interface QueryResult<T> {
     results: T[],
     size: number,
     error?: any,

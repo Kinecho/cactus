@@ -58,7 +58,9 @@
     import SocialConnectionRequestService from '@web/services/SocialConnectionRequestService';
     import SocialConnectionRequest from "@shared/models/SocialConnectionRequest"
     import {ImportedContact} from "@shared/types/ImportedContactTypes";
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("SocialImportedContact.vue");
     export default Vue.extend({
         props: {
             imported_contact: {
@@ -101,7 +103,7 @@
 
                     const sendInviteResult = await sendInvite(this.contact, this.message);
 
-                    if (sendInviteResult.data && sendInviteResult.data.success) {
+                    if (sendInviteResult.success) {
                         this.sendingInvite = false;
                         this.wasInvited = true;
                         this.readyToInvite = false;
@@ -139,7 +141,7 @@
                         }
                         return true;
                     } catch (e) {
-                        console.error("Failed to send friend request", e);
+                        logger.error("Failed to send friend request", e);
                         this.error = 'Something went wrong';
                         this.sendingInvite = false;
                         return false;

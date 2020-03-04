@@ -4,12 +4,13 @@ import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
 import CactusMemberService from "@web/services/CactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
-import {createElementAccumulation, ElementAccumulation} from "@shared/models/ElementAccumulation";
-import {getStreak} from "@shared/util/DateUtil";
 import {Config} from "@web/config";
 import {PageRoute} from "@shared/PageRoutes";
 import StorageService, {LocalStorageKey} from "@web/services/StorageService";
-import {calculateStreak, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
+import {calculateStreaks, StreakResult} from "@shared/util/ReflectionResponseUtil";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("ReflectionResponseService");
 
 export interface ReflectionSaveOptions {
     saveIfAnonymous?: boolean,
@@ -77,7 +78,7 @@ export default class ReflectionResponseService {
         response.responseMedium = medium;
         response.createdAt = new Date();
         response.updatedAt = new Date();
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
 
         if (cactusMember) {
             response.userId = cactusMember.userId;
@@ -96,7 +97,7 @@ export default class ReflectionResponseService {
     }
 
     static populateMemberFields(response: ReflectionResponse): ReflectionResponse {
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
 
         if (cactusMember) {
             response.userId = cactusMember.userId;
@@ -112,9 +113,9 @@ export default class ReflectionResponseService {
     }
 
     static createReflectionResponse(promptId: string, medium: ResponseMedium, promptQuestion?: string): ReflectionResponse | undefined {
-        const cactusMember = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const cactusMember = CactusMemberService.sharedInstance.currentMember;
         if (!cactusMember) {
-            console.log("Unable to get cactus member");
+            logger.log("Unable to get cactus member");
             return;
         }
 
@@ -150,7 +151,7 @@ export default class ReflectionResponseService {
             return saved;
         }
         if (!model.cactusMemberId) {
-            console.warn("No cactusMemberId found on ReflectionResponse, Saving to local storage");
+            logger.warn("No cactusMemberId found on ReflectionResponse, Saving to local storage");
             StorageService.saveModel(LocalStorageKey.anonReflectionResponse, model, model.promptId);
 
             return model;
@@ -164,7 +165,7 @@ export default class ReflectionResponseService {
             const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
             return results.results;
         } catch (error) {
-            console.error("Failed to fetch reflection responses", error);
+            logger.error("Failed to fetch reflection responses", error);
             return [];
         }
     }
@@ -242,9 +243,9 @@ export default class ReflectionResponseService {
     }
 
     async getAllReflections(): Promise<ReflectionResponse[]> {
-        const member = CactusMemberService.sharedInstance.getCurrentCactusMember();
+        const member = CactusMemberService.sharedInstance.currentMember;
         if (!member) {
-            console.warn("ReflectionResponseService.getTotalReflectionDurationMsL No current cactus member found");
+            logger.warn("ReflectionResponseService.getTotalReflectionDurationMsL No current cactus member found");
             return [];
         }
         const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", member.id).orderBy(BaseModelField.createdAt, QuerySortDirection.desc);
@@ -256,14 +257,14 @@ export default class ReflectionResponseService {
         const reflections = await this.getAllReflections();
         const totalDuration = reflections.reduce((duration, doc) => {
             const current = doc.reflectionDurationMs || 0;
-            console.log("current response duration ", current);
+            logger.log("current response duration ", current);
             return duration + (Number(current) || 0);
         }, 0);
-        console.log("total duration is", totalDuration);
+        logger.log("total duration is", totalDuration);
         return totalDuration;
     }
 
-    static getCurrentStreak(reflections: ReflectionResponse[], member?: CactusMember): number {
-        return calculateStreak(reflections, {timeZone: member?.timeZone || undefined})
+    static getCurrentStreaks(reflections: ReflectionResponse[], member?: CactusMember): StreakResult {
+        return calculateStreaks(reflections, {timeZone: member?.timeZone || undefined});
     }
 }

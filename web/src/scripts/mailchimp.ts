@@ -1,12 +1,12 @@
 import "firebase/functions"
-import SubscriptionRequest from "@shared/mailchimp/models/SubscriptionRequest";
+import SignupRequest from "@shared/mailchimp/models/SignupRequest";
 import {Endpoint, getAuthHeaders, request} from "@web/requestUtils";
 import SubscriptionResult from "@shared/mailchimp/models/SubscriptionResult";
 import {gtag, fireSignupEvent} from "@web/analytics";
 import {addModal, getQueryParam, showModal} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 import {sendEmailLinkSignIn} from "@web/auth";
-import {isValidEmail} from "@shared/util/StringUtil";
+import {isValidEmail, isGmail} from "@shared/util/StringUtil";
 import {NotificationStatus} from "@shared/models/CactusMember";
 import {
     UnsubscribeRequest,
@@ -16,21 +16,26 @@ import {
 } from "@shared/mailchimp/models/UpdateStatusTypes";
 import {ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import {LocalStorageKey} from "@web/services/StorageService";
+import CopyService from '@shared/copy/CopyService'
+import Logger from "@shared/Logger";
+
+const copy = CopyService.getSharedInstance().copy;
+const logger = new Logger("mailchimp.ts");
 
 /**
  *
- * @param {SubscriptionRequest} subscription
+ * @param {SignupRequest} subscription
  * @return {Promise<SubscriptionResult>}
  */
-export async function submitEmail(subscription: SubscriptionRequest): Promise<SubscriptionResult> {
+export async function submitEmail(subscription: SignupRequest): Promise<SubscriptionResult> {
     // subscription.as
-    console.log("submitting subscription", subscription);
+    logger.log("submitting subscription", subscription);
 
     const result = (await request.post(Endpoint.mailchimp, subscription)).data as SubscriptionResult;
     if (result.success) {
-        console.log("Signup successful", result)
+        logger.log("Signup successful", result)
     } else {
-        console.warn("not successful getting data from endpoint", result)
+        logger.warn("not successful getting data from endpoint", result)
     }
     return result
 }
@@ -39,7 +44,7 @@ export function configureLoginForm(formId: string) {
     const form = document.getElementById(formId);
 
     if (!form) {
-        console.error("no form found in document for id", formId);
+        logger.error("no form found in document for id", formId);
         gtag("event", "exception", {
             description: "no form found on page for formId" + formId,
             fatal: false
@@ -54,7 +59,7 @@ export function configureLoginForm(formId: string) {
         }
 
         /* do what you want with the form */
-        console.log("form submitted", formId);
+        logger.log("form submitted", formId);
 
         gtag('event', 'email_signup_clicked', {
             event_category: "email_signup",
@@ -84,7 +89,7 @@ export function configureLoginForm(formId: string) {
 
         if (!emailInput) {
             //handle error
-            console.warn("no email input was found");
+            logger.warn("no email input was found");
             gtag("event", "exception", {
                 description: "email input field was found for form " + formId,
                 fatal: false
@@ -96,7 +101,7 @@ export function configureLoginForm(formId: string) {
 
         let emailAddress = emailInput.value || "";
         emailAddress = emailAddress.trim().toLowerCase();
-        console.log("submitting email", emailAddress);
+        logger.log("submitting email", emailAddress);
 
 
         if (!isValidEmail(emailAddress)) {
@@ -112,7 +117,7 @@ export function configureLoginForm(formId: string) {
 
         try {
 
-            const subscription = new SubscriptionRequest(emailAddress);
+            const subscription = new SignupRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             let referredByEmail = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
@@ -120,7 +125,7 @@ export function configureLoginForm(formId: string) {
                 try {
                     referredByEmail = window.localStorage.getItem(LocalStorageKey.referredByEmail);
                 } catch (e) {
-                    console.error("error trying to get referredByEmail from local storage", e)
+                    logger.error("error trying to get referredByEmail from local storage", e)
                 }
             }
 
@@ -148,12 +153,14 @@ export function configureLoginForm(formId: string) {
                     message,
                     imageUrl,
                     imageAlt: 'Email Signup Success!',
+                    buttonCta: isGmail(emailAddress) ? copy.common.VERIFY_IN_GMAIL : undefined,
+                    buttonUrl: isGmail(emailAddress) ? copy.common.VERIFY_GMAIL_URL : undefined
                 });
                 gtag('event', 'email_signup_success', {
                     event_category: "email_signup",
                     event_label: `${formId}`
                 });
-                fireSignupEvent();
+                await fireSignupEvent();
                 showModal(modalId);
 
 
@@ -173,7 +180,7 @@ export function configureLoginForm(formId: string) {
                 showError("Sorry, it looks like we're having issues. Please try again later");
             }
         } catch (error) {
-            console.error("failed to process form", error);
+            logger.error("failed to process form", error);
             showError("Sorry, it looks like we're having issues.");
         } finally {
             button.disabled = false
@@ -191,7 +198,7 @@ export function configureMailchimpSignupForm(formId: string) {
     const form = document.getElementById(formId);
 
     if (!form) {
-        console.error("no form found in document for id", formId);
+        logger.error("no form found in document for id", formId);
         gtag("event", "exception", {
             description: "no form found on page for formId" + formId,
             fatal: false
@@ -207,7 +214,7 @@ export function configureMailchimpSignupForm(formId: string) {
 
 
         /* do what you want with the form */
-        console.log("form submitted", formId);
+        logger.log("form submitted", formId);
 
         gtag('event', 'email_signup_clicked', {
             event_category: "email_signup",
@@ -237,7 +244,7 @@ export function configureMailchimpSignupForm(formId: string) {
 
         if (!emailInput) {
             //handle error
-            console.warn("no email input was found");
+            logger.warn("no email input was found");
             gtag("event", "exception", {
                 description: "email input field was found for form " + formId,
                 fatal: false
@@ -249,7 +256,7 @@ export function configureMailchimpSignupForm(formId: string) {
 
         let emailAddress = emailInput.value || "";
         emailAddress = emailAddress.trim().toLowerCase();
-        console.log("submitting email", emailAddress);
+        logger.log("submitting email", emailAddress);
 
 
         if (!isValidEmail(emailAddress)) {
@@ -265,7 +272,7 @@ export function configureMailchimpSignupForm(formId: string) {
 
         try {
 
-            const subscription = new SubscriptionRequest(emailAddress);
+            const subscription = new SignupRequest(emailAddress);
             subscription.subscriptionLocation = {page: window.location.pathname, formId};
 
             const referredParam = getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
@@ -308,7 +315,7 @@ export function configureMailchimpSignupForm(formId: string) {
                 showError("Sorry, it looks like we're having issues. Please try again later");
             }
         } catch (error) {
-            console.error("failed to process form", error);
+            logger.error("failed to process form", error);
             showError("Sorry, it looks like we're having issues.");
         } finally {
             button.disabled = false
@@ -333,10 +340,10 @@ export function setupJumpToForm(buttonClass: string = "jump-to-form") {
         const scrollToId = button.dataset.scrollTo;
         const doFocus = Boolean(button.dataset.focusForm);
         const focusFormId = button.dataset.focusForm;
-        console.log("scrolling to", scrollToId);
+        logger.log("scrolling to", scrollToId);
 
         if (!scrollToId) {
-            console.log("no content to scroll to");
+            logger.log("no content to scroll to");
             return;
         }
 
@@ -383,7 +390,7 @@ export async function updateSubscriptionStatus(status: NotificationStatus, email
 
         return response.data;
     } catch (error) {
-        console.error("Unable to update the user's status");
+        logger.error("Unable to update the user's status");
         //TODO: Show snackbar error;
         return {error: error, success: false};
     }

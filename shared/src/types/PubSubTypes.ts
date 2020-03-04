@@ -7,7 +7,10 @@ export enum PubSubTopic {
     slack_command = "slack_command",
     create_daily_sent_prompts = "create_daily_sent_prompts",
     member_stats_sync = "member_stats_sync",
-    custom_sent_prompt_notifications = "custom_sent_prompt_notifications"
+    custom_sent_prompt_notifications = "custom_sent_prompt_notifications",
+    expire_subscription_trials = "expire_subscription_trials",
+    sync_trial_members_to_mailchimp = "sync_trial_members_to_mailchimp"
+
 }
 
 

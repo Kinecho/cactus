@@ -4,7 +4,9 @@ import {PageLoader} from "@web/datasource/models/PageLoader";
 import SentPromptService from "@web/services/SentPromptService";
 import {PageResult} from "@web/services/FirestoreService";
 import JournalEntry, {JournalEntryDelegate} from "@web/datasource/models/JournalEntry";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("JournalFeedDataSource");
 
 interface JournalFeedDataSourceDelegate {
     didLoad?: (hasData: boolean) => void
@@ -21,7 +23,7 @@ interface SetupJournalEntryResult {
 
 }
 
-class JournalFeedDataSource implements JournalEntryDelegate{
+class JournalFeedDataSource implements JournalEntryDelegate {
     member: CactusMember;
     pageSize: number = 10;
     delegate?: JournalFeedDataSourceDelegate;
@@ -39,10 +41,14 @@ class JournalFeedDataSource implements JournalEntryDelegate{
 
     journalEntries: JournalEntry[] = [];
 
-    constructor(member: CactusMember) {
+    onlyCompleted: boolean = false;
+
+    constructor(member: CactusMember, options?: { onlyCompleted?: boolean }) {
         this.member = member;
         this.memberId = member.id!;
         this.startDate = new Date();
+        const {onlyCompleted = false} = options || {};
+        this.onlyCompleted = onlyCompleted;
     }
 
     start() {
@@ -57,6 +63,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
         futurePage.listener = SentPromptService.sharedInstance.observeFuturePrompts({
             memberId: this.memberId,
             since: this.startDate,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
                 futurePage.result = page;
                 this.handlePageResult(page);
@@ -67,8 +74,9 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             memberId: this.memberId,
             beforeOrEqualTo: this.startDate,
             limit: this.pageSize,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
-                console.log("🌵 🥇Got first page results", page);
+                logger.log("🌵 🥇Got first page results", page);
                 firstPage.result = page;
 
                 this.handlePageResult(page);
@@ -102,13 +110,13 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             updatedSentPrompts.push(...(page.result?.results || []))
         });
 
-        const journalEntries:JournalEntry[] = [];
+        const journalEntries: JournalEntry[] = [];
         updatedSentPrompts.forEach(sentPrompt => {
             if (sentPrompt.promptId) {
                 updatedPromptIds.push(sentPrompt.promptId);
 
                 const entry = this.journalEntriesByPromptId[sentPrompt.promptId];
-                if (entry){
+                if (entry) {
                     journalEntries.push(entry);
                 }
             }
@@ -138,7 +146,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             return {created: false, entry}
         }
 
-        entry = new JournalEntry(sentPrompt);
+        entry = new JournalEntry(promptId, sentPrompt);
         entry.delegate = this;
         entry.start();
         this.journalEntriesByPromptId[promptId] = entry;
@@ -154,28 +162,28 @@ class JournalFeedDataSource implements JournalEntryDelegate{
      * @return {boolean} True if the next page will be loaded, false if not.
      */
     loadNextPage(): boolean {
-        if (this.loadingPage){
-            console.log("[JournalFeedDataSource] Page is loading, not doing anything");
+        if (this.loadingPage) {
+            logger.log("[JournalFeedDataSource] Page is loading, not doing anything");
             return false;
         }
         if (!this.hasLoaded) {
-            console.log("[JournalFeedDataSource] Not set up, can't load next page");
+            logger.log("[JournalFeedDataSource] Not set up, can't load next page");
             return false;
         }
 
         if (this.pages.length === 0) {
-            console.log("[JournalFeedDataSource] There are no pages. Can't load next page");
+            logger.log("[JournalFeedDataSource] There are no pages. Can't load next page");
             return false;
         }
         const lastPage = this.pages[this.pages.length - 1];
 
         if (!lastPage.finishedLoading) {
-            console.log("[JournalFeedDataSource] Last page has not finished loading.");
+            logger.log("[JournalFeedDataSource] Last page has not finished loading.");
             return false;
         }
 
         if (lastPage.result?.mightHaveMore !== true) {
-            console.log("[JournalFeedDataSource] There is no more expected data. Not loading");
+            logger.log("[JournalFeedDataSource] There is no more expected data. Not loading");
             return false;
         }
 
@@ -185,8 +193,9 @@ class JournalFeedDataSource implements JournalEntryDelegate{
             memberId: this.memberId,
             limit: this.pageSize,
             lastResult: lastPage.result,
+            onlyCompleted: this.onlyCompleted,
             onData: (page) => {
-                console.log("🌵 Got Next page results", page);
+                logger.log("🌵 Got Next page results", page);
                 nextPage.result = page;
 
                 this.handlePageResult(page);
@@ -199,7 +208,7 @@ class JournalFeedDataSource implements JournalEntryDelegate{
     }
 
     stop() {
-        console.log("[JournalEntryDataSource] stop() called");
+        logger.log("[JournalEntryDataSource] stop() called");
         this.pages.forEach(page => {
             page.stop()
         });

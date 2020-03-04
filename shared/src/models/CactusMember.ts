@@ -3,6 +3,14 @@ import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
+import {getValidTimezoneName} from "@shared/timezones";
+import {
+    isInTrial,
+    MemberSubscription,
+    subscriptionTierDisplayName,
+    needsTrialExpiration
+} from "@shared/models/MemberSubscription";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -27,6 +35,8 @@ export type NotificationSettings = {
 
 export interface ReflectionStats {
     currentStreakDays: number,
+    currentStreakWeeks: number,
+    currentStreakMonths: number,
     totalDurationMs: number,
     totalCount: number,
     elementAccumulation: ElementAccumulation
@@ -50,9 +60,16 @@ export enum Field {
     stats = "stats",
     stats_reflections = "reflections",
     activityStatus = "activityStatus",
+    promptSendTime = "promptSendTime",
+    timeZone = "timeZone",
     promptSendTimeUTC = "promptSendTimeUTC",
     promptSendTimeUTC_hour = "promptSendTimeUTC.hour",
     promptSendTimeUTC_minute = "promptSendTimeUTC.minute",
+    subscription = "subscription",
+    subscriptionTier = "subscription.tier",
+    subscriptionTrialEndsAt = "subscription.trial.endsAt",
+    subscriptionStripeId = "subscription.stripeSubscriptionId",
+    subscriptionActivated = "subscription.activated",
 }
 
 export interface PromptSendTime {
@@ -63,6 +80,10 @@ export interface PromptSendTime {
 export type QuarterHour = 0 | 15 | 30 | 45;
 
 export const DEFAULT_PROMPT_SEND_TIME = (): PromptSendTime => ({hour: 2, minute: 45});
+
+export interface MemberStripeDetails {
+    customerId?: string,
+}
 
 export default class CactusMember extends BaseModel {
     readonly collection = Collection.members;
@@ -85,15 +106,16 @@ export default class CactusMember extends BaseModel {
 
     journalStatus = JournalStatus.NONE;
 
-    fcmTokens?: [string];
+    fcmTokens?: string[];
+    firebaseInstanceIds?: string[];
     notificationSettings: NotificationSettings = {
         [NotificationChannel.email]: NotificationStatus.ACTIVE,
         [NotificationChannel.push]: NotificationStatus.NOT_SET,
     };
     timeZone?: string | null;
     locale?: string | null | undefined;
-    promptSendTime?: PromptSendTime = DEFAULT_PROMPT_SEND_TIME();
-    readonly promptSendTimeUTC?: PromptSendTime;
+    promptSendTime?: PromptSendTime;
+    readonly promptSendTimeUTC?: PromptSendTime = this.getDefaultPromptSendTimeUTC();
     referredByEmail?: string;
     signupQueryParams: {
         utm_source?: string,
@@ -108,6 +130,9 @@ export default class CactusMember extends BaseModel {
     activityStatus?: {
         lastSeenOccurredAt?: Date
     } = {};
+
+    subscription?: MemberSubscription;
+    stripe?: MemberStripeDetails = {};
 
     prepareForFirestore(): any {
         super.prepareForFirestore();
@@ -149,5 +174,69 @@ export default class CactusMember extends BaseModel {
             return DateUtil.getDateObjectForTimezone(date, this.timeZone);
         }
         return DateTime.local().toObject();
+    }
+
+    getDefaultPromptSendTimeUTC(): PromptSendTime {
+        return {
+            hour: DateTime.utc().minus({hours: 1}).hour,
+            minute: DateUtil.getCurrentQuarterHour()
+        } as PromptSendTime;
+    }
+
+    /**
+     * Use a "valid" timezone to create their local send prompt time preference
+     * @return {PromptSendTime | undefined}
+     */
+    getLocalPromptSendTimeFromUTC(): PromptSendTime | undefined {
+        const tz = getValidTimezoneName(this.timeZone);
+        if (this.promptSendTimeUTC && tz) {
+
+            const utcDateTime = DateTime.utc().set(this.promptSendTimeUTC);
+            const localDateTime = utcDateTime.setZone(tz);
+
+            return {
+                hour: localDateTime.hour,
+                minute: localDateTime.minute
+            } as PromptSendTime;
+        }
+        return;
+    }
+
+    get tier(): SubscriptionTier {
+        return this.subscription?.tier ?? SubscriptionTier.PLUS
+    }
+
+    get tierDisplayName(): string | undefined {
+        return subscriptionTierDisplayName(this.tier, this.isInTrial)
+    }
+
+    get daysLeftInTrial(): number {
+        const end = this.subscription?.trial?.endsAt;
+        if (!end) {
+            return 0;
+        }
+        return Math.max(DateUtil.daysUntilDate(end), 0);
+    }
+
+    get isInTrial(): boolean {
+        return isInTrial(this.subscription)
+    }
+
+    get needsTrialExpiration(): boolean {
+        return needsTrialExpiration(this.subscription)
+    }
+
+    get hasActiveSubscription(): boolean {
+        return !!this.subscription && !this.isInTrial && this.tier !== SubscriptionTier.BASIC
+    }
+
+    set stripeCustomerId(customerId: string | undefined) {
+        const stripeDetails: MemberStripeDetails = this.stripe || {};
+        stripeDetails.customerId = customerId;
+        this.stripe = stripeDetails;
+    }
+
+    get stripeCustomerId(): string | undefined {
+        return this.stripe?.customerId;
     }
 }

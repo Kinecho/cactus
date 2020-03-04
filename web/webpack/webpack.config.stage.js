@@ -10,7 +10,7 @@ module.exports = () => {
     return getCommonWebpackConfig(config).then(common => {
         return merge(common, minimizersConfig, {
             devtool: 'source-map',
-            mode: "production",
+            mode: "development",
             // plugins: [
             //     new SentryWebpackPlugin({
             //         include: path.resolve(__dirname, '..', 'public'),

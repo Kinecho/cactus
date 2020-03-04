@@ -1,5 +1,5 @@
 <template>
-    <footer :class={lifted}>
+    <footer v-bind:class="{lifted, transparent: isTransparent}">
         <div class="centered">
             <div class="footerInfo">
                 <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
@@ -7,19 +7,22 @@
                     <p class="copyright">&copy; 2020 Cactus. All rights reserved.<br>
                         Have questions?&nbsp;&nbsp;<a class="contact" href="mailto:help@cactus.app">Send an
                             email.</a><br>
-                        <a class="legal" href="/privacy-policy">Privacy</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/terms-of-service">Terms</a>
+                        <a class="legal" href="/pricing">Pricing</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/privacy-policy">Privacy</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/terms-of-service">Terms</a>
                     </p>
                     <nav class="socialLinks">
-                        <a class="link" href="https://www.facebook.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/facebook.svg" alt="facebook"/></a>
-                        <a class="link" href="https://twitter.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/twitter.svg" alt="twitter"/></a>
-                        <a class="link" href="https://www.linkedin.com/company/19185975" target="_blank"><img class="icon" src="/assets/images/linkedin.svg" alt="linkedin"/></a>
-                        <a class="link" href="https://www.instagram.com/itscalledcactus/" target="_blank"><img class="icon" src="/assets/images/instagram.svg" alt="instagram"/></a>
-                        <a class="link" href="https://www.pinterest.com/itscalledcactus/" target="_blank"><img class="icon" src="/assets/images/pinterest.svg" alt="pinterest"/></a>
-                        <a class="link" href="https://itscalledcactus.tumblr.com/" target="_blank"><img class="icon" src="/assets/images/tumblr.svg" alt="tumblr"/></a>
+                        <a class="link" rel="noreferrer" href="https://www.facebook.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/facebook.svg" alt="facebook"/></a>
+                        <a class="link" rel="noreferrer" href="https://twitter.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/twitter.svg" alt="twitter"/></a>
+                        <a class="link" rel="noreferrer" href="https://www.linkedin.com/company/19185975" target="_blank"><img class="icon" src="/assets/images/linkedin.svg" alt="linkedin"/></a>
+                        <a class="link" rel="noreferrer" href="https://www.instagram.com/itscalledcactus/" target="_blank"><img class="icon" src="/assets/images/instagram.svg" alt="instagram"/></a>
+                        <a class="link" rel="noreferrer" href="https://www.pinterest.com/itscalledcactus/" target="_blank"><img class="icon" src="/assets/images/pinterest.svg" alt="pinterest"/></a>
+                        <a class="link" rel="noreferrer" href="https://itscalledcactus.tumblr.com/" target="_blank"><img class="icon" src="/assets/images/tumblr.svg" alt="tumblr"/></a>
                     </nav>
                 </div>
             </div>
-            <AppStoreIcon/>
+            <div class="app-icons">
+                <AppStoreIcon/>
+                <PlayStoreIcon/>
+            </div>
         </div>
     </footer>
 </template>
@@ -27,13 +30,16 @@
 <script lang="ts">
     import Vue from "vue"
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
+    import PlayStoreIcon from "@web/components/PlayStoreIcon.vue";
 
     export default Vue.extend({
         props: {
-            lifted: {type: Boolean, required: false, default: false}
+            lifted: {type: Boolean, required: false, default: false},
+            isTransparent: {type: Boolean, default: false},
         },
         components: {
-            AppStoreIcon
+            AppStoreIcon,
+            PlayStoreIcon
         }
     })
 
@@ -57,16 +63,8 @@
             padding: 8rem 2.4rem 3.2rem;
         }
 
-        .app-store-icon {
-            display: block;
-            margin-top: 2rem;
-            text-align: center;
-
-            @include r(600) {
-                display: inline-block;
-                margin-left: 1rem;
-                margin-top: 0;
-            }
+        &.transparent {
+            background-color: transparent;
         }
 
         .centered {
@@ -87,6 +85,11 @@
                 color: $yellow;
                 transition: color .3s ease-in-out;
             }
+        }
+
+        .app-icons {
+            display: flex;
+            justify-content: center;
         }
     }
 
@@ -148,5 +151,4 @@
             width: 2.4rem;
         }
     }
-
 </style>

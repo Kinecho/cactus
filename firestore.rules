@@ -134,7 +134,7 @@ service cloud.firestore {
 
     match /friendships/{document=**} {
       allow create: if true;
-      allow read,update: if resource.data.memberIds.indexOf(getMemberId()) > -1;
+      allow read,update: if resource.data.memberIds.hasAll([getMemberId()]);
     }
 
     match /socialConnectionRequests/{document=**} {

@@ -1,3 +1,7 @@
+import Logger from "@shared/Logger";
+
+const logger = new Logger("SharingService");
+
 class SharingService {
     static sharedInstance =new SharingService();
 
@@ -18,7 +22,7 @@ class SharingService {
         try {
             await navigator.share(options);
         } catch  (error) {
-            console.error("SharingService: an error occurred trying to share a link", error);
+            logger.error("SharingService: an error occurred trying to share a link", error);
             return false
         }
 

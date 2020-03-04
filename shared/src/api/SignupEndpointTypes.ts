@@ -1,4 +1,5 @@
 import {ApiResponse} from "@shared/api/ApiTypes";
+import {AppType} from "@shared/models/ReflectionResponse";
 
 export interface ChangeEmailRequest {
     newEmail: string,
@@ -35,6 +36,7 @@ export interface EmailStatusResponse extends ApiResponse {
 export enum SourceApp {
     web = "web",
     ios = "ios",
+    android = "android"
 }
 
 export interface MagicLinkRequest {
@@ -54,14 +56,6 @@ export interface MagicLinkResponse extends ApiResponse {
     message?: string,
 }
 
-export interface InvitationResponse extends ApiResponse {
-    success: boolean,
-    toEmail: string,
-    fromEmail?: string | undefined,
-    message?: string,
-    error?: any,
-}
-
 export interface LoginEvent {
     userId?: string | null,
     isNewUser: boolean,
@@ -69,5 +63,5 @@ export interface LoginEvent {
     referredByEmail?: string | undefined | null,
     signupQueryParams?: { [name: string]: string } | undefined;
     reflectionResponseIds?: string[],
-
+    app?: AppType,
 }

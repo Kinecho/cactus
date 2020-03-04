@@ -18,20 +18,20 @@
 }
 
 @mixin fancyLinkLight {
-    background-image: linear-gradient(lighten($darkestGreen, 15%), lighten($darkestGreen, 15%));
-    background-position: 0 100%;
-    background-repeat: no-repeat;
-    background-size: 100% .8rem;
-    color: $white;
-    padding: .2rem;
-    text-decoration: none;
-    transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
+  background-image: linear-gradient(lighten($darkestGreen, 15%), lighten($darkestGreen, 15%));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% .8rem;
+  color: $white;
+  padding: .2rem;
+  text-decoration: none;
+  transition: background-size cubic-bezier(0, .5, 0, 1) .3s;
 
-    &:hover {
-        background-image: linear-gradient(lighten($darkestGreen, 20%), lighten($darkestGreen, 20%));
-        background-size: 100% 100%;
-        text-decoration: none;
-    }
+  &:hover {
+    background-image: linear-gradient(lighten($darkestGreen, 20%), lighten($darkestGreen, 20%));
+    background-size: 100% 100%;
+    text-decoration: none;
+  }
 }
 
 @mixin popoverShadow {
@@ -41,12 +41,11 @@
 @mixin shadowbox {
   background-color: white;
   border-radius: 12px;
-  box-shadow:
-      0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
-      0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
-      0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
-      0 24px 63px -24px rgba(0, 0, 0, 0.15);
-  }
+  box-shadow: 0 6.9px 21px -24px rgba(0, 0, 0, 0.012),
+  0 11.5px 32.3px -24px rgba(0, 0, 0, 0.036),
+  0 13.9px 37.7px -24px rgba(0, 0, 0, 0.074),
+  0 24px 63px -24px rgba(0, 0, 0, 0.15);
+}
 
 $widthXxs: 374;
 $widthXs: 600;
@@ -205,6 +204,11 @@ $widthDesktop: $widthXL;
 
 /*height*/
 @mixin h( $point ) {
+  @if $point==600 {
+    @media (min-height: 600px) {
+      @content;
+    }
+  }
   @if $point==768 {
     @media (min-height: 768px) {
       @content;
@@ -282,33 +286,39 @@ $widthDesktop: $widthXL;
 }
 
 @mixin secondaryButton() {
-    background-color: $white;
-    border: 1px solid $lightestGreen;
-    box-shadow: none;
-    color: $darkestGreen;
-    padding: 1.2rem 2.4rem;
+  background-color: $white;
+  border: 1px solid $lightestGreen;
+  box-shadow: none;
+  color: $darkestGreen;
+  padding: 1.2rem 2.4rem;
+
+  @include r(600) {
+    &:hover:enabled {
+      background-color: transparentize($lightestGreen, .6);
+    }
+  }
 }
 
 @mixin tertiaryButton() {
-    background-color: transparent;
-    box-shadow: none;
-    color: $darkGreen;
+  background-color: transparent;
+  box-shadow: none;
+  color: $darkGreen;
+
+  @include r(600) {
+    &:hover {
+      background-color: $lightGreen;
+    }
+  }
+
+  &.red {
+    color: $red;
 
     @include r(600) {
-        &:hover {
-            background-color: $lightGreen;
-        }
+      &:hover {
+        background-color: transparent;
+      }
     }
-
-    &.red {
-        color: $red;
-
-        @include r(600) {
-            &:hover {
-                background-color: transparent;
-            }
-        }
-    }
+  }
 }
 
 @mixin smallButton() {
@@ -329,6 +339,7 @@ $widthDesktop: $widthXL;
 @mixin button {
   background-color: $green;
   border: 0;
+  text-align: center;
   border-radius: 3rem;
   box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.2);
   color: white;
@@ -338,7 +349,6 @@ $widthDesktop: $widthXL;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
-
   text-decoration: none;
 
   @include r(768) {
@@ -364,7 +374,7 @@ $widthDesktop: $widthXL;
     &:not(.no-loading) {
       &:before {
         animation: rotate 1s linear infinite;
-        background: url(assets/images/loading.svg) no-repeat;
+        background: url(/assets/images/loading.svg) no-repeat;
         background-size: 1.6rem;
         content: '';
         display: block;
@@ -376,6 +386,13 @@ $widthDesktop: $widthXL;
         width: 1.6rem;
         z-index: 1;
       }
+
+      &.loading-white {
+        &:before {
+          background: url(/assets/images/loading-white.svg) no-repeat;
+          background-size: 1.6rem;
+        }
+      }
     }
   }
 
@@ -385,6 +402,16 @@ $widthDesktop: $widthXL;
 
   &.secondary {
     @include secondaryButton;
+
+    &.onDark {
+      background: transparent;
+      border-color: transparentize($white, .8);
+      color: $white;
+
+      &:hover {
+        background-color: transparentize($white, .8);
+      }
+    }
   }
 
   &.tertiary {
@@ -394,4 +421,35 @@ $widthDesktop: $widthXL;
   &.small {
     @include smallButton;
   }
+}
+
+@mixin blueWavyBackground {
+  background-attachment: fixed;
+  background-color: $darkestGreen;
+  background-image: url(/assets/images/grainy.png), url(/assets/images/loginBG-left.svg), url(/assets/images/loginBG-right.svg);
+  background-position: center, right 50% top 0, 100% 100%;
+  background-size: auto, cover, 50%;
+  background-repeat: repeat, no-repeat, no-repeat;
+}
+
+@mixin trialBadge {
+  background-color: transparentize($royal, .4);
+  border-radius: 2rem;
+  display: inline-block;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-left: .8rem;
+  padding: .4rem .8rem;
+  text-transform: uppercase;
+  vertical-align: baseline;
+}
+
+@mixin accountBox {
+  align-items: center;
+  background-color: lighten($lightestGreen, 9%);
+  border-radius: .8rem;
+  display: flex;
+  padding: .4rem 1.6rem;
+  width: 100%;
 }

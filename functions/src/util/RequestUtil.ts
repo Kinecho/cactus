@@ -1,6 +1,9 @@
 import * as admin from "firebase-admin";
 import * as express from "express";
+import Logger from "@shared/Logger";
+import {AppType} from "@shared/models/ReflectionResponse";
 
+const logger = new Logger("RequestUtil")
 
 export async function getAuthUser(request: express.Request): Promise<admin.auth.UserRecord | undefined> {
     try {
@@ -9,12 +12,12 @@ export async function getAuthUser(request: express.Request): Promise<admin.auth.
         if (userId) {
             const user = await admin.auth().getUser(userId);
             const endTime = new Date().getTime();
-            console.log(`Get auth user took ${endTime - startTime}ms`);
+            logger.log(`Get auth user took ${endTime - startTime}ms`);
             return user;
         }
         return;
     } catch (error) {
-        console.error("Failed to get user", error);
+        logger.error("Failed to get user", error);
         return;
     }
 }
@@ -33,10 +36,21 @@ export async function getAuthUserId(request: express.Request): Promise<string | 
     try {
         const verifiedToken = await admin.auth().verifyIdToken(token);
         const endTime = new Date().getTime();
-        console.log(`Verify auth bearer took ${endTime - startTime}ms`);
+        logger.log(`Verify auth bearer took ${endTime - startTime}ms`);
         return verifiedToken.uid;
     } catch (error) {
-        console.error("Unable to verify ID token or get a user", error);
+        logger.error("Unable to verify ID token or get a user", error);
         return undefined;
     }
+}
+
+export function getAppType(request: express.Request): AppType | undefined {
+    const agent = request.header("user-agent");
+    logger.info("Found user agent", agent);
+
+    if (agent === "CactusAndroid") {
+        return AppType.ANDROID
+    }
+
+    return;
 }

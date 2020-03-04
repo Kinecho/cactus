@@ -1,6 +1,18 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {CactusElement} from "@shared/models/CactusElement";
 
+export enum ResponseMediumType {
+    PROMPT = "PROMPT",
+    JOURNAL = "JOURNAL",
+    EMAIL = "EMAIL"
+}
+
+export enum AppType {
+    WEB = "WEB",
+    ANDROID = "ANDROID",
+    IOS = "IOS"
+}
+
 export enum ResponseMedium {
     EMAIL = "EMAIL",
     PROMPT_WEB = "PROMPT_WEB",
@@ -9,6 +21,16 @@ export enum ResponseMedium {
     JOURNAL_WEB = "JOURNAL_WEB",
     JOURNAL_IOS = "JOURNAL_IOS",
     JOURNAL_ANDROID = "JOURNAL_ANDROID"
+}
+
+export function getResponseMedium(options: { type: ResponseMediumType, app: AppType }): ResponseMedium {
+    switch (options.type) {
+        case ResponseMediumType.PROMPT:
+        case ResponseMediumType.JOURNAL:
+            return `${options.type}_${options.app}` as ResponseMedium;
+        case ResponseMediumType.EMAIL:
+            return ResponseMedium.EMAIL;
+    }
 }
 
 export function isJournal(medium?: ResponseMedium): boolean {
@@ -49,6 +71,22 @@ export function getResponseMediumDisplayName(medium?: ResponseMedium | string): 
     return displayName;
 }
 
+export function getAppEmoji(app?: AppType): string {
+    if (!app) {
+        return ":question:"
+    }
+
+    switch (app) {
+        case AppType.WEB:
+            return ":computer:";
+        case AppType.ANDROID:
+            return ":android:";
+        case AppType.IOS:
+            return ":ios:";
+        default:
+            return ":question:";
+    }
+}
 
 export function getResponseMediumSlackEmoji(medium?: ResponseMedium): string {
     if (!medium) {

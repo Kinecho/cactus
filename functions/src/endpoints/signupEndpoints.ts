@@ -28,11 +28,16 @@ import {getISODateTime} from "@shared/util/DateUtil";
 import {QueryParam} from "@shared/util/queryParams";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
+import Logger from "@shared/Logger";
+import {getAppEmoji} from "@shared/models/ReflectionResponse";
 
+const logger = new Logger("signupEndpoints");
 const Config = getConfig();
 
 const app = express();
-app.use(cors({origin: true}));
+app.use(cors({
+    origin: Config.allowedOrigins,
+}));
 
 app.post("/change-email", async (req: functions.https.Request | any, resp: functions.Response) => {
     console.log("Starting change-email with request body body", JSON.stringify(req.body));
@@ -74,14 +79,14 @@ app.post("/change-email", async (req: functions.https.Request | any, resp: funct
 app.post("/email-status", async (req: functions.https.Request | any, resp: functions.Response) => {
 
     const payload: EmailStatusRequest = req.body;
-    console.log("signupEndpoints.email-status", payload);
+    logger.log("signupEndpoints.email-status", payload);
     let response: EmailStatusResponse | undefined = undefined;
     const email = payload.email;
     let exists = false;
 
     if (!email) {
-        console.error("No email was provided for the signup endpoint");
-        await AdminSlackService.getSharedInstance().sendActivityMessage({
+        logger.error("No email was provided for the signup endpoint");
+        await AdminSlackService.getSharedInstance().sendSignupsMessage({
             text: `Magic Link endpoint called with no email in payload.`
         });
 
@@ -99,7 +104,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
         }
 
     } catch (e) {
-        console.error("no user found for email", email);
+        logger.error("no user found for email", email);
     }
 
     await AdminSlackService.getSharedInstance().sendActivityMessage({
@@ -113,7 +118,7 @@ app.post("/email-status", async (req: functions.https.Request | any, resp: funct
 
 
 app.post("/login", async (req: functions.https.Request | any, resp: functions.Response) => {
-    console.log("handling logged in ");
+    logger.log("handling logged in ");
     const user = await getAuthUser(req);
     if (!user) {
         resp.sendStatus(401);
@@ -123,12 +128,12 @@ app.post("/login", async (req: functions.https.Request | any, resp: functions.Re
 
 app.post("/magic-link", async (req: functions.https.Request | any, resp: functions.Response) => {
     const payload: MagicLinkRequest = req.body;
-    console.log("signupEndpoints.magic-link", payload);
+    logger.log("signupEndpoints.magic-link", payload);
 
     const {email, referredBy} = payload;
 
     if (!email) {
-        console.error("signupEndpoints.magic-link: No email provided in payload");
+        logger.error("signupEndpoints.magic-link: No email provided in payload");
         const errorResponse: MagicLinkResponse = {success: false, error: "No email provided", email: "", exists: false};
         resp.send(errorResponse);
         return;
@@ -143,7 +148,7 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
             const foundUser = await admin.auth().getUserByEmail(email);
             resolve(foundUser);
         } catch (error) {
-            console.log("No user found for email", email);
+            logger.log("No user found for email", email);
             resolve(undefined);
         }
     });
@@ -159,11 +164,11 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     }
 
     if (member) {
-        console.log(`Found cactus member for ${email}`);
+        logger.log(`Found cactus member for ${email}`);
         memberExists = true;
         displayName = member.getFullName();
     } else {
-        console.log(`no cactus member found for ${email}`);
+        logger.log(`no cactus member found for ${email}`);
     }
 
     const existingMember = userExists || memberExists;
@@ -213,10 +218,6 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
     attachments.push({
         fields,
     });
-    await AdminSlackService.getSharedInstance().sendActivityMessage({
-        text: `${email} triggered the Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
-        attachments: attachments
-    });
 
     const url = appendDomain(payload.continuePath, Config.web.domain);
     const sourceApp = payload.sourceApp || "web";
@@ -225,30 +226,37 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
         url,
     };
 
-    console.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
+    await AdminSlackService.getSharedInstance().sendSignupsMessage({
+        text: `${email} triggered the ${sourceApp} Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
+        attachments: attachments
+    });
+
+    logger.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
         let magicLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
         magicLink = appendQueryParams(magicLink, {[QueryParam.SOURCE_APP]: sourceApp});
-        console.log(`Generated signing link for ${email}: ${magicLink}`);
+        logger.log(`Generated signing link for ${email}: ${magicLink}`);
 
         if (userExists || memberExists) {
             await AdminSendgridService.getSharedInstance().sendMagicLink({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         } else {
             await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
                 displayName,
                 email,
-                link: magicLink
+                link: magicLink,
+                sourceApp: sourceApp
             });
         }
 
         resp.send(response);
     } catch (error) {
         Sentry.captureException(error);
-        console.error(error);
+        logger.error(error);
 
         resp.status(500).send({
             exists: userExists || memberExists,
@@ -264,27 +272,27 @@ app.post("/magic-link", async (req: functions.https.Request | any, resp: functio
 
 app.post("/login-event", async (req: functions.https.Request | any, resp: functions.Response) => {
     try {
-        console.log("Handling login event");
+        logger.log("Handling login event");
         const requestUser = await getAuthUser(req);
         if (!requestUser) {
-            console.log("No auth user was found on the request");
+            logger.log("No auth user was found on the request");
             resp.sendStatus(401);
             return
         }
 
         const payload: LoginEvent = req.body;
 
-        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = []} = payload;
+        const {userId, isNewUser, providerId, referredByEmail, reflectionResponseIds = [], app: appType} = payload;
 
         if (!userId) {
-            console.warn("No user Id was provided in the body fo the request");
+            logger.warn("No user Id was provided in the body fo the request");
             resp.status(400).send({message: "You muse provide as user ID in the body of the request"});
             return;
         }
 
 
         if (requestUser.uid !== userId) {
-            console.warn(`The auth user on the request did not match the payload. Request User ID = ${requestUser.uid} | payloadUserId = ${userId}`);
+            logger.warn(`The auth user on the request did not match the payload. Request User ID = ${requestUser.uid} | payloadUserId = ${userId}`);
             resp.sendStatus(403);
             return
         }
@@ -292,13 +300,18 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         const fields: SlackAttachmentField[] = [];
 
         const attachments: SlackAttachment[] = [];
-        const message: ChatMessage = {text: "A user has logged in.", attachments};
+        const message: ChatMessage = {text: "A user has logged in.", attachments, didSignup: false};
 
 
         const [user, member] = await Promise.all([
             AdminUserService.getSharedInstance().getById(userId),
             AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId)
         ]);
+
+        const trialStartedAt = member?.subscription?.trial?.startedAt;
+        const trialEndAt = member?.subscription?.trial?.endsAt;
+        logger.info("typeof trial.startedAt = ",  typeof (trialStartedAt));
+        logger.info("typeof trial.endAt = ",  typeof (trialEndAt));
 
         if (!user) {
             resp.status(400).send({message: `Unable to find a user for userId ${userId}`});
@@ -317,10 +330,10 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
         user.lastLoginAt = new Date();
         await AdminUserService.getSharedInstance().save(user);
 
-        message.text = `${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
+        message.text = `${appType ? getAppEmoji(appType) : ""} ${user.email} logged in with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
 
         if (user.email) {
-            console.log("checking for pending user so we can grab the reflectionResponseIds from it");
+            logger.log("checking for pending user so we can grab the reflectionResponseIds from it");
 
             const pendingUser = await AdminPendingUserService.getSharedInstance().completeSignup({
                 userId,
@@ -337,7 +350,8 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
 
         if (isNewUser && member) {
-            message.text = `${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`;
+            message.text = `${appType ? getAppEmoji(appType) : ""}  ${user.email} has completed their sign up  with ${getProviderDisplayName(providerId)} ${AdminSlackService.getProviderEmoji(providerId)}`.trim();
+            message.didSignup = true;
             await AdminUserService.getSharedInstance().setReferredByEmail({
                 userId,
                 referredByEmail: referredByEmail || undefined
@@ -346,14 +360,16 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             const accountAttachment: SlackAttachment = {fields, color: "good"};
             member.referredByEmail = referredByEmail || undefined;
             member.signupQueryParams = {...payload.signupQueryParams, ...member.signupQueryParams};
+
             await AdminCactusMemberService.getSharedInstance().save(member);
-            console.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
+
+            logger.log(`set referred by ${referredByEmail} on ${member.email || "unknown"}`);
 
             const invitedByMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(referredByEmail);
             await AdminSocialInviteService.getSharedInstance().handleMemberJoined(member, invitedByMember);
 
             if (member.email && referredByEmail) {
-                console.log("Updating mailchimp ref email to ", referredByEmail);
+                logger.log("Updating mailchimp ref email to ", referredByEmail);
                 await MailchimpService.getSharedInstance().updateMergeFields({
                     email: member.email,
                     mergeFields: {REF_EMAIL: referredByEmail}
@@ -378,7 +394,7 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
                 value: "User Trigger probably didn't finish processing.",
             })
         } else {
-            console.log("this was not a new user");
+            logger.log("this was not a new user");
         }
 
 
@@ -395,10 +411,14 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             });
         }
 
-        await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+        if (message.didSignup) {
+            await AdminSlackService.getSharedInstance().sendSignupsMessage(message);
+        } else {
+            await AdminSlackService.getSharedInstance().sendActivityMessage(message);
+        }
         resp.sendStatus(204);
     } catch (error) {
-        console.error("An unexpected error occurred while processing the login-event");
+        logger.error("An unexpected error occurred while processing the login-event");
         resp.sendStatus(500)
     }
 

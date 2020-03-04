@@ -12,10 +12,17 @@ import AdminPromptContentService from "@admin/services/AdminPromptContentService
 import * as DateUtil from "@shared/util/DateUtil";
 import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
+import Logger from "@shared/Logger";
+import {runMemberStatsJob} from "@api/pubsub/subscribers/MemberStatsJob";
 
+const logger = new Logger("testApp");
+// const Config = getConfig();
 const app = express();
+// app.use(cors({origin: Config.allowedOrigins}));
 app.use(cors({origin: true}));
 app.get('/', (req, res) => {
     res.status(200).json({status: 'ok', queryParams: req.query});
@@ -23,7 +30,7 @@ app.get('/', (req, res) => {
 
 app.get("/fcm", async (req, res) => {
     try {
-        console.log("Staring the message send process");
+        logger.log("Staring the message send process");
         const title = req.query.title || "Cactus Test Push Message";
         const body = req.query.body || "This is the body of the request";
 
@@ -41,15 +48,32 @@ app.get("/fcm", async (req, res) => {
         };
         const result = await admin.messaging().sendToDevice(token, payload);
 
-        console.log("Send Message Result", result);
+        logger.log("Send Message Result", result);
 
 
         return res.sendStatus(201);
     } catch (error) {
-        console.error("failed to send message", error);
+        logger.error("failed to send message", error);
         res.send(error);
     }
     return;
+
+});
+
+app.get("/stats", async (req, res) => {
+    try {
+        const size = req.query.size || 1000;
+        console.log("starting member batches");
+        const result = await runMemberStatsJob(Number(size));
+        // let total = 0;
+
+        console.log("finished all");
+        res.send(result);
+        return;
+    } catch (error) {
+        logger.error("Failed to execute query", error);
+        res.send("Unable to process the request. an error was thrown: " + error.message);
+    }
 
 });
 
@@ -72,7 +96,7 @@ app.get("/send-time", async (req, res) => {
     const day = req.query.date || currentDate.getDate();
     const month = req.query.month || currentDate.getMonth();
     const year = req.query.y || currentDate.getFullYear();
-    console.log(`found hour=${hour} and minute=${minute}`);
+    logger.log(`found hour=${hour} and minute=${minute}`);
     let sendTime: PromptSendTime | undefined = undefined;
 
     const systemDateObject = DateTime.local().setZone("utc").toObject();
@@ -91,7 +115,7 @@ app.get("/send-time", async (req, res) => {
         dryRun: true,
         systemDateObject: systemDateObject
     });
-    console.log("result", result);
+    logger.log("result", result);
 
     res.send(result)
 });
@@ -115,8 +139,8 @@ app.get("/next-prompt", async (req, res) => {
 
     memberId = member.id;
 
-    console.log("Got member", memberId, member.email);
-    console.log("getting next prompt for member Id", memberId);
+    logger.log("Got member", memberId, member.email);
+    logger.log("getting next prompt for member Id", memberId);
 
     const userTZ = member.timeZone;
     // let systemDate = new Date();
@@ -124,10 +148,10 @@ app.get("/next-prompt", async (req, res) => {
     const systemDateObject = DateTime.local().toObject();
     let userDateObject: DateObject = systemDateObject;
     if (userTZ) {
-        console.log("timezone =", userTZ);
+        logger.log("timezone =", userTZ);
         userDateObject = DateUtil.getDateObjectForTimezone(systemDate, userTZ);
-        console.log("user date obj", userDateObject);
-        console.log("user date (locale)", userDateObject.toLocaleString())
+        logger.log("user date obj", userDateObject);
+        logger.log("user date (locale)", userDateObject.toLocaleString())
     }
 
 
@@ -152,28 +176,93 @@ app.get("/next-prompt", async (req, res) => {
     });
 });
 
+app.get("/member-send-time", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+    const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(member);
+    return resp.send(result || "none")
+});
+
+app.get("/expire-trial", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member?.id) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+
+    const result = await AdminSubscriptionService.getSharedInstance().expireTrial(member);
+    return resp.send(result || "none")
+});
+
+app.get("/member-stats", async (req, resp) => {
+    const memberId = req.query.memberId;
+    const email = req.query.email;
+    let member: CactusMember | undefined;
+    if (!memberId && email) {
+        member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
+    } else if (memberId) {
+        member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    }
+
+    if (!member?.id) {
+        resp.status(404);
+        resp.send("No member found");
+        return;
+    }
+    logger.log('Found a member:');
+    logger.log(member);
+
+    const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId: member.id, timeZone: member?.timeZone ? member.timeZone.toString() : undefined});
+    return resp.send(result || "none")
+});
+
 app.get("/content", async (req, resp) => {
-    console.log("Trying to fetch content");
+    logger.log("Trying to fetch content");
     const qDate = req.query.d;
     let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
-        console.log("date input", qDate);
+        logger.log("date input", qDate);
         d = DateUtil.localDateFromISOString(qDate) || d
     }
 
-    console.log("local date ", d);
+    logger.log("local date ", d);
     const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: d});
     return resp.send((content && content.toJSON()) || "none")
 });
 
 app.get("/contentJob", async (req, resp) => {
-    console.log("Trying to fetch content");
+    logger.log("Trying to fetch content");
     const qDate = req.query.d;
     let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
         d = DateUtil.localDateFromISOString(qDate) || d;
     }
-    console.log("testApi: content Date", DateUtil.getISODate(d));
+    logger.log("testApi: content Date", DateUtil.getISODate(d));
     const result = await startSentPromptJob(d, undefined, true);
     return resp.send(result);
 });
@@ -241,7 +330,7 @@ app.get("/sheets/values", async (req, resp) => {
 
 
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         resp.send({error: e});
     }
 });
@@ -308,7 +397,7 @@ app.get("/sheets/process", async (req, resp) => {
 
 
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         resp.send({error: e});
     }
 });
@@ -327,7 +416,7 @@ app.get("/sheets/update", async (req, resp) => {
         });
 
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         resp.send({error: e});
     }
 });
@@ -344,7 +433,7 @@ app.get("/sheets/add", async (req, resp) => {
         });
 
     } catch (e) {
-        console.error(e);
+        logger.error(e);
         resp.send({error: e});
     }
 });

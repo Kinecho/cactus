@@ -13,7 +13,7 @@
             <transition name="fade-in" appear>
                 <div v-if="member" class="member-container">
                     <div class="settings-group profile">
-                        <h3>Personal Info</h3>
+                        <h2>Personal Info</h2>
                         <div class="item" v-if="memberSince">
                             <label class="label">
                                 {{copy.auth.MEMBER_SINCE}}
@@ -46,8 +46,14 @@
                         </div>
                     </div>
 
+                    <div class="settings-group subscription">
+                        <h2>{{copy.common.SUBSCRIPTION}}</h2>
+                        <upgrade :tabs-on-mobile="false" :learnMoreLinks="true" v-if="!hasActiveSubscription"/>
+                        <manage-subscription v-if="hasActiveSubscription" :member="member" @error="addSnackbar"/>
+                    </div>
+
                     <div class="settings-group notifications">
-                        <h3>{{copy.common.NOTIFICATIONS}}</h3>
+                        <h2>{{copy.common.NOTIFICATIONS}}</h2>
                         <div class="item">
                             <CheckBox :label="copy.account.EMAIL_NOTIFICATION_CHECKBOX_LABEL" @change="saveEmailStatus" v-model="member.notificationSettings.email" :true-value="notificationValues.TRUE" :false-value="notificationValues.FALSE"/>
                             <div v-if="complianceStateError" class="alert error compliance">
@@ -55,7 +61,7 @@
                             </div>
                         </div>
 
-                        <div class="item">
+                        <div class="item" v-if="promptSendTime">
                             <label class="label">
                                 {{copy.account.PREFERRED_NOTIFICATION_TIME}}
                             </label>
@@ -80,12 +86,12 @@
                                     </button>
                                 </div>
                             </div>
-                            <timezone-picker @change="tzSelected" v-bind:value="formData.current.timeZone"/>
+                            <timezone-picker @change="tzSelected" v-bind:value="formData.current.timeZone" v-if="formData.current.timeZone"/>
                         </div>
                     </div>
 
                     <div class="settings-group profile" v-if="providers.length > 0">
-                        <h3>{{copy.auth.CONNECTED_ACCOUNTS}}</h3>
+                        <h2>{{copy.auth.CONNECTED_ACCOUNTS}}</h2>
                         <div class="item" v-if="showProviders">
                             <div v-for="provider of providers" class="provider-info" @click="removeProvider(provider.providerId)" :key="provider.providerId">
                                 <provider-icon :providerId="provider.providerId" class="provider-icon"/>
@@ -95,6 +101,15 @@
                                     {{copy.common.REMOVE}}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group delete">
+                        <div class="item">
+                            <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
+                                <img src="assets/images/trash.svg" alt=""/>
+                                {{copy.account.DELETE_ACCOUNT}}
+                            </button>
                         </div>
                     </div>
 
@@ -109,6 +124,9 @@
 
                 </div>
             </transition>
+            <delete-account-modal
+                :showModal="deleteAccountModalVisible"
+                @close="deleteAccountModalVisible = false" />
             <div class="snackbar-container">
 
                 <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
@@ -146,21 +164,28 @@
     import {ListenerUnsubscriber} from '@web/services/FirestoreService';
     import {formatDate} from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {findByZoneName, ZoneInfo} from '@web/timezones'
+    import {findByZoneName, ZoneInfo} from '@shared/timezones'
     import {updateSubscriptionStatus} from '@web/mailchimp'
     import {PageRoute} from '@shared/PageRoutes'
     import {FirebaseUser} from '@web/firebase'
     import {getProviderDisplayName} from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
+    import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import SnackbarContent from "@components/SnackbarContent.vue";
+    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
+    import Logger from "@shared/Logger";
+    import PremiumPricing from "@components/PremiumPricing.vue";
+    import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
+    import {getQueryParam, removeQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams";
     import AccountSettingsFormData, {FormValidator, Validations} from "@web/datasource/AccountSettingsFormData";
     import {Config} from "@web/config";
 
+    const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
     const SAVING_TIMOUT_MS = 2000;
 
@@ -182,6 +207,16 @@
             ProviderIcon,
             SnackbarContent,
             TimePicker,
+            Upgrade: PremiumPricing,
+            ManageSubscription: ManageActiveSubscription,
+            DeleteAccountModal
+        },
+        mounted(): void {
+            const message = getQueryParam(QueryParam.MESSAGE);
+            if (message) {
+                this.addSnackbar({message, timeoutMs: 10000, closeable: true});
+                removeQueryParam(QueryParam.MESSAGE);
+            }
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -224,6 +259,9 @@
             deviceTimezone: string | undefined,
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
+            upgradeRoute: string,
+
+            deleteAccountModalVisible: boolean
             saving: boolean,
             savingTimeout: number | undefined,
             formData: AccountSettingsFormData;
@@ -255,14 +293,22 @@
                 formData: formData,
                 complianceStateError: false,
                 validator: formData.current.validator
+                upgradeRoute: PageRoute.PAYMENT_PLANS,
+                deleteAccountModalVisible: false
             }
         },
         computed: {
             showSaveActions(): boolean {
                 return this.changesToSave || this.formData.hasChanges || this.saving
             },
+            hasActiveSubscription(): boolean {
+                return this.member?.hasActiveSubscription ?? false;
+            },
             promptSendTime(): PromptSendTime {
                 return this.formData.current.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
+                return this.member?.promptSendTime ||
+                    this.member?.getLocalPromptSendTimeFromUTC() ||
+                    DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -351,12 +397,10 @@
                 el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
                 el.style.top = `${el.offsetTop}px`;
-                el.style.width = width
-                el.style.height = height
+                el.style.width = width;
+                el.style.height = height;
             },
-
-            addSnackbar(message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }): string {
-
+            addSnackbar(message: SnackbarMessage): string {
                 const id = uuid();
                 if (typeof message === "string") {
                     this.snackbars.push({id, message: message, autoHide: true});
@@ -367,7 +411,7 @@
                 return id;
             },
             removeSnackbar(id: string) {
-                console.log("removing snackbar", id);
+                logger.log("removing snackbar", id);
                 this.snackbars = this.snackbars.filter(snack => snack.id !== id);
             },
             removeAllSnackbars() {
@@ -377,10 +421,10 @@
                 const snackbar = this.snackbars.find(snack => snack.id === id);
 
                 if (!snackbar) {
-                    console.log("no snackbar found with id");
+                    logger.log("no snackbar found with id");
                     return;
                 }
-                console.log("Found snackbar ", id);
+                logger.log("Found snackbar ", id);
                 if (typeof message === "string") {
                     snackbar.message = message;
                 } else {
@@ -388,17 +432,16 @@
                 }
             },
             async save() {
-                // if (this.changesToSave && this.member) {
-                //     this.saving = true;
+                // if (this.member) {
                 //     await CactusMemberService.sharedInstance.save(this.member);
-                //     this.savingTimeout = window.setTimeout(() => {
-                //         this.saving = false;
-                //     }, SAVING_TIMOUT_MS);
-                //     console.log("Save success");
+                //     logger.log("Save success");
                 //     this.addSnackbar({message: "Changes Saved", color: "success"});
                 //     this.changesToSave = false;
                 // }
-
+                //
+                // this.savingTimeout = window.setTimeout(() => {
+                //     this.saving = false;
+                // }, SAVING_TIMOUT_MS);
                 if (this.formData.hasChanges) {
                     this.removeAllSnackbars();
                     this.saving = true;
@@ -431,14 +474,14 @@
                     autoHide: false,
                     color: "info",
                 });
-                console.log("Saving status...", status);
+                logger.log("Saving status...", status);
                 this.error = undefined;
                 this.complianceStateError = false;
                 if (this.member && this.member.email) {
                     const result = await updateSubscriptionStatus(status, this.member.email);
                     if (!result.success) {
                         this.addSnackbar("Oops! Unable to save email settings.");
-                        console.log("Unsetting notification status change since the update failed");
+                        logger.log("Unsetting notification status change since the update failed");
 
                         let errorMessage = "Oops, we're unable to save your email notification settings right now. Please try again later.";
 
@@ -500,7 +543,7 @@
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -512,6 +555,7 @@
         flex-flow: column nowrap;
         min-height: 100vh;
         justify-content: space-between;
+        overflow: hidden;
 
         header, .centered {
             width: 100%;
@@ -520,7 +564,7 @@
 
     .centered.content {
         flex-grow: 1;
-        max-width: 70rem;
+        max-width: 80rem;
         padding: 6.4rem 2.4rem;
         text-align: left;
     }
@@ -529,12 +573,10 @@
         margin-bottom: 3.2rem;
     }
 
-    h3 {
-        margin-bottom: 2.4rem;
-    }
-
-    h3 {
+    h2 {
         color: $royal;
+        font-size: 2.4rem;
+        margin-bottom: 2.4rem;
     }
 
     .label {
@@ -588,16 +630,21 @@
     }
 
     .settings-group {
-        margin-bottom: 4.8rem;
+        margin-bottom: 6.4rem;
+
+        &.delete {
+            border-top: $lightestGreen 1px solid;
+            padding-top: 4.8rem;
+        }
+    }
+
+    .subscription .centered {
+        display: block;
+        text-align: left;
     }
 
     .provider-info {
-        align-items: center;
-        background-color: lighten($lightestGreen, 9%);
-        border-radius: .8rem;
-        display: flex;
-        padding: .4rem 1.6rem;
-        width: 100%;
+        @include accountBox;
 
         &:hover {
             background-color: $lightestGreen;
@@ -727,6 +774,10 @@
                 flex-grow: 0;
             }
         }
+    }
+
+    .modal-wrapper {
+        max-width: 60rem;
     }
 
 </style>

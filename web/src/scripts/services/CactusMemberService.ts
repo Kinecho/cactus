@@ -1,8 +1,12 @@
-import FirestoreService, {ListenerUnsubscriber, Query, QueryObserverOptions} from "@web/services/FirestoreService";
+import FirestoreService, {ListenerUnsubscriber, Query} from "@web/services/FirestoreService";
 import CactusMember, {Field} from "@shared/models/CactusMember";
 import {Collection} from "@shared/FirestoreBaseModels";
 import {FirebaseUser, getAuth, Unsubscribe} from "@web/firebase";
-import {getDeviceLocale, getDeviceTimeZone} from "@web/DeviceUtil";
+import {getDeviceLocale, getDeviceTimeZone, getUserAgent, isAndroidApp} from "@web/DeviceUtil";
+import Logger from "@shared/Logger";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+
+const logger = new Logger("CactusMemberService");
 
 export default class CactusMemberService {
     public static sharedInstance = new CactusMemberService();
@@ -10,7 +14,7 @@ export default class CactusMemberService {
 
     authUnsubscriber?: Unsubscribe;
     protected currentMemberUnsubscriber?: ListenerUnsubscriber;
-    protected currentMember?: CactusMember;
+    currentMember?: CactusMember;
     protected memberHasLoaded = false;
 
     constructor() {
@@ -22,14 +26,18 @@ export default class CactusMemberService {
             if (user) {
                 this.currentMemberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: async member => {
-                        console.log("********* Got current cactus member", member);
+                        logger.log("[memberService constructor callback] BEFORE LOGGING member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
+                        logger.info("Current CactusMember", member);
                         this.currentMember = member;
                         this.memberHasLoaded = true;
-                        await this.updateMemberSettingsIfNeeded(member)
+                        logger.log("[memberService instance constructor callback] member trial started at type of = ", typeof (member?.subscription?.trial?.startedAt));
+                        if (member) {
+                            await this.updateMemberSettingsIfNeeded(member)
+                        }
                     }
                 })
             } else {
-                console.log("***** *unsetting current cactus member");
+                logger.info("unsetting current cactus member");
                 this.currentMember = undefined;
             }
         });
@@ -58,16 +66,71 @@ export default class CactusMemberService {
             doSave = true
         }
 
+        const fcmToken = StorageService.getString(LocalStorageKey.androidFCMToken);
+        const currentTokens: string[] = member.fcmTokens ?? [];
+        if (fcmToken && !currentTokens.includes(fcmToken)) {
+            console.log("Adding FCM token to member");
+            currentTokens.push(fcmToken);
+            member.fcmTokens = currentTokens;
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
+            doSave = true;
+        }
+
         if (doSave) {
-            console.log("Updating member settings");
+            logger.log("[update settings if needed] member trial started at type of = ", typeof (member.subscription?.trial?.startedAt))
+            logger.log("Updating member settings for member", member);
+
             await this.save(member)
         }
 
     }
 
-    getCurrentCactusMember(): CactusMember | undefined {
-        return this.currentMember;
+    async registerFCMToken(token: string) {
+        const member = this.currentMember;
+        if (!member) {
+            logger.info("No cactus member found, not registering token");
+            return;
+        }
+
+        if (!isAndroidApp()) {
+            logger.warn(`User agent not allowed: ${getUserAgent()}`);
+            return;
+        }
+
+        const currentTokens: string[] = member.fcmTokens ?? [];
+        if (!currentTokens.includes(token)) {
+            currentTokens.push(token);
+            member.fcmTokens = currentTokens;
+            await this.save(member);
+            StorageService.removeItem(LocalStorageKey.androidFCMToken);
+            logger.info("Saved token to member");
+        }
     }
+
+    /**
+     * Get the current cactus member. Will wait to fetch from database if the member hasn't loaded yet.
+     * @return {Promise<CactusMember | undefined>}
+     */
+    async getCurrentMember(): Promise<CactusMember | undefined> {
+        if (this.currentMember) {
+            return this.currentMember;
+        }
+
+        return new Promise<CactusMember | undefined>(resolve => {
+            const authUnsubscriber = getAuth().onAuthStateChanged(async user => {
+                authUnsubscriber();
+                if (user) {
+                    const member = this.getByUserId(user.uid);
+                    resolve(member);
+                } else {
+                    resolve(undefined)
+                }
+            });
+        })
+
+    }
+
+    // async awaitCurrentMember(): Promise<CactusMember|undefined>
 
     getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.members);
@@ -110,6 +173,7 @@ export default class CactusMemberService {
             if (user) {
                 memberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: (member) => {
+                        logger.log("[observeCurrentMember] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
                         options.onData({user: user, member: member})
                     }
                 })
@@ -126,6 +190,3 @@ export default class CactusMemberService {
         }
     }
 }
-
-
-

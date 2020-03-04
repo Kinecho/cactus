@@ -1,5 +1,6 @@
 import {convertDateToJSON, convertDateToTimestamp} from "@shared/util/FirestoreUtil";
-
+import Logger from "@shared/Logger";
+const logger = new Logger("FirestoreBaseModels");
 
 export enum Collection {
     emailReply = "emailReply",
@@ -16,6 +17,9 @@ export enum Collection {
     memberProfiles = "memberProfiles",
     socialConnectionRequests = "socialConnectionRequests",
     flamelink_content = "fl_content",
+    checkoutSessions = "checkoutSessions",
+    payments = "payments",
+    emailLogs = "emailLogs",
 }
 
 export interface FirestoreIdentifiable {
@@ -55,7 +59,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
             throw new Error("Unable to prepare for firestore");
         }
         const data = convertDateToTimestamp(prepared);
-        // console.log("data after converting to dates", data);
+        // logger.log("data after converting to dates", data);
 
         if (removeKeys && data) {
             removeKeys.forEach(key => {
@@ -74,7 +78,8 @@ export abstract class BaseModel implements FirestoreIdentifiable {
 
     toJSON(removeKeys = ["collection"]): any {
         try {
-            const data = convertDateToJSON(this);
+            const copy = Object.assign({}, this);
+            const data = convertDateToJSON(copy);
             const keysToRemove = Array.isArray(removeKeys) ? removeKeys : ["collection"];
             if (keysToRemove && Array.isArray(keysToRemove) && data) {
                 keysToRemove.forEach(key => {
@@ -83,7 +88,7 @@ export abstract class BaseModel implements FirestoreIdentifiable {
             }
             return data;
         } catch (error) {
-            console.error("Error processing this model toJSON", error);
+            logger.error("Error processing this model toJSON", error);
             return {message: "Error processing this model toJSON", error};
         }
     }

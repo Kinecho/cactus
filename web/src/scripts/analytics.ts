@@ -3,13 +3,14 @@ import {QueryParam} from "@shared/util/queryParams";
 import {getQueryParam} from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
-
 import * as Sentry from '@sentry/browser';
 import {User} from "firebase/app"
 import {getAuth} from "@web/firebase";
-import {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("Analytics.ts");
 declare global {
     interface Window {
         dataLayer: Array<any>;
@@ -36,6 +37,7 @@ export const gtag = createGTag();
 
 
 let hasInit = false;
+let isFirstAuthLoad = false;
 
 /**
  * set up the analytics function
@@ -44,20 +46,20 @@ let hasInit = false;
  */
 export function init() {
     if (hasInit) {
-        console.warn("Analytics already initialized, not reinitializing");
+        logger.warn("Analytics already initialized, not reinitializing");
         return;
     }
-
 
     getAuth().onAuthStateChanged(user => {
         setUser(user);
         if (user) {
-            console.log("User has logged in, removing any tracking/referral info");
+            logger.log("User has logged in, removing any tracking/referral info");
         }
+        isFirstAuthLoad = true;
 
     });
 
-    const sentryIntegrations = [];
+    const sentryIntegrations: any[] = []; //using any because it doesn't look like sentry's Integration interface is exported
     if (!Config.isDev) {
         sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
         Sentry.init({
@@ -66,7 +68,7 @@ export function init() {
             environment: Config.env,
             integrations: sentryIntegrations,
             beforeSend(event: Sentry.Event): Promise<Sentry.Event | null> | Sentry.Event | null {
-                const email = CactusMemberService.sharedInstance.getCurrentCactusMember()?.email;
+                const email = CactusMemberService.sharedInstance.currentMember?.email;
                 if (email) {
                     const tags = event.tags || {};
                     tags["user.email"] = email;
@@ -78,7 +80,7 @@ export function init() {
         });
     }
 
-    console.log("version is ", Config.version);
+    logger.log("version is ", Config.version);
 
     // if ()
 
@@ -103,7 +105,7 @@ export function clearTrackingData() {
         window.localStorage.removeItem(LocalStorageKey.referredByEmail);
         window.localStorage.removeItem(LocalStorageKey.emailAutoFill);
     } catch (e) {
-        console.error("Failed to clear tracking data", e);
+        logger.error("Failed to clear tracking data", e);
     }
 }
 
@@ -124,33 +126,43 @@ export function setUser(user?: User | null) {
             id: user.uid,
             email: email || undefined,
         };
-
         Sentry.setUser(sentryUser);
-        
+
     } else {
         setUserId(undefined);
         Sentry.setUser(null);
     }
 }
 
-export function fireConfirmedSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        window.fbq('track','CompleteRegistration', {
-            value: 0.00,
-            currency: 'USD'
-        });
-    }
+export async function fireConfirmedSignupEvent(options: { email?: string, userId?: string }): Promise<void> {
+    return new Promise(async resolve => {
+
+        logger.debug("Firing confirmed signup event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending CompleteRegistration event to facebook");
+            window.fbq('track', 'CompleteRegistration', {
+                value: 0.00,
+                currency: 'USD'
+            });
+        }
+        resolve();
+    })
 }
 
-export function fireSignupEvent() {
-    /* Facebook */
-    if (window.fbq) {
-        window.fbq('track','Lead');
-    }
+export async function fireSignupEvent() {
+    return new Promise(async resolve => {
+        logger.info("Fired 'Lead' Event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending Lead event to Facebook");
+            window.fbq('track', 'Lead');
+        }
+        resolve();
+    })
 }
 
-export function socialSharingEvent(options: {type: "open"|"close"|"change", network?: string, url?: string}) {
+export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
     gtag('event', options.type, {
         event_category: "social_share",
         event_label: options.network

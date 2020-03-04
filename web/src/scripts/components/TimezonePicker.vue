@@ -13,8 +13,11 @@
 <script lang="ts">
     import Vue from "vue";
     import Multiselect from "vue-multiselect"
-    import {findByZoneName, timezoneInfoList, ZoneInfo, zonesByName} from '@web/timezones'
+    import {findByZoneName, timezoneInfoList, ZoneInfo, zonesInfoByName} from '@shared/timezones'
     import 'vue-multiselect/dist/vue-multiselect.min.css'
+    import Logger from "@shared/Logger";
+    
+    const logger = new Logger("TimezonePicker.vue");
     export default Vue.extend({
         components: {
           Multiselect,
@@ -32,7 +35,7 @@
                 return `(${zone.offsetDisplay}) ${zone.displayName}`
             },
             handleChange(newValue:ZoneInfo|undefined){
-                console.log("multiselect changed", newValue);
+                logger.log("multiselect changed", newValue);
                 // const newValue = "";
                 this.$emit('change', newValue)
             }

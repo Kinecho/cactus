@@ -17,11 +17,14 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import bodyParser = require("body-parser");
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
+import {getConfig} from "@admin/config/configService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("inboundApp");
 const app = express();
+const config = getConfig();
 
-
-app.use(cors({origin: true}));
+app.use(cors({origin: config.allowedOrigins}));
 
 app.get('/', (req, res) => res.status(200).json({status: 'ok'}));
 
@@ -39,7 +42,7 @@ app.get('/testModel/:id', async (req, res) => {
     }
 
 
-    console.log("model.name", model.name);
+    logger.log("model.name", model.name);
 
     return res.status(200).json({status: 'ok', data: model.toJSON()})
 
@@ -48,11 +51,11 @@ app.get('/testModel/:id', async (req, res) => {
 app.post("/testModel", bodyParser.json(), async (req, res) => {
 
     try {
-        console.log("body", JSON.stringify(req.body));
+        logger.log("body", JSON.stringify(req.body));
         const model = fromJSON(req.body, TestModel);
-        console.log("model", JSON.stringify(model));
+        logger.log("model", JSON.stringify(model));
         const saved = await AdminFirestoreService.getSharedInstance().save(model);
-        console.log("saved object", saved);
+        logger.log("saved object", saved);
         res.send({data: saved.toJSON()})
     } catch (e) {
         res.status(500).send({error: e});
@@ -80,7 +83,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
 
         const emailReply = await processEmail(req.headers, req.rawBody || req.body);
         if (!emailReply) {
-            console.warn("Unable to process an EmailReply");
+            logger.warn("Unable to process an EmailReply");
             await slackService.sendActivityNotification("ERROR: Failed to process incoming email: no email was returned");
             res.sendStatus(500);
             return;
@@ -90,21 +93,21 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
 
         let prompt: ReflectionPrompt | undefined = undefined;
         if (reflectionPromptId) {
-            console.log("fetching reflection prompt by reflectionPromptId found on email address");
+            logger.log("fetching reflection prompt by reflectionPromptId found on email address");
             prompt = await AdminReflectionPromptService.getSharedInstance().get(reflectionPromptId);
         }
 
         if (!prompt) {
-            console.log("Prompt still not found, trying to fetch it via campaign id");
+            logger.log("Prompt still not found, trying to fetch it via campaign id");
             try {
                 prompt = await AdminReflectionPromptService.getSharedInstance().getPromptForCampaignId(mailchimpCampaignId);
             } catch (promptError) {
-                console.error("Failed to get prompt by campaign id - error", promptError);
+                logger.error("Failed to get prompt by campaign id - error", promptError);
             }
             if (!prompt) {
-                console.log("Unable to find prompt by campaign id");
+                logger.log("Unable to find prompt by campaign id");
             } else {
-                console.log("found prompt by campaign id", prompt.id);
+                logger.log("found prompt by campaign id", prompt.id);
             }
 
         }
@@ -119,7 +122,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         }
 
         if (!cactusMember) {
-            console.log("No cactus member was found using mailchimp unique id, trying with the from email " + emailReply.from.email);
+            logger.log("No cactus member was found using mailchimp unique id, trying with the from email " + emailReply.from.email);
             cactusMember = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(emailReply.from.email);
         }
 
@@ -129,7 +132,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         }
 
 
-        console.log("Saving the EmailReply to the database");
+        logger.log("Saving the EmailReply to the database");
         emailReply.setStoragePath(EmailStoragePath.BODY, bodyStoragePath);
         emailReply.setStoragePath(EmailStoragePath.HEADERS, headersStoragePath);
         emailReply.mailchimpMemberId = listMember ? listMember.id : undefined;
@@ -140,7 +143,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
 
 
         if (!prompt) {
-            console.warn(`No reflection prompt found still, not saving response from email ${cactusMember ? cactusMember.email : emailReply.from.email}`);
+            logger.warn(`No reflection prompt found still, not saving response from email ${cactusMember ? cactusMember.email : emailReply.from.email}`);
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `:warning: Received an email from cactus member ${cactusMember ? cactusMember.email : "unknown"} (sent from ${emailReply.from.email}) but no Reflection Prompt could be found from the email`,
                 attachments: [
@@ -205,7 +208,7 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
             await slackService.sendActivityNotification({text: `:warning: Resetting reminder notification using the email's "from" address (${from.email}) because we shouldn't find a mailchimp ListMember. EmailReply.id = ${savedEmail ? savedEmail.id : "unknown"}`});
             resetUserResponse = await AdminReflectionResponseService.resetUserReminder(from.email);
             if (!resetUserResponse.success) {
-                console.log("reset user reminder failed", resetUserResponse);
+                logger.log("reset user reminder failed", resetUserResponse);
                 await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${from.email}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
             }
         }
@@ -213,12 +216,12 @@ app.post("/", async (req: functions.https.Request | any, res: express.Response) 
         const savedReflectionResponse = await AdminReflectionResponseService.getSharedInstance().save(promptResponse);
 
         if (savedReflectionResponse) {
-            console.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
+            logger.log("Saved reflection response", JSON.stringify(promptResponse.toJSON()))
         }
 
         res.send({email: (savedEmail || emailReply).toJSON()});
     } catch (error) {
-        console.error("Failed to process incoming email", error);
+        logger.error("Failed to process incoming email", error);
         await slackService.sendActivityNotification("ERROR: Failed to process incoming email: " + `${error}`);
         res.sendStatus(500);
     }

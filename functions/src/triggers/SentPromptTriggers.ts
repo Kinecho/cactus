@@ -10,7 +10,9 @@ import PushNotificationService from "@api/services/PushNotificationService";
 import {NewPromptNotificationResult} from "@admin/PushNotificationTypes";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {isSendTimeWindow} from "@shared/util/NotificationUtil";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("SendPromptTriggers");
 /**
  * The purpose of this method is to send a push notification to the recipient of a new SentPrompt!
  * @type {CloudFunction<DocumentSnapshot>}
@@ -20,21 +22,21 @@ export const sentPromptPushNotificationTrigger = functions.firestore
     .onCreate(async (snapshot: functions.firestore.DocumentSnapshot, context: functions.EventContext) => {
         const sentPrompt = fromDocumentSnapshot(snapshot, SentPrompt);
         if (!sentPrompt) {
-            console.log("No sent prompt was able to be processed. Returning");
+            logger.log("No sent prompt was able to be processed. Returning");
             return
         }
 
         const memberId = sentPrompt.cactusMemberId;
         const promptId = sentPrompt.promptId;
         if (!memberId || !promptId) {
-            console.warn("No cactus member Id  or promptId was found on the sentPrompt. Id = " + sentPrompt.id);
+            logger.warn("No cactus member Id  or promptId was found on the sentPrompt. Id = " + sentPrompt.id);
             return
         }
         const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
         const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
 
         if (!member || !prompt) {
-            console.warn("No Cactus Member or ReflectionPrompt could be found. Exiting");
+            logger.warn("No Cactus Member or ReflectionPrompt could be found. Exiting");
             return;
         }
         await sendPush({member, prompt, sentPrompt});

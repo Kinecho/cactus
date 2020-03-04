@@ -5,7 +5,9 @@ import SocialConnection from "@shared/models/SocialConnection";
 import {SocialActivityFeedEvent, SocialActivityType} from "@shared/types/SocialTypes";
 import {Collection} from "@shared/FirestoreBaseModels";
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("AdminSocialActivityService");
 
 export default class AdminSocialActivityService {
     protected static sharedInstance: AdminSocialActivityService;
@@ -19,7 +21,7 @@ export default class AdminSocialActivityService {
         if (AdminSocialActivityService.sharedInstance) {
             return AdminSocialActivityService.sharedInstance;
         }
-        console.error("no shared instance of AdminSocialActivityService is yet available. Initializing it now (in the getter)");
+        logger.error("no shared instance of AdminSocialActivityService is yet available. Initializing it now (in the getter)");
         return AdminSocialActivityService.initialize();
 
     }
@@ -36,7 +38,7 @@ export default class AdminSocialActivityService {
     }
 
     async getActivityFeedForMember(memberId: string): Promise<SocialActivityFeedEvent[]> {
-        console.log("Fetching activity feed events for ", memberId);
+        logger.log("Fetching activity feed events for ", memberId);
         const startDate = new Date();
         const socialConnections = await AdminSocialConnectionService.getSharedInstance().getConnectionsForMember(memberId);
 
@@ -53,7 +55,7 @@ export default class AdminSocialActivityService {
             .orderBy('createdAt', QuerySortDirection.desc);
         const reflectionResponses = await this.firestoreService.executeQuery(query, ReflectionResponse);
         const endDate = new Date();
-        console.log(`getActivityFeedForMember query processed in ${endDate.getTime() - startDate.getTime()}ms`);
+        logger.log(`getActivityFeedForMember query processed in ${endDate.getTime() - startDate.getTime()}ms`);
         return this.feedEventsFor(reflectionResponses.results);
     }
 

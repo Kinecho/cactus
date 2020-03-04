@@ -5,8 +5,9 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CactusMember from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {getISODate} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
 
-
+const logger = new Logger("UnsubscriberReportSyncJob");
 export async function onPublish() {
     const mailchimpService = MailchimpService.getSharedInstance();
     const unsubLookback = DateTime.fromJSDate(new Date()).minus({days: 2}).toISODate();
@@ -15,7 +16,7 @@ export async function onPublish() {
         status: ListMemberStatus.unsubscribed
     });
 
-    console.log(`Got ${unsubscribers.length} unsubscribers`);
+    logger.log(`Got ${unsubscribers.length} unsubscribers`);
     const updates: { cactusMember?: CactusMember, mailchimpListMember: ListMember }[] = [];
     for (const unsubscriber of unsubscribers) {
         const cactusMember = await AdminCactusMemberService.getSharedInstance().updateFromMailchimpListMember(unsubscriber);

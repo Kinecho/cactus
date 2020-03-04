@@ -4,6 +4,7 @@ const getCommonWebpackConfig = require('./webpack.config.common')
 const config = require('./config.prod')
 const SentryWebpackPlugin = require('@sentry/webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const minimizersConfig = require('./minimizers.config')
 
 const simplegit = require('simple-git/promise')
 
@@ -16,7 +17,7 @@ module.exports = () => {
     return getCommitHash().then(commithash => {
         return getCommonWebpackConfig(config).then(common => {
             // console.log('Setting the release on SentryWebpackPlugin to', commithash)
-            return merge(common, {
+            return merge(common, minimizersConfig,  {
                 devtool: 'source-map',
                 mode: 'production',
                 plugins: [

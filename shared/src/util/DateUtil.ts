@@ -1,8 +1,13 @@
-import {DateObject, DateTime, Duration} from "luxon";
+import {DateObject, DateTime, Duration, Interval} from "luxon";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 import * as prettyMilliseconds from "pretty-ms";
 import {isTimestamp, timestampToDate} from "@shared/util/FirestoreUtil";
 import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
+import Logger from "@shared/Logger";
+import {getValidTimezoneName} from "@shared/timezones";
+import {isDate, isNull, isNumber} from "@shared/util/ObjectUtil";
+
+const logger = new Logger("DateUtil.ts");
 
 export const mailchimpTimeZone = "America/Denver";
 
@@ -15,16 +20,25 @@ export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
 }
 
-// export function getDateForTimezone(timeZone: string, date: Date): Date {
-//     return DateTime.fromJSDate(date ).setZone(timeZone, {keepLocalTime: false}).toJSDate();
-// }
-
 export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {
     return DateTime.fromJSDate(date).setZone(timeZone).toObject()
 }
 
 export function dateObjectToISODate(date: DateObject): string {
     return DateTime.fromObject(date).toISODate()
+}
+
+export function toTimestampMs(date: Date | undefined | number | null): number | undefined {
+    if (isNull(date)) {
+        return undefined;
+    }
+    if (isDate(date)) {
+        return date.getTime();
+    }
+    if (isNumber(date)) {
+        return Number(date);
+    }
+    return;
 }
 
 /**
@@ -191,7 +205,7 @@ export function asDate(input: any): Date | undefined {
         return new Date(input);
     }
 
-    console.warn("Could not convert input of ", input, "to date");
+    logger.warn("Could not convert input of ", input, "to date");
     return;
 
 }
@@ -265,6 +279,16 @@ export function numDaysAgoFromMidnights(date: Date, today: Date = new Date(), ti
     return Math.round(t.diff(dt).as("day"))
 }
 
+export function daysUntilDate(date: Date): number {
+    const end = DateTime.fromJSDate(date).set({hour: 0});
+    const interval = Interval.fromDateTimes(DateTime.local(), end);
+    const days = interval.count("days") - 1;
+    if (Number.isNaN(days)) {
+        return 0;
+    }
+    return days;
+}
+
 export function atMidnight(date: Date): Date {
     return DateTime.fromJSDate(date).set({hour: 0, minute: 0, millisecond: 0, second: 0}).toJSDate();
 }
@@ -274,9 +298,8 @@ export function atMidnight(date: Date): Date {
  * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
  * @return {number}
  */
-export function getStreak(options: { dates: Date[], start?: Date, timeZone?: string }) {
+export function getStreakDays(options: { dates: Date[], start?: Date, timeZone?: string }) {
     const {dates = [], start = new Date(), timeZone} = options;
-    console.log('calculating streak for timezone', timeZone);
     let _dates = dates;
     if (_dates.length === 0) {
         return 0;
@@ -311,12 +334,128 @@ export function getStreak(options: { dates: Date[], start?: Date, timeZone?: str
     }
 
     return streak;
-
 }
 
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakWeeks(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevWeekStart = startDateTime.startOf('week').minus({weeks: 1});
+    let prevWeekEnd = startDateTime.endOf('week').minus({weeks: 1});
+    let i = 0;
+    let reflectionDateTime;
+    let weeksWithoutReflection = 0;
+
+    while (_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+
+        // found a date in this week
+        if (reflectionDateTime > prevWeekStart &&
+            reflectionDateTime < prevWeekEnd) {
+            streak++;
+            prevWeekStart = prevWeekStart.minus({weeks: 1});
+            prevWeekEnd = prevWeekEnd.minus({weeks: 1});
+
+            // current date is before current week start
+        } else if (reflectionDateTime < prevWeekStart) {
+            prevWeekStart = prevWeekStart.minus({weeks: 1});
+            prevWeekEnd = prevWeekEnd.minus({weeks: 1});
+            weeksWithoutReflection++;
+        }
+
+        // streak broken, return
+        if (weeksWithoutReflection > 1) {
+            return streak;
+        }
+
+        i++;
+    }
+
+    return streak;
+}
+
+/**
+ * * Assumes ordered by date DESC already
+ * @param {{dates: Date[], start?: Date|undefined, timeZone?: string|undefined}} options
+ * @return {number}
+ */
+export function getStreakMonths(options: { dates: Date[], start?: Date, timeZone?: string }) {
+    const {dates = [], start = new Date(), timeZone} = options;
+    let _dates = dates;
+    if (_dates.length === 0) {
+        return 0;
+    }
+    //find the index where the date is before the start date
+
+    const startIndex = _dates.findIndex(date => date.getTime() <= start.getTime());
+    _dates = _dates.slice(startIndex);
+
+    if (_dates.length === 0) {
+        return 0;
+    }
+
+    let streak = 1;
+    let startDateTime = DateTime.fromJSDate(_dates[0]);
+    if (timeZone) {
+        startDateTime = startDateTime.setZone(timeZone);
+    }
+    let prevMonthStart = startDateTime.startOf('month').minus({months: 1});
+    let prevMonthEnd = startDateTime.endOf('month').minus({months: 1});
+    let i = 0;
+    let reflectionDateTime;
+    let monthsWithoutReflection = 0;
+
+    while (_dates[i]) {
+        reflectionDateTime = DateTime.fromJSDate(_dates[i]);
+
+        // found a date in this week
+        if (reflectionDateTime > prevMonthStart &&
+            reflectionDateTime < prevMonthEnd) {
+            streak++;
+            prevMonthStart = prevMonthStart.minus({months: 1});
+            prevMonthEnd = prevMonthEnd.minus({months: 1});
+
+            // current date is before current week start
+        } else if (reflectionDateTime < prevMonthStart) {
+            prevMonthStart = prevMonthStart.minus({months: 1});
+            prevMonthEnd = prevMonthEnd.minus({months: 1});
+            monthsWithoutReflection++;
+        }
+
+        // streak broken, return
+        if (monthsWithoutReflection > 1) {
+            return streak;
+        }
+
+        i++;
+    }
+
+    return streak;
+}
 
 export function getSendTimeUTC(options: { timeZone?: string | undefined | null, sendTime?: PromptSendTime | undefined, forDate?: Date }): PromptSendTime | undefined {
-    const timeZone = options.timeZone;
+    const timeZone = getValidTimezoneName(options.timeZone);
     if (!timeZone) {
         return;
     }
@@ -363,4 +502,50 @@ export function convertDateToSendTimeUTC(date: Date = new Date()): PromptSendTim
     const quarterHour = getQuarterHourFromMinute(minute);
 
     return {hour: hour, minute: quarterHour}
+}
+
+export function getContentQueryDateStrings(options: {
+    systemDate?: Date,
+    dateObject?: DateObject
+}): { startDateString: string, endDateString: string } | undefined {
+    const {systemDate, dateObject} = options;
+
+    let startDateString;
+    let endDateString;
+    if (dateObject) {
+        dateObject.hour = 0;
+        dateObject.minute = 0;
+        dateObject.second = 0;
+        dateObject.millisecond = 0;
+        endDateString = dateObjectToISODate(dateObject);
+        const startTime = DateTime.fromObject(dateObject).plus({days: 1});
+
+        if (!DateTime.fromObject(dateObject).isValid || !startTime.isValid) {
+            logger.error(`The start date or end date were nto valid datetime objects: StartTime: ${JSON.stringify(startTime.toObject())} | EndTime: ${JSON.stringify(dateObject)}`)
+            return undefined;
+        }
+        const startObject = startTime.toObject();
+        startDateString = dateObjectToISODate(startObject);
+    } else if (systemDate) {
+        const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
+        midnightDenver.setHours(0);
+        midnightDenver.setMinutes(0);
+        midnightDenver.setSeconds(0);
+        midnightDenver.setMilliseconds(0);
+        const nextDate = plusDays(1, midnightDenver);
+        nextDate.setHours(0);
+        startDateString = getFlamelinkDateString(nextDate);
+        endDateString = getFlamelinkDateString(midnightDenver);
+
+    } else {
+        logger.error("No valid date passed into getPromptContentForDate method");
+        return undefined;
+    }
+
+    if (!startDateString || !endDateString) {
+        logger.error(`Unable to get both a start date and end date string. StartDateString=${startDateString} | EndDateString = ${endDateString}`);
+        return undefined;
+    }
+
+    return {startDateString, endDateString}
 }

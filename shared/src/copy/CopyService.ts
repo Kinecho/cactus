@@ -1,5 +1,8 @@
 import {LocalizedCopy} from "@shared/copy/CopyTypes";
 import EnglishCopy from "@shared/copy/en-US";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("CopyService");
 
 export enum LocaleCode {
     en_US = "en-US",
@@ -18,7 +21,7 @@ export default class CopyService {
     }
 
     static initialize(config: { locale?: LocaleCode } = {}) {
-        console.log("Initializing firestore service");
+        logger.log("Initializing firestore service");
         CopyService.sharedInstance = new CopyService(config);
     }
 
@@ -33,11 +36,30 @@ export default class CopyService {
                 this.copy = new EnglishCopy();
                 break;
             default:
-                console.error(`Unsupported locale ${this.locale}, using ${LocaleCode.en_US} as default`);
+                logger.error(`Unsupported locale ${this.locale}, using ${LocaleCode.en_US} as default`);
                 this.copy = new EnglishCopy();
         }
     }
 
+    getTrialDaysLeftShort(days: number, useEndsToday: boolean = false): string {
+        if (days === 0 && useEndsToday) {
+            return this.copy.common.ENDS_TODAY;
+        } else if (days === 0 && !useEndsToday) {
+            return `${days} ${this.copy.common.DAYS_LEFT}`
+        } else if (days === 1){
+            return `${days} ${this.copy.common.DAY_LEFT}`
+        } else {
+            return `${days} ${this.copy.common.DAYS_LEFT}`;
+        }
+    }
+
+    getTrialDaysLeftLong(days: number, useEndsToday: boolean = false): string {
+        if (days === 1) {
+            return useEndsToday ? this.copy.common.TRIAL_ENDS_TODAY : `${days} ${this.copy.common.DAY_LEFT_IN_TRIAL}`;
+        } else {
+            return `${days} ${this.copy.common.DAYS_LEFT_IN_TRIAL}`;
+        }
+    }
 }
 
 

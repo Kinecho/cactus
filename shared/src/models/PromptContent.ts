@@ -3,6 +3,10 @@ import {CactusElement} from "@shared/models/CactusElement";
 import {preventOrphanedWords} from "@shared/util/StringUtil";
 import {timestampToDate} from "@shared/util/FirestoreUtil";
 import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
+import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+
+const logger = new Logger("PromptContent.ts");
 
 export interface FlamelinkFile {
     fileIds?: string[]
@@ -85,6 +89,7 @@ export enum ContentType {
     reflect = "reflect",
     elements = "elements",
     share_reflection = "share_reflection",
+    invite = "invite",
 }
 
 
@@ -143,8 +148,11 @@ export function processContent(content: Content): Content {
             processed.text = content.text_md || content.text;
             processed.title = content.title;
             break;
+        case ContentType.invite:
+            processed.invite = true;
+            break;
         default:
-            console.warn("UNHANDLED CONTENT TYPE", content.contentType);
+            logger.warn("UNHANDLED CONTENT TYPE", content.contentType);
     }
 
     processed.title = preventOrphanedWords(processed.title);
@@ -170,6 +178,7 @@ export interface Content {
     audio?: Audio;
     link?: ContentLink;
     elements?: boolean;
+    invite?: boolean;
     actionButton?: ActionButton;
     showElementIcon?: boolean;
 }
@@ -179,6 +188,7 @@ export enum PromptContentFields {
     cactusElement = "cactusElement",
     scheduledSendAt = "scheduledSendAt",
     contentStatus = "contentStatus",
+    subscriptionTiers = "subscriptionTiers",
 }
 
 export default class PromptContent extends FlamelinkModel {
@@ -196,6 +206,7 @@ export default class PromptContent extends FlamelinkModel {
     errorMessage?: string;
     topic?: string;
     shareReflectionCopy_md?: string;
+    subscriptionTiers: SubscriptionTier[] = [];
 
     constructor(data?: Partial<PromptContent>) {
         super(data);
@@ -207,9 +218,9 @@ export default class PromptContent extends FlamelinkModel {
             this.cactusElement = data.cactusElement;
 
             if (data.scheduledSendAt) {
-                console.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
+                logger.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
                 this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
-                console.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
+                logger.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
             }
         }
     }
@@ -228,7 +239,7 @@ export default class PromptContent extends FlamelinkModel {
         super.updateFromData(data);
         const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
         if (scheduledDateField) {
-            console.log("Setting scheduledSendAt from data value", scheduledDateField);
+            logger.log("Setting scheduledSendAt from data value", scheduledDateField);
             this.scheduledSendAt = new Date(scheduledDateField);
         } else {
             this.scheduledSendAt = undefined;
@@ -243,7 +254,7 @@ export default class PromptContent extends FlamelinkModel {
         return;
     }
 
-    getPreviewText(): string|undefined {
+    getPreviewText(): string | undefined {
         const [first] = (this.content || []);
         return first?.text;
     }

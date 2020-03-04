@@ -1,276 +1,319 @@
 import * as express from "express";
 import * as cors from "cors";
-import * as Stripe from "stripe";
-import {getConfig} from "@admin/config/configService";
-import {CreateSessionRequest, CreateSessionResponse} from "@shared/api/CheckoutTypes";
-import chalk from "chalk";
+import * as functions from "firebase-functions";
+import Stripe from "stripe";
+import {getConfig, getHostname} from "@admin/config/configService";
+import {
+    CreateSessionRequest,
+    CreateSessionResponse,
+    CreateSetupSubscriptionSessionRequest,
+    CreateSetupSubscriptionSessionResponse
+} from "@shared/api/CheckoutTypes";
 import {QueryParam} from "@shared/util/queryParams";
-import {URL} from "url";
-import MailchimpService from "@admin/services/MailchimpService";
-import {JournalStatus} from "@shared/models/CactusMember";
-import {MergeField, TagName, TagStatus} from "@shared/mailchimp/models/MailchimpTypes";
-import AdminSlackService, {
-    ChatMessage,
-    SlackAttachment,
-    SlackAttachmentField,
-    SlackMessage
-} from "@admin/services/AdminSlackService";
-import ICustomerUpdateOptions = Stripe.customers.ICustomerUpdateOptions;
-import ICheckoutSession = Stripe.checkouts.sessions.ICheckoutSession;
-import IPaymentIntent = Stripe.paymentIntents.IPaymentIntent;
+import Logger from "@shared/Logger";
+import {getAuthUserId} from "@api/util/RequestUtil";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import CheckoutSession from "@shared/models/CheckoutSession";
+import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
+import StripeWebhookService from "@admin/services/StripeWebhookService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
+import {appendQueryParams} from "@shared/util/StringUtil";
+import CactusMember from "@shared/models/CactusMember";
+import {PageRoute} from "@shared/PageRoutes";
 
+const bodyParser = require('body-parser');
+
+const logger = new Logger("checkoutApp");
 const config = getConfig();
 
-const stripe = new Stripe(config.stripe.secret_key);
+const stripe = new Stripe(config.stripe.secret_key, {
+    apiVersion: '2019-12-03',
+});
 const app = express();
 
 // Automatically allow cross-origin requests
-app.use(cors({origin: true}));
+app.use(cors({origin: config.allowedOrigins}));
 
-app.post("/webhooks/sessions/completed", async (req: express.Request, res: express.Response) => {
-    // const mailchimpService = MailchimpService.getSharedInstance();
-    const slackService = AdminSlackService.getSharedInstance();
+function isFirebaseRequest(_req: any): _req is functions.https.Request {
+    return !!_req.rawBody;
+}
+
+app.get("/", async (req: express.Request, res: express.Response) => {
+    const index = 8;
+    res.send("totally different...." + index);
+});
+
+/**
+ * Main entry to handle stripe webhooks. We should send all webhook event types to this single endpoint
+ * and the StripeWebhookService will handle (or not) the given event type.
+ */
+app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), async (req: express.Request, res: express.Response) => {
+    if (!isFirebaseRequest(req)) {
+        logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
+        res.sendStatus(204);
+        return
+    }
+
+    const event = StripeWebhookService.getSharedInstance().getSignedEvent({
+        request: req,
+        webhookSigningKey: config.stripe.webhook_signing_secrets.main
+    });
+    if (!event) {
+        const stripeType = req.body?.type || "unknown";
+        const slackPayload = {body: req.body, headers: req.headers};
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            data: stringifyJSON(slackPayload, 2),
+            fileType: "json",
+            message: `:stripe: \`${stripeType}\` webhook failed. No event was parsed from the body. Perhaps the signature was invalid?`,
+            filename: `stripe-failed-webhook-${stripeType.replace(".", "-")}-${(new Date()).toISOString()}.json`,
+            channel: ChannelName.engineering
+        });
+        logger.error("Unable to construct the signed stripe event");
+        res.status(400).send("Unable to parse the stripe event. Perhaps it wasn't able verify the signature? ");
+        return;
+    }
+
+    const result = await StripeWebhookService.getSharedInstance().handleWebhookEvent(event);
+    logger.info("Processed webhook event: ", result.type);
+    res.status(result.statusCode).send(result);
+
+    return;
+});
+
+/**
+ * Get a sessionID to setup a subscription
+ */
+app.post("/sessions/setup-subscription", async (req: express.Request, res: express.Response) => {
+    const userId = await getAuthUserId(req);
+
+    const response: CreateSetupSubscriptionSessionResponse = {success: false};
+    if (!userId) {
+        logger.info("You must be authenticated to create a checkout session.");
+        response.error = "You must be logged in to create a checkout session";
+        res.status(401).send(response);
+        return;
+    }
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        response.error = "You must have a member associated with your account to create a checkout session";
+        res.status(403).send(response);
+        return;
+    }
+
+    const stripeSubscriptionId = member?.subscription?.stripeSubscriptionId;
+    const stripeCustomerId = member?.stripeCustomerId;
+    if (!stripeSubscriptionId || !stripeCustomerId) {
+        response.error = "member does not have all of the required stripe fields: subscription, customerId";
+        res.status(400).send(response);
+        return;
+    }
+    const {successUrl, cancelUrl} = req.body as CreateSetupSubscriptionSessionRequest;
     try {
-        const event = req.body as Stripe.events.IEvent;
-        const data = event.data.object as Stripe.checkouts.sessions.ICheckoutSession;
-
-        // Handle the pre-order use case. This can probably be deleted.
-        const paymentIntent = data.payment_intent;
-        if (paymentIntent) {
-            console.log("Handing payment intent");
-            const intentResult = await handlePaymentIntent(paymentIntent, data);
-            if (intentResult.error) {
-                console.log("error processing payment intent", intentResult.error);
-            }
-            res.sendStatus(intentResult.statusCode)
-            return
-        } else {
-            const [firstItem] = data.display_items;
-            const attachments: SlackAttachment[] = [];
-            const fields: SlackAttachmentField[] = [];
-
-            const customerEmail = data.customer_email || "unknown";
-            if (firstItem) {
-                fields.push({title: "Amount", value: (firstItem.amount / 100).toFixed(2), short: true});
-                const item = firstItem as any;
-                if (item.plan) {
-                    const subItem = item as Stripe.subscriptionItems.ISubscriptionItem;
-                    if (subItem.plan.interval) {
-                        fields.push({title: "Interval", value: subItem.plan.interval, short: true});
-                    }
-                    if (subItem.plan.nickname) {
-                        fields.push({title: "Plan", value: subItem.plan.nickname});
-                    }
-
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'setup',
+            customer_email: member.email || undefined,
+            setup_intent_data: {
+                metadata: {
+                    memberId: memberId,
+                    customerId: stripeCustomerId,
+                    subscriptionId: stripeSubscriptionId,
                 }
-
-            }
-            attachments.push({fields});
-            const message: ChatMessage = {
-                text: `:moneybag: ${customerEmail} completed a purchase!`,
-                attachments,
-            };
-            await AdminSlackService.getSharedInstance().sendActivityMessage(message)
-        }
-
-
-        console.log(chalk.blue(JSON.stringify(data, null, 2)));
-        return res.sendStatus(204);
+            },
+            success_url: successUrl || `${getHostname()}${PageRoute.ACCOUNT}?${QueryParam.MESSAGE}=${encodeURIComponent("Your payment settings have been successfully updated.")}`,
+            cancel_url: cancelUrl || `${getHostname()}${PageRoute.ACCOUNT}`,
+        });
+        response.sessionId = session.id;
+        response.success = true;
+        res.send(response);
+        return;
     } catch (error) {
-        const msg: SlackMessage = {
-            text: `:rotating_light: Failed to process Stripe Payment Complete webhook event.\n\`${error}\`\n\`\`\`${JSON.stringify(req.body, null, 2)}\`\`\``,
-
-        };
-        await slackService.sendActivityNotification(msg);
-        res.status(500);
-        res.send("Unable to process session: " + error);
+        logger.error("Failed to create stripe session", error);
+        response.error = "Unable to create stripe session";
+        response.success = false;
+        res.send(response);
         return;
     }
 });
 
-interface PaymentIntentResult {
-    error?: any;
-    statusCode: number;
-}
-
-async function handlePaymentIntent(paymentIntent: string | IPaymentIntent, data: ICheckoutSession): Promise<PaymentIntentResult> {
-    try {
-        // const data = event.data.object;
-        let customerId: string | undefined;
-        if (typeof data.customer === "string") {
-            customerId = data.customer
-        } else {
-            customerId = data.customer?.id
-        }
-
-        let paymentIntentId: string;
-        if (typeof paymentIntent === "string") {
-            paymentIntentId = paymentIntent
-        } else {
-            paymentIntentId = paymentIntent.id
-        }
-
-
-        let email = data.customer_email;
-        const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        const slackService = AdminSlackService.getSharedInstance();
-        if (intent && customerId) {
-            const paymentMethodId = intent.payment_method;
-            const updateData = {
-                invoice_settings: {
-                    default_payment_method: paymentMethodId,
-                }
-            } as ICustomerUpdateOptions;
-
-            const updateResponse = await stripe.customers.update(customerId, updateData); //Force the update options to comply to typescript :(
-            email = updateResponse.email;
-
-            //Notify slack that payment was successful
-            await slackService.sendActivityNotification(`:moneybag: Successfully processed pre-order for ${email}!`);
-
-            //Update mailchimp member, if they exist, if not, send scary slack message
-            const mailchimpMember = await MailchimpService.getSharedInstance().getMemberByEmail(email);
-            console.log("Mailchimp member", mailchimpMember);
-            if (email && mailchimpMember) {
-                const tagUpdateResponse = await MailchimpService.getSharedInstance().updateTags({
-                    tags: [{
-                        name: TagName.JOURNAL_PREMIUM,
-                        status: TagStatus.ACTIVE
-                    }], email
-                });
-                if (!tagUpdateResponse.success) {
-                    await slackService.sendActivityNotification(`:rotating-light: Failed to add tag ${TagName.JOURNAL_PREMIUM} to Mailchimp member ${email}\nError: \`${tagUpdateResponse.error ? tagUpdateResponse.error.title : tagUpdateResponse.unknownError}\``);
-                }
-
-                const mergeFieldUpdateResponse = await MailchimpService.getSharedInstance().updateMergeFields({
-                    mergeFields: {JNL_STATUS: JournalStatus.PREMIUM},
-                    email
-                });
-                if (!mergeFieldUpdateResponse.success) {
-                    await slackService.sendActivityNotification(`:rotating-light: Failed update merge field ${MergeField.JNL_STATUS} to ${TagName.JOURNAL_PREMIUM} for Mailchimp member ${email}\nError: \`${mergeFieldUpdateResponse.error ? mergeFieldUpdateResponse.error.title : mergeFieldUpdateResponse.unknownError}\``);
-                }
-
-            } else {
-                await slackService.sendActivityNotification(`:warning: ${email} is not subscribed to mailchimp list`);
-            }
-
-            console.log("Update response", JSON.stringify(updateResponse, null, 2));
-
-            return {statusCode: 204, error: undefined}
-        } else {
-            const msg: SlackMessage = {
-                text: `:rotating_light: No customerId or payment intent found on payload. Unable to process payment webhook.\n*Event Payload:*\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``,
-            };
-            await slackService.sendActivityNotification(msg);
-            return {statusCode: 204, error: undefined}
-        }
-    } catch (error) {
-        const msg: SlackMessage = {
-            text: `:rotating_light: Failed to process Stripe Payment Complete webhook event.\n\`${error}\`\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``,
-
-        };
-        await AdminSlackService.getSharedInstance().sendActivityNotification(msg);
-
-        return {
-            statusCode: 500,
-            error: error
-        };
-    }
-}
-
 /**
- * Get a session ID for stripe checkout
+ * Get a session ID for stripe checkout. Requires authentication.
  *
  * Note: Unlike sessions created via the Client integration,
  * sessions created via the Server integration do not support creating subscriptions with trial_period_days set at the Plan level.
  * To set a trial period, please pass the desired trial length as the value of the subscription_data.trial_period_days argument.
  */
-app.post("/sessions", async (req: express.Request, res: express.Response) => {
-    let createResponse: CreateSessionResponse;
-
+app.post("/sessions/create-subscription", async (req: express.Request, res: express.Response) => {
     try {
-        res.contentType("application/json");
+        const userId = await getAuthUserId(req);
 
-        const sessionRequest = req.body as CreateSessionRequest;
+        if (!userId) {
+            logger.info("You must be authenticated to create a checkout session.");
+            res.status(401).send({unauthorized: true});
+            return;
+        }
+        const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+        const memberId = member?.id;
+        if (!member || !memberId) {
+            logger.info("No cactus member was found for the given userId: " + userId);
+            res.status(401).send({unauthorized: true});
+            return;
+        }
+        const {
+            subscriptionProductId,
+            successUrl = `${getHostname()}/home?${QueryParam.UPGRADE_SUCCESS}=success`,
+            cancelUrl = `${getHostname()}/pricing`
+        } = req.body as CreateSessionRequest;
 
-
-        console.log(chalk.yellow("request body", JSON.stringify(sessionRequest, null, 2)));
-
-        // const isPreorder = req.params
-        const successUrl = sessionRequest.successUrl || "https://cactus.app/success";
-        const cancelUrl = sessionRequest.cancelUrl || "https://cactus.app";
-        const preOrder = sessionRequest.preOrder || false;
-        const planId = sessionRequest.planId;
-        const items = sessionRequest.items;
-
-
-        const stripeOptions: any = {
-            payment_method_types: ['card'],
-            success_url: successUrl,
-            cancel_url: cancelUrl,
-        };
-
-
-        if (items && items.length > 0) {
-            stripeOptions.line_items = items;
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId);
+        if (!subscriptionProduct) {
+            res.status(400).send({message: "Unable to find a subscription product with the entryId " + subscriptionProductId});
+            return;
         }
 
-
-        let chargeAmount: number | undefined | null = 499;
-        let productId = planId;
-        if (planId) {
-            stripeOptions.subscription_data = {
-                items: [{
-                    plan: planId
-                }]
-            };
-
-            try {
-                const plan = await stripe.plans.retrieve(planId);
-                chargeAmount = plan.amount;
-            } catch (error) {
-                console.error("failed to retrive the plan");
-            }
-        } else if (preOrder) {
-            productId = 'Cactus Journal';
-            stripeOptions.payment_intent_data = {
-                capture_method: 'manual',
-            };
-
-            stripeOptions.line_items = [{
-                name: "Cactus Journal",
-                currency: 'USD',
-                amount: chargeAmount,
-                description: "You will be billed monthly. Pause or cancel anytime.",
-                quantity: 1,
-            }];
+        if (!subscriptionProduct.availableForSale) {
+            logger.warn(`Member tried to buy a subscription product that is not available for sale. Member: ${member.email}, SubscriptionProductId: ${subscriptionProductId}`);
+            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`Member tried to buy a subscription product that is not available for sale. Member: ${member.email}, SubscriptionProductId: ${subscriptionProductId}`)
+            return res.status(404).send({message: "The product you are looking for could not be found"});
         }
 
-        const updatedSuccess = new URL(stripeOptions.success_url);
-        updatedSuccess.searchParams.set(QueryParam.PURCHASE_AMOUNT, `${chargeAmount}`);
-        updatedSuccess.searchParams.set(QueryParam.PURCHASE_ITEM_ID, `${productId}`);
+        await AdminSubscriptionService.getSharedInstance().addStripeCustomerToMember(member);
 
+        const {createOptions, plan, error} = await buildStripeSubscriptionCheckoutSessionOptions({
+            successUrl,
+            cancelUrl,
+            member,
+            subscriptionProduct
+        });
 
-        console.log(chalk.blue("success url is", updatedSuccess.toString()))
-        stripeOptions.success_url = updatedSuccess.toString();
+        if (error || !(createOptions && plan)) {
+            const errorResponse: CreateSessionResponse = {
+                error: error || "Unable to build a checkout response",
+                success: false
+            };
+            res.status(400).send(errorResponse);
+            return;
+        }
 
+        const chargeAmount = plan.amount;
+        const session = await stripe.checkout.sessions.create(createOptions);
+        logger.info("Stripe session was created: " + JSON.stringify(session, null, 2));
 
-        console.log("Stripe Checkout Options", JSON.stringify(stripeOptions, null, 2));
-        // @ts-ignore
-        const session = await stripe.checkout.sessions.create(stripeOptions);
+        const cactusCheckoutSession = CheckoutSession.stripe({
+            memberId: memberId,
+            email: member.email,
+            sessionId: session.id,
+            amount: chargeAmount,
+            planId: plan.id,
+            raw: session,
+        });
 
-        createResponse = {
+        const savedSession = await AdminCheckoutSessionService.getSharedInstance().save(cactusCheckoutSession);
+        logger.info("saved the checkout session to firestore: " + stringifyJSON(savedSession, 2));
+
+        const createResponse: CreateSessionResponse = {
             success: true,
             sessionId: session.id,
             amount: chargeAmount,
-            productId,
         };
-
+        return res.send(createResponse);
     } catch (error) {
-        console.error("failed to load stripe checkout", error);
-        createResponse = {success: false, error: "Unable to load the checkout page"};
+        logger.error("failed to load stripe checkout", error);
+        const createResponse: CreateSessionResponse = {success: false, error: "Unable to load the checkout page"};
+        return res.send(createResponse);
     }
-    return res.send(createResponse);
+
+});
+
+async function buildStripeSubscriptionCheckoutSessionOptions(options: {
+    subscriptionProduct: SubscriptionProduct,
+    member: CactusMember,
+    successUrl: string,
+    cancelUrl: string
+}): Promise<{ createOptions?: Stripe.Checkout.SessionCreateParams, error?: string, plan?: Stripe.Plan }> {
+    const {subscriptionProduct, member, successUrl, cancelUrl} = options;
+    const planId = subscriptionProduct.stripePlanId;
+    const subscriptionProductId = subscriptionProduct.entryId;
+    const memberId = member.id;
+
+    if (!planId) {
+        logger.error(`No plan ID was given. Can not initialize session`);
+        return {error: "No plan ID was found on the subscription Product"};
+    }
+
+    const plan = await AdminSubscriptionService.getSharedInstance().fetchStripePlan(planId);
+    if (!plan) {
+        logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+        return {error: `Unable to find plan '${planId}' in stripe. Can not complete checkout.`};
+    }
+
+    const chargeAmount = plan.amount;
+    const updatedSuccessUrl = appendQueryParams(successUrl, {
+        [QueryParam.PURCHASE_AMOUNT]: `${chargeAmount}`,
+        [QueryParam.SUBSCRIPTION_PRODUCT_ID]: `${subscriptionProductId}`,
+    });
+
+    const stripeOptions: Stripe.Checkout.SessionCreateParams = {
+        payment_method_types: ['card'],
+        success_url: updatedSuccessUrl,
+        cancel_url: cancelUrl,
+        customer_email: member.stripeCustomerId ? undefined : member.email,
+        customer: member.stripeCustomerId,
+        metadata: {
+            memberId: `${memberId}`,
+            subscriptionProductId: `${subscriptionProductId}`,
+        },
+        subscription_data: {
+            items: [{
+                plan: planId
+            }]
+        }
+    };
+    logger.info("Successfully constructed stripe checkout options", stringifyJSON(stripeOptions, 2));
+    return {createOptions: stripeOptions, plan};
+}
+
+/**
+ * @type {SubscriptionDetails}
+ * Returns a {SubscriptionDetails} object
+ */
+app.get("/subscription-details", async (req: express.Request, resp: express.Response) => {
+    const userId = await getAuthUserId(req);
+    if (!userId) {
+        resp.sendStatus(401);
+        return;
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    if (!member) {
+        resp.sendStatus(401);
+        return;
+    }
+    // const memberId = member.id!;
+    const upcomingInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({member});
+
+    let subscriptionProduct: SubscriptionProduct | undefined;
+    const subscriptionProductId = member.subscription?.subscriptionProductId;
+    if (subscriptionProductId) {
+        subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByEntryId(subscriptionProductId)
+    }
+
+
+    const subscriptionDetails: SubscriptionDetails = {
+        upcomingInvoice: upcomingInvoice,
+        subscriptionProduct,
+    };
+
+    logger.info(`Subscription details for member ${member.email}: ${stringifyJSON(subscriptionDetails, 2)}`)
+    resp.send(subscriptionDetails);
+
+    return;
 });
 
 export default app;

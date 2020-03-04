@@ -1,4 +1,3 @@
-import {SourceApp} from '@shared/api/SignupEndpointTypes'
 <template>
     <div class="root centered">
         <NavBar/>
@@ -58,6 +57,9 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
     import {appendQueryParams} from '@shared/util/StringUtil'
     import Spinner from "@components/Spinner.vue"
     import {SourceApp} from "@shared/api/SignupEndpointTypes"
+    import Logger from "@shared/Logger";
+
+    const logger = new Logger("EmailActionHandler.vue");
 
     export default Vue.extend({
         components: {
@@ -75,10 +77,6 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
             this.continueUrl = continueUrl || PageRoute.JOURNAL_HOME;
             this.lang = lang;
 
-
-            debugger;
-
-
             switch (mode) {
                 case EmailActionMode.recoverEmail:
                     await this.handleRecoverEmail();
@@ -94,11 +92,11 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
                     break;
                 case EmailActionMode.signIn:
                     const sourceApp = getQueryParam(QueryParam.SOURCE_APP) as SourceApp;
-                    console.log("app source", sourceApp);
+                    logger.log("app source", sourceApp);
                     const isSignIn = getAuth().isSignInWithEmailLink(window.location.href);
 
-                    if (sourceApp === SourceApp.ios && isSignIn) {
-                        let appUrl = `${PageRoute.IOS_MAGIC_LINK_LOGIN}`;
+                    if (isSignIn && sourceApp === SourceApp.ios) {
+                        let appUrl = `${PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN}`;
                         appUrl = appendQueryParams(appUrl, getAllQueryParams());
                         window.location.assign(appUrl);
                         return;
@@ -115,7 +113,7 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
                     window.location.assign(url);
                     break;
                 default:
-                    console.error("No valid code was found");
+                    logger.error("No valid code was found");
                     this.error ="Invalid link.";
                     this.loading = false;
                     this.showContinueButton = true;
@@ -209,14 +207,14 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
 
                         this.error = undefined;
                     } catch (revertError) {
-                        console.error(revertError);
+                        logger.error(revertError);
                         this.successMessage = undefined;
                         this.error = "Unable to recover your email address. Please try again later";
                         this.submitting = false;
                     }
 
                 } catch (invalidCodeError) {
-                    console.error(invalidCodeError);
+                    logger.error(invalidCodeError);
                     this.successMessage = undefined;
                     this.error = "This link is either invalid or expired. Please try again.";
                     this.submitting = false;
@@ -234,7 +232,7 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
                     const email = await auth.verifyPasswordResetCode(this.actionCode);
                     return email
                 } catch (verifyError) {
-                    console.error(verifyError);
+                    logger.error(verifyError);
                     this.error = "This link is invalid or has expired. Please try to reset the password again.";
                     this.showPasswordResetButton = true;
                     this.successMessage = undefined;
@@ -299,7 +297,7 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
                         // Save the new password.
                         const resp = await auth.confirmPasswordReset(this.actionCode, this.newPassword || "");
                         // Password reset has been confirmed and new password updated.
-                        console.log("confirm password reset response", resp);
+                        logger.log("confirm password reset response", resp);
                         // TODO: Display a link back to the app, or sign-in the user directly
                         // if the page belongs to the same domain as the app:
                         await auth.signInWithEmailAndPassword(email, this.newPassword);
@@ -318,14 +316,14 @@ import {SourceApp} from '@shared/api/SignupEndpointTypes'
                         // Error occurred during confirmation. The code might have expired or the
                         // password is too weak.
                     } catch (confirmError) {
-                        console.error(confirmError);
+                        logger.error(confirmError);
                         this.error = "Unable to save password: " + confirmError.message;
                         this.successMessage = undefined;
                     }
                 } catch (verifyError) {
                     // Invalid or expired action code. Ask user to try to reset the password
                     // again.
-                    console.error(verifyError);
+                    logger.error(verifyError);
                     this.error = "This link is invalid or has expired. Please try to reset the password again.";
                     this.showPasswordResetButton = true;
                     this.successMessage = undefined;

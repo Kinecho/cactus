@@ -13,11 +13,6 @@ module.exports = {
         "path": "/signup",
         "name": "sign_up"
     },
-    "payment_success": {
-        "title": "Payment Success",
-        "path": "/success",
-        "name": "payment_success"
-    },
     "payment_cancel": {
         "title": "Payment Canceled",
         "path": "/cancel",
@@ -46,6 +41,11 @@ module.exports = {
     "email_action": {
         "title": "Email Action",
         "path": "/auth-actions",
+        "name": "email_action"
+    },
+    "email_action": {
+        "title": "Email Action",
+        "path": "/authenticate-actions",
         "name": "email_action"
     },
     "account_settings": {
@@ -102,9 +102,14 @@ module.exports = {
         "includeInDev": true,
         "name": "unsubscribe_confirmed"
     },
-    "ios_login_continue": {
-        "title": "iOS Login",
-        "path": "/ios-login-continue",
-        "name": "ios_login_continue"
+    "native_app_login_continue": {
+        "title": "App Login",
+        "path": "/app-login-continue",
+        "name": "native_app_login_continue"
+    },
+    "android_welcome": {
+        "title": "Welcome",
+        "path": "/welcome",
+        "name": "android_welcome"
     }
 }

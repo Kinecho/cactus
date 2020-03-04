@@ -2,15 +2,18 @@ import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import PromptContent, {ContentStatus} from "@shared/models/PromptContent";
 import {SchemaName} from "@shared/FlamelinkModel";
 import {CactusElement} from "@shared/models/CactusElement";
-import {dateObjectToISODate, getFlamelinkDateString, plusDays} from "@shared/util/DateUtil";
-import {fromFlamelinkData} from "@shared/util/FlamelinkUtils";
+import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/util/FlamelinkUtils";
 import {DateObject} from "luxon";
 import AdminSlackService from "@admin/services/AdminSlackService";
+import Logger from "@shared/Logger";
+import {CactusConfig} from "@shared/CactusConfig";
+
+const logger = new Logger("AdminPromptContentService");
 
 
 export default class AdminPromptContentService {
     protected static sharedInstance: AdminPromptContentService;
-
+    config: CactusConfig;
     flamelinkService: AdminFlamelinkService;
     schema = SchemaName.promptContent;
 
@@ -21,18 +24,19 @@ export default class AdminPromptContentService {
         return AdminPromptContentService.sharedInstance;
     }
 
-    static initialize() {
-        AdminPromptContentService.sharedInstance = new AdminPromptContentService();
+    static initialize(config: CactusConfig) {
+        AdminPromptContentService.sharedInstance = new AdminPromptContentService(config);
     }
 
-    constructor() {
+    constructor(config: CactusConfig) {
         this.flamelinkService = AdminFlamelinkService.getSharedInstance();
+        this.config = config;
     }
 
     async save(model: PromptContent): Promise<PromptContent | undefined> {
-        console.log("[AdminPromptContentService.save] Saving prompt content with scheduledSendAt = ", model.scheduledSendAt);
+        logger.log("[AdminPromptContentService.save] Saving prompt content with scheduledSendAt = ", model.scheduledSendAt);
         const saved = await this.flamelinkService.save(model);
-        console.log("[AdminPromptContentService.save] Saved prompt content with scheduledSendAt = ", saved?.scheduledSendAt);
+        logger.log("[AdminPromptContentService.save] Saved prompt content with scheduledSendAt = ", saved?.scheduledSendAt);
         return saved;
     }
 
@@ -65,73 +69,31 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
-    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus }): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus, }): Promise<PromptContent | undefined> {
         try {
-            const {systemDate, dateObject, status} = options;
-            // const midnightDenver = getDateAtMidnightDenver(date);
-            let startDateString = "";
-            let endDateString = "";
-            if (dateObject) {
-                dateObject.hour = 0;
-                dateObject.minute = 0;
-                dateObject.second = 0;
-                dateObject.millisecond = 0;
-                endDateString = dateObjectToISODate(dateObject);
-                const startObject = {...dateObject, day: dateObject.day! + 1};
-                startDateString = dateObjectToISODate(startObject);
-            } else if (systemDate) {
-                const midnightDenver = new Date(systemDate); //make a copy of the date so we don't edit the original one
-                midnightDenver.setHours(0);
-                midnightDenver.setMinutes(0);
-                midnightDenver.setSeconds(0);
-                midnightDenver.setMilliseconds(0);
-                const nextDate = plusDays(1, midnightDenver);
-                nextDate.setHours(0);
-                startDateString = getFlamelinkDateString(nextDate);
-                endDateString = getFlamelinkDateString(midnightDenver);
-
-            } else {
-                console.error("No valid date passed into getPromptContentForDate method");
+            const getOptions = getPromptContentForDateQueryOptions(options);
+            if (!getOptions) {
+                logger.error("Unable to get prompt content options for dates");
                 return;
             }
-
-            console.log("start date", startDateString);
-            console.log("end date", endDateString);
-
-
-            const filters: string[][] = [];
-            if (status) {
-                console.log("adding status filter for status = ", status);
-                filters.push([PromptContent.Fields.contentStatus, "==", status])
-            }
-
-            const getOptions = {
-                schemaKey: SchemaName.promptContent,
-                // field: PromptContent.Fields.scheduledSendAt,
-                filters,
-                orderBy: {field: PromptContent.Fields.scheduledSendAt, order: "desc"},
-                startAt: startDateString,
-                endAt: endDateString,
-            };
-
             const raw = await this.flamelinkService.content.get(getOptions);
 
             if (!raw) {
-                console.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
-                return
+                logger.warn("AdminPromptContentService.getPromptContentForDate: No objects found for dates given");
+                return;
             }
 
             const allValues = Object.values(raw);
-            console.log(`Found ${allValues.length} that matched the criteria for the date range`);
+            logger.log(`Found ${allValues.length} that matched the criteria for the date range`);
             const [content]: (any | undefined)[] = allValues;
             if (!content) {
-                return undefined
+                return undefined;
             }
 
             return fromFlamelinkData(content, PromptContent);
         } catch (error) {
-            console.error("Failed to fetch content", error);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\``);
+            logger.error("Failed to fetch content", error);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(this.config.app.serverName + ` | getPromptContentForDate():  Failed to execute query for Flamelink content. Error\n\`\`\`${error}\`\`\`\nOptions\n\`\`\`${options}\`\`\``);
             return undefined;
         }
     }

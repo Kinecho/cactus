@@ -3,6 +3,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
+                <upgrade-banner :member="member" />
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                     <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
@@ -45,7 +46,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                                 {{durationLabel}}
                             </p>
                         </section>
-                        <section class="metric">
+                        <section class="metric" v-if="currentStreak == 'days'">
                             <div class="label">
                                 <transition name="fade-in" mode="out-in" appear>
                                     <span v-if="streakDays !== undefined">{{streakDays}}</span>
@@ -56,15 +57,37 @@ import {LocalStorageKey} from '@web/services/StorageService'
                                 {{promptCopy.DAY_STREAK}}
                             </p>
                         </section>
+                        <section class="metric" v-if="currentStreak == 'weeks'">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakWeeks !== undefined">{{streakWeeks}}</span>
+                                    <spinner v-if="streakWeeks === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakWeeks !== undefined">
+                                {{promptCopy.WEEK_STREAK}}
+                            </p>
+                        </section>
+                        <section class="metric" v-if="currentStreak == 'months'">
+                            <div class="label">
+                                <transition name="fade-in" mode="out-in" appear>
+                                    <span v-if="streakMonths !== undefined">{{streakMonths}}</span>
+                                    <spinner v-if="streakMonths === undefined" :delay="1000"/>
+                                </transition>
+                            </div>
+                            <p v-show="streakMonths !== undefined">
+                                {{promptCopy.MONTH_STREAK}}
+                            </p>
+                        </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="secondary authBtn" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                        <button class="authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
                         <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
                         </button>
-                        <button class="primary authBtn"
+                        <button class="authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
                                 v-if="authLoaded && loggedIn && !isModal"
                                 @click="goToHome">
                             {{promptCopy.GO_HOME}}
@@ -136,9 +159,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import Modal from "@components/Modal.vue";
     import {CactusElement} from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
+    import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    import Logger from "@shared/Logger";
+    import {gtag} from "@web/analytics"
 
+    const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
@@ -148,7 +175,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             MagicLink,
             PromptContentCard,
             ElementDescriptionModal,
-            InputNameModal
+            InputNameModal,
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -158,15 +186,18 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     this.loggedIn = !!member;
 
                     if (StorageService.getBoolean(LocalStorageKey.memberStatsEnabled) && member && member.stats.reflections) {
-                        console.log("using member stats");
+                        logger.log("using member stats");
                         this.setDurationMs(member.stats.reflections.totalDurationMs);
                         this.reflectionCount = member.stats.reflections.totalCount;
                         this.streakDays = member.stats.reflections.currentStreakDays;
+                        this.streakWeeks = member.stats.reflections.currentStreakWeeks;
+                        this.streakMonths = member.stats.reflections.currentStreakMonths;
                         this.elementAccumulations = member.stats.reflections.elementAccumulation;
+                        this.selectStreak();
                     } else {
                         //this will calculate stats if the member doesn't have the new stats object
                         //Or, if the user is anonymous/not logged in.
-                        console.log("calculating streak from raw data");
+                        logger.log("calculating streak from raw data");
                         await this.calculateStats()
                     }
 
@@ -186,6 +217,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             reflectionCount: number | undefined,
             totalDuration: string | undefined,
             streakDays: number | undefined,
+            streakWeeks: number | undefined,
+            streakMonths: number | undefined,
             elementAccumulations: ElementAccumulation | undefined,
             loading: boolean,
             authLoaded: boolean,
@@ -201,11 +234,14 @@ import {LocalStorageKey} from '@web/services/StorageService'
             cactusModalElement: string | undefined,
             inputNameModalVisible: boolean,
             sawInputNameModal: boolean,
+            currentStreak: 'days' | 'weeks' | 'months'
         } {
             return {
                 reflectionCount: undefined,
                 totalDuration: undefined,
                 streakDays: undefined,
+                streakWeeks: undefined,
+                streakMonths: undefined,
                 elementAccumulations: undefined,
                 loading: true,
                 loggedIn: false,
@@ -220,7 +256,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
                 inputNameModalVisible: false,
-                sawInputNameModal: false
+                sawInputNameModal: false,
+                currentStreak: 'days'
             }
         },
         destroyed() {
@@ -269,25 +306,27 @@ import {LocalStorageKey} from '@web/services/StorageService'
             async calculateStats() {
                 const member = this.member;
                 const reflections = await ReflectionResponseService.sharedInstance.getAllReflections();
-                console.log("all reflections", reflections);
+                logger.log("all reflections", reflections);
                 if (reflections.length === 0 && this.reflectionResponse) {
                     reflections.push(this.reflectionResponse);
                 }
 
                 const totalDuration = reflections.reduce((duration, doc) => {
                     const current = doc.reflectionDurationMs || 0;
-                    console.log("current response duration ", current);
+                    logger.log("current response duration ", current);
                     return duration + (Number(current) || 0);
                 }, 0);
 
 
-                console.log("totalDuration", totalDuration);
+                logger.log("totalDuration", totalDuration);
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                this.streakDays = ReflectionResponseService.getCurrentStreak(reflections, member);
-
-                // this.elementAccumulations = anonymousAccumulations;
+                const {dayStreak, weekStreak, monthStreak} = ReflectionResponseService.getCurrentStreaks(reflections, member);
+                this.streakDays = dayStreak;
+                this.streakWeeks = weekStreak;
+                this.streakMonths = monthStreak;
+                this.selectStreak();
             },
             setDurationMs(totalDuration: number) {
                 if (totalDuration < (60 * 1000)) {
@@ -317,13 +356,13 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.$emit("navigationDisabled")
             },
             magicLinkSuccess(email: string | undefined) {
-                console.log("Celebrate Screen: Magic link sent successfully to ", email);
+                logger.log("Celebrate Screen: Magic link sent successfully to ", email);
                 if (this.reflectionResponse && this.reflectionResponse.promptId) {
                     StorageService.removeItem(LocalStorageKey.anonReflectionResponse, this.reflectionResponse.promptId);
                 }
             },
             magicLinkError(message: string | undefined) {
-                console.error("Celebrate component: Failed to send magic link", message);
+                logger.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
                 window.location.href = PageRoute.SIGNUP;
@@ -335,6 +374,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.disableNavigation()
             },
             tradeNote() {
+                this.trackShareTap();
                 if (this.member && !this.member.getFullName() && !this.sawInputNameModal) {
                     this.showInputNameModal();
                 } else {
@@ -362,6 +402,25 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 this.updateResponseMemberName();
                 this.hideInputNameModal();
                 this.tradeNote();
+            },
+            trackShareTap() {
+                gtag('event', 'click', {
+                    'event_category': "prompt_content",
+                    'event_action': "clicked_share_note"
+                });
+            },
+            selectStreak() {
+                this.currentStreak = 'days';
+                
+                if (this.streakDays && this.streakWeeks && this.streakMonths) {
+                    if (this.streakDays > 1) {
+                        this.currentStreak = 'days';
+                    } else if (this.streakWeeks > 1) {
+                        this.currentStreak = 'weeks';
+                    } else if (this.streakWeeks == 1 && this.streakMonths > 1) {
+                        this.currentStreak = 'months';
+                    }
+                }
             }
         }
     })
@@ -415,11 +474,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
     .successText {
         flex-grow: 1;
-        padding: 6.4rem 4rem;
+        padding: 4rem 4rem 6.4rem;
+
+        @include r(374) {
+            padding: 7.2rem 4rem 9.6rem;
+        }
+        @include r(600) {
+            padding: 6.4rem 4rem;
+        }
     }
 
     h2 {
         color: $magenta;
+        font-size: 3.2rem;
         margin-bottom: 2.4rem;
 
         @include r(600) {
@@ -458,7 +525,11 @@ import {LocalStorageKey} from '@web/services/StorageService'
         align-items: flex-end;
         display: flex;
         justify-content: center;
-        margin: -13.6rem 0 2.4rem;
+        margin: -12rem 0 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .cactusContainer {
@@ -491,6 +562,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         display: flex;
         justify-content: center;
         margin-bottom: 1.6rem;
+
+        @include r(374) {
+            margin-bottom: 2.4rem;
+        }
     }
 
     .metric {

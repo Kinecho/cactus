@@ -8,41 +8,101 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {MergeField} from "@shared/mailchimp/models/MailchimpTypes";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import UserRecord = admin.auth.UserRecord;
+import Logger from "@shared/Logger";
+import {getValidTimezoneName} from "@shared/timezones";
+import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+
+const logger = new Logger("MemberTriggers");
+
+
+/**
+ * Ensure a member's subscription info is correct
+ */
+export const updateSubscriptionDetailsTrigger = functions.firestore
+    .document(`${Collection.members}/{memberId}`)
+    .onWrite(async (change) => {
+        if (!change.after) {
+            logger.info("no \"after\" was found on the change. not doing anything");
+            return;
+        }
+
+        const member = fromDocumentSnapshot(change.after, CactusMember);
+        if (!member) {
+            logger.info("No member was able to be built from the document snapshot. Returning");
+            return;
+        }
+
+        const subscription = member.subscription;
+        if (!subscription) {
+            logger.info("Member doesn't have a subscription, not doing anything");
+            return;
+        }
+        let needsSave = false;
+        const hasActivatedDate = !!subscription.trial?.activatedAt;
+        if (hasActivatedDate && !subscription.activated) {
+            logger.info(`setting ${member.email} subscription to activated = true`);
+            subscription.activated = true;
+            needsSave = true;
+        } else if (!hasActivatedDate && subscription.activated === true) {
+            subscription.activated = false;
+            logger.info(`setting ${member.email} subscription to activated = false`);
+            needsSave = true;
+        }
+
+        if (needsSave) {
+            await AdminCactusMemberService.getSharedInstance().save(member);
+        }
+
+    });
 
 export const updatePromptSendTimeTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
-    .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("Starting update prompt send time trigger");
+    .onWrite(async (change, context: functions.EventContext) => {
+        logger.log("Starting update prompt send time trigger");
         const afterSnapshot = change.after;
         if (!afterSnapshot) {
-            console.warn("No data found on the 'after' snapshot. Not updating.");
+            logger.warn("No data found on the 'after' snapshot. Not updating.");
             return;
         }
         const memberAfter = fromDocumentSnapshot(afterSnapshot, CactusMember);
         if (!memberAfter) {
-            console.error("There was no updated member. It was deleted. Nothing to process");
+            logger.error("There was no updated member. It was deleted. Nothing to process");
             return;
         }
 
-        const result = await AdminCactusMemberService.getSharedInstance().updateMemberUTCSendPromptTime(memberAfter);
-        console.log(JSON.stringify(result, null, 2));
+        // First, ensure the timezone is valid on the member, and if not, save it and return.
+        // The next trigger will run the sent time update.
+        const originalTz = memberAfter.timeZone || undefined;
+        const validTz = getValidTimezoneName(originalTz);
+        if (validTz && validTz !== originalTz) {
+            const message = `Updating ${memberAfter.email}'s timezone from '${originalTz}' to '${validTz}'.`;
+            logger.info(message);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage("[MemberTriggers.updatePromptSendTimeTrigger]" + message);
+            memberAfter.timeZone = validTz;
+            await afterSnapshot.ref.update({[CactusMember.Field.timeZone]: validTz});
+            return;
+        }
+
+        const result = await AdminCactusMemberService.getSharedInstance().updateMemberSendPromptTime(memberAfter);
+        logger.log(JSON.stringify(result, null, 2));
     });
 
 
 export const updateMemberProfileTrigger = functions.firestore
     .document(`${Collection.members}/{memberId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("Starting member profile update");
+        logger.log("Starting member profile update");
 
         const snapshot = change.after;
         if (!snapshot) {
-            console.warn("No data found on the 'after' snapshot. Not updating.");
+            logger.warn("No data found on the 'after' snapshot. Not updating.");
             return;
         }
         const member = fromDocumentSnapshot(snapshot, CactusMember);
 
         if (!member) {
-            console.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null, 2));
+            logger.error("Unable to deserialize a cactus member from the after snapshot. snapshot.data() was", JSON.stringify(snapshot.data(), null, 2));
             return;
         }
 
@@ -56,31 +116,38 @@ export const updateMemberProfileTrigger = functions.firestore
 
 
             const profile = await AdminMemberProfileService.getSharedInstance().upsertMember({member, userRecord});
-            console.log("Updated profile to", profile);
+            logger.log("Updated profile to", profile);
 
         } catch (error) {
-            console.error(`Failed to update the member's public profile. MemberId = ${member.id}`, error);
+            logger.error(`Failed to update the member's public profile. MemberId = ${member.id}`, error);
         }
 
         try {
-            //update mailchimp
-            const mailchimpMember = member.mailchimpListMember;
-            const email = member.email || mailchimpMember?.email_address;
-            if (!email) {
-                return;
-            }
-            if (mailchimpMember?.merge_fields[MergeField.FNAME] !== member.firstName || mailchimpMember?.merge_fields[MergeField.LNAME] !== member.lastName) {
-                const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
-                    email: email,
-                    mergeFields: {
-                        [MergeField.FNAME]: member.firstName || "",
-                        [MergeField.LNAME]: member.lastName || "",
-                    }
-                });
-                console.log("Update mailchimp merge fields response:", mailchimpResponse);
+            //update mailchimp, if needed
+            const email = member?.email;
+            const needsNameUpdate = MailchimpService.getSharedInstance().needsNameUpdate(member);
+            const needsSubscriptionUpdate = MailchimpService.getSharedInstance().needsSubscriptionUpdate(member);
+
+            const nameMergeFields = {
+                [MergeField.FNAME]: member.firstName || "",
+                [MergeField.LNAME]: member.lastName || "",
+            };
+
+            const subscriptionMergeFields = AdminSubscriptionService.getSharedInstance().mergeFieldValues(member);
+
+            const mergeFieldsToUpdate = {...nameMergeFields, ...subscriptionMergeFields};
+
+            if (email) {
+                if (needsNameUpdate || needsSubscriptionUpdate) {
+                    const mailchimpResponse = await MailchimpService.getSharedInstance().updateMergeFields({
+                        email: email,
+                        mergeFields: mergeFieldsToUpdate
+                    });
+                    logger.log("Update mailchimp merge fields response:", mailchimpResponse);
+                }
             }
         } catch (error) {
-            console.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
+            logger.log(`Failed to update mailchimp merge fields. MemberId = ${member.id}`, error);
         }
 
         return;

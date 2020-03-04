@@ -1,3 +1,5 @@
+import {SendgridTemplate} from "@shared/models/EmailLog";
+
 export interface ServiceAccountCredentials {
     project_id: string,
     token_uri: string,
@@ -12,18 +14,23 @@ export interface ServiceAccountCredentials {
 }
 
 export type EnvironmentType = "test" | "dev" | "prod" | "stage"
+export type SendgridTemplateConfig = { [name in SendgridTemplate]: string };
 
 export interface CactusConfig {
     isEmulator: boolean,
+    allowedOrigins: (string | RegExp)[],
     app: {
-        environment: EnvironmentType
+        serverName: string | undefined
+        environment: EnvironmentType,
+        fake_email_domain: string
     },
     mailchimp: {
         api_key: string,
         audience_id: string,
         bridge_to_monday_segment_id: string,
         non_prompt_campaign_ids: string //this is a comma separated string
-        segment_id_daily_prompt: string,
+        segment_id_all_tiers: string,
+        segment_id_plus_tier: string,
         templates: {
             prompt_module_morning: string
         }
@@ -58,6 +65,10 @@ export interface CactusConfig {
     stripe: {
         api_key: string,
         secret_key: string,
+        webhook_signing_secrets: {
+            checkout_session_completed: string,
+            main: string,
+        }
     },
     backups_config: {
         analytics_project_id: string,
@@ -83,12 +94,7 @@ export interface CactusConfig {
     },
     sendgrid: {
         api_key: string,
-        template_ids: {
-            magic_link: string,
-            magic_link_new_user: string,
-            invitation: string,
-            friend_request: string
-        }
+        template_ids: SendgridTemplateConfig,
     },
     sheets: {
         client_id: string,

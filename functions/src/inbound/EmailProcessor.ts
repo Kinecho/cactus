@@ -4,7 +4,9 @@ import {InboundAttachmentInfo, InboundEmailAttachments} from "@shared/models/Ema
 import {splitOnFirst} from "@admin/util/StringUtil";
 import EmailHeaders, {Header} from "@shared/models/EmailHeaders";
 import * as Busboy from "busboy";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("EmailProcessor");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
@@ -26,7 +28,7 @@ export async function processEmail(headers:any, body:any):Promise<EmailReply|nul
             const emailInput: InboundEmail = {};
 
             busboy.on("error", (error: any) => {
-                console.error("failed to process something", error);
+                logger.error("failed to process something", error);
             });
 
             busboy.on("file", getFileHandler(emailFiles));
@@ -48,24 +50,24 @@ export async function processEmail(headers:any, body:any):Promise<EmailReply|nul
             // const body = req.rawBody || req.body;
             try {
                 const mailchimpUniqueId = getMailchimpEmailIdFromBody(String(body));
-                console.log("raw body mailchimp email id", mailchimpUniqueId);
+                logger.log("raw body mailchimp email id", mailchimpUniqueId);
                 emailInput.mailchimpEmailId = mailchimpUniqueId;
             } catch (error){
-                console.error("failed to get mailchimp email id from raw body", error);
+                logger.error("failed to get mailchimp email id from raw body", error);
             }
 
             try {
                 const campaignId = getMailchimpCampaignIdFromBody(String(body));
-                console.log("raw body mailchimp campaign id", campaignId);
+                logger.log("raw body mailchimp campaign id", campaignId);
                 emailInput.mailchimpCampaignId = campaignId;
             } catch (error){
-                console.error("failed to get mailchimp campaign id from raw body", error);
+                logger.error("failed to get mailchimp campaign id from raw body", error);
             }
 
             //this is the method that actually passes in the body to the busboy processor
             busboy.end(body);
         } catch (error) {
-            console.error("failed to process email", error);
+            logger.error("failed to process email", error);
             reject(error);
             return;
         }
@@ -83,7 +85,7 @@ export async function createEmailFromInputs(emailInput: InboundEmail, fileInput:
  * @return {(fieldname: string, file: NodeJS.ReadableStream, filename: string, encoding: string, mimetype: string) => void}
  */
 export function getFileHandler(emailFiles: InboundEmailFiles) {
-    console.log("getting file handler for email input");
+    logger.log("getting file handler for email input");
     return (fieldname: string,
             file: NodeJS.ReadableStream,
             filename: string,
@@ -91,17 +93,17 @@ export function getFileHandler(emailFiles: InboundEmailFiles) {
             mimetype: string) => {
 
         file.on("error", (error: any) => {
-            console.error("failed to process file", error);
+            logger.error("failed to process file", error);
 
         });
 
-        console.log(`File [${fieldname}] filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
+        logger.log(`File [${fieldname}] filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`);
         // Note that os.tmpdir() is an in-memory file system, so should only
         // be used for files small enough to fit in memory.
         const filepath = path.join(os.tmpdir(), fieldname);
 
         emailFiles[fieldname] = {file: filepath};
-        console.log(`Saving '${fieldname}' to ${filepath}`);
+        logger.log(`Saving '${fieldname}' to ${filepath}`);
         file.pipe(fs.createWriteStream(filepath));
     }
 
@@ -109,7 +111,7 @@ export function getFileHandler(emailFiles: InboundEmailFiles) {
 
 
 export function getFieldHandler(email: InboundEmail) {
-    console.log("field handler for email", email);
+    logger.log("field handler for email", email);
     return function (fieldname: string,
                      val: any,
                      fieldnameTruncated: boolean,
@@ -117,7 +119,7 @@ export function getFieldHandler(email: InboundEmail) {
                      encoding: string,
                      mimetype: string) {
 
-        // console.log('Field [' + fieldname + ']: value: ' + inspect(val));
+        // logger.log('Field [' + fieldname + ']: value: ' + inspect(val));
 
         switch (fieldname) {
             case 'headers':
@@ -129,7 +131,7 @@ export function getFieldHandler(email: InboundEmail) {
                 email.html = val;
                 if (!email.mailchimpEmailId){
                     email.mailchimpEmailId = getMailchimpEmailIdFromBody(val);
-                    console.log("processing html, found mailchimpEmailId", email.mailchimpEmailId);
+                    logger.log("processing html, found mailchimpEmailId", email.mailchimpEmailId);
                 }
                 break;
             case "to":
@@ -147,11 +149,11 @@ export function getFieldHandler(email: InboundEmail) {
             case "sender_ip":
                 break;
             case "envelope":
-                // console.log("ENVELOPE: ", val);
+                // logger.log("ENVELOPE: ", val);
                 try {
                     email.envelope = JSON.parse(val);
                 } catch (e) {
-                    console.error(`Unable to process the envelope field ${val}`, e);
+                    logger.error(`Unable to process the envelope field ${val}`, e);
                 }
 
                 break;
@@ -166,7 +168,7 @@ export function getFieldHandler(email: InboundEmail) {
             case "SPF":
                 break;
             default:
-                console.warn("field name [", fieldname, "] not handled");
+                logger.warn("field name [", fieldname, "] not handled");
                 break;
         }
     }
@@ -184,7 +186,7 @@ export function processBodyHeaders(input: string): EmailHeaders {
         return headers;
     }, {} as EmailHeaders);
 
-    // console.log("processed headers into", aggregated);
+    // logger.log("processed headers into", aggregated);
     return aggregated
 }
 
@@ -204,7 +206,7 @@ export function getSenderFromHeaders(headers: EmailHeaders): string | null {
 
         return mailfrom ? mailfrom.trim().toLowerCase() : null;
     } catch (error) {
-        console.error("error processing sender headers", error);
+        logger.error("error processing sender headers", error);
         return null;
     }
 
@@ -212,11 +214,11 @@ export function getSenderFromHeaders(headers: EmailHeaders): string | null {
 
 export function processAttachments(input: InboundEmailAttachments): Array<InboundAttachmentInfo> {
     try {
-        console.log("processing attachments");
+        logger.log("processing attachments");
         inspect(input);
         return Object.values(input)
     } catch (error) {
-        console.error("failed to parse attachments");
+        logger.error("failed to parse attachments");
         return [];
     }
 }
@@ -247,7 +249,7 @@ export function getReplyTextContent(email:EmailReply):string {
         const visibleText = parsedBody.getVisibleText() || "";
         return visibleText.trim();
     } catch (error){
-        console.error("failed to process reply", error);
+        logger.error("failed to process reply", error);
         return "";
     }
 

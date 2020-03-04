@@ -35,6 +35,7 @@ window.__APP_STORE_URL__ = "https://apple.com/test"
 
 window.__FLAMELINK_FIREBASE_CONFIG__ = window.__FIREBASE_CONFIG__;
 window.__FLAMELINK_ENV_ID__ = "stage";
+window.__BRANCH_LIVE_KEY__ = "key_test";
 
 const firebasemock = require('firebase-mock');
 

@@ -32,20 +32,20 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import NavBar from "@components/NavBar.vue";
-    import Footer from "@components/StandardFooter.vue";
-    import Spinner from "@components/Spinner.vue";
-    import SocialActivityEvent from "@components/SocialActivityEvent.vue"
     import CactusMember from "@shared/models/CactusMember";
+    import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
+    import {PageRoute} from "@shared/PageRoutes";
     import CactusMemberService from '@web/services/CactusMemberService';
+    import {getSocialActivity} from '@web/social';
+    import NavBar from "@components/NavBar.vue";
+    import Spinner from "@components/Spinner.vue";
+    import Footer from "@components/StandardFooter.vue";
     import VueClipboard from 'vue-clipboard2';
     import SocialSharing from 'vue-social-sharing';
-    import {getSocialActivity} from '@web/social';
-    import {SocialActivityFeedEvent} from "@shared/types/SocialTypes";
-    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
-    import {PageRoute} from "@shared/PageRoutes";
     import SocialFriendList from "@components/SocialFriendList.vue";
+    import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import SkeletonEvent from "@components/SocialActivityEventSkeleton.vue";
+    import SocialActivityEvent from "@components/SocialActivityEvent.vue"
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);

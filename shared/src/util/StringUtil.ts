@@ -1,8 +1,9 @@
 import * as queryString from "query-string";
-import * as camelcase from "camelcase";
+import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
+import {isNumber} from "@shared/util/ObjectUtil";
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()
@@ -21,8 +22,7 @@ export function getFilenameFromInput(input: string, extension: string | undefine
     }
 }
 
-export function preventOrphanedWords<T>(input?: string, escapeCode: string = "\xa0"): string | undefined {
-    // noinspection SuspiciousTypeOfGuard
+export function preventOrphanedWords<T>(input?: T | string, escapeCode: string = "\xa0"): string | undefined | T {
     if (!input || typeof input !== "string") {
         return input;
     }
@@ -106,6 +106,10 @@ export function isValidEmail(input?: string): boolean {
         return false;
     }
     return /^\w+([\.+-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(input);
+}
+
+export function isGmail(input: string) {
+    return /^[a-z0-9](\.?[a-z0-9]){5,}@g(oogle)?mail\.com$/.test(input);
 }
 
 export function destructureDisplayName(displayName?: string | null): { firstName?: string, middleName?: string, lastName?: string } {
@@ -235,5 +239,37 @@ export function titleCase(str: string | undefined): string {
         }).join(' ');
     } else {
         return '';
+    }
+}
+
+export const StringTransforms = {
+    stringOrUndefined: (input: string): string | undefined => {
+        return isBlank(input) ? undefined : input;
+    },
+
+    numberOrUndefined: (input: string): number | undefined => {
+        return isNumber(input) ? undefined : Number(input);
+    },
+
+    booleanOrUndefined: (input: string): boolean | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        return input.toLowerCase().startsWith("t");
+    },
+
+    dateOrUndefined: (input: string): Date | undefined => {
+        if (isBlank(input)) {
+            return undefined;
+        }
+        try {
+            const date = new Date(input);
+
+            return date;
+
+        } catch (error) {
+            return undefined;
+        }
+
     }
 }

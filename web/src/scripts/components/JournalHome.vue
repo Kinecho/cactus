@@ -1,6 +1,19 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <snackbar-content
+            class="upgrade-confirmation"
+            v-if="upgradeConfirmed"
+            :closeable="true"
+            key="upgrade-confirmation"
+            :autoHide="false"
+            color="successAlt">
+            <div slot="text" class="centered">
+                <h3>Welcome to Cactus Plus!</h3>
+                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+            </div>
+        </snackbar-content>
         <div class="container centered">
             <div v-if="loginReady && !loggedIn" class="section-container">
                 <section class="loggedOut journalList">
@@ -12,11 +25,10 @@
             </div>
 
             <transition name="fade-in-fast" appear mode="out-in">
-                <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length === 0 && dataHasLoaded" :key="'empty'">
+                <div class="section-container" v-if="showOnboardingPrompt" :key="'empty'">
                     <section class="empty journalList">
                         <h1>Welcome to Cactus</h1>
-                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the
-                            day.</p>
+                        <p>To get started, you'll learn about how Cactus works and reflect on your first question of the&nbsp;day.</p>
                         <img class="graphic" src="assets/images/emptyState.png" alt="Three friends welcoming you"/>
                         <a class="button primary" :href="firstPromptPath">Let's Begin</a>
                     </section>
@@ -29,8 +41,16 @@
                                 v-bind:css="false"
                                 v-on:before-enter="beforeEnter"
                                 v-on:enter="enter">
+
+                            <entry
+                                    class="journalListItem"
+                                    v-if="todayEntry && todayLoaded"
+                                    :journalEntry="todayEntry"
+                                    v-bind:key="todayEntry.promptId"
+                            ></entry>
                             <entry
                                     :class="['journalListItem', {even: index%2}]"
+                                    :style="{zIndex: Math.max(1000 - index, 0)}"
                                     v-for="(entry, index) in journalEntries"
                                     :journalEntry="entry"
                                     v-bind:index="index"
@@ -65,6 +85,17 @@
     import JournalEntry from '@web/datasource/models/JournalEntry'
     import {debounce} from "debounce"
     import Spinner from "@components/Spinner.vue"
+    import PromptContentService from "@web/services/PromptContentService";
+    import SentPromptService from "@web/services/SentPromptService";
+    import SentPrompt from "@shared/models/SentPrompt";
+    import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
+    import Logger from "@shared/Logger";
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import {QueryParam} from "@shared/util/queryParams";
+    import {getQueryParam} from "@web/util";
+    import SnackbarContent from "@components/SnackbarContent.vue";
+
+    const logger = new Logger("JournalHome.vue");
 
     declare interface JournalHomeData {
         cactusMember?: CactusMember,
@@ -76,6 +107,10 @@
         journalEntries: JournalEntry[],
         showPageLoading: boolean,
         dataHasLoaded: boolean,
+        todayUnsubscriber?: ListenerUnsubscriber,
+        todayEntry?: JournalEntry,
+        todayLoaded: boolean,
+        showUpgradeCard: boolean,
     }
 
     export default Vue.extend({
@@ -85,6 +120,8 @@
             AutoPromptContentModal,
             SkeletonCard,
             Spinner,
+            UpgradeCard: UpgradeSubscriptionJournalEntryCard,
+            SnackbarContent
         },
         props: {
             loginPath: {type: String, default: PageRoute.SIGNUP},
@@ -96,17 +133,16 @@
             this.scrollHandler();
         },
         beforeMount() {
-            console.log("Journal Home calling Created function");
+            logger.log("Journal Home calling Created function");
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({member, user}) => {
                     if (!user) {
-                        console.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         window.location.href = PageRoute.HOME;
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
-                    // const memberChanged =  member && member.id && this.cactusMember?.id === member?.id;
 
                     this.cactusMember = member;
                     this.user = user;
@@ -114,32 +150,67 @@
                         this.loginReady = true;
                     }
 
+                    // Query Flamelink for today's PromptContent and then back into a JournalEntry
+                    if (this.cactusMember?.id) {
+                        const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
+                        const todaysPromptContent = await PromptContentService.sharedInstance.getPromptContentForDate({
+                            systemDate: new Date(),
+                            subscriptionTier: tier
+                        });
+
+                        if (todaysPromptContent?.promptId) {
+                            this.todayUnsubscriber = SentPromptService.sharedInstance.observeByPromptId(this.cactusMember.id, todaysPromptContent.promptId, {
+                                onData: async (todaySentPrompt: SentPrompt | undefined) => {
+                                    let todayEntry = undefined;
+
+                                    if (todaySentPrompt?.promptId && todaySentPrompt.completed === false) {
+                                        todayEntry = new JournalEntry(todaySentPrompt.promptId, todaySentPrompt);
+                                    } else if (!todaySentPrompt && todaysPromptContent?.promptId) {
+                                        // they don't have a SentPrompt for today's prompt
+                                        // but we show it to them anyway
+                                        todayEntry = new JournalEntry(todaysPromptContent.promptId);
+                                    }
+
+                                    if (todayEntry) {
+                                        todayEntry.delegate = {
+                                            entryUpdated: entry => {
+                                                if (entry.allLoaded) {
+                                                    this.todayLoaded = true;
+                                                }
+                                            }
+                                        };
+                                        todayEntry.start();
+                                        this.todayEntry = todayEntry;
+                                    } else {
+                                        this.todayEntry = undefined;
+                                    }
+                                }
+                            });
+                        } else {
+                            logger.error("Today's prompt could not be found for member");
+                            this.todayLoaded = true;
+                        }
+
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial) {
+                            this.showUpgradeCard = true;
+                        }
+                    }
+
                     if (isFreshLogin) {
-                        // this.sentPrompts = await SentPromptService.sharedInstance.getPrompts({limit: 10});
-                        // this.sentPromptsLoaded = true;
-                        console.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!);
+                        logger.log("[JournalHome] fresh login. Setting up data source");
+                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
-                                console.log("[JournalHome] didLoad called. Has Data = ", hasData);
+                                logger.log("[JournalHome] didLoad called. Has Data = ", hasData);
 
-                                // this.$set(this.journalEntries, this.dataSource!.journalEntries);
                                 this.journalEntries = this.dataSource!.journalEntries;
-                                // this.$set(this.$data.journalEntries)
                                 this.dataHasLoaded = true;
                             },
-                            onAdded: (entry: JournalEntry, index) => {
-                                //not implemented
-                            },
-                            onRemoved: (entry: JournalEntry, removedIndex) => {
-                                //not implemented
-                            },
                             updateAll: (entries) => {
-                                console.log("got entries in journal home", entries);
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                console.log(`entry updated at index ${index}`, entry);
+                                logger.log(`entry updated at index ${index}`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -166,10 +237,15 @@
                 journalEntries: [],
                 showPageLoading: false,
                 dataHasLoaded: false,
+                todayUnsubscriber: undefined,
+                todayEntry: undefined,
+                todayLoaded: false,
+                showUpgradeCard: false,
             };
         },
         destroyed() {
             this.authUnsubscribe?.();
+            this.todayUnsubscriber?.();
             this.dataSource?.stop();
         },
         methods: {
@@ -193,7 +269,7 @@
                 const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
-                    console.log("load more! Offset = ", distance);
+                    logger.log("load more! Offset = ", distance);
 
                     const willLoad = this.dataSource?.loadNextPage() || false;
                     this.showPageLoading = this.dataSource?.loadingPage || willLoad
@@ -214,6 +290,16 @@
             isSticky(): boolean {
                 return false;
             },
+            upgradeConfirmed(): boolean {
+                const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+                return upgradeQueryParam === 'success';
+            },
+            showOnboardingPrompt(): boolean {
+                return (this.loggedIn && 
+                    this.loginReady && 
+                    this.dataHasLoaded && 
+                    this.journalEntries.length === 0)
+            }
         }
     })
 </script>
@@ -248,6 +334,29 @@
 
     section .heading {
         text-align: center;
+    }
+
+    .upgrade-confirmation {
+        border-radius: 0;
+        display: block;
+        padding: 3.2rem 2.4rem;
+
+        .centered {
+            max-width: 64rem;
+        }
+
+        h3 {
+            font-size: 2.4rem;
+            margin-bottom: .4rem;
+        }
+
+        p {
+            opacity: .9;
+        }
+
+        a {
+            @include fancyLinkLight;
+        }
     }
 
     .section-container {

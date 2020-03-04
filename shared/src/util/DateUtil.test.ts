@@ -1,17 +1,26 @@
 import {
+    daysUntilDate,
     differenceInMinutes,
     formatDate,
     formatDateTime,
     formatDuration,
-    formatDurationAsTime, getCurrentQuarterHour,
+    formatDurationAsTime,
+    getCurrentQuarterHour,
     getDateAtMidnightDenver,
-    getDateObjectForTimezone, getFlamelinkDateStringInDenver,
-    getMailchimpDateString, getQuarterHourFromMinute, getSendTimeUTC,
-    getStreak,
+    getDateObjectForTimezone,
+    getFlamelinkDateStringInDenver,
+    getMailchimpDateString,
+    getQuarterHourFromMinute,
+    getSendTimeUTC,
+    getStreakDays,
+    getStreakMonths,
+    getStreakWeeks,
     isoDateStringToFlamelinkDateString,
     mailchimpTimeZone,
     makeUTCDateIntoMailchimpDate,
     numDaysAgoFromMidnights,
+    plusDays,
+    toTimestampMs,
 } from "@shared/util/DateUtil";
 import {DateTime} from "luxon";
 
@@ -251,11 +260,11 @@ describe("numDaysAgo", () => {
     })
 });
 
-describe("get streak", () => {
+describe("get streak days", () => {
     test("empty list", () => {
         const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
         const dates: Date[] = [];
-        expect(getStreak({dates, start: startTime})).toEqual(0);
+        expect(getStreakDays({dates, start: startTime})).toEqual(0);
     });
 
     test("with today", () => {
@@ -263,7 +272,7 @@ describe("get streak", () => {
         const dates: Date[] = [
             new Date(),
         ];
-        expect(getStreak({dates, start: startTime})).toEqual(1);
+        expect(getStreakDays({dates, start: startTime})).toEqual(1);
     });
 
     test("2 days in streak, 2 dates", () => {
@@ -273,7 +282,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             // DateTime.local().minus({days: 5}).toJSDate(),
         ];
-        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
+        expect(getStreakDays({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
 
@@ -284,7 +293,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             startTime.minus({hours: 36, minutes: 0}).toJSDate(),
         ];
-        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
+        expect(getStreakDays({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
     test("3 days in streak, 3 dates", () => {
@@ -294,7 +303,7 @@ describe("get streak", () => {
             startTime.minus({hours: 13}).toJSDate(),
             startTime.minus({hours: 36, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(3);
+        expect(getStreakDays({dates, start: startTime.toJSDate()})).toEqual(3);
     });
 
     test("broken streak after 2 days, 4 dates", () => {
@@ -305,7 +314,7 @@ describe("get streak", () => {
             startTime.minus({hours: 90}).toJSDate(),
             startTime.minus({hours: 100, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(2);
+        expect(getStreakDays({dates, start: startTime.toJSDate()})).toEqual(2);
     });
 
     test("broken streak after 3 days, 4 dates", () => {
@@ -316,7 +325,7 @@ describe("get streak", () => {
             startTime.minus({hours: 37}).toJSDate(),
             startTime.minus({hours: 100, minutes: 1}).toJSDate(),
         ];
-        expect(getStreak({dates, start: startTime.toJSDate()})).toEqual(3);
+        expect(getStreakDays({dates, start: startTime.toJSDate()})).toEqual(3);
     });
 
     test("streak with timezone, real data for Eastern timezone", () => {
@@ -369,13 +378,100 @@ describe("get streak", () => {
 
         const dates = timestamps.map(ts => new Date(ts));
         const start = new Date(1576520560489);
-        const streak = getStreak({dates, start, timeZone});
+        const streak = getStreakDays({dates, start, timeZone});
         console.log("found streak to be", streak);
 
         expect(streak).toEqual(7);
     })
 
 });
+
+
+describe("get streak weeks", () => {
+    test("empty list", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [];
+        expect(getStreakWeeks({dates, start: startTime})).toEqual(0);
+    });
+
+    test("with today", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [
+            new Date(),
+        ];
+        expect(getStreakWeeks({dates, start: startTime})).toEqual(1);
+    });
+
+    test("reflected on Monday, and the previous Friday", () => {
+        const startTime = DateTime.local(2020, 2, 10).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({days: 3}).toJSDate(),
+        ];
+        expect(getStreakWeeks({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+    test("reflected on Saturday, and the previous week's Monday (12 days apart)", () => {
+        const startTime = DateTime.local(2020, 2, 8).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({days: 12}).toJSDate(),
+        ];
+        expect(getStreakWeeks({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+    test("reflected three times, but missed a week", () => {
+        const startTime = DateTime.local(2020, 2, 8).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({days: 12}).toJSDate(),
+            startTime.minus({days: 28}).toJSDate(),
+        ];
+        expect(getStreakWeeks({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+});
+
+
+describe("get streak months", () => {
+    test("empty list", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [];
+        expect(getStreakMonths({dates, start: startTime})).toEqual(0);
+    });
+
+    test("with today", () => {
+        const startTime = DateTime.local().set({hour: 12, minute: 0, second: 0}).toJSDate();
+        const dates: Date[] = [
+            new Date(),
+        ];
+        expect(getStreakMonths({dates, start: startTime})).toEqual(1);
+    });
+
+    test("reflected on 15th day, and the previous month's 10th day", () => {
+        const startTime = DateTime.local(2020, 2, 15).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({month: 1}).minus({day: 5}).toJSDate(),
+        ];
+        expect(getStreakMonths({dates, start: startTime.toJSDate()})).toEqual(2);
+    });
+
+    test("reflected many times, but missed a month", () => {
+        const startTime = DateTime.local(2020, 2, 8).set({hour: 12, minute: 0, second: 0});
+        const dates: Date[] = [
+            startTime.toJSDate(),
+            startTime.minus({months: 1}).toJSDate(),
+            startTime.minus({months: 2}).toJSDate(),
+            startTime.minus({months: 3}).toJSDate(),
+            startTime.minus({months: 6}).toJSDate(),
+            startTime.minus({months: 7}).toJSDate(),
+        ];
+        expect(getStreakMonths({dates, start: startTime.toJSDate()})).toEqual(4);
+    });
+
+});
+
 
 describe('Get Date at Midnight Denver', function () {
     test("8pm get date midnight denver from GMT at ", () => {
@@ -587,4 +683,32 @@ describe("Flamelink to and from", () => {
         expect(getFlamelinkDateStringInDenver(date)).toEqual(flamelinkIso)
 
     })
-})
+});
+
+describe("toTimestampMs", () => {
+    test("null -> undefined", () => {
+        expect(toTimestampMs(null)).toBeUndefined();
+    });
+
+    test("undefined -> undefined", () => {
+        expect(toTimestampMs(undefined)).toBeUndefined();
+    });
+
+    test("known Date -> number", () => {
+        const date = new Date(111111111111);
+        expect(toTimestampMs(date)).toEqual(111111111111);
+    });
+
+    test("number -> number", () => {
+        expect(toTimestampMs(111111111111)).toEqual(111111111111);
+    });
+});
+
+describe("daysUntil test", () => {
+    test("check days until for various inputs", () => {
+        expect(daysUntilDate(plusDays(7))).toEqual(7);
+        expect(daysUntilDate(plusDays(3))).toEqual(3);
+        expect(daysUntilDate(plusDays(1))).toEqual(1);
+        expect(daysUntilDate(plusDays(0))).toEqual(0);
+    })
+});

@@ -1,6 +1,8 @@
 import {isDate, isNotNull, transformObjectSync} from "@shared/util/ObjectUtil";
 import {BaseModel} from "@shared/FirestoreBaseModels";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("FirestoreUti.ts");
 let TimestampClass: TimestampInterface | any;
 
 export interface TimestampInterface {
@@ -86,7 +88,7 @@ export function convertDateToJSON(input: any): any {
 
     return transformObjectSync(copy, (value) => {
         if (isDate(value)) {
-            return (value as Date).getTime();
+            return value.getTime();
         }
         return value;
     })
@@ -144,7 +146,7 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
         if (model) {
             results.push(model);
         } else {
-            console.warn("Unable to decode model", Type);
+            logger.warn("Unable to decode model", Type);
         }
     });
     return results;
@@ -152,6 +154,7 @@ export function fromQuerySnapshot<T extends BaseModel>(snapshot: QuerySnapshot, 
 
 export function fromFirestoreData<T extends BaseModel>(data: any, Type: { new(): T }): T {
     const transformed = convertTimestampToDate(data);
+
     const model = new Type();
     const t = Object.assign(model, transformed) as T;
     t.prepareFromFirestore(data);
@@ -163,4 +166,32 @@ export function fromJSON<T extends BaseModel>(json: any, Type: { new(): T }): T 
     const model = new Type();
     model.decodeJSON(json);
     return model;
+}
+
+export type WhereFilterOp = '<' | '<=' | '==' | '>=' | '>' | 'array-contains' |
+    'in' | 'array-contains-any';
+
+export type QueryWhere = [string, WhereFilterOp, any];
+export type QueryWhereClauses = QueryWhere[];
+
+export function removeDuplicates<T extends BaseModel>(models: T[]): T[] {
+    const map: { [id: string]: T } = {};
+
+    models.reduce((agg, model) => {
+        const id = model.id;
+        if (!id) {
+            return agg;
+        }
+        if (!agg[id]) {
+            agg[id] = model;
+        }
+        return agg;
+    }, map);
+
+    return Object.values(map);
+}
+
+export function flattenUnique<T extends BaseModel>(nestedModels: T[][]): T[] {
+    const flat = ([] as T[]).concat(...nestedModels);
+    return removeDuplicates(flat);
 }

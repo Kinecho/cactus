@@ -19,6 +19,7 @@ import DocumentReference = firebaseClient.firestore.DocumentReference;
 import DocumentSnapshot = firebaseClient.firestore.DocumentSnapshot;
 import Timestamp = firebaseClient.firestore.Timestamp;
 import FieldValue = firebaseClient.firestore.FieldValue;
+import Logger from "@shared/Logger";
 
 export type Query = firebaseClient.firestore.Query;
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
@@ -27,6 +28,7 @@ export type GetOptions = IGetOptions
 export type QueryObserverOptions<T extends BaseModel> = IQueryObserverOptions<QueryCursor, T>
 export type ListenerUnsubscriber = () => void;
 
+const logger = new Logger("FirestoreService");
 
 export interface PageListenerResult<T extends BaseModel> extends IPageListenerResult<T, DocumentSnapshot> {
 }
@@ -140,7 +142,7 @@ export default class FirestoreService {
 
             return model;
         } catch (e) {
-            console.error("failed to save firestore document", e);
+            logger.error("failed to save firestore document", e);
             if (e.code === "permission-denied") {
 
                 handleDatabaseError({
@@ -166,7 +168,7 @@ export default class FirestoreService {
         }
 
         if (!options.includeDeleted && doc.get("deleted") === true) {
-            console.warn("Document is deleted, and the request options did not include deleted objects");
+            logger.warn("Document is deleted, and the request options did not include deleted objects");
             return;
         }
 
@@ -183,6 +185,7 @@ export default class FirestoreService {
         return this.observeQuery(originalQuery, Type, {
             onData: (results: T[]) => {
                 const [first] = results;
+                logger.log("[observe first] not sure if it's a m ember but here we go ", typeof ((first as any)?.subscription?.trial?.startedAt));
                 options.onData(first);
             }
         });
@@ -195,13 +198,13 @@ export default class FirestoreService {
 
         return collection.doc(id).onSnapshot(snapshot => {
             if (!options.includeDeleted && snapshot.get("deleted") === true) {
-                console.warn("Document is deleted, and the request options did not include deleted objects", options.queryName);
+                logger.warn("Document is deleted, and the request options did not include deleted objects", options.queryName);
                 options.onData(undefined);
                 return;
             }
             options.onData(fromDocumentSnapshot(snapshot, Type));
         }, error => {
-            console.error(`there was an error fetching the document snapshot "${options.queryName || "unknown"}"`, error);
+            logger.error(`there was an error fetching the document snapshot "${options.queryName || "unknown"}"`, error);
             options.onData(undefined, error)
         });
     }
@@ -263,7 +266,7 @@ export default class FirestoreService {
                 if (m) {
                     result.results?.push(m);
                 } else {
-                    console.error(`Failed to decode model for doc.id ${doc.id} and type ${Type}`);
+                    logger.error(`Failed to decode model for doc.id ${doc.id} and type ${Type}`);
                 }
             });
 
@@ -338,7 +341,7 @@ export default class FirestoreService {
 
             return {results, size};
         } catch (error) {
-            console.error("Failed to execute query", error);
+            logger.error("Failed to execute query", error);
             if (error.message && error.message.indexOf("The query requires an index") !== -1) {
                 addModal("index-needed", {title: "An index needs to be created", message: error.message});
                 showModal("index-needed");
@@ -394,7 +397,7 @@ export default class FirestoreService {
             });
             options.onData(allResults);
         }, error => {
-            console.error("Error getting snapshot | queryName=" + options.queryName, error.message);
+            logger.error("Error getting snapshot | queryName=" + options.queryName, error.message);
             if (error.message.includes("The query requires an index")) {
                 addModal("index-needed", {title: "An index needs to be created", message: error.message});
                 showModal("index-needed");
@@ -411,9 +414,9 @@ export default class FirestoreService {
             model.deletedAt = new Date();
             await this.save(model);
         } else if (model && model.deleted) {
-            console.warn("Model is already deleted. Not performing any action");
+            logger.warn("Model is already deleted. Not performing any action");
         } else {
-            console.warn("No object found for given id. Not deleting anything.");
+            logger.warn("No object found for given id. Not deleting anything.");
         }
 
         return model;

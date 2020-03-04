@@ -46,3 +46,13 @@ export function buildPromptURL(prompt?: ReflectionPrompt): string | undefined {
     const path = prompt.contentPath && !prompt.contentPath.startsWith("/") ? `/${prompt.contentPath}` : prompt.contentPath;
     return `${protocol}://${domain}${path}`;
 }
+
+export function isGeneratedEmailAddress(emailAddress: string, config: CactusConfig = getConfig()): boolean {
+    if (emailAddress && config?.app?.fake_email_domain) {
+        const domain = config.app.fake_email_domain.trim().toLowerCase();
+        const email = emailAddress.trim().toLowerCase();
+        return email.includes(domain);
+    }
+
+    return false;
+}

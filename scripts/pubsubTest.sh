@@ -1,0 +1,1 @@
+npm --prefix ../scripts start SyncTrialToMailchimp

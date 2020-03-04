@@ -6,16 +6,19 @@ import {ListenerUnsubscriber} from "@web/services/FirestoreService";
 import ReflectionResponseService from "@web/services/ReflectionResponseService";
 import ReflectionPromptService from "@web/services/ReflectionPromptService";
 import PromptContentService from "@web/services/PromptContentService";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("JournalEntry.ts");
 
 export interface JournalEntryDelegate {
     entryUpdated: (entry: JournalEntry) => void
 }
 
 class JournalEntry {
-    sentPrompt: SentPrompt;
     promptId: string;
 
     delegate?: JournalEntryDelegate = undefined;
+    sentPrompt?: SentPrompt;
 
     responses?: ReflectionResponse[] = undefined;
     responsesLoaded: boolean = false;
@@ -29,9 +32,12 @@ class JournalEntry {
     promptContentLoaded: boolean = false;
     promptContentUnsubscriber?: ListenerUnsubscriber;
 
-    constructor(sentPrompt: SentPrompt) {
-        this.sentPrompt = sentPrompt;
-        this.promptId = sentPrompt.promptId!
+    constructor(promptId: string, sentPrompt?: SentPrompt) {
+        this.promptId = promptId;
+
+        if (sentPrompt) {
+            this.sentPrompt = sentPrompt;
+        }
     }
 
     get allLoaded(): boolean {
@@ -39,7 +45,7 @@ class JournalEntry {
     }
 
     start() {
-        console.log("Starting listeners for journal entry");
+        logger.log("Starting listeners for journal entry");
         const promptId = this.promptId;
         this.responsesUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
             onData: (responses) => {
@@ -67,7 +73,7 @@ class JournalEntry {
     }
 
     stop() {
-        console.log("Stopping entries for prompt id");
+        logger.log("Stopping entries for prompt id");
         this.promptUnsubscriber?.();
         this.promptUnsubscriber = undefined;
 

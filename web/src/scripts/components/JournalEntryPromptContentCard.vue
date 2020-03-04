@@ -1,8 +1,8 @@
+import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
-        <div class="doneStatus" v-show="entry.responsesLoaded && completed">{{promptCopy.DONE}}</div>
-        <p class="date">{{promptDate}}</p>
+        <p class="date">{{dateLabel}}</p>
         <div class="menuParent">
             <dropdown-menu :items="linkItems"/>
         </div>
@@ -73,7 +73,7 @@
     import {PageRoute} from "@shared/PageRoutes"
     import PromptContentVue from "@components/PromptContent.vue"
     import {formatDate} from "@shared/util/DateUtil"
-    import ReflectionResponse, {ResponseMedium} from "@shared/models/ReflectionResponse"
+    import ReflectionResponse, {getResponseMedium, ResponseMedium, ResponseMediumType} from "@shared/models/ReflectionResponse"
     import {getIntegerFromStringBetween, getResponseText, isBlank, preventOrphanedWords} from "@shared/util/StringUtil"
     import DropdownMenu from "@components/DropdownMenu.vue";
     import Modal from "@components/Modal.vue"
@@ -88,7 +88,10 @@
     import {PromptCopy} from "@shared/copy/CopyTypes"
     import PromptContentCard from "@components/PromptContentCard.vue"
     import JournalEntry from '@web/datasource/models/JournalEntry'
+    import Logger from "@shared/Logger";
+    import {getAppType} from "@web/DeviceUtil";
 
+    const logger = new Logger("JournalEntryPromptContentCard.vue");
     const copy = CopyService.getSharedInstance().copy;
     const NUM_RANDO_BACKGROUND_IMAGES = 5;
     export default Vue.extend({
@@ -107,7 +110,7 @@
             entry: {
                 type: Object as () => JournalEntry,
                 required: true,
-            },
+            }
         },
         data(): {
             canReflectInline: boolean,
@@ -129,7 +132,7 @@
                 showContent: false,
                 editedText: "",
                 editedResponses: [],
-                responseMedium: ResponseMedium.JOURNAL_WEB,
+                responseMedium: getResponseMedium({app: getAppType(), type: ResponseMediumType.JOURNAL}),
                 showSharing: false,
                 promptCopy: copy.prompts,
                 initialIndex: undefined,
@@ -157,12 +160,12 @@
 
             },
             allLoaded(): boolean {
-                return !this.loading && this.entry.responsesLoaded;
+                return !this.loading && this.entry.allLoaded;
             },
             backgroundClasses(): { [name: string]: string | boolean } {
                 const [first]: Content[] = (this.entry.promptContent && this.entry.promptContent.content) || [];
                 const bgImage = first ? first.backgroundImage : undefined;
-                const id = this.entry.sentPrompt.promptId || "";
+                const id = this.entry.promptId || "";
 
                 const showRandomBackground = !bgImage;
 
@@ -205,8 +208,22 @@
             promptContentPath(): string {
                 return `${PageRoute.PROMPTS_ROOT}/${this.entryId}`
             },
+            isTodaysPrompt(): boolean {
+                return (this.promptDate == formatDate(new Date(), copy.settings.dates.longFormat))
+            },
             promptDate(): string | undefined {
-                return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat)
+                if (this.entry.sentPrompt?.firstSentAt) {
+                    return formatDate(this.entry.sentPrompt.firstSentAt, copy.settings.dates.longFormat);
+                } else {
+                    return formatDate(new Date(), copy.settings.dates.longFormat);
+                }
+            },
+            dateLabel(): string | undefined {
+                if (this.isTodaysPrompt) {
+                    return copy.prompts.TODAY;
+                } else {
+                    return this.promptDate;
+                }
             },
             responseText(): string | undefined {
                 return getResponseText(this.entry.responses);
@@ -257,10 +274,10 @@
         watch: {
             showContent(show) {
                 if (show && this.entry.promptContent && this.entry.promptContent.entryId) {
-                    console.log("adding prompt content entry id query param");
+                    logger.log("adding prompt content entry id query param");
                     updateQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID, this.entry.promptContent.entryId);
                 } else {
-                    console.log("removing prompt content entry id");
+                    logger.log("removing prompt content entry id");
                     removeQueryParam(QueryParam.PROMPT_CONTENT_ENTRY_ID);
                     removeQueryParam(QueryParam.CONTENT_INDEX);
                 }

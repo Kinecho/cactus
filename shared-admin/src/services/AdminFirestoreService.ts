@@ -5,21 +5,31 @@ import {IGetOptions, IQueryOptions, QueryResult} from "@shared/types/FirestoreTy
 import * as Sentry from "@sentry/node"
 import AdminSlackService from "@admin/services/AdminSlackService";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import DocumentReference = firebaseAdmin.firestore.DocumentReference;
-import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
-import Timestamp = firebaseAdmin.firestore.Timestamp;
+import Logger from "@shared/Logger";
+import {CactusConfig} from "@shared/CactusConfig";
+export import DocumentReference = firebaseAdmin.firestore.DocumentReference;
+export import DocumentSnapshot = firebaseAdmin.firestore.DocumentSnapshot;
+export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
+export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
 
-export type QueryCursor = string | number | DocumentSnapshot | Timestamp;
+export type QueryCursor = string | number | DocumentSnapshot | Timestamp | any;
+
+const logger = new Logger("AdminFirestoreService");
 
 export interface QueryOptions extends IQueryOptions<QueryCursor> {
-    transaction?: Transaction
+    transaction?: Transaction,
 }
 
 export interface GetOptions extends IGetOptions {
     transaction?: Transaction
     throwOnError?: boolean,
+}
+
+export interface GetBatchOptions<T extends BaseModel> extends GetOptions {
+    batchSize?: number,
+    onData: (models: T[], batchNumber: number) => Promise<void>
 }
 
 export interface DeleteOptions {
@@ -42,13 +52,15 @@ export const DefaultGetOptions: GetOptions = {
 
 export interface SaveOptions {
     setUpdatedAt?: boolean,
-    transaction?: Transaction
+    transaction?: Transaction,
+    batch?: Batch,
 }
 
 
 export const DEFAULT_SAVE_OPTIONS: SaveOptions = {
     setUpdatedAt: true,
-    transaction: undefined
+    transaction: undefined,
+    batch: undefined,
 };
 
 export function getDefaultOptions(): SaveOptions {
@@ -60,6 +72,7 @@ export const DEFAULT_BATCH_SIZE = 500;
 export default class AdminFirestoreService {
     admin: firebaseAdmin.app.App;
     firestore: FirebaseFirestore.Firestore;
+    config: CactusConfig;
     static Timestamp = Timestamp;
 
     protected static sharedInstance: AdminFirestoreService;
@@ -71,17 +84,18 @@ export default class AdminFirestoreService {
         return AdminFirestoreService.sharedInstance;
     }
 
-    static initialize(app: firebaseAdmin.app.App) {
-        console.log("Initializing firestore service");
-        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app);
+    static initialize(app: firebaseAdmin.app.App, config: CactusConfig) {
+        logger.log("Initializing firestore service");
+        AdminFirestoreService.sharedInstance = new AdminFirestoreService(app, config);
     }
 
-    constructor(admin: firebaseAdmin.app.App) {
+    constructor(admin: firebaseAdmin.app.App, config: CactusConfig) {
         this.admin = admin;
         this.firestore = admin.firestore();
+        this.config = config;
     }
 
-    getCollectionRef(collectionName: Collection): CollectionReference {
+    getCollectionRef(collectionName: Collection) {
         return this.firestore.collection(collectionName);
     }
 
@@ -139,6 +153,10 @@ export default class AdminFirestoreService {
         }, options)
     }
 
+    getBatch(): Batch {
+        return this.firestore.batch();
+    }
+
     async save<T extends BaseModel>(model: T, opts: SaveOptions = DEFAULT_SAVE_OPTIONS): Promise<T> {
         try {
             const options = {...DEFAULT_SAVE_OPTIONS, ...opts};
@@ -158,16 +176,18 @@ export default class AdminFirestoreService {
             // const doc = this.getDocumentRefFromModel(model);
 
             const data = await model.toFirestoreData();
-            // console.log("Data to save:", JSON.stringify(data));
+            // logger.log("Data to save:", JSON.stringify(data));
             if (options.transaction) {
                 await options.transaction.set(doc, data, {merge: true})
+            } else if (options.batch){
+                await options.batch.set(doc, data, {merge: true})
             } else {
                 await doc.set(data, {merge: true});
             }
 
             return model;
         } catch (e) {
-            console.error("failed to save firestore document", e);
+            logger.error(`[${this.config.app.serverName || "unknown_server"}] failed to save firestore document`, e);
             throw e;
         }
     }
@@ -190,7 +210,7 @@ export default class AdminFirestoreService {
         }
 
         if (!options.includeDeleted && doc.get("deleted") === true) {
-            console.warn("Document is deleted, and the request options did not include deleted objects");
+            logger.warn("Document is deleted, and the request options did not include deleted objects");
             return;
         }
 
@@ -243,9 +263,12 @@ export default class AdminFirestoreService {
 
             return queryResult;
         } catch (e) {
-            console.error(`Failed to execute query ${options.queryName || ""}`.trim(), e);
+            // const serverName = config.serv
+            const errorMessage = `[${this.config.app.serverName}] Failed to execute query ${options.queryName || ""}`.trim()
+                + (options.transaction ? " while using a transaction" : "").trim();
+            logger.error(errorMessage, e);
             Sentry.captureException(e);
-            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`Failed to execute query. Error\n\`\`\`${e}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendEngineeringMessage(`${errorMessage}\n\`\`\`${e}\`\`\``);
             return {size: 0, results: [], error: e};
         }
 
@@ -255,7 +278,7 @@ export default class AdminFirestoreService {
         query: FirebaseFirestore.Query,
         type: { new(): T }
         batchSize?: number,
-        onData: (sentPrompts: T[], batchNumber: number) => Promise<void>,
+        onData: (models: T[], batchNumber: number) => Promise<void>,
         orderBy?: string,
         sortDirection?: QuerySortDirection,
     }) {
@@ -268,7 +291,7 @@ export default class AdminFirestoreService {
                 orderBy: options.orderBy || BaseModelField.createdAt,
             }
         });
-        console.log(`Fetched ${results.size} sentPrompts in batch ${batchNumber}`);
+        logger.log(`Fetched ${results.size} items in batch ${batchNumber}`);
         await options.onData(results.results, 0);
         while (results.results.length > 0 && results.lastCursor) {
             batchNumber++;
@@ -280,7 +303,7 @@ export default class AdminFirestoreService {
                     sortDirection: options.sortDirection || QuerySortDirection.asc,
                 }
             });
-            console.log(`Fetched ${results.size} results in batch ${batchNumber}`);
+            logger.log(`Fetched ${results.size} results in batch ${batchNumber}`);
             await options.onData(results.results, batchNumber);
         }
     }
@@ -296,9 +319,9 @@ export default class AdminFirestoreService {
             model.deletedAt = new Date();
             await this.save(model);
         } else if (model && model.deleted) {
-            console.warn("Model is already deleted. Not performing any action");
+            logger.warn("Model is already deleted. Not performing any action");
         } else {
-            console.warn("No object found for given id. Not deleting anything.");
+            logger.warn("No object found for given id. Not deleting anything.");
         }
 
         return model;
@@ -317,7 +340,7 @@ export default class AdminFirestoreService {
             await doc.delete();
         }
 
-        console.log(`Deleted ${model.collection}.${model.id} from the database`);
+        logger.log(`Deleted ${model.collection}.${model.id} from the database`);
         return model
     }
 
@@ -339,7 +362,7 @@ export default class AdminFirestoreService {
         });
 
         const results = await Promise.all(tasks);
-        console.log(`Permanently Deleted ${results.length} documents`);
+        logger.log(`Permanently Deleted ${results.length} documents`);
         return results.length
 
     }
@@ -347,7 +370,7 @@ export default class AdminFirestoreService {
     async deleteForQuery<T extends BaseModel>(query: FirebaseFirestore.Query, Type: { new(): T }): Promise<(T | undefined)[]> {
         const results = await this.executeQuery(query, Type);
         const deletedModels = await Promise.all(results.results.map(this.deleteModel));
-        console.log(`deleted ${deletedModels.length} models`);
+        logger.log(`deleted ${deletedModels.length} models`);
         return deletedModels;
     }
 }

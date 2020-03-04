@@ -21,32 +21,40 @@ import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {buildPromptURL} from "@admin/util/StringUtil";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt, {PromptSendMedium} from "@shared/models/SentPrompt";
-import {getWordCount} from "@shared/util/StringUtil";
+import Logger from "@shared/Logger";
 
+const logger = new Logger("ReflectionResponseTriggers");
 
 export const updateReflectionStatsTrigger = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("updating member stats");
+        logger.log("updating member stats");
         const snapshot = change.after || change.before;
         if (!snapshot) {
-            console.warn("No snapshot was found in the change event");
+            logger.warn("No snapshot was found in the change event");
             return
         }
 
         const data = snapshot.data();
         if (!data) {
-            console.error("No data could be retrieved from the snapshot", snapshot);
+            logger.error("No data could be retrieved from the snapshot", snapshot);
             return;
         }
         const memberId = data[ReflectionResponse.Field.cactusMemberId];
         if (!memberId) {
-            console.warn("No member ID was found in the document data", data);
+            logger.warn("No member ID was found in the document data", data);
             return;
         }
+        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+        if (!member) {
+            logger.warn("Member details were not able to be loaded", data);
+            return;
+        }
+        const timeZone = member.timeZone || undefined;
 
         const reflectionStats = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
             memberId,
+            timeZone
         });
         if (reflectionStats) {
             await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
@@ -56,26 +64,26 @@ export const updateReflectionStatsTrigger = functions.firestore
 export const updateSentPromptOnReflectionWrite = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        console.log("starting updateSentPromptOnReflectionWrite");
+        logger.log("starting updateSentPromptOnReflectionWrite");
         try {
             const snapshot = change.after;
             if (!snapshot) {
-                console.warn("No snapshot was found in the change event");
+                logger.warn("No snapshot was found in the change event");
                 return
             }
 
             const reflectionResponse = fromDocumentSnapshot(snapshot, ReflectionResponse);
             if (!reflectionResponse) {
-                console.error(`Unable to de-serialize the reflection response for snapshot.id = ${snapshot.id}`);
+                logger.error(`Unable to de-serialize the reflection response for snapshot.id = ${snapshot.id}`);
                 return;
             }
 
-            console.log(`Processing reflection response ${reflectionResponse.id}`);
+            logger.log(`Processing reflection response ${reflectionResponse.id}`);
             const promptId = reflectionResponse.promptId;
             const memberId = reflectionResponse.cactusMemberId;
 
             if (!promptId || !memberId) {
-                console.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
+                logger.error("Failed to get a member id and/or a prompt ID off of ReflectionPrompt", snapshot.id);
                 return;
             }
 
@@ -84,12 +92,12 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
                 promptId: promptId
             });
             if (!sentPrompt) {
-                console.info(`No sent prompt found for memberId = ${memberId} and promptId = ${promptId}. ReflectionResponseId = ${reflectionResponse.id}`);
+                logger.info(`No sent prompt found for memberId = ${memberId} and promptId = ${promptId}. ReflectionResponseId = ${reflectionResponse.id}`);
                 return;
             }
 
             if (sentPrompt.completed && !reflectionResponse.deleted) {
-                console.info("Sent prompt already completed");
+                logger.info("Sent prompt already completed");
                 return;
             }
 
@@ -117,21 +125,21 @@ export const updateSentPromptOnReflectionWrite = functions.firestore
             sentPrompt.completedAt = isComplete ? new Date() : undefined;
             const saved = await AdminSentPromptService.getSharedInstance().save(sentPrompt);
 
-            console.log(`Successfully saved sentPrompt.id ${saved.id} for member ${memberId} and promptId ${promptId}`);
+            logger.log(`Successfully saved sentPrompt.id ${saved.id} for member ${memberId} and promptId ${promptId}`);
             return;
         } catch (error) {
-            console.error("Failed to process the ReflectionResponse.");
+            logger.error("Failed to process the ReflectionResponse.");
         }
     });
 
 /**
  * This function will reset the reflection reminder flag in Mailchimp and notify slack.
- * @type {CloudFunction<DocumentSnapshot>}
+ * @type {DocumentSnapshot}
  */
 export const onReflectionResponseCreated = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
     .onCreate(async (snapshot: functions.firestore.DocumentSnapshot, context: functions.EventContext) => {
-            console.log("ReflectionResponse created");
+            logger.log("ReflectionResponse created");
             const slackService = AdminSlackService.getSharedInstance();
             const reflectionResponse = fromDocumentSnapshot(snapshot, ReflectionResponse);
 
@@ -165,10 +173,10 @@ export const onReflectionResponseCreated = functions.firestore
             const fields: SlackAttachmentField[] = [];
 
             if (member && member.mailchimpListMember) {
-                console.log(`Resetting the reminder for ${member.mailchimpListMember.email_address}`);
+                logger.log(`Resetting the reminder for ${member.mailchimpListMember.email_address}`);
                 const resetUserResponse = await AdminReflectionResponseService.resetUserReminder(member.mailchimpListMember.email_address);
                 if (!resetUserResponse.success) {
-                    console.log("reset user reminder failed", resetUserResponse);
+                    logger.log("reset user reminder failed", resetUserResponse);
                     attachments.push({
                         text: `Failed to reset reminder\n\`\`\`${JSON.stringify(resetUserResponse)}`,
                         color: "danger"
@@ -176,14 +184,14 @@ export const onReflectionResponseCreated = functions.firestore
                     await slackService.sendActivityNotification(`:warning: Failed to reset user reminder for ${member.mailchimpListMember.email_address}\n\`\`\`${JSON.stringify(resetUserResponse)}\`\`\``)
                 }
             } else {
-                console.log("not resetting user reminder for email " + memberEmail)
+                logger.log("not resetting user reminder for email " + memberEmail)
             }
 
 
             if (member && memberEmail && isJournal(reflectionResponse.responseMedium)) {
                 const setLastJournalDateResult = await AdminReflectionResponseService.setLastJournalDate(memberEmail);
                 if (setLastJournalDateResult.error) {
-                    console.error("Failed to set the last journal date", setLastJournalDateResult.error);
+                    logger.error("Failed to set the last journal date", setLastJournalDateResult.error);
                 }
             }
 
@@ -194,22 +202,26 @@ export const onReflectionResponseCreated = functions.firestore
                 reflectionResponse
             });
             if (sentPrompt && sentPromptCreated) {
-                console.log("Created sent prompt", sentPrompt.toJSON());
+                logger.log("Created sent prompt", sentPrompt.toJSON());
                 fields.push({
                     title: "SentPrompt created",
                     value: `${sentPrompt.id}`
                 })
             }
 
-            const reflectionText = reflectionResponse.content.text || "";
-            const wordCount = getWordCount(reflectionText);
-            const didJournal = (wordCount > 0 ? 'Yes' : 'No');
+            if (member?.subscription?.tier) {
+                const trialDaysLeft = member?.daysLeftInTrial;
+                let daysLeftText = '';
 
-            fields.push({
-                title: "Reflection Info",
-                value: `Journaled: ${didJournal}`
-            });
+                if (member?.isInTrial && trialDaysLeft && trialDaysLeft > 0) {
+                    daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
+                }
 
+                fields.push({
+                    title: "Subscription",
+                    value: `${member.tierDisplayName}${daysLeftText}`
+                })
+            }
 
             if (prompt && prompt.question) {
                 let contentLink = prompt.question;
@@ -284,7 +296,7 @@ async function getSentPrompt(options: { member?: CactusMember, prompt?: Reflecti
         })
     } else if (reflectionResponse && !reflectionResponse.anonymous) {
         const errorMessage = `Non-Anonymous reflection response Unable to search for sent prompt because no member and/or promptId was found\n Member: ${member && member.email} | Prompt ${prompt && prompt.id}`
-        console.warn(errorMessage);
+        logger.warn(errorMessage);
         await AdminSlackService.getSharedInstance().sendAlertMessage(errorMessage)
     }
     return;

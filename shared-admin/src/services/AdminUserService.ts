@@ -16,6 +16,9 @@ import AdminMemberProfileService from "@admin/services/AdminMemberProfileService
 import AdminSocialConnectionService from "@admin/services/AdminSocialConnectionService";
 import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConnectionRequestService";
 import MailchimpService from "@admin/services/MailchimpService";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("AdminUserService");
 
 export interface SubscriberSignupResult {
     success: boolean,
@@ -104,7 +107,7 @@ export default class AdminUserService {
             });
             return {success: true, signinUrl: signinUrl, email};
         } catch (e) {
-            console.error("Failed to generate signin url", e);
+            logger.error("Failed to generate signin url", e);
             return {success: false, error: e, email};
         }
     }
@@ -196,10 +199,10 @@ export default class AdminUserService {
             const {userId, referredByEmail} = args;
             await this.getCollectionRef().doc(userId).set({[User.Field.referredByEmail]: referredByEmail}, {
                 merge: true,
-                mergeFields: [User.Field.referredByEmail]
+                // mergeFields: [User.Field.referredByEmail]
             });
         } catch (e) {
-            console.error("Failed to update referred by email");
+            logger.error("Failed to update referred by email", e);
         }
 
     }
@@ -211,8 +214,8 @@ export default class AdminUserService {
         const errors: string[] = [];
         const results: DeleteUserResult = {email, documentsDeleted: {}, success: false};
         const [members, users, firebaseUser] = await Promise.all([
-            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email),
-            await AdminUserService.getSharedInstance().getAllMatchingEmail(email),
+            await AdminCactusMemberService.getSharedInstance().geAllMemberMatchingEmail(email, {includeDeleted: true}),
+            await AdminUserService.getSharedInstance().getAllMatchingEmail(email, {includeDeleted: true}),
             await new Promise<admin.auth.UserRecord | undefined>(async resolve => {
                 if (userRecord) {
                     resolve(userRecord);
@@ -220,35 +223,35 @@ export default class AdminUserService {
                 }
                 try {
                     const u = await (adminApp.auth().getUserByEmail(email));
-                    console.log("got user from admin", u?.toJSON());
+                    logger.log("got user from admin", u?.toJSON());
                     resolve(u);
                     return;
                 } catch (e) {
-                    console.error("Failed to get user from admin");
+                    logger.error("Failed to get user from admin");
                     resolve(undefined);
                     return;
                 }
             })
         ]);
-        console.log("Firebase user.uid", firebaseUser?.uid);
+        logger.log("Firebase user.uid", firebaseUser?.uid);
         results.members = members;
         results.userRecord = firebaseUser;
         results.users = users;
         const memberIds = members.map(m => m.id).filter(id => !!id) as string[];
-        const endTime = new Date().getTime();
-        console.log(`Delete user task took ${endTime - startTime}ms`);
-
+        const userIds = users.map(u => u.id).filter(id => !!id) as string[];
+        logger.log("Found member ids", memberIds.join(", "));
+        logger.log("Found userIds", userIds.join(", "));
         const generator = (collection: Collection, job: Promise<number>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
-                    console.log("starting generator for collection", collection);
+                    logger.log("starting generator for collection", collection);
                     const count = (await job);
                     resolve({
                         numDocuments: count,
                         collectionName: collection
                     })
                 } catch (error) {
-                    console.error(`"error in generator for collection ${collection}`, error);
+                    logger.error(`"error in generator for collection ${collection}`, error);
                     resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]})
                 }
             })
@@ -257,14 +260,14 @@ export default class AdminUserService {
         const singleGenerator = (collection: Collection, job: Promise<BaseModel | undefined>): Promise<DeleteTaskResult> => {
             return new Promise<DeleteTaskResult>(async resolve => {
                 try {
-                    console.log("Starting job for collection", collection);
+                    logger.log("Starting job for collection", collection);
                     const model = (await job);
                     resolve({
                         numDocuments: model ? 1 : 0,
                         collectionName: collection
                     })
                 } catch (error) {
-                    console.error(`Failed to delete ${collection}`, error);
+                    logger.error(`Failed to delete ${collection}`, error);
                     resolve({numDocuments: 0, collectionName: collection, errors: [`${error}`]});
                 }
             })
@@ -288,7 +291,7 @@ export default class AdminUserService {
 
         const taskResults = await Promise.all(tasks);
 
-        console.log("AdminUserService.deleteAllData: task results", taskResults);
+        logger.log("AdminUserService.deleteAllData: task results", taskResults);
         taskResults.reduce((agg, r) => {
             agg.errors?.concat(r.errors || []);
             agg.documentsDeleted[r.collectionName] = r.numDocuments;
@@ -309,7 +312,7 @@ export default class AdminUserService {
         } catch (error) {
 
             if (error.code !== "auth/user-not-found") {
-                console.error("Can't delete user record from auth", error);
+                logger.error("Can't delete user record from auth", error);
                 errors.push(`${error.code} Failed to delete user record ${error}`.trim());
             }
             results.userRecordDeleted = false;
@@ -317,7 +320,7 @@ export default class AdminUserService {
 
         try {
             const mailchimpResponse = await MailchimpService.getSharedInstance().deleteMemberPermanently(email);
-            console.log("mailchimp response", mailchimpResponse);
+            logger.log("mailchimp response", mailchimpResponse);
             if (mailchimpResponse.error) {
                 errors.push(mailchimpResponse.error);
                 results.mailchimpDeleted = false;
@@ -366,15 +369,17 @@ export default class AdminUserService {
             attachments.push({
                 title: "Errors",
                 color: AttachmentColor.error,
-                text: errors.join("\n"),
+                text: "```" + errors.map(e => JSON.stringify(e, null, 2)).join("\n") + "```",
             })
         }
 
-        await AdminSlackService.getSharedInstance().sendEngineeringMessage({
+        await AdminSlackService.getSharedInstance().sendDeletionMessage({
             text: "",
             attachments,
         });
 
+        const endTime = new Date().getTime();
+        logger.log(`Delete user task took ${endTime - startTime}ms`);
         return results;
     }
 }
