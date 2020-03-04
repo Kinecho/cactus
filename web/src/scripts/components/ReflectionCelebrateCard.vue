@@ -83,18 +83,18 @@
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                        <button class="lowerBtn authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
-                        <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
                         </button>
-                        <button class="authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
+                        <button class="lowerBtn authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
                                 v-if="authLoaded && loggedIn && !isModal"
                                 @click="goToHome">
                             {{promptCopy.GO_HOME}}
                         </button>
-                        <button class="primary authBtn"
+                        <button class="lowerBtn primary authBtn"
                                 v-if="authLoaded && loggedIn && isModal"
                                 @click="close">
                             {{promptCopy.CLOSE}}
@@ -658,6 +658,11 @@
         @include r(374) {
             margin-bottom: 2.4rem;
         }
+        @include r(600) {
+            .insightRevealed & {
+                margin-bottom: 0;
+            }
+        }
     }
 
     .cactusContainer {
@@ -689,19 +694,12 @@
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 1.6rem;
-
-        @include r(374) {
-            margin-bottom: 2.4rem;
-        }
+        margin-bottom: 4.8rem;
     }
 
     .metric {
         color: $lightGreen;
         padding: 0 .8rem;
-
-        @include r(600) {
-        }
 
         p {
             font-size: 1.6rem;
@@ -788,62 +786,28 @@
                 }
             }
         }
-
-        /* Lower Buttons */
-
-        .authBtn {
-            box-shadow: none;
-            bottom: 3.2rem;
-            flex-grow: 0;
-            left: 3.2rem;
-            margin: 3.2rem auto 0;
-            right: 3.2rem;
-            width: calc(100% - 6.4rem);
-
-            @include r(600) {
-                max-width: none;
-                position: static;
-                width: auto;
-            }
-        }
-
-        .authBtn {
-            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
-        }
-
-        .secondary,
-        .primary {
-            height: 4.8rem;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        .secondary {
-            margin-right: .8rem;
-        }
     }
 
     .btnContainer {
         display: flex;
-        flex-direction: column;
+        flex-flow: column wrap;
+        justify-content: center;
 
-        .authBtn {
-            width: 100%;
+        button.lowerBtn {
+            box-shadow: none;
+            flex-grow: 1;
+            white-space: nowrap;
 
-            + .authBtn {
-                margin-top: 1.6rem;
+            &.secondary:hover {
+                background-color: $white;
             }
         }
 
         @include r(600) {
-            flex-direction: row;
+            flex-flow: row nowrap;
 
-            .authBtn {
-                width: auto;
-
-                + .authBtn {
-                    margin-top: 3.2rem;
-                }
+            .lowerBtn {
+                height: 4.8rem;
             }
         }
     }
@@ -860,6 +824,10 @@
         button {
             flex-grow: 1;
             margin: 0 .8rem;
+
+            &.secondary:hover {
+                background-color: $white;
+            }
         }
 
         .backBtn {
