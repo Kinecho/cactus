@@ -569,7 +569,6 @@
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
         margin: 0 auto 8rem;
-        max-width: 48rem;
         min-height: 20rem; // to prevent bouncing around a bit
         width: 93%;
 
@@ -580,8 +579,12 @@
 
         &.revealed {
             background: $white none;
+            border-radius: 0;
+            box-shadow: none;
             color: $darkestGreen;
-            margin-top: 4rem;
+            margin: 0;
+            padding: 2.4rem 0;
+            width: 100%;
 
             .insightContent {
                 opacity: 1;
@@ -613,10 +616,6 @@
             padding: 2.4rem 2.4rem 0;
         }
 
-        p {
-            padding: 0 2.4rem 2.4rem;
-        }
-
         button.secondary {
             margin: 0;
             width: 100%;
@@ -628,6 +627,14 @@
 
             &:hover {
                 background-color: $white;
+            }
+        }
+
+        .insightIntro {
+            padding: 0 2.4rem 2.4rem;
+
+            p {
+                margin-bottom: 2.4rem;
             }
         }
 
@@ -643,10 +650,6 @@
     .lowerContainer {
         background: $darkerGreen url(assets/images/grainy.png);
         padding: 6.4rem 4rem 4rem;
-
-        .insightRevealed & {
-            padding-top: 4.8rem;
-        }
     }
 
     .cactusGarden {
