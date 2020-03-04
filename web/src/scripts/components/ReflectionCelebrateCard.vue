@@ -1,4 +1,3 @@
-import {LocalStorageKey} from '@web/services/StorageService'
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
@@ -11,7 +10,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         <p>Get insights about your daily reflections so that you learn more about yourself.</p>
                         <button class="secondary" @click="revealInsight">Reveal Insight</button>
                     </div>
-                    <div class="insightContent"></div>
+                    <div class="insightContent">
+                        <p>Here's a visualization of words that have come up recently in your reflections.</p>
+                    </div>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
