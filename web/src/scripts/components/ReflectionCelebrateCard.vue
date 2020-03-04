@@ -452,6 +452,8 @@
                             .attr("text-anchor", "middle")
                         // @ts-ignore
                             .text(function(d){ return d.data["word"]; })
+                        // @ts-ignore
+                            .style("font-size", function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px"; })
                             .style("fill", "#FFF");
                     }
                 this.insightRevealed = true;
