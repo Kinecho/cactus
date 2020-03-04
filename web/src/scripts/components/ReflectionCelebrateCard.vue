@@ -1,17 +1,13 @@
 <template>
-    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}, {insightRevealed: insightRevealed}]">
+    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
-                <h2 class="successText" v-if="!insightRevealed">{{celebrateText}}</h2>
-                <div :class="['insightContainer', {revealed: insightRevealed}]" v-if="hasInsights">
+                <div class="insightContainer revealed" v-if="hasInsights">
                     <h4>Daily Insight</h4>
-                    <div class="insightIntro">
-                        <p>Get insights about your daily reflections so that you learn more about yourself.</p>
-                        <button class="secondary" @click="revealInsight">Reveal Insight</button>
-                    </div>
                     <div class="insightContent">
                         <p>Here's a visualization of words that have come up recently in your reflections.</p>
+                        <InsightWordChart :words="wordData" />
                     </div>
                 </div>
                 <div class="lowerContainer">
@@ -153,14 +149,8 @@
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
+    import InsightWordChart from "@components/InsightWordChart.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
-    import {
-        pack as d3Pack,
-        scaleLinear as d3ScaleLinear,
-        format as d3Format,
-        hierarchy as d3Hierarchy,
-        select as d3Select
-    } from "d3";
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics"
 
@@ -175,7 +165,8 @@
             PromptContentCard,
             ElementDescriptionModal,
             InputNameModal,
-            UpgradeBanner: ReflectionCelebrateUpgradeBanner
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner,
+            InsightWordChart
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -225,7 +216,6 @@
             authUnsubscriber: ListenerUnsubscriber | undefined,
             member: CactusMember | undefined,
             flipped: boolean,
-            insightRevealed: boolean,
             durationLabel: string,
             promptCopy: PromptCopy,
             elementCopy: ElementCopy,
@@ -249,7 +239,6 @@
                 authUnsubscriber: undefined,
                 member: undefined,
                 flipped: false,
-                insightRevealed: false,
                 durationLabel: "",
                 promptCopy: copy.prompts,
                 elementCopy: copy.elements,
@@ -304,7 +293,10 @@
             },
             hasInsights(): boolean {
                 return this.member?.wordCloud ? true : false;
-            }
+            },
+            wordData(): InsightWord[] | undefined {
+                return this.member?.wordCloud;
+            },
         },
         methods: {
             async calculateStats() {
@@ -376,90 +368,6 @@
                 this.cactusModalVisible = true;
                 this.cactusModalElement = CactusElement[element];
                 this.disableNavigation()
-            },
-            revealInsight() {
-                var diameter = 375, //max size of the bubbles
-                    format   = d3Format(",d"),
-                    color    = d3ScaleLinear().domain([0,2])
-                               //@ts-ignore
-                               .range(["#F2EBE9", "#47445E", "#364FAC", "#9C1AA3"])
-                    //more color options: https://github.com/d3/d3-scale-chromatic
-
-                var bubble = d3Pack()
-                    .size([diameter, diameter])
-                    .padding(12);
-
-                var svg = d3Select(".insightContent")
-                    .append("svg")
-                    .attr("width", "100%")
-                    .attr("height", "100%")
-                    .attr("preserveAspectRatio", "xMinYMid")
-                    .attr("viewBox", "0 0 375 375")
-
-                    if (this.member?.wordCloud) {
-                        const extras: InsightWord[] = [
-                            {word: "", frequency: .5},
-                            {word: "", frequency: .5},
-                            {word: "", frequency: .3},
-                            {word: "", frequency: .3},
-                            {word: "", frequency: .3},
-                            {word: "", frequency: .1},
-                            {word: "", frequency: .1},
-                            {word: "", frequency: .1},
-                            {word: "", frequency: .1},
-                            {word: "", frequency: .1},
-                        ];
-                        var dataset = this.member.wordCloud.slice(0,7).concat(extras);
-
-                        //convert numerical values from strings to numbers
-                        // @ts-ignore
-                        var data = dataset.map(function(d){ d.value = +d["frequency"]; return d; });
-
-                        //Sets up a hierarchy of data object
-                        var root = d3Hierarchy({children:data})
-                        // @ts-ignore
-                          .sum(function(d) { return d.value; })
-                        // @ts-ignore
-                          .sort(function(a, b) { return b.value - a.value; });
-
-                        //Once we have hierarchal data, run bubble generator
-                        bubble(root);
-
-                        //setup the chart
-                        var bubbles = svg.selectAll(".bubble")
-                        // @ts-ignore
-                            .data(root.children)
-                            .enter();
-
-                        //create the bubbles
-                        bubbles.append("circle")
-                            .attr("class", "circle")
-                        // @ts-ignore
-                            .attr("r", function(d){ return d.r; })
-                        // @ts-ignore
-                            .attr("cx", function(d){ return d.x; })
-                        // @ts-ignore
-                            .attr("cy", function(d){ return d.y; })
-                        // @ts-ignore
-                            .style("fill", function(d) { return color(d.value); });
-
-                        //format the text for each bubble
-                        bubbles.append("text")
-                        // @ts-ignore
-                            .attr("x", function(d){ return d.x; })
-                        // @ts-ignore
-                            .attr("y", function(d){ return d.y + 5; })
-                            .attr("text-anchor", "middle")
-                        // @ts-ignore
-                            .text(function(d){ return d.data["word"]; })
-                        // @ts-ignore
-                            .style("font-size", function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px"; })
-                            .style("fill", "#FFF")
-                            .append("title")
-                            // @ts-ignore
-                            .text(function(d, i) { return d.data["word"]; });
-                    }
-                this.insightRevealed = true;
             },
             tradeNote() {
                 this.trackShareTap();
