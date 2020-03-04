@@ -386,7 +386,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
                 var bubble = d3Pack()
                     .size([diameter, diameter])
-                    .padding(1.5);
+                    .padding(16);
 
                 var svg = d3Select(".insightContent")
                     .append("svg")
@@ -394,15 +394,19 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     .attr("height", "100%")
                     .attr("preserveAspectRatio", "xMinYMid")
                     .attr("viewBox", "0 0 375 375")
-                    .attr("class", "bubble");
 
                     if (this.member?.wordCloud) {
                         const extras: InsightWord[] = [
-                            {word: "", frequency: Math.random()*.5},
-                            {word: "", frequency: Math.random()*.5},
-                            {word: "", frequency: Math.random()},
-                            {word: "", frequency: Math.random()},
-                            {word: "", frequency: Math.random()},
+                            {word: "", frequency: .5},
+                            {word: "", frequency: .5},
+                            {word: "", frequency: .3},
+                            {word: "", frequency: .3},
+                            {word: "", frequency: .3},
+                            {word: "", frequency: .1},
+                            {word: "", frequency: .1},
+                            {word: "", frequency: .1},
+                            {word: "", frequency: .1},
+                            {word: "", frequency: .1},
                         ];
                         var dataset = this.member.wordCloud.slice(0,7).concat(extras);
 
@@ -554,6 +558,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         padding: 4rem 2.4rem 2.4rem;
     }
 
+    .insightContent {
+        max-width: 40rem;
+    }
+
     .insightContainer {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
@@ -561,7 +569,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         margin: 0 auto 8rem;
         max-width: 48rem;
         min-height: 20rem; // to prevent bouncing around a bit
-        padding: 2.4rem;
         width: 93%;
 
         @include r(600) {
@@ -601,10 +608,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
         h4 {
             margin-bottom: .8rem;
             opacity: .8;
+            padding: 2.4rem 2.4rem 0;
         }
 
         p {
             margin-bottom: 2.4rem;
+        }
+
+        .insightIntro {
+            padding: 0 2.4rem;
         }
 
         button.secondary {
