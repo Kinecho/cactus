@@ -17,12 +17,10 @@
 
     export default Vue.extend({
         mounted() {
-            console.log('called in created')
             this.renderBubbles();
         },
         watch: { 
             words() {
-                console.log('called')
                 this.renderBubbles();
             }
         },
