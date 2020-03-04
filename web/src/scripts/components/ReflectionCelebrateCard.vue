@@ -1,5 +1,5 @@
 <template>
-    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
+    <div :class="['flip-container', 'celebrate-container', {flipped: flipped}, {insightRevealed: insightRevealed}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
@@ -564,10 +564,6 @@
         padding: 4rem 2.4rem 2.4rem;
     }
 
-    .insightContent {
-        max-width: 40rem;
-    }
-
     .insightContainer {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
@@ -618,8 +614,7 @@
         }
 
         p {
-            margin-bottom: 2.4rem;
-            padding: 0 2.4rem;
+            padding: 0 2.4rem 2.4rem;
         }
 
         button.secondary {
@@ -635,11 +630,23 @@
                 background-color: $white;
             }
         }
+
+        .insightContent {
+            max-width: 40rem;
+
+            p {
+                padding-bottom: 0;
+            }
+        }
     }
 
     .lowerContainer {
         background: $darkerGreen url(assets/images/grainy.png);
         padding: 6.4rem 4rem 4rem;
+
+        .insightRevealed & {
+            padding-top: 4.8rem;
+        }
     }
 
     .cactusGarden {
