@@ -381,7 +381,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     format   = d3Format(",d"),
                     color    = d3ScaleLinear().domain([0,2])
                                //@ts-ignore
-                               .range(["#f2ebe9", "#364fac", "#47445e"])
+                               .range(["#F2EBE9", "#47445E", "#364FAC", "#9C1AA3"])
                     //more color options: https://github.com/d3/d3-scale-chromatic
 
                 var bubble = d3Pack()
@@ -390,8 +390,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
                 var svg = d3Select(".insightContent")
                     .append("svg")
-                    .attr("width", diameter)
-                    .attr("height", diameter)
+                    .attr("width", "100%")
+                    .attr("height", "100%")
+                    .attr("preserveAspectRatio", "xMinYMid")
+                    .attr("viewBox", "0 0 375 375")
                     .attr("class", "bubble");
 
                     if (this.member?.wordCloud) {
@@ -445,10 +447,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
                             .attr("text-anchor", "middle")
                         // @ts-ignore
                             .text(function(d){ return d.data["word"]; })
-                            .style("fill","white")
-                            .style("font-family", "Helvetica Neue, Helvetica, Arial, san-serif")
-                        // @ts-ignore
-                            .style("font-size", "12px");
+                            .style("fill", "#FFF");
                     }
                 this.insightRevealed = true;
             },
@@ -553,59 +552,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         flex-grow: 1;
         font-size: 3.2rem;
         padding: 4rem 2.4rem 2.4rem;
-    }
-
-    .insightCluster {
-    }
-
-    .element1 {
-        circle {
-            fill: $dolphin;
-        }
-        text {
-            fill: $white;
-        }
-    }
-    .element2 {
-        circle {
-            fill: $indigo;
-        }
-        text {
-            fill: $white;
-        }
-    }
-    .element3 {
-        circle {
-            fill: $purple;
-        }
-        text {
-            fill: $white;
-        }
-    }
-    .element4 {
-        circle {
-            fill: $darkestGreen;
-        }
-        text {
-            fill: $white;
-        }
-    }
-    .element5 {
-        circle {
-            fill: $royal;
-        }
-        text {
-            fill: $darkText;
-        }
-    }
-    .size1 {
-        font-size: 1.4rem;
-    }
-    .size2 {
-        font-size: 1.6rem;
-    }
-    .size3 {
-        font-size: 1.8rem;
     }
 
     .insightContainer {
