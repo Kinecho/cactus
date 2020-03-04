@@ -26,7 +26,6 @@ export enum CardBrand {
     union_pay = "union_pay",
     visa = "visa",
     unknown = "unknown",
-
 }
 
 export enum InvoiceStatus {
