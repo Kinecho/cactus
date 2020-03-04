@@ -387,7 +387,7 @@
 
                 var bubble = d3Pack()
                     .size([diameter, diameter])
-                    .padding(16);
+                    .padding(12);
 
                 var svg = d3Select(".insightContent")
                     .append("svg")
@@ -454,7 +454,10 @@
                             .text(function(d){ return d.data["word"]; })
                         // @ts-ignore
                             .style("font-size", function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px"; })
-                            .style("fill", "#FFF");
+                            .style("fill", "#FFF")
+                            .append("title")
+                            // @ts-ignore
+                            .text(function(d, i) { return d.data["word"]; });
                     }
                 this.insightRevealed = true;
             },
@@ -616,9 +619,6 @@
 
         p {
             margin-bottom: 2.4rem;
-        }
-
-        .insightIntro {
             padding: 0 2.4rem;
         }
 
