@@ -24,7 +24,7 @@
         mounted() {
             this.renderBubbles();
         },
-        watch: { 
+        watch: {
             words() {
                 this.renderBubbles();
             }
@@ -44,7 +44,7 @@
                     format   = d3Format(",d"),
                     color    = d3ScaleOrdinal()
                                //@ts-ignore
-                               .range(["#F2EBE9","#F2EBE9","#47445E","#47445E","#364FAC"].reverse())
+                               .range(["#F2EBE9","#F2EBE9","#F2EBE9","#9C1AA3","#364FAC","#47445E"].reverse())
                     //more color options: https://github.com/d3/d3-scale-chromatic
 
                 var bubble = d3Pack()
@@ -112,6 +112,7 @@
                     // @ts-ignore
                         .attr("y", function(d){ return d.y + 5; })
                         .attr("text-anchor", "middle")
+                        .attr("dominant-baseline", "middle")
                     // @ts-ignore
                         .text(function(d){ return d.data["word"]; })
                     // @ts-ignore
@@ -131,7 +132,7 @@
     @import "mixins";
     @import "variables";
 
-    .insight-word-chart { 
+    .insight-word-chart {
         position: relative;
     }
     .upgrade {
