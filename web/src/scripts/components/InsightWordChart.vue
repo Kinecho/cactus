@@ -2,7 +2,7 @@
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{hasAccess: hasAccess}]" />
         <div class="upgrade" v-if="!hasAccess">
-            <p>To unlock your insights,<br>upgrade to Cactus Plus.</p>
+            <p>To reveal Today's Insight,<br>upgrade to Cactus Plus.</p>
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
         </div>
     </div>
@@ -149,10 +149,12 @@
     }
 
     .bubble-chart {
-        filter: blur(5px);
+        filter: blur(4px);
+        opacity: .8;
 
         &.hasAccess {
             filter: none;
+            opacity: 1;
         }
     }
 </style>

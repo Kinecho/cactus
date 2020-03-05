@@ -4,7 +4,7 @@
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
                 <div class="insightContainer revealed" v-if="hasInsights">
-                    <h4>Daily Insight</h4>
+                    <h4>Today's Insight</h4>
                     <div class="insightContent">
                         <p>Here's a visualization of words that have come up recently in your reflections.</p>
                         <InsightWordChart :words="wordData" :hasAccess="isPlus" />
