@@ -6,7 +6,7 @@
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
         </div>
         <div class="revealBox" v-if="!isRevealed && isPlus">
-            <p>To see Today's&nbsp;Insight,<br>tap the button:</p>
+            <p>Want to see Today’s Insight?</p>
             <a class="button primary" @click="revealInsights()">Show Me!</a>
         </div>
     </div>
