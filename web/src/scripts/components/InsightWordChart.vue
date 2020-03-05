@@ -1,6 +1,10 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
+        <div class="warningBox" v-if="isRevealed && didWrite && !wordData">
+            <p>There was an error displaying Today's Insight.</p>
+            <button @click="reloadPage()">Try Again</button>
+        </div>
         <div class="warningBox" v-if="isRevealed && !didWrite">
             <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
             <a :href="pricingPageUrl">What are insights?</a>
@@ -90,6 +94,8 @@
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
                     return true;
+                } else if (!this.wordData) {
+                    return true;
                 }
                 return false;
             }
@@ -104,6 +110,9 @@
             revealInsights(): void {
                 this.isRevealed = true;
                 this.trackRevealEvent();
+            },
+            reloadPage(): void {
+                window.location.reload();
             },
             renderBubbles(): void {
                 this.$forceUpdate();
