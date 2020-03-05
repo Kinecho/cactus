@@ -196,15 +196,15 @@
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
         left: 0;
-        margin: 0 auto;
+        margin: auto;
         padding: 2.4rem;
         position: absolute;
         right: 0;
-        top: 20%;
+        top: 50%;
+        transform: translateY(-50%);
 
         @include r(374) {
             max-width: 75%;
-            top: 33%;
         }
 
         .button {
