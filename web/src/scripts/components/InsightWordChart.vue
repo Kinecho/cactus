@@ -1,13 +1,13 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="upgradeBox" v-if="!isRevealed && isBasic">
+        <div class="upgradeBox" v-if="isRevealed && isBasic">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
-            <a class="button primary" :href="pricingPageUrl">Learn More</a>
+            <a :href="pricingPageUrl">Learn More</a>
         </div>
-        <div class="revealBox" v-if="!isRevealed && isPlus">
+        <div class="revealBox" v-if="!isRevealed">
             <p>Want to see Today’s Insight?</p>
-            <a class="button primary" @click="revealInsights()">Show Me!</a>
+            <button class="primary" @click="revealInsights()">Show Me!</button>
         </div>
     </div>
 </template>
@@ -56,7 +56,7 @@
             }
         },
         props: {
-            words: {type: Array as () => InsightWord[], default: []},
+            words: {type: Array as () => InsightWord[], default: [{word: "", frequency: 3}]},
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
             startGated: {type: Boolean, default: false}
@@ -79,7 +79,9 @@
                 return this.subscriptionTier === SubscriptionTier.BASIC
             },
             isBlurry(): boolean {
-                if (this.startGated && !this.isRevealed) {
+                if (this.isBasic) { // never not blurry if basic
+                    return true;
+                } else if (this.startGated && !this.isRevealed) {
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
                     return true;
@@ -246,10 +248,15 @@
             max-width: 75%;
         }
 
-        .button {
+        button, a {
             display: inline-block;
             margin: 1.6rem auto 0;
         }
+    }
+
+    .upgradeBox {
+        background: $white;
+        color: $darkText;
     }
 
     .bubble-chart {
