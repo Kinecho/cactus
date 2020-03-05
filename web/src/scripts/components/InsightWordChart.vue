@@ -40,6 +40,8 @@
         },
         methods: {
             renderBubbles(): void {
+                this.$forceUpdate();
+
                 var diameter = 375, //max size of the bubbles
                     format   = d3Format(",d"),
                     color    = d3ScaleOrdinal()

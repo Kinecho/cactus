@@ -14,6 +14,7 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
+import {WordCloudExclusionList} from "@shared/util/LanguageUtil";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -29,7 +30,6 @@ export interface ResetUserResponse {
     tagResponse: UpdateTagResponse,
     lastReplyString?: string,
 }
-
 
 export default class AdminReflectionResponseService {
     protected static sharedInstance: AdminReflectionResponseService;
@@ -256,6 +256,10 @@ export default class AdminReflectionResponseService {
                 reflections.forEach(reflection => {
                     if (reflection.insights?.insightWords) {
                         reflection.insights.insightWords.forEach(wordInsight => {
+                            // don't include words in the exclusion list
+                            if (WordCloudExclusionList.includes(wordInsight.word)) {
+                                return;
+                            }
                             if(wordFrequencies[wordInsight.word]) {
                                wordFrequencies[wordInsight.word]++;
                             } else {
