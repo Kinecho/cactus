@@ -3,10 +3,11 @@
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
         <div class="warningBox" v-if="isRevealed && !didWrite">
             <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
+            <a :href="pricingPageUrl">What are insights?</a>
         </div>
         <div class="upgradeBox" v-if="didWrite && isRevealed && isBasic">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
-            <a :href="pricingPageUrl">Learn More</a>
+            <a :href="pricingPageUrl">What are insights?</a>
         </div>
         <div class="revealBox" v-if="!isRevealed">
             <p>Want to see Today’s Insight?</p>
