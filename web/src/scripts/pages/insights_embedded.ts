@@ -62,6 +62,18 @@ window.setInsightWords = (words: any) => {
     }
 };
 
+window.setInsightWordsBase64 = (base64: string|undefined|null) => {
+    if (!base64) {
+        return
+    }
+
+    let decoded = atob(base64);
+    const words = JSON.parse(decoded) as InsightWord[];
+    logger.info("Decoded base64 string into words array", words);
+    if (words && Array.isArray(words)) {
+        dataSource.words = words;
+    }
+};
 
 new Vue({
     el: "#app",
