@@ -1,7 +1,10 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="upgradeBox" v-if="isRevealed && isBasic">
+        <div class="warningBox" v-if="isRevealed && !didWrite">
+            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
+        </div>
+        <div class="upgradeBox" v-if="didWrite && isRevealed && isBasic">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
             <a :href="pricingPageUrl">Learn More</a>
         </div>
@@ -59,7 +62,8 @@
             words: {type: Array as () => InsightWord[], default: [{word: "", frequency: 3}]},
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
-            startGated: {type: Boolean, default: false}
+            startGated: {type: Boolean, default: false},
+            didWrite: {type: Boolean, default: true}
         },
         data(): {
             isRevealed: boolean    
@@ -232,7 +236,7 @@
         position: relative;
     }
 
-    .upgradeBox, .revealBox {
+    .upgradeBox, .revealBox, .warningBox {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
@@ -254,7 +258,7 @@
         }
     }
 
-    .upgradeBox {
+    .upgradeBox, .warningBox {
         background: $white;
         color: $darkText;
     }
