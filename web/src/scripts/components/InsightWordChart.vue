@@ -1,7 +1,11 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="warningBox" v-if="isRevealed && didWrite && !wordData">
+        <div class="warningBox" v-if="isRevealed && didWrite && !loggedIn">
+            <p>To get Today's Insights,<br>signup to try Cactus.</p>
+            <a class="button" :href="signupPageUrl">Try It Free</a>
+        </div>
+        <div class="warningBox" v-if="isRevealed && didWrite && !words">
             <p>There was an error displaying Today's Insight.</p>
             <button @click="reloadPage()">Try Again</button>
         </div>
@@ -68,7 +72,8 @@
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
             startGated: {type: Boolean, default: false},
-            didWrite: {type: Boolean, default: true}
+            didWrite: {type: Boolean, default: true},
+            loggedIn: {type: Boolean, default: true}
         },
         data(): {
             isRevealed: boolean    
@@ -80,6 +85,9 @@
         computed: {
             pricingPageUrl(): string {
                 return PageRoute.PAYMENT_PLANS;
+            },
+            signupPageUrl(): string {
+                return PageRoute.SIGNUP + "?message=" + encodeURIComponent("To get Today's Insights, sign up to try Cactus.")
             },
             isPlus(): boolean {
                 return this.subscriptionTier === SubscriptionTier.PLUS
@@ -94,7 +102,9 @@
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
                     return true;
-                } else if (!this.wordData) {
+                } else if (!this.words) {
+                    return true;
+                } else if (!this.loggedIn) {
                     return true;
                 }
                 return false;

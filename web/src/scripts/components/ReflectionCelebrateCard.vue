@@ -11,7 +11,8 @@
                         :didWrite="didWriteReflection" 
                         :subscriptionTier="subscriptionTier" 
                         :startGated="true" 
-                        :startBlurred="true" />
+                        :startBlurred="true"
+                        :loggedIn="loggedIn" />
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
