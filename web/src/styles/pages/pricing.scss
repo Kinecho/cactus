@@ -239,10 +239,10 @@
             background-position: right -12rem bottom 0, right -8rem top 0;
             height: 47rem;
             right: -1px;
-            top: 18%;
         }
         @include r(768) {
             background-position: right -20rem bottom 0, right -19rem top 0;
+            top: 18%;
         }
         @include r(1200) {
             background-position: right -12rem bottom 0, right -8rem top 0;
