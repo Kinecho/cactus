@@ -6,6 +6,8 @@ import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 import {InsightWord} from "@shared/models/ReflectionResponse";
 import "@styles/transitions.scss"
+import "@styles/common.scss"
+import "@styles/pages/insights_embedded.scss"
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
 
