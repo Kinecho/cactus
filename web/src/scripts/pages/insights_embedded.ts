@@ -5,13 +5,15 @@ import InsightWordChart from "@components/InsightWordChart.vue";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 import {InsightWord} from "@shared/models/ReflectionResponse";
-
+import "@styles/transitions.scss"
 const logger = new Logger("insights_embed");
 commonInit();
 
 class InsightDataSource {
     _words: InsightWord[] = [];
     _delegate?: InsightDataSourceDelegate | undefined;
+    blurred: boolean = true;
+    loaded: boolean = false;
 
     set delegate(delegate: InsightDataSourceDelegate | undefined) {
         this._delegate = delegate;
@@ -28,6 +30,7 @@ class InsightDataSource {
 
     set words(words: InsightWord[]) {
         this._words = words || [];
+        this.loaded = true;
         this.delegate?.onData(this._words);
     }
 }
@@ -38,19 +41,6 @@ interface InsightDataSourceDelegate {
 
 
 const dataSource = new InsightDataSource();
-dataSource.words = [
-    {word: "One", frequency: 1.5},
-    {word: "Shadow", frequency: .5},
-    {word: "Dog", frequency: 2.3},
-    {word: "Christina", frequency: .3},
-    {word: "Neil", frequency: .3},
-    {word: "Hockey", frequency: .1},
-    {word: "Chips", frequency: .1},
-    {word: "Salsa", frequency: .1},
-    {word: "Laura", frequency: .1},
-    {word: "Max", frequency: .1},
-];
-
 
 window.setInsightWords = (words: any) => {
     console.log("Setting words ", words);
@@ -79,12 +69,13 @@ new Vue({
     el: "#app",
     template: `
         <div class="container" :style="{ display: 'flex', flex: 1, justifyItems: 'stretch', alignItems: 'stretch' }">
-            <WordChart :words="dataSource.words" style="flex: 1"/>
+            <transition name="fade-in">
+                <WordChart :words="dataSource.words" style="flex: 1" :burred="dataSource.blurred" v-if="dataSource.loaded"/>
+            </transition>
         </div>
     `,
     components: {
         WordChart: InsightWordChart,
-
     },
     data(): { dataSource: InsightDataSource } {
         return {
