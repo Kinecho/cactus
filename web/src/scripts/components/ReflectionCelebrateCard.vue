@@ -7,7 +7,7 @@
                     <h4>Daily Insight</h4>
                     <div class="insightContent">
                         <p>Here's a visualization of words that have come up recently in your reflections.</p>
-                        <InsightWordChart :words="wordData" />
+                        <InsightWordChart :words="wordData" :hasAccess="isPlus" />
                     </div>
                 </div>
                 <div class="lowerContainer">
@@ -151,6 +151,7 @@
     import InputNameModal from "@components/InputNameModal.vue";
     import InsightWordChart from "@components/InsightWordChart.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics"
 
@@ -256,6 +257,9 @@
             }
         },
         computed: {
+            isPlus(): boolean {
+                return this.member?.tier == SubscriptionTier.PLUS;
+            },
             loginUrl(): string {
                 const base = `${PageRoute.SIGNUP}`;
                 // const params = {}

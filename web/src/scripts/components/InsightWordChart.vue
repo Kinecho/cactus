@@ -1,6 +1,10 @@
 <template>
     <div class="insight-word-chart">
-        <div class="bubble-chart" />
+        <div :class="['bubble-chart',{hasAccess: hasAccess}]" />
+        <div class="upgrade" v-if="!hasAccess">
+            <p>To unlock your insights,<br>upgrade to Cactus Plus.</p>
+            <a class="button primary" :href="pricingPageUrl">Learn More</a>
+        </div>
     </div>
 </template>
 
@@ -14,6 +18,7 @@
         hierarchy as d3Hierarchy,
         select as d3Select
     } from "d3";
+    import {PageRoute} from '@shared/PageRoutes'
 
     export default Vue.extend({
         mounted() {
@@ -25,7 +30,13 @@
             }
         },
         props: {
-            words: Array
+            words: Array,
+            hasAccess: {type: Boolean, default: true}
+        },
+        computed: {
+            pricingPageUrl(): string {
+                return PageRoute.PAYMENT_PLANS;
+            }
         },
         methods: {
             renderBubbles(): void {
@@ -119,4 +130,29 @@
     @import "common";
     @import "mixins";
     @import "variables";
+
+    .insight-word-chart { 
+        position: relative;
+    }
+    .upgrade {
+        padding: 2rem;
+        background: $darkestGreen;
+        color: $white;
+        border-radius: 12px;
+        top: 100px;
+        width: 100%;
+        position: absolute;
+        a {
+            display: inline-block;
+            margin: 2rem auto 0;
+        }
+    }
+
+    .bubble-chart {
+        filter: blur(5px);
+
+        &.hasAccess {
+            filter: none;
+        }
+    }
 </style>
