@@ -32,7 +32,8 @@ export enum QueryParam {
     SELECTED_PERIOD = "period",
     SOURCE_APP = "source-app",
     USE_PROMPT_ID = "prompt",
-    UPGRADE_SUCCESS = "upgrade"
+    UPGRADE_SUCCESS = "upgrade",
+    CHART_TYPE = "chart_type",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {
