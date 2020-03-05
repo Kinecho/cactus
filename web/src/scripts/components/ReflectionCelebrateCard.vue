@@ -5,10 +5,8 @@
                 <upgrade-banner :member="member" />
                 <div class="insightContainer revealed" v-if="hasInsights">
                     <h4>Today's Insight</h4>
-                    <div class="insightContent">
-                        <p>Here's a visualization of words that have come up recently in your reflections.</p>
-                        <InsightWordChart :words="wordData" :hasAccess="isPlus" />
-                    </div>
+                    <p>Here's a visualization of words that have come up recently in your reflections.</p>
+                    <InsightWordChart :words="wordData" :hasAccess="isPlus" />
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -477,85 +475,12 @@
     }
 
     .insightContainer {
-        @include shadowbox;
-        background: $dolphin url(assets/images/grainy.png);
-        color: $white;
-        margin: 0 auto 8rem;
-        min-height: 20rem; // to prevent bouncing around a bit
-        width: 93%;
-
-        @include r(600) {
-            margin: 0 3.2rem 8rem;
-            width: auto;
-        }
-
-        &.revealed {
-            background: $white none;
-            border-radius: 0;
-            box-shadow: none;
-            color: $darkestGreen;
-            margin: 0;
-            padding: 2.4rem 0;
-            width: 100%;
-
-            .insightContent {
-                opacity: 1;
-                position: static;
-                transform: translate(0, 0);
-                width: 100%;
-            }
-        }
-
-        &.revealed .insightIntro,
-        .insightContent {
-            left: 0;
-            margin: 0 auto;
-            opacity: 0;
-            position: absolute;
-            right: 0;
-            transform: translate(0, 3rem);
-            width: 75%;
-        }
-
-        .insightContent,
-        .insightIntro {
-            transition: transform .1s ease-in, opacity .1s ease-in;
-        }
+        padding: 3.2rem;
+        width: 100%;
 
         h4 {
             margin-bottom: .8rem;
             opacity: .8;
-            padding: 2.4rem 2.4rem 0;
-        }
-
-        button.secondary {
-            margin: 0;
-            width: 100%;
-
-            @include r(600) {
-                min-width: 60%;
-                width: auto;
-            }
-
-            &:hover {
-                background-color: $white;
-            }
-        }
-
-        .insightIntro {
-            padding: 0 2.4rem 2.4rem;
-
-            p {
-                margin-bottom: 2.4rem;
-            }
-        }
-
-        .insightContent {
-            max-width: 40rem;
-
-            p {
-                padding-bottom: 0;
-            }
         }
     }
 
