@@ -48,8 +48,7 @@
     import {
         getSubscriptionDetails,
         getUpdatePaymentMethodSession,
-        redirectToStripeCheckout,
-        startCheckout, startStripeCheckoutSession
+        startStripeCheckoutSession
     } from "@web/checkoutService";
     import {formatDate} from "@shared/util/DateUtil";
     import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
@@ -60,8 +59,7 @@
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
-    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
-    import {isString} from "@shared/util/ObjectUtil";
+    import {SnackbarMessage} from "@components/SnackbarTypes";
 
     const copy = CopyService.getSharedInstance().copy;
 

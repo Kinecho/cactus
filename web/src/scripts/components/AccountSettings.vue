@@ -173,7 +173,7 @@
     import CopyService from "@shared/copy/CopyService";
     import DeleteAccountModal from "@components/DeleteAccountModal.vue";
     import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
+    import SnackbarContent from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
     import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
@@ -182,8 +182,9 @@
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
     import {getQueryParam, removeQueryParam} from "@web/util";
     import {QueryParam} from "@shared/util/queryParams";
-    import AccountSettingsFormData, {FormValidator, Validations} from "@web/datasource/AccountSettingsFormData";
+    import AccountSettingsFormData, {FormValidator} from "@web/datasource/AccountSettingsFormData";
     import {Config} from "@web/config";
+    import {SnackbarMessage, SnackbarMessageType} from "@components/SnackbarTypes";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -250,7 +251,8 @@
             error: string | undefined,
             removedProviderIds: string[],
             copy: LocalizedCopy,
-            snackbars: { id: string, message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }[],
+            mailchimpSignupFormUrl: string,
+            snackbars: SnackbarMessage[],
             notificationValues: {
                 TRUE: NotificationStatus,
                 FALSE: NotificationStatus,
@@ -261,12 +263,11 @@
             tzAlertDismissed: boolean,
             upgradeRoute: string,
 
-            deleteAccountModalVisible: boolean
+            deleteAccountModalVisible: boolean,
             saving: boolean,
             savingTimeout: number | undefined,
-            formData: AccountSettingsFormData;
-            complianceStateError: boolean;
-            mailchimpSignupFormUrl: string,
+            formData: AccountSettingsFormData,
+            complianceStateError: boolean,
             validator: FormValidator,
         } {
             const formData = new AccountSettingsFormData();
@@ -288,13 +289,14 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
+                upgradeRoute: PageRoute.PAYMENT_PLANS,
+
+                deleteAccountModalVisible: false,
                 saving: false,
                 savingTimeout: undefined,
                 formData: formData,
                 complianceStateError: false,
-                validator: formData.current.validator
-                upgradeRoute: PageRoute.PAYMENT_PLANS,
-                deleteAccountModalVisible: false
+                validator: formData .current.validator,
             }
         },
         computed: {
@@ -306,9 +308,9 @@
             },
             promptSendTime(): PromptSendTime {
                 return this.formData.current.promptSendTime || DEFAULT_PROMPT_SEND_TIME()
-                return this.member?.promptSendTime ||
-                    this.member?.getLocalPromptSendTimeFromUTC() ||
-                    DEFAULT_PROMPT_SEND_TIME;
+                // return this.member?.promptSendTime ||
+                //     this.member?.getLocalPromptSendTimeFromUTC() ||
+                //     DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -392,7 +394,7 @@
                 }
                 return;
             },
-            beforeLeave(el: any) {
+            beforeLeave(el: any): void {
                 const {marginLeft, marginTop, width, height} = window.getComputedStyle(el);
                 el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
@@ -400,7 +402,7 @@
                 el.style.width = width;
                 el.style.height = height;
             },
-            addSnackbar(message: SnackbarMessage): string {
+            addSnackbar(message: SnackbarMessageType): string {
                 const id = uuid();
                 if (typeof message === "string") {
                     this.snackbars.push({id, message: message, autoHide: true});
@@ -410,14 +412,14 @@
 
                 return id;
             },
-            removeSnackbar(id: string) {
+            removeSnackbar(id: string): void {
                 logger.log("removing snackbar", id);
                 this.snackbars = this.snackbars.filter(snack => snack.id !== id);
             },
-            removeAllSnackbars() {
+            removeAllSnackbars(): void {
                 this.snackbars = [];
             },
-            updateSnackbar(id: string, message: string | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: string }) {
+            updateSnackbar(id: string, message: SnackbarMessageType): void {
                 const snackbar = this.snackbars.find(snack => snack.id === id);
 
                 if (!snackbar) {
@@ -431,7 +433,7 @@
                     Object.assign(snackbar, message);
                 }
             },
-            async save() {
+            async save(): Promise<void> {
                 // if (this.member) {
                 //     await CactusMemberService.sharedInstance.save(this.member);
                 //     logger.log("Save success");

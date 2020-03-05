@@ -11,6 +11,9 @@ import {isBlank, isValidEmail} from "@shared/util/StringUtil";
 import {ChangeEmailResponse, ChangeEmailResponseCode} from "@shared/api/SignupEndpointTypes";
 import {createAuthModal} from "@web/auth";
 import {closeModal, showModal} from "@web/util";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("AccountSettingsFormData");
 
 const DEFAULT_NOTIFICATION_SETTINGS = (): NotificationSettings => ({
     [NotificationChannel.email]: NotificationStatus.NOT_SET,
@@ -186,7 +189,7 @@ class FormData {
     validateField(fieldName: string) {
         const data = this as any;
         this.validator.validateField(fieldName, data[fieldName]);
-        console.log(this.validator.validations);
+        logger.log(this.validator.validations);
     }
 
     static create(args: { member?: CactusMember, user?: FirebaseUser }): FormData {
@@ -292,7 +295,7 @@ export default class AccountSettingsFormData {
         const member = this.member;
         const validator = this.current.validate();
         if (!member) {
-            console.error("No cactus member was found when trying to save AccountSettings FormData");
+            logger.error("No cactus member was found when trying to save AccountSettings FormData");
             return {errors: ["No member found. Unable to save the form."], success: false, validator};
         }
         try {
@@ -329,7 +332,7 @@ export default class AccountSettingsFormData {
                 validator,
             }
         } catch (error) {
-            console.error("Failed to save cactus member form data", error);
+            logger.error("Failed to save cactus member form data", error);
             return {
                 success: false,
                 errors: [error.message || "Unable to save the account settings."],
@@ -339,7 +342,7 @@ export default class AccountSettingsFormData {
     }
 
     async changeEmail(email: string, allowRetry = true): Promise<ChangeEmailResponse> {
-        console.log("Attempting to change email");
+        logger.log("Attempting to change email");
         const user = this.user;
         try {
             await user?.updateEmail(email);
@@ -350,7 +353,7 @@ export default class AccountSettingsFormData {
                 code: ChangeEmailResponseCode.SUCCESS
             };
         } catch (error) {
-            console.error("Failed to update user's email", error);
+            logger.error("Failed to update user's email", error);
             if (error.code === "auth/email-already-in-use") {
                 return {
                     confirmationEmailSent: false,
@@ -365,7 +368,7 @@ export default class AccountSettingsFormData {
                     if (reAuthSuccess) {
                         return this.changeEmail(email, false);
                     } else {
-                        console.error("Unable to re-log in the user. Can not change email", error);
+                        logger.error("Unable to re-log in the user. Can not change email", error);
                         return {
                             emailAvailable: false,
                             code: ChangeEmailResponseCode.CREDENTIAL_TOO_OLD,
@@ -375,7 +378,7 @@ export default class AccountSettingsFormData {
                         }
                     }
                 } else {
-                    console.warn("The credential is too old, but we are not retrying any more times to prevent an infinite loop");
+                    logger.warn("The credential is too old, but we are not retrying any more times to prevent an infinite loop");
                     return {
                         emailAvailable: false,
                         code: ChangeEmailResponseCode.CREDENTIAL_TOO_OLD,
@@ -400,23 +403,23 @@ export default class AccountSettingsFormData {
         const [provider] = this.user?.providerData || [];
         if (provider) {
             try {
-                console.log("attempting to reauthenticate with provider", provider);
+                logger.log("attempting to reauthenticate with provider", provider);
                 const {modalId, loginPromise} = createAuthModal({
                     title: "Please Sign in Again",
                     message: "It's been a while since you last signed in, and for security purposes, you must sign in again in order to change your email."
                 });
-                console.log("awaiting login promise...");
+                logger.log("awaiting login promise...");
                 showModal(modalId);
                 const credential = await loginPromise;
                 closeModal(modalId);
                 // const credential = await this.user?.reauthenticateWithPopup(provider);
-                console.log("Successfully reauthenticated with provider");
+                logger.log("Successfully reauthenticated with provider");
                 return {success: true, credential};
             } catch (error) {
-                console.error("Error authenticating the user", error);
+                logger.error("Error authenticating the user", error);
             }
         } else {
-            console.warn("No providers found, can not reauthenticate")
+            logger.warn("No providers found, can not reauthenticate")
         }
 
         return {success: false};

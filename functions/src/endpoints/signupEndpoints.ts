@@ -40,20 +40,20 @@ app.use(cors({
 }));
 
 app.post("/change-email", async (req: functions.https.Request | any, resp: functions.Response) => {
-    console.log("Starting change-email with request body body", JSON.stringify(req.body));
+    logger.log("Starting change-email with request body body", JSON.stringify(req.body));
     const authUser = await getAuthUser(req);
 
     if (!authUser) {
-        console.error("the user is not authenticated");
+        logger.error("the user is not authenticated");
         resp.sendStatus(401);
         return;
     }
 
     const payload = req.body as ChangeEmailRequest;
     const {newEmail} = payload;
-    console.log(`Processing email change request for user ${authUser.email} (userId=${authUser.uid}). New email = ${newEmail}`);
+    logger.log(`Processing email change request for user ${authUser.email} (userId=${authUser.uid}). New email = ${newEmail}`);
     if (!isValidEmail(newEmail)) {
-        console.warn(`the provided email "${newEmail}" is not a valid email address. Returning 400`);
+        logger.warn(`the provided email "${newEmail}" is not a valid email address. Returning 400`);
         const errorResponse: ChangeEmailResponse = {
             newEmail,
             confirmationEmailSent: false,
@@ -70,7 +70,7 @@ app.post("/change-email", async (req: functions.https.Request | any, resp: funct
 
     ]);
 
-    console.log(`Found ${users.length} users with the email address of ${newEmail}`);
+    logger.log(`Found ${users.length} users with the email address of ${newEmail}`);
 
     resp.sendStatus(500);
     return;

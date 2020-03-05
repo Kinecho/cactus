@@ -14,13 +14,10 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import {SnackbarColors} from "@components/SnackbarTypes";
 
     const DEFAULT_DURATION_MS = 5000;
 
-    export type SnackbarColor = 'success' | 'successAlt' | 'warning' | 'danger' | "info" | "default";
-    export type SnackbarMessage =
-        | string
-        | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: SnackbarColor }
 
     export default Vue.extend({
         created() {
@@ -36,7 +33,7 @@
                 required: false,
                 validator: function (value: string) {
                     // The value must match one of these strings
-                    return ['success', 'warning', 'danger', "info", "default"].indexOf(value) !== -1
+                    return SnackbarColors.indexOf(value) !== -1
                 }
             }
         },

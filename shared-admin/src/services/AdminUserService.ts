@@ -20,6 +20,10 @@ import Logger from "@shared/Logger";
 
 const logger = new Logger("AdminUserService");
 
+export interface ChangeEmailResult {
+    success: boolean,
+}
+
 export interface SubscriberSignupResult {
     success: boolean,
     isNewUser?: boolean,
@@ -382,4 +386,5 @@ export default class AdminUserService {
         logger.log(`Delete user task took ${endTime - startTime}ms`);
         return results;
     }
+
 }

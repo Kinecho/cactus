@@ -123,7 +123,9 @@ export interface AccountCopy {
     CANCEL_UPDATE_TIMEZONE: string,
     EMAIL_NOTIFICATION_CHECKBOX_LABEL: string,
     DELETE_ACCOUNT: string,
-    PERMANENTLY_DELETE_ACCOUNT: string
+    PERMANENTLY_DELETE_ACCOUNT: string,
+    EMAIL_SUBSCRIBE_COMPLIANCE_ERROR: string,
+    EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT: string,
 }
 
 export interface CheckoutCopy {
@@ -141,8 +143,6 @@ export interface CheckoutCopy {
     TIER_BASIC: string,
     TIER_PLUS: string,
     TIER_PREMIUM: string,
-    EMAIL_SUBSCRIBE_COMPLIANCE_ERROR: string,
-    EMAIL_SUBSCRIBE_COMPLIANCE_LINK_TEXT: string,
 }
 
 export abstract class LocalizedCopy {
