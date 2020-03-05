@@ -1,13 +1,25 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="upgradeBox" v-if="!isRevealed && isBasic">
-            <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
-            <a class="button primary" :href="pricingPageUrl">Learn More</a>
+        <div class="warningBox" v-if="isRevealed && didWrite && !loggedIn">
+            <p>To get Today's Insights,<br>signup to try Cactus.</p>
+            <a class="button" :href="signupPageUrl">Try It Free</a>
         </div>
-        <div class="revealBox" v-if="!isRevealed && isPlus">
+        <div class="warningBox" v-if="isRevealed && didWrite && !words">
+            <p>There was an error displaying Today's Insight.</p>
+            <button @click="reloadPage()">Try Again</button>
+        </div>
+        <div class="warningBox" v-if="isRevealed && !didWrite">
+            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
+            <a :href="pricingPageUrl">What are insights?</a>
+        </div>
+        <div class="upgradeBox" v-if="didWrite && isRevealed && isBasic">
+            <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
+            <a :href="pricingPageUrl">What are insights?</a>
+        </div>
+        <div class="revealBox" v-if="!isRevealed">
             <p>Want to see Today’s Insight?</p>
-            <a class="button primary" @click="revealInsights()">Show Me!</a>
+            <button class="primary" @click="revealInsights()">Show Me!</button>
         </div>
     </div>
 </template>
@@ -56,10 +68,12 @@
             }
         },
         props: {
-            words: {type: Array as () => InsightWord[], default: []},
+            words: {type: Array as () => InsightWord[], default: [{word: "", frequency: 3}]},
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
-            startGated: {type: Boolean, default: false}
+            startGated: {type: Boolean, default: false},
+            didWrite: {type: Boolean, default: true},
+            loggedIn: {type: Boolean, default: true}
         },
         data(): {
             isRevealed: boolean    
@@ -72,6 +86,9 @@
             pricingPageUrl(): string {
                 return PageRoute.PAYMENT_PLANS;
             },
+            signupPageUrl(): string {
+                return PageRoute.SIGNUP + "?message=" + encodeURIComponent("To get Today's Insights, sign up to try Cactus.")
+            },
             isPlus(): boolean {
                 return this.subscriptionTier === SubscriptionTier.PLUS
             },
@@ -79,9 +96,15 @@
                 return this.subscriptionTier === SubscriptionTier.BASIC
             },
             isBlurry(): boolean {
-                if (this.startGated && !this.isRevealed) {
+                if (this.isBasic) { // never not blurry if basic
+                    return true;
+                } else if (this.startGated && !this.isRevealed) {
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
+                    return true;
+                } else if (!this.words) {
+                    return true;
+                } else if (!this.loggedIn) {
                     return true;
                 }
                 return false;
@@ -98,6 +121,9 @@
             revealInsights(): void {
                 this.isRevealed = true;
                 this.trackRevealEvent();
+            },
+            reloadPage(): void {
+                window.location.reload();
             },
             renderBubbles(): void {
                 this.$forceUpdate();
@@ -231,7 +257,7 @@
         position: relative;
     }
 
-    .upgradeBox, .revealBox {
+    .upgradeBox, .revealBox, .warningBox {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
@@ -247,10 +273,15 @@
             max-width: 75%;
         }
 
-        .button {
+        button, a {
             display: inline-block;
             margin: 1.6rem auto 0;
         }
+    }
+
+    .upgradeBox, .warningBox {
+        background: $white;
+        color: $darkText;
     }
 
     .bubble-chart {

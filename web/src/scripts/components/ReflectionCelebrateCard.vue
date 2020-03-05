@@ -3,10 +3,16 @@
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
-                <div class="insightContainer revealed" v-if="hasInsights">
+                <div class="insightContainer revealed">
                     <h4>Today's Insight</h4>
                     <p>A visualization of words that have come up recently in your reflections.</p>
-                    <InsightWordChart :words="wordData" :subscriptionTier="subscriptionTier" :startGated="true" :startBlurred="true" />
+                    <InsightWordChart 
+                        :words="wordData"
+                        :didWrite="didWriteReflection" 
+                        :subscriptionTier="subscriptionTier" 
+                        :startGated="true" 
+                        :startBlurred="true"
+                        :loggedIn="loggedIn" />
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -299,6 +305,9 @@
             wordData(): InsightWord[] | undefined {
                 return this.member?.wordCloud;
             },
+            didWriteReflection(): boolean {
+                return this.reflectionResponse?.content?.text ? true : false;
+            }
         },
         methods: {
             async calculateStats() {
