@@ -213,13 +213,37 @@ export const onReflectionResponseCreated = functions.firestore
                 const trialDaysLeft = member?.daysLeftInTrial;
                 let daysLeftText = '';
 
-                if (member?.isInTrial && trialDaysLeft && trialDaysLeft > 0) {
+                if (member?.isInTrial && trialDaysLeft > 0) {
                     daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
+                } else if (member?.isInTrial && trialDaysLeft == 0) {
+                    daysLeftText = ' (Ends Today)';
                 }
 
                 fields.push({
                     title: "Subscription",
                     value: `${member.tierDisplayName}${daysLeftText}`
+                })
+            }
+
+            if (member?.stats?.reflections?.totalCount) {
+                let reflectionText = 'reflection';
+
+                if (member.stats.reflections.totalCount > 1) {
+                    reflectionText = reflectionText + 's';
+                }
+
+                let streakText = ', ';
+                if (member.stats.reflections.currentStreakDays > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakDays + ' day streak'
+                } else if (member.stats.reflections.currentStreakWeeks > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakWeeks + ' week streak'
+                } else if (member.stats.reflections.currentStreakMonths > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakMonths + ' month streak'
+                }
+
+                fields.push({
+                    title: "Engagement",
+                    value: `${member.stats.reflections.totalCount} ${reflectionText}${streakText}`
                 })
             }
 
