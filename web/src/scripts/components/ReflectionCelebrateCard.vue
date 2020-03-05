@@ -6,7 +6,7 @@
                 <div class="insightContainer revealed" v-if="hasInsights">
                     <h4>Today's Insight</h4>
                     <p>A visualization of words that have come up recently in your reflections.</p>
-                    <InsightWordChart :words="wordData" :hasAccess="isPlus" />
+                    <InsightWordChart :words="wordData" :subscriptionTier="subscriptionTier" :startGated="true" :startBlurred="true" />
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -255,8 +255,8 @@
             }
         },
         computed: {
-            isPlus(): boolean {
-                return this.member?.tier == SubscriptionTier.PLUS;
+            subscriptionTier(): SubscriptionTier | undefined {
+                return this.member?.tier;
             },
             loginUrl(): string {
                 const base = `${PageRoute.SIGNUP}`;

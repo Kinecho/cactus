@@ -1,9 +1,13 @@
 <template>
     <div class="insight-word-chart">
-        <div :class="['bubble-chart',{hasAccess: hasAccess}]"/>
-        <div class="upgradeBox" v-if="!hasAccess">
+        <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
+        <div class="upgradeBox" v-if="!isRevealed && isBasic">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
+        </div>
+        <div class="revealBox" v-if="!isRevealed && isPlus">
+            <p>To see Today's&nbsp;Insight,<br>tap the button:</p>
+            <a class="button primary" @click="revealInsights()">Show Me!</a>
         </div>
     </div>
 </template>
@@ -11,6 +15,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {InsightWord} from '@shared/models/ReflectionResponse'
+    import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     import {
         pack as d3Pack,
         scaleOrdinal as d3ScaleOrdinal,
@@ -51,14 +56,41 @@
         },
         props: {
             words: {type: Array as () => InsightWord[], default: []},
-            hasAccess: {type: Boolean, default: true}
+            startBlurred: {type: Boolean, default: false},
+            unBlurred: {type: Boolean, default: false},
+            subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
+            startGated: {type: Boolean, default: false}
+        },
+        data(): {
+            isRevealed: boolean    
+        } {
+            return {
+                isRevealed: !this.startGated
+            }
         },
         computed: {
             pricingPageUrl(): string {
                 return PageRoute.PAYMENT_PLANS;
+            },
+            isPlus(): boolean {
+                return this.subscriptionTier === SubscriptionTier.PLUS
+            },
+            isBasic(): boolean {
+                return this.subscriptionTier === SubscriptionTier.BASIC
+            },
+            isBlurry(): boolean {
+                if (this.startGated && !this.isRevealed) {
+                    return true;
+                } else if (!this.startGated && this.startBlurred && !this.unBlurred) {
+                    return true;
+                }
+                return false;
             }
         },
         methods: {
+            revealInsights(): void {
+                this.isRevealed = true;
+            },
             renderBubbles(): void {
                 this.$forceUpdate();
 
@@ -191,7 +223,7 @@
         position: relative;
     }
 
-    .upgradeBox {
+    .upgradeBox, .revealBox {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
@@ -214,15 +246,15 @@
     }
 
     .bubble-chart {
-        filter: blur(11px);
         margin: 0 auto;
         max-width: 350px;
-        opacity: .8;
 
-        &.hasAccess {
-            filter: none;
-            max-width: none;
-            opacity: 1;
+        -webkit-transition: 1s ease-in-out;
+        transition: 1s ease-in-out;
+
+        &.isBlurry {
+            opacity: .8;
+            filter: blur(11px);
         }
     }
 </style>
