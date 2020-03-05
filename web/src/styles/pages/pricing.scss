@@ -67,44 +67,25 @@
     }
 }
 
+.middleSections {
+    margin-top: -2.4rem;
+    overflow: hidden;
+    position: relative;
+
+    @include r(374) {
+        margin-top: 0;
+    }
+}
+
 .sectionHeader {
     margin-bottom: 4rem;
 }
 
 .benefits {
-    margin-top: -2.4rem;
-    overflow: hidden;
-    padding: 0 2.4rem 6.4rem;
-    position: relative;
+    padding: 0 2.4rem 3.2rem;
 
-    &:before {
-        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
-        background-position: right bottom, right top;
-        background-repeat: no-repeat;
-        background-size: 240px 275px, 225px 310px;
-        content: "";
-        display: block;
-        height: 324px;
-        position: absolute;
-        right: -20rem;
-        bottom: 14%;
-        width: 300px;
-    }
-
-    @include r(374) {
-        margin-top: 0;
-    }
-    @include r(600) {
-        &:before {
-            right: -10rem;
-        }
-    }
     @include r(768) {
         padding-bottom: 10rem;
-
-        &:before {
-            display: none;
-        }
     }
 
     .flexContainer {
@@ -156,6 +137,137 @@
     }
 }
 
+.insights {
+    background: $darkestGreen url(assets/images/grainy.png);
+    padding: 6.4rem 2.4rem;
+
+    &:before {
+        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+        background-position: right bottom, right top;
+        background-repeat: no-repeat;
+        background-size: 240px 275px, 225px 310px;
+        content: "";
+        display: block;
+        height: 324px;
+        position: absolute;
+        right: -20rem;
+        top: 45%;
+        width: 300px;
+    }
+
+    @include r(768) {
+        &:before {
+            right: -15rem;
+            top: 25%;
+        }
+    }
+
+    .centered {
+        text-align: left;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            justify-content: space-around;
+
+            &.reverse {
+                flex-direction: row-reverse;
+            }
+        }
+    }
+
+    .sectionGraphic {
+        height: auto;
+        width: 100%;
+
+        @include r(768) {
+            margin: 0 auto;
+            max-width: 38rem;
+        }
+    }
+
+    .textContainer {
+        @include r(768) {
+            margin: 0 auto;
+            max-width: 38rem;
+        }
+    }
+
+    h3 {
+        color: $lightestGreen;
+        font-size: 2.4rem;
+        margin-bottom: .8rem;
+    }
+
+    p {
+        color: $white;
+        opacity: .8;
+
+        @include r(768) {
+            font-size: 1.6rem;
+        }
+        @include r(960) {
+            font-size: 1.8rem;
+        }
+    }
+}
+
+.coreValues {
+    background: $indigo url(assets/images/grainy.png);
+    padding: 6.4rem 2.4rem;
+    position: relative;
+
+    .centered {
+        text-align: left;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            justify-content: space-around;
+        }
+    }
+
+    .sectionGraphic {
+        height: auto;
+        width: 100%;
+
+        @include r(768) {
+            margin: 0 auto;
+            max-width: 38rem;
+        }
+    }
+
+    .textContainer {
+        @include r(768) {
+            margin: 0 auto;
+            max-width: 38rem;
+        }
+    }
+
+    h4 {
+        color: $aqua;
+        margin-bottom: .8rem;
+    }
+
+    h3 {
+        color: change-color($indigo, $saturation: 81, $lightness: 84);
+        font-size: 2.4rem;
+        margin-bottom: .8rem;
+    }
+
+    p {
+        color: $white;
+        opacity: .8;
+
+        @include r(768) {
+            font-size: 1.6rem;
+        }
+        @include r(960) {
+            font-size: 1.8rem;
+        }
+    }
+}
+
 .upgrade {
     background: $beige;
     padding: 4.8rem .4rem;
@@ -170,25 +282,5 @@
     }
     @include r(768) {
         padding: 9rem .8rem 11rem;
-
-        &:before {
-            background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
-            background-position: right bottom, right top;
-            background-repeat: no-repeat;
-            background-size: 240px 275px, 225px 310px;
-            content: "";
-            display: block;
-            height: 324px;
-            overflow: hidden;
-            position: absolute;
-            right: 0;
-            top: -4.8rem;
-            width: 300px;
-        }
-    }
-    @include r(960) {
-        &:before {
-            background-size: 300px 275px, 225px 310px;
-        }
     }
 }
