@@ -5,7 +5,7 @@
             <p>To get Today's Insights,<br>signup to try Cactus.</p>
             <a class="button" :href="signupPageUrl">Try It Free</a>
         </div>
-        <div class="warningBox" v-if="loggedIn && isRevealed && didWrite && !words">
+        <div class="warningBox" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
             <p>There was an error displaying Today's Insight.</p>
             <button @click="reloadPage()">Try Again</button>
         </div>
@@ -68,7 +68,7 @@
             }
         },
         props: {
-            words: {type: Array as () => InsightWord[], default: [{word: "", frequency: 3}]},
+            words: {type: Array as () => InsightWord[], default: () => []},
             startBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
             startGated: {type: Boolean, default: false},
@@ -84,7 +84,7 @@
         },
         computed: {
             pricingPageUrl(): string {
-                return PageRoute.PAYMENT_PLANS;
+                return PageRoute.PAYMENT_PLANS + "#insights";
             },
             signupPageUrl(): string {
                 return PageRoute.SIGNUP + "?message=" + encodeURIComponent("To get Today's Insights, sign up to try Cactus.")
@@ -102,7 +102,7 @@
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
                     return true;
-                } else if (!this.words) {
+                } else if (!this.words.length > 0) {
                     return true;
                 } else if (!this.loggedIn) {
                     return true;
