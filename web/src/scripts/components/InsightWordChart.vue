@@ -1,7 +1,7 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{hasAccess: hasAccess}]" />
-        <div class="upgrade" v-if="!hasAccess">
+        <div class="upgradeBox" v-if="!hasAccess">
             <p>To reveal Today's Insight,<br>upgrade to Cactus Plus.</p>
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
         </div>
@@ -44,7 +44,7 @@
                     format   = d3Format(",d"),
                     color    = d3ScaleOrdinal()
                                //@ts-ignore
-                               .range(["#F2EBE9","#F2EBE9","#F2EBE9","#9C1AA3","#364FAC","#47445E"].reverse())
+                               .range(["#D9D3D0","#D9D3D0","#D9D3D0","#9C1AA3","#364FAC","#47445E"].reverse())
                     //more color options: https://github.com/d3/d3-scale-chromatic
 
                 var bubble = d3Pack()
@@ -135,22 +135,27 @@
     .insight-word-chart {
         position: relative;
     }
-    .upgrade {
-        padding: 2rem;
-        background: $darkestGreen;
+
+    .upgradeBox {
+        @include shadowbox;
+        background: $dolphin url(assets/images/grainy.png);
         color: $white;
-        border-radius: 12px;
-        top: 100px;
-        width: 100%;
+        left: 0;
+        margin: 0 auto;
+        max-width: 75%;
+        padding: 2.4rem;
         position: absolute;
-        a {
+        right: 0;
+        top: 33%;
+
+        .button {
             display: inline-block;
-            margin: 2rem auto 0;
+            margin: 1.6rem auto 0;
         }
     }
 
     .bubble-chart {
-        filter: blur(4px);
+        filter: blur(11px);
         opacity: .8;
 
         &.hasAccess {
