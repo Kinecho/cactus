@@ -6,8 +6,15 @@ import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 import {InsightWord} from "@shared/models/ReflectionResponse";
 import "@styles/transitions.scss"
+import {getQueryParam} from "@web/util";
+import {QueryParam} from "@shared/util/queryParams";
+
 const logger = new Logger("insights_embed");
 commonInit();
+
+const dataParam = getQueryParam(QueryParam.CHART_DATA);
+const initialWords:InsightWord[] = dataParam ? JSON.parse(atob(dataParam)) : [];
+console.log("initial words", initialWords);
 
 class InsightDataSource {
     _words: InsightWord[] = [];
@@ -41,6 +48,13 @@ interface InsightDataSourceDelegate {
 
 
 const dataSource = new InsightDataSource();
+if (initialWords && initialWords.length) {
+    dataSource.words = initialWords
+}
+window.unlockInsights = () => {
+    dataSource.blurred = false;
+    //TODO: Fire analytics
+};
 
 window.setInsightWords = (words: any) => {
     console.log("Setting words ", words);
@@ -70,7 +84,7 @@ new Vue({
     template: `
         <div class="container" :style="{ display: 'flex', flex: 1, justifyItems: 'stretch', alignItems: 'stretch' }">
             <transition name="fade-in">
-                <WordChart :words="dataSource.words" style="flex: 1" :burred="dataSource.blurred" v-if="dataSource.loaded"/>
+                <WordChart :words="dataSource.words" style="flex: 1" :start-blurred="dataSource.blurred" v-if="dataSource.loaded"/>
             </transition>
         </div>
     `,

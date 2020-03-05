@@ -34,6 +34,7 @@ export enum QueryParam {
     USE_PROMPT_ID = "prompt",
     UPGRADE_SUCCESS = "upgrade",
     CHART_TYPE = "chart_type",
+    CHART_DATA = "chart_data",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

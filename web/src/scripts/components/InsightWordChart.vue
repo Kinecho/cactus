@@ -246,7 +246,7 @@
 
     .bubble-chart {
         margin: 0 auto;
-        max-width: 350px;
+        /*max-width: 350px;*/
 
         -webkit-transition: 1s ease-in-out;
         transition: 1s ease-in-out;
