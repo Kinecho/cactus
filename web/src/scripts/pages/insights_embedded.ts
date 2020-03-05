@@ -62,11 +62,14 @@ window.setInsightWords = (words: any) => {
     }
 };
 
+
 new Vue({
     el: "#app",
     template: `
-            <WordChart :words="dataSource.words"/>
-        `,
+        <div class="container" :style="{ display: 'flex', flex: 1, justifyItems: 'stretch', alignItems: 'stretch' }">
+            <WordChart :words="dataSource.words" style="flex: 1"/>
+        </div>
+    `,
     components: {
         WordChart: InsightWordChart,
 
