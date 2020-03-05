@@ -26,7 +26,7 @@
     import {PageRoute} from '@shared/PageRoutes'
     import Logger from "@shared/Logger";
     import {HierarchyCircularNode} from "d3-hierarchy";
-    import {gtag} from "@web/analytics"
+    import {fireRevealInsightEvent, gtag} from "@web/analytics"
 
     interface InsightDataValue extends InsightWord {
         value: number
@@ -89,10 +89,11 @@
         },
         methods: {
             trackRevealEvent() {
-                gtag('event', 'revealed_insight', {
-                    event_category: "prompt_content",
-                    event_label: "word_chart"
-                });
+                // gtag('event', 'revealed_insight', {
+                //     event_category: "prompt_content",
+                //     event_label: "word_chart"
+                // });
+                fireRevealInsightEvent();
             },
             revealInsights(): void {
                 this.isRevealed = true;

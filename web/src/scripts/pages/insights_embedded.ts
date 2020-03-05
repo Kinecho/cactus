@@ -10,6 +10,7 @@ import "@styles/common.scss"
 import "@styles/pages/insights_embedded.scss"
 import {getQueryParam} from "@web/util";
 import {QueryParam} from "@shared/util/queryParams";
+import {fireRevealInsightEvent} from "@web/analytics";
 
 const logger = new Logger("insights_embed");
 commonInit();
@@ -53,9 +54,15 @@ const dataSource = new InsightDataSource();
 if (initialWords && initialWords.length) {
     dataSource.words = initialWords
 }
+
+
+window.fireShowMeAnalyticsEvent = () => {
+    fireRevealInsightEvent()
+};
+
 window.unlockInsights = () => {
     dataSource.blurred = false;
-    //TODO: Fire analytics
+    window.fireShowMeAnalyticsEvent()
 };
 
 window.setInsightWords = (words: any) => {
