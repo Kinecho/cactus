@@ -75,7 +75,7 @@ export const updateReflectionStatsTrigger = functions.firestore
 export const updateInsightWordsOnReflectionWrite = functions.firestore
     .document(`${Collection.reflectionResponses}/{responseId}`)
     .onWrite(async (change: functions.Change<functions.firestore.DocumentSnapshot>, context: functions.EventContext) => {
-        logger.log("starting updateSentPromptOnReflectionWrite");
+        logger.log("starting updateInsightWordsOnReflectionWrite");
         try {
             const beforeSnapshot = change.before;
             const afterSnapshot = change.after;
@@ -97,12 +97,18 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                 reflectionResponseAfter.content.text !== reflectionResponseBefore?.content?.text) {
                 const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
                 if (insightsResult) {
+                    // for now, don't store all this raw data (it's huge)
+                    // later we will store this in a separate collection
+                    delete insightsResult.syntaxRaw;
+                    delete insightsResult.entitiesRaw;
+
+                    // save words to the reflection response
                     await afterSnapshot.ref.update({[ReflectionResponse.Field.insights]: insightsResult});
                     return;
                 }
             }            
         } catch (error) {
-            logger.error("Failed to process the ReflectionResponse for insights.");
+            logger.error("Failed to process the ReflectionResponse for insights.", error);
         }
     });
 

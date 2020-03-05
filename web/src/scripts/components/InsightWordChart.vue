@@ -1,6 +1,6 @@
 <template>
     <div class="insight-word-chart">
-        <div :class="['bubble-chart',{hasAccess: hasAccess}]" />
+        <div :class="['bubble-chart',{hasAccess: hasAccess}]"/>
         <div class="upgradeBox" v-if="!hasAccess">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
@@ -19,6 +19,26 @@
         select as d3Select
     } from "d3";
     import {PageRoute} from '@shared/PageRoutes'
+    import Logger from "@shared/Logger";
+    import {HierarchyCircularNode} from "d3-hierarchy";
+
+    interface InsightDataValue extends InsightWord {
+        value: number
+    }
+
+    const logger = new Logger("InsightWordChart");
+
+    type Datum = { children: InsightWord[] };
+    type BubbleNode = Datum | InsightWord;
+
+    function isInsightWord(d: BubbleNode): d is InsightWord {
+        return !(d as Datum).children && (d as InsightWord).word != undefined
+    }
+
+    function isDatum(d: BubbleNode): d is Datum {
+        return !!(d as Datum).children
+    }
+
 
     export default Vue.extend({
         mounted() {
@@ -30,7 +50,7 @@
             }
         },
         props: {
-            words: Array,
+            words: {type: Array as () => InsightWord[], default: []},
             hasAccess: {type: Boolean, default: true}
         },
         computed: {
@@ -42,23 +62,35 @@
             renderBubbles(): void {
                 this.$forceUpdate();
 
-                var diameter = 375, //max size of the bubbles
-                    format   = d3Format(",d"),
-                    color    = d3ScaleOrdinal()
-                               //@ts-ignore
-                               .range(["#D9D3D0","#D9D3D0","#D9D3D0","#9C1AA3","#364FAC","#47445E"].reverse())
-                    //more color options: https://github.com/d3/d3-scale-chromatic
+                const maxDiameter = 375; //max size of the bubbles
+                const format = d3Format(",d");
 
-                var bubble = d3Pack()
-                    .size([diameter, diameter])
+                //more color options: https://github.com/d3/d3-scale-chromatic
+                let colorRange: string[] = [
+                    "#47445E",
+                    "#364FAC",
+                    "#9C1AA3",
+                    "#D9D3D0",
+                    "#D9D3D0",
+                    "#D9D3D0"
+                ];
+
+                const color = d3ScaleOrdinal()
+                    //@ts-ignore - ignore because this range does accept strings but typescript doesn't know that.
+                    .range(colorRange);
+
+                let bubble = d3Pack()
+                    .size([maxDiameter, maxDiameter])
                     .padding(12);
 
-                var svg = d3Select(".bubble-chart")
+                d3Select(".bubble-chart svg").remove();
+
+                let svg = d3Select(".bubble-chart")
                     .append("svg")
                     .attr("width", "100%")
                     .attr("height", "100%")
                     .attr("preserveAspectRatio", "xMinYMid")
-                    .attr("viewBox", "0 0 375 375")
+                    .attr("viewBox", "0 0 375 375");
 
                 if (this.words) {
                     const extras: InsightWord[] = [
@@ -73,56 +105,77 @@
                         {word: "", frequency: .1},
                         {word: "", frequency: .1},
                     ];
-                    var dataset = this.words.slice(0,7).concat(extras);
-
-                    //convert numerical values from strings to numbers
-                    // @ts-ignore
-                    var data = dataset.map(function(d){ d.value = +d["frequency"]; return d; });
+                    let dataset = this.words.slice(0, 7).concat(extras);
+                    logger.info("dataset", dataset);
 
                     //Sets up a hierarchy of data object
-                    var root = d3Hierarchy({children:data})
-                    // @ts-ignore
-                      .sum(function(d) { return d.value; })
-                    // @ts-ignore
-                      .sort(function(a, b) { return b.value - a.value; });
+                    let root = d3Hierarchy({children: dataset})
+                        .sum((d: BubbleNode) => {
+                            let t = 0;
+                            if (isInsightWord(d)) {
+                                t = d.frequency ?? 0
+                            }
+                            return t;
+
+                        })
+                        .sort((a, b) => {
+                            return (b.value ?? 0) - (a.value ?? 0);
+                        }) as HierarchyCircularNode<BubbleNode>;
 
                     //Once we have hierarchal data, run bubble generator
                     bubble(root);
 
                     //setup the chart
-                    var bubbles = svg.selectAll(".bubble")
-                    // @ts-ignore
-                        .data(root.children)
+                    let bubbles = svg.selectAll(".bubble")
+                        .data(root.children!)
                         .enter();
 
                     //create the bubbles
                     bubbles.append("circle")
                         .attr("class", "circle")
-                    // @ts-ignore
-                        .attr("r", function(d){ return d.r; })
-                    // @ts-ignore
-                        .attr("cx", function(d){ return d.x; })
-                    // @ts-ignore
-                        .attr("cy", function(d){ return d.y; })
-                    // @ts-ignore
-                        .style("fill", function(d) { return color(d.value); });
+                        .attr("r", (d) => {
+                            return d.r;
+                        })
+                        .attr("cx", (d) => {
+                            return d.x;
+                        })
+                        .attr("cy", (d) => {
+                            return d.y;
+                        })
+                        .style("fill", (d) => {
+                            let fillColor = color(`${d.value ?? 0}`);
+                            return fillColor as string;
+                        });
 
                     //format the text for each bubble
                     bubbles.append("text")
-                    // @ts-ignore
-                        .attr("x", function(d){ return d.x; })
-                    // @ts-ignore
-                        .attr("y", function(d){ return d.y + 5; })
+                        .attr("x", (d) => {
+                            return d.x;
+                        })
+                        .attr("y", (d) => {
+                            return d.y + 5;
+                        })
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "middle")
-                    // @ts-ignore
-                        .text(function(d){ return d.data["word"]; })
-                    // @ts-ignore
-                        .style("font-size", function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px"; })
+                        .text((d) => {
+                            if (isInsightWord(d.data)) {
+                                return d.data.word
+                            }
+                            return " "
+                        })
+                        // Note: This one needs to have the anonymous function
+                        // syntax because we need the "this" context that gets lost with the arrow syntax
+                        .style("font-size", function (d) {
+                            return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 14) + "px";
+                        })
                         .style("fill", "#FFF")
                         .append("title")
-                        // @ts-ignore
-                        .text(function(d, i) { return d.data["word"]; });
+                        .text(d => {
+                            if (isInsightWord(d.data)) {
+                                return d.data.word
+                            }
+                            return " "
+                        });
                 }
             }
         }
