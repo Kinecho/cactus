@@ -13,7 +13,7 @@
     import {InsightWord} from '@shared/models/ReflectionResponse'
     import {
         pack as d3Pack,
-        scaleLinear as d3ScaleLinear,
+        scaleOrdinal as d3ScaleOrdinal,
         format as d3Format,
         hierarchy as d3Hierarchy,
         select as d3Select
@@ -42,9 +42,9 @@
             renderBubbles(): void {
                 var diameter = 375, //max size of the bubbles
                     format   = d3Format(",d"),
-                    color    = d3ScaleLinear().domain([0,2])
+                    color    = d3ScaleOrdinal()
                                //@ts-ignore
-                               .range(["#F2EBE9", "#47445E", "#364FAC", "#9C1AA3"])
+                               .range(["#F2EBE9","#F2EBE9","#47445E","#47445E","#364FAC"].reverse())
                     //more color options: https://github.com/d3/d3-scale-chromatic
 
                 var bubble = d3Pack()
