@@ -1,23 +1,23 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="warningBox" v-if="isRevealed && didWrite && !loggedIn">
+        <div class="warningBox" v-if="!loggedIn">
             <p>To get Today's Insights,<br>signup to try Cactus.</p>
             <a class="button" :href="signupPageUrl">Try It Free</a>
         </div>
-        <div class="warningBox" v-if="isRevealed && didWrite && !words">
+        <div class="warningBox" v-if="loggedIn && isRevealed && didWrite && !words">
             <p>There was an error displaying Today's Insight.</p>
             <button @click="reloadPage()">Try Again</button>
         </div>
-        <div class="warningBox" v-if="isRevealed && !didWrite">
+        <div class="warningBox" v-if="loggedIn && isRevealed && !didWrite">
             <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
-            <a :href="pricingPageUrl">What are insights?</a>
+            <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
         </div>
-        <div class="upgradeBox" v-if="didWrite && isRevealed && isBasic">
+        <div class="upgradeBox" v-if="loggedIn && didWrite && isBasic">
             <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
-            <a :href="pricingPageUrl">What are insights?</a>
+            <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
         </div>
-        <div class="revealBox" v-if="!isRevealed">
+        <div class="revealBox" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
             <p>Want to see Today’s Insight?</p>
             <button class="primary" @click="revealInsights()">Show Me!</button>
         </div>
@@ -106,6 +106,8 @@
                     return true;
                 } else if (!this.loggedIn) {
                     return true;
+                } else if (!this.didWrite) {
+                    return true;
                 }
                 return false;
             }
@@ -117,6 +119,17 @@
                 //     event_label: "word_chart"
                 // });
                 fireRevealInsightEvent();
+            },
+            trackRevealUrlEvent(url: string) {
+                gtag('event', 'revealed_insight', {
+                    'event_category': "prompt_content",
+                    'event_label': "word_chart",
+                    'transport_type': 'beacon',
+                    'event_callback': function() {
+                        // @ts-ignore
+                        document.location = url;
+                    }
+                });
             },
             revealInsights(): void {
                 this.isRevealed = true;
