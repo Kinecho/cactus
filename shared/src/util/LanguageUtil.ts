@@ -7,5 +7,6 @@ export const WordCloudExclusionList = [
     "go",
     "me",
     "gon",
-    "s"
+    "s",
+    "'s"
 ]
