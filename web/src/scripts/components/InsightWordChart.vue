@@ -57,7 +57,6 @@
         props: {
             words: {type: Array as () => InsightWord[], default: []},
             startBlurred: {type: Boolean, default: false},
-            unBlurred: {type: Boolean, default: false},
             subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
             startGated: {type: Boolean, default: false}
         },
@@ -81,7 +80,7 @@
             isBlurry(): boolean {
                 if (this.startGated && !this.isRevealed) {
                     return true;
-                } else if (!this.startGated && this.startBlurred && !this.unBlurred) {
+                } else if (!this.startGated && this.startBlurred) {
                     return true;
                 }
                 return false;
