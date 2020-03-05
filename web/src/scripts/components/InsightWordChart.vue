@@ -2,7 +2,7 @@
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{hasAccess: hasAccess}]"/>
         <div class="upgradeBox" v-if="!hasAccess">
-            <p>To reveal Today's Insight,<br>upgrade to Cactus Plus.</p>
+            <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
             <a class="button primary" :href="pricingPageUrl">Learn More</a>
         </div>
     </div>
@@ -196,12 +196,16 @@
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
         left: 0;
-        margin: 0 auto;
-        max-width: 75%;
+        margin: auto;
         padding: 2.4rem;
         position: absolute;
         right: 0;
-        top: 33%;
+        top: 50%;
+        transform: translateY(-50%);
+
+        @include r(374) {
+            max-width: 75%;
+        }
 
         .button {
             display: inline-block;
@@ -211,10 +215,13 @@
 
     .bubble-chart {
         filter: blur(11px);
+        margin: 0 auto;
+        max-width: 350px;
         opacity: .8;
 
         &.hasAccess {
             filter: none;
+            max-width: none;
             opacity: 1;
         }
     }
