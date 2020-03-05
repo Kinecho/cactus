@@ -97,6 +97,12 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                 reflectionResponseAfter.content.text !== reflectionResponseBefore?.content?.text) {
                 const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
                 if (insightsResult) {
+                    // for now, don't store all this raw data (it's huge)
+                    // later we will store this in a separate collection
+                    insightsResult.syntaxRaw = undefined;
+                    insightsResult.entitiesRaw = undefined;
+
+                    // save words to the reflection response
                     await afterSnapshot.ref.update({[ReflectionResponse.Field.insights]: insightsResult});
                     return;
                 }
