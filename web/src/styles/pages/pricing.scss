@@ -145,6 +145,7 @@
     }
 
     .centered {
+        position: relative;
         text-align: left;
 
         @include r(768) {
@@ -231,14 +232,20 @@
         height: 324px;
         position: absolute;
         right: -20rem;
-        top: 45%;
+        top: 33%;
         width: 300px;
 
-        @include r(768) {
+        @include r(600) {
             background-position: right -12rem bottom 0, right -8rem top 0;
             height: 47rem;
             right: -1px;
             top: 18%;
+        }
+        @include r(768) {
+            background-position: right -20rem bottom 0, right -19rem top 0;
+        }
+        @include r(1200) {
+            background-position: right -12rem bottom 0, right -8rem top 0;
         }
     }
 
@@ -258,16 +265,36 @@
 
     &:before {
         background-image: url(assets/images/blob-outline.svg), url(assets/images/blob-green.svg);
-        background-position: left -5rem top, left bottom;
+        background-position: left bottom, left -2rem top;
         background-repeat: no-repeat;
-        background-size: 30rem 30.5rem, 28rem 30rem;
+        background-size: 15rem 14rem, 16rem 19rem;
+        bottom: 24%;
         content: "";
         display: block;
-        height: 38rem;
-        left: -16rem;
+        height: 21rem;
+        left: -10rem;
         position: absolute;
-        bottom: 20%;
-        width: 300px;
+        width: 30rem;
+
+        @include r(600) {
+            background-position: left -5rem top, left bottom;
+            background-size: 30rem 30.5rem, 28rem 30rem;
+            bottom: 20%;
+            height: 38rem;
+            left: -16rem;
+        }
+        @include r(768) {
+            background-position: left bottom, left -2rem top;
+            background-size: 15rem 14rem, 16rem 19rem;
+            height: 21rem;
+            left: -8rem;
+        }
+        @include r(1200) {
+            background-position: left -5rem top, left bottom;
+            background-size: 30rem 30.5rem, 28rem 30rem;
+            height: 38rem;
+            left: -16rem;
+        }
     }
 
     .sectionGraphic {
