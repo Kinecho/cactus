@@ -150,7 +150,8 @@ export enum ReflectionResponseField {
     reflectionDurationMs = "reflectionDurationMs",
     shared = "shared",
     cactusElement = "cactusElement",
-    insights = "insights"
+    insights = "insights",
+    updatedAt = "updatedAt"
 }
 
 export default class ReflectionResponse extends BaseModel {

@@ -112,7 +112,7 @@ export default class DownloadJournalFeedCommand extends FirebaseCommand {
     }
 
     async buildFeed(memberId: string): Promise<JournalEntry[]> {
-        const responseTask = AdminReflectionResponseService.getSharedInstance().getResponsesForMember(memberId);
+        const responseTask = AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId});
         const sentPromptsTask = AdminSentPromptService.getSharedInstance().getAllForCactusMemberId(memberId);
 
         const [responses, sentPrompts] = await Promise.all([responseTask, sentPromptsTask]);

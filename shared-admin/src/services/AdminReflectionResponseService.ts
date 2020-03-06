@@ -198,16 +198,24 @@ export default class AdminReflectionResponseService {
         }
     }
 
-    async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
-        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
-        const queryOptions = options || {};
+    async getResponsesForMember(options: { memberId: string, limit?: number}, queryOptions: QueryOptions = {}): Promise<ReflectionResponse[]> {
+        const {memberId, limit} = options;
+
+        let query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+            
+        if (limit) {
+            query = query.limit(limit)
+        }
+
+        query = query.orderBy(ReflectionResponse.Field.updatedAt, QuerySortDirection.desc);
+
         if (queryOptions.queryName) {
             queryOptions.queryName = queryOptions.queryName + "_AdminReflectionResponseService.getResponsesForMember";
         } else {
             queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
         }
 
-        const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
+        const result = await this.firestoreService.executeQuery(query, ReflectionResponse, queryOptions);
         return result.results
     }
 
@@ -219,7 +227,7 @@ export default class AdminReflectionResponseService {
                 return
             }
 
-            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            const reflections = await this.getResponsesForMember({memberId}, queryOptions);
             const {dayStreak, weekStreak, monthStreak} = calculateStreaks(reflections, {timeZone});
             const duration = calculateDurationMs(reflections);
 
@@ -248,7 +256,7 @@ export default class AdminReflectionResponseService {
                 return
             }
 
-            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            const reflections = await this.getResponsesForMember({memberId}, queryOptions);
             let wordFrequencies: {[key: string]: number} = {};
             let wordCloud: InsightWord[] = [];
 
