@@ -58,7 +58,7 @@ export const updateReflectionStatsTrigger = functions.firestore
             timeZone
         });
         if (reflectionStats) {
-            await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: reflectionStats})
+            await AdminCactusMemberService.getSharedInstance().setStats({memberId, stats: reflectionStats})
         }
 
         const wordCloud = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({

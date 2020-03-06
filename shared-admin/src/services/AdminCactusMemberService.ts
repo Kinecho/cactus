@@ -79,14 +79,19 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setReflectionStats(options: { memberId: string, stats: ReflectionStats, batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
-        const {memberId, stats} = options;
+    async setStats(options: { memberId: string, stats: ReflectionStats, wordCloud?: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
+        const {memberId, stats, wordCloud} = options;
         const doc: DocumentReference = this.getCollectionRef().doc(memberId);
         const data: Partial<CactusMember> = {
             stats: {
                 reflections: stats
             }
         };
+
+        if (wordCloud) {
+            data.wordCloud = wordCloud;
+        }
+
         try {
             if (queryOptions?.transaction) {
                 await queryOptions?.transaction.set(doc, data, {merge: true})
