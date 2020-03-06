@@ -94,7 +94,7 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
 
             // only run insights if there is content to run it for
             if (reflectionResponseAfter.content?.text && 
-                reflectionResponseAfter.content.text !== reflectionResponseBefore?.content?.text) {
+                reflectionResponseAfter.content.text.trim().toLowerCase() !== reflectionResponseBefore?.content?.text?.trim().toLowerCase()) {
                 
                 const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
                 if (insightsResult) {
