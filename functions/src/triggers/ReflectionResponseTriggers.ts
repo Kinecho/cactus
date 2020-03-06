@@ -123,7 +123,7 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                                 response.insights = pastInsightsResult;
 
                                 // save words to the reflection response
-                                await AdminReflectionResponseService.getSharedInstance().save(response);
+                                await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
                             }
                         }
                     }
