@@ -297,7 +297,7 @@ export default class AdminReflectionResponseService {
                   wordCloud.push({
                       word: word,
                       frequency: wordStats[word].frequency,
-                      salience: wordStats[word].salience * wordStats[word].frequency
+                      salience: (wordStats[word].salience || 0) * (wordStats[word].frequency || 1)
                   });
                 }
             }
