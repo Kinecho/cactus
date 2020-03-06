@@ -1,24 +1,38 @@
 <template>
     <div class="insight-word-chart">
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-        <div class="warningBox" v-if="!loggedIn">
+
+        <!-- Logged out user -->
+        <div class="warning box" v-if="!loggedIn">
+            <h4>Today's Insight</h4>
             <p>To get Today's Insights,<br>signup to try Cactus.</p>
             <a class="button" :href="signupPageUrl">Try It Free</a>
         </div>
-        <div class="warningBox" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
+
+        <!-- Error state -->
+        <div class="warning box" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
+            <h4>Today's Insight</h4>
             <p>There was an error displaying Today's Insight.</p>
             <button @click="reloadPage()">Try Again</button>
         </div>
-        <div class="warningBox" v-if="loggedIn && isRevealed && !didWrite">
+
+        <!-- No words written -->
+        <div class="warning box" v-if="loggedIn && isRevealed && !didWrite">
+            <h4>Today's Insight</h4>
             <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
             <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
         </div>
-        <div class="upgradeBox" v-if="loggedIn && didWrite && isBasic">
-            <p>To reveal Today's&nbsp;Insight,<br>upgrade to Cactus&nbsp;Plus.</p>
-            <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
+
+        <!-- Basic user -->
+        <div class="upgrade box" v-if="loggedIn && didWrite && isBasic">
+            <h4>Today's Insight</h4>
+            <p>To reveal Today's Insight, upgrade to Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
         </div>
-        <div class="revealBox" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
-            <p>Want to see Today’s Insight?</p>
+
+        <!-- Plus (Trial) user -->
+        <div class="reveal box" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
+            <h4>Today's Insight</h4>
+            <p>Want to see a visualization of words that have come up recently in your&nbsp;reflections?</p>
             <button class="primary" @click="revealInsights()">Show Me!</button>
         </div>
     </div>
@@ -76,7 +90,7 @@
             loggedIn: {type: Boolean, default: true}
         },
         data(): {
-            isRevealed: boolean    
+            isRevealed: boolean
         } {
             return {
                 isRevealed: !this.startGated
@@ -169,7 +183,8 @@
                     .attr("width", "100%")
                     .attr("height", "100%")
                     .attr("preserveAspectRatio", "xMinYMid")
-                    .attr("viewBox", "0 0 375 375");
+                    .attr("viewBox", "0 0 375 375")
+                    .style("display", "block");
 
                 if (this.words) {
                     const extras: InsightWord[] = [
