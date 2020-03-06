@@ -110,23 +110,29 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                 // attempt to process the last 14 reflections as well
                 const memberId = reflectionResponseAfter.cactusMemberId;
                 if (memberId) {
+                    const insightTasks: Promise<void>[] = [];
                     const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId: memberId, limit: 14});
                     for (const response of reflectionResponses) {
-                        if (!response.insights && response.content?.text) {
-                            const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
-                            if (pastInsightsResult) {
-                                // for now, don't store all this raw data (it's huge)
-                                // later we will store this in a separate collection
-                                delete pastInsightsResult.syntaxRaw;
-                                delete pastInsightsResult.entitiesRaw;
+                        insightTasks.push(new Promise<void>(async resolve => {
+                            if (!response.insights && response.content?.text) {
+                                const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
+                                if (pastInsightsResult) {
+                                    // for now, don't store all this raw data (it's huge)
+                                    // later we will store this in a separate collection
+                                    delete pastInsightsResult.syntaxRaw;
+                                    delete pastInsightsResult.entitiesRaw;
 
-                                response.insights = pastInsightsResult;
+                                    response.insights = pastInsightsResult;
 
-                                // save words to the reflection response
-                                await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                    // save words to the reflection response
+                                    await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                }
                             }
-                        }
+                            
+                            resolve();
+                        }));
                     }
+                    await Promise.all(insightTasks);
                 }
             }            
         } catch (error) {
