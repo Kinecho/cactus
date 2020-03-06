@@ -19,8 +19,7 @@
         <!-- No words written -->
         <div class="warning box" v-if="loggedIn && isRevealed && !didWrite">
             <h4>Today's Insight</h4>
-            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
-            <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
+            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
         </div>
 
         <!-- Basic user -->
@@ -308,10 +307,11 @@
         }
     }
 
-    .primary {
+    .primary,
+    a.button {
         display: inline-block;
         margin: 1.6rem auto 0;
-        min-width: 16rem;
+        width: 100%;
     }
 
     .fancyLink {
