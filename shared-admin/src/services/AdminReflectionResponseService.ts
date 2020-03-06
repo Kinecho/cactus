@@ -257,7 +257,7 @@ export default class AdminReflectionResponseService {
             }
 
             const reflections = await this.getResponsesForMember({memberId, limit: 7}, queryOptions);
-            const wordFrequencies: {[key: string]: number} = {};
+            const wordStats: {[key: string]: InsightWord} = {};
             const wordCloud: InsightWord[] = [];
 
             if (reflections) {
@@ -268,24 +268,42 @@ export default class AdminReflectionResponseService {
                             if (WordCloudExclusionList.includes(wordInsight.word)) {
                                 return;
                             }
-                            if(wordFrequencies[wordInsight.word]) {
-                               wordFrequencies[wordInsight.word]++;
-                            } else {
-                               wordFrequencies[wordInsight.word] = 1;
+
+                            if (wordInsight.word) {
+                                if(wordStats[wordInsight.word]) {
+                                   const aggFrequency = wordStats[wordInsight.word].frequency;
+                                   const aggSalience = wordStats[wordInsight.word].salience;
+                                   if (aggFrequency) {
+                                       wordStats[wordInsight.word].frequency = aggFrequency + 1;
+                                   }
+                                   if (aggSalience && wordInsight.salience) {
+                                       wordStats[wordInsight.word].salience = (aggSalience + wordInsight.salience) / 2;
+                                   }
+                                } else {
+                                   wordStats[wordInsight.word] = {
+                                       word: wordInsight.word,
+                                       frequency: 1,
+                                       salience: wordInsight.salience || 0
+                                   }
+                                }
                             }
                         });
                     }
                 });
             }
 
-            if (wordFrequencies) {
-                for (const word in wordFrequencies){
+            if (wordStats) {
+                for (const word in wordStats){
                   wordCloud.push({
                       word: word,
-                      frequency: wordFrequencies[word]
+                      frequency: wordStats[word].frequency,
+                      salience: wordStats[word].salience * wordStats[word].frequency
                   });
                 }
             }
+
+            // sort array by salience
+            wordCloud.sort((a: InsightWord, b: InsightWord) => (b.salience || 0) - (a.salience || 0));
 
             return wordCloud;
         } catch (error) {
