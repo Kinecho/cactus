@@ -89,10 +89,10 @@
                         <button class="lowerBtn authBtn secondary" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
-                        <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
-                        </button>
-                        <button class="lowerBtn authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
+                        </button> -->
+                        <button class="lowerBtn authBtn secondary"
                                 v-if="authLoaded && loggedIn && !isModal"
                                 @click="goToHome">
                             {{promptCopy.GO_HOME}}

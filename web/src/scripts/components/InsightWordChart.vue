@@ -3,7 +3,7 @@
         <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
 
         <!-- Logged out user -->
-        <div class="warning box" v-if="!loggedIn">
+        <div class="box" v-if="!loggedIn">
             <h4>Today's Insight</h4>
             <p>To get Today's Insights,<br>signup to try Cactus.</p>
             <a class="button" :href="signupPageUrl">Try It Free</a>
@@ -12,25 +12,24 @@
         <!-- Error state -->
         <div class="warning box" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
             <h4>Today's Insight</h4>
-            <p>There was an error displaying Today's Insight.</p>
-            <button @click="reloadPage()">Try Again</button>
+            <p>There was an error displaying Today's&nbsp;Insight.</p>
+            <button class="primary" @click="reloadPage()">Try Again</button>
         </div>
 
         <!-- No words written -->
-        <div class="warning box" v-if="loggedIn && isRevealed && !didWrite">
+        <div class="box" v-if="loggedIn && isRevealed && !didWrite">
             <h4>Today's Insight</h4>
-            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.</p>
-            <a href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a>
+            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
         </div>
 
         <!-- Basic user -->
-        <div class="upgrade box" v-if="loggedIn && didWrite && isBasic">
+        <div class="box" v-if="loggedIn && didWrite && isBasic">
             <h4>Today's Insight</h4>
             <p>To reveal Today's Insight, upgrade to Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
         </div>
 
         <!-- Plus (Trial) user -->
-        <div class="reveal box" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
+        <div class="box" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
             <h4>Today's Insight</h4>
             <p>Want to see a visualization of words that have come up recently in your&nbsp;reflections?</p>
             <button class="primary" @click="revealInsights()">Show Me!</button>
@@ -306,12 +305,17 @@
         @include r(374) {
             max-width: 85%;
         }
+
+        &.warning {
+            background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
+        }
     }
 
-    .primary {
+    .primary,
+    a.button {
         display: inline-block;
         margin: 1.6rem auto 0;
-        min-width: 16rem;
+        width: 100%;
     }
 
     .fancyLink {
