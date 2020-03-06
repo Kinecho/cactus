@@ -3,14 +3,17 @@
         <div class="flipper">
             <div :class="['front', 'flip-card']">
                 <upgrade-banner :member="member" />
+                <div class="successText">
+                    <h2>{{celebrateText}}</h2>
+                </div>
                 <div class="insightContainer revealed">
-                    <h4>Today's Insight</h4>
-                    <p>A visualization of words that have come up recently in your reflections.</p>
-                    <InsightWordChart 
+                    <!-- <h4>Today's Insight</h4>
+                    <p>A visualization of words that have come up recently in your reflections.</p> -->
+                    <InsightWordChart
                         :words="wordData"
-                        :didWrite="didWriteReflection" 
-                        :subscriptionTier="subscriptionTier" 
-                        :startGated="true" 
+                        :didWrite="didWriteReflection"
+                        :subscriptionTier="subscriptionTier"
+                        :startGated="true"
                         :startBlurred="true"
                         :loggedIn="loggedIn" />
                 </div>
@@ -83,7 +86,7 @@
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="lowerBtn authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                        <button class="lowerBtn authBtn secondary" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
                         <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
@@ -484,7 +487,7 @@
     }
 
     .insightContainer {
-        padding: 3.2rem;
+        padding: 0 3.2rem 3.2rem;
         width: 100%;
 
         h4 {
@@ -508,9 +511,7 @@
             margin-bottom: 2.4rem;
         }
         @include r(600) {
-            .insightRevealed & {
-                margin-bottom: 0;
-            }
+            margin-bottom: 0;
         }
     }
 
@@ -543,7 +544,7 @@
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 4.8rem;
+        margin-bottom: 3.2rem;
     }
 
     .metric {
