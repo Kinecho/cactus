@@ -12,8 +12,8 @@
         <!-- Error state -->
         <div class="warning box" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
             <h4>Today's Insight</h4>
-            <p>There was an error displaying Today's Insight.</p>
-            <button @click="reloadPage()">Try Again</button>
+            <p>There was an error displaying Today's&nbsp;Insight.</p>
+            <button class="primary" @click="reloadPage()">Try Again</button>
         </div>
 
         <!-- No words written -->
@@ -304,6 +304,10 @@
 
         @include r(374) {
             max-width: 85%;
+        }
+
+        &.warning {
+            background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
         }
     }
 
