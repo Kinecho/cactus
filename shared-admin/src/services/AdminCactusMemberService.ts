@@ -79,11 +79,13 @@ export default class AdminCactusMemberService {
         return firestoreService.delete(id, CactusMember);
     }
 
-    async setStats(options: { memberId: string, stats: ReflectionStats, wordCloud?: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
+    async setStats(options: { memberId: string, stats?: ReflectionStats, wordCloud?: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {
         const {memberId, stats, wordCloud} = options;
         const doc: DocumentReference = this.getCollectionRef().doc(memberId);
-        const data: Partial<CactusMember> = {
-            stats: {
+        const data: Partial<CactusMember> = {};
+
+        if (stats) {
+            data.stats = {
                 reflections: stats
             }
         };
@@ -92,18 +94,20 @@ export default class AdminCactusMemberService {
             data.wordCloud = wordCloud;
         }
 
-        try {
-            if (queryOptions?.transaction) {
-                await queryOptions?.transaction.set(doc, data, {merge: true})
-            } else if (options.batch) {
-                options.batch.set(doc, data, {merge: true})
-            } else {
-                await doc.set(data, {merge: true});
+        if (data.stats || data.wordCloud) {
+            try {
+                if (queryOptions?.transaction) {
+                    await queryOptions?.transaction.set(doc, data, {merge: true})
+                } else if (options.batch) {
+                    options.batch.set(doc, data, {merge: true})
+                } else {
+                    await doc.set(data, {merge: true});
+                }
+            } catch (error) {
+                logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
             }
-        } catch (error) {
-            logger.error(`Unable to update member stats for memberId = ${memberId}. ${queryOptions?.transaction ? "Used transaction" : "Not using transaction."}`, error)
         }
-
+        return;
     }
 
     async setWordInsights(options: { memberId: string, wordCloud: InsightWord[], batch?: Batch }, queryOptions?: SaveOptions): Promise<void> {

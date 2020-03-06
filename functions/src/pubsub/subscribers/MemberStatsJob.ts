@@ -74,7 +74,7 @@ async function handleMember(member: CactusMember, batch?: Batch): Promise<Member
 
         result.wordCloud = wordCloud;
 
-        if (stats) {
+        if (stats || wordCloud) {
             await AdminCactusMemberService.getSharedInstance().setStats({
                 memberId,
                 stats: stats,
