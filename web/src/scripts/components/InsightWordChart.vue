@@ -187,16 +187,16 @@
 
                 if (this.words) {
                     const extras: InsightWord[] = [
-                        {word: "", frequency: .5},
-                        {word: "", frequency: .5},
-                        {word: "", frequency: .3},
-                        {word: "", frequency: .3},
-                        {word: "", frequency: .3},
-                        {word: "", frequency: .1},
-                        {word: "", frequency: .1},
-                        {word: "", frequency: .1},
-                        {word: "", frequency: .1},
-                        {word: "", frequency: .1},
+                        {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .3, salience: .3},
+                        {word: "", frequency: .3, salience: .3},
+                        {word: "", frequency: .3, salience: .3},
+                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .1, salience: .1},
                     ];
                     let dataset = this.words.slice(0, 7).concat(extras);
                     logger.info("dataset", dataset);
@@ -206,7 +206,8 @@
                         .sum((d: BubbleNode) => {
                             let t = 0;
                             if (isInsightWord(d)) {
-                                t = d.frequency ?? 0
+                                // never take a value greater than six, to control colors
+                                t = Math.min(Math.max(d.frequency,d.salience),6) ?? 0
                             }
                             return t;
 
