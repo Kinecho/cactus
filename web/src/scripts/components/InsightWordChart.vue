@@ -282,10 +282,16 @@
     @import "variables";
 
     .insight-word-chart {
+        margin: -4rem 0 0;
         position: relative;
     }
 
-    .upgradeBox, .revealBox, .warningBox {
+    h4 {
+        margin-bottom: .8rem;
+        opacity: .8;
+    }
+
+    .box {
         @include shadowbox;
         background: $dolphin url(assets/images/grainy.png);
         color: $white;
@@ -298,30 +304,28 @@
         transform: translateY(-50%);
 
         @include r(374) {
-            max-width: 75%;
-        }
-
-        button, a {
-            display: inline-block;
-            margin: 1.6rem auto 0;
+            max-width: 85%;
         }
     }
 
-    .upgradeBox, .warningBox {
-        background: $white;
-        color: $darkText;
+    .primary {
+        display: inline-block;
+        margin: 1.6rem auto 0;
+        min-width: 16rem;
+    }
+
+    .fancyLink {
+        @include fancyLinkLight;
+        margin-left: .8rem;
     }
 
     .bubble-chart {
         margin: 0 auto;
-        /*max-width: 350px;*/
-
-        -webkit-transition: 1s ease-in-out;
         transition: 1s ease-in-out;
 
         &.isBlurry {
-            opacity: .8;
             filter: blur(11px);
+            opacity: .8;
         }
     }
 </style>
