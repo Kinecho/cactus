@@ -207,7 +207,7 @@
                             let t = 0;
                             if (isInsightWord(d)) {
                                 // never take a value greater than six, to control colors
-                                t = Math.min(Math.max(d.frequency,d.salience),6) ?? 0
+                                t = Math.min(Math.max(d.frequency || 1, d.salience || 0),6) ?? 0
                             }
                             return t;
 
