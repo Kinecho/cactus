@@ -256,7 +256,7 @@ export default class AdminReflectionResponseService {
                 return
             }
 
-            const reflections = await this.getResponsesForMember({memberId}, queryOptions);
+            const reflections = await this.getResponsesForMember({memberId, limit: 7}, queryOptions);
             const wordFrequencies: {[key: string]: number} = {};
             const wordCloud: InsightWord[] = [];
 
