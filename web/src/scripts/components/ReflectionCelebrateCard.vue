@@ -489,7 +489,7 @@
     .insightContainer {
         padding: 0 3.2rem 3.2rem;
         width: 100%;
-
+        margin: -4rem 0 0;
         h4 {
             margin-bottom: .8rem;
             opacity: .8;

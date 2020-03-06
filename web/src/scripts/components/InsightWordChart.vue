@@ -282,7 +282,7 @@
     @import "variables";
 
     .insight-word-chart {
-        margin: -4rem 0 0;
+        margin: 0;
         position: relative;
     }
 
