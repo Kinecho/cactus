@@ -116,7 +116,7 @@
                     return true;
                 } else if (!this.startGated && this.startBlurred) {
                     return true;
-                } else if (!this.words.length > 0) {
+                } else if (this.words?.length <= 0) {
                     return true;
                 } else if (!this.loggedIn) {
                     return true;
