@@ -12,6 +12,7 @@ import AdminSentCampaignService from "@admin/services/AdminSentCampaignService";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
 import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import GoogleSheetsService from "@admin/services/GoogleSheetsService";
+import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import * as Sentry from "@sentry/node";
 import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
@@ -56,6 +57,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPendingUserService.initialize();
     AdminSentCampaignService.initialize();
     GoogleSheetsService.initialize(config);
+    GoogleLanguageService.initialize(config);
     AdminEmailReplyService.initialize();
     AdminSocialInviteService.initialize(config);
     AdminMemberProfileService.initialize();

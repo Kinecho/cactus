@@ -49,7 +49,7 @@
         "module-alias": "^2.2.0",
         "prompts": "^2.1.0",
         "simple-git": "^1.121.0",
-        "stripe": "^8.17.0",
+        "stripe": "8.17.0",
         "yesno": "^0.2.0"
     },
     "engines": {

@@ -66,7 +66,7 @@ export default class MemberStatsCommand extends FirebaseCommand {
             });
 
             if (saveResponse.save) {
-                await AdminCactusMemberService.getSharedInstance().setReflectionStats({memberId, stats: stats});
+                await AdminCactusMemberService.getSharedInstance().setStats({memberId, stats: stats});
                 console.log("successfully saved the member")
             }
         }

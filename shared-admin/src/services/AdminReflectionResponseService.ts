@@ -1,5 +1,5 @@
 import AdminFirestoreService, {DeleteOptions, QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {ReflectionResponseField} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {ReflectionResponseField, InsightWord} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -14,6 +14,7 @@ import {
     UpdateTagsRequest
 } from "@shared/mailchimp/models/MailchimpTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
+import {WordCloudExclusionList} from "@shared/util/LanguageUtil";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
@@ -29,7 +30,6 @@ export interface ResetUserResponse {
     tagResponse: UpdateTagResponse,
     lastReplyString?: string,
 }
-
 
 export default class AdminReflectionResponseService {
     protected static sharedInstance: AdminReflectionResponseService;
@@ -198,16 +198,24 @@ export default class AdminReflectionResponseService {
         }
     }
 
-    async getResponsesForMember(memberId: string, options?: QueryOptions): Promise<ReflectionResponse[]> {
-        const query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
-        const queryOptions = options || {};
+    async getResponsesForMember(options: { memberId: string, limit?: number}, queryOptions: QueryOptions = {}): Promise<ReflectionResponse[]> {
+        const {memberId, limit} = options;
+
+        let query = this.getCollectionRef().where(ReflectionResponse.Field.cactusMemberId, "==", memberId);
+            
+        if (limit) {
+            query = query.limit(limit)
+        }
+
+        query = query.orderBy(ReflectionResponse.Field.updatedAt, QuerySortDirection.desc);
+
         if (queryOptions.queryName) {
             queryOptions.queryName = queryOptions.queryName + "_AdminReflectionResponseService.getResponsesForMember";
         } else {
             queryOptions.queryName = "AdminReflectionResponseService.getResponsesForMember";
         }
 
-        const result = await this.firestoreService.executeQuery(query, ReflectionResponse, options);
+        const result = await this.firestoreService.executeQuery(query, ReflectionResponse, queryOptions);
         return result.results
     }
 
@@ -219,7 +227,7 @@ export default class AdminReflectionResponseService {
                 return
             }
 
-            const reflections = await this.getResponsesForMember(memberId, queryOptions);
+            const reflections = await this.getResponsesForMember({memberId}, queryOptions);
             const {dayStreak, weekStreak, monthStreak} = calculateStreaks(reflections, {timeZone});
             const duration = calculateDurationMs(reflections);
 
@@ -233,6 +241,71 @@ export default class AdminReflectionResponseService {
                 totalDurationMs: duration,
                 elementAccumulation: elementAccumulation
             };
+        } catch (error) {
+            logger.error("Failed to calculate stats for memberId", options.memberId);
+            return undefined;
+        }
+
+    }
+
+    async aggregateWordInsightsForMember(options: { memberId: string }, queryOptions?: QueryOptions): Promise<InsightWord[] | undefined> {
+        try {
+            const {memberId} = options;
+            if (!memberId) {
+                logger.error("No memberId provided to calculate stats.");
+                return
+            }
+
+            const reflections = await this.getResponsesForMember({memberId, limit: 7}, queryOptions);
+            const wordStats: {[key: string]: InsightWord} = {};
+            const wordCloud: InsightWord[] = [];
+
+            if (reflections) {
+                reflections.forEach(reflection => {
+                    if (reflection.insights?.insightWords) {
+                        reflection.insights.insightWords.forEach(wordInsight => {
+                            // don't include words in the exclusion list
+                            if (WordCloudExclusionList.includes(wordInsight.word)) {
+                                return;
+                            }
+
+                            if (wordInsight.word) {
+                                if(wordStats[wordInsight.word]) {
+                                   const aggFrequency = wordStats[wordInsight.word].frequency;
+                                   const aggSalience = wordStats[wordInsight.word].salience;
+                                   if (aggFrequency) {
+                                       wordStats[wordInsight.word].frequency = aggFrequency + 1;
+                                   }
+                                   if (aggSalience && wordInsight.salience) {
+                                       wordStats[wordInsight.word].salience = (aggSalience + wordInsight.salience) / 2;
+                                   }
+                                } else {
+                                   wordStats[wordInsight.word] = {
+                                       word: wordInsight.word,
+                                       frequency: 1,
+                                       salience: wordInsight.salience || 0
+                                   }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            if (wordStats) {
+                for (const word in wordStats){
+                  wordCloud.push({
+                      word: word,
+                      frequency: wordStats[word].frequency,
+                      salience: (wordStats[word].salience || 0) * (wordStats[word].frequency || 1)
+                  });
+                }
+            }
+
+            // sort array by salience
+            wordCloud.sort((a: InsightWord, b: InsightWord) => (b.salience || 0) - (a.salience || 0));
+
+            return wordCloud;
         } catch (error) {
             logger.error("Failed to calculate stats for memberId", options.memberId);
             return undefined;

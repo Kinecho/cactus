@@ -3,6 +3,7 @@ import * as functions from "firebase-functions";
 import * as Sentry from "@sentry/node"
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
+import {InsightWord} from "@shared/models/ReflectionResponse";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
@@ -45,7 +46,8 @@ interface MemberStatResult {
     memberId?: string,
     memberEmail?: string,
     error?: string,
-    stats?: ReflectionStats
+    stats?: ReflectionStats,
+    wordCloud?: InsightWord[]
 }
 
 
@@ -63,14 +65,24 @@ async function handleMember(member: CactusMember, batch?: Batch): Promise<Member
             memberId,
             timeZone,
         }, {queryName: `calculateMemberStats.${member.email}`});
+        
         result.stats = stats;
-        if (stats) {
-            await AdminCactusMemberService.getSharedInstance().setReflectionStats({
+            
+        const wordCloud = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({
+            memberId
+        }, {queryName: `aggregateWordInsightsForMember.${member.email}`});
+
+        result.wordCloud = wordCloud;
+
+        if (stats || wordCloud) {
+            await AdminCactusMemberService.getSharedInstance().setStats({
                 memberId,
                 stats: stats,
+                wordCloud: wordCloud,
                 batch: batch,
             });
         }
+
         result.success = true;
         result.error = undefined;
         return result;

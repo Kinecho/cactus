@@ -178,3 +178,10 @@ function createGTag() {
     }
     return _gtag
 }
+
+export function fireRevealInsightEvent() {
+    gtag('event', 'revealed_insight', {
+        event_category: "prompt_content",
+        event_label: "word_chart"
+    });
+}

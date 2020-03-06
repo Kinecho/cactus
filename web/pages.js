@@ -40,11 +40,6 @@ module.exports = {
     },
     "email_action": {
         "title": "Email Action",
-        "path": "/auth-actions",
-        "name": "email_action"
-    },
-    "email_action": {
-        "title": "Email Action",
         "path": "/authenticate-actions",
         "name": "email_action"
     },
@@ -111,5 +106,10 @@ module.exports = {
         "title": "Welcome",
         "path": "/welcome",
         "name": "android_welcome"
+    },
+    "insights_embedded": {
+        "title": "Insights",
+        "path": "/insights-embed",
+        "name": "insights_embedded"
     }
 }

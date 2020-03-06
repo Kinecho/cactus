@@ -1,5 +1,6 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
+import {InsightWord} from "@shared/models/ReflectionResponse";
 import {ElementAccumulation} from "@shared/models/ElementAccumulation";
 import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
@@ -133,6 +134,8 @@ export default class CactusMember extends BaseModel {
 
     subscription?: MemberSubscription;
     stripe?: MemberStripeDetails = {};
+
+    wordCloud?: InsightWord[];
 
     prepareForFirestore(): any {
         super.prepareForFirestore();

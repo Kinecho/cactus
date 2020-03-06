@@ -1,4 +1,3 @@
-import {LocalStorageKey} from '@web/services/StorageService'
 <template>
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
@@ -6,11 +5,17 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 <upgrade-banner :member="member" />
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
-                    <img src="/assets/images/celebrate2.svg" class="illustration" alt="Celebrate!" v-if="cactusElement === undefined"/>
-                    <p class="subtext" v-if="cactusElement">Today’s question focused on
-                        <a class="element-name" href="" @click.prevent="showCactusModal(cactusElement)">{{elementName}}</a>,
-                        which is about <span class="meaning">{{elementCopy[cactusElement.toUpperCase() + '_DESCRIPTION']}}</span>.
-                    </p>
+                </div>
+                <div class="insightContainer revealed">
+                    <!-- <h4>Today's Insight</h4>
+                    <p>A visualization of words that have come up recently in your reflections.</p> -->
+                    <InsightWordChart
+                        :words="wordData"
+                        :didWrite="didWriteReflection"
+                        :subscriptionTier="subscriptionTier"
+                        :startGated="true"
+                        :startBlurred="true"
+                        :loggedIn="loggedIn" />
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -81,18 +86,18 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="authBtn" v-bind:class="[loggedIn && !isModal ? 'primary' : 'secondary']" v-if="this.reflectionResponse.content.text" @click="tradeNote">
+                        <button class="lowerBtn authBtn secondary" v-if="this.reflectionResponse.content.text" @click="tradeNote">
                             Share Note
                         </button>
-                        <button class="primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
+                        <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
                             {{promptCopy.SIGN_UP_MESSAGE}}
-                        </button>
-                        <button class="authBtn" v-bind:class="[this.reflectionResponse.content.text ? 'secondary' : 'primary']"
+                        </button> -->
+                        <button class="lowerBtn authBtn secondary"
                                 v-if="authLoaded && loggedIn && !isModal"
                                 @click="goToHome">
                             {{promptCopy.GO_HOME}}
                         </button>
-                        <button class="primary authBtn"
+                        <button class="lowerBtn primary authBtn"
                                 v-if="authLoaded && loggedIn && isModal"
                                 @click="close">
                             {{promptCopy.CLOSE}}
@@ -105,16 +110,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
                         v-if="showTradeNote"
                         :content="sharingContentCard"
                         :response="reflectionResponse"/>
-                <div class="auth-card" v-else>
-                    <img src="/assets/images/balloons.svg" class="illustration" alt=""/>
-                    <h2>Become a better version of yourself</h2>
-                    <p class="subtext">
-                        Questions to help you become more mindful and reflect on what makes you happy.
-                    </p>
-                    <div class="auth" v-if="authLoaded && !loggedIn">
-                        <magic-link v-on:success="magicLinkSuccess" @error="magicLinkError"/>
-                    </div>
-                </div>
                 <div class="flexContainer">
                     <button @click="flipped = false" class="backBtn tertiary">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
@@ -144,7 +139,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
     import {ElementAccumulation} from '@shared/models/ElementAccumulation'
-    import ReflectionResponse from '@shared/models/ReflectionResponse'
+    import ReflectionResponse, {InsightWord} from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
     import {ListenerUnsubscriber} from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
@@ -161,7 +156,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
+    import InsightWordChart from "@components/InsightWordChart.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
+    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics"
 
@@ -176,7 +173,8 @@ import {LocalStorageKey} from '@web/services/StorageService'
             PromptContentCard,
             ElementDescriptionModal,
             InputNameModal,
-            UpgradeBanner: ReflectionCelebrateUpgradeBanner
+            UpgradeBanner: ReflectionCelebrateUpgradeBanner,
+            InsightWordChart
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
@@ -266,6 +264,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
             }
         },
         computed: {
+            subscriptionTier(): SubscriptionTier | undefined {
+                return this.member?.tier;
+            },
             loginUrl(): string {
                 const base = `${PageRoute.SIGNUP}`;
                 // const params = {}
@@ -300,6 +301,15 @@ import {LocalStorageKey} from '@web/services/StorageService'
                     default:
                         return this.cactusElement
                 }
+            },
+            hasInsights(): boolean {
+                return this.member?.wordCloud ? true : false;
+            },
+            wordData(): InsightWord[] | undefined {
+                return this.member?.wordCloud;
+            },
+            didWriteReflection(): boolean {
+                return this.reflectionResponse?.content?.text ? true : false;
             }
         },
         methods: {
@@ -411,7 +421,7 @@ import {LocalStorageKey} from '@web/services/StorageService'
             },
             selectStreak() {
                 this.currentStreak = 'days';
-                
+
                 if (this.streakDays && this.streakWeeks && this.streakMonths) {
                     if (this.streakDays > 1) {
                         this.currentStreak = 'days';
@@ -446,9 +456,6 @@ import {LocalStorageKey} from '@web/services/StorageService'
         }
 
         &.flip-container .flipper {
-            // background: $lightBlue url(assets/images/lightGreenNeedles.svg) 0 0/30rem;
-            // causing issues on safari
-
             @include r(600) {
                 background: transparent;
                 box-shadow: none;
@@ -473,47 +480,20 @@ import {LocalStorageKey} from '@web/services/StorageService'
     }
 
     .successText {
-        flex-grow: 1;
-        padding: 4rem 4rem 6.4rem;
-
-        @include r(374) {
-            padding: 7.2rem 4rem 9.6rem;
-        }
-        @include r(600) {
-            padding: 6.4rem 4rem;
-        }
-    }
-
-    h2 {
         color: $magenta;
+        flex-grow: 1;
         font-size: 3.2rem;
-        margin-bottom: 2.4rem;
-
-        @include r(600) {
-            margin-bottom: 3.2rem;
-        }
-
-        &.green {
-            color: $darkestGreen;
-        }
+        padding: 4rem 2.4rem 2.4rem;
     }
 
-    .subtext {
-        margin: -1.6rem 0 .8rem;
-        opacity: .8;
-
-        .meaning, .element-name {
-            text-transform: lowercase;
+    .insightContainer {
+        padding: 0 3.2rem 3.2rem;
+        width: 100%;
+        margin: -4rem 0 0;
+        h4 {
+            margin-bottom: .8rem;
+            opacity: .8;
         }
-
-        @include r(600) {
-            margin-top: -2.4rem;
-        }
-    }
-
-    .front .illustration {
-        margin: 0 auto;
-        width: 90%;
     }
 
     .lowerContainer {
@@ -529,6 +509,9 @@ import {LocalStorageKey} from '@web/services/StorageService'
 
         @include r(374) {
             margin-bottom: 2.4rem;
+        }
+        @include r(600) {
+            margin-bottom: 0;
         }
     }
 
@@ -561,19 +544,12 @@ import {LocalStorageKey} from '@web/services/StorageService'
     .stats-container {
         display: flex;
         justify-content: center;
-        margin-bottom: 1.6rem;
-
-        @include r(374) {
-            margin-bottom: 2.4rem;
-        }
+        margin-bottom: 3.2rem;
     }
 
     .metric {
         color: $lightGreen;
         padding: 0 .8rem;
-
-        @include r(600) {
-        }
 
         p {
             font-size: 1.6rem;
@@ -660,62 +636,28 @@ import {LocalStorageKey} from '@web/services/StorageService'
                 }
             }
         }
-
-        /* Lower Buttons */
-
-        .authBtn {
-            box-shadow: none;
-            bottom: 3.2rem;
-            flex-grow: 0;
-            left: 3.2rem;
-            margin: 3.2rem auto 0;
-            right: 3.2rem;
-            width: calc(100% - 6.4rem);
-
-            @include r(600) {
-                max-width: none;
-                position: static;
-                width: auto;
-            }
-        }
-
-        .authBtn {
-            bottom: 1.2rem; //before changing this bottom setting, the button was covering the metric labels on small screens
-        }
-
-        .secondary,
-        .primary {
-            height: 4.8rem;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        .secondary {
-            margin-right: .8rem;
-        }
     }
 
     .btnContainer {
         display: flex;
-        flex-direction: column;
+        flex-flow: column wrap;
+        justify-content: center;
 
-        .authBtn {
-            width: 100%;
+        button.lowerBtn {
+            box-shadow: none;
+            flex-grow: 1;
+            white-space: nowrap;
 
-            + .authBtn {
-                margin-top: 1.6rem;
+            &.secondary:hover {
+                background-color: $white;
             }
         }
 
         @include r(600) {
-            flex-direction: row;
+            flex-flow: row nowrap;
 
-            .authBtn {
-                width: auto;
-
-                + .authBtn {
-                    margin-top: 3.2rem;
-                }
+            .lowerBtn {
+                height: 4.8rem;
             }
         }
     }
@@ -732,6 +674,10 @@ import {LocalStorageKey} from '@web/services/StorageService'
         button {
             flex-grow: 1;
             margin: 0 .8rem;
+
+            &.secondary:hover {
+                background-color: $white;
+            }
         }
 
         .backBtn {

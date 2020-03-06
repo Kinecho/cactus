@@ -11,7 +11,8 @@ import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/Unsubscriber
 import {
     onReflectionResponseCreated,
     updateReflectionStatsTrigger,
-    updateSentPromptOnReflectionWrite
+    updateSentPromptOnReflectionWrite,
+    updateInsightWordsOnReflectionWrite
 } from "@api/triggers/ReflectionResponseTriggers";
 import * as SlackCommandJob from "@api/pubsub/subscribers/SlackCommandJob";
 import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob";
@@ -73,4 +74,5 @@ export const cloudFunctions = {
     updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
     publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
     updateSubscriptionDetailsTrigger,
+    updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite
 };

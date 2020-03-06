@@ -96,6 +96,11 @@ export interface CactusConfig {
         api_key: string,
         template_ids: SendgridTemplateConfig,
     },
+    language: {
+        client_id: string,
+        client_secret: string,
+        service_account: ServiceAccountCredentials,
+    },
     sheets: {
         client_id: string,
         client_secret: string,
