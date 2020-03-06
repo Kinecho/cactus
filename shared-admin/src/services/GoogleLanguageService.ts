@@ -1,6 +1,9 @@
 import language from "@google-cloud/language";
 import {CactusConfig} from "@shared/CactusConfig";
 import {InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("GoogleLanguageService");
 
 export enum WordTypes {
     VERB = 'verb',
@@ -44,8 +47,13 @@ export default class GoogleLanguageService {
             content: text,
             type: 'PLAIN_TEXT'
         };
-        const entityResponse = await this.client.analyzeEntities({document: document});
-        return entityResponse[0]?.entities;
+        try {
+            const entityResponse = await this.client.analyzeEntities({document: document});
+            return entityResponse[0]?.entities;
+        } catch(error) {
+            logger.log('There was an error analyzing entities with Google Language API', error);
+            return;
+        }
     }
 
     async getSyntaxTokens(text: string): Promise<any> {
@@ -53,8 +61,13 @@ export default class GoogleLanguageService {
             content: text,
             type: 'PLAIN_TEXT'
         };
-        const [result] = await this.client.analyzeSyntax({document: document});
-        return result.tokens;
+        try {
+            const [result] = await this.client.analyzeSyntax({document: document});
+            return result.tokens;
+        } catch(error) {
+            logger.log('There was an error analyzing syntax with Google Language API', error);
+            return;
+        }
     }
 
     async insightWords(text: string): Promise<InsightWordsResult> {

@@ -115,17 +115,21 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                     for (const response of reflectionResponses) {
                         insightTasks.push(new Promise<void>(async resolve => {
                             if (!response.insights && response.content?.text) {
-                                const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
-                                if (pastInsightsResult) {
-                                    // for now, don't store all this raw data (it's huge)
-                                    // later we will store this in a separate collection
-                                    delete pastInsightsResult.syntaxRaw;
-                                    delete pastInsightsResult.entitiesRaw;
+                                try {
+                                    const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
+                                    if (pastInsightsResult) {
+                                        // for now, don't store all this raw data (it's huge)
+                                        // later we will store this in a separate collection
+                                        delete pastInsightsResult.syntaxRaw;
+                                        delete pastInsightsResult.entitiesRaw;
 
-                                    response.insights = pastInsightsResult;
+                                        response.insights = pastInsightsResult;
 
-                                    // save words to the reflection response
-                                    await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                        // save words to the reflection response
+                                        await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                    }
+                                } catch(error) {
+                                    logger.log('There was a problem processing insights for reflection response', error)
                                 }
                             }
                             
