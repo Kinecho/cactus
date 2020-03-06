@@ -8,7 +8,7 @@ import PremiumPricing from "@components/PremiumPricing.vue";
 import AppStoreIcon from "@components/AppStoreIcon.vue";
 import PlayStoreIcon from "@components/PlayStoreIcon.vue";
 import StandardFooter from "@components/StandardFooter.vue";
-
+import {isIosDevice, isAndroidDevice} from '@web/DeviceUtil';
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 
@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setupJumpToForm();
 });
+
+const $tryItHeader = document.getElementById("tryItHeader");
+const isMobileDevice = (isAndroidDevice() || isIosDevice());
+if ($tryItHeader) {
+    $tryItHeader.classList.add(isMobileDevice ? 'show' : 'hide');
+} 
 
 // new Vue({
 //     el: "#premium-pricing",

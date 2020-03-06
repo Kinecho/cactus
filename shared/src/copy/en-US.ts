@@ -63,6 +63,7 @@ export default class EnglishCopy extends LocalizedCopy {
         LOG_IN: "Log In",
         NEXT: "Next",
         SIGN_UP: "Sign Up",
+        TRY_IT_FREE: "Try It Free",
         SUBMIT: "Submit",
         SIGNING_IN: "Signing In",
         PRICING: "Pricing",

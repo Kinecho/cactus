@@ -31,6 +31,7 @@ export interface PromptCopy {
 
 export interface CommonCopy {
     SIGN_UP: string,
+    TRY_IT_FREE: string,
     SIGNING_IN: string,
     LOG_IN: string,
     PRICING: string,

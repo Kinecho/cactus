@@ -67,44 +67,25 @@
     }
 }
 
-h2 {
-    margin-bottom: 4rem;
-}
-
-.benefits {
+.middleSections {
     margin-top: -2.4rem;
     overflow: hidden;
-    padding: 0 2.4rem 6.4rem;
     position: relative;
-
-    &:before {
-        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
-        background-position: right bottom, right top;
-        background-repeat: no-repeat;
-        background-size: 240px 275px, 225px 310px;
-        content: "";
-        display: block;
-        height: 324px;
-        position: absolute;
-        right: -20rem;
-        bottom: 14%;
-        width: 300px;
-    }
 
     @include r(374) {
         margin-top: 0;
     }
-    @include r(600) {
-        &:before {
-            right: -10rem;
-        }
-    }
-    @include r(768) {
-        padding-bottom: 10rem;
+}
 
-        &:before {
-            display: none;
-        }
+.sectionHeader {
+    margin-bottom: 4rem;
+}
+
+.benefits {
+    padding: 0 2.4rem 3.2rem;
+
+    @include r(768) {
+        padding-bottom: 9.6rem;
     }
 
     .flexContainer {
@@ -156,6 +137,179 @@ h2 {
     }
 }
 
+.feature {
+    padding: 6.4rem 2.4rem;
+
+    @include r(960) {
+        padding: 12.8rem 2.4rem;
+    }
+
+    .centered {
+        position: relative;
+        text-align: left;
+
+        @include r(768) {
+            align-items: center;
+            display: flex;
+            justify-content: space-around;
+
+            &.reverse {
+                flex-direction: row-reverse;
+            }
+        }
+    }
+
+    .sectionGraphic {
+
+        @include r(768) {
+            flex-grow: 1;
+            margin: 0 auto;
+            max-width: 40rem;
+        }
+
+        img {
+            display: block;
+            height: auto;
+            margin: 0 auto;
+            max-width: 32rem;
+            width: 100%;
+
+            @include r(768) {
+                max-width: 24rem;
+            }
+            @include r(960) {
+                max-width: 36rem;
+            }
+        }
+    }
+
+    .textContainer {
+        margin: 0 auto;
+        max-width: 40rem;
+
+        @include r(768) {
+            flex-grow: 1;
+        }
+        @include r(960) {
+            max-width: 48rem;
+        }
+    }
+
+    h4 {
+        color: $aqua;
+        margin-bottom: .8rem;
+    }
+
+    h3 {
+        font-size: 2.4rem;
+        margin-bottom: .8rem;
+
+        @include r(960) {
+            font-size: 3.2rem;
+        }
+    }
+
+    p {
+        color: $white;
+        opacity: .8;
+
+        @include r(960) {
+            font-size: 2rem;
+        }
+    }
+}
+
+.insights {
+    background: $darkestGreen url(assets/images/grainy.png);
+
+    &:before {
+        background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
+        background-position: right bottom, right top;
+        background-repeat: no-repeat;
+        background-size: 240px 275px, 225px 310px;
+        content: "";
+        display: block;
+        height: 324px;
+        position: absolute;
+        right: -20rem;
+        top: 33%;
+        width: 300px;
+
+        @include r(600) {
+            background-position: right -12rem bottom 0, right -8rem top 0;
+            height: 47rem;
+            right: -1px;
+        }
+        @include r(768) {
+            background-position: right -20rem bottom 0, right -19rem top 0;
+            top: 18%;
+        }
+        @include r(1200) {
+            background-position: right -12rem bottom 0, right -8rem top 0;
+        }
+    }
+
+    .sectionGraphic img {
+        @include r(768) {
+            margin-bottom: -4rem;
+        }
+    }
+
+    h3 {
+        color: $lightGreen;
+    }
+}
+
+.coreValues {
+    background: $indigo url(assets/images/grainy.png);
+
+    &:before {
+        background-image: url(assets/images/blob-outline.svg), url(assets/images/blob-green.svg);
+        background-position: left bottom, left -2rem top;
+        background-repeat: no-repeat;
+        background-size: 15rem 14rem, 16rem 19rem;
+        bottom: 24%;
+        content: "";
+        display: block;
+        height: 21rem;
+        left: -10rem;
+        position: absolute;
+        width: 30rem;
+
+        @include r(600) {
+            background-position: left -5rem top, left bottom;
+            background-size: 30rem 30.5rem, 28rem 30rem;
+            bottom: 20%;
+            height: 38rem;
+            left: -16rem;
+        }
+        @include r(768) {
+            background-position: left bottom, left -2rem top;
+            background-size: 15rem 14rem, 16rem 19rem;
+            height: 21rem;
+            left: -8rem;
+        }
+        @include r(1200) {
+            background-position: left -5rem top, left bottom;
+            background-size: 30rem 30.5rem, 28rem 30rem;
+            height: 38rem;
+            left: -16rem;
+        }
+    }
+
+    .sectionGraphic {
+        margin-bottom: 4.8rem;
+
+        @include r(768) {
+            margin-bottom: 0;
+        }
+    }
+
+    h3 {
+        color: change-color($indigo, $saturation: 81, $lightness: 84);
+    }
+}
+
 .upgrade {
     background: $beige;
     padding: 4.8rem .4rem;
@@ -170,25 +324,5 @@ h2 {
     }
     @include r(768) {
         padding: 9rem .8rem 11rem;
-
-        &:before {
-            background-image: url(assets/images/blob-outline-right.svg), url(assets/images/blob-magenta-right.svg);
-            background-position: right bottom, right top;
-            background-repeat: no-repeat;
-            background-size: 240px 275px, 225px 310px;
-            content: "";
-            display: block;
-            height: 324px;
-            overflow: hidden;
-            position: absolute;
-            right: 0;
-            top: -4.8rem;
-            width: 300px;
-        }
-    }
-    @include r(960) {
-        &:before {
-            background-size: 300px 275px, 225px 310px;
-        }
     }
 }
