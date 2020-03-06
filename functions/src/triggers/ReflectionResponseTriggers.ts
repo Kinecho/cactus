@@ -113,14 +113,14 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                     const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId: memberId, limit: 14});
                     for (const response of reflectionResponses) {
                         if (!response.insights && response.content?.text) {
-                            const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
-                            if (insightsResult) {
+                            const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
+                            if (pastInsightsResult) {
                                 // for now, don't store all this raw data (it's huge)
                                 // later we will store this in a separate collection
-                                delete insightsResult.syntaxRaw;
-                                delete insightsResult.entitiesRaw;
+                                delete pastInsightsResult.syntaxRaw;
+                                delete pastInsightsResult.entitiesRaw;
 
-                                response.insights = insightsResult;
+                                response.insights = pastInsightsResult;
 
                                 // save words to the reflection response
                                 await AdminReflectionResponseService.getSharedInstance().save(response);

@@ -257,8 +257,8 @@ export default class AdminReflectionResponseService {
             }
 
             const reflections = await this.getResponsesForMember({memberId}, queryOptions);
-            let wordFrequencies: {[key: string]: number} = {};
-            let wordCloud: InsightWord[] = [];
+            const wordFrequencies: {[key: string]: number} = {};
+            const wordCloud: InsightWord[] = [];
 
             if (reflections) {
                 reflections.forEach(reflection => {
@@ -279,7 +279,7 @@ export default class AdminReflectionResponseService {
             }
 
             if (wordFrequencies) {
-                for (var word in wordFrequencies){
+                for (const word in wordFrequencies){
                   wordCloud.push({
                       word: word,
                       frequency: wordFrequencies[word]

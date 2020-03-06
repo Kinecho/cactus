@@ -61,19 +61,19 @@ export default class GoogleLanguageService {
         const syntaxTokens = await this.getSyntaxTokens(text);
         const entities = await this.getEntities(text);
 
-        let insightWords: InsightWord[] = [];
+        const insightWords: InsightWord[] = [];
 
         if (syntaxTokens) {
             syntaxTokens.forEach((token: any) => {
                 if (this.tagsToKeep.includes(token.partOfSpeech?.tag)) {
                     if (token.text?.content) {
-                        let wordObj: InsightWord = {
+                        const wordObj: InsightWord = {
                             word: token.text.content,
                             partOfSpeech: WordTypes[token.partOfSpeech.tag as keyof typeof WordTypes]
                         };
 
                         if (entities) {
-                            let salience = this.getSalience(wordObj.word, entities);
+                            const salience = this.getSalience(wordObj.word, entities);
                             if (salience) {
                                 wordObj.salience = salience; 
                             }
