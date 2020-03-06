@@ -95,6 +95,7 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
             // only run insights if there is content to run it for
             if (reflectionResponseAfter.content?.text && 
                 reflectionResponseAfter.content.text !== reflectionResponseBefore?.content?.text) {
+                
                 const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
                 if (insightsResult) {
                     // for now, don't store all this raw data (it's huge)
@@ -104,12 +105,35 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
 
                     // save words to the reflection response
                     await afterSnapshot.ref.update({[ReflectionResponse.Field.insights]: insightsResult});
-                    return;
+                }
+
+                // attempt to process the last 14 reflections as well
+                const memberId = reflectionResponseAfter.cactusMemberId;
+                if (memberId) {
+                    const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId: memberId, limit: 14});
+                    for (const response of reflectionResponses) {
+                        if (!response.insights && response.content?.text) {
+                            const insightsResult = await GoogleLanguageService.getSharedInstance().insightWords(reflectionResponseAfter.content.text);
+                            if (insightsResult) {
+                                // for now, don't store all this raw data (it's huge)
+                                // later we will store this in a separate collection
+                                delete insightsResult.syntaxRaw;
+                                delete insightsResult.entitiesRaw;
+
+                                response.insights = insightsResult;
+
+                                // save words to the reflection response
+                                await AdminReflectionResponseService.getSharedInstance().save(response);
+                            }
+                        }
+                    }
                 }
             }            
         } catch (error) {
             logger.error("Failed to process the ReflectionResponse for insights.", error);
         }
+
+        return;
     });
 
 export const updateSentPromptOnReflectionWrite = functions.firestore
