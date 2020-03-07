@@ -50,16 +50,6 @@
     import {fireRevealInsightEvent, gtag} from "@web/analytics";
     import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 
-    /*
-    InsightWordChart
-                        :words="wordData"
-                        :didWrite="didWriteReflection"
-                        :subscriptionTier="subscriptionTier"
-                        :startGated="true"
-                        :startBlurred="true"
-                        :loggedIn="loggedIn" />
-     */
-
     export default Vue.extend({
         components: {
             WordChart: InsightWordChart

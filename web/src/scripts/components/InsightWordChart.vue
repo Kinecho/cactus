@@ -7,22 +7,15 @@
 <script lang="ts">
     import Vue from "vue";
     import {InsightWord} from '@shared/models/ReflectionResponse'
-    import {SubscriptionTier} from '@shared/models/SubscriptionProductGroup'
     import {
-        pack as d3Pack,
-        scaleOrdinal as d3ScaleOrdinal,
         format as d3Format,
         hierarchy as d3Hierarchy,
+        pack as d3Pack,
+        scaleOrdinal as d3ScaleOrdinal,
         select as d3Select
     } from "d3";
-    import {PageRoute} from '@shared/PageRoutes'
     import Logger from "@shared/Logger";
     import {HierarchyCircularNode} from "d3-hierarchy";
-    import {fireRevealInsightEvent, gtag} from "@web/analytics"
-
-    interface InsightDataValue extends InsightWord {
-        value: number
-    }
 
     const logger = new Logger("InsightWordChart");
 
@@ -32,11 +25,6 @@
     function isInsightWord(d: BubbleNode): d is InsightWord {
         return !(d as Datum).children && (d as InsightWord).word != undefined
     }
-
-    function isDatum(d: BubbleNode): d is Datum {
-        return !!(d as Datum).children
-    }
-
 
     export default Vue.extend({
         mounted() {
@@ -50,60 +38,16 @@
         props: {
             words: {type: Array as () => InsightWord[], default: () => []},
             blurry: {type: Boolean, default: false},
-            // startBlurred: {type: Boolean, default: false},
-            // subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
-            // startGated: {type: Boolean, default: false},
-            // didWrite: {type: Boolean, default: true},
-            // loggedIn: {type: Boolean, default: true}
         },
         data(): {
-            // isRevealed: boolean
         } {
             return {
-                // isRevealed: !this.startGated
             }
         },
         computed: {
 
-            // isBlurry(): boolean {
-            //     if (this.isBasic) { // never not blurry if basic
-            //         return true;
-            //     } else if (this.startGated && !this.isRevealed) {
-            //         return true;
-            //     } else if (!this.startGated && this.startBlurred) {
-            //         return true;
-            //     } else if (this.words?.length <= 0) {
-            //         return true;
-            //     } else if (!this.loggedIn) {
-            //         return true;
-            //     } else if (!this.didWrite) {
-            //         return true;
-            //     }
-            //     return false;
-            // }
         },
         methods: {
-            // trackRevealEvent() {
-            //     fireRevealInsightEvent();
-            // },
-            // trackRevealUrlEvent(url: string) {
-            //     gtag('event', 'revealed_insight', {
-            //         'event_category': "prompt_content",
-            //         'event_label': "word_chart",
-            //         'transport_type': 'beacon',
-            //         'event_callback': function() {
-            //             // @ts-ignore
-            //             document.location = url;
-            //         }
-            //     });
-            // },
-            // revealInsights(): void {
-            //     this.isRevealed = true;
-            //     this.trackRevealEvent();
-            // },
-            // reloadPage(): void {
-            //     window.location.reload();
-            // },
             renderBubbles(): void {
                 this.$forceUpdate();
 
@@ -238,44 +182,6 @@
        margin: 0;
        position: relative;
    }
-
-//   h4 {
-//       margin-bottom: .8rem;
-//       opacity: .8;
-//   }
-
-//   .box {
-//       @include shadowbox;
-//       background: $dolphin url(assets/images/grainy.png);
-//       color: $white;
-//       left: 0;
-//       margin: auto;
-//       padding: 2.4rem;
-//       position: absolute;
-//       right: 0;
-//       top: 50%;
-//       transform: translateY(-50%);
-
-//       @include r(374) {
-//           max-width: 85%;
-//       }
-
-//       &.warning {
-//           background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
-//       }
-//   }
-
-//   .primary,
-//   a.button {
-//       display: inline-block;
-//       margin: 1.6rem auto 0;
-//       width: 100%;
-//   }
-
-//   .fancyLink {
-//       @include fancyLinkLight;
-//       margin-left: .8rem;
-//   }
 
    .bubble-chart {
        margin: 0 auto;
