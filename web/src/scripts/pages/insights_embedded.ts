@@ -93,7 +93,7 @@ new Vue({
     template: `
         <div class="container" :style="{ display: 'flex', flex: 1, justifyItems: 'stretch', alignItems: 'stretch' }">
             <transition name="fade-in">
-                <WordChart :words="dataSource.words" style="flex: 1" :start-blurred="dataSource.blurred" v-if="dataSource.loaded"/>
+                <WordChart :words="dataSource.words" style="flex: 1" :blurry="dataSource.blurred" v-if="dataSource.loaded"/>
             </transition>
         </div>
     `,
