@@ -1,39 +1,6 @@
 <template>
     <div class="insight-word-chart">
-        <div :class="['bubble-chart',{isBlurry: isBlurry}]"/>
-
-        <!-- Logged out user -->
-        <div class="box" v-if="!loggedIn">
-            <h4>Today's Insight</h4>
-            <p>To get Today's Insights,<br>signup to try Cactus.</p>
-            <a class="button" :href="signupPageUrl">Try It Free</a>
-        </div>
-
-        <!-- Error state -->
-        <div class="warning box" v-if="loggedIn && isRevealed && didWrite && words.length <= 0">
-            <h4>Today's Insight</h4>
-            <p>There was an error displaying Today's&nbsp;Insight.</p>
-            <button class="primary" @click="reloadPage()">Try Again</button>
-        </div>
-
-        <!-- No words written -->
-        <div class="box" v-if="loggedIn && isRevealed && !didWrite">
-            <h4>Today's Insight</h4>
-            <p>You didn't write anything today. That's fine, but Today's Insight only works when you capture your thoughts.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
-        </div>
-
-        <!-- Basic user -->
-        <div class="box" v-if="loggedIn && didWrite && isBasic">
-            <h4>Today's Insight</h4>
-            <p>To reveal Today's Insight, upgrade to Cactus&nbsp;Plus.<a class="fancyLink" href="#" @click.prevent="trackRevealUrlEvent(pricingPageUrl)">What are insights?</a></p>
-        </div>
-
-        <!-- Plus (Trial) user -->
-        <div class="box" v-if="loggedIn && !isRevealed && !(isBasic && didWrite)">
-            <h4>Today's Insight</h4>
-            <p>Want to see a visualization of words that have come up recently in your&nbsp;reflections?</p>
-            <button class="primary" @click="revealInsights()">Show Me!</button>
-        </div>
+        <div :class="['bubble-chart', {isBlurry: blurry}]"/>
     </div>
 </template>
 
@@ -82,75 +49,61 @@
         },
         props: {
             words: {type: Array as () => InsightWord[], default: () => []},
-            startBlurred: {type: Boolean, default: false},
-            subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
-            startGated: {type: Boolean, default: false},
-            didWrite: {type: Boolean, default: true},
-            loggedIn: {type: Boolean, default: true}
+            blurry: {type: Boolean, default: false},
+            // startBlurred: {type: Boolean, default: false},
+            // subscriptionTier: {type: String as () => SubscriptionTier, default: SubscriptionTier.PLUS},
+            // startGated: {type: Boolean, default: false},
+            // didWrite: {type: Boolean, default: true},
+            // loggedIn: {type: Boolean, default: true}
         },
         data(): {
-            isRevealed: boolean
+            // isRevealed: boolean
         } {
             return {
-                isRevealed: !this.startGated
+                // isRevealed: !this.startGated
             }
         },
         computed: {
-            pricingPageUrl(): string {
-                return PageRoute.PAYMENT_PLANS + "#insights";
-            },
-            signupPageUrl(): string {
-                return PageRoute.SIGNUP + "?message=" + encodeURIComponent("To get Today's Insights, sign up to try Cactus.")
-            },
-            isPlus(): boolean {
-                return this.subscriptionTier === SubscriptionTier.PLUS
-            },
-            isBasic(): boolean {
-                return this.subscriptionTier === SubscriptionTier.BASIC
-            },
-            isBlurry(): boolean {
-                if (this.isBasic) { // never not blurry if basic
-                    return true;
-                } else if (this.startGated && !this.isRevealed) {
-                    return true;
-                } else if (!this.startGated && this.startBlurred) {
-                    return true;
-                } else if (this.words?.length <= 0) {
-                    return true;
-                } else if (!this.loggedIn) {
-                    return true;
-                } else if (!this.didWrite) {
-                    return true;
-                }
-                return false;
-            }
+
+            // isBlurry(): boolean {
+            //     if (this.isBasic) { // never not blurry if basic
+            //         return true;
+            //     } else if (this.startGated && !this.isRevealed) {
+            //         return true;
+            //     } else if (!this.startGated && this.startBlurred) {
+            //         return true;
+            //     } else if (this.words?.length <= 0) {
+            //         return true;
+            //     } else if (!this.loggedIn) {
+            //         return true;
+            //     } else if (!this.didWrite) {
+            //         return true;
+            //     }
+            //     return false;
+            // }
         },
         methods: {
-            trackRevealEvent() {
-                // gtag('event', 'revealed_insight', {
-                //     event_category: "prompt_content",
-                //     event_label: "word_chart"
-                // });
-                fireRevealInsightEvent();
-            },
-            trackRevealUrlEvent(url: string) {
-                gtag('event', 'revealed_insight', {
-                    'event_category': "prompt_content",
-                    'event_label': "word_chart",
-                    'transport_type': 'beacon',
-                    'event_callback': function() {
-                        // @ts-ignore
-                        document.location = url;
-                    }
-                });
-            },
-            revealInsights(): void {
-                this.isRevealed = true;
-                this.trackRevealEvent();
-            },
-            reloadPage(): void {
-                window.location.reload();
-            },
+            // trackRevealEvent() {
+            //     fireRevealInsightEvent();
+            // },
+            // trackRevealUrlEvent(url: string) {
+            //     gtag('event', 'revealed_insight', {
+            //         'event_category': "prompt_content",
+            //         'event_label': "word_chart",
+            //         'transport_type': 'beacon',
+            //         'event_callback': function() {
+            //             // @ts-ignore
+            //             document.location = url;
+            //         }
+            //     });
+            // },
+            // revealInsights(): void {
+            //     this.isRevealed = true;
+            //     this.trackRevealEvent();
+            // },
+            // reloadPage(): void {
+            //     window.location.reload();
+            // },
             renderBubbles(): void {
                 this.$forceUpdate();
 
@@ -281,56 +234,55 @@
     @import "mixins";
     @import "variables";
 
-    .insight-word-chart {
-        margin: 0;
-        position: relative;
-    }
+   .insight-word-chart {
+       margin: 0;
+       position: relative;
+   }
 
-    h4 {
-        margin-bottom: .8rem;
-        opacity: .8;
-    }
+//   h4 {
+//       margin-bottom: .8rem;
+//       opacity: .8;
+//   }
 
-    .box {
-        @include shadowbox;
-        background: $dolphin url(assets/images/grainy.png);
-        color: $white;
-        left: 0;
-        margin: auto;
-        padding: 2.4rem;
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
+//   .box {
+//       @include shadowbox;
+//       background: $dolphin url(assets/images/grainy.png);
+//       color: $white;
+//       left: 0;
+//       margin: auto;
+//       padding: 2.4rem;
+//       position: absolute;
+//       right: 0;
+//       top: 50%;
+//       transform: translateY(-50%);
 
-        @include r(374) {
-            max-width: 85%;
-        }
+//       @include r(374) {
+//           max-width: 85%;
+//       }
 
-        &.warning {
-            background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
-        }
-    }
+//       &.warning {
+//           background-image: url(assets/images/sadCactusPatternWhiteTransparent.svg);
+//       }
+//   }
 
-    .primary,
-    a.button {
-        display: inline-block;
-        margin: 1.6rem auto 0;
-        width: 100%;
-    }
+//   .primary,
+//   a.button {
+//       display: inline-block;
+//       margin: 1.6rem auto 0;
+//       width: 100%;
+//   }
 
-    .fancyLink {
-        @include fancyLinkLight;
-        margin-left: .8rem;
-    }
+//   .fancyLink {
+//       @include fancyLinkLight;
+//       margin-left: .8rem;
+//   }
 
-    .bubble-chart {
-        margin: 0 auto;
-        transition: 1s ease-in-out;
-
-        &.isBlurry {
-            filter: blur(11px);
-            opacity: .8;
-        }
-    }
+   .bubble-chart {
+       margin: 0 auto;
+       transition: 1s ease-in-out;
+       &.isBlurry {
+           filter: blur(11px);
+           opacity: .8;
+       }
+  }
 </style>

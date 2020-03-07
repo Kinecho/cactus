@@ -9,7 +9,7 @@
                 <div class="insightContainer revealed">
                     <!-- <h4>Today's Insight</h4>
                     <p>A visualization of words that have come up recently in your reflections.</p> -->
-                    <InsightWordChart
+                    <MemberInsights
                         :words="wordData"
                         :didWrite="didWriteReflection"
                         :subscriptionTier="subscriptionTier"
@@ -156,7 +156,8 @@
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
-    import InsightWordChart from "@components/InsightWordChart.vue";
+    // import InsightWordChart from "@components/InsightWordChart.vue";
+    import MemberInsights from "@components/MemberInsights.vue";
     import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
@@ -174,7 +175,7 @@
             ElementDescriptionModal,
             InputNameModal,
             UpgradeBanner: ReflectionCelebrateUpgradeBanner,
-            InsightWordChart
+            MemberInsights
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
