@@ -126,6 +126,9 @@ const defaultTestConfig: CactusConfig = {
         team_id: "XYZ123",
         app_id: "XYZ123.com.cactus.TestApp",
         custom_scheme: "app.cactus-stage",
+        verify_receipt_url: "https://sandbox.itunes.apple/verifyReceipt",
+        verify_receipt_sandbox_url: "https://sandbox.itunes.apple/verifyReceipt",
+        iap_shared_secret: "test-key"
     },
     bigquery_service_account: {
         "type": "service_account",

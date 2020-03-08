@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import * as express from "express";
 import Logger from "@shared/Logger";
 import {AppType} from "@shared/models/ReflectionResponse";
+import {AxiosError} from "axios";
 
 const logger = new Logger("RequestUtil")
 
@@ -53,4 +54,9 @@ export function getAppType(request: express.Request): AppType | undefined {
     }
 
     return;
+}
+
+
+export function isAxiosError(error: any): error is AxiosError {
+    return error.isAxiosError
 }

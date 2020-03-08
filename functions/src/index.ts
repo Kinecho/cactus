@@ -26,6 +26,7 @@ import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
 import socialEndpoints from "@api/endpoints/socialEndpoints";
 import userEndpoints from "@api/endpoints/userEndpoints";
+import appleEndpoints from "@api/endpoints/appleEndpoints"
 import {
     updateMemberProfileTrigger,
     updatePromptSendTimeTrigger,
@@ -48,6 +49,7 @@ export const cloudFunctions = {
     user: functions.https.onRequest(userEndpoints),
     test: functions.https.onRequest(testApp),
     notificationPreferences: functions.https.onRequest(manageNotificationApp),
+    apple: functions.https.onRequest(appleEndpoints),
 
     //PubSub topics
     bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
