@@ -9,7 +9,12 @@ import {
     MagicLinkRequest,
     MagicLinkResponse,
 } from "@shared/api/SignupEndpointTypes";
-import AdminSlackService, {ChatMessage, SlackAttachment, SlackAttachmentField} from "@admin/services/AdminSlackService";
+import AdminSlackService, {
+    ChannelName,
+    ChatMessage,
+    SlackAttachment,
+    SlackAttachmentField
+} from "@admin/services/AdminSlackService";
 import {getConfig} from "@admin/config/configService";
 import * as Sentry from "@sentry/node";
 import AdminSendgridService from "@admin/services/AdminSendgridService";
@@ -27,6 +32,7 @@ import {getISODateTime} from "@shared/util/DateUtil";
 import {QueryParam} from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
 import {getAppEmoji} from "@shared/models/ReflectionResponse";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("signupEndpoints");
 const Config = getConfig();
@@ -89,145 +95,163 @@ app.post("/login", async (req: functions.https.Request | any, resp: functions.Re
 app.post("/magic-link", async (req: functions.https.Request | any, resp: functions.Response) => {
     const payload: MagicLinkRequest = req.body;
     logger.log("signupEndpoints.magic-link", payload);
-
     const {email, referredBy} = payload;
-
-    if (!email) {
-        logger.error("signupEndpoints.magic-link: No email provided in payload");
-        const errorResponse: MagicLinkResponse = {success: false, error: "No email provided", email: "", exists: false};
-        resp.send(errorResponse);
-        return;
-    }
-
-    let userExists = false;
-    let memberExists = false;
-    let displayName: string | undefined;
-
-    const getUserTask = new Promise<UserRecord | undefined>(async (resolve) => {
-        try {
-            const foundUser = await admin.auth().getUserByEmail(email);
-            resolve(foundUser);
-        } catch (error) {
-            logger.log("No user found for email", email);
-            resolve(undefined);
-        }
-    });
-
-    const [user, member] = await Promise.all([
-        getUserTask,
-        AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
-    ]);
-
-    if (user) {
-        displayName = user.displayName || undefined;
-        userExists = true;
-    }
-
-    if (member) {
-        logger.log(`Found cactus member for ${email}`);
-        memberExists = true;
-        displayName = member.getFullName();
-    } else {
-        logger.log(`no cactus member found for ${email}`);
-    }
-
-    const existingMember = userExists || memberExists;
-
-    const attachments: SlackAttachment[] = [];
-
-
-    /*
-        Return ths response now, and finish everything afterwards, so that the user has a faster experience.
-     */
-    const response: MagicLinkResponse = {
-        exists: userExists || memberExists,
-        success: true,
-        email,
-    };
-
-    if (!existingMember) {
-        const pendingUser = await AdminPendingUserService.getSharedInstance().addPendingSignup({
-            email,
-            referredByEmail: referredBy,
-            reflectionResponseIds: payload.reflectionResponseIds,
-            queryParams: payload.queryParams,
-        });
-        attachments.push({
-            text: `Added PendingUser \`${pendingUser.id}\``,
-        })
-    }
-
-
-    const fields = [{
-        title: "Auth User",
-        value: `${user ? user.uid : "none"}`,
-        short: true,
-    }, {
-        title: "Cactus Member",
-        value: `${member ? member.id : "none"}`,
-        short: true,
-    }];
-    if (referredBy && !existingMember) {
-        fields.push({
-            title: "Referred By Email",
-            value: `${referredBy || "--"}`,
-            short: false,
-        })
-    }
-
-    attachments.push({
-        fields,
-    });
-
-    const url = appendDomain(payload.continuePath, Config.web.domain);
-    const sourceApp = payload.sourceApp || "web";
-    const actionCodeSettings: ActionCodeSettings = {
-        handleCodeInApp: true,
-        url,
-    };
-
-    await AdminSlackService.getSharedInstance().sendSignupsMessage({
-        text: `${email} triggered the ${sourceApp} Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
-        attachments: attachments
-    });
-
-    logger.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
     try {
-        let magicLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
-        magicLink = appendQueryParams(magicLink, {[QueryParam.SOURCE_APP]: sourceApp});
-        logger.log(`Generated signing link for ${email}: ${magicLink}`);
 
-        if (userExists || memberExists) {
-            await AdminSendgridService.getSharedInstance().sendMagicLink({
-                displayName,
-                email,
-                link: magicLink,
-                sourceApp: sourceApp
-            });
+        if (!email) {
+            logger.error("signupEndpoints.magic-link: No email provided in payload");
+            const errorResponse: MagicLinkResponse = {
+                success: false,
+                error: "No email provided",
+                email: "",
+                exists: false
+            };
+            resp.send(errorResponse);
+            return;
+        }
+
+        let userExists = false;
+        let memberExists = false;
+        let displayName: string | undefined;
+
+        const getUserTask = new Promise<UserRecord | undefined>(async (resolve) => {
+            try {
+                const foundUser = await admin.auth().getUserByEmail(email);
+                resolve(foundUser);
+            } catch (error) {
+                logger.log("No user found for email", email);
+                resolve(undefined);
+            }
+        });
+
+        const [user, member] = await Promise.all([
+            getUserTask,
+            AdminCactusMemberService.getSharedInstance().getMemberByEmail(email)
+        ]);
+
+        if (user) {
+            displayName = user.displayName || undefined;
+            userExists = true;
+        }
+
+        if (member) {
+            logger.log(`Found cactus member for ${email}`);
+            memberExists = true;
+            displayName = member.getFullName();
         } else {
-            await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
-                displayName,
+            logger.log(`no cactus member found for ${email}`);
+        }
+
+        const existingMember = userExists || memberExists;
+
+        const attachments: SlackAttachment[] = [];
+
+
+        /*
+            Return ths response now, and finish everything afterwards, so that the user has a faster experience.
+         */
+        const response: MagicLinkResponse = {
+            exists: userExists || memberExists,
+            success: true,
+            email,
+        };
+
+        if (!existingMember) {
+            const pendingUser = await AdminPendingUserService.getSharedInstance().addPendingSignup({
                 email,
-                link: magicLink,
-                sourceApp: sourceApp
+                referredByEmail: referredBy,
+                reflectionResponseIds: payload.reflectionResponseIds,
+                queryParams: payload.queryParams,
+            });
+            attachments.push({
+                text: `Added PendingUser \`${pendingUser.id}\``,
+            })
+        }
+
+
+        const fields = [{
+            title: "Auth User",
+            value: `${user ? user.uid : "none"}`,
+            short: true,
+        }, {
+            title: "Cactus Member",
+            value: `${member ? member.id : "none"}`,
+            short: true,
+        }];
+        if (referredBy && !existingMember) {
+            fields.push({
+                title: "Referred By Email",
+                value: `${referredBy || "--"}`,
+                short: false,
+            })
+        }
+
+        attachments.push({
+            fields,
+        });
+
+        const url = appendDomain(payload.continuePath, Config.web.domain);
+        const sourceApp = payload.sourceApp || "web";
+        const actionCodeSettings: ActionCodeSettings = {
+            handleCodeInApp: true,
+            url,
+        };
+
+        await AdminSlackService.getSharedInstance().sendSignupsMessage({
+            text: `${email} triggered the ${sourceApp} Magic Link flow. Will get ${(memberExists || userExists) ? "\`Welcome Back\`" : "\`Confirm Email\`"} email from SendGrid.`,
+            attachments: attachments
+        });
+
+        logger.log(`action code settings: ${JSON.stringify(actionCodeSettings)}`);
+        try {
+            let magicLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
+            magicLink = appendQueryParams(magicLink, {[QueryParam.SOURCE_APP]: sourceApp});
+            logger.log(`Generated signing link for ${email}: ${magicLink}`);
+
+            if (userExists || memberExists) {
+                await AdminSendgridService.getSharedInstance().sendMagicLink({
+                    displayName,
+                    email,
+                    link: magicLink,
+                    sourceApp: sourceApp
+                });
+            } else {
+                await AdminSendgridService.getSharedInstance().sendMagicLinkNewUser({
+                    displayName,
+                    email,
+                    link: magicLink,
+                    sourceApp: sourceApp
+                });
+            }
+
+            resp.send(response);
+        } catch (error) {
+            Sentry.captureException(error);
+            logger.error(error);
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                message: `Failed to send magic link to ${email}`,
+                data: stringifyJSON(error, 2),
+                fileType: "json",
+                channel: ChannelName.engineering,
+                filename: `failed-magic-link-${new Date().toISOString()}.json`
+
+            });
+            resp.status(500).send({
+                exists: userExists || memberExists,
+                email,
+                sendSuccess: false,
+                error: error,
             });
         }
 
-        resp.send(response);
+
+        return;
+
     } catch (error) {
-        Sentry.captureException(error);
-        logger.error(error);
-
-        resp.status(500).send({
-            exists: userExists || memberExists,
-            email,
-            sendSuccess: false,
-            error: error,
-        });
+        logger.error("Failed to generate magic link");
+        resp.status(500).send({sendSuccess: false, error: error.message, email: email});
+        return
     }
-
-
-    return;
 });
 
 app.post("/login-event", async (req: functions.https.Request | any, resp: functions.Response) => {
@@ -270,8 +294,8 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
 
         const trialStartedAt = member?.subscription?.trial?.startedAt;
         const trialEndAt = member?.subscription?.trial?.endsAt;
-        logger.info("typeof trial.startedAt = ",  typeof (trialStartedAt));
-        logger.info("typeof trial.endAt = ",  typeof (trialEndAt));
+        logger.info("typeof trial.startedAt = ", typeof (trialStartedAt));
+        logger.info("typeof trial.endAt = ", typeof (trialEndAt));
 
         if (!user) {
             resp.status(400).send({message: `Unable to find a user for userId ${userId}`});
