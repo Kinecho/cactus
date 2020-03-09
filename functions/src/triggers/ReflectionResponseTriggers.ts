@@ -324,6 +324,8 @@ export const onReflectionResponseCreated = functions.firestore
                     streakText = streakText + member.stats.reflections.currentStreakWeeks + ' week streak'
                 } else if (member.stats.reflections.currentStreakMonths > 1) {
                     streakText = streakText + member.stats.reflections.currentStreakMonths + ' month streak'
+                } else {
+                    streakText = streakText + '1 day streak';
                 }
 
                 fields.push({
