@@ -1,7 +1,7 @@
 import {isNull} from "@shared/util/ObjectUtil";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
 
-export interface VerifyReceiptParams {
+export interface AppleCompletePurchaseRequest {
     /**
      * Base 64 encoded receipt string
      */
@@ -13,7 +13,7 @@ export interface AppleFulfillmentResult {
     message?: string,
 }
 
-export interface VerifyReceiptResult {
+export interface AppleCompletePurchaseResult {
     success: boolean,
     isValid?: boolean,
     fulfillmentResult?: AppleFulfillmentResult,
@@ -22,8 +22,8 @@ export interface VerifyReceiptResult {
     appleReceiptData?: AppleReceiptResponseRawBody,
 }
 
-export function isVerifyReceiptParams(input: any): input is VerifyReceiptParams {
-    return !isNull(input) && !!(input as VerifyReceiptParams).receiptData;
+export function isCompletePurchaseRequest(input: any): input is AppleCompletePurchaseRequest {
+    return !isNull(input) && !!(input as AppleCompletePurchaseRequest).receiptData;
 }
 
 export function isAppleReceiptResponseRawBody(input: any): input is AppleReceiptResponseRawBody {
@@ -119,6 +119,11 @@ export enum ExpirationIntent {
 
 export interface PendingRenewalInfo {
     auto_renew_product_id?: string;
+
+    /**
+     * 1 = The subscription will renew at the end of the current subscription period.
+     * 0 = The customer has turned off automatic renewal for the subscription.
+     */
     auto_renew_status: "0" | "1";
     /**
      * The reason a subscription expired. This field is only present for a receipt that contains an expired auto-renewable subscription.
@@ -198,3 +203,12 @@ export const AppleReceiptCode = {
     21009: "Internal data access error. Try again later.",
     21010: "The user account cannot be found or has been deleted."
 };
+
+export function getOriginalTransactionId(receipt?: AppleReceiptResponseRawBody): string | undefined {
+    if (!receipt) {
+        return undefined;
+    }
+    const [nextRenewal] = receipt.pending_renewal_info ?? [];
+    const [lastInfo] = receipt.latest_receipt_info ?? [];
+    return nextRenewal.original_transaction_id ?? lastInfo?.original_transaction_id;
+}

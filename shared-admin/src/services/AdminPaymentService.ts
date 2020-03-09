@@ -34,4 +34,13 @@ export default class AdminPaymentService {
         return await this.firestoreService.getById(id, Payment);
     }
 
+    async getByAppleOriginalTransactionId(transactionId?: string): Promise<Payment[]> {
+        if (!transactionId) {
+            return [];
+        }
+        const query = this.getCollectionRef().where(Payment.Fields.appleOriginalTransactionId, "==", transactionId);
+        const queryResult = await this.firestoreService.executeQuery(query, Payment);
+        return queryResult.results;
+    }
+
 }

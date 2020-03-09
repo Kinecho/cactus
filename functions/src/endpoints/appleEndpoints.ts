@@ -4,7 +4,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {isVerifyReceiptParams, VerifyReceiptResult} from "@shared/api/AppleApi";
+import {isCompletePurchaseRequest, AppleCompletePurchaseResult} from "@shared/api/AppleApi";
 import {getAuthUserId} from "@api/util/RequestUtil";
 import AppleService from "@admin/services/AppleService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -16,11 +16,12 @@ app.use(cors({
     origin: Config.allowedOrigins,
 }));
 
-app.post("/verify-receipt", async (req: functions.https.Request | any, resp: functions.Response<VerifyReceiptResult>) => {
+app.post("/complete-purchase", async (req: functions.https.Request | any, resp: functions.Response<AppleCompletePurchaseResult>) => {
     const body = req.body;
     logger.info("verify receipt called");
     const userId = await getAuthUserId(req);
     if (!userId) {
+        logger.info("Call to complete-purchase was not authenticated. returning 401");
         resp.status(401).send({success: false, error: "You must be logged in to verify a receipt"});
         return;
     }
@@ -28,7 +29,7 @@ app.post("/verify-receipt", async (req: functions.https.Request | any, resp: fun
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
     console.log("Cactus member id", member?.id);
 
-    if (!isVerifyReceiptParams(body)) {
+    if (!isCompletePurchaseRequest(body)) {
         resp.status(400).send({
             success: false,
             error: "The body was not a valid receipt param object. Please include in the format {receiptData: string}"
@@ -36,7 +37,7 @@ app.post("/verify-receipt", async (req: functions.https.Request | any, resp: fun
         return
     }
 
-    const result = await AppleService.getSharedInstance().verifyReceipt({receipt: body, userId});
+    const result = await AppleService.getSharedInstance().completePurchase({receipt: body, userId});
     logger.info("Verify receipt completed");
     resp.status(200).send(result);
     return

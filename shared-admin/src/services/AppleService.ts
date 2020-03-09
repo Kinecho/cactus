@@ -3,8 +3,8 @@ import {
     AppleReceiptResponseRawBody,
     isAppleReceiptResponseRawBody,
     ReceiptStatusCode,
-    VerifyReceiptParams,
-    VerifyReceiptResult
+    AppleCompletePurchaseRequest,
+    AppleCompletePurchaseResult, getOriginalTransactionId
 } from "@shared/api/AppleApi";
 import {CactusConfig} from "@shared/CactusConfig";
 import axios from "axios";
@@ -72,10 +72,10 @@ export default class AppleService {
         }
     }
 
-    async verifyReceipt(options: { userId: string, receipt: VerifyReceiptParams }): Promise<VerifyReceiptResult> {
+    async completePurchase(options: { userId: string, receipt: AppleCompletePurchaseRequest }): Promise<AppleCompletePurchaseResult> {
         const {userId, receipt} = options;
         this.logger.info("Verifying receipt for userId", userId);
-        const result: VerifyReceiptResult = {success: false, isValid: false};
+        const result: AppleCompletePurchaseResult = {success: false, isValid: false};
 
         //First, try prod
         const prodResponse = await this.sendToApple({
@@ -91,15 +91,15 @@ export default class AppleService {
                 excludeOldTransactions: true,
                 sandbox: true
             });
-            console.log("got sandbox response", sandboxResponse);
+            console.log("got sandbox response. Status = ", sandboxResponse?.status);
             appleResponse = sandboxResponse;
         }
 
-        console.log("Got apple receipt info from ", appleResponse?.environment, stringifyJSON(appleResponse));
+        console.log("Got apple receipt info from ", appleResponse?.environment, `original transaction id = ${getOriginalTransactionId(appleResponse)}`);
         result.appleReceiptData = appleResponse;
 
         result.isValid = appleResponse?.status === ReceiptStatusCode.valid;
-        console.log("verify receipt result", stringifyJSON(result, 2));
+        // console.log("verify receipt result", stringifyJSON(result, 2));
 
         if (appleResponse) {
             const fulfilResult = await this.fulfilReceipt({receipt: appleResponse, userId});
@@ -122,12 +122,6 @@ export default class AppleService {
         const [nextRenewal] = receipt.pending_renewal_info;
         const [lastInfo] = receipt.latest_receipt_info;
         return nextRenewal?.product_id ?? lastInfo?.product_id;
-    }
-
-    getOriginalTransactionId(receipt: AppleReceiptResponseRawBody): string | undefined {
-        const [nextRenewal] = receipt.pending_renewal_info;
-        const [lastInfo] = receipt.latest_receipt_info;
-        return nextRenewal?.original_transaction_id ?? lastInfo?.original_transaction_id;
     }
 
     async fulfilReceipt(options: { userId: string, receipt: AppleReceiptResponseRawBody }): Promise<AppleFulfillmentResult> {
@@ -161,18 +155,21 @@ export default class AppleService {
             subscriptionProductId: subscriptionProductId
         });
         await AdminPaymentService.getSharedInstance().save(payment);
-        this.logger.info("Saved payment for apple receipt", stringifyJSON(payment, 2));
+        // this.logger.info("Saved payment for apple receipt", stringifyJSON(payment, 2));
 
         const cactusSubscription = member.subscription ?? getDefaultSubscription();
         cactusSubscription.tier = subscriptionProduct?.subscriptionTier || SubscriptionTier.PLUS;
         cactusSubscription.subscriptionProductId = subscriptionProductId;
-        cactusSubscription.appleOriginalTransactionId = this.getOriginalTransactionId(receipt);
+        cactusSubscription.appleOriginalTransactionId = getOriginalTransactionId(receipt);
 
         const trial = (cactusSubscription.trial || getDefaultTrial());
-        trial.activatedAt = new Date();
+        if (trial.activatedAt) {
+            this.logger.info(`User's trial was already activated at ${trial.activatedAt?.toISOString()}, not updating it.`)
+        }
+        trial.activatedAt = trial.activatedAt ?? new Date();
         cactusSubscription.trial = trial;
         await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false});
-
+        result.success = true;
         return result;
     }
 }

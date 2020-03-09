@@ -1,11 +1,17 @@
 import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
-import {AppleReceiptResponseRawBody} from "@shared/api/AppleApi";
+import {AppleReceiptResponseRawBody, getOriginalTransactionId} from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("PaymentModel");
+
+enum Field {
+    appleOriginalTransactionId = "apple.originalTransactionId"
+}
+
 export default class Payment extends BaseModel {
     collection = Collection.payments;
+    static Fields = Field;
     memberId!: string;
     amountCentsUsd?: number;
     subscriptionProductId?: string;
@@ -28,18 +34,14 @@ export default class Payment extends BaseModel {
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
 
-        const [renewalInfo] = receipt.pending_renewal_info;
-        let transactionId: string | undefined = renewalInfo?.original_transaction_id;
-        if (!transactionId && receipt.latest_receipt_info?.length > 0) {
-            transactionId = receipt.latest_receipt_info[0].transaction_id
-        }
+        const transactionId: string | undefined = getOriginalTransactionId(receipt);
         if (transactionId) {
             payment.id = `apple_${transactionId}`;
         } else {
             logger.warn("No transaction ID was determined from the receipt");
         }
 
-        payment.apple = {raw: receipt};
+        payment.apple = {raw: receipt, originalTransactionId: transactionId};
 
         return payment;
     }
@@ -52,4 +54,5 @@ interface StripePayment {
 
 interface ApplePayment {
     raw?: AppleReceiptResponseRawBody;
+    originalTransactionId?: string
 }

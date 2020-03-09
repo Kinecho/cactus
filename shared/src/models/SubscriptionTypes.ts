@@ -15,6 +15,8 @@ export interface SubscriptionInvoice {
     status?: InvoiceStatus;
     stripeInvoiceId?: string;
     stripeSubscriptionId?: string;
+    isAppleSubscription?: boolean;
+    isAutoRenew?: boolean;
 }
 
 export enum CardBrand {
