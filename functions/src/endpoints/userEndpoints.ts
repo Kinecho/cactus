@@ -65,17 +65,17 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 app.get("/feature-auth", async (req: functions.https.Request | any, resp: functions.Response) => {
     const queryParams = req.query;
     const {memberId, featureKey} = queryParams as FeatureAuthRequest;
-    const features = ['core-values']
+    const features = ['core-values'];
 
     if (!memberId) {
         logger.log("No MemberId was found on the request.");
-        resp.sendStatus(401);
+        resp.status(401).send(`The request was missing parameters for authentication. Visit ${getHostname()} to continue.`);
         return
     }
 
     if (!features.includes(featureKey)) {
         logger.log("No valid feature was found on the request.");
-        resp.sendStatus(400);
+        resp.status(400).send(`The request was missing required parameters. Visit ${getHostname()} to continue.`);
         return
     }
 
@@ -83,7 +83,7 @@ app.get("/feature-auth", async (req: functions.https.Request | any, resp: functi
 
     if (!member) {
         logger.log("No member could be found.");
-        resp.sendStatus(400);
+        resp.status(400).send(`The request could not be authenticated. Visit ${getHostname()} to continue.`);
         return
     }
 
