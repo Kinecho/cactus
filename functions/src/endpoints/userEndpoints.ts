@@ -66,22 +66,15 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
     const queryParams = req.query;
     const {memberId} = queryParams as FeatureAuthRequest;
 
-    if (!memberId) {
-        logger.log("No MemberId was found on the request.");
-        resp.status(401).send(`The request was missing parameters for authentication. Visit ${getHostname()} to continue.`);
-        return
-    }
-
     const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
 
     if (!member) {
-        logger.log("No member could be found.");
-        resp.status(400).send(`The request could not be authenticated. Visit ${getHostname()} to continue.`);
-        return
+        logger.log("No member could be found for memberId: ", memberId);
+        resp.redirect(`${getHostname()}${PageRoute.LOGIN}?${QueryParam.MESSAGE}=${encodeURIComponent("To continue to Core Values, please login.")}`);
+        return;
     }
 
-
-    if (member.hasActiveSubscription && member.email) {
+    if (member?.hasActiveSubscription && member?.email) {
         logger.log('Member has active subscription. Redirecting to survey...');
         resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
         return;
