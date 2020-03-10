@@ -1,4 +1,4 @@
-![logo](https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs.png?alt=media&token=9e41b0c7-5553-4f78-9e8b-4fae213d44e3)
+![logo](https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574)
 
 
 # cactus
