@@ -4,6 +4,11 @@ export interface DeleteUserRequest {
     email: string,
 }
 
+export interface FeatureAuthRequest {
+    memberId: string,
+    featureKey: string
+}
+
 export interface DeleteUserResponse extends ApiResponse {
     success: boolean,
     error?: any,

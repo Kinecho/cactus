@@ -1,9 +1,12 @@
 import * as express from "express";
 import * as cors from "cors";
-import {getConfig} from "@admin/config/configService";
+import {getConfig, getHostname} from "@admin/config/configService";
 import AdminUserService from "@admin/services/AdminUserService";
+import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getAuthUser} from "@api/util/RequestUtil";
-import {DeleteUserRequest} from "@shared/api/UserEndpointTypes";
+import {DeleteUserRequest, FeatureAuthRequest} from "@shared/api/UserEndpointTypes";
+import {QueryParam} from "@shared/util/queryParams";
+import {PageRoute} from "@shared/PageRoutes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import Logger from "@shared/Logger";
@@ -56,6 +59,49 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
     // don't expect to ever get here but just in case
     resp.sendStatus(500);
     return;
+});
+
+
+app.post("/feature-auth", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const payload = req.body;
+    const {memberId, featureKey} = payload as FeatureAuthRequest;
+    const features = ['core-values']
+
+    if (!memberId) {
+        logger.log("No MemberId was found on the request.");
+        resp.sendStatus(401);
+        return
+    }
+
+    if (!features.includes(featureKey)) {
+        logger.log("No valid feature was found on the request.");
+        resp.sendStatus(400);
+        return
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+
+    if (!member) {
+        logger.log("No member could be found.");
+        resp.sendStatus(400);
+        return
+    }
+
+    if (featureKey == 'core-values') {
+        if (member.hasActiveSubscription && member.email) {
+            logger.log('Member has active subscription. Redirecting to survey...');
+            resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
+            return;
+        } else {
+            const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.MESSAGE}=${encodeURIComponent("Core Values is only available to Cactus Plus members.")}`;
+            resp.redirect(pricingUrl);
+            return;
+        }
+
+    } else {
+        resp.sendStatus(404);
+        return;
+    }
 });
 
 export default app
