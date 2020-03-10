@@ -114,7 +114,7 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                     const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId: memberId, limit: 14});
                     for (const response of reflectionResponses) {
                         insightTasks.push(new Promise<void>(async resolve => {
-                            if (!response.insights && response.content?.text) {
+                            if (!response.insights && response.content?.text && response.id) {
                                 try {
                                     const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
                                     if (pastInsightsResult) {
@@ -123,10 +123,8 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                                         delete pastInsightsResult.syntaxRaw;
                                         delete pastInsightsResult.entitiesRaw;
 
-                                        response.insights = pastInsightsResult;
-
                                         // save words to the reflection response
-                                        await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                        await AdminReflectionResponseService.getSharedInstance().setInsights({ reflectionResponseId: response.id, insightsResult: pastInsightsResult });
                                     }
                                 } catch(error) {
                                     logger.log('There was a problem processing insights for reflection response', error)
