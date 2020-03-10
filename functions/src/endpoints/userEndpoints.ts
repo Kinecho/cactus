@@ -62,20 +62,13 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 });
 
 
-app.get("/feature-auth", async (req: functions.https.Request | any, resp: functions.Response) => {
+app.get("/feature-auth/core-values", async (req: functions.https.Request | any, resp: functions.Response) => {
     const queryParams = req.query;
-    const {memberId, featureKey} = queryParams as FeatureAuthRequest;
-    const features = ['core-values'];
+    const {memberId} = queryParams as FeatureAuthRequest;
 
     if (!memberId) {
         logger.log("No MemberId was found on the request.");
         resp.status(401).send(`The request was missing parameters for authentication. Visit ${getHostname()} to continue.`);
-        return
-    }
-
-    if (!features.includes(featureKey)) {
-        logger.log("No valid feature was found on the request.");
-        resp.status(400).send(`The request was missing required parameters. Visit ${getHostname()} to continue.`);
         return
     }
 
@@ -87,21 +80,19 @@ app.get("/feature-auth", async (req: functions.https.Request | any, resp: functi
         return
     }
 
-    if (featureKey == 'core-values') {
-        if (member.hasActiveSubscription && member.email) {
-            logger.log('Member has active subscription. Redirecting to survey...');
-            resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
-            return;
-        } else {
-            const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.MESSAGE}=${encodeURIComponent("Core Values is available to Cactus Plus members.")}`;
-            resp.redirect(pricingUrl);
-            return;
-        }
 
+    if (member.hasActiveSubscription && member.email) {
+        logger.log('Member has active subscription. Redirecting to survey...');
+        resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
+        return;
     } else {
-        resp.sendStatus(404);
+        const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.MESSAGE}=${encodeURIComponent("Core Values is available to Cactus Plus members.")}`;
+        resp.redirect(pricingUrl);
         return;
     }
+
+    resp.sendStatus(500);
+    return;
 });
 
 export default app

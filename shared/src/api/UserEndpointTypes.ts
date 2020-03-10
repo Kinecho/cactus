@@ -5,8 +5,7 @@ export interface DeleteUserRequest {
 }
 
 export interface FeatureAuthRequest {
-    memberId: string,
-    featureKey: string
+    memberId: string
 }
 
 export interface DeleteUserResponse extends ApiResponse {
