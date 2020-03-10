@@ -1,5 +1,6 @@
 import {isNull} from "@shared/util/ObjectUtil";
 import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 export interface AppleCompletePurchaseRequest {
     /**
@@ -11,6 +12,7 @@ export interface AppleCompletePurchaseRequest {
 export interface AppleFulfillmentResult {
     success: boolean,
     message?: string,
+    subscriptionProduct?: SubscriptionProduct
 }
 
 export interface AppleCompletePurchaseResult {
@@ -71,6 +73,7 @@ export interface AppleTransactionInfo {
     subscription_group_identifier?: string;
     transaction_id?: string;
     web_order_line_item_id?: string;
+
     [key: string]: any
 }
 
@@ -105,16 +108,56 @@ export interface AppleReceipt {
     request_date_ms?: string;
     request_date_pst?: string;
     version_external_identifier?: number;
+
     [key: string]: any
 }
 
-
+/**
+ * The reason a subscription expired.
+ */
 export enum ExpirationIntent {
+    /**
+     * The customer voluntarily canceled their subscription.
+     */
     customer_canceled = "1",
+
+    /**
+     * Billing error; for example, the customer's payment information was no longer valid.
+     */
     billing_error = "2",
+
+    /**
+     * The customer did not agree to a recent price increase.
+     */
     customer_denied_price_increase = "3",
+
+    /**
+     * The product was not available for purchase at the time of renewal.
+     */
     product_not_available = "4",
-    unknown = "5"
+
+    /**
+     * Unknown Error
+     */
+        unknown = "5"
+}
+
+export function getExpirationIntentDescription(intent?: ExpirationIntent): string | undefined {
+    if (!intent) {
+        return undefined;
+    }
+    switch (intent) {
+        case ExpirationIntent.customer_canceled:
+            return "The customer voluntarily canceled their subscription.";
+        case ExpirationIntent.billing_error:
+            return "Billing error; for example, the customer's payment information was no longer valid.";
+        case ExpirationIntent.customer_denied_price_increase:
+            return "The customer did not agree to a recent price increase.";
+        case ExpirationIntent.product_not_available:
+            return "The product was not available for purchase at the time of renewal.";
+        case ExpirationIntent.unknown:
+            return "Unknown error"
+    }
 }
 
 export interface PendingRenewalInfo {
@@ -211,4 +254,145 @@ export function getOriginalTransactionId(receipt?: AppleReceiptResponseRawBody):
     const [nextRenewal] = receipt.pending_renewal_info ?? [];
     const [lastInfo] = receipt.latest_receipt_info ?? [];
     return nextRenewal.original_transaction_id ?? lastInfo?.original_transaction_id;
+}
+
+/**
+ * Apple notification type for subscription event
+ * See [Apple Docs](https://developer.apple.com/documentation/appstoreservernotifications/notification_type)
+ */
+export enum AppleNotificationType {
+    /**
+     * Indicates that either Apple customer support canceled the subscription or the user upgraded their subscription.
+     * The cancellation_date key contains the date and time of the change.
+     */
+    CANCEL = "CANCEL",
+
+    /**
+     * Indicates the customer made a change in their subscription plan that takes effect at the next renewal.
+     * The currently active plan is not affected.
+     */
+    DID_CHANGE_RENEWAL_PREF = "DID_CHANGE_RENEWAL_PREF",
+
+    /**
+     * Indicates a change in the subscription renewal status.
+     * Check auto_renew_status_change_date_ms and auto_renew_status in the JSON response
+     * to know the date and time of the last status update and the current renewal status.
+     */
+    DID_CHANGE_RENEWAL_STATUS = "DID_CHANGE_RENEWAL_STATUS",
+
+    /**
+     * Indicates a subscription that failed to renew due to a billing issue.
+     * Check is_in_billing_retry_period to know the current retry status of the subscription,
+     * and grace_period_expires_date to know the new service expiration date if the subscription is in a billing grace period.
+     */
+    DID_FAIL_TO_RENEW = "DID_FAIL_TO_RENEW",
+
+    /**
+     * Indicates successful automatic renewal of an expired subscription that failed to renew in the past.
+     * Check expires_date to determine the next renewal date and time.
+     */
+    DID_RECOVER = "DID_RECOVER",
+
+    /**
+     * Occurs at the initial purchase of the subscription.
+     * Store latest_receipt on your server as a token to verify the user’s subscription status at any time,
+     * by validating it with the App Store.
+     */
+    INITIAL_BUY = "INITIAL_BUY",
+
+    /**
+     * Indicates the customer renewed a subscription interactively, either by using your app’s interface,
+     * or on the App Store in the account's Subscriptions settings. Make service available immediately.
+     */
+    INTERACTIVE_RENEWAL = "INTERACTIVE_RENEWAL",
+
+    /**
+     * Indicates successful automatic renewal of an expired subscription that failed to renew in the past.
+     * Check expires_date to determine the next renewal date and time.
+     */
+    RENEWAL = "RENEWAL",
+}
+
+/**
+ * Data type sent from Apple on server-to-server notifications such as Subscription Status changes
+ * See [Apple Docs](https://developer.apple.com/documentation/appstoreservernotifications/responsebody)
+ */
+export interface AppleServerNotificationBody {
+    notification_type: AppleNotificationType
+    password: string
+    auto_renew_adam_id?: string
+    auto_renew_product_id: string
+    auto_renew_status: "true" | "false"
+    auto_renew_status_change_date: ISODate
+    auto_renew_status_change_date_ms: string,
+    auto_renew_status_change_date_pst: string,
+    environment: "Sandbox" | "PROD"
+    expiration_intent?: ExpirationIntent
+
+    /**
+     * The latest Base64-encoded transaction receipt. This field appears in the notification instead of latest_receipt for expired transactions.
+     */
+    latest_expired_receipt?: string
+    latest_expired_receipt_info?: AppleTransactionInfo[]
+
+    latest_receipt: string
+
+    /**
+     * The JSON representation of the value in latest_receipt. Note that this field is an array in the receipt but a single object in server-to-server notifications.
+     */
+    latest_receipt_info: AppleTransactionInfo
+
+    /**
+     * An object that contains information about the most recent in-app purchase transactions for the app.
+     */
+    unified_receipt: AppleUnifiedReceipt;
+}
+
+export function isAppleServerNotification(input: any): input is AppleServerNotificationBody {
+    if (isNull(input)) {
+        return false
+    }
+
+    return !isNull((input as AppleServerNotificationBody).auto_renew_product_id) && !isNull((input as AppleServerNotificationBody).password)
+}
+
+export function getOriginalTransactionIdFromServerNotification(notification: AppleServerNotificationBody): string | undefined {
+    if (!notification) {
+        return undefined;
+    }
+    const [nextRenewal] = notification.unified_receipt?.pending_renewal_info ?? [];
+    const lastInfo = notification.latest_receipt_info;
+    return lastInfo?.original_transaction_id ?? nextRenewal?.original_transaction_id;
+}
+
+
+export function getExpirationIntentFromNotification(notification: AppleServerNotificationBody): ExpirationIntent | undefined {
+    if (!notification) {
+        return undefined;
+    }
+    const [nextRenewal] = notification.unified_receipt?.pending_renewal_info ?? [];
+    return notification.expiration_intent ?? nextRenewal?.expiration_intent;
+}
+
+export interface AppleUnifiedReceipt {
+    environment: "Sandbox" | "Production"
+    /**
+     * encoded receipt string
+     */
+    latest_receipt: string
+    /**
+     * An array that contains the latest 100 in-app purchase transactions of the decoded value in latest_receipt.
+     * This array excludes transactions for consumable products that your app has marked as finished.
+     * The contents of this array are identical to those in responseBody.Latest_receipt_info
+     * in the verifyReceipt endpoint response for receipt validation.
+     */
+    latest_receipt_info: AppleTransactionInfo[]
+
+    /**
+     * An array where each element contains the pending renewal information for each auto-renewable subscription identified in product_id.
+     * The contents of this array are identical
+     * to those in responseBody.Pending_renewal_info in the verifyReciept endpoint response for receipt validation.
+     */
+    pending_renewal_info: PendingRenewalInfo[]
+    status: 0
 }

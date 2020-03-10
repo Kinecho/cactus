@@ -139,6 +139,7 @@ export default class AppleService {
             appleProductId,
             onlyAvailableForSale: false
         });
+        result.subscriptionProduct = subscriptionProduct;
         const subscriptionProductId = subscriptionProduct?.entryId;
         if (!subscriptionProductId) {
             result.success = false;
