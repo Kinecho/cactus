@@ -65,8 +65,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 app.get("/feature-auth/core-values", async (req: functions.https.Request | any, resp: functions.Response) => {
     const queryParams = req.query;
     const {memberId} = queryParams as FeatureAuthRequest;
-    const afterLoginUrl = `${getHostname()}/feature-auth/core-values?memberId=${memberId}`;
-    const loginUrl = `${getHostname()}${PageRoute.LOGIN}?${QueryParam.MESSAGE}=${encodeURIComponent("To continue to Core Values, please login.")}&${QueryParam.REDIRECT_URL}=${afterLoginUrl}`;
+    const loginUrl = `${getHostname()}${PageRoute.LOGIN}?${QueryParam.MESSAGE}=${encodeURIComponent("To continue to Core Values, please login.")}`;
 
     if (!memberId) {
         logger.log("No memberId provided");
