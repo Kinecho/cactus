@@ -35,7 +35,9 @@ export enum QueryParam {
     UPGRADE_SUCCESS = "upgrade",
     CHART_TYPE = "chart_type",
     CHART_DATA = "chart_data",
-    CACTUS_MEMBER_ID = "cmid"
+    CACTUS_MEMBER_ID = "memberId",
+    CORE_VALUES = "coreValues"
+
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

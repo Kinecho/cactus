@@ -1,21 +1,15 @@
 <template>
   <div>
     <NavBar/>
-    <snackbar-content
-        class="top-message"
-        v-if="message"
-        :closeable="true"
-        key="top-message"
-        :autoHide="false"
-        color="successAlt">
-        <div slot="text" class="centered">
-          <p>{{message}}</p>
-        </div>
-    </snackbar-content>
     <section class="hero">
-        <div class="centered">
+        <div class="centered" v-if="!coreValues">
             <h1>Get more with Cactus&nbsp;Plus</h1>
-            <p class="subtext">Daily prompts, personal insights, and more</p>
+            <p class="subtext">Daily prompts, insights, core values, and&nbspmore</p>
+            <a class="button btn primary" href="#upgrade">Upgrade</a>
+        </div>
+        <div class="centered" v-if="coreValues">
+            <h1>Discover your Core&nbspValues</h1>
+            <p class="subtext">Cactus Plus members get core values, daily prompts, and&nbsp;more</p>
             <a class="button btn primary" href="#upgrade">Upgrade</a>
         </div>
     </section>
@@ -95,14 +89,14 @@
         SnackbarContent
     },
     data(): {
-            message: string | undefined,
-        } {
-            return {
-                message: undefined,
-            }
-        },
+      coreValues: boolean,
+    } {
+        return {
+            coreValues: false,
+        }
+    },
     created() {
-      this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
+      this.coreValues = getQueryParam(QueryParam.CORE_VALUES) == "true" || false;
     }
   });
 </script>
