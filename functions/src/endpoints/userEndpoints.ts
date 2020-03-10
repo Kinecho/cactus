@@ -62,9 +62,9 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 });
 
 
-app.post("/feature-auth", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const payload = req.body;
-    const {memberId, featureKey} = payload as FeatureAuthRequest;
+app.get("/feature-auth", async (req: functions.https.Request | any, resp: functions.Response) => {
+    const queryParams = req.query;
+    const {memberId, featureKey} = queryParams as FeatureAuthRequest;
     const features = ['core-values']
 
     if (!memberId) {
@@ -93,7 +93,7 @@ app.post("/feature-auth", async (req: functions.https.Request | any, resp: funct
             resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
             return;
         } else {
-            const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.MESSAGE}=${encodeURIComponent("Core Values is only available to Cactus Plus members.")}`;
+            const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.MESSAGE}=${encodeURIComponent("Core Values is available to Cactus Plus members.")}`;
             resp.redirect(pricingUrl);
             return;
         }
