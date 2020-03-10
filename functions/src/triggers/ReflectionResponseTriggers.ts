@@ -114,7 +114,7 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                     const reflectionResponses = await AdminReflectionResponseService.getSharedInstance().getResponsesForMember({memberId: memberId, limit: 14});
                     for (const response of reflectionResponses) {
                         insightTasks.push(new Promise<void>(async resolve => {
-                            if (!response.insights && response.content?.text) {
+                            if (!response.insights && response.content?.text && response.id) {
                                 try {
                                     const pastInsightsResult = await GoogleLanguageService.getSharedInstance().insightWords(response.content.text);
                                     if (pastInsightsResult) {
@@ -123,10 +123,8 @@ export const updateInsightWordsOnReflectionWrite = functions.firestore
                                         delete pastInsightsResult.syntaxRaw;
                                         delete pastInsightsResult.entitiesRaw;
 
-                                        response.insights = pastInsightsResult;
-
                                         // save words to the reflection response
-                                        await AdminReflectionResponseService.getSharedInstance().save(response, {setUpdatedAt: false});
+                                        await AdminReflectionResponseService.getSharedInstance().setInsights({ reflectionResponseId: response.id, insightsResult: pastInsightsResult });
                                     }
                                 } catch(error) {
                                     logger.log('There was a problem processing insights for reflection response', error)
@@ -298,13 +296,39 @@ export const onReflectionResponseCreated = functions.firestore
                 const trialDaysLeft = member?.daysLeftInTrial;
                 let daysLeftText = '';
 
-                if (member?.isInTrial && trialDaysLeft && trialDaysLeft > 0) {
+                if (member?.isInTrial && trialDaysLeft > 0) {
                     daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
+                } else if (member?.isInTrial && trialDaysLeft == 0) {
+                    daysLeftText = ' (Ends Today)';
                 }
 
                 fields.push({
                     title: "Subscription",
                     value: `${member.tierDisplayName}${daysLeftText}`
+                })
+            }
+
+            if (member?.stats?.reflections?.totalCount) {
+                let reflectionText = 'reflection';
+
+                if (member.stats.reflections.totalCount > 1) {
+                    reflectionText = reflectionText + 's';
+                }
+
+                let streakText = ', ';
+                if (member.stats.reflections.currentStreakDays > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakDays + ' day streak'
+                } else if (member.stats.reflections.currentStreakWeeks > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakWeeks + ' week streak'
+                } else if (member.stats.reflections.currentStreakMonths > 1) {
+                    streakText = streakText + member.stats.reflections.currentStreakMonths + ' month streak'
+                } else {
+                    streakText = streakText + '1 day streak';
+                }
+
+                fields.push({
+                    title: "Engagement",
+                    value: `${member.stats.reflections.totalCount} ${reflectionText}${streakText}`
                 })
             }
 

@@ -316,7 +316,7 @@ export async function getOperation(name: string): Promise<Operation | undefined>
         if (error.isAxiosError) {
             const axiosError = error as AxiosError;
             logger.error(`Failed to get operation. Code ${axiosError.code}. ${JSON.stringify(axiosError.response, null, 2)}`);
-            await slackService.sendEngineeringMessage({text: `Failed to get operation. Code ${axiosError.code}.\n\`\`\`${JSON.stringify(axiosError.response, null, 2)}\`\`\``})
+            await slackService.sendEngineeringMessage({text: `Failed to get operation. Code ${axiosError.code}.\n\`\`\`${JSON.stringify(axiosError.response?.data, null, 2)}\`\`\``})
         } else {
             logger.error("Failed to get operation" + name, error);
         }

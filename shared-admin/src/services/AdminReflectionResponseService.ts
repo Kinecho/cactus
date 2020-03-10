@@ -1,5 +1,5 @@
 import AdminFirestoreService, {DeleteOptions, QueryOptions, SaveOptions} from "@admin/services/AdminFirestoreService";
-import ReflectionResponse, {ReflectionResponseField, InsightWord} from "@shared/models/ReflectionResponse";
+import ReflectionResponse, {ReflectionResponseField, InsightWord, InsightWordsResult} from "@shared/models/ReflectionResponse";
 import {BaseModelField, Collection} from "@shared/FirestoreBaseModels";
 import MailchimpService from "@admin/services/MailchimpService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -18,6 +18,8 @@ import {WordCloudExclusionList} from "@shared/util/LanguageUtil";
 import CactusMember, {ReflectionStats} from "@shared/models/CactusMember";
 import {calculateDurationMs, calculateStreaks, getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
+import * as admin from "firebase-admin";
+import DocumentReference = admin.firestore.DocumentReference;
 import {AxiosError} from "axios";
 import Logger from "@shared/Logger";
 
@@ -96,6 +98,25 @@ export default class AdminReflectionResponseService {
         const results = await this.firestoreService.executeQuery(query, ReflectionResponse);
 
         return results.results
+    }
+
+    async setInsights(options: { reflectionResponseId: string, insightsResult?: InsightWordsResult }): Promise<void> {
+        const {reflectionResponseId, insightsResult} = options;
+        const doc: DocumentReference = this.getCollectionRef().doc(reflectionResponseId);
+        const data: Partial<ReflectionResponse> = {};
+
+        if (insightsResult) {
+            data.insights = insightsResult;
+        }
+
+        if (data.insights) {
+            try {
+                await doc.set(data, {merge: true});
+            } catch (error) {
+                logger.error(`Unable to update reflection response insights for reflectionResponseId = ${reflectionResponseId}.`, error)
+            }
+        }
+        return;
     }
 
     static async setLastJournalDate(email?: string, date?: Date): Promise<ApiResponse> {
