@@ -32,6 +32,7 @@ import StripeWebhookService from "@admin/services/StripeWebhookService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {PubSubService} from "@admin/pubsub/PubSubService";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
+import AppleService from "@admin/services/AppleService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -75,6 +76,8 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPromptContentService.initialize(config);
     AdminSubscriptionProductService.initialize();
 
+    //Apple
+    AppleService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

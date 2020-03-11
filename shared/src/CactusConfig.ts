@@ -22,7 +22,7 @@ export interface CactusConfig {
     app: {
         serverName: string | undefined
         environment: EnvironmentType,
-        fake_email_domain: string
+        fake_email_domain: string,
     },
     mailchimp: {
         api_key: string,
@@ -91,6 +91,9 @@ export interface CactusConfig {
         team_id: string,
         app_id: string,
         custom_scheme: string,
+        verify_receipt_url: string,
+        verify_receipt_sandbox_url: string,
+        iap_shared_secret: string,
     },
     sendgrid: {
         api_key: string,

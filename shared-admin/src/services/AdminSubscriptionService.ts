@@ -27,6 +27,9 @@ import {
     isStripePaymentMethod
 } from "@admin/util/AdminStripeUtils";
 import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
+import AdminPaymentService from "@admin/services/AdminPaymentService";
+import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
+import {PendingRenewalInfo} from "@shared/api/AppleApi";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -537,6 +540,7 @@ export default class AdminSubscriptionService {
                 paid: stripeInvoice.paid,
                 stripeInvoiceId: stripeInvoice.id,
                 stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
+                isAppleSubscription: false,
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
@@ -547,7 +551,54 @@ export default class AdminSubscriptionService {
         }
     }
 
-    async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
+    async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
+        const {member} = options;
+
+        let invoice: SubscriptionInvoice | undefined;
+        const originalTransactionId = member.subscription?.appleOriginalTransactionId;
+        if (!originalTransactionId) {
+            this.logger.warn("No apple original transaction id found for member", member.email);
+            return undefined;
+        }
+        const payments = await AdminPaymentService.getSharedInstance().getByAppleOriginalTransactionId(originalTransactionId)
+        this.logger.info(`found ${payments.length} payments for transactionId = ${originalTransactionId}`);
+        const [payment] = payments || [];
+        if (!payment) {
+            this.logger.info("No payment found for original transaction id = ", originalTransactionId);
+            return undefined;
+        }
+        const receiptInfo = payment?.apple?.raw;
+        if (!receiptInfo) {
+            this.logger.info("No receipt info found on payment", payment.id);
+            return undefined;
+        }
+
+        const [latestInfo] = receiptInfo.latest_receipt_info;
+        if (!latestInfo) {
+            this.logger.info("No latest receipt info found on the apple receipt");
+            return undefined;
+        }
+
+        const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo|undefined)[];
+
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
+            appleProductId: latestInfo.product_id,
+            onlyAvailableForSale: false
+        });
+
+        const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms)/1000 : undefined;
+        invoice = {
+            nextPaymentDate_epoch_seconds: expiresAtSeconds,
+            // status: InvoiceS
+            amountCentsUsd: subscriptionProduct?.priceCentsUsd,
+            isAppleSubscription: true,
+            appleProductId: latestInfo.product_id,
+            isAutoRenew: autoRenewInfo?.auto_renew_status === "1"
+        };
+        return invoice;
+    }
+
+    async getStripeSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
         const memberId = member.id;
         const stripeCustomerId = member.stripeCustomerId;
@@ -569,6 +620,16 @@ export default class AdminSubscriptionService {
         //TODO: Handle for fetching invoices from Apple, Google, etc
 
         return invoice;
+    }
+
+    async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
+        const {member} = options;
+
+        if (member.subscription?.appleOriginalTransactionId) {
+            return await this.getAppleSubscriptionInvoice({member});
+        } else {
+            return await this.getStripeSubscriptionInvoice({member})
+        }
     }
 
     /**

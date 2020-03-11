@@ -44,4 +44,24 @@ export default class AdminSubscriptionProductService {
         return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
     }
 
+    async getByAppleProductId(options: { appleProductId?: string, onlyAvailableForSale?: boolean }): Promise<SubscriptionProduct | undefined> {
+        if (!options.appleProductId) {
+            return undefined;
+        }
+        const fields: { name: string, value: any }[] = [{
+            name: SubscriptionProduct.Fields.appleProductId,
+            value: options.appleProductId,
+        }];
+
+        if (options.onlyAvailableForSale === true) {
+            fields.push({
+                name: SubscriptionProduct.Fields.availableForSale,
+                value: true
+            })
+        }
+
+        return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
+    }
+
+
 }

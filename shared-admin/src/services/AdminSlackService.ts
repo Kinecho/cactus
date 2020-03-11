@@ -59,7 +59,9 @@ export enum ChannelName {
     content = "content",
     customer_support = "customer-support",
     signups = "signups",
-    deletions = "deletions"
+    deletions = "deletions",
+    cha_ching = "cha-ching",
+    subscription_status = "subscription-status"
 }
 
 export enum SlackResponseType {
@@ -305,6 +307,15 @@ export default class AdminSlackService {
     async sendEngineeringMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.engineering, message);
     }
+
+    async sendChaChingMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.cha_ching, message);
+    }
+
+    async sendSubscriptionStatusMessage(message: string | ChatMessage): Promise<void> {
+        await this.sendMessage(ChannelName.subscription_status, message);
+    }
+
 
     async sendDeletionMessage(message: string | ChatMessage): Promise<void> {
         await this.sendMessage(ChannelName.deletions, message);

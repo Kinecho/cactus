@@ -151,7 +151,7 @@ export default class AdminFlamelinkService {
             return [name, "==", value]
         });
 
-        logger.log(`Fetching from ${schema} where ${JSON.stringify(filters, null, 2)}`);
+        // logger.log(`Fetching from ${schema} where ${JSON.stringify(filters, null, 2)}`);
 
         const results = await this.flamelinkApp.content.get({
             filters,

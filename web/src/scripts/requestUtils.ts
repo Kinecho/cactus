@@ -62,5 +62,4 @@ export const request = getInstance();
 
 export function isAxiosError(error: any): error is AxiosError {
     return error.isAxiosError
-
 }
