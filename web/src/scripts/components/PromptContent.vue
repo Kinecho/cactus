@@ -810,7 +810,6 @@
         background-color: $beige;
         display: flex;
         flex-direction: column;
-        flex-grow: 1;
         position: relative;
         width: 100vw;
 
@@ -829,10 +828,6 @@
 
         .content-container {
             perspective: 1000px;
-
-            @include r(600) {
-                margin-bottom: 12rem;
-            }
 
             .progress-wrapper {
                 left: 0;
