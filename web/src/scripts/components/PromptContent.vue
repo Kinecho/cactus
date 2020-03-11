@@ -1,5 +1,10 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
+        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="close" title="Close" class="close tertiary icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+            </svg>
+        </button>
         <transition appear name="fade-in" mode="out-in">
             <div v-if="show404">
                 <FourOhFour/>
@@ -29,11 +34,6 @@
                         <span class="buttonText">Back</span>
                     </button>
                 </div>
-                <button aria-label="Close" v-if="showCloseButton" @click="close" title="Close" class="close tertiary icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
-                        <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
-                    </svg>
-                </button>
                 <div class="progress-wrapper" v-if="!completed && !showSharing && !isShareNote">
                     <div class="progress">
                         <span v-for="(content, index) in promptContent.content" :class="['segment', {complete: index <= activeIndex}]"></span>
@@ -1010,7 +1010,8 @@
         z-index: 20;
 
         @include r(600) {
-            display: none;
+            right: 1.6rem;
+            top: 1.6rem;
         }
 
         svg {
