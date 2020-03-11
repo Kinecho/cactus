@@ -2,7 +2,6 @@
 import "@styles/pages/prompt.scss"
 import Vue from "vue";
 import PromptPage from "@components/PromptContent.vue";
-import NavBar from "@components/NavBar.vue";
 import Footer from "@components/StandardFooter.vue";
 import {PageRoute} from "@shared/PageRoutes";
 import {getAuth} from "@web/firebase";
@@ -41,12 +40,10 @@ function renderPromptComponent() {
     new Vue({
         el: "#app",
         template: `<div class="prompt-page">
-    <NavBar v-bind:isSticky="false"/>
     <Prompt v-on:close="redirectToJournal"/>
 </div>`,
         components: {
             Prompt: PromptPage,
-            NavBar,
             Footer,
         }, methods: {
             redirectToJournal(): void {
