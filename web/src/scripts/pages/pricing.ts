@@ -2,28 +2,14 @@ import "@styles/pages/pricing.scss"
 import StandardFooter from "@components/StandardFooter.vue";
 import NavBar from "@components/NavBar.vue";
 import {commonInit} from "@web/common";
-import PremiumPricing from "@components/PremiumPricing.vue";
+import PricingPage from "@components/PricingPage.vue";
 import Vue from "vue"
 
 commonInit();
 
 new Vue({
-    el: "header",
+    el: "#app",
     template: `
-        <NavBar :show-signup="true" :show-login="true" :show-links="true"/>`,
-    components: {NavBar}
-});
-
-new Vue({
-    el: "#premium-pricing",
-    template: `
-        <PremiumPricing/>`,
-    components: {PremiumPricing: PremiumPricing}
-});
-
-new Vue({
-    el: "footer",
-    template: `
-        <StandardFooter/>`,
-    components: {StandardFooter}
+        <PricingPage/>`,
+    components: {PricingPage}
 });

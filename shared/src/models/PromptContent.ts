@@ -56,6 +56,7 @@ export interface ContentLink {
     destinationHref: string,
     linkTarget: LinkTarget,
     linkStyle: LinkStyle,
+    appendMemberId?: boolean
 }
 
 export interface ActionButton {

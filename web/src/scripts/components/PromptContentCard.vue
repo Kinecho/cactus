@@ -93,7 +93,7 @@
 
             <!--      START Link      -->
             <div class="link-container" v-if="processedContent.link">
-                <a :href="processedContent.link.destinationHref"
+                <a :href="linkDestinationUrl"
                         :target="processedContent.link.linkTarget"
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
             </div>
@@ -295,11 +295,13 @@
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
     import {CactusElement} from "@shared/models/CactusElement";
+    import CactusMember from "@shared/models/CactusMember";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
     import Logger from "@shared/Logger";
     import {gtag} from "@web/analytics";
     import MarkdownText from "@components/MarkdownText.vue"
+    import {appendQueryParams} from "@shared/util/StringUtil";
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -329,7 +331,7 @@
             reflectionDuration: Number,
             saving: Boolean,
             saved: Boolean,
-            tapAnywhereEnabled: Boolean,
+            tapAnywhereEnabled: Boolean
         },
         data(): {
             youtubeVideoLoading: boolean,
@@ -343,6 +345,7 @@
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
             nativeShareEnabled: boolean,
+            member: CactusMember | undefined
         } {
             return {
                 youtubeVideoLoading: true,
@@ -355,11 +358,13 @@
                 linkCreated: false,
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
-                nativeShareEnabled: SharingService.canShareNatively()
+                nativeShareEnabled: SharingService.canShareNatively(),
+                member: undefined
             }
         },
         beforeMount() {
             this.shareableLinkUrl = ReflectionResponseService.getShareableUrl(this.response);
+            this.member = CactusMemberService.sharedInstance.currentMember;
         },
         watch: {
             saved(isSaved) {
@@ -378,11 +383,9 @@
         },
         computed: {
             shareableLinkParams(): {} | undefined {
-                if (this.shareableLinkUrl) {
-                    const member = CactusMemberService.sharedInstance.currentMember;
-                    const email = member && member.email;
+                if (this.shareableLinkUrl && this.member?.email) {
                     return {
-                        [QueryParam.REFERRED_BY_EMAIL]: email,
+                        [QueryParam.REFERRED_BY_EMAIL]: this.member.email,
                         [QueryParam.UTM_MEDIUM]: "prompt-share-note",
                         [QueryParam.UTM_SOURCE]: "cactus.app",
                     }
@@ -439,6 +442,15 @@
 
                 return classes;
             },
+            linkDestinationUrl(): string | undefined {
+                let linkUrl = this.content?.link?.destinationHref;
+
+                if (linkUrl && this.content?.link?.appendMemberId && this.member?.id) {
+                    linkUrl = appendQueryParams(this.content.link.destinationHref, {memberId: this.member.id});
+                } 
+
+                return linkUrl;
+            }
         },
         methods: {
             async shareNatively() {

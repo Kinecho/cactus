@@ -142,6 +142,10 @@
                 "function": "notificationPreferences"
             },
             {
+                "source": "/feature-auth/**",
+                "function": "user"
+            },
+            {
                 "source": "/unsubscribe-confirmed",
                 "destination": "/unsubscribe_confirmed.html"
             },
