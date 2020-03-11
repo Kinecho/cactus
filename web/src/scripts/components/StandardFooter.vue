@@ -19,7 +19,7 @@
                     </nav>
                 </div>
             </div>
-            <div class="app-icons">
+            <div class="app-icons" v-if="!isAndroidApp">
                 <AppStoreIcon/>
                 <PlayStoreIcon/>
             </div>
@@ -31,6 +31,7 @@
     import Vue from "vue"
     import AppStoreIcon from "@web/components/AppStoreIcon.vue";
     import PlayStoreIcon from "@web/components/PlayStoreIcon.vue";
+    import {isAndroidApp} from '@web/DeviceUtil'
 
     export default Vue.extend({
         props: {
@@ -40,6 +41,11 @@
         components: {
             AppStoreIcon,
             PlayStoreIcon
+        },
+        computed: {
+            isAndroidApp(): boolean {
+                return isAndroidApp();
+            }
         }
     })
 
