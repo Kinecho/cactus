@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
 const $tryItHeader = document.getElementById("tryItHeader");
 const isMobileDevice = (isAndroidDevice() || isIosDevice());
 if ($tryItHeader) {
-    $tryItHeader.classList.add(isMobileDevice && !isAndroidApp ? 'show' : 'hide');
+    $tryItHeader.classList.add(isMobileDevice && !isAndroidApp() ? 'show' : 'hide');
 } 
 
 // new Vue({
