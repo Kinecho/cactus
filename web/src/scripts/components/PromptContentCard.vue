@@ -447,7 +447,7 @@
 
                 if (linkUrl && this.content?.link?.appendMemberId && this.member?.id) {
                     linkUrl = appendQueryParams(this.content.link.destinationHref, {memberId: this.member.id});
-                } 
+                }
 
                 return linkUrl;
             }
@@ -816,6 +816,7 @@
         a {
             display: inline-block;
             margin: 0 auto;
+            text-align: center;
         }
     }
 
