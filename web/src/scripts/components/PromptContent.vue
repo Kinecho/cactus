@@ -831,14 +831,14 @@
 
             .progress-wrapper {
                 left: 0;
+                margin: 0 auto;
                 position: absolute;
                 right: 0;
-                top: 1.6rem;
-                width: 100%;
+                top: .4rem;
+                width: 98%;
                 z-index: 20;
 
                 @include r(600) {
-                    margin: auto;
                     top: 5.6rem;
                     width: 94%;
                 }
@@ -873,18 +873,17 @@
 
             .arrow {
                 margin: auto;
+                padding: 1.2rem;
                 position: absolute;
                 top: 50%;
                 z-index: 20;
 
                 &.previous {
-                    left: .8rem;
-                    padding: 2rem 2rem 2rem 0;
+                    left: 0;
                 }
 
                 &.next {
-                    padding: 2rem 0 2rem 2rem;
-                    right: .8rem;
+                    right: 0;
                 }
 
                 @include r(600) {
@@ -934,7 +933,7 @@
     .shareContainer {
         left: 0;
         position: absolute;
-        top: 2.4rem;
+        top: .8rem;
         z-index: 20;
 
         @include r(600) {
@@ -965,7 +964,7 @@
     button.share {
         align-items: center;
         display: flex;
-        padding: 1.2rem 1.6rem;
+        padding: 1.2rem;
 
         &:hover {
             background-color: transparent;
@@ -1000,8 +999,8 @@
 
     button.close {
         position: absolute;
-        right: .8rem;
-        top: 2.8rem;
+        right: 0;
+        top: 1.2rem;
         z-index: 20;
 
         @include r(600) {
