@@ -390,7 +390,7 @@
                 return false;
             },
             showCloseButton(): boolean {
-                return this.isModal && !this.showSharing && !this.isShareNote;
+                return !this.showSharing;
             },
             slideNumberClass(): string {
                 return `slide-${this.activeIndex}`
