@@ -592,6 +592,7 @@ export default class AdminSubscriptionService {
             // status: InvoiceS
             amountCentsUsd: subscriptionProduct?.priceCentsUsd,
             isAppleSubscription: true,
+            appleProductId: latestInfo.product_id,
             isAutoRenew: autoRenewInfo?.auto_renew_status === "1"
         };
         return invoice;

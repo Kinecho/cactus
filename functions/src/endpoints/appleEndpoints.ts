@@ -52,11 +52,10 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
 
     const product = result.fulfillmentResult?.subscriptionProduct;
     if (result.success) {
-        await AdminSlackService.getSharedInstance().sendChaChingMessage({text: `${member?.email} has purchased \`${product?.displayName} (${product?.appleProductId})\` a subscription on iOS`});
+        await AdminSlackService.getSharedInstance().sendChaChingMessage({text: `:ios: ${member?.email} has completed an in-app purchase \`${product?.displayName} (${product?.appleProductId})\``});
     } else {
         await AdminSlackService.getSharedInstance().sendChaChingMessage({text: `${member?.email} failed to complete a purchase on iOS\n>${result.message}`});
     }
-
 
     logger.info("Verify receipt completed");
     resp.status(200).send(result);
@@ -73,10 +72,10 @@ app.post("/subscription-status", async (req: functions.https.Request | any, resp
     }
 
     if (notification.password !== Config.ios.iap_shared_secret) {
-        logger.error("The password provided on the apple subscription status endpoint did not match the shaerd secret in the Cactus Config");
+        logger.error("The password provided on the apple subscription status endpoint did not match the shared secret in the Cactus Config");
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             channel: ChannelName.engineering,
-            message: "The password provided on the apple subscription status endpoint did not match the shaerd secret in the Cactus Config",
+            message: "The password provided on the apple subscription status endpoint did not match the shared secret in the Cactus Config",
             data: stringifyJSON(notification, 2),
             fileType: "json",
             filename: "Failed Apple Server-to-ServerNotification.json",

@@ -16,6 +16,7 @@ export interface SubscriptionInvoice {
     stripeInvoiceId?: string;
     stripeSubscriptionId?: string;
     isAppleSubscription?: boolean;
+    appleProductId?: string
     isAutoRenew?: boolean;
 }
 
