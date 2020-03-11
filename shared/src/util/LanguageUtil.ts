@@ -17,5 +17,6 @@ export const WordCloudExclusionList = [
     "'ve",
     "I",
     "’re",
-    "'s"
+    "'s",
+    "lot"
 ]
