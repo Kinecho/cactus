@@ -13,9 +13,16 @@
                 {{error}}
             </div>
             <template v-if="!error">
-                <p v-if="!subscriptionDetailsLoading">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is
+                <p v-if="!subscriptionDetailsLoading && isAutoRenewable">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill
+                    is
                     for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
-                <div class="card-info">
+                <p v-if="!subscriptionDetailsLoading && !isAutoRenewable">Your subscription will end on <strong>{{nextBillingDate}}</strong>.</p>
+
+                <div class="card-info apple-subscription" v-if="isAppleSubscription">
+                    <img src="/assets/icons/apple.svg" class="ccIcon"/>
+                    <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage subscription</a> on iTunes</div>
+                </div>
+                <div class="card-info" v-if="showCardInfo">
                     <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
                     <div class="cardDetails">
                         <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
@@ -48,8 +55,7 @@
     import {
         getSubscriptionDetails,
         getUpdatePaymentMethodSession,
-        redirectToStripeCheckout,
-        startCheckout, startStripeCheckoutSession
+        startStripeCheckoutSession
     } from "@web/checkoutService";
     import {formatDate} from "@shared/util/DateUtil";
     import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
@@ -60,8 +66,7 @@
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
-    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
-    import {isString} from "@shared/util/ObjectUtil";
+    import {SnackbarMessage} from "@components/SnackbarContent.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -93,6 +98,15 @@
             this.fetchSubscriptionDetails();
         },
         computed: {
+            isAutoRenewable(): boolean {
+              return this.subscriptionDetails?.upcomingInvoice?.isAutoRenew ?? false
+            },
+            isAppleSubscription(): boolean {
+              return this.subscriptionDetails?.upcomingInvoice?.isAppleSubscription ?? false
+            },
+            showCardInfo(): boolean {
+                return this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card !== undefined
+            },
             nextBillingDate(): string | undefined {
                 const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.nextPaymentDate_epoch_seconds;
                 if (nextDateSeconds) {
