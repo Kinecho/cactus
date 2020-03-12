@@ -18,7 +18,7 @@
                     for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
                 <div class="card-info apple-subscription" v-if="isAppleSubscription">
                     <img src="/assets/icons/apple.svg" class="ccIcon"/>
-                    <div class="cardDetails">View your <a href="https://apps.apple.com/account/subscriptions" target="_blank">iTunes subscription</a> </div>
+                    <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage subscription on iTunes</a></div>
                 </div>
                 <div class="card-info" v-if="showCardInfo">
                     <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
