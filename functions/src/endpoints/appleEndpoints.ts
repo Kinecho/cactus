@@ -5,7 +5,6 @@ import * as cors from "cors";
 import * as functions from "firebase-functions";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {
-    AppleCompletePurchaseResult,
     AppleTransactionInfo,
     getExpirationIntentDescription,
     getExpirationIntentFromNotification,
@@ -27,7 +26,7 @@ app.use(cors({
     origin: Config.allowedOrigins,
 }));
 
-app.post("/complete-purchase", async (req: functions.https.Request | any, resp: functions.Response<AppleCompletePurchaseResult>) => {
+app.post("/complete-purchase", async (req: functions.https.Request | any, resp: functions.Response) => {
     const body = req.body;
     logger.info("verify receipt called");
     const userId = await getAuthUserId(req);
