@@ -5,6 +5,7 @@ import AdminUserService from "@admin/services/AdminUserService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import {DeleteUserRequest, FeatureAuthRequest} from "@shared/api/UserEndpointTypes";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import {QueryParam} from "@shared/util/queryParams";
 import {PageRoute} from "@shared/PageRoutes";
 import * as functions from "firebase-functions";
@@ -82,8 +83,8 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         return;
     }
 
-    if (member?.hasActiveSubscription && member?.email) {
-        logger.log('Member has active subscription. Redirecting to survey...');
+    if (member?.tier == SubscriptionTier.PLUS && member?.email) {
+        logger.log('Member is PLUS. Redirecting to Core Values survey...');
         resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
         return;
     } else {
