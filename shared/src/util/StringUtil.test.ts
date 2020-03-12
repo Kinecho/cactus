@@ -10,7 +10,8 @@ import {
     getWordCount,
     isBlank, preventOrphanedWords,
     stripQueryParams,
-    titleCase
+    titleCase,
+    isFeatureAuthUrl
 } from "@shared/util/StringUtil";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
@@ -166,6 +167,32 @@ describe("appendDomain", () => {
         const path = "/test?key=value";
         const domain = "cactus.app";
         expect(appendDomain(path, domain)).toEqual("https://cactus.app/test?key=value");
+    });
+})
+
+describe("isFeatureAuthUrl", () => {
+    test("empty url", () => {
+        const url = "";
+        expect(isFeatureAuthUrl(url)).toBe(false);
+    });
+    test("null url", () => {
+        const url = null;
+        expect(isFeatureAuthUrl(url)).toBe(false);
+    });
+    test("undefined", () => {
+        expect(isFeatureAuthUrl(undefined)).toBe(false);
+    });
+    test("non-feature auth url", () => {
+        const url = "https://example.com/this-is-not/a-feature-auth"
+        expect(isFeatureAuthUrl(url)).toBe(false);
+    });
+    test("feature auth url", () => {
+        const url = "https://example.com/feature-auth/a-feature"
+        expect(isFeatureAuthUrl(url)).toBe(true);
+    });
+    test("feature auth without a feature", () => {
+        const url = "https://example.com/feature-auth"
+        expect(isFeatureAuthUrl(url)).toBe(true);
     });
 })
 

@@ -35,6 +35,7 @@
     import {CommonCopy} from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
     import {getAuthUI, getAuthUIConfig} from "@web/authUi";
+    import {appendQueryParams, isFeatureAuthUrl} from "@shared/util/StringUtil";
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -192,6 +193,10 @@
                     } catch (e) {
                         logger.error("failed to log login event", e);
                     } finally {
+                        // append the memberId to any feature-auth urls
+                        if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
+                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, {memberId: this.member.id});
+                        }
                         window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
                     }
                 }

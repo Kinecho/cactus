@@ -2,16 +2,20 @@ import "@styles/pages/subscription_confirmed.scss"
 import {EmailLinkSignupResult, sendLoginEvent} from "@web/auth";
 import {FirebaseUser, getAuth, initializeFirebase} from "@web/firebase";
 import {getQueryParam, triggerWindowResize} from "@web/util";
+import {appendQueryParams, isFeatureAuthUrl} from "@shared/util/StringUtil";
 import {PageRoute} from "@shared/PageRoutes";
 import {QueryParam} from "@shared/util/queryParams";
+import CactusMember from "@shared/models/CactusMember";
 import {LocalStorageKey} from "@web/services/StorageService";
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 import {handleEmailLinkSignIn} from "@web/authUi";
+import CactusMemberService from '@web/services/CactusMemberService'
 const logger = new Logger("subscription_confirmed.ts");
 commonInit();
 
 let hasLoaded = false;
+
 getAuth().onAuthStateChanged(async user => {
     logger.log("auth state changed. Has Loaded = ", hasLoaded, " User = ", user);
     if (!hasLoaded && !user) {
@@ -35,7 +39,13 @@ async function handleExistingUserLoginSuccess(user: FirebaseUser) {
 
     await sendLoginEvent({user});
 
-    const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+    const member: CactusMember | undefined = CactusMemberService.sharedInstance.currentMember;
+    let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+
+    if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
+        redirectUrl = appendQueryParams(redirectUrl, {memberId: member.id});
+    }
+
     window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
 }
 
@@ -56,7 +66,14 @@ async function handleResponse(response: EmailLinkSignupResult) {
             logger.error("unable to persist new user status to localstorage");
         } finally {
             await sendLoginEvent(response.credential);
-            const redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+            
+            const member: CactusMember | undefined = CactusMemberService.sharedInstance.currentMember;
+            let redirectUrl = getQueryParam(QueryParam.REDIRECT_URL);
+
+            if (member?.id && redirectUrl && isFeatureAuthUrl(redirectUrl)) {
+                redirectUrl = appendQueryParams(redirectUrl, {memberId: member.id});
+            }
+
             window.location.href = redirectUrl || PageRoute.JOURNAL_HOME;
         }
 
