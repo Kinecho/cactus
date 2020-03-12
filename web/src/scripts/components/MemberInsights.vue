@@ -173,6 +173,7 @@
 
     .fancyLink {
         @include fancyLinkLight;
+        display: inline-block; //to keep on one line
         margin-left: .8rem;
     }
 </style>
