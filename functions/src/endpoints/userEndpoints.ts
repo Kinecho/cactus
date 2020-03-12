@@ -70,8 +70,9 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
     const loginUrl = `${getHostname()}${PageRoute.LOGIN}?${QueryParam.MESSAGE}=${encodeURIComponent("To continue to Core Values, please login.")}&signInSuccessUrl=${afterLoginUrl}`;
 
     if (!memberId) {
+        // show an error message and instructions to upgrade
         logger.log("No memberId provided");
-        resp.redirect(loginUrl);
+        resp.status(401).send('<html><body style="font-family: sans-serif; text-align: center; padding: 3rem 1rem; line-height: 150%;"><h3>To access Core Values, use the latest version of Cactus.</h3><br><p><strong>iOS Users:</strong> <a style="color:#29A389" href="https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514">Follow this link</a> to upgrade your app.<br><br>Still having problems? Email <a style="color:#29A389" href="mailto:help@cactus.app">help@cactus.app</a></p></body></html>');
         return;
     }
 
