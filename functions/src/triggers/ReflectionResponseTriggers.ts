@@ -298,7 +298,7 @@ export const onReflectionResponseCreated = functions.firestore
 
                 if (member?.isInTrial && trialDaysLeft > 0) {
                     daysLeftText = ' (' + member.daysLeftInTrial + ' days left)';
-                } else if (member?.isInTrial && trialDaysLeft == 0) {
+                } else if (member?.isInTrial && trialDaysLeft === 0) {
                     daysLeftText = ' (Ends Today)';
                 }
 

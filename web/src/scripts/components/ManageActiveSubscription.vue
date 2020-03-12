@@ -13,9 +13,11 @@
                 {{error}}
             </div>
             <template v-if="!error">
-                <p v-if="!subscriptionDetailsLoading">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill
+                <p v-if="!subscriptionDetailsLoading && isAutoRenewable">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill
                     is
                     for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
+                <p v-if="!subscriptionDetailsLoading && !isAutoRenewable">Your subscription will end on <strong>{{nextBillingDate}}</strong>.</p>
+
                 <div class="card-info apple-subscription" v-if="isAppleSubscription">
                     <img src="/assets/icons/apple.svg" class="ccIcon"/>
                     <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage subscription</a> on iTunes</div>
@@ -96,6 +98,9 @@
             this.fetchSubscriptionDetails();
         },
         computed: {
+            isAutoRenewable(): boolean {
+              return this.subscriptionDetails?.upcomingInvoice?.isAutoRenew ?? false
+            },
             isAppleSubscription(): boolean {
               return this.subscriptionDetails?.upcomingInvoice?.isAppleSubscription ?? false
             },
