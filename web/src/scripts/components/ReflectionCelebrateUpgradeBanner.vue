@@ -69,7 +69,11 @@
         background: $royal url(assets/images/plusBg.svg) center top/105% auto no-repeat;
         color: $white;
         cursor: pointer;
-        padding: 1.6rem 2.4rem;
+        padding: 1.6rem 4rem;
+
+        @include r(600) {
+            padding: 1.6rem 2.4rem;
+        }
 
         a {
             @include fancyLinkLight;
