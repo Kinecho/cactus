@@ -40,6 +40,14 @@ export function stripQueryParams(url: string): { url: string, query?: any } {
 
 }
 
+export function isFeatureAuthUrl(url?: string | null): boolean {
+    if (url && /\/feature-auth/.test(url)) {
+        return true;
+    }
+
+    return false;
+}
+
 export function appendQueryParams(url: string, params: any): string {
     if (!params || Object.keys(params).length === 0) {
         return url;
