@@ -998,12 +998,14 @@
     }
 
     button.close {
+        background-color: $beige;
         position: absolute;
         right: 0;
         top: 1.2rem;
         z-index: 20;
 
         @include r(600) {
+            background-color: transparent;
             right: 1.6rem;
             top: 1.6rem;
         }
