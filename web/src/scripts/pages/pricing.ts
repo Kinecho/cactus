@@ -1,4 +1,3 @@
-import "@styles/pages/pricing.scss"
 import StandardFooter from "@components/StandardFooter.vue";
 import NavBar from "@components/NavBar.vue";
 import {commonInit} from "@web/common";
