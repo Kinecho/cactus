@@ -105,6 +105,7 @@
   @import "~styles/common";
   @import "~styles/mixins";
   @import "~styles/transitions";
+  @import "~styles/pages/pricing";
   
   .top-message {
       border-radius: 0;
