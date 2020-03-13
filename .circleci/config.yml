@@ -98,7 +98,7 @@ commands:
       - when:
           condition: << parameters.module >>
           steps:
-            - run: npm --prefix << parameters.module >> install
+            - run: npm --prefix << parameters.module >> ci
             - save_cache:
                 name: "Save << parameters.module >> Dependencies to Cache"
                 paths:
@@ -107,7 +107,7 @@ commands:
       - unless:
           condition: << parameters.module >>
           steps:
-            - run: npm install
+            - run: npm ci
             - save_cache:
                 name: "Save Root Dependencies to Cache"
                 paths:
