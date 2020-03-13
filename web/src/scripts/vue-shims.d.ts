@@ -16,6 +16,8 @@ declare module 'vue-simple-markdown' {
 }
 
 interface Window {
+    Android?: AndroidAppInterface,
+    androidCheckoutFinished?: (success: boolean) => void
     [key: string]: any; // Add index signature
 }
 

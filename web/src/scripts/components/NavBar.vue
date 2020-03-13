@@ -2,6 +2,7 @@
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
+            <button @click="showToast">Show Toast</button>
             <div v-if="" class="anonLinks ">
                 <a v-if="displayLoginButton"
                         class="login "
@@ -224,6 +225,9 @@
             },
             goToSignup() {
                 window.location.href = this.signupHref;
+            },
+            showToast() {
+                window.Android?.showToast("Hello from web!")
             },
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {

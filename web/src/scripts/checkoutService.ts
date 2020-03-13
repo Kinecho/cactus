@@ -15,9 +15,18 @@ import {PageRoute} from "@shared/PageRoutes";
 import CopyService from "@shared/copy/CopyService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import {stripQueryParams} from "@shared/util/StringUtil";
+import {isAndroidApp} from "@web/DeviceUtil";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
+
+
+interface AndroidDelegate {
+    onCompleted: (success: boolean) => void
+}
+
+let androidDelegate: AndroidDelegate | undefined = undefined;
+
 
 export async function createStripeSession(options: { subscriptionProductId: string }): Promise<CreateSessionResponse> {
     const {subscriptionProductId} = options;
@@ -103,11 +112,42 @@ export async function startCheckout(options: {
         sendToLoginForCheckout({subscriptionProductId});
         result.isRedirecting = true;
     } else if (member && subscriptionProductId) {
+        if (isAndroidApp()) {
+            return await startAndroidCheckout({subscriptionProductId, member});
+        }
         return await redirectToStripeCheckout({subscriptionProductId, member});
     }
 
     return result;
 }
+
+export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember }): Promise<CheckoutRedirectResult> {
+    const {member, subscriptionProductId} = options;
+    const memberId = member.id;
+    if (!memberId) {
+        return {isRedirecting: false, isLoggedIn: false, success: false}
+    }
+    if (!window.Android) {
+        logger.error("Failed to get android app interface object");
+        return {isRedirecting: false, isLoggedIn: false, success: false}
+    }
+    alert("Test alerts");
+    return new Promise<CheckoutRedirectResult>(resolve => {
+        window.Android?.startCheckout(subscriptionProductId, memberId);
+        androidDelegate = {
+            onCompleted: (success: boolean) => {
+                window.Android?.showToast("Checkout completed- from web");
+                resolve({success, isRedirecting: false, isLoggedIn: true});
+            }
+        }
+    })
+}
+
+window.androidCheckoutFinished = (success) => {
+    logger.info("Android checkout finished with success = ", success);
+    alert("Checkout finished from android: " + success);
+    androidDelegate?.onCompleted(success)
+};
 
 /**
  * Send a user to the Stripe checkout page using a subscription product id.

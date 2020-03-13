@@ -146,7 +146,8 @@
                 return CopyService.getSharedInstance().getTrialDaysLeftShort(member.daysLeftInTrial, true);
             },
             isAndroidApp(): boolean {
-                return isAndroidApp();
+                // return isAndroidApp();
+                return false
             }
         },
         methods: {
