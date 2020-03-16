@@ -22,6 +22,7 @@ export default class SubscriptionProduct extends FlamelinkModel {
     priceCentsUsd: number = 0;
     billingPeriod: BillingPeriod = BillingPeriod.monthly;
     appleProductId?: string;
+    androidProductId?: string;
     stripePlanId?: string;
     availableForSale: boolean = false;
     subscriptionTier: SubscriptionTier = SubscriptionTier.PLUS;

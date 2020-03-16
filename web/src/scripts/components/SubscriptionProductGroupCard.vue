@@ -179,8 +179,8 @@
                 return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
             },
             getSelectedProduct(): SubscriptionProduct {
-                return this.getPreSelectedProduct() || 
-                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
+                return this.getPreSelectedProduct() ||
+                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) ||
                     this.productGroup.products[0];
             },
             getPreSelectedProduct(): SubscriptionProduct | undefined {
@@ -217,12 +217,13 @@
                     this.isProcessing = false;
                     return;
                 }
-                const checkoutResult = await startCheckout({subscriptionProductId});
+                const checkoutResult = await startCheckout({subscriptionProductId, subscriptionProduct: product});
                 if (!checkoutResult.success) {
                     logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
                     this.checkoutError = "Unable to load checkout. Please try again later";
                     this.isProcessing = false;
                 } else {
+                    this.isProcessing = false;
                     this.checkoutError = undefined;
                 }
             },

@@ -16,13 +16,14 @@ import CopyService from "@shared/copy/CopyService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import {stripQueryParams} from "@shared/util/StringUtil";
 import {isAndroidApp} from "@web/DeviceUtil";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
 
 
 interface AndroidDelegate {
-    onCompleted: (success: boolean) => void
+    onCompleted: (success: boolean, message?: string|undefined) => void
 }
 
 let androidDelegate: AndroidDelegate | undefined = undefined;
@@ -97,9 +98,10 @@ export function sendToLoginForCheckout(options: { subscriptionProductId: string 
  */
 export async function startCheckout(options: {
     subscriptionProductId: string,
+    subscriptionProduct?: SubscriptionProduct
     member?: CactusMember | null | undefined,
 }): Promise<CheckoutRedirectResult> {
-    const {subscriptionProductId} = options;
+    const {subscriptionProductId, subscriptionProduct} = options;
     const member = options.member || await CactusMemberService.sharedInstance.getCurrentMember();
     const result: CheckoutRedirectResult = {
         isRedirecting: false,
@@ -113,7 +115,7 @@ export async function startCheckout(options: {
         result.isRedirecting = true;
     } else if (member && subscriptionProductId) {
         if (isAndroidApp()) {
-            return await startAndroidCheckout({subscriptionProductId, member});
+            return await startAndroidCheckout({subscriptionProductId, member, subscriptionProduct});
         }
         return await redirectToStripeCheckout({subscriptionProductId, member});
     }
@@ -121,32 +123,41 @@ export async function startCheckout(options: {
     return result;
 }
 
-export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember }): Promise<CheckoutRedirectResult> {
-    const {member, subscriptionProductId} = options;
+export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember, subscriptionProduct?: SubscriptionProduct, }): Promise<CheckoutRedirectResult> {
+    const {member, subscriptionProductId, subscriptionProduct} = options;
+    const androidProductId = subscriptionProduct?.androidProductId;
     const memberId = member.id;
     if (!memberId) {
         return {isRedirecting: false, isLoggedIn: false, success: false}
     }
+
+    if (!androidProductId) {
+        return {isRedirecting: false, isLoggedIn: true, success: false}
+    }
+
     if (!window.Android) {
         logger.error("Failed to get android app interface object");
         return {isRedirecting: false, isLoggedIn: false, success: false}
     }
     alert("Test alerts");
     return new Promise<CheckoutRedirectResult>(resolve => {
-        window.Android?.startCheckout(subscriptionProductId, memberId);
+        logger.info("starting android checkout");
+        window.Android?.startCheckout(androidProductId, memberId);
         androidDelegate = {
-            onCompleted: (success: boolean) => {
-                window.Android?.showToast("Checkout completed- from web");
-                resolve({success, isRedirecting: false, isLoggedIn: true});
+            onCompleted: (success: boolean, message: string|undefined) => {
+                logger.info("Android delegate completed");
+                const result = {success, isRedirecting: false, isLoggedIn: true};
+                window.Android?.showToast(`Checkout completed (from web). Success = ${success}\n\nmessage: ${message}\n\n` + JSON.stringify(result, null ,2));
+                resolve(result);
             }
         }
     })
 }
 
-window.androidCheckoutFinished = (success) => {
-    logger.info("Android checkout finished with success = ", success);
-    alert("Checkout finished from android: " + success);
-    androidDelegate?.onCompleted(success)
+window.androidCheckoutFinished = (success, message) => {
+    logger.info("Android checkout finished with success = ", success, message);
+    alert("Checkout finished from android: " + success + "\n" + message);
+    androidDelegate?.onCompleted(success, message)
 };
 
 /**
