@@ -1,5 +1,5 @@
 <template>
-    <footer v-bind:class="{lifted, transparent: isTransparent}">
+    <footer v-bind:class="{lifted, transparent: isTransparent}" v-if="!isAndroidApp">
         <div class="centered">
             <div class="footerInfo">
                 <img class="logomark" src="/assets/images/logoMark.svg" alt=""/>
