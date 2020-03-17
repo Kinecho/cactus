@@ -167,7 +167,7 @@ jobs:
               exit 0
             else
               echo "Starting firebase deploy for --only ${MODULES}"
-              firebase deploy --only $MODULES -P stage
+              firebase deploy --debug --only $MODULES -P stage
             fi
       - notify-on-failure
   install-all:
@@ -363,7 +363,7 @@ jobs:
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-            npx firebase deploy -P << parameters.project >> -f
+            npx firebase deploy --debug -P << parameters.project >> -f
       - notify-on-failure
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
