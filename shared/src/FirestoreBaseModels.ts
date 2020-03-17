@@ -20,6 +20,7 @@ export enum Collection {
     checkoutSessions = "checkoutSessions",
     payments = "payments",
     emailLogs = "emailLogs",
+    memberEmailChangeLogs = "memberEmailChangeLogs"
 }
 
 export interface FirestoreIdentifiable {
