@@ -252,7 +252,7 @@ export const onReflectionResponseCreated = functions.firestore
 
 
             const attachments: SlackAttachment[] = [];
-            let messageText = `${getResponseMediumSlackEmoji(reflectionResponse.responseMedium)} ${memberEmail || "An anonymous user"} recorded a Reflection Response via *${getResponseMediumDisplayName(reflectionResponse.responseMedium)}*`;
+            let messageText = `${getResponseMediumSlackEmoji(reflectionResponse.responseMedium)} ${memberEmail || "A member without email"} recorded a Reflection Response via *${getResponseMediumDisplayName(reflectionResponse.responseMedium)}*`;
             const fields: SlackAttachmentField[] = [];
 
             if (member && member.mailchimpListMember) {

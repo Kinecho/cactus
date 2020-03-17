@@ -152,7 +152,6 @@ export default class EnglishCopy extends LocalizedCopy {
         CONNECTED_ACCOUNTS: "Connected Accounts",
         DISPLAY_NAME: "Display Name",
         MEMBER_SINCE: "Member Since",
-        AN_ANONYMOUS_USER: "An anonymous user",
         SIGN_UP_FREE: "Sign Up Free",
         magicLinkSuccess(email: string): string {
             return `To confirm your email address and securely sign in, tap the button in the email sent to ${email}.`

@@ -175,6 +175,9 @@
                 onData: ({member}) => {
                     this.authLoaded = true;
                     this.member = member;
+                    if (!member) {
+                        window.location.href = PageRoute.LOGIN;
+                    }
                 }
             });
 
@@ -430,11 +433,6 @@
                     return styles;
                 }
             },
-            storageKey(): string | undefined {
-                if (this.promptContent && this.promptContent.promptId) {
-                    return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
-                }
-            },
             tapAnywhereEnabled(): boolean {
                 return true;
             },
@@ -633,37 +631,15 @@
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-
-                    let localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
-                    logger.log("local response found in storage", localResponse);
-
-                    this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
                     // logger.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
+                             //TODO: combine if there are multiple?
                             const [first] = responses;
-                            // logger.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
-
-
-                            if (!first && !localResponse) {
-                                // logger.log("No local response and no db response, creating one now");
-                                // logger.log("Using the newly created response for this prompt.");
-                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, getResponseMedium({
-                                    app: getAppType(),
-                                    type: ResponseMediumType.PROMPT
-                                }), promptQuestion);
-                            } else if (first) {
-                            }
-
-                            if (!first && localResponse) {
-                                // logger.log("No data found from database, using the locally created response");
-                            }
-
-                            //TODO: combine if there are multiple?
-                            const response = first || localResponse;
+                            const response = first;
 
                             await this.updatePendingActiveIndex(response);
                             this.responsesLoaded = true;
@@ -694,10 +670,6 @@
                         updateReflectionLog: options.updateReflectionLog
                     });
                     this.reflectionResponse = saved;
-                    if (!this.member && saved && saved.promptId) {
-                        logger.log("Member is not logged in, saving to localstorage");
-                        StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
-                    }
                     this.saved = true;
                     this.saving = false;
                     return saved;

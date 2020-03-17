@@ -64,9 +64,7 @@
         },
         computed: {
             memberName(): string | undefined {
-                if (this.response && this.response.anonymous) {
-                    return copy.auth.AN_ANONYMOUS_USER;
-                } else if (this.fetchedProfile) {
+                if (this.fetchedProfile) {
                     return this.fetchedProfile.getFullName();
                 }
             },

@@ -85,11 +85,6 @@ export async function sendMagicLink(options: MagicLinkRequest): Promise<MagicLin
     }
 }
 
-export function getAnonymousReflectionResponseIds(): string[] {
-    const anonReflectionResponses = StorageService.getDecodeModelMap(LocalStorageKey.anonReflectionResponse, ReflectionResponse);
-    return anonReflectionResponses ? Object.values(anonReflectionResponses).map(r => r.id).filter(Boolean) as string[] : [];
-}
-
 export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<EmailLinkSignupResult> {
     const email = subscription.email;
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -107,7 +102,6 @@ export async function sendEmailLinkSignIn(subscription: SignupRequest): Promise<
         email: email,
         referredBy: subscription.referredByEmail,
         continuePath: emailLinkRedirectUrl,
-        reflectionResponseIds: getAnonymousReflectionResponseIds(),
         queryParams: landingParams,
         sourceApp: sourceApp
     });
@@ -148,7 +142,6 @@ export async function sendLoginEvent(args: {
                             isNewUser: (args.additionalUserInfo && args.additionalUserInfo.isNewUser) || false,
                             referredByEmail: referredByEmail,
                             signupQueryParams: {...getAllQueryParams(), ...landingParams},
-                            reflectionResponseIds: getAnonymousReflectionResponseIds(),
                             app: getAppType(),
                         };
                         logger.log("login-event payload", JSON.stringify(event, null, 2));
