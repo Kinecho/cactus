@@ -64,7 +64,7 @@ export const cloudFunctions = {
     customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
     expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
     syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
-    googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.google_play_billing_events).onPublish(GooglePlayBillingJob),
+    googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
 
     //auth triggers
     userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),

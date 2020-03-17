@@ -10,7 +10,7 @@ export enum PubSubTopic {
     custom_sent_prompt_notifications = "custom_sent_prompt_notifications",
     expire_subscription_trials = "expire_subscription_trials",
     sync_trial_members_to_mailchimp = "sync_trial_members_to_mailchimp",
-    google_play_billing_events = "google_play_billing_events",
+    android_google_play_billing_events = "android_google_play_billing_events",
 
 }
 
