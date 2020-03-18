@@ -21,16 +21,10 @@ import {stripQueryParams} from "@shared/util/StringUtil";
 import {isAndroidApp} from "@web/DeviceUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
+import AndroidService from "@web/android/AndroidService";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
-
-interface AndroidDelegate {
-    onCompleted: (result: AndroidPurchaseResult) => void
-}
-
-let androidDelegate: AndroidDelegate | undefined = undefined;
-
 
 export async function createStripeSession(options: { subscriptionProductId: string }): Promise<CreateSessionResponse> {
     const {subscriptionProductId} = options;
@@ -127,7 +121,7 @@ export async function startCheckout(options: {
 }
 
 export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember, subscriptionProduct?: SubscriptionProduct, }): Promise<CheckoutRedirectResult> {
-    const {member, subscriptionProductId, subscriptionProduct} = options;
+    const {member, subscriptionProduct} = options;
     const androidProductId = subscriptionProduct?.androidProductId;
     const memberId = member.id;
     if (!memberId) {
@@ -138,27 +132,31 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
         return {isRedirecting: false, isLoggedIn: true, success: false}
     }
 
-    if (!window.Android) {
+    if (!AndroidService.shared.isReady) {
         logger.error("Failed to get android app interface object");
         return {isRedirecting: false, isLoggedIn: false, success: false}
     }
     alert("Test alerts");
     return new Promise<CheckoutRedirectResult>(resolve => {
         logger.info("starting android checkout");
-        // window.An
-        window.Android?.startCheckout(androidProductId, memberId);
-        androidDelegate = {
+        AndroidService.shared.startCheckout(androidProductId, memberId);
+        AndroidService.shared.checkoutDelegate = {
             onCompleted: async (androidPurchaseResult: AndroidPurchaseResult) => {
                 logger.info("Android delegate onCompleted called with ", androidPurchaseResult);
                 if (androidPurchaseResult.success && androidPurchaseResult.purchase) {
                     logger.info("Attempting to fulfill android purchase");
-                    const fulfilResult = await fulfilAndroidPurchase({purchase: androidPurchaseResult.purchase});
-                    logger.info("fulfillment result", fulfilResult);
-                    window.Android?.showToast(stringifyJSON({
-                        fulfilResult: fulfilResult,
+                    const fulfillResult = await fulfilAndroidPurchase({purchase: androidPurchaseResult.purchase});
+                    logger.info("fulfillment result", fulfillResult);
+
+                    if (fulfillResult.success) {
+                        AndroidService.shared.handlePurchaseFulfilled({purchaseToken: fulfillResult.purchase?.token ?? androidPurchaseResult.purchase.token})
+                    }
+
+                    AndroidService.shared.showToast(stringifyJSON({
+                        fulfilResult: fulfillResult,
                         androidPurchaseResult
                     }, 2));
-                    const result = {success: fulfilResult.success, isRedirecting: false, isLoggedIn: true};
+                    const result = {success: fulfillResult.success, isRedirecting: false, isLoggedIn: true};
 
                     resolve(result);
                 } else {
@@ -171,14 +169,14 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
     })
 }
 
-
-window.AndroidDelegate = {
-    purchaseCompleted: async (result: AndroidPurchaseResult) => {
-        const {message, purchase, success} = result;
-        logger.info("Android checkout finished with success = ", success, message, purchase);
-        await androidDelegate?.onCompleted(result)
-    }
-};
+//
+// window.AndroidDelegate = {
+//     purchaseCompleted: async (result: AndroidPurchaseResult) => {
+//         const {message, purchase, success} = result;
+//         logger.info("Android checkout finished with success = ", success, message, purchase);
+//         await androidDelegate?.onCompleted(result)
+//     }
+// };
 
 /**
  * Send a user to the Stripe checkout page using a subscription product id.
