@@ -2,7 +2,7 @@ import {Config} from "@web/config";
 import {CloudspongeContact, EmailContact} from "@shared/types/EmailContactTypes";
 
 class AddressBookService {
-  public static sharedInstance =new AddressBookService();
+  public static sharedInstance = new AddressBookService();
   cloudsponge: undefined;
 
   start(callback?: object) {

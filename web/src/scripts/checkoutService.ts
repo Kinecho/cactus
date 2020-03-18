@@ -1,7 +1,10 @@
 import {Config} from "@web/config";
 import {QueryParam} from "@shared/util/queryParams";
 import {
+    AndroidFulfillParams,
+    AndroidFulfillResult,
     CreateSessionRequest,
+    AndroidPurchaseResult,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
     CreateSetupSubscriptionSessionResponse
@@ -17,13 +20,13 @@ import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import {stripQueryParams} from "@shared/util/StringUtil";
 import {isAndroidApp} from "@web/DeviceUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
 
-
 interface AndroidDelegate {
-    onCompleted: (success: boolean, message?: string|undefined) => void
+    onCompleted: (result: AndroidPurchaseResult) => void
 }
 
 let androidDelegate: AndroidDelegate | undefined = undefined;
@@ -142,22 +145,39 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
     alert("Test alerts");
     return new Promise<CheckoutRedirectResult>(resolve => {
         logger.info("starting android checkout");
+        // window.An
         window.Android?.startCheckout(androidProductId, memberId);
         androidDelegate = {
-            onCompleted: (success: boolean, message: string|undefined) => {
-                logger.info("Android delegate completed");
-                const result = {success, isRedirecting: false, isLoggedIn: true};
-                window.Android?.showToast(`Checkout completed (from web). Success = ${success}\n\nmessage: ${message}\n\n` + JSON.stringify(result, null ,2));
-                resolve(result);
+            onCompleted: async (androidPurchaseResult: AndroidPurchaseResult) => {
+                logger.info("Android delegate onCompleted called with ", androidPurchaseResult);
+                if (androidPurchaseResult.success && androidPurchaseResult.purchase) {
+                    logger.info("Attempting to fulfill android purchase");
+                    const fulfilResult = await fulfilAndroidPurchase({purchase: androidPurchaseResult.purchase});
+                    logger.info("fulfillment result", fulfilResult);
+                    window.Android?.showToast(stringifyJSON({
+                        fulfilResult: fulfilResult,
+                        androidPurchaseResult
+                    }, 2));
+                    const result = {success: fulfilResult.success, isRedirecting: false, isLoggedIn: true};
+
+                    resolve(result);
+                } else {
+                    logger.info("not attempting to fulfill purchase, result was not a succcess or no purchase was found on the response");
+                    const result = {success: false, isRedirecting: false, isLoggedIn: true};
+                    resolve(result);
+                }
             }
         }
     })
 }
 
-window.androidCheckoutFinished = (success, message) => {
-    logger.info("Android checkout finished with success = ", success, message);
-    alert("Checkout finished from android: " + success + "\n" + message);
-    androidDelegate?.onCompleted(success, message)
+
+window.AndroidDelegate = {
+    purchaseCompleted: async (result: AndroidPurchaseResult) => {
+        const {message, purchase, success} = result;
+        logger.info("Android checkout finished with success = ", success, message, purchase);
+        await androidDelegate?.onCompleted(result)
+    }
 };
 
 /**
@@ -199,6 +219,22 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
     }
 
     return {isLoggedIn: true, isRedirecting: true, success: true};
+}
+
+async function fulfilAndroidPurchase(params: AndroidFulfillParams): Promise<AndroidFulfillResult> {
+    try {
+        logger.info("Attempting to fulfill android purchase");
+        const response = await request.post(Endpoint.androidFulfilPurchase, params, {headers: {...await getAuthHeaders()}});
+        logger.info("Send fulfil request successfully. Response = ", response.data);
+        return response.data;
+    } catch (error) {
+        let e = error;
+        if (isAxiosError(error)) {
+            e = error.response?.data ?? e
+        }
+        logger.error("Failed to process result", stringifyJSON(e));
+        return {success: false, purchase: params.purchase, message: "Unable to complete the purchase."}
+    }
 }
 
 export async function startStripeCheckoutSession(sessionId: string): Promise<{ error?: any }> {

@@ -110,6 +110,9 @@ export interface CactusConfig {
         prompt_content_sheet_id: string,
         service_account: ServiceAccountCredentials,
     },
+    android_publisher: {
+        service_account: ServiceAccountCredentials
+    },
     flamelink: {
         service_account: ServiceAccountCredentials,
         robot_user_id: string,

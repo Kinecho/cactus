@@ -4,7 +4,7 @@ import AdminFirestoreService, {
     Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+import {getDefaultSubscription, getDefaultTrial, PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService, {GetMembersBatchOptions} from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService, {SendEmailResult} from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -30,6 +30,11 @@ import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMa
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {PendingRenewalInfo} from "@shared/api/AppleApi";
+import {AndroidFulfillParams, AndroidFulfillResult} from "@shared/api/CheckoutTypes";
+import GooglePlayService from "@admin/services/GooglePlayService";
+import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
+import Payment from "@shared/models/Payment";
+import * as Sentry from "@sentry/node";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -579,14 +584,14 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo|undefined)[];
+        const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo | undefined)[];
 
         const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
             appleProductId: latestInfo.product_id,
             onlyAvailableForSale: false
         });
 
-        const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms)/1000 : undefined;
+        const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms) / 1000 : undefined;
         invoice = {
             nextPaymentDate_epoch_seconds: expiresAtSeconds,
             // status: InvoiceS
@@ -689,4 +694,84 @@ export default class AdminSubscriptionService {
             return;
         }
     }
+
+    async fulfillAndroidPurchase(member: CactusMember, params: AndroidFulfillParams): Promise<AndroidFulfillResult> {
+        const {purchase} = params;
+        const result: AndroidFulfillResult = {success: false, message: "not processed", purchase};
+        try {
+            const memberId = member.id;
+            if (!memberId) {
+                result.message = "No member ID found on the provided member.";
+                result.success = false;
+                return result;
+            }
+
+            this.logger.info("Processing purchase token:", purchase.token);
+
+            const androidSubscriptionPurchase = await GooglePlayService.getSharedInstance().getSubscriptionPurchase({
+                subscriptionId: purchase.subscriptionProductId,
+                packageName: purchase.packageName,
+                token: purchase.token
+            });
+            this.logger.info("Android Subscription Product", stringifyJSON(androidSubscriptionPurchase, 2));
+
+            if (!androidSubscriptionPurchase) {
+                result.message = "Could not fetch the Android Subscription Purchase from Google Play API";
+                return result;
+            }
+
+            const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
+                androidProductId: purchase.subscriptionProductId,
+                onlyAvailableForSale: true
+            });
+
+            const subscriptionProductId = subscriptionProduct?.entryId;
+            if (!subscriptionProduct || !subscriptionProductId) {
+                result.success = false;
+                result.message = `No Cactus Subscription Product was found for the android sku ${purchase.subscriptionProductId}`;
+                await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                    channel: ChannelName.cha_ching,
+                    message: ":boom: :android: Failed to fulfill Android Checkout",
+                    data: stringifyJSON({memberId: member.id, email: member.email, params,}),
+                    fileType: "json",
+                    filename: `failed-purchase-android-${member.id}.json`,
+                });
+                this.logger.error("Failed to complete android purchase - no cactus product was found", result);
+                return result;
+            }
+
+
+            const payment = Payment.fromAndroidPurchase({
+                memberId: memberId,
+                subscriptionProductId,
+                purchase,
+                subscriptionPurchase: androidSubscriptionPurchase
+            });
+
+            await AdminPaymentService.getSharedInstance().save(payment);
+
+            //Do the upgrade
+            const cactusSubscription = member.subscription ?? getDefaultSubscription();
+            cactusSubscription.tier = subscriptionProduct.subscriptionTier ?? SubscriptionTier.PLUS;
+            cactusSubscription.subscriptionProductId = subscriptionProductId;
+            cactusSubscription.googleOrderId = purchase.orderId;
+
+            const trial = (cactusSubscription.trial || getDefaultTrial());
+            trial.activatedAt = trial.activatedAt ?? new Date();
+            cactusSubscription.trial = trial;
+            member.subscription = cactusSubscription;
+
+            await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false});
+
+            result.message = "Purchase completed successfully.";
+            result.success = true;
+
+        } catch (error) {
+            this.logger.error("Unexpected error while processing Android payment", error);
+            Sentry.captureException(error);
+        }
+
+        return result;
+    }
+
 }

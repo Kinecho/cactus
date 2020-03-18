@@ -49,6 +49,7 @@ export interface MemberSubscription {
     subscriptionProductId?: string,
     stripeSubscriptionId?: string,
     appleOriginalTransactionId?: string,
+    googleOrderId?: string;
 }
 
 export const DEFAULT_TRIAL_DAYS = 7;

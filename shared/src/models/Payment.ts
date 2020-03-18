@@ -2,6 +2,9 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
 import {AppleReceiptResponseRawBody, getOriginalTransactionId} from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
+import {AndroidPurchase} from "@shared/api/CheckoutTypes";
+import {androidpublisher_v3} from "googleapis";
+import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
 
 const logger = new Logger("PaymentModel");
 
@@ -17,6 +20,7 @@ export default class Payment extends BaseModel {
     subscriptionProductId?: string;
     stripe?: StripePayment;
     apple?: ApplePayment;
+    google?: GooglePayment;
 
     static fromStripeCheckoutSession(options: { session: Stripe.Checkout.Session, subscriptionProductId?: string, memberId: string }): Payment {
         const {session, memberId, subscriptionProductId} = options;
@@ -45,6 +49,23 @@ export default class Payment extends BaseModel {
 
         return payment;
     }
+
+    static fromAndroidPurchase(options: { memberId: string, subscriptionProductId: string, purchase: AndroidPurchase, subscriptionPurchase: Schema$SubscriptionPurchase }): Payment {
+        const {memberId, subscriptionProductId, purchase, subscriptionPurchase} = options;
+
+        const payment = new Payment();
+        payment.id = `google_${purchase.orderId}`;
+        payment.memberId = memberId;
+        payment.subscriptionProductId = subscriptionProductId;
+
+        payment.google = {
+            raw: purchase,
+            subscriptionPurchase,
+            purchase,
+        };
+
+        return payment;
+    }
 }
 
 interface StripePayment {
@@ -55,4 +76,10 @@ interface StripePayment {
 interface ApplePayment {
     raw?: AppleReceiptResponseRawBody;
     originalTransactionId?: string
+}
+
+interface GooglePayment {
+    raw?: any;
+    subscriptionPurchase?: Schema$SubscriptionPurchase;
+    purchase?: AndroidPurchase;
 }

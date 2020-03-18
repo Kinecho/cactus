@@ -10,7 +10,7 @@ export interface CreateSessionResponse {
     error?: any,
     unauthorized?: boolean,
     sessionId?: string,
-    amount?: number|null|undefined,
+    amount?: number | null | undefined,
 }
 
 export interface CreateSetupSubscriptionSessionRequest {
@@ -22,4 +22,32 @@ export interface CreateSetupSubscriptionSessionResponse {
     success: boolean,
     sessionId?: string,
     error?: string,
+}
+
+export interface AndroidFulfillParams {
+    purchase: AndroidPurchase,
+}
+
+export interface AndroidFulfillResult {
+    purchase?: AndroidPurchase,
+    success: boolean,
+    message?: string | undefined,
+}
+
+
+export interface AndroidPurchase {
+    token: string;
+    packageName: string;
+    orderId: string;
+
+    /**
+     * The SKU that was purchased. Corresponds to Cactus.SubscriptionProduct.androidProductId
+     */
+    subscriptionProductId: string;
+}
+
+export interface AndroidPurchaseResult {
+    success: boolean,
+    message?: string | undefined
+    purchase?: AndroidPurchase
 }

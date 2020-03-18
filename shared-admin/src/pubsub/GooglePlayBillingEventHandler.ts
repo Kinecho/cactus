@@ -21,18 +21,24 @@ export default class GooglePlayBillingEventHandler {
             return;
         }
 
-        const purchase = await GooglePlayService.getSharedInstance().getPurchaseFromToken(token);
+        const purchase = await GooglePlayService.getSharedInstance().getPurchaseFromNotification(this.notification);
         if (!purchase) {
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                message: "\`[GooglePlayBillingEventHandler]\` :boom: Unable to get purchase from notification.",
+                data: stringifyJSON({notification: this.notification}, 2),
+                fileType: "json",
+                filename: "google-play-billing-listeners-error.json",
+                channel: ChannelName.subscription_status
+            });
             this.logger.error("Failed to get a purchase from the google play api");
             return;
         }
-
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             message: "\`[GooglePlayBillingEventHandler]\` Got purchase and processed message.",
             data: stringifyJSON({notification: this.notification, purchase,}, 2),
             fileType: "json",
-            filename: "google-play-billing-listeners-error.json",
+            filename: "google-play-billing-listeners-success.json",
             channel: ChannelName.subscription_status
         });
 

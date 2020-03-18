@@ -21,7 +21,8 @@ export enum Endpoint {
     activityFeedSummary = "social/activity-feed-summary",
     userDeletePermanently = "user/delete-permanently",
     subscriptionDetails = "checkout/subscription-details",
-    subscriptionSetup = "checkout/sessions/setup-subscription"
+    subscriptionSetup = "checkout/sessions/setup-subscription",
+    androidFulfilPurchase = "checkout/android/fulfill-purchase",
 }
 
 export function initializeAxios(): AxiosInstance {

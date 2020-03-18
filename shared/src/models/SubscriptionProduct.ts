@@ -13,6 +13,7 @@ enum Fields {
     availableForSale = "availableForSale",
     stripePlanId = "stripePlanId",
     appleProductId = "appleProductId",
+    androidProductId = "androidProductId",
 }
 
 export default class SubscriptionProduct extends FlamelinkModel {
