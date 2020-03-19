@@ -18,7 +18,7 @@ import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/Mail
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {isString, stringifyJSON} from "@shared/util/ObjectUtil";
+import {isNull, isString, stringifyJSON} from "@shared/util/ObjectUtil";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import {getHostname} from "@admin/config/configService";
 import {PageRoute} from "@shared/PageRoutes";
@@ -792,6 +792,7 @@ export default class AdminSubscriptionService {
         const {purchase, historyRecord} = params;
         const item: AndroidPurchase | AndroidPurchaseHistoryRecord | undefined = purchase ?? historyRecord;
         const result: AndroidFulfillResult = {success: false, message: "not processed", purchase, historyRecord};
+        const isNewPurchase = !isNull(purchsae);
         if (!item) {
             return result
         }
@@ -863,6 +864,13 @@ export default class AdminSubscriptionService {
 
             result.message = "Purchase completed successfully.";
             result.success = true;
+
+
+            if (isNewPurchase) {
+                await AdminSlackService.getSharedInstance().sendChaChingMessage({
+                    text: `:android: ${member.email} has completed an in-app purchase \`${subscriptionProduct.displayName} (${item.subscriptionProductId})\``
+                })
+            }
 
         } catch (error) {
             this.logger.error("Unexpected error while processing Android payment", error);
