@@ -99,6 +99,7 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
@@ -175,6 +176,11 @@
                 onData: ({member}) => {
                     this.authLoaded = true;
                     this.member = member;
+
+                    if (!this.member) {
+                        const afterLoginUrl = window.location.href;
+                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(afterLoginUrl)}`;
+                    }
                 }
             });
 
@@ -277,9 +283,6 @@
                 //this is the default behavior
                 this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(promptContentId, flamelinkOptions)
             }
-
-            //TODO: use a promptContentService
-            // this.promptsUnsubscriber = await flamelink.content.subscribe(flamelinkOptions);
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
@@ -430,11 +433,6 @@
                     return styles;
                 }
             },
-            storageKey(): string | undefined {
-                if (this.promptContent && this.promptContent.promptId) {
-                    return StorageService.buildKey(LocalStorageKey.anonReflectionResponse, this.promptContent.promptId || "unknown");
-                }
-            },
             tapAnywhereEnabled(): boolean {
                 return true;
             },
@@ -445,7 +443,7 @@
                 if (this.promptContent) {
                     return this.promptContent.cactusElement;
                 }
-            },
+            }
         },
         watch: {
             responsesLoaded(loaded) {
@@ -633,48 +631,33 @@
                 const promptQuestion = promptContent ? promptContent.text : undefined;
 
                 if (promptId) {
-
-                    let localResponse = StorageService.getModel(LocalStorageKey.anonReflectionResponse, ReflectionResponse, promptId);
-                    logger.log("local response found in storage", localResponse);
-
-                    this.reflectionResponse = localResponse;
                     this.reflectionDuration = this.reflectionResponse ? (this.reflectionResponse.reflectionDurationMs || 0) : 0;
 
                     // logger.log("subscribing to responses for promptId", promptId);
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
+                            //TODO: combine if there are multiple?
                             const [first] = responses;
-                            // logger.log("ResponseSubscriber returned data. First in list is: ", first ? first.toJSON() : "no data");
-
-
-                            if (!first && !localResponse) {
-                                // logger.log("No local response and no db response, creating one now");
-                                // logger.log("Using the newly created response for this prompt.");
-                                localResponse = ReflectionResponseService.createPossiblyAnonymousReflectionResponse(promptId as string, getResponseMedium({
+                            const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
                                     app: getAppType(),
                                     type: ResponseMediumType.PROMPT
                                 }), promptQuestion);
-                            } else if (first) {
-                            }
 
-                            if (!first && localResponse) {
-                                // logger.log("No data found from database, using the locally created response");
-                            }
+                            const response = first || newResponse;
 
-                            //TODO: combine if there are multiple?
-                            const response = first || localResponse;
+                            if (response) {
+                                await this.updatePendingActiveIndex(response);
+                                this.responsesLoaded = true;
+                                this.reflectionResponses = responses;
+                                this.reflectionResponse = response;
+                                this.reflectionDuration = response.reflectionDurationMs || 0;
 
-                            await this.updatePendingActiveIndex(response);
-                            this.responsesLoaded = true;
-                            this.reflectionResponses = responses;
-                            this.reflectionResponse = response;
-                            this.reflectionDuration = response.reflectionDurationMs || 0;
-
-                            if (this.isFirstCard && !this.saving && !this.saved) {
-                                logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                const saveTask = this.save({updateReflectionLog: false});
-                                await saveTask;
+                                if (this.isFirstCard && !this.saving && !this.saved) {
+                                    logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
+                                    const saveTask = this.save({updateReflectionLog: false});
+                                    await saveTask;
+                                }
                             }
                         }
                     })
@@ -694,10 +677,6 @@
                         updateReflectionLog: options.updateReflectionLog
                     });
                     this.reflectionResponse = saved;
-                    if (!this.member && saved && saved.promptId) {
-                        logger.log("Member is not logged in, saving to localstorage");
-                        StorageService.saveModel(LocalStorageKey.anonReflectionResponse, saved, saved.promptId);
-                    }
                     this.saved = true;
                     this.saving = false;
                     return saved;

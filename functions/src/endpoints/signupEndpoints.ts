@@ -27,7 +27,6 @@ import MailchimpService from "@admin/services/MailchimpService";
 import {getAuthUser} from "@api/util/RequestUtil";
 import UserRecord = admin.auth.UserRecord;
 import ActionCodeSettings = admin.auth.ActionCodeSettings;
-import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import {getISODateTime} from "@shared/util/DateUtil";
 import {QueryParam} from "@shared/util/queryParams";
 import Logger from "@shared/Logger";
@@ -379,20 +378,6 @@ app.post("/login-event", async (req: functions.https.Request | any, resp: functi
             })
         } else {
             logger.log("this was not a new user");
-        }
-
-
-        if (member && reflectionResponseIds.length > 0) {
-            await AdminSentPromptService.getSharedInstance().createSentPromptsFromReflectionResponseIds({
-                reflectionResponseIds,
-                member,
-                userId: userId,
-            });
-
-            attachments.push({
-                title: `Added ${reflectionResponseIds.length} Anonymous Reflections to their account`,
-                color: "good"
-            });
         }
 
         if (message.didSignup) {

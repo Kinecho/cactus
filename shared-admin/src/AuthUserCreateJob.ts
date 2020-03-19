@@ -271,7 +271,7 @@ interface SlackMessageInput {
 }
 
 function createSlackMessage(args: SlackMessageInput): ChatMessage {
-    const {member, user, existingCactusMember, errorAttachments, pendingUser} = args;
+    const {member, user, existingCactusMember, errorAttachments} = args;
 
     const fields: SlackAttachmentField[] = [];
     const attachment: SlackAttachment = {fields, color: AttachmentColor.success};
@@ -313,13 +313,6 @@ function createSlackMessage(args: SlackMessageInput): ChatMessage {
             title: "Existing Cactus Member",
             value: `Since ${formatDate(member.signupAt || member.createdAt) || 'unknown'}`,
             short: false,
-        })
-    }
-
-    if (pendingUser && pendingUser.reflectionResponseIds.length > 0) {
-        fields.push({
-            title: "Anonymous Reflections Transferred",
-            value: `${pendingUser.reflectionResponseIds.length}`
         })
     }
 

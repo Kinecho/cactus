@@ -152,12 +152,12 @@
         display: flex;
         flex-flow: column wrap;
         margin: 0 auto;
-        max-width: 70rem;
-        padding: 2.4rem 0;
+        max-width: 64rem;
+        padding: 3.2rem 0;
 
         @include r(600) {
             flex-direction: row;
-            padding: 2.4rem;
+            padding: 4rem 2.4rem;
         }
     }
 

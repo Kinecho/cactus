@@ -2,7 +2,7 @@
     <div class="centered">
         <div>
             <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
-            <p v-if="message && !isPendingRedirect">{{message}}</p>
+            <p class="messageSubtext" v-if="message && !isPendingRedirect">{{message}}</p>
         </div>
         <div class="actions-container">
             <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
@@ -35,6 +35,7 @@
     import {CommonCopy} from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
     import {getAuthUI, getAuthUIConfig} from "@web/authUi";
+    import {appendQueryParams, isFeatureAuthUrl} from "@shared/util/StringUtil";
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -192,6 +193,10 @@
                     } catch (e) {
                         logger.error("failed to log login event", e);
                     } finally {
+                        // append the memberId to any feature-auth urls
+                        if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
+                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, {memberId: this.member.id});
+                        }
                         window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
                     }
                 }
@@ -263,15 +268,8 @@
                         &:not(:last-child) {
                             margin-right: 1rem;
                         }
-
                     }
-
-
-                    /*button.firebaseui-id-submit, button.mdl-button, .mdl-button--raised.mdl-button--colored {*/
-                    /*    */
-                    /*}*/
                 }
-
             }
 
             .firebaseui-card-header {
@@ -281,8 +279,10 @@
             }
 
             .firebaseui-card-footer {
+                margin: 2.4rem auto;
+                opacity: .8;
+                padding: 0;
                 width: 30rem;
-                margin: 3rem auto;
             }
         }
     }
@@ -295,18 +295,17 @@
 
     h1 {
         margin: 0;
-    }
-
-    form {
-        display: flex;
-        flex-flow: column wrap;
-        margin: 0 auto;
-        max-width: 70rem;
-        padding: 2.4rem 0;
 
         @include r(600) {
-            flex-direction: row;
-            padding: 2.4rem;
+            font-size: 4.8rem;
+        }
+    }
+
+    .messageSubtext {
+        font-size: 2rem;
+
+        @include r(600) {
+            font-size: 2.4rem;
         }
     }
 
@@ -321,9 +320,7 @@
     }
 
     .divider {
-        margin: 2rem 0;
-        @include maxW(600) {
-            font-size: 1.6rem;
-        }
+        margin: 0 0 2.4rem;
+        opacity: .8;
     }
 </style>
