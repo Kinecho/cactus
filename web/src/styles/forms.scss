@@ -11,12 +11,12 @@
   flex-grow: 1;
   font-size: 1.8rem;
   margin: 0 0 1.6rem;
-  max-width: 53rem;
   padding: 1.2rem 1.6rem;
   transition: border-color .3s ease-in-out;
 
   @include r(600) {
     margin: 0 1.6rem 0 0;
+    max-width: 53rem;
   }
   @include r(768) {
     min-width: 32rem;

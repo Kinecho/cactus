@@ -17,6 +17,11 @@ body.sign-up-body {
         .centered {
             justify-content: center;
         }
+
+        .nav-logo {
+            height: 5.8rem;
+            width: 11.7rem;
+        }
     }
 
     .signin-wrapper {
@@ -31,7 +36,6 @@ body.sign-up-body {
 
         @include r(600) {
             min-height: calc(100vh - 19rem);
-            padding-top: 8rem;
         }
     }
 
