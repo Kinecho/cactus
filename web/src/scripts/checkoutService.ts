@@ -83,9 +83,22 @@ export function getSignUpStripeCheckoutUrl(options: { subscriptionProductId: str
     return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
 }
 
+export function getSignUpAndroidCheckoutUrl(options: { subscriptionProductId: string }): string {
+    const {subscriptionProductId} = options;
+    const copy = CopyService.getSharedInstance().copy;
+    const successUrl = `${PageRoute.PRICING}?${QueryParam.SUBSCRIPTION_PRODUCT_ID}=${subscriptionProductId}&${QueryParam.PREMIUM_DEFAULT}=true&${QueryParam.FROM_AUTH}=true#upgrade`;
+    return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
+}
+
 export function sendToLoginForCheckout(options: { subscriptionProductId: string }) {
     logger.warn("Sending to login before checkout can occur");
-    window.location.href = getSignUpStripeCheckoutUrl(options);
+    if (isAndroidApp()) {
+        window.location.href = getSignUpAndroidCheckoutUrl(options);
+    } else {
+        window.location.href = getSignUpStripeCheckoutUrl(options);
+        return;
+    }
+
 }
 
 /**
@@ -136,7 +149,6 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
         logger.error("Failed to get android app interface object");
         return {isRedirecting: false, isLoggedIn: false, success: false}
     }
-    alert("Test alerts");
     return new Promise<CheckoutRedirectResult>(resolve => {
         logger.info("starting android checkout");
         AndroidService.shared.startCheckout(androidProductId, memberId);

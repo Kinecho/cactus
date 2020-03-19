@@ -36,7 +36,8 @@ export enum QueryParam {
     CHART_TYPE = "chart_type",
     CHART_DATA = "chart_data",
     CACTUS_MEMBER_ID = "memberId",
-    CORE_VALUES = "coreValues"
+    CORE_VALUES = "coreValues",
+    FROM_AUTH = "fromAuth",
 
 }
 

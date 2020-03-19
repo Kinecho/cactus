@@ -96,7 +96,7 @@
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
-                learnMorePath: PageRoute.PAYMENT_PLANS,
+                learnMorePath: PageRoute.PRICING,
             }
         },
         beforeMount() {

@@ -27,7 +27,7 @@
             commonCopy: CommonCopy,
         } {
             return {
-                pricingRoute: PageRoute.PAYMENT_PLANS,
+                pricingRoute: PageRoute.PRICING,
                 commonCopy: copy.common,
             }
         },

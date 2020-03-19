@@ -86,7 +86,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
         return;
     } else {
-        const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.CORE_VALUES}=true}`;
+        const pricingUrl = `${getHostname()}${PageRoute.PRICING}?${QueryParam.CORE_VALUES}=true}`;
         resp.redirect(pricingUrl);
         return;
     }

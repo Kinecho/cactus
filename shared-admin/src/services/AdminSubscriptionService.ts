@@ -138,7 +138,7 @@ export default class AdminSubscriptionService {
                 toEmail: member.email,
                 memberId: member.id,
                 firstName: member?.firstName,
-                link: `${getHostname()}${PageRoute.PAYMENT_PLANS}`
+                link: `${getHostname()}${PageRoute.PRICING}`
             });
             this.logger.info(`Email send result... did send = ${emailSendResult.didSend}`);
         }

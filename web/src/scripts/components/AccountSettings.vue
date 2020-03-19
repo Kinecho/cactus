@@ -258,7 +258,7 @@
                 deviceTimezone: getDeviceTimeZone(),
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
-                upgradeRoute: PageRoute.PAYMENT_PLANS,
+                upgradeRoute: PageRoute.PRICING,
                 deleteAccountModalVisible: false
             }
         },

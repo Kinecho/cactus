@@ -1,9 +1,12 @@
+import {LocalStorageKey} from '@web/services/StorageService'
+import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="centered">
         <transition appear name="fade-in">
             <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
                 <div v-for="(productGroup, i) in groupEntries" class="plan-container">
-                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">{{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">
+                        {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
                         <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                     </div>
                     <product-group
@@ -14,7 +17,7 @@
                             :display-index="i"
                             :member="member"
                             :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks" />
+                            :learnMoreLinks="learnMoreLinks"/>
                 </div>
             </div>
             <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
@@ -41,7 +44,7 @@
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}" />
+                                :class="{active: activetab === i}"/>
                     </template>
                 </div>
             </div>
@@ -66,7 +69,10 @@
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {isAndroidApp} from '@web/DeviceUtil'
+    import {isAndroidApp} from "@web/DeviceUtil";
+    import {isNull} from "@shared/util/ObjectUtil";
+    import AndroidService from "@web/android/AndroidService";
+    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -102,6 +108,16 @@
                 productGroups: [],
             }
         },
+        mounted(): void {
+            const fromAuth = getQueryParam(QueryParam.FROM_AUTH);
+            // const fromAuthStorage = StorageService.getJSON(LocalStorageKey.landingQueryParams)[QueryParam.FROM_AUTH];
+            if (isAndroidApp() && fromAuth) {
+                AndroidService.shared.showToast("You are now signed in");
+                logger.info("Showing toast for signed in ");
+            } else {
+                logger.info("Not showing toast");
+            }
+        },
         async beforeMount() {
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -132,7 +148,7 @@
             },
             groupEntries(): SubscriptionProductGroupEntry[] {
                 return this.productGroups.filter(e => {
-                    if (!this.member){
+                    if (!this.member) {
                         return true
                     }
                     return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
