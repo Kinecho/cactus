@@ -29,7 +29,7 @@ export default class EnglishCopy extends LocalizedCopy {
         MANAGE_MY_PLAN: "Manage My Plan",
         PURCHASE: "Purchase",
         SIGN_IN_TO_CONTINUE_CHECKOUT: "Please log in to continue the upgrade process.",
-        SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES: "Please sign in before restoring your purchases",
+        SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES: "Please sign in to restoring your purchases",
         BILLING_PERIOD: {
             [BillingPeriod.weekly]: "Weekly",
             [BillingPeriod.monthly]: "Monthly",

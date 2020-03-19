@@ -93,7 +93,14 @@ export interface AndroidPurchase {
 }
 
 export interface AndroidPurchaseResult {
+    /**
+     * TRUE if the checkout flow completed successfully
+     */
     success: boolean,
+    /**
+     * TRUE if the user canceled the checkout flow
+     */
+    canceled?: boolean,
     message?: string | undefined
     purchase?: AndroidPurchase
 }

@@ -219,7 +219,7 @@
                     return;
                 }
                 const checkoutResult = await startCheckout({subscriptionProductId, subscriptionProduct: product});
-                if (!checkoutResult.success) {
+                if (!checkoutResult.success && !checkoutResult.canceled) {
                     logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
                     this.checkoutError = "Unable to load checkout. Please try again later";
                     this.isProcessing = false;

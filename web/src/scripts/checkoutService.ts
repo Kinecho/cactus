@@ -70,6 +70,7 @@ export async function createStripeSession(options: { subscriptionProductId: stri
 
 export interface CheckoutRedirectResult {
     isRedirecting: boolean,
+    canceled?: boolean,
     isLoggedIn: boolean,
     success: boolean
 }
@@ -212,9 +213,12 @@ function createAndroidCheckoutDelegateHandler(): Promise<CheckoutRedirectResult>
 
                     const result = {success: fulfillResult.success, isRedirecting: false, isLoggedIn: true};
                     resolve(result);
+                } else if (androidPurchaseResult.canceled) {
+                    logger.info("The user canceled the checkout flow");
+                    resolve({success: false, canceled: true, isRedirecting: false, isLoggedIn: true});
                 } else {
-                    logger.info("not attempting to fulfill purchase, result was not a succcess or no purchase was found on the response");
-                    const result = {success: false, isRedirecting: false, isLoggedIn: true};
+                    logger.info("not attempting to fulfill purchase, result was not a success or no purchase was found on the response");
+                    const result = {success: false, canceled: false, isRedirecting: false, isLoggedIn: true};
                     resolve(result);
                 }
             }
@@ -260,7 +264,7 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
         return {isRedirecting: false, isLoggedIn: true, success: true};
     }
 
-    return {isLoggedIn: true, isRedirecting: true, success: true};
+    return {isLoggedIn: true, isRedirecting: true, canceled: false, success: true};
 }
 
 export async function restoreAndroidPurchases(options: { member: CactusMember | undefined }): Promise<CheckoutRedirectResult> {
@@ -268,13 +272,14 @@ export async function restoreAndroidPurchases(options: { member: CactusMember | 
 
     if (!isAndroidApp()) {
         logger.error("Attempted to restore purchases but user is not in the android app.");
-        return {success: false, isLoggedIn: !!member, isRedirecting: false}
+        return {success: false, canceled: true, isLoggedIn: !!member, isRedirecting: false}
     }
 
 
     if (!member) {
         window.location.href = getSignUpAndroidRestoreUrl();
         return {
+            canceled: false,
             isRedirecting: true,
             isLoggedIn: false,
             success: true,
