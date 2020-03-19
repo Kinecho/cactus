@@ -124,7 +124,7 @@ service cloud.firestore {
 
     match /reflectionResponses/{document=**} {
       allow read: if belongsToMember() || resource.data.shared == true;
-      allow update: if belongsToMember() || resource.data.anonymous == true;
+      allow update: if belongsToMember();
       // allow create: if request.resource.data.cactusMemberId == getMemberId() || request.resource.data.mailchimpMemberId == getCurrentMember().data.mailchimpListMember.id;
       allow create: if true;
     }
