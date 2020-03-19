@@ -6,7 +6,7 @@ import {DateObject, DateTime} from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
 import {getValidTimezoneName} from "@shared/timezones";
 import {
-    isInTrial,
+    isOptInTrialing,
     MemberSubscription,
     subscriptionTierDisplayName,
     needsTrialExpiration
@@ -210,7 +210,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get tierDisplayName(): string | undefined {
-        return subscriptionTierDisplayName(this.tier, this.isInTrial)
+        return subscriptionTierDisplayName(this.tier, this.isOptInTrialing)
     }
 
     get daysLeftInTrial(): number {
@@ -221,8 +221,8 @@ export default class CactusMember extends BaseModel {
         return Math.max(DateUtil.daysUntilDate(end), 0);
     }
 
-    get isInTrial(): boolean {
-        return isInTrial(this.subscription)
+    get isOptInTrialing(): boolean {
+        return isOptInTrialing(this.subscription)
     }
 
     get needsTrialExpiration(): boolean {
@@ -230,7 +230,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get hasActiveSubscription(): boolean {
-        return !!this.subscription && !this.isInTrial && this.tier !== SubscriptionTier.BASIC
+        return !!this.subscription && !this.isOptInTrialing && this.tier !== SubscriptionTier.BASIC
     }
 
     set stripeCustomerId(customerId: string | undefined) {

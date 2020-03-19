@@ -27,7 +27,7 @@
         },
         computed: {
             isTrialing(): boolean {
-                return this.member?.isInTrial;
+                return this.member?.isOptInTrialing;
             },
             trialDaysLeftHeader(): string {
                 if (this.member?.daysLeftInTrial) {
@@ -49,7 +49,7 @@
             },
             showUpgradeBanner(): boolean {
                 const tier = this.member?.tier ?? SubscriptionTier.PLUS;
-                return (tier === SubscriptionTier.BASIC || this.member?.isInTrial) ? true : false;
+                return (tier === SubscriptionTier.BASIC || this.member?.isOptInTrialing) ? true : false;
             }
         },
         methods: {

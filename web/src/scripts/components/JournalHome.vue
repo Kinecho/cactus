@@ -191,7 +191,7 @@
                             this.todayLoaded = true;
                         }
 
-                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial) {
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isOptInTrialing) {
                             this.showUpgradeCard = true;
                         }
                     }

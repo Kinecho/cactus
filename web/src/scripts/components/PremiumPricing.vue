@@ -135,7 +135,7 @@
                     if (!this.member){
                         return true
                     }
-                    return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
+                    return !((this.member?.isOptInTrialing ?? false) && e.tier === SubscriptionTier.BASIC)
                 })
             },
             trialBadgeText(): string | undefined {
@@ -157,7 +157,7 @@
                 return entry.productGroup?.title ?? entry.tierDisplayName;
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
-                return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+                return this.member && this.member.isOptInTrialing && this.member.tier === entry.tier || false
             }
         }
 

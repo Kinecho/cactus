@@ -38,7 +38,7 @@
         },
         computed: {
             isTrialing(): boolean {
-                return this.member?.isInTrial;
+                return this.member?.isOptInTrialing;
             },
             trialDaysLeftHeader(): string {
                 if (this.member?.daysLeftInTrial) {

@@ -83,7 +83,7 @@ export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): Subscri
     }
 }
 
-export function isInTrial(subscription?: MemberSubscription): boolean {
+export function isOptInTrialing(subscription?: MemberSubscription): boolean {
     if (!subscription) {
         return true;
     }

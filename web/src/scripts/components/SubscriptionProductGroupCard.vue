@@ -52,7 +52,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
-    import {isInTrial, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import {isOptInTrialing, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
@@ -126,7 +126,7 @@
                     return copy.common.LOADING;
                 }
 
-                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isOptInTrialing) {
                     return copy.checkout.MANAGE_MY_PLAN;
                 }
                 if (this.selectedProduct.isFree) {
@@ -146,11 +146,11 @@
             isCurrentTier(): boolean {
                 return this.productGroup.tier === this.member?.tier;
             },
-            isInTrial(): boolean {
-                return this.member?.isInTrial ?? false
+            isOptInTrialing(): boolean {
+                return this.member?.isOptInTrialing ?? false
             },
             isTrialingTier(): boolean {
-                return this.productGroup.tier === this.member?.tier && this.member?.isInTrial;
+                return this.productGroup.tier === this.member?.tier && this.member?.isOptInTrialing;
             },
             signedIn(): boolean {
                 return !!this.member
@@ -201,7 +201,7 @@
 
                 const product = this.selectedProduct;
 
-                if (this.isCurrentTier && !this.isInTrial) {
+                if (this.isCurrentTier && !this.isOptInTrialing) {
                     this.goToAccount()
                 }
 
