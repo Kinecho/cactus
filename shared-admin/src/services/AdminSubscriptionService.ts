@@ -792,7 +792,7 @@ export default class AdminSubscriptionService {
         const {purchase, historyRecord} = params;
         const item: AndroidPurchase | AndroidPurchaseHistoryRecord | undefined = purchase ?? historyRecord;
         const result: AndroidFulfillResult = {success: false, message: "not processed", purchase, historyRecord};
-        const isNewPurchase = !isNull(purchsae);
+        const isNewPurchase = !isNull(purchase);
         if (!item) {
             return result
         }
