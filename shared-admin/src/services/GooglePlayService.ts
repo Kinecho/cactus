@@ -4,7 +4,7 @@ import Logger from "@shared/Logger";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import {DeveloperNotification} from "@shared/api/GooglePlayBillingTypes";
 import Androidpublisher = androidpublisher_v3.Androidpublisher;
-import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
+export import GoogleSubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
 
 interface GetSubscriptionParams {
     subscriptionId: string;
@@ -44,7 +44,7 @@ export default class GooglePlayService {
         });
     }
 
-    async getSubscriptionPurchase(params: GetSubscriptionParams): Promise<Schema$SubscriptionPurchase | undefined> {
+    async getSubscriptionPurchase(params: GetSubscriptionParams): Promise<GoogleSubscriptionPurchase | undefined> {
         try {
             this.logger.info("Fetching subscription purchase with params: ", params);
             const response = await this.publisherClient.purchases.subscriptions.get({
@@ -60,7 +60,7 @@ export default class GooglePlayService {
         }
     }
 
-    async getPurchaseFromNotification(notification: DeveloperNotification): Promise<Schema$SubscriptionPurchase | undefined> {
+    async getPurchaseFromNotification(notification: DeveloperNotification): Promise<GoogleSubscriptionPurchase | undefined> {
         try {
             const {packageName, subscriptionNotification} = notification;
             if (!subscriptionNotification) {
@@ -68,13 +68,13 @@ export default class GooglePlayService {
                 return undefined;
             }
             const {purchaseToken, subscriptionId} = subscriptionNotification;
-            const androidSubscriptionProduct = await this.getSubscriptionPurchase({
-                    token: purchaseToken,
-                    packageName,
-                    subscriptionId,
-                });
-            this.logger.info("Fetched data from google purchases", stringifyJSON(androidSubscriptionProduct));
-            return androidSubscriptionProduct
+            const androidSubscriptionPurchase = await this.getSubscriptionPurchase({
+                token: purchaseToken,
+                packageName,
+                subscriptionId,
+            });
+            this.logger.info("Fetched data from google purchases", stringifyJSON(androidSubscriptionPurchase));
+            return androidSubscriptionPurchase
         } catch (error) {
             this.logger.error("Failed to get purchase from token", error);
             return;

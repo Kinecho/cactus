@@ -3,7 +3,7 @@ import {isNull} from "@shared/util/ObjectUtil";
 export interface DeveloperNotification {
     /**
      * The version of this notification. Initially, this will be “1.0”. This version is distinct from other version fields.
-      */
+     */
     version: string,
 
     /**
@@ -99,6 +99,42 @@ export enum OneTimeProductNotificationType {
     ONE_TIME_PRODUCT_CANCELED = 2,
 }
 
+export function getSubscriptionNotificationDescription(type?: SubscriptionNotificationType): string | undefined {
+    if (isNull(type)) {
+        return undefined;
+    }
+    switch (type) {
+        case SubscriptionNotificationType.SUBSCRIPTION_RECOVERED:
+            return "Subscription was recovered from account hold";
+        case SubscriptionNotificationType.SUBSCRIPTION_RENEWED:
+            return "Active subscription was renewed";
+        case SubscriptionNotificationType.SUBSCRIPTION_CANCELED:
+            return "Subscription was either voluntarily or involuntarily cancelled. For voluntary cancellation, sent when the user cancels.";
+        case SubscriptionNotificationType.SUBSCRIPTION_PURCHASED:
+            return "A new subscription was purchased.";
+        case SubscriptionNotificationType.SUBSCRIPTION_ON_HOLD:
+            return "A subscription has entered account hold.";
+        case SubscriptionNotificationType.SUBSCRIPTION_IN_GRACE_PERIOD:
+            return "subscription has entered grace period";
+        case SubscriptionNotificationType.SUBSCRIPTION_RESTARTED:
+            return "User has reactivated their subscription from Play > Account > Subscriptions (requires opt-in for subscription restoration)";
+        case SubscriptionNotificationType.SUBSCRIPTION_PRICE_CHANGE_CONFIRMED:
+            return "Subscription price change has successfully been confirmed by the user.";
+        case SubscriptionNotificationType.SUBSCRIPTION_DEFERRED:
+            return "Subscription's recurrence time has been extended.";
+        case SubscriptionNotificationType.SUBSCRIPTION_PAUSED:
+            return "Subscription has been paused";
+        case SubscriptionNotificationType.SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED:
+            return "Subscription pause schedule has been changed.";
+        case SubscriptionNotificationType.SUBSCRIPTION_REVOKED:
+            return "Subscription has been revoked from the user before the expiration time.";
+        case SubscriptionNotificationType.SUBSCRIPTION_EXPIRED:
+            return "Subscription has expired.";
+        default:
+            return undefined;
+    }
+}
+
 /**
  * See (Google Developer docs)[https://developer.android.com/google/play/billing/realtime_developer_notifications.html] for more info
  */
@@ -167,4 +203,38 @@ export enum SubscriptionNotificationType {
      * A subscription has expired.
      */
     SUBSCRIPTION_EXPIRED = 13
+}
+
+export function getCancelReasonDescription(code?: SubscriptionCancelReasonCode | number | undefined): string | undefined {
+    if (isNull(code)) {
+        return undefined;
+    }
+    switch (code) {
+        case SubscriptionCancelReasonCode.USER_CANCELED:
+            return "User canceled the subscription";
+        case SubscriptionCancelReasonCode.SYSTEM_CANCELED:
+            return "Subscription was canceled by the system, for example because of a billing problem";
+        case SubscriptionCancelReasonCode.SUBSCRIPTION_REPLACED:
+            return "Subscription was replaced with a new subscription";
+        case SubscriptionCancelReasonCode.DEVELOPER_CANCELED:
+            return "Subscription was canceled by the developer";
+        default:
+            return `Unknown reason code: ${code}`;
+    }
+
+}
+
+export enum SubscriptionCancelReasonCode {
+    USER_CANCELED = 0,
+    SYSTEM_CANCELED = 1,
+    SUBSCRIPTION_REPLACED = 2,
+    DEVELOPER_CANCELED = 3
+}
+
+export enum GooglePaymentState {
+    PAYMENT_PENDING = 0,
+    PAYMENT_RECEIVED = 1,
+    FREE_TRIAL = 2,
+    PENDING_DEFERRED_UPGRADE_OR_DOWNGRADE = 3
+
 }
