@@ -875,7 +875,7 @@ export default class AdminSubscriptionService {
         } catch (error) {
             this.logger.error("Unexpected error while processing Android payment", error);
             await AdminSlackService.getSharedInstance().sendChaChingMessage({
-                text: `:android: :boom: ${member.email} ran into an error while processing an in-app purchase \`${subscriptionProduct.displayName} (${item.subscriptionProductId})\``,
+                text: `:android: :boom: ${member.email} ran into an error while processing an in-app purchase \`${item.subscriptionProductId}\``,
                 attachments: [{
                     title: "Error",
                     color: "danger",
