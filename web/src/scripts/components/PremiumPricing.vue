@@ -48,7 +48,7 @@
 
                 </div>
                 <div class="restore-container" v-if="isAndroidApp">
-                    <button class="button secondary" @click="restorePurchases">Restore Purchases</button>
+                    <button class="button secondary" @click="restorePurchases" :disabled="isRestoringPurchases">Restore Purchases</button>
                 </div>
             </div>
         </transition>
@@ -183,6 +183,7 @@
                 }
                 this.isRestoringPurchases = true;
                 await restoreAndroidPurchases({member: this.member ?? undefined});
+                AndroidService.shared.showToast("Finished restoring purchases");
                 this.isRestoringPurchases = false
             }
         }
