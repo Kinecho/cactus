@@ -641,16 +641,18 @@
                             const [first] = responses;
                             const response = first;
 
-                            await this.updatePendingActiveIndex(response);
-                            this.responsesLoaded = true;
-                            this.reflectionResponses = responses;
-                            this.reflectionResponse = response;
-                            this.reflectionDuration = response.reflectionDurationMs || 0;
+                            if (response) {
+                                await this.updatePendingActiveIndex(response);
+                                this.responsesLoaded = true;
+                                this.reflectionResponses = responses;
+                                this.reflectionResponse = response;
+                                this.reflectionDuration = response.reflectionDurationMs || 0;
 
-                            if (this.isFirstCard && !this.saving && !this.saved) {
-                                logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                const saveTask = this.save({updateReflectionLog: false});
-                                await saveTask;
+                                if (this.isFirstCard && !this.saving && !this.saved) {
+                                    logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
+                                    const saveTask = this.save({updateReflectionLog: false});
+                                    await saveTask;
+                                }
                             }
                         }
                     })
