@@ -637,9 +637,14 @@
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
-                             //TODO: combine if there are multiple?
+                            //TODO: combine if there are multiple?
                             const [first] = responses;
-                            const response = first;
+                            const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
+                                    app: getAppType(),
+                                    type: ResponseMediumType.PROMPT
+                                }), promptQuestion);
+
+                            const response = first || newResponse;
 
                             if (response) {
                                 await this.updatePendingActiveIndex(response);
