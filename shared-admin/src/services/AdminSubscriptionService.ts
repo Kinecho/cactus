@@ -776,7 +776,7 @@ export default class AdminSubscriptionService {
             }
 
 
-            AdminSlackService.getSharedInstance().sendChaChingMessage({
+            await AdminSlackService.getSharedInstance().sendChaChingMessage({
                 text: `:android: ${member.email} triggered the restore purchase flow.`,
                 attachments,
             });
