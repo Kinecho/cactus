@@ -99,6 +99,7 @@
 
 <script lang="ts">
     import Vue from "vue";
+    import {Config} from "@web/config";
     import {PageRoute} from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
@@ -175,8 +176,10 @@
                 onData: ({member}) => {
                     this.authLoaded = true;
                     this.member = member;
-                    if (!member) {
-                        window.location.href = PageRoute.LOGIN;
+
+                    if (!this.member) {
+                        const afterLoginUrl = window.location.href;
+                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(afterLoginUrl)}`;
                     }
                 }
             });
@@ -280,9 +283,6 @@
                 //this is the default behavior
                 this.promptsUnsubscriber = PromptContentService.sharedInstance.observeByEntryId(promptContentId, flamelinkOptions)
             }
-
-            //TODO: use a promptContentService
-            // this.promptsUnsubscriber = await flamelink.content.subscribe(flamelinkOptions);
         },
         destroyed() {
             if (this.promptsUnsubscriber) {
@@ -443,7 +443,7 @@
                 if (this.promptContent) {
                     return this.promptContent.cactusElement;
                 }
-            },
+            }
         },
         watch: {
             responsesLoaded(loaded) {
