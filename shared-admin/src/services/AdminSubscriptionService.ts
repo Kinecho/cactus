@@ -4,7 +4,13 @@ import AdminFirestoreService, {
     Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {getDefaultSubscription, getDefaultTrial, PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+import {
+    BillingPlatform,
+    getDefaultSubscription,
+    getDefaultTrial,
+    getSubscriptionBillingPlatform,
+    PremiumSubscriptionTiers
+} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService, {GetMembersBatchOptions} from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService, {SendEmailResult} from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -556,6 +562,23 @@ export default class AdminSubscriptionService {
         }
     }
 
+    async getGoogleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
+        const {member} = options;
+        const subscription = member.subscription;
+        if (!subscription) {
+            this.logger.info("[getGoogleSubscriptionInvoice] No subscription found on the member.");
+            return undefined;
+        }
+        const googleOriginalOrderId = subscription.googleOriginalOrderId;
+        const googlePurchaseToken = subscription.googlePurchaseToken;
+        if (!googleOriginalOrderId || !googlePurchaseToken) {
+            return undefined;
+        }
+
+        this.logger.info(`Attempting to fetch Google Invoice for member: ${member.email} (${member.id})`);
+        return undefined;
+    }
+
     async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
 
@@ -629,11 +652,22 @@ export default class AdminSubscriptionService {
 
     async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
+        const subscription = member.subscription;
+        if (!subscription) {
+            this.logger.info("No subscription found on the member. Can not process upcoming invoice");
+            return undefined;
+        }
 
-        if (member.subscription?.appleOriginalTransactionId) {
-            return await this.getAppleSubscriptionInvoice({member});
-        } else {
-            return await this.getStripeSubscriptionInvoice({member})
+        const billingPlatform = getSubscriptionBillingPlatform(subscription);
+
+        switch (billingPlatform) {
+            case BillingPlatform.APPLE:
+                return this.getAppleSubscriptionInvoice({member});
+            case BillingPlatform.GOOGLE:
+                return this.getGoogleSubscriptionInvoice({member});
+            default:
+                //For all other types, try to get it via stripe as this method will find subscription info in a few ways
+                return this.getStripeSubscriptionInvoice({member})
         }
     }
 
@@ -754,7 +788,8 @@ export default class AdminSubscriptionService {
             const cactusSubscription = member.subscription ?? getDefaultSubscription();
             cactusSubscription.tier = subscriptionProduct.subscriptionTier ?? SubscriptionTier.PLUS;
             cactusSubscription.subscriptionProductId = subscriptionProductId;
-            cactusSubscription.googleOrderId = purchase.orderId;
+            cactusSubscription.googleOriginalOrderId = purchase.orderId;
+            cactusSubscription.googlePurchaseToken = purchase.token;
 
             const trial = (cactusSubscription.trial || getDefaultTrial());
             trial.activatedAt = trial.activatedAt ?? new Date();

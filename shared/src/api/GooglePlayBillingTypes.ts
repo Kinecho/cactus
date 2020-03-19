@@ -135,6 +135,42 @@ export function getSubscriptionNotificationDescription(type?: SubscriptionNotifi
     }
 }
 
+export function getSubscriptionNotificationTypeName(type?: SubscriptionNotificationType): string | undefined {
+    if (isNull(type)) {
+        return undefined;
+    }
+    switch (type) {
+        case SubscriptionNotificationType.SUBSCRIPTION_RECOVERED:
+            return "SUBSCRIPTION_RECOVERED";
+        case SubscriptionNotificationType.SUBSCRIPTION_RENEWED:
+            return "SUBSCRIPTION_RENEWED";
+        case SubscriptionNotificationType.SUBSCRIPTION_CANCELED:
+            return "SUBSCRIPTION_CANCELED";
+        case SubscriptionNotificationType.SUBSCRIPTION_PURCHASED:
+            return "SUBSCRIPTION_PURCHASED";
+        case SubscriptionNotificationType.SUBSCRIPTION_ON_HOLD:
+            return "SUBSCRIPTION_ON_HOLD";
+        case SubscriptionNotificationType.SUBSCRIPTION_IN_GRACE_PERIOD:
+            return "SUBSCRIPTION_IN_GRACE_PERIOD";
+        case SubscriptionNotificationType.SUBSCRIPTION_RESTARTED:
+            return "SUBSCRIPTION_RESTARTED";
+        case SubscriptionNotificationType.SUBSCRIPTION_PRICE_CHANGE_CONFIRMED:
+            return "SUBSCRIPTION_PRICE_CHANGE_CONFIRMED";
+        case SubscriptionNotificationType.SUBSCRIPTION_DEFERRED:
+            return "SUBSCRIPTION_DEFERRED";
+        case SubscriptionNotificationType.SUBSCRIPTION_PAUSED:
+            return "SUBSCRIPTION_PAUSED";
+        case SubscriptionNotificationType.SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED:
+            return "SUBSCRIPTION_PAUSE_SCHEDULE_CHANGED";
+        case SubscriptionNotificationType.SUBSCRIPTION_REVOKED:
+            return "SUBSCRIPTION_REVOKED";
+        case SubscriptionNotificationType.SUBSCRIPTION_EXPIRED:
+            return "SUBSCRIPTION_EXPIRED";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 /**
  * See (Google Developer docs)[https://developer.android.com/google/play/billing/realtime_developer_notifications.html] for more info
  */

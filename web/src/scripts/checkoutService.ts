@@ -164,12 +164,7 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
                         AndroidService.shared.handlePurchaseFulfilled({purchaseToken: fulfillResult.purchase?.token ?? androidPurchaseResult.purchase.token})
                     }
 
-                    AndroidService.shared.showToast(stringifyJSON({
-                        fulfilResult: fulfillResult,
-                        androidPurchaseResult
-                    }, 2));
                     const result = {success: fulfillResult.success, isRedirecting: false, isLoggedIn: true};
-
                     resolve(result);
                 } else {
                     logger.info("not attempting to fulfill purchase, result was not a succcess or no purchase was found on the response");
@@ -180,15 +175,6 @@ export async function startAndroidCheckout(options: { subscriptionProductId: str
         }
     })
 }
-
-//
-// window.AndroidDelegate = {
-//     purchaseCompleted: async (result: AndroidPurchaseResult) => {
-//         const {message, purchase, success} = result;
-//         logger.info("Android checkout finished with success = ", success, message, purchase);
-//         await androidDelegate?.onCompleted(result)
-//     }
-// };
 
 /**
  * Send a user to the Stripe checkout page using a subscription product id.

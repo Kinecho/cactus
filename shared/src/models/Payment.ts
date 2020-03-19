@@ -9,7 +9,8 @@ import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurc
 const logger = new Logger("PaymentModel");
 
 enum Field {
-    appleOriginalTransactionId = "apple.originalTransactionId"
+    appleOriginalTransactionId = "apple.originalTransactionId",
+    googlePurchaseToken = "google.token"
 }
 
 export default class Payment extends BaseModel {
@@ -59,9 +60,8 @@ export default class Payment extends BaseModel {
         payment.subscriptionProductId = subscriptionProductId;
 
         payment.google = {
-            raw: purchase,
+            ...purchase,
             subscriptionPurchase,
-            purchase,
         };
 
         return payment;
@@ -78,8 +78,6 @@ interface ApplePayment {
     originalTransactionId?: string
 }
 
-interface GooglePayment {
-    raw?: any;
+interface GooglePayment extends AndroidPurchase {
     subscriptionPurchase?: Schema$SubscriptionPurchase;
-    purchase?: AndroidPurchase;
 }
