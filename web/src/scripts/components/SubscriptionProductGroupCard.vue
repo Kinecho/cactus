@@ -28,7 +28,7 @@
         <div class="actions">
             <div class="error" v-if="checkoutError">{{checkoutError}}</div>
             <button v-if="canPurchaseTier"
-                    v-bind:disabled="isProcessing"
+                    v-bind:disabled="isProcessing || isRestoringPurchases"
                     class="button primary loading-white"
                     :class="{secondary: selectedProduct.isFree}"
                     @click="checkout">
@@ -81,7 +81,8 @@
             showFeatures: {type: Boolean, default: false},
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
-            learnMoreLinks: {type: Boolean, default: false}
+            learnMoreLinks: {type: Boolean, default: false},
+            isRestoringPurchases: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -122,7 +123,7 @@
                 return this.selectedProduct?.isFree ?? false;
             },
             buttonText(): string {
-                if (this.isProcessing) {
+                if (this.isProcessing || this.isRestoringPurchases) {
                     return copy.common.LOADING;
                 }
 

@@ -4,11 +4,12 @@ import {
     PurchaseCompleteParams
 } from "@web/android/AndroidAppInterface";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
-import {AndroidPurchaseResult} from "@shared/api/CheckoutTypes";
+import {AndroidPurchaseResult, AndroidRestorePurchaseResult} from "@shared/api/CheckoutTypes";
 import Logger from "@shared/Logger";
 
 export interface AndroidCheckoutDelegate {
-    onCompleted: (result: AndroidPurchaseResult) => void
+    handlePurchaseCompleted?: (result: AndroidPurchaseResult) => void;
+    handleRestoreCompleted?: (result: AndroidRestorePurchaseResult) => void;
 }
 
 export default class AndroidService implements AndroidAppDelegateInterface {
@@ -38,10 +39,22 @@ export default class AndroidService implements AndroidAppDelegateInterface {
         this.api.handlePurchaseFulfilled(stringifyJSON(params));
     }
 
+    restorePurchases() {
+        this.api.restorePurchases()
+    }
+
+
+    //DELEGATE METHODS
+    handleRestoredPurchases(result: AndroidRestorePurchaseResult) {
+        const {records, success} = result;
+        this.logger.info("Android restored purchases finished with success = ", success, records);
+        this.checkoutDelegate?.handleRestoreCompleted?.(result)
+    }
+
     purchaseCompleted(result: AndroidPurchaseResult) {
         const {message, purchase, success} = result;
         this.logger.info("Android checkout finished with success = ", success, message, purchase);
-        this.checkoutDelegate?.onCompleted(result)
+        this.checkoutDelegate?.handlePurchaseCompleted?.(result)
     }
 
 }

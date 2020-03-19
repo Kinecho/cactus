@@ -54,8 +54,9 @@ export default class Payment extends BaseModel {
     static fromAndroidPurchase(options: { memberId: string, subscriptionProductId: string, purchase: AndroidPurchase, subscriptionPurchase: Schema$SubscriptionPurchase }): Payment {
         const {memberId, subscriptionProductId, purchase, subscriptionPurchase} = options;
 
+        const orderId = purchase.orderId ?? subscriptionPurchase.orderId;
         const payment = new Payment();
-        payment.id = `google_${purchase.orderId}`;
+        payment.id = orderId ? `google_${orderId}` : undefined;
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
 

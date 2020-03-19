@@ -36,7 +36,7 @@ import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMa
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {PendingRenewalInfo} from "@shared/api/AppleApi";
-import {AndroidFulfillParams, AndroidFulfillResult} from "@shared/api/CheckoutTypes";
+import {AndroidFulfillResult, AndroidPurchase, AndroidPurchaseHistoryRecord} from "@shared/api/CheckoutTypes";
 import GooglePlayService from "@admin/services/GooglePlayService";
 import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
 import Payment from "@shared/models/Payment";
@@ -729,9 +729,13 @@ export default class AdminSubscriptionService {
         }
     }
 
-    async fulfillAndroidPurchase(member: CactusMember, params: AndroidFulfillParams): Promise<AndroidFulfillResult> {
-        const {purchase} = params;
-        const result: AndroidFulfillResult = {success: false, message: "not processed", purchase};
+    async fulfillAndroidPurchase(member: CactusMember, params: { purchase?: AndroidPurchase, historyRecord?: AndroidPurchaseHistoryRecord }): Promise<AndroidFulfillResult> {
+        const {purchase, historyRecord} = params;
+        const item: AndroidPurchase | AndroidPurchaseHistoryRecord | undefined = purchase ?? historyRecord;
+        const result: AndroidFulfillResult = {success: false, message: "not processed", purchase, historyRecord};
+        if (!item) {
+            return result
+        }
         try {
             const memberId = member.id;
             if (!memberId) {
@@ -740,12 +744,12 @@ export default class AdminSubscriptionService {
                 return result;
             }
 
-            this.logger.info("Processing purchase token:", purchase.token);
+            this.logger.info("Processing purchase token:", item.token);
 
             const androidSubscriptionPurchase = await GooglePlayService.getSharedInstance().getSubscriptionPurchase({
-                subscriptionId: purchase.subscriptionProductId,
-                packageName: purchase.packageName,
-                token: purchase.token
+                subscriptionId: item.subscriptionProductId,
+                packageName: item.packageName,
+                token: item.token
             });
             this.logger.info("Android Subscription Product", stringifyJSON(androidSubscriptionPurchase, 2));
 
@@ -755,18 +759,18 @@ export default class AdminSubscriptionService {
             }
 
             const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
-                androidProductId: purchase.subscriptionProductId,
+                androidProductId: item.subscriptionProductId,
                 onlyAvailableForSale: true
             });
 
             const subscriptionProductId = subscriptionProduct?.entryId;
             if (!subscriptionProduct || !subscriptionProductId) {
                 result.success = false;
-                result.message = `No Cactus Subscription Product was found for the android sku ${purchase.subscriptionProductId}`;
+                result.message = `No Cactus Subscription Product was found for the android sku ${item.subscriptionProductId}`;
                 await AdminSlackService.getSharedInstance().uploadTextSnippet({
                     channel: ChannelName.cha_ching,
                     message: ":boom: :android: Failed to fulfill Android Checkout",
-                    data: stringifyJSON({memberId: member.id, email: member.email, params,}),
+                    data: stringifyJSON({memberId: member.id, email: member.email, params}),
                     fileType: "json",
                     filename: `failed-purchase-android-${member.id}.json`,
                 });
@@ -778,7 +782,7 @@ export default class AdminSubscriptionService {
             const payment = Payment.fromAndroidPurchase({
                 memberId: memberId,
                 subscriptionProductId,
-                purchase,
+                purchase: item,
                 subscriptionPurchase: androidSubscriptionPurchase
             });
 
@@ -788,8 +792,8 @@ export default class AdminSubscriptionService {
             const cactusSubscription = member.subscription ?? getDefaultSubscription();
             cactusSubscription.tier = subscriptionProduct.subscriptionTier ?? SubscriptionTier.PLUS;
             cactusSubscription.subscriptionProductId = subscriptionProductId;
-            cactusSubscription.googleOriginalOrderId = purchase.orderId;
-            cactusSubscription.googlePurchaseToken = purchase.token;
+            cactusSubscription.googleOriginalOrderId = (item as AndroidPurchase).orderId ?? androidSubscriptionPurchase.orderId;
+            cactusSubscription.googlePurchaseToken = item.token;
 
             const trial = (cactusSubscription.trial || getDefaultTrial());
             trial.activatedAt = trial.activatedAt ?? new Date();

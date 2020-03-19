@@ -1,9 +1,7 @@
-import {LocalStorageKey} from '@web/services/StorageService'
-import {QueryParam} from '@shared/util/queryParams'
 <template>
     <div class="centered">
         <transition appear name="fade-in">
-            <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
+            <div class="flex-plans" v-if="loaded && !tabsOnMobile">
                 <div v-for="(productGroup, i) in groupEntries" class="plan-container">
                     <div :class="[productGroup.tier.toLowerCase(), 'heading']">
                         {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
@@ -20,7 +18,7 @@ import {QueryParam} from '@shared/util/queryParams'
                             :learnMoreLinks="learnMoreLinks"/>
                 </div>
             </div>
-            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
+            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
                 <div class="tabs">
                     <template v-for="(productGroup, i) in groupEntries">
                         <a class="tab-label"
@@ -44,12 +42,14 @@ import {QueryParam} from '@shared/util/queryParams'
                                 class="tabPanel"
                                 :tabs-on-mobile="tabsOnMobile"
                                 :learnMoreLinks="learnMoreLinks"
+                                :is-restoring-purchases="isRestoringPurchases"
                                 :class="{active: activetab === i}"/>
                     </template>
+
                 </div>
-            </div>
-            <div class="android-app" v-if="isAndroidApp">
-                Questions? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a>.
+                <div class="restore-container" v-if="isAndroidApp">
+                    <button class="button secondary" @click="restorePurchases">Restore Purchases</button>
+                </div>
             </div>
         </transition>
     </div>
@@ -70,9 +70,8 @@ import {QueryParam} from '@shared/util/queryParams'
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
     import {isAndroidApp} from "@web/DeviceUtil";
-    import {isNull} from "@shared/util/ObjectUtil";
     import AndroidService from "@web/android/AndroidService";
-    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import {restoreAndroidPurchases} from "@web/checkoutService";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -87,6 +86,7 @@ import {QueryParam} from '@shared/util/queryParams'
         },
         data(): {
             isProcessing: boolean,
+            isRestoringPurchases: boolean,
             memberLoaded: boolean,
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
@@ -99,6 +99,7 @@ import {QueryParam} from '@shared/util/queryParams'
             return {
                 memberLoaded: false,
                 isProcessing: false,
+                isRestoringPurchases: false,
                 member: undefined,
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
@@ -162,8 +163,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 return CopyService.getSharedInstance().getTrialDaysLeftShort(member.daysLeftInTrial, true);
             },
             isAndroidApp(): boolean {
-                // return isAndroidApp();
-                return false
+                return isAndroidApp();
             }
         },
         methods: {
@@ -175,6 +175,15 @@ import {QueryParam} from '@shared/util/queryParams'
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
                 return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+            },
+            async restorePurchases() {
+                if (!isAndroidApp()) {
+                    alert("Restore Purchases can only be done on an android device.");
+                    return;
+                }
+                this.isRestoringPurchases = true;
+                await restoreAndroidPurchases({member: this.member ?? undefined});
+                this.isRestoringPurchases = false
             }
         }
 
@@ -345,6 +354,10 @@ import {QueryParam} from '@shared/util/queryParams'
                 flex-basis: 50%;
             }
         }
+    }
+
+    .restore-container {
+        padding: 3rem 0;
     }
 
     .trial-badge {

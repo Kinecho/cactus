@@ -50,7 +50,7 @@ export interface MemberSubscription {
     subscriptionProductId?: string,
     stripeSubscriptionId?: string,
     appleOriginalTransactionId?: string,
-    googleOriginalOrderId?: string;
+    googleOriginalOrderId?: string | undefined;
     googlePurchaseToken?: string;
 }
 
