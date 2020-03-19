@@ -360,15 +360,11 @@ app.post("/android/fulfill-restored-purchases", async (req, resp) => {
         return;
     }
 
-    const {restoredPurchases} = req.body as AndroidFulfillRestoredPurchasesParams;
+    const params = req.body as AndroidFulfillRestoredPurchasesParams;
 
-    const fulfillResults: AndroidFulfillResult[] = [];
-    for (const record of restoredPurchases) {
-        const fulfillResult = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, {historyRecord: record});
-        fulfillResults.push(fulfillResult);
-    }
-
-    result.fulfillResults = fulfillResults;
+    const {fulfillmentResults, success} = await AdminSubscriptionService.getSharedInstance().fulfillRestoredAndroidPurchases(member, params);
+    result.success = success;
+    result.fulfillResults = fulfillmentResults;
 
     result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
     resp.status(200).send(result);

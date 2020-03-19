@@ -36,9 +36,14 @@ import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMa
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {PendingRenewalInfo} from "@shared/api/AppleApi";
-import {AndroidFulfillResult, AndroidPurchase, AndroidPurchaseHistoryRecord} from "@shared/api/CheckoutTypes";
+import {
+    AndroidFulfillRestoredPurchasesParams,
+    AndroidFulfillResult,
+    AndroidPurchase,
+    AndroidPurchaseHistoryRecord
+} from "@shared/api/CheckoutTypes";
 import GooglePlayService from "@admin/services/GooglePlayService";
-import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
+import AdminSlackService, {ChannelName, SlackAttachment} from "@admin/services/AdminSlackService";
 import Payment from "@shared/models/Payment";
 import * as Sentry from "@sentry/node";
 
@@ -726,6 +731,60 @@ export default class AdminSubscriptionService {
         } catch (error) {
             this.logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
             return;
+        }
+    }
+
+    async fulfillRestoredAndroidPurchases(member: CactusMember, params: AndroidFulfillRestoredPurchasesParams): Promise<{ success: boolean, fulfillmentResults: AndroidFulfillResult[] }> {
+        try {
+            const fulfillResults: AndroidFulfillResult[] = [];
+            for (const record of params.restoredPurchases) {
+                const fulfillResult = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, {historyRecord: record});
+                fulfillResults.push(fulfillResult);
+            }
+
+            const successes = fulfillResults.filter(r => r.success);
+            const numSuccess = successes.length;
+            const failures = fulfillResults.filter(r => !r.success);
+            const numError = failures.length;
+            const productIds = successes.map(r => {
+                return r.historyRecord?.subscriptionProductId
+            });
+            const attachments: SlackAttachment[] = [];
+
+            if (numSuccess > 0) {
+                attachments.push({
+                    text: `${numSuccess} Purchases Restored successfully`,
+                    color: "good",
+                    fields: [{
+                        title: "Restored Product IDs",
+                        value: `\`\`\`${productIds.join("\n")}\`\`\``
+                    }]
+                })
+            }
+            if (numError > 0) {
+                attachments.push({
+                    text: `${numError} purchases failed to be restored`,
+                    color: "danger",
+                    fields: [{
+                        title: "Failed Product IDs",
+                        value: `\`\`\`${failures.map(r => r.historyRecord?.subscriptionProductId).filter(Boolean).join("\n")}\`\`\``
+                    }, {
+                        title: "Failed Purchase Tokens",
+                        value: `\`\`\`${failures.map(r => r.historyRecord?.token).filter(Boolean).join("\n")}\`\`\``
+                    }]
+                })
+            }
+
+
+            AdminSlackService.getSharedInstance().sendChaChingMessage({
+                text: `:android: ${member.email} triggered the restore purchase flow.`,
+                attachments,
+            });
+
+            return {success: true, fulfillmentResults: fulfillResults}
+        } catch (error) {
+            this.logger.error("Unexpected error while processing fulfillRestoredAndroid Purchases", error);
+            return {success: false, fulfillmentResults: []}
         }
     }
 
