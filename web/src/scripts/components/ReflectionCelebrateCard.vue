@@ -12,7 +12,7 @@
                     <MemberInsights
                         :words="wordData"
                         :didWrite="didWriteReflection"
-                        :subscriptionTier="subscriptionTier"
+                        :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
                         :startGated="true"
                         :startBlurred="true"
                         :loggedIn="loggedIn" />
@@ -136,6 +136,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Spinner from "@components/Spinner.vue";
+    import {Config} from "@web/config";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
     import {ElementAccumulation} from '@shared/models/ElementAccumulation'
@@ -265,6 +266,12 @@
             }
         },
         computed: {
+            isOnboardingPrompt(): boolean {
+                return this.promptContent.documentId === Config.firstPromptId;
+            },
+            plusTier(): SubscriptionTier {
+                return SubscriptionTier.PLUS;
+            },
             subscriptionTier(): SubscriptionTier | undefined {
                 return this.member?.tier;
             },
