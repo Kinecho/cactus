@@ -63,5 +63,24 @@ export default class AdminSubscriptionProductService {
         return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
     }
 
+    async getByAndroidProductId(options: { androidProductId?: string, onlyAvailableForSale?: boolean }): Promise<SubscriptionProduct | undefined> {
+        if (!options.androidProductId) {
+            return undefined;
+        }
+        const fields: { name: string, value: any }[] = [{
+            name: SubscriptionProduct.Fields.androidProductId,
+            value: options.androidProductId,
+        }];
+
+        if (options.onlyAvailableForSale === true) {
+            fields.push({
+                name: SubscriptionProduct.Fields.availableForSale,
+                value: true
+            })
+        }
+
+        return this.flamelinkService.getWhereFields(fields, SubscriptionProduct);
+    }
+
 
 }

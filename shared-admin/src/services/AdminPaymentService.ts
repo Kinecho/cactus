@@ -43,4 +43,13 @@ export default class AdminPaymentService {
         return queryResult.results;
     }
 
+    async getByGooglePurchaseToken(purchaseToken?: string) : Promise<Payment[]> {
+        if (!purchaseToken) {
+            return []
+        }
+
+        const query = this.getCollectionRef().where(Payment.Fields.googlePurchaseToken, "==", purchaseToken);
+        const queryResult = await this.firestoreService.executeQuery(query, Payment);
+        return queryResult.results;
+    }
 }

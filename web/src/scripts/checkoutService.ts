@@ -1,10 +1,16 @@
 import {Config} from "@web/config";
 import {QueryParam} from "@shared/util/queryParams";
 import {
+    AndroidFulfillParams,
+    AndroidFulfillResult,
     CreateSessionRequest,
+    AndroidPurchaseResult,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
-    CreateSetupSubscriptionSessionResponse
+    CreateSetupSubscriptionSessionResponse,
+    AndroidPurchaseHistoryRecord,
+    AndroidRestorePurchaseResult,
+    AndroidFulfillRestoredPurchasesParams, AndroidFulfillRestorePurchasesResult
 } from "@shared/api/CheckoutTypes";
 import {Endpoint, getAuthHeaders, isAxiosError, request} from "@web/requestUtils";
 import {gtag} from "@web/analytics";
@@ -15,6 +21,10 @@ import {PageRoute} from "@shared/PageRoutes";
 import CopyService from "@shared/copy/CopyService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import {stripQueryParams} from "@shared/util/StringUtil";
+import {isAndroidApp} from "@web/DeviceUtil";
+import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import {stringifyJSON} from "@shared/util/ObjectUtil";
+import AndroidService from "@web/android/AndroidService";
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
@@ -60,6 +70,7 @@ export async function createStripeSession(options: { subscriptionProductId: stri
 
 export interface CheckoutRedirectResult {
     isRedirecting: boolean,
+    canceled?: boolean,
     isLoggedIn: boolean,
     success: boolean
 }
@@ -76,9 +87,27 @@ export function getSignUpStripeCheckoutUrl(options: { subscriptionProductId: str
     return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
 }
 
+export function getSignUpAndroidCheckoutUrl(): string {
+    const copy = CopyService.getSharedInstance().copy;
+    const successUrl = `${PageRoute.PRICING}?${QueryParam.PREMIUM_DEFAULT}=true&${QueryParam.FROM_AUTH}=true#upgrade`;
+    return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_CHECKOUT)}`;
+}
+
+export function getSignUpAndroidRestoreUrl(): string {
+    const copy = CopyService.getSharedInstance().copy;
+    const successUrl = `${PageRoute.PRICING}?${QueryParam.PREMIUM_DEFAULT}=true&${QueryParam.FROM_AUTH}=true#upgrade`;
+    return `${PageRoute.SIGNUP}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(successUrl)}&${QueryParam.MESSAGE}=${encodeURIComponent(copy.checkout.SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES)}`;
+}
+
 export function sendToLoginForCheckout(options: { subscriptionProductId: string }) {
     logger.warn("Sending to login before checkout can occur");
-    window.location.href = getSignUpStripeCheckoutUrl(options);
+    if (isAndroidApp()) {
+        window.location.href = getSignUpAndroidCheckoutUrl();
+    } else {
+        window.location.href = getSignUpStripeCheckoutUrl(options);
+        return;
+    }
+
 }
 
 /**
@@ -88,9 +117,10 @@ export function sendToLoginForCheckout(options: { subscriptionProductId: string 
  */
 export async function startCheckout(options: {
     subscriptionProductId: string,
+    subscriptionProduct?: SubscriptionProduct
     member?: CactusMember | null | undefined,
 }): Promise<CheckoutRedirectResult> {
-    const {subscriptionProductId} = options;
+    const {subscriptionProductId, subscriptionProduct} = options;
     const member = options.member || await CactusMemberService.sharedInstance.getCurrentMember();
     const result: CheckoutRedirectResult = {
         isRedirecting: false,
@@ -103,10 +133,97 @@ export async function startCheckout(options: {
         sendToLoginForCheckout({subscriptionProductId});
         result.isRedirecting = true;
     } else if (member && subscriptionProductId) {
+        if (isAndroidApp()) {
+            return await startAndroidCheckout({subscriptionProductId, member, subscriptionProduct});
+        }
         return await redirectToStripeCheckout({subscriptionProductId, member});
     }
 
     return result;
+}
+
+export async function startAndroidCheckout(options: { subscriptionProductId: string, member: CactusMember, subscriptionProduct?: SubscriptionProduct, }): Promise<CheckoutRedirectResult> {
+    const {member, subscriptionProduct} = options;
+    const androidProductId = subscriptionProduct?.androidProductId;
+    const memberId = member.id;
+    if (!memberId) {
+        return {isRedirecting: false, isLoggedIn: false, success: false}
+    }
+
+    if (!androidProductId) {
+        return {isRedirecting: false, isLoggedIn: true, success: false}
+    }
+
+    if (!AndroidService.shared.isReady) {
+        logger.error("Failed to get android app interface object");
+        return {isRedirecting: false, isLoggedIn: false, success: false}
+    }
+    const delegateHandler = createAndroidCheckoutDelegateHandler();
+    logger.info("starting android checkout");
+    AndroidService.shared.startCheckout(androidProductId, memberId);
+    return delegateHandler;
+}
+
+function createAndroidCheckoutDelegateHandler(): Promise<CheckoutRedirectResult> {
+    return new Promise<CheckoutRedirectResult>(resolve => {
+        AndroidService.shared.checkoutDelegate = {
+            handleRestoreCompleted: async (restoreResult: AndroidRestorePurchaseResult) => {
+                if (!restoreResult.success) {
+                    logger.error("Restore checkout returned unsuccessful response ");
+                    resolve({success: false, isRedirecting: false, isLoggedIn: true});
+                    AndroidService.shared.showToast("Unable to restore purchases");
+                    return;
+                }
+
+                if (!restoreResult.records || restoreResult.records.length === 0) {
+                    AndroidService.shared.showToast("There were no purchases to restore");
+                    const result = {success: true, isRedirecting: false, isLoggedIn: true};
+                    resolve(result);
+                    return;
+                }
+
+                const fulfillResult = await fulfillAndroidRestoredPurchases({restoredPurchases: restoreResult.records});
+                logger.info("restored result", fulfillResult);
+                if (fulfillResult.success) {
+                    fulfillResult.fulfillResults?.forEach(p => {
+                        const token = p.historyRecord?.token ?? p.purchase?.token;
+                        if (token) {
+                            AndroidService.shared.handlePurchaseFulfilled({purchaseToken: token})
+                        }
+
+                    });
+
+                    const result = {success: true, isRedirecting: false, isLoggedIn: true};
+                    resolve(result);
+                    return;
+                }
+                resolve({success: false, isRedirecting: false, isLoggedIn: true});
+                return;
+            },
+            handlePurchaseCompleted: async (androidPurchaseResult: AndroidPurchaseResult) => {
+                logger.info("Android delegate onCompleted called with ", androidPurchaseResult);
+                if (androidPurchaseResult.success && androidPurchaseResult.purchase) {
+                    logger.info("Attempting to fulfill android purchase");
+                    const fulfillResult = await fulfilAndroidPurchase({purchase: androidPurchaseResult.purchase});
+                    logger.info("fulfillment result", fulfillResult);
+
+                    if (fulfillResult.success) {
+                        AndroidService.shared.handlePurchaseFulfilled({purchaseToken: fulfillResult.purchase?.token ?? androidPurchaseResult.purchase.token})
+                    }
+
+                    const result = {success: fulfillResult.success, isRedirecting: false, isLoggedIn: true};
+                    resolve(result);
+                } else if (androidPurchaseResult.canceled) {
+                    logger.info("The user canceled the checkout flow");
+                    resolve({success: false, canceled: true, isRedirecting: false, isLoggedIn: true});
+                } else {
+                    logger.info("not attempting to fulfill purchase, result was not a success or no purchase was found on the response");
+                    const result = {success: false, canceled: false, isRedirecting: false, isLoggedIn: true};
+                    resolve(result);
+                }
+            }
+        }
+    })
 }
 
 /**
@@ -147,7 +264,64 @@ export async function redirectToStripeCheckout(options: { subscriptionProductId:
         return {isRedirecting: false, isLoggedIn: true, success: true};
     }
 
-    return {isLoggedIn: true, isRedirecting: true, success: true};
+    return {isLoggedIn: true, isRedirecting: true, canceled: false, success: true};
+}
+
+export async function restoreAndroidPurchases(options: { member: CactusMember | undefined }): Promise<CheckoutRedirectResult> {
+    const member = options.member || await CactusMemberService.sharedInstance.getCurrentMember();
+
+    if (!isAndroidApp()) {
+        logger.error("Attempted to restore purchases but user is not in the android app.");
+        return {success: false, canceled: true, isLoggedIn: !!member, isRedirecting: false}
+    }
+
+
+    if (!member) {
+        window.location.href = getSignUpAndroidRestoreUrl();
+        return {
+            canceled: false,
+            isRedirecting: true,
+            isLoggedIn: false,
+            success: true,
+        };
+    } else {
+        const delegateHandler = createAndroidCheckoutDelegateHandler();
+        AndroidService.shared.restorePurchases();
+        return delegateHandler;
+    }
+
+}
+
+async function fulfillAndroidRestoredPurchases(params: AndroidFulfillRestoredPurchasesParams): Promise<AndroidFulfillRestorePurchasesResult> {
+    try {
+        logger.info("Attempting to fulfill restored android purchase", params);
+        const response = await request.post(Endpoint.androidFulfilRestoredPurchases, params, {headers: {...await getAuthHeaders()}});
+        logger.info("Send fulfil request successfully. Response = ", response.data);
+        return response.data;
+    } catch (error) {
+        let e = error;
+        if (isAxiosError(error)) {
+            e = error.response?.data ?? e
+        }
+        logger.error("Failed to process result", stringifyJSON(e));
+        return {success: false, message: "Unable to complete the purchase."}
+    }
+}
+
+async function fulfilAndroidPurchase(params: AndroidFulfillParams): Promise<AndroidFulfillResult> {
+    try {
+        logger.info("Attempting to fulfill android purchase", params);
+        const response = await request.post(Endpoint.androidFulfilPurchase, params, {headers: {...await getAuthHeaders()}});
+        logger.info("Send fulfil request successfully. Response = ", response.data);
+        return response.data;
+    } catch (error) {
+        let e = error;
+        if (isAxiosError(error)) {
+            e = error.response?.data ?? e
+        }
+        logger.error("Failed to process result", stringifyJSON(e));
+        return {success: false, purchase: params.purchase, message: "Unable to complete the purchase."}
+    }
 }
 
 export async function startStripeCheckoutSession(sessionId: string): Promise<{ error?: any }> {

@@ -33,6 +33,7 @@ import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionPr
 import {PubSubService} from "@admin/pubsub/PubSubService";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import AppleService from "@admin/services/AppleService";
+import GooglePlayService from "@admin/services/GooglePlayService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -78,6 +79,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Apple
     AppleService.initialize(config);
+
+    //Google Play
+    GooglePlayService.initialize(config);
 
     logger.log("Initializing Sentry");
     const sentryOptions: Sentry.NodeOptions = {

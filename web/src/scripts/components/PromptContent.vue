@@ -637,20 +637,27 @@
                     this.reflectionResponseUnsubscriber = ReflectionResponseService.sharedInstance.observeForPromptId(promptId, {
                         onData: async (responses) => {
 
-                             //TODO: combine if there are multiple?
+                            //TODO: combine if there are multiple?
                             const [first] = responses;
-                            const response = first;
+                            const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
+                                    app: getAppType(),
+                                    type: ResponseMediumType.PROMPT
+                                }), promptQuestion);
 
-                            await this.updatePendingActiveIndex(response);
-                            this.responsesLoaded = true;
-                            this.reflectionResponses = responses;
-                            this.reflectionResponse = response;
-                            this.reflectionDuration = response.reflectionDurationMs || 0;
+                            const response = first || newResponse;
 
-                            if (this.isFirstCard && !this.saving && !this.saved) {
-                                logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                const saveTask = this.save({updateReflectionLog: false});
-                                await saveTask;
+                            if (response) {
+                                await this.updatePendingActiveIndex(response);
+                                this.responsesLoaded = true;
+                                this.reflectionResponses = responses;
+                                this.reflectionResponse = response;
+                                this.reflectionDuration = response.reflectionDurationMs || 0;
+
+                                if (this.isFirstCard && !this.saving && !this.saved) {
+                                    logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
+                                    const saveTask = this.save({updateReflectionLog: false});
+                                    await saveTask;
+                                }
                             }
                         }
                     })

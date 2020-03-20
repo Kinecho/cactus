@@ -74,7 +74,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         // show an error message and instructions to upgrade
         logger.log("No memberId provided");
         resp.status(401).contentType("text/html").send('<html><body style="font-family: sans-serif; text-align: center; padding: 3rem 1rem; line-height: 150%;"><h3>To access Core Values, use must be logged-in to the latest version of Cactus.</h3><br><p><strong>iOS Users:</strong> <a style="color:#29A389" href="https://apps.apple.com/us/app/cactus-mindfulness-journal/id1474513514">Follow this link</a> to upgrade your app.<br><br>Still having problems? Email <a style="color:#29A389" href="mailto:help@cactus.app">help@cactus.app</a></p></body></html>');
-        
+
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `Someone without a memberId tried to auth to Core Values.`
@@ -108,7 +108,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
 
         return;
     } else {
-        const pricingUrl = `${getHostname()}${PageRoute.PAYMENT_PLANS}?${QueryParam.CORE_VALUES}=true`;
+        const pricingUrl = `${getHostname()}${PageRoute.PRICING}?${QueryParam.CORE_VALUES}=true}`;
         resp.redirect(pricingUrl);
 
         try {

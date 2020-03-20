@@ -22,7 +22,7 @@
             upgradeRoute: string
         } {
             return {
-                upgradeRoute: PageRoute.PAYMENT_PLANS
+                upgradeRoute: PageRoute.PRICING
             }
         },
         computed: {
@@ -54,7 +54,7 @@
         },
         methods: {
             goToPricing() {
-                window.location.href = PageRoute.PAYMENT_PLANS;
+                window.location.href = PageRoute.PRICING;
             },
         }
     })

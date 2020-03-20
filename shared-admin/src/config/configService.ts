@@ -43,7 +43,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
         config.web.protocol = 'https'
     }
 
-    config.allowedOrigins = ["https://cactus.app", "https://cactus-app-stage.web.app", "https://cactus-app-prod.web.app", /localhost:*/];
+    config.allowedOrigins = ["https://cactus.app", "https://cactus-app-stage.web.app", "https://cactus-app-prod.web.app", /localhost:*/, /cactus-web.ngrok.io/];
     return config;
 }
 
@@ -62,6 +62,20 @@ export function isNonPromptCampaignId(campaignId: string): boolean {
 
 const defaultTestConfig: CactusConfig = {
     isEmulator: true,
+    android_publisher: {
+        service_account: {
+            type: "service_account",
+            project_id: "cactus-app-stage",
+            private_key_id: "id123",
+            private_key: "-----BEGIN PRIVATE KEY-----\nFAKE PRIVATE KEY\n-----END PRIVATE KEY-----\n",
+            client_email: "firestore-backups@cactus-app-stage.iam.gserviceaccount.com",
+            client_id: "fake_id",
+            auth_uri: "https://accounts.google.com/o/oauth2/auth",
+            token_uri: "https://oauth2.googleapis.com/token",
+            auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+            client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/firestore-backups%40cactus-app-stage.iam.gserviceaccount.com"
+        },
+    },
     allowedOrigins: ["https://cactus.app", "https://cactus-app-stage.web.app", "https://cactus-app-prod.web.app", /localhost:*/],
     mailchimp: {
         api_key: "fake_key-us20",

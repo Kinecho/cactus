@@ -56,7 +56,7 @@ export default class ExpireMembersCommand extends FirebaseCommand {
 
             }
         } else {
-            let job = new ExpireMembershipTrialJob();
+            const job = new ExpireMembershipTrialJob();
             await job.expireOne({email: userInput.email});
             console.log("result");
             console.log(job.getResult());

@@ -2,6 +2,7 @@ import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import CopyService from "@shared/copy/CopyService";
 import {BillingPeriod} from "@shared/models/SubscriptionProduct";
+import {isBlank} from "@shared/util/StringUtil";
 
 export const SubscriptionTierSortValue: { [tier in SubscriptionTier]: number } = {
     [SubscriptionTier.BASIC]: 0,
@@ -49,6 +50,36 @@ export interface MemberSubscription {
     subscriptionProductId?: string,
     stripeSubscriptionId?: string,
     appleOriginalTransactionId?: string,
+    googleOriginalOrderId?: string | undefined;
+    googlePurchaseToken?: string;
+}
+
+/**
+ * The payment processor used
+ */
+export enum BillingPlatform {
+    STRIPE = "STRIPE",
+    APPLE = "APPLE",
+    GOOGLE = "GOOGLE",
+}
+
+export function getSubscriptionBillingPlatform(subscription?: MemberSubscription): BillingPlatform | undefined {
+    if (!subscription) {
+        return undefined;
+    }
+    if (!isBlank(subscription.appleOriginalTransactionId)) {
+        return BillingPlatform.APPLE
+    }
+
+    if (!isBlank(subscription.googleOriginalOrderId)) {
+        return BillingPlatform.GOOGLE
+    }
+
+    if (!isBlank(subscription.stripeSubscriptionId)) {
+        return BillingPlatform.STRIPE
+    }
+
+    return undefined;
 }
 
 export const DEFAULT_TRIAL_DAYS = 7;

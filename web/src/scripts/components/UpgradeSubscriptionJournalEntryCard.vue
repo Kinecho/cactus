@@ -33,7 +33,7 @@
             upgradeRoute: string
         } {
             return {
-                upgradeRoute: PageRoute.PAYMENT_PLANS
+                upgradeRoute: PageRoute.PRICING
             }
         },
         computed: {

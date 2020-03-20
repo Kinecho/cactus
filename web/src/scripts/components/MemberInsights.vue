@@ -74,7 +74,7 @@
         },
         computed: {
             pricingPageUrl(): string {
-                return PageRoute.PAYMENT_PLANS + "#insights";
+                return PageRoute.PRICING + "#insights";
             },
             signupPageUrl(): string {
                 return PageRoute.SIGNUP + "?message=" + encodeURIComponent("To get Today's Insights, sign up to try Cactus.")

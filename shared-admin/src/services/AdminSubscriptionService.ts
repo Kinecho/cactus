@@ -4,7 +4,13 @@ import AdminFirestoreService, {
     Timestamp
 } from "@admin/services/AdminFirestoreService";
 import CactusMember from "@shared/models/CactusMember";
-import {PremiumSubscriptionTiers} from "@shared/models/MemberSubscription";
+import {
+    BillingPlatform,
+    getDefaultSubscription,
+    getDefaultTrial,
+    getSubscriptionBillingPlatform,
+    PremiumSubscriptionTiers
+} from "@shared/models/MemberSubscription";
 import AdminCactusMemberService, {GetMembersBatchOptions} from "@admin/services/AdminCactusMemberService";
 import AdminSendgridService, {SendEmailResult} from "@admin/services/AdminSendgridService";
 import MailchimpService from "@admin/services/MailchimpService";
@@ -12,7 +18,7 @@ import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/Mail
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {isString, stringifyJSON} from "@shared/util/ObjectUtil";
+import {isNull, isString, stringifyJSON} from "@shared/util/ObjectUtil";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import {getHostname} from "@admin/config/configService";
 import {PageRoute} from "@shared/PageRoutes";
@@ -30,6 +36,17 @@ import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMa
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {PendingRenewalInfo} from "@shared/api/AppleApi";
+import {
+    AndroidFulfillRestoredPurchasesParams,
+    AndroidFulfillResult,
+    AndroidPurchase,
+    AndroidPurchaseHistoryRecord
+} from "@shared/api/CheckoutTypes";
+import GooglePlayService from "@admin/services/GooglePlayService";
+import AdminSlackService, {ChannelName, SlackAttachment} from "@admin/services/AdminSlackService";
+import Payment from "@shared/models/Payment";
+import * as Sentry from "@sentry/node";
+import {getLatestGooglePayment} from "@shared/util/PaymentUtil";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -133,7 +150,7 @@ export default class AdminSubscriptionService {
                 toEmail: member.email,
                 memberId: member.id,
                 firstName: member?.firstName,
-                link: `${getHostname()}${PageRoute.PAYMENT_PLANS}`
+                link: `${getHostname()}${PageRoute.PRICING}`
             });
             this.logger.info(`Email send result... did send = ${emailSendResult.didSend}`);
         }
@@ -541,6 +558,9 @@ export default class AdminSubscriptionService {
                 stripeInvoiceId: stripeInvoice.id,
                 stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
                 isAppleSubscription: false,
+                isGoogleSubscription: false,
+                isAutoRenew: stripeInvoice.auto_advance ?? true,
+                billingPlatform: BillingPlatform.STRIPE,
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
@@ -549,6 +569,57 @@ export default class AdminSubscriptionService {
             this.logger.warn(`No upcoming invoice found for| customerId ${stripeCustomerId} | stripeSubscriptionId ${stripeSubscriptionId}`);
             return undefined;
         }
+    }
+
+    async getGoogleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
+        const {member} = options;
+        this.logger.info(`Attempting to fetch Google Invoice for member: ${member.email} (${member.id})`);
+        const subscription = member.subscription;
+        if (!subscription) {
+            this.logger.info("[getGoogleSubscriptionInvoice] No subscription found on the member.");
+            return undefined;
+        }
+        const googleOriginalOrderId = subscription.googleOriginalOrderId;
+        const googlePurchaseToken = subscription.googlePurchaseToken;
+        if (!googleOriginalOrderId || !googlePurchaseToken) {
+            return undefined;
+        }
+
+        const payments = await AdminPaymentService.getSharedInstance().getByGooglePurchaseToken(googlePurchaseToken);
+        const latestPayment = getLatestGooglePayment(payments);
+        if (!latestPayment) {
+            return undefined;
+        }
+
+        this.logger.info("latest payment is", stringifyJSON(latestPayment));
+
+        const purchase = latestPayment.google?.subscriptionPurchase;
+        if (!purchase) {
+            this.logger.info("Can not fetch purchase from the payment. Can ont process invoice.");
+            return undefined;
+        }
+
+        const expiryDateMs = purchase.expiryTimeMillis;
+        const autoRenewing = purchase.autoRenewing ?? false;
+        const priceCents = latestPayment.amountCentsUsd;
+        const androidProductId = latestPayment.google?.subscriptionProductId;
+
+        const nextPaymentSeconds = expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined;
+        const hasEnded = nextPaymentSeconds ? (Date.now() / 1000 > nextPaymentSeconds) : false;
+
+        return {
+            nextPaymentDate_epoch_seconds: expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined,
+            amountCentsUsd: priceCents,
+            isAppleSubscription: false,
+            isGoogleSubscription: true,
+            billingPlatform: BillingPlatform.GOOGLE,
+            androidProductId,
+            isAutoRenew: autoRenewing,
+            isExpired: hasEnded,
+            androidPackageName: latestPayment.google?.packageName,
+        };
+
+
     }
 
     async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
@@ -579,19 +650,21 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo|undefined)[];
+        const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo | undefined)[];
 
         const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
             appleProductId: latestInfo.product_id,
             onlyAvailableForSale: false
         });
 
-        const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms)/1000 : undefined;
+        const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms) / 1000 : undefined;
         invoice = {
             nextPaymentDate_epoch_seconds: expiresAtSeconds,
             // status: InvoiceS
+            billingPlatform: BillingPlatform.APPLE,
             amountCentsUsd: subscriptionProduct?.priceCentsUsd,
             isAppleSubscription: true,
+            isGoogleSubscription: false,
             appleProductId: latestInfo.product_id,
             isAutoRenew: autoRenewInfo?.auto_renew_status === "1"
         };
@@ -608,7 +681,7 @@ export default class AdminSubscriptionService {
         if (stripeCustomerId || stripeSubscriptionId) {
             invoice = await this.getUpcomingStripeInvoice({
                 customerId: stripeCustomerId,
-                subscriptionId: stripeSubscriptionId
+                subscriptionId: stripeSubscriptionId,
             });
 
             //If the member didn't have their subscriptionId saved on their member object, go ahead and update it now.
@@ -624,11 +697,22 @@ export default class AdminSubscriptionService {
 
     async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
+        const subscription = member.subscription;
+        if (!subscription) {
+            this.logger.info("No subscription found on the member. Can not process upcoming invoice");
+            return undefined;
+        }
 
-        if (member.subscription?.appleOriginalTransactionId) {
-            return await this.getAppleSubscriptionInvoice({member});
-        } else {
-            return await this.getStripeSubscriptionInvoice({member})
+        const billingPlatform = getSubscriptionBillingPlatform(subscription);
+
+        switch (billingPlatform) {
+            case BillingPlatform.APPLE:
+                return this.getAppleSubscriptionInvoice({member});
+            case BillingPlatform.GOOGLE:
+                return this.getGoogleSubscriptionInvoice({member});
+            default:
+                //For all other types, try to get it via stripe as this method will find subscription info in a few ways
+                return this.getStripeSubscriptionInvoice({member})
         }
     }
 
@@ -689,4 +773,159 @@ export default class AdminSubscriptionService {
             return;
         }
     }
+
+    async fulfillRestoredAndroidPurchases(member: CactusMember, params: AndroidFulfillRestoredPurchasesParams): Promise<{ success: boolean, fulfillmentResults: AndroidFulfillResult[] }> {
+        try {
+            const fulfillResults: AndroidFulfillResult[] = [];
+            for (const record of params.restoredPurchases) {
+                const fulfillResult = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, {historyRecord: record});
+                fulfillResults.push(fulfillResult);
+            }
+
+            const successes = fulfillResults.filter(r => r.success);
+            const numSuccess = successes.length;
+            const failures = fulfillResults.filter(r => !r.success);
+            const numError = failures.length;
+            const productIds = successes.map(r => {
+                return r.historyRecord?.subscriptionProductId
+            });
+            const attachments: SlackAttachment[] = [];
+
+            if (numSuccess > 0) {
+                attachments.push({
+                    text: `${numSuccess} Purchases Restored successfully`,
+                    color: "good",
+                    fields: [{
+                        title: "Restored Product IDs",
+                        value: `\`\`\`${productIds.join("\n")}\`\`\``
+                    }]
+                })
+            }
+            if (numError > 0) {
+                attachments.push({
+                    text: `${numError} purchases failed to be restored`,
+                    color: "danger",
+                    fields: [{
+                        title: "Failed Product IDs",
+                        value: `\`\`\`${failures.map(r => r.historyRecord?.subscriptionProductId).filter(Boolean).join("\n")}\`\`\``
+                    }, {
+                        title: "Failed Purchase Tokens",
+                        value: `\`\`\`${failures.map(r => r.historyRecord?.token).filter(Boolean).join("\n")}\`\`\``
+                    }]
+                })
+            }
+
+
+            await AdminSlackService.getSharedInstance().sendChaChingMessage({
+                text: `:android: ${member.email} triggered the restore purchase flow.`,
+                attachments,
+            });
+
+            return {success: true, fulfillmentResults: fulfillResults}
+        } catch (error) {
+            this.logger.error("Unexpected error while processing fulfillRestoredAndroid Purchases", error);
+            return {success: false, fulfillmentResults: []}
+        }
+    }
+
+    async fulfillAndroidPurchase(member: CactusMember, params: { purchase?: AndroidPurchase, historyRecord?: AndroidPurchaseHistoryRecord }): Promise<AndroidFulfillResult> {
+        const {purchase, historyRecord} = params;
+        const item: AndroidPurchase | AndroidPurchaseHistoryRecord | undefined = purchase ?? historyRecord;
+        const result: AndroidFulfillResult = {success: false, message: "not processed", purchase, historyRecord};
+        const isNewPurchase = !isNull(purchase);
+        if (!item) {
+            return result
+        }
+        try {
+            const memberId = member.id;
+            if (!memberId) {
+                result.message = "No member ID found on the provided member.";
+                result.success = false;
+                return result;
+            }
+
+            this.logger.info("Processing purchase token:", item.token);
+
+            const androidSubscriptionPurchase = await GooglePlayService.getSharedInstance().getSubscriptionPurchase({
+                subscriptionId: item.subscriptionProductId,
+                packageName: item.packageName,
+                token: item.token
+            });
+            this.logger.info("Android Subscription Product", stringifyJSON(androidSubscriptionPurchase, 2));
+
+            if (!androidSubscriptionPurchase) {
+                result.message = "Could not fetch the Android Subscription Purchase from Google Play API";
+                return result;
+            }
+
+            const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({
+                androidProductId: item.subscriptionProductId,
+                onlyAvailableForSale: true
+            });
+
+            const subscriptionProductId = subscriptionProduct?.entryId;
+            if (!subscriptionProduct || !subscriptionProductId) {
+                result.success = false;
+                result.message = `No Cactus Subscription Product was found for the android sku ${item.subscriptionProductId}`;
+                await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                    channel: ChannelName.cha_ching,
+                    message: ":boom: :android: Failed to fulfill Android Checkout",
+                    data: stringifyJSON({memberId: member.id, email: member.email, params}),
+                    fileType: "json",
+                    filename: `failed-purchase-android-${member.id}.json`,
+                });
+                this.logger.error("Failed to complete android purchase - no cactus product was found", result);
+                return result;
+            }
+
+
+            const payment = Payment.fromAndroidPurchase({
+                memberId: memberId,
+                subscriptionProductId,
+                purchase: item,
+                subscriptionPurchase: androidSubscriptionPurchase
+            });
+
+            await AdminPaymentService.getSharedInstance().save(payment);
+
+            //Do the upgrade
+            const cactusSubscription = member.subscription ?? getDefaultSubscription();
+            cactusSubscription.tier = subscriptionProduct.subscriptionTier ?? SubscriptionTier.PLUS;
+            cactusSubscription.subscriptionProductId = subscriptionProductId;
+            cactusSubscription.googleOriginalOrderId = (item as AndroidPurchase).orderId ?? androidSubscriptionPurchase.orderId;
+            cactusSubscription.googlePurchaseToken = item.token;
+
+            const trial = (cactusSubscription.trial || getDefaultTrial());
+            trial.activatedAt = trial.activatedAt ?? new Date();
+            cactusSubscription.trial = trial;
+            member.subscription = cactusSubscription;
+
+            await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false});
+
+            result.message = "Purchase completed successfully.";
+            result.success = true;
+
+
+            if (isNewPurchase) {
+                await AdminSlackService.getSharedInstance().sendChaChingMessage({
+                    text: `:android: ${member.email} has completed an in-app purchase \`${subscriptionProduct.displayName} (${item.subscriptionProductId})\``
+                })
+            }
+
+        } catch (error) {
+            this.logger.error("Unexpected error while processing Android payment", error);
+            await AdminSlackService.getSharedInstance().sendChaChingMessage({
+                text: `:android: :boom: ${member.email} ran into an error while processing an in-app purchase \`${item.subscriptionProductId}\``,
+                attachments: [{
+                    title: "Error",
+                    color: "danger",
+                    text: `\`\`\`${stringifyJSON(error, 2)}\`\`\``
+                }]
+            });
+            Sentry.captureException(error);
+        }
+
+        return result;
+    }
+
 }

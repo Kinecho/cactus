@@ -72,16 +72,15 @@
 </template>
 
 <script lang="ts">
-  import Vue from "vue"
-  import StandardFooter from "@components/StandardFooter.vue";
-  import NavBar from "@components/NavBar.vue";
-  import {commonInit} from "@web/common";
-  import PremiumPricing from "@components/PremiumPricing.vue";
-  import {getQueryParam} from "@web/util";
-  import {QueryParam} from "@shared/util/queryParams"
-  import SnackbarContent from "@components/SnackbarContent.vue";
+    import Vue from "vue"
+    import StandardFooter from "@components/StandardFooter.vue";
+    import NavBar from "@components/NavBar.vue";
+    import PremiumPricing from "@components/PremiumPricing.vue";
+    import {getQueryParam} from "@web/util";
+    import {QueryParam} from "@shared/util/queryParams"
+    import SnackbarContent from "@components/SnackbarContent.vue";
 
-  export default Vue.extend({
+    export default Vue.extend({
     components: {
         StandardFooter,
         NavBar,
