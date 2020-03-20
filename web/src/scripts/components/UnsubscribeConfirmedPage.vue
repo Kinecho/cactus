@@ -15,8 +15,16 @@ import {QueryParam} from '@shared/util/queryParams'
             </div>
             <div class="leftAlign" v-else-if="unsubscribeSuccess">
                 <h2>Notification Settings Updated</h2>
-                <p>Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can
-                    start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.</p>
+                <div v-if="isSendGrid">
+                    <p>
+                        Cactus will no longer send you <b v-if="email">({{email}})</b> new account related emails.
+                    </p>
+                </div>
+                <div v-else>
+                    <p>
+                        Cactus will no longer send you <b v-if="email">({{email}})</b> new reflection prompt emails. You can start receiving them again at any time by adjusting your <a :href="accountPath">settings</a>.
+                    </p>
+                </div>
                 <h3>Interested in Push Notifications instead?</h3>
                 <p>Learn about <a :href="appStoreUrl">Cactus for iOS</a>.</p>
                 <h3>Have feedback or questions?</h3>
@@ -59,6 +67,10 @@ import {QueryParam} from '@shared/util/queryParams'
             if (getQueryParam(QueryParam.UNSUBSCRIBE_SUCCESS) === "false") {
                 this.error = true;
             }
+            if (getQueryParam(QueryParam.SEND_GRID) === "yes") {
+                this.isSendGrid = true;
+            }
+
         },
         props: {},
         data(): {
@@ -69,6 +81,7 @@ import {QueryParam} from '@shared/util/queryParams'
             accountPath: string,
             error: boolean,
             submitting: boolean,
+            isSendGrid: boolean
         } {
             return {
                 email: null,
@@ -78,6 +91,7 @@ import {QueryParam} from '@shared/util/queryParams'
                 accountPath: PageRoute.ACCOUNT,
                 error: false,
                 submitting: false,
+                isSendGrid: false
             }
         },
         methods: {
