@@ -25,6 +25,10 @@
             </div>
         </div>
 
+        <div class="comfort" v-if="startTrial">
+            First 7 days free! Cancel anytime.
+        </div>
+
         <div class="actions">
             <div class="error" v-if="checkoutError">{{checkoutError}}</div>
             <button v-if="canPurchaseTier"

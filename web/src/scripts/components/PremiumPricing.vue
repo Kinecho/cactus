@@ -16,7 +16,7 @@
                                 :display-index="i"
                                 :member="member"
                                 :class="[`tabPanel`, {active: activetab === i}]"
-                                :learnMoreLinks="learnMoreLinks"
+                                :learnMoreLinks="learnMoreLinks || startTrial"
                                 :startTrial="startTrial" />
                     </div>
 
@@ -44,7 +44,7 @@
                                     :member="member"
                                     class="tabPanel"
                                     :tabs-on-mobile="tabsOnMobile"
-                                    :learnMoreLinks="learnMoreLinks"
+                                    :learnMoreLinks="learnMoreLinks || startTrial"
                                     :is-restoring-purchases="isRestoringPurchases"
                                     :class="{active: activetab === i}"
                                     :startTrial="startTrial" />
