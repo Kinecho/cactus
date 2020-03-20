@@ -16,7 +16,7 @@
     <div class="middleSections">
         <section class="benefits">
             <div class="centered">
-                <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
+                <h2 class="sectionHeader" v-if="!abbreviated">Expand your mindfulness&nbsp;journey</h2>
                 <div class="flexContainer">
                     <div class="benefit">
                         <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
@@ -36,7 +36,7 @@
                 </div>
             </div>
         </section>
-        <section class="insights feature">
+        <section class="insights feature" v-if="!abbreviated">
             <div class="centered reverse" id="insights">
                 <div class="sectionGraphic">
                     <img class="" src="assets/images/insights.svg" alt="insights graphic" />
@@ -48,7 +48,7 @@
                 </div>
             </div>
         </section>
-        <section class="coreValues feature">
+        <section class="coreValues feature" v-if="!abbreviated">
             <div class="centered" id="coreValues">
                 <div class="sectionGraphic">
                     <img class="" src="assets/images/coreValues.svg" alt="core values graphic" />
@@ -89,13 +89,16 @@
     },
     data(): {
       coreValues: boolean,
+      abbreviated: boolean,
     } {
         return {
             coreValues: false,
+            abbreviated: false
         }
     },
     created() {
       this.coreValues = getQueryParam(QueryParam.CORE_VALUES) == "true" || false;
+      this.abbreviated = getQueryParam(QueryParam.ABBREVIATED) == "true" || false;
     }
   });
 </script>

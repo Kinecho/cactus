@@ -94,9 +94,6 @@
                 </button>
             </section>
         </transition>
-        <premium-pricing-modal
-            :showModal="pricingModalVisible"
-            @close="hidePricingModal"/>
     </div>
 </template>
 
@@ -116,7 +113,6 @@
     import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
-    import PremiumPricingModal from "@components/PremiumPricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
@@ -144,8 +140,7 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            FourOhFour,
-            PremiumPricingModal
+            FourOhFour
         },
         props: {
             initialIndex: Number,
@@ -334,8 +329,7 @@
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
             show404: boolean,
-            hasSeenPricing: boolean,
-            pricingModalVisible: boolean
+            hasSeenPricing: boolean
         } {
             return {
                 error: undefined,
@@ -365,8 +359,7 @@
                 pendingActiveIndex: undefined,
                 usePromptId: false,
                 show404: false,
-                hasSeenPricing: false,
-                pricingModalVisible: false
+                hasSeenPricing: false
             };
         },
         computed: {
@@ -487,9 +480,6 @@
 
         },
         methods: {
-            hidePricingModal(): void {
-                this.pricingModalVisible = false;
-            },
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
                 logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
@@ -778,8 +768,7 @@
                 });
                 if (this.promptContent?.documentId === Config.firstPromptId && 
                     !this.hasSeenPricing) {
-                    this.pricingModalVisible = true;
-                    this.hasSeenPricing = true;
+                    window.location.href = PageRoute.PRICING + `?${QueryParam.ABBREVIATED}=true`;
                 } else {
                     this.onClose();
                 }
