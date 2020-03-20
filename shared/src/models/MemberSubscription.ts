@@ -53,7 +53,14 @@ export interface MemberSubscription {
 
 export const DEFAULT_TRIAL_DAYS = 7;
 
-export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
+export function getDefaultSubscription(): MemberSubscription {
+    return {
+        tier: SubscriptionTier.BASIC,
+        activated: false
+    }
+}
+
+export function getDefaultSubscriptionWithOptInTrial(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
     return {
         tier: SubscriptionTier.PLUS,
         activated: false,
