@@ -1,54 +1,62 @@
 <template>
-    <div class="centered">
-        <transition appear name="fade-in">
-            <div class="flex-plans" v-if="loaded && !tabsOnMobile && !isAndroidApp">
-                <div v-for="(productGroup, i) in groupEntries" class="plan-container">
-                    <div :class="[productGroup.tier.toLowerCase(), 'heading']">{{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
-                        <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
-                    </div>
-                    <product-group
-                            :productGroup="productGroup"
-                            :key="productGroup.tier"
-                            :tabs-on-mobile="tabsOnMobile"
-                            :id="`product-tier-${productGroup.tier}`"
-                            :display-index="i"
-                            :member="member"
-                            :class="[`tabPanel`, {active: activetab === i}]"
-                            :learnMoreLinks="learnMoreLinks" />
-                </div>
-            </div>
-            <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile && !isAndroidApp">
-                <div class="tabs">
-                    <template v-for="(productGroup, i) in groupEntries">
-                        <a class="tab-label"
-                                @click.prevent="activetab = i"
-                                v-bind:class="{active: activetab === i}"
-                                aria-controls="basic">
+    <div class="wrapper">
+        <div class="centered">
+            <transition appear name="fade-in">
+                <div class="flex-plans" v-if="loaded && !tabsOnMobile">
+                    <div v-for="(productGroup, i) in groupEntries" class="plan-container">
+                        <div :class="[productGroup.tier.toLowerCase(), 'heading']">
                             {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
                             <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
-                        </a>
-                    </template>
-                </div>
-
-                <div class="tabPanels">
-                    <template v-for="(productGroup, i) in groupEntries">
+                        </div>
                         <product-group
                                 :productGroup="productGroup"
                                 :key="productGroup.tier"
+                                :tabs-on-mobile="tabsOnMobile"
                                 :id="`product-tier-${productGroup.tier}`"
                                 :display-index="i"
                                 :member="member"
-                                class="tabPanel"
-                                :tabs-on-mobile="tabsOnMobile"
-                                :learnMoreLinks="learnMoreLinks"
-                                :class="{active: activetab === i}" />
-                    </template>
+                                :class="[`tabPanel`, {active: activetab === i}]"
+                                :learnMoreLinks="learnMoreLinks"/>
+                    </div>
+
                 </div>
-            </div>
-            <div class="android-app" v-if="isAndroidApp">
-                Questions? Email us at <a href="mailto:help@cactus.app">help@cactus.app</a>.
-            </div>
-        </transition>
+                <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
+                    <div class="tabs">
+                        <template v-for="(productGroup, i) in groupEntries">
+                            <a class="tab-label"
+                                    @click.prevent="activetab = i"
+                                    v-bind:class="{active: activetab === i}"
+                                    aria-controls="basic">
+                                {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                                <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
+                            </a>
+                        </template>
+                    </div>
+
+                    <div class="tabPanels">
+                        <template v-for="(productGroup, i) in groupEntries">
+                            <product-group
+                                    :productGroup="productGroup"
+                                    :key="productGroup.tier"
+                                    :id="`product-tier-${productGroup.tier}`"
+                                    :display-index="i"
+                                    :member="member"
+                                    class="tabPanel"
+                                    :tabs-on-mobile="tabsOnMobile"
+                                    :learnMoreLinks="learnMoreLinks"
+                                    :is-restoring-purchases="isRestoringPurchases"
+                                    :class="{active: activetab === i}"/>
+                        </template>
+
+                    </div>
+                </div>
+            </transition>
+        </div>
+        <div class="restore-container" :class="{noTabs: !tabsOnMobile}" v-if="isAndroidApp">
+            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">Restore
+                Purchases
+            </a>
+        </div>
     </div>
 </template>
 
@@ -66,7 +74,9 @@
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {isAndroidApp} from '@web/DeviceUtil'
+    import {isAndroidApp} from "@web/DeviceUtil";
+    import AndroidService from "@web/android/AndroidService";
+    import {restoreAndroidPurchases} from "@web/checkoutService";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -81,6 +91,7 @@
         },
         data(): {
             isProcessing: boolean,
+            isRestoringPurchases: boolean,
             memberLoaded: boolean,
             member: CactusMember | undefined | null,
             memberEmail: string | undefined,
@@ -93,6 +104,7 @@
             return {
                 memberLoaded: false,
                 isProcessing: false,
+                isRestoringPurchases: false,
                 member: undefined,
                 memberEmail: undefined,
                 memberUnsubscriber: undefined,
@@ -100,6 +112,16 @@
                 activetab: 1,
                 productsLoaded: false,
                 productGroups: [],
+            }
+        },
+        mounted(): void {
+            const fromAuth = getQueryParam(QueryParam.FROM_AUTH);
+            // const fromAuthStorage = StorageService.getJSON(LocalStorageKey.landingQueryParams)[QueryParam.FROM_AUTH];
+            if (isAndroidApp() && fromAuth) {
+                AndroidService.shared.showToast("You are now signed in");
+                logger.info("Showing toast for signed in ");
+            } else {
+                logger.info("Not showing toast");
             }
         },
         async beforeMount() {
@@ -132,7 +154,7 @@
             },
             groupEntries(): SubscriptionProductGroupEntry[] {
                 return this.productGroups.filter(e => {
-                    if (!this.member){
+                    if (!this.member) {
                         return true
                     }
                     return !((this.member?.isInTrial ?? false) && e.tier === SubscriptionTier.BASIC)
@@ -158,6 +180,24 @@
             },
             showTrialBadge(entry: SubscriptionProductGroupEntry): boolean {
                 return this.member && this.member.isInTrial && this.member.tier === entry.tier || false
+            },
+            async restorePurchases() {
+                try {
+                    if (!isAndroidApp()) {
+                        alert("Restore Purchases can only be done on an android device.");
+                        return;
+                    }
+                    this.isRestoringPurchases = true;
+                    const result = await restoreAndroidPurchases({member: this.member ?? undefined});
+                    if (result.success) {
+                        AndroidService.shared.showToast("Finished restoring purchases");
+                    }
+                } catch (error) {
+                    logger.error("Failed to init restore purchases flow", error);
+                } finally {
+                    this.isRestoringPurchases = false
+                }
+
             }
         }
 
@@ -327,6 +367,13 @@
             @include r(768) {
                 flex-basis: 50%;
             }
+        }
+    }
+
+    .restore-container {
+        padding: 3rem 0;
+        &.noTabs {
+            margin-left: 1rem;
         }
     }
 

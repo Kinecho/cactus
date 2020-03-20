@@ -2,11 +2,15 @@ import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
 import {AppleReceiptResponseRawBody, getOriginalTransactionId} from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
+import {AndroidPurchase} from "@shared/api/CheckoutTypes";
+import {androidpublisher_v3} from "googleapis";
+import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
 
 const logger = new Logger("PaymentModel");
 
 enum Field {
-    appleOriginalTransactionId = "apple.originalTransactionId"
+    appleOriginalTransactionId = "apple.originalTransactionId",
+    googlePurchaseToken = "google.token"
 }
 
 export default class Payment extends BaseModel {
@@ -17,6 +21,7 @@ export default class Payment extends BaseModel {
     subscriptionProductId?: string;
     stripe?: StripePayment;
     apple?: ApplePayment;
+    google?: GooglePayment;
 
     static fromStripeCheckoutSession(options: { session: Stripe.Checkout.Session, subscriptionProductId?: string, memberId: string }): Payment {
         const {session, memberId, subscriptionProductId} = options;
@@ -45,6 +50,23 @@ export default class Payment extends BaseModel {
 
         return payment;
     }
+
+    static fromAndroidPurchase(options: { memberId: string, subscriptionProductId: string, purchase: AndroidPurchase, subscriptionPurchase: Schema$SubscriptionPurchase }): Payment {
+        const {memberId, subscriptionProductId, purchase, subscriptionPurchase} = options;
+
+        const orderId = purchase.orderId ?? subscriptionPurchase.orderId;
+        const payment = new Payment();
+        payment.id = orderId ? `google_${orderId}` : undefined;
+        payment.memberId = memberId;
+        payment.subscriptionProductId = subscriptionProductId;
+
+        payment.google = {
+            ...purchase,
+            subscriptionPurchase,
+        };
+
+        return payment;
+    }
 }
 
 interface StripePayment {
@@ -55,4 +77,9 @@ interface StripePayment {
 interface ApplePayment {
     raw?: AppleReceiptResponseRawBody;
     originalTransactionId?: string
+}
+
+interface GooglePayment extends AndroidPurchase {
+    subscriptionPurchase?: Schema$SubscriptionPurchase;
+    purchaseTime?: number
 }

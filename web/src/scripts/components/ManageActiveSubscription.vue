@@ -13,14 +13,31 @@
                 {{error}}
             </div>
             <template v-if="!error">
-                <p v-if="!subscriptionDetailsLoading && isAutoRenewable">Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill
-                    is
-                    for <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
-                <p v-if="!subscriptionDetailsLoading && !isAutoRenewable">Your subscription will end on <strong>{{nextBillingDate}}</strong>.</p>
+                <template v-if="!subscriptionDetailsLoading">
+                    <p v-if="isExpired">
+                        Your subscription ended on <strong>{{nextBillingDate}}</strong>.
+                    </p>
+                    <p v-else-if="isAutoRenewable">
+                        Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for
+                        <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
+                    <p v-else-if="!isAutoRenewable">
+                        Your subscription will end on <strong>{{nextBillingDate}}</strong>.
+                    </p>
+                </template>
+
 
                 <div class="card-info apple-subscription" v-if="isAppleSubscription">
+
                     <img src="/assets/icons/apple.svg" class="ccIcon"/>
-                    <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage subscription</a> on iTunes</div>
+                    <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage
+                        subscription</a> on iTunes
+                    </div>
+                </div>
+                <div class="card-info apple-subscription" v-else-if="isGoogleSubscription">
+                    <img src="/assets/icons/google_g.svg" class="ccIcon"/>
+                    <div class="cardDetails"><a :href="googleSubscriptionUrl" target="_blank">Manage
+                        subscription</a> on Google Play
+                    </div>
                 </div>
                 <div class="card-info" v-if="showCardInfo">
                     <img class="ccIcon" src="assets/icons/creditCard.svg" alt=""/>
@@ -48,7 +65,7 @@
 <script lang="ts">
     import Vue from "vue";
     import CactusMember from "@shared/models/CactusMember";
-    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import {BillingPlatform, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import Modal from "@components/Modal.vue";
     import DowngradeSubscriptionForm from "@components/DowngradeSubscriptionForm.vue";
     import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
@@ -67,6 +84,7 @@
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
     import {SnackbarMessage} from "@components/SnackbarContent.vue";
+    import {appendQueryParams} from "@shared/util/StringUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -98,11 +116,28 @@
             this.fetchSubscriptionDetails();
         },
         computed: {
+            isExpired(): boolean {
+                return this.subscriptionDetails?.upcomingInvoice?.isExpired ?? false
+            },
             isAutoRenewable(): boolean {
-              return this.subscriptionDetails?.upcomingInvoice?.isAutoRenew ?? false
+                return this.subscriptionDetails?.upcomingInvoice?.isAutoRenew ?? false
             },
             isAppleSubscription(): boolean {
-              return this.subscriptionDetails?.upcomingInvoice?.isAppleSubscription ?? false
+                return this.subscriptionDetails?.upcomingInvoice?.isAppleSubscription ?? this.subscriptionDetails?.upcomingInvoice?.billingPlatform === BillingPlatform.APPLE ?? false
+            },
+            isGoogleSubscription(): boolean {
+                return this.subscriptionDetails?.upcomingInvoice?.isGoogleSubscription ?? this.subscriptionDetails?.upcomingInvoice?.billingPlatform === BillingPlatform.GOOGLE ?? false
+            },
+            googleSubscriptionUrl(): string | undefined {
+                const upcomingInvoice = this.subscriptionDetails?.upcomingInvoice;
+                if (!upcomingInvoice || !this.isGoogleSubscription) {
+                    return
+                }
+                const sku = upcomingInvoice.androidProductId;
+                const packageName = upcomingInvoice.androidPackageName;
+                const basUrl = "https://play.google.com/store/account/subscriptions";
+                return appendQueryParams(basUrl, {sku, package: packageName});
+                // return `https://play.google.com/store/account/subscriptions?sku=cactus_plus_monthly_499&package=app.cactus.stage`
             },
             showCardInfo(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card !== undefined

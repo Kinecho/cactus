@@ -28,7 +28,7 @@
         <div class="actions">
             <div class="error" v-if="checkoutError">{{checkoutError}}</div>
             <button v-if="canPurchaseTier"
-                    v-bind:disabled="isProcessing"
+                    v-bind:disabled="isProcessing || isRestoringPurchases"
                     class="button primary loading-white"
                     :class="{secondary: selectedProduct.isFree}"
                     @click="checkout">
@@ -81,7 +81,8 @@
             showFeatures: {type: Boolean, default: false},
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
-            learnMoreLinks: {type: Boolean, default: false}
+            learnMoreLinks: {type: Boolean, default: false},
+            isRestoringPurchases: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -96,7 +97,7 @@
                 copy,
                 isProcessing: false,
                 checkoutError: undefined,
-                learnMorePath: PageRoute.PAYMENT_PLANS,
+                learnMorePath: PageRoute.PRICING,
             }
         },
         beforeMount() {
@@ -122,7 +123,7 @@
                 return this.selectedProduct?.isFree ?? false;
             },
             buttonText(): string {
-                if (this.isProcessing) {
+                if (this.isProcessing || this.isRestoringPurchases) {
                     return copy.common.LOADING;
                 }
 
@@ -179,8 +180,8 @@
                 return this.selectedProduct !== undefined && this.selectedProduct?.entryId === product.entryId && this.canPurchaseTier;
             },
             getSelectedProduct(): SubscriptionProduct {
-                return this.getPreSelectedProduct() || 
-                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) || 
+                return this.getPreSelectedProduct() ||
+                    this.productGroup.products.find(product => product.billingPeriod == this.productGroup.defaultSelectedPeriod) ||
                     this.productGroup.products[0];
             },
             getPreSelectedProduct(): SubscriptionProduct | undefined {
@@ -217,12 +218,13 @@
                     this.isProcessing = false;
                     return;
                 }
-                const checkoutResult = await startCheckout({subscriptionProductId});
-                if (!checkoutResult.success) {
+                const checkoutResult = await startCheckout({subscriptionProductId, subscriptionProduct: product});
+                if (!checkoutResult.success && !checkoutResult.canceled) {
                     logger.error("failed to load checkout", stringifyJSON(checkoutResult, 2));
                     this.checkoutError = "Unable to load checkout. Please try again later";
                     this.isProcessing = false;
                 } else {
+                    this.isProcessing = false;
                     this.checkoutError = undefined;
                 }
             },

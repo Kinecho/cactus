@@ -4,6 +4,10 @@ import * as functions from "firebase-functions";
 import Stripe from "stripe";
 import {getConfig, getHostname} from "@admin/config/configService";
 import {
+    AndroidFulfillParams,
+    AndroidFulfillRestoredPurchasesParams,
+    AndroidFulfillRestorePurchasesResult,
+    AndroidFulfillResult,
     CreateSessionRequest,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
@@ -27,7 +31,6 @@ import CactusMember from "@shared/models/CactusMember";
 import {PageRoute} from "@shared/PageRoutes";
 
 const bodyParser = require('body-parser');
-
 const logger = new Logger("checkoutApp");
 const config = getConfig();
 
@@ -313,6 +316,58 @@ app.get("/subscription-details", async (req: express.Request, resp: express.Resp
     logger.info(`Subscription details for member ${member.email}: ${stringifyJSON(subscriptionDetails, 2)}`)
     resp.send(subscriptionDetails);
 
+    return;
+});
+
+app.post("/android/fulfill-purchase", async (req, resp) => {
+    const userId = await getAuthUserId(req);
+
+    let result: AndroidFulfillResult = {success: false};
+    if (!userId) {
+        result.message = "You must be authenticated to fulfill a purchase";
+        resp.status(401).send(result);
+        return;
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    if (!member) {
+        result.message = "No cactus member found for authenticated user";
+        resp.status(401).send(result);
+        return;
+    }
+
+    const params = req.body as AndroidFulfillParams;
+
+    result = await AdminSubscriptionService.getSharedInstance().fulfillAndroidPurchase(member, {purchase: params.purchase});
+    result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
+    resp.status(200).send(result);
+    return;
+});
+
+app.post("/android/fulfill-restored-purchases", async (req, resp) => {
+    const result: AndroidFulfillRestorePurchasesResult = {success: false};
+    const userId = await getAuthUserId(req);
+    if (!userId) {
+        result.message = "You must be authenticated to fulfill a purchase";
+        resp.status(401).send(result);
+        return;
+    }
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    if (!member) {
+        result.message = "No cactus member found for authenticated user";
+        resp.status(401).send(result);
+        return;
+    }
+
+    const params = req.body as AndroidFulfillRestoredPurchasesParams;
+
+    const {fulfillmentResults, success} = await AdminSubscriptionService.getSharedInstance().fulfillRestoredAndroidPurchases(member, params);
+    result.success = success;
+    result.fulfillResults = fulfillmentResults;
+
+    result.message = result.message + "\n\nWARNING:\nSTILL USING HARD CODED USER ID";
+    resp.status(200).send(result);
     return;
 });
 

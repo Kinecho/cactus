@@ -1,4 +1,5 @@
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import {BillingPlatform} from "@shared/models/MemberSubscription";
 
 export interface SubscriptionDetails {
     upcomingInvoice?: SubscriptionInvoice,
@@ -16,8 +17,13 @@ export interface SubscriptionInvoice {
     stripeInvoiceId?: string;
     stripeSubscriptionId?: string;
     isAppleSubscription?: boolean;
+    isGoogleSubscription?: boolean;
+    billingPlatform?: BillingPlatform;
     appleProductId?: string
+    androidProductId?: string
+    androidPackageName?: string
     isAutoRenew?: boolean;
+    isExpired?: boolean;
 }
 
 export enum CardBrand {
