@@ -94,7 +94,7 @@
                         </button> -->
                         <button class="lowerBtn authBtn secondary"
                                 v-if="authLoaded && loggedIn && !isModal"
-                                @click="goToHome">
+                                @click="close">
                             {{promptCopy.GO_HOME}}
                         </button>
                         <button class="lowerBtn primary authBtn"
@@ -117,7 +117,7 @@
                         </svg>
                         Back
                     </button>
-                    <button class="secondary" @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                    <button class="secondary" @click="close">{{promptCopy.GO_HOME}}</button>
                 </div>
             </div>
         </div>
@@ -354,9 +354,6 @@
                     this.durationLabel = copy.prompts.MINUTES;
                     this.totalDuration = millisecondsToMinutes(totalDuration);
                 }
-            },
-            goToHome() {
-                window.location.href = PageRoute.JOURNAL_HOME;
             },
             back() {
                 this.$emit("back");

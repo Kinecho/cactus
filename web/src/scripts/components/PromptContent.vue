@@ -1,6 +1,6 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
-        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="close" title="Close" class="close tertiary icon">
+        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="seePricingOrGoHome" title="Close" class="close tertiary icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -64,7 +64,7 @@
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
-                                    v-on:restart="restart" v-on:close="close"
+                                    v-on:restart="restart" v-on:close="seePricingOrGoHome"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
@@ -329,6 +329,7 @@
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
             show404: boolean,
+            hasSeenPricing: boolean,
         } {
             return {
                 error: undefined,
@@ -358,6 +359,7 @@
                 pendingActiveIndex: undefined,
                 usePromptId: false,
                 show404: false,
+                hasSeenPricing: false
             };
         },
         computed: {
@@ -759,12 +761,18 @@
                 this.completed = false;
                 await saveTask;
             },
-            close() {
+            seePricingOrGoHome(): void {
                 gtag('event', 'close', {
                     event_category: "prompt_content",
                     event_label: `Slide ${this.activeIndex}`
                 });
-                this.onClose();
+                if (this.promptContent?.documentId === Config.firstPromptId && 
+                    !this.hasSeenPricing) {
+                    window.alert('Show Pricing Modal')
+                    this.hasSeenPricing = true;
+                } else {
+                    this.onClose();
+                }
             }
         }
     })
