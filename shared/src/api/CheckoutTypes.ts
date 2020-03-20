@@ -60,7 +60,7 @@ export interface AndroidPurchaseHistoryRecord {
      */
     subscriptionProductId: string;
 
-    purchaseTime: string;
+    purchaseTime: number;
 }
 
 /**
