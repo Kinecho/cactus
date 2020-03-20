@@ -27,7 +27,6 @@
 
 
                 <div class="card-info apple-subscription" v-if="isAppleSubscription">
-
                     <img src="/assets/icons/apple.svg" class="ccIcon"/>
                     <div class="cardDetails"><a href="https://apps.apple.com/account/subscriptions" target="_blank">Manage
                         subscription</a> on iTunes
@@ -44,6 +43,7 @@
                     <div class="cardDetails">
                         <span class="brand" v-if="cardBrandName">{{cardBrandName}}</span>
                         <span class="last4" v-if="last4">ending in {{last4}}</span>
+                        <p class="expires" v-if="cardExpiration">Expires: {{cardExpiration}}</p>
                         <p class="wallet" v-if="digitalWallet && digitalWallet.displayName">
                             {{digitalWallet.displayName}}</p>
                     </div>
@@ -85,6 +85,7 @@
     import Spinner from "@components/Spinner.vue";
     import {SnackbarMessage} from "@components/SnackbarContent.vue";
     import {appendQueryParams} from "@shared/util/StringUtil";
+    import {isNull} from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -164,6 +165,20 @@
             },
             last4(): string | undefined {
                 return this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card?.last4;
+            },
+            cardExpiration(): string | undefined {
+                const card = this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card;
+
+                if (!card) {
+                    return;
+                }
+                const month = card.expiryMonth;
+                const year = card.expiryYear;
+                if (month === undefined || year === undefined) {
+                    return;
+                }
+
+                return `${month < 10 ? "0" : ""}${month}/${year}`;
             },
             digitalWallet(): DigitalWalletDetails | undefined {
                 return getDigitalWalletDetails(this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card?.walletType);
@@ -264,7 +279,7 @@
         font-weight: bold;
     }
 
-    .wallet {
+    .wallet, .expires {
         font-size: 1.6rem;
         margin-bottom: 0;
         opacity: .8;

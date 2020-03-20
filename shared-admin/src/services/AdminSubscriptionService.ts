@@ -559,6 +559,7 @@ export default class AdminSubscriptionService {
                 stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
                 isAppleSubscription: false,
                 isGoogleSubscription: false,
+                isAutoRenew: stripeInvoice.auto_advance ?? true,
                 billingPlatform: BillingPlatform.STRIPE,
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
