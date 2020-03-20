@@ -3,6 +3,10 @@ import {AndroidPurchaseResult, AndroidRestorePurchaseResult} from "@shared/api/C
 
 interface PurchaseCompleteParams {
     purchaseToken: string,
+
+    /**
+     * Can set this when acknowledging a purchase
+     */
     developerPayload?: string | undefined
 }
 

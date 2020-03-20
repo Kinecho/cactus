@@ -188,7 +188,11 @@ function createAndroidCheckoutDelegateHandler(): Promise<CheckoutRedirectResult>
                     fulfillResult.fulfillResults?.forEach(p => {
                         const token = p.historyRecord?.token ?? p.purchase?.token;
                         if (token) {
-                            AndroidService.shared.handlePurchaseFulfilled({purchaseToken: token})
+                            const memberId = CactusMemberService.sharedInstance.currentMember?.id;
+                            AndroidService.shared.handlePurchaseFulfilled({
+                                purchaseToken: token,
+                                developerPayload: stringifyJSON({memberId})
+                            })
                         }
 
                     });
@@ -208,7 +212,11 @@ function createAndroidCheckoutDelegateHandler(): Promise<CheckoutRedirectResult>
                     logger.info("fulfillment result", fulfillResult);
 
                     if (fulfillResult.success) {
-                        AndroidService.shared.handlePurchaseFulfilled({purchaseToken: fulfillResult.purchase?.token ?? androidPurchaseResult.purchase.token})
+                        const memberId = CactusMemberService.sharedInstance.currentMember?.id;
+                        AndroidService.shared.handlePurchaseFulfilled({
+                            purchaseToken: fulfillResult.purchase?.token ?? androidPurchaseResult.purchase.token,
+                            developerPayload: stringifyJSON({memberId})
+                        })
                     }
 
                     const result = {success: fulfillResult.success, isRedirecting: false, isLoggedIn: true};
