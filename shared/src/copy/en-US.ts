@@ -25,6 +25,7 @@ export default class EnglishCopy extends LocalizedCopy {
 
     checkout: CheckoutCopy = {
         UPGRADE: "Upgrade",
+        TRY_CACTUS_PLUS: "Try Cactus Plus",
         CURRENT_PLAN: "Current Plan",
         MANAGE_MY_PLAN: "Manage My Plan",
         PURCHASE: "Purchase",

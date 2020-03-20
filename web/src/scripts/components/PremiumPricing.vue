@@ -4,7 +4,7 @@
             <transition appear name="fade-in">
                 <div class="flex-plans" v-if="loaded && !tabsOnMobile">
                     <div v-for="(productGroup, i) in groupEntries" class="plan-container">
-                        <div :class="[productGroup.tier.toLowerCase(), 'heading']">
+                        <div :class="[productGroup.tier.toLowerCase(), 'heading']" v-if="!startTrial">
                             {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
                             <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                         </div>
@@ -16,7 +16,8 @@
                                 :display-index="i"
                                 :member="member"
                                 :class="[`tabPanel`, {active: activetab === i}]"
-                                :learnMoreLinks="learnMoreLinks"/>
+                                :learnMoreLinks="learnMoreLinks"
+                                :startTrial="startTrial" />
                     </div>
 
                 </div>
@@ -26,8 +27,8 @@
                             <a class="tab-label"
                                     @click.prevent="activetab = i"
                                     v-bind:class="{active: activetab === i}"
-                                    aria-controls="basic">
-                                {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span>
+                                    aria-controls="basic"><span v-if="!startTrial">
+                                {{getGroupDisplayName(productGroup)}}<span v-if="showTrialBadge(productGroup)">&nbsp;Trial</span></span>
                                 <span class="trial-badge" v-if="showTrialBadge(productGroup)">{{trialBadgeText}}</span>
                             </a>
                         </template>
@@ -45,7 +46,8 @@
                                     :tabs-on-mobile="tabsOnMobile"
                                     :learnMoreLinks="learnMoreLinks"
                                     :is-restoring-purchases="isRestoringPurchases"
-                                    :class="{active: activetab === i}"/>
+                                    :class="{active: activetab === i}"
+                                    :startTrial="startTrial" />
                         </template>
 
                     </div>
@@ -158,6 +160,8 @@
                     if (!this.member) {
                         return true
                     }
+
+                    // hide basic if we are upselling to opt-out trial
                     if (this.startTrial && e.tier == SubscriptionTier.BASIC) {
                         return false;
                     }

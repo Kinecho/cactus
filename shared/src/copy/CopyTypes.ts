@@ -129,6 +129,7 @@ export interface CheckoutCopy {
     SIGN_IN_TO_CONTINUE_CHECKOUT: string,
     SIGN_IN_TO_CONTINUE_RESTORING_PURCHASES: string,
     UPGRADE: string,
+    TRY_CACTUS_PLUS: string,
     CURRENT_PLAN: string,
     MANAGE_MY_PLAN: string,
     PURCHASE: string,

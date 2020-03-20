@@ -1,7 +1,7 @@
 <template>
     <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`, {tabsOnMobile}]">
 
-        <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
+        <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown && !this.startTrial"/>
 
         <template v-for="(section, index) in sections" v-if="showFeatures">
             <h3 v-if="section.title">{{section.title}}</h3>
@@ -83,7 +83,7 @@
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
             isRestoringPurchases: {type: Boolean, default: false},
-            showFree: {type: Boolean, default: true}
+            startTrial: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -133,6 +133,8 @@
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE;
+                } else if (this.startTrial) {
+                    return `${copy.checkout.TRY_CACTUS_PLUS}`;
                 } else if (this.signedIn) {
                     return `${copy.checkout.UPGRADE}`;
                 } else {

@@ -89,7 +89,7 @@
     <section class="upgrade">
         <div class="centered" id="upgrade">
             <h2 class="sectionHeader">Choose your plan:</h2>
-            <PremiumPricing :startTrial="true" />
+            <PremiumPricing :startTrial="abbreviated" />
         </div>
     </section>
     <StandardFooter/>
