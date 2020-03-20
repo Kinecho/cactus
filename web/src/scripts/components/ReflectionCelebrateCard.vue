@@ -86,7 +86,7 @@
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="lowerBtn authBtn secondary" v-if="didWriteReflection" @click="tradeNote">
+                        <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
                             Share Note
                         </button>
                         <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
