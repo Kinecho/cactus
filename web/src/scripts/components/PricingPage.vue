@@ -2,37 +2,62 @@
   <div>
     <NavBar/>
     <section class="hero">
-        <div class="centered" v-if="!coreValues">
+        <div class="centered" v-if="!coreValues && !abbreviated">
             <h1>Get more with Cactus&nbsp;Plus</h1>
             <p class="subtext">Daily prompts, insights, core values, and&nbspmore</p>
             <a class="button btn primary" href="#upgrade">Upgrade</a>
         </div>
-        <div class="centered" v-if="coreValues">
+        <div class="centered" v-if="coreValues && !abbreviated">
             <h1>Discover your Core&nbspValues</h1>
             <p class="subtext">Cactus Plus members get core values, daily prompts, and&nbsp;more</p>
             <a class="button btn primary" href="#upgrade">Upgrade</a>
+        </div>
+        <div class="centered" v-if="abbreviated">
+            <h1>Keep going with Cactus&nbspPlus</h1>
+            <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
         </div>
     </section>
     <div class="middleSections">
         <section class="benefits">
             <div class="centered">
-                <h2 class="sectionHeader" v-if="!abbreviated">Expand your mindfulness&nbsp;journey</h2>
+                <div v-if="!abbreviated">
+                  <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
+                  <div class="flexContainer">
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                          <h3>Make it daily</h3>
+                          <p class="text">Become more focused at work, more positive at home with a fresh prompt, every&nbsp;day.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
+                          <h3>Look back</h3>
+                          <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                          <h3>Private + secure</h3>
+                          <p class="text">Your journal entries are yours—encrypted and never read or&nbsp;sold.</p>
+                      </div>
+                  </div>
+              </div>
+              <div v-if="abbreviated">
                 <div class="flexContainer">
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-                        <h3>Make it daily</h3>
-                        <p class="text">Become more focused at work, more positive at home with a fresh prompt, every&nbsp;day.</p>
-                    </div>
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                        <h3>Look back</h3>
-                        <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
-                    </div>
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
-                        <h3>Private + secure</h3>
-                        <p class="text">Your journal entries are yours—encrypted and never read or&nbsp;sold.</p>
-                    </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                          <h3>Make it daily</h3>
+                          <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
+                          <h3>Personal Insights</h3>
+                          <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                          <h3>Core Values Assessment</h3>
+                          <p class="text">Make better decisions by prioritizing what's important to you.</p>
+                      </div>
+                  </div>
                 </div>
             </div>
         </section>
@@ -63,8 +88,8 @@
     </div>
     <section class="upgrade">
         <div class="centered" id="upgrade">
-            <h2 class="sectionHeader">Upgrade to Plus</h2>
-            <PremiumPricing/>
+            <h2 class="sectionHeader">Choose your plan:</h2>
+            <PremiumPricing :startTrial="true" />
         </div>
     </section>
     <StandardFooter/>

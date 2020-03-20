@@ -88,6 +88,7 @@
         props: {
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
+            startTrial: {type: Boolean, default: false}
         },
         data(): {
             isProcessing: boolean,
@@ -156,6 +157,9 @@
                 return this.productGroups.filter(e => {
                     if (!this.member) {
                         return true
+                    }
+                    if (this.startTrial && e.tier == SubscriptionTier.BASIC) {
+                        return false;
                     }
                     return !((this.member?.isOptInTrialing ?? false) && e.tier === SubscriptionTier.BASIC)
                 })

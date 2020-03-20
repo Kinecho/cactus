@@ -82,7 +82,8 @@
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
-            isRestoringPurchases: {type: Boolean, default: false}
+            isRestoringPurchases: {type: Boolean, default: false},
+            showFree: {type: Boolean, default: true}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
