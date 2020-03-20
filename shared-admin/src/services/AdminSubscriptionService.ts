@@ -46,6 +46,7 @@ import GooglePlayService from "@admin/services/GooglePlayService";
 import AdminSlackService, {ChannelName, SlackAttachment} from "@admin/services/AdminSlackService";
 import Payment from "@shared/models/Payment";
 import * as Sentry from "@sentry/node";
+import {getLatestGooglePayment} from "@shared/util/PaymentUtil";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -557,6 +558,8 @@ export default class AdminSubscriptionService {
                 stripeInvoiceId: stripeInvoice.id,
                 stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
                 isAppleSubscription: false,
+                isGoogleSubscription: false,
+                billingPlatform: BillingPlatform.STRIPE,
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
@@ -569,6 +572,7 @@ export default class AdminSubscriptionService {
 
     async getGoogleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
+        this.logger.info(`Attempting to fetch Google Invoice for member: ${member.email} (${member.id})`);
         const subscription = member.subscription;
         if (!subscription) {
             this.logger.info("[getGoogleSubscriptionInvoice] No subscription found on the member.");
@@ -580,8 +584,41 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        this.logger.info(`Attempting to fetch Google Invoice for member: ${member.email} (${member.id})`);
-        return undefined;
+        const payments = await AdminPaymentService.getSharedInstance().getByGooglePurchaseToken(googlePurchaseToken);
+        const latestPayment = getLatestGooglePayment(payments);
+        if (!latestPayment) {
+            return undefined;
+        }
+
+        this.logger.info("latest payment is", stringifyJSON(latestPayment));
+
+        const purchase = latestPayment.google?.subscriptionPurchase;
+        if (!purchase) {
+            this.logger.info("Can not fetch purchase from the payment. Can ont process invoice.");
+            return undefined;
+        }
+
+        const expiryDateMs = purchase.expiryTimeMillis;
+        const autoRenewing = purchase.autoRenewing ?? false;
+        const priceCents = latestPayment.amountCentsUsd;
+        const androidProductId = latestPayment.google?.subscriptionProductId;
+
+        const nextPaymentSeconds = expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined;
+        const hasEnded = nextPaymentSeconds ? (Date.now() / 1000 > nextPaymentSeconds) : false;
+
+        return {
+            nextPaymentDate_epoch_seconds: expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined,
+            amountCentsUsd: priceCents,
+            isAppleSubscription: false,
+            isGoogleSubscription: true,
+            billingPlatform: BillingPlatform.GOOGLE,
+            androidProductId,
+            isAutoRenew: autoRenewing,
+            isExpired: hasEnded,
+            androidPackageName: latestPayment.google?.packageName,
+        };
+
+
     }
 
     async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
@@ -623,8 +660,10 @@ export default class AdminSubscriptionService {
         invoice = {
             nextPaymentDate_epoch_seconds: expiresAtSeconds,
             // status: InvoiceS
+            billingPlatform: BillingPlatform.APPLE,
             amountCentsUsd: subscriptionProduct?.priceCentsUsd,
             isAppleSubscription: true,
+            isGoogleSubscription: false,
             appleProductId: latestInfo.product_id,
             isAutoRenew: autoRenewInfo?.auto_renew_status === "1"
         };
@@ -641,7 +680,7 @@ export default class AdminSubscriptionService {
         if (stripeCustomerId || stripeSubscriptionId) {
             invoice = await this.getUpcomingStripeInvoice({
                 customerId: stripeCustomerId,
-                subscriptionId: stripeSubscriptionId
+                subscriptionId: stripeSubscriptionId,
             });
 
             //If the member didn't have their subscriptionId saved on their member object, go ahead and update it now.

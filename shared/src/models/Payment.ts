@@ -81,4 +81,5 @@ interface ApplePayment {
 
 interface GooglePayment extends AndroidPurchase {
     subscriptionPurchase?: Schema$SubscriptionPurchase;
+    purchaseTime?: number
 }
