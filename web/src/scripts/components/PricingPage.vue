@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="[{abbreviated}]">
     <NavBar/>
     <section class="hero">
         <div class="centered" v-if="!coreValues && !abbreviated">
