@@ -102,7 +102,7 @@ export default class ReflectionResponseService {
         response.memberEmail = cactusMember.email;
         response.memberFirstName = cactusMember.firstName;
         response.memberLastName = cactusMember.lastName;
-        response.responseMedium = ResponseMedium.JOURNAL_WEB;
+        response.responseMedium = medium;
         response.mailchimpMemberId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.id : undefined;
         response.mailchimpUniqueEmailId = cactusMember.mailchimpListMember ? cactusMember.mailchimpListMember.unique_email_id : undefined;
 
