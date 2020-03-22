@@ -1,52 +1,62 @@
 <template>
-  <div>
-    <section class="hero">
+  <modal :show="showModal"
+            v-on:close="$emit('close')"
+            :showCloseButton="true"
+    >
+    <div slot="body" class="modalContainer">
+      <section class="hero">
         <div class="centered">
             <h1>Keep going with Cactus&nbspPlus</h1>
             <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
         </div>
-    </section>
-    <div class="middleSections">
-        <section class="benefits">
-            <div class="centered">
-              <div>
-                <div class="flexContainer">
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-                          <h3>Make it daily</h3>
-                          <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
-                      </div>
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                          <h3>Personal Insights</h3>
-                          <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
-                      </div>
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
-                          <h3>Core Values Assessment</h3>
-                          <p class="text">Make better decisions by prioritizing what's important to you.</p>
-                      </div>
+      </section>
+      <div class="middleSections">
+          <section class="benefits">
+              <div class="centered">
+                <div>
+                  <div class="flexContainer">
+                        <div class="benefit">
+                            <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                            <h3>Make it daily</h3>
+                            <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
+                            <h3>Personal Insights</h3>
+                            <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                            <h3>Core Values Assessment</h3>
+                            <p class="text">Make better decisions by prioritizing what's important to you.</p>
+                        </div>
+                    </div>
                   </div>
-                </div>
-            </div>
-        </section>
+              </div>
+          </section>
+      </div>
+      <section class="upgrade">
+          <div class="centered" id="upgrade">
+              <h2 class="sectionHeader">Choose your plan:</h2>
+              <PremiumPricing :startTrial="true" />
+          </div>
+      </section>
     </div>
-    <section class="upgrade">
-        <div class="centered" id="upgrade">
-            <h2 class="sectionHeader">Choose your plan:</h2>
-            <PremiumPricing :startTrial="true" />
-        </div>
-    </section>
-  </div>
+  </modal>
 </template>
 
 <script lang="ts">
     import Vue from "vue"
     import PremiumPricing from "@components/PremiumPricing.vue";
+    import Modal from "@components/Modal.vue";
 
     export default Vue.extend({
     components: {
         PremiumPricing,
+        Modal,
+    },
+    props: {
+        showModal: {type: Boolean, default: false},
     },
     data(): {
     } {
@@ -62,6 +72,16 @@
   @import "~styles/transitions";
   @import "~styles/pages/pricing";
   
+  .modalContainer {
+      background-color: $white;
+      border-radius: 1.2rem;
+      color: $lightGreen;
+      display: flex;
+      min-height: 34rem;
+      overflow: hidden;
+      width: 30rem;
+  }
+
   .top-message {
       border-radius: 0;
       display: block;
