@@ -70,16 +70,15 @@
   @import "~styles/common";
   @import "~styles/mixins";
   @import "~styles/transitions";
-  @import "~styles/pages/pricing";
+  /*@import "~styles/pages/pricing";*/
   
   .modalContainer {
       background-color: $white;
       border-radius: 1.2rem;
-      color: $lightGreen;
       display: flex;
       min-height: 34rem;
       overflow: hidden;
-      width: 30rem;
+      width: 48rem;
   }
 
   .top-message {
