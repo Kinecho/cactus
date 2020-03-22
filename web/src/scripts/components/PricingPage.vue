@@ -1,26 +1,22 @@
 <template>
-  <div :class="[{abbreviated}]">
+  <div>
     <NavBar/>
     <section class="hero">
-        <div class="centered" v-if="!coreValues && !abbreviated">
+        <div class="centered" v-if="!coreValues">
             <h1>Get more with Cactus&nbsp;Plus</h1>
             <p class="subtext">Daily prompts, insights, core values, and&nbspmore</p>
             <a class="button btn primary" href="#upgrade">Upgrade</a>
         </div>
-        <div class="centered" v-if="coreValues && !abbreviated">
+        <div class="centered" v-if="coreValues">
             <h1>Discover your Core&nbspValues</h1>
             <p class="subtext">Cactus Plus members get core values, daily prompts, and&nbsp;more</p>
             <a class="button btn primary" href="#upgrade">Upgrade</a>
-        </div>
-        <div class="centered" v-if="abbreviated">
-            <h1>Keep going with Cactus&nbspPlus</h1>
-            <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
         </div>
     </section>
     <div class="middleSections">
         <section class="benefits">
             <div class="centered">
-                <div v-if="!abbreviated">
+                <div>
                   <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
                   <div class="flexContainer">
                       <div class="benefit">
@@ -40,28 +36,9 @@
                       </div>
                   </div>
               </div>
-              <div v-if="abbreviated">
-                <div class="flexContainer">
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-                          <h3>Make it daily</h3>
-                          <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
-                      </div>
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                          <h3>Personal Insights</h3>
-                          <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
-                      </div>
-                      <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
-                          <h3>Core Values Assessment</h3>
-                          <p class="text">Make better decisions by prioritizing what's important to you.</p>
-                      </div>
-                  </div>
-                </div>
             </div>
         </section>
-        <section class="insights feature" v-if="!abbreviated">
+        <section class="insights feature">
             <div class="centered reverse" id="insights">
                 <div class="sectionGraphic">
                     <img class="" src="assets/images/insights.svg" alt="insights graphic" />
@@ -73,7 +50,7 @@
                 </div>
             </div>
         </section>
-        <section class="coreValues feature" v-if="!abbreviated">
+        <section class="coreValues feature">
             <div class="centered" id="coreValues">
                 <div class="sectionGraphic">
                     <img class="" src="assets/images/coreValues.svg" alt="core values graphic" />
@@ -89,7 +66,7 @@
     <section class="upgrade">
         <div class="centered" id="upgrade">
             <h2 class="sectionHeader">Choose your plan:</h2>
-            <PremiumPricing :startTrial="abbreviated" />
+            <PremiumPricing />
         </div>
     </section>
     <StandardFooter/>
@@ -114,16 +91,13 @@
     },
     data(): {
       coreValues: boolean,
-      abbreviated: boolean,
     } {
         return {
             coreValues: false,
-            abbreviated: false
         }
     },
     created() {
       this.coreValues = getQueryParam(QueryParam.CORE_VALUES) == "true" || false;
-      this.abbreviated = getQueryParam(QueryParam.ABBREVIATED) == "true" || false;
     }
   });
 </script>
