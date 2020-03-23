@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <div class="comfort" v-if="startTrial">
+        <div class="comfort">
             First 7 days free! Cancel anytime.
         </div>
 
@@ -323,6 +323,12 @@
             max-width: none;
             white-space: nowrap;
             width: 100%;
+        }
+
+        .comfort {
+            display: block;
+            text-align: center;
+            margin: 0 0 3rem;
         }
     }
 
