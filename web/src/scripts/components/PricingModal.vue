@@ -4,31 +4,35 @@
             :showCloseButton="true"
     >
     <div slot="body" class="miniModal">
-        <h2>Keep going with Cactus&nbsp;Plus</h2>
-        <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
-        <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-            <div>
-                <h3>Make it daily</h3>
-                <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
+        <div class="upperInfo">
+            <h2>Keep going with Cactus&nbsp;Plus</h2>
+            <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
+            <div class="benefit">
+                <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                <div>
+                    <h3>Make it daily</h3>
+                    <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <span class="benefitIcon"><img src="/assets/images/journal.svg" alt=""/></span>
+                <div>
+                    <h3>Personal Insights</h3>
+                    <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
+                </div>
+            </div>
+            <div class="benefit">
+                <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                <div>
+                    <h3>Core Values Assessment</h3>
+                    <p class="text">Make better decisions by prioritizing what's important to you.</p>
+                </div>
             </div>
         </div>
-        <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/journal.svg" alt=""/></span>
-            <div>
-                <h3>Personal Insights</h3>
-                <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
-            </div>
+        <div class="pricingWrapper">
+            <PremiumPricing :startTrial="true" />
+            <a class="button secondary" href="#upgrade">Learn More</a>
         </div>
-        <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
-            <div>
-                <h3>Core Values Assessment</h3>
-                <p class="text">Make better decisions by prioritizing what's important to you.</p>
-            </div>
-        </div>
-        <PremiumPricing :startTrial="true" />
-        <a class="button secondary" href="#upgrade">Learn More</a>
     </div>
   </modal>
 </template>
@@ -64,15 +68,11 @@
       @include shadowbox;
       background-color: $beige;
       min-height: 100vh;
-      padding: .8rem;
       text-align: center;
 
-      @include r(374) {
-          padding: 2.4rem;
-      }
       @include r(600) {
+          max-width: 64rem;
           min-height: 0;
-          padding: 3.2rem;
       }
 
       .subtext {
@@ -93,14 +93,67 @@
           &:last-of-type {
               margin-bottom: 4rem;
           }
+
+          p {
+              font-size: 1.6rem;
+
+              @include r(600) {
+                  font-size: 1.8rem;
+              }
+          }
       }
 
       h3 {
+          font-size: 1.8rem;
           margin-bottom: 0;
+
+          @include r(600) {
+              font-size: 2.1rem;
+          }
       }
 
       .benefitIcon {
-          margin: 0;
+          flex-shrink: 0;
+          margin: -1.5rem 1.2rem 0 0;
+          width: 3rem;
+
+          @include r(600) {
+              width: 6.4rem;
+          }
+      }
+  }
+
+  .upperInfo {
+      padding: .8rem .8rem 0;
+
+      @include r(374) {
+          padding: 2.4rem 2.4rem 0;
+      }
+      @include r(600) {
+          padding: 3.2rem 3.2rem 0;
+      }
+  }
+
+  .pricingWrapper {
+      background: $dolphin url(assets/images/grainy.png) repeat;
+      border-radius: 0 0 1.2rem 1.2rem;
+      padding: 0 0 2.4rem;
+
+      @include r(374) {
+          padding: 0 2.4rem 2.4rem;
+      }
+      @include r(600) {
+          padding: 0 3.2rem 3.2rem;
+      }
+
+      .button {
+          display: block;
+          margin: 2.4rem 2.4rem 0;
+
+          @include r(600) {
+              margin: 0 auto;
+              max-width: 33rem;
+          }
       }
   }
 </style>
