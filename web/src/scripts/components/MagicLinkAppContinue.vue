@@ -1,6 +1,5 @@
 <template>
     <div class="page-container">
-        <NavBar/>
         <div class="centered">
             <section class="hasApp">
                 <h2>Continue on the app</h2>
