@@ -456,7 +456,6 @@ export default class AdminSubscriptionService {
             subscriptionStatus,
             androidPackageName: latestPayment.google?.packageName,
         };
-
     }
 
     async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {

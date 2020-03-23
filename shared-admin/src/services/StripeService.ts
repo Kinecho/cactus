@@ -6,10 +6,11 @@ import {
     convertPaymentMethod,
     getInvoiceStatusFromStripeStatus,
     getStripeId,
-    isStripePaymentMethod, subscriptionStatusFromStripeInvoice
+    isStripePaymentMethod,
+    subscriptionStatusFromStripeInvoice
 } from "@admin/util/AdminStripeUtils";
 import { isString, stringifyJSON } from "@shared/util/ObjectUtil";
-import { PaymentMethod, SubscriptionInvoice, SubscriptionStatus } from "@shared/models/SubscriptionTypes";
+import { PaymentMethod, SubscriptionInvoice } from "@shared/models/SubscriptionTypes";
 import { BillingPlatform } from "@shared/models/MemberSubscription";
 import CactusMember from "@shared/models/CactusMember";
 

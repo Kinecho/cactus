@@ -20,7 +20,10 @@ export function getCustomerId(customer: Stripe.Customer | string | undefined | n
 }
 
 export function subscriptionStatusFromStripeInvoice(invoice: Stripe.Invoice): SubscriptionStatus {
-    const subscription: Stripe.Subscription | undefined = invoice.subscription;
+    const subscription = invoice.subscription;
+    if (isString(subscription)) {
+        return SubscriptionStatus.unknown;
+    }
     if (!subscription) {
         return SubscriptionStatus.unknown;
     }
