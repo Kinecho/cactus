@@ -67,6 +67,7 @@
   .miniModal {
       @include shadowbox;
       background-color: $beige;
+      margin: 0 auto;
       min-height: 100vh;
       text-align: center;
 
