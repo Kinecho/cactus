@@ -361,10 +361,6 @@
     .actions .button {
         display: block;
         margin-bottom: .8rem;
-
-        & + .button {
-            margin-bottom: 1.6rem;
-        }
     }
 
     .actions .error {
