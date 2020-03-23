@@ -30,8 +30,8 @@ export default class GooglePlayTest extends FirebaseCommand {
                 notificationType: 3,
                 // "purchaseToken": "aacmccpmabajagnfahagbkmd.AO-J1Owi0peoORNtkgncRKNMRkpyNojGt55oxuKVtNvd6kSPpjnTZJq7WhxM_bMm5GfhpSdkMG6kOuIo2Cvqta4TpXWQA-6yEacNjs4RBz0ND29QrbWI9qOSS1HIJJIbTpbYDmMx1EVS",
                 // purchaseToken: "dhomdbbcmiidefcgiafhkogk.AO-J1OyoKj7FTE_G_1b_chZiDRI5bmh-swIE8Yv21TTAlbfkHKJ7QVHFi2ptC4kSerFPWL0HijRZo02kpgJ5mr2uF_5QMPx40Q0x4FndHhEZAiIiPcfFKnk3hh1uxi_9SGoD7cjeXgVh",
-                purchaseToken: "bibdciiklbfgonjmbapnigaa.AO-J1Ox0MSAUtUKtEf8MD8PAyZ1iqctcU_mRyE8qscWlwtPbx4xAK4Ymaa08k186l11YH8-NUfza3kUbYqWhszPi6SS5QKfv1aqQy_WsG3Pllqynvfp_oxGg_rOsj_ucUbdxhYE48Ns_",
-                subscriptionId: "cactus_plus_monthly_499"
+                purchaseToken: "cdgefbpcealpllmcoiiflonl.AO-J1Ozx5gUMnrnLnE8hrt8W4LkZ2C8WIDvdw1qjPQIAROxA-AvDWJGKFn-obSY7MvORT-v_y5CshGf0WEDaH1x-pTK-jVLhAT4a2Dw3SgxADuzH9vEWIBKp1jMR4h-H1Qm4cghQIGub",
+                subscriptionId: "cactus_plus_weekly_199"
             }
         };
 

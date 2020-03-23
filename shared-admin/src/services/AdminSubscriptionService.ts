@@ -18,20 +18,14 @@ import {MergeField, UpdateMergeFieldRequest} from "@shared/mailchimp/models/Mail
 import {Collection} from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import {QuerySortDirection} from "@shared/types/FirestoreConstants";
-import {isNull, isString, stringifyJSON} from "@shared/util/ObjectUtil";
+import {isNull, stringifyJSON} from "@shared/util/ObjectUtil";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import {getHostname} from "@admin/config/configService";
 import {PageRoute} from "@shared/PageRoutes";
-import Stripe from "stripe";
 import {CactusConfig} from "@shared/CactusConfig";
-import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
+import {SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
 import {ApiResponse} from "@shared/api/ApiTypes";
-import {
-    convertPaymentMethod,
-    getInvoiceStatusFromStripeStatus,
-    getStripeId,
-    isStripePaymentMethod
-} from "@admin/util/AdminStripeUtils";
+
 import {SyncTrialMembersToMailchimpJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
@@ -47,6 +41,7 @@ import AdminSlackService, {ChannelName, SlackAttachment} from "@admin/services/A
 import Payment from "@shared/models/Payment";
 import * as Sentry from "@sentry/node";
 import {getLatestGooglePayment} from "@shared/util/PaymentUtil";
+import StripeService from "@admin/services/StripeService";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -87,7 +82,6 @@ export default class AdminSubscriptionService {
     protected static sharedInstance: AdminSubscriptionService;
     firestoreService: AdminFirestoreService;
     logger = new Logger("AdminSubscriptionService");
-    stripe: Stripe;
     config: CactusConfig;
 
     get membersCollection(): CollectionReference {
@@ -108,9 +102,6 @@ export default class AdminSubscriptionService {
     private constructor(config: CactusConfig) {
         this.config = config;
         this.firestoreService = AdminFirestoreService.getSharedInstance();
-        this.stripe = new Stripe(config.stripe.secret_key, {
-            apiVersion: '2019-12-03',
-        });
     }
 
     async expireTrial(member: CactusMember): Promise<ExpireTrialResult> {
@@ -366,13 +357,11 @@ export default class AdminSubscriptionService {
         const isTrialing = member.isInTrial ? "YES" : "NO";
         const trialDaysLeft = member.daysLeftInTrial > 0 ? member.daysLeftInTrial : "";
 
-        const mergeFields = {
+        return {
             [MergeField.SUB_TIER]: subscriptionTier,
             [MergeField.IN_TRIAL]: isTrialing,
             [MergeField.TDAYS_LEFT]: trialDaysLeft,
         };
-
-        return mergeFields;
     }
 
     async updateMailchimpListMember(options: { memberId?: string, member?: CactusMember }): Promise<ApiResponse> {
@@ -418,158 +407,6 @@ export default class AdminSubscriptionService {
         return await mailchimpService.updateMergeFields(mergeFieldRequest);
     }
 
-    async getStripeCustomer(customerId: string, expand?: string[]): Promise<Stripe.Customer | undefined> {
-        try {
-            const customer = await this.stripe.customers.retrieve(customerId, {expand});
-            if ((customer as Stripe.DeletedCustomer).deleted) {
-                return undefined;
-            }
-            return customer as Stripe.Customer;
-        } catch (error) {
-            this.logger.error(`Failed to get the stripe customer for customerId = ${customerId}`, error);
-            return undefined;
-        }
-    }
-
-    async updateStripeCustomer(customerId: string, settings: Stripe.CustomerUpdateParams): Promise<Stripe.Customer | undefined> {
-        try {
-            return await this.stripe.customers.update(customerId, settings);
-        } catch (error) {
-            this.logger.error(`Failed to update stripe customer ${customerId}`, error);
-            return;
-        }
-    }
-
-    async updateStripeSubscriptionDefaultPaymentMethod(subscriptionId: string, paymentMethodId: string): Promise<Stripe.Subscription | undefined> {
-        try {
-            return await this.stripe.subscriptions.update(subscriptionId, {
-                default_payment_method: paymentMethodId,
-            })
-        } catch (error) {
-            this.logger.error(`Failed to update the default payment method in subscription ${subscriptionId}`, error);
-            return;
-        }
-    }
-
-    async getDefaultStripeSourceId(customerId: string): Promise<string | undefined> {
-        const customer = await this.getStripeCustomer(customerId);
-        if (!customer) {
-            return undefined;
-        }
-        if (isString(customer.default_source)) {
-            return customer.default_source;
-        }
-        return undefined;
-    }
-
-    async getDefaultStripeInvoicePaymentMethod(customerId: string): Promise<PaymentMethod | undefined> {
-        const customer = await this.getStripeCustomer(customerId, ["invoice_settings.default_payment_method"]);
-        if (!customer) {
-            return undefined;
-        }
-        const paymentMethod = customer.invoice_settings?.default_payment_method;
-        if (isStripePaymentMethod(paymentMethod)) {
-            return convertPaymentMethod(paymentMethod);
-        } else {
-            this.logger.warn(`Unable to build payment method from invoice_settings.default_payment_method ${JSON.stringify(paymentMethod, null, 2)}`);
-        }
-        return;
-    }
-
-    async getStripePaymentMethod(paymentMethodId?: string): Promise<Stripe.PaymentMethod | undefined> {
-        if (!paymentMethodId) {
-            return;
-        }
-        try {
-            return await this.stripe.paymentMethods.retrieve(paymentMethodId);
-        } catch (error) {
-            this.logger.error("Unable to fetch payment method with id ", paymentMethodId);
-            return;
-        }
-    }
-
-    async getStripeSubscription(subscriptionId?: string): Promise<Stripe.Subscription | undefined> {
-        if (!subscriptionId) {
-            return undefined;
-        }
-
-        try {
-            const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {expand: ["default_payment_method"]});
-            this.logger.info("retrieved striped subscription", stringifyJSON(subscription, 2));
-            return subscription
-        } catch (error) {
-            this.logger.error("Failed to fetch stripe subscription with id", subscriptionId)
-            return undefined;
-        }
-    }
-
-    async getDefaultPaymentMethodFromStripeInvoice(invoice: Stripe.Invoice): Promise<Stripe.PaymentMethod | undefined> {
-        const stripeCustomerId: string | null = isString(invoice.customer) ? invoice.customer : invoice.customer.id;
-        if (isStripePaymentMethod(invoice.default_payment_method)) {
-            return invoice.default_payment_method
-        }
-        const subscription = isString(invoice.subscription) ? await this.getStripeSubscription(invoice.subscription) : invoice.subscription;
-        const subPaymentMethod = subscription?.default_payment_method;
-        if (isStripePaymentMethod(subPaymentMethod)) {
-            return subPaymentMethod;
-        }
-        const subPaymentMethodId = getStripeId(subPaymentMethod);
-        if (subPaymentMethodId) {
-            return await this.getStripePaymentMethod(subPaymentMethodId);
-        }
-        if (stripeCustomerId) {
-            this.logger.info("attempting to fetch customer's default payment method");
-            const customer = await this.getStripeCustomer(stripeCustomerId, ["invoice_settings.default_payment_method"]);
-            const invoiceSettingsPaymentMethod = customer?.invoice_settings?.default_payment_method;
-            if (isStripePaymentMethod(invoiceSettingsPaymentMethod)) {
-                return invoiceSettingsPaymentMethod;
-            }
-        }
-        return;
-    }
-
-    async getUpcomingStripeInvoice(options: { customerId?: string, subscriptionId?: string }): Promise<SubscriptionInvoice | undefined> {
-        const {customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId} = options;
-        if (!stripeCustomerId && !stripeSubscriptionId) {
-            this.logger.warn("No stripeCustomerId or stripeSubscriptionId found on the member. Can not fetch subscription details.");
-            return undefined;
-        }
-        try {
-            const stripeInvoice = await this.stripe.invoices.retrieveUpcoming({
-                customer: stripeCustomerId,
-                subscription: stripeSubscriptionId,
-                expand: ["default_payment_method", "subscription.default_payment_method"]
-            });
-            if (!stripeInvoice) {
-                this.logger.info("No upcoming invoices found.");
-                return undefined;
-            }
-
-            const stripePaymentMethod = await this.getDefaultPaymentMethodFromStripeInvoice(stripeInvoice);
-
-            const invoice: SubscriptionInvoice = {
-                status: getInvoiceStatusFromStripeStatus(stripeInvoice.status),
-                amountCentsUsd: stripeInvoice.total,
-                defaultPaymentMethod: convertPaymentMethod(stripePaymentMethod),
-                periodStart_epoch_seconds: stripeInvoice.period_start,
-                periodEnd_epoch_seconds: stripeInvoice.period_end,
-                nextPaymentDate_epoch_seconds: stripeInvoice.next_payment_attempt || undefined,
-                paid: stripeInvoice.paid,
-                stripeInvoiceId: stripeInvoice.id,
-                stripeSubscriptionId: getStripeId(stripeInvoice.subscription),
-                isAppleSubscription: false,
-                isGoogleSubscription: false,
-                isAutoRenew: stripeInvoice.auto_advance ?? true,
-                billingPlatform: BillingPlatform.STRIPE,
-            };
-            this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
-            return invoice;
-
-        } catch (error) {
-            this.logger.warn(`No upcoming invoice found for| customerId ${stripeCustomerId} | stripeSubscriptionId ${stripeSubscriptionId}`);
-            return undefined;
-        }
-    }
 
     async getGoogleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
         const {member} = options;
@@ -619,7 +456,6 @@ export default class AdminSubscriptionService {
             androidPackageName: latestPayment.google?.packageName,
         };
 
-
     }
 
     async getAppleSubscriptionInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
@@ -631,7 +467,7 @@ export default class AdminSubscriptionService {
             this.logger.warn("No apple original transaction id found for member", member.email);
             return undefined;
         }
-        const payments = await AdminPaymentService.getSharedInstance().getByAppleOriginalTransactionId(originalTransactionId)
+        const payments = await AdminPaymentService.getSharedInstance().getByAppleOriginalTransactionId(originalTransactionId);
         this.logger.info(`found ${payments.length} payments for transactionId = ${originalTransactionId}`);
         const [payment] = payments || [];
         if (!payment) {
@@ -679,9 +515,9 @@ export default class AdminSubscriptionService {
 
         let invoice: SubscriptionInvoice | undefined;
         if (stripeCustomerId || stripeSubscriptionId) {
-            invoice = await this.getUpcomingStripeInvoice({
+            invoice = await StripeService.getSharedInstance().getUpcomingStripeInvoice({
                 customerId: stripeCustomerId,
-                subscriptionId: stripeSubscriptionId,
+                subscriptionId: stripeSubscriptionId
             });
 
             //If the member didn't have their subscriptionId saved on their member object, go ahead and update it now.
@@ -729,14 +565,7 @@ export default class AdminSubscriptionService {
         if (!member.stripeCustomerId && memberId) {
             try {
                 this.logger.info(`Creating stripe customer for ${member.email}`);
-                const customer = await this.stripe.customers.create({
-                    email: member.email,
-                    name: member.getFullName(),
-                    metadata: {
-                        "memberId": memberId,
-                        "userId": member.userId ?? "",
-                    }
-                });
+                const customer = await StripeService.getSharedInstance().createStripeCustomer(member);
                 member.stripeCustomerId = customer.id;
                 this.logger.info(`Successfully created stripe customer ${customer.id} for cactus member ${member.email}`);
 
@@ -749,30 +578,6 @@ export default class AdminSubscriptionService {
         return member;
     }
 
-    async fetchStripeSetupIntent(setupIntentId?: string): Promise<Stripe.SetupIntent | undefined> {
-        if (!setupIntentId) {
-            return;
-        }
-
-        try {
-            return await this.stripe.setupIntents.retrieve(setupIntentId);
-        } catch (error) {
-            this.logger.error(`Failed to fetch setup intent with id ${setupIntentId}`);
-            return;
-        }
-    }
-
-    async fetchStripePlan(planId?: string): Promise<Stripe.Plan | undefined> {
-        if (!planId) {
-            return undefined;
-        }
-        try {
-            return await this.stripe.plans.retrieve(planId);
-        } catch (error) {
-            this.logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
-            return;
-        }
-    }
 
     async fulfillRestoredAndroidPurchases(member: CactusMember, params: AndroidFulfillRestoredPurchasesParams): Promise<{ success: boolean, fulfillmentResults: AndroidFulfillResult[] }> {
         try {

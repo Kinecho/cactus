@@ -1,5 +1,5 @@
 import {CactusConfig} from "@shared/CactusConfig";
-import * as functions from "firebase-functions";
+import {Request} from "express";
 import Stripe from "stripe";
 import Logger from "@shared/Logger";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
@@ -13,7 +13,7 @@ import Payment from "@shared/models/Payment";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import {getCustomerId, getStripeId, isStripeSubscription} from "@admin/util/AdminStripeUtils";
 import {destructureDisplayName, isBlank} from "@shared/util/StringUtil";
-import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import StripeService from "@admin/services/StripeService";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -21,6 +21,14 @@ export interface WebhookResponse {
     statusCode: number,
     type?: string,
     body?: string | any | undefined,
+}
+
+export interface RawBodyRequest extends Request {
+    rawBody: any
+}
+
+export function isRawBodyRequest(input: any): input is RawBodyRequest {
+    return !!(input as RawBodyRequest).rawBody && !!(input as RawBodyRequest).header
 }
 
 /**
@@ -64,7 +72,7 @@ export default class StripeWebhookService {
         StripeWebhookService.sharedInstance = new StripeWebhookService(config);
     }
 
-    getSignedEvent(options: { request: functions.https.Request, webhookSigningKey?: string }): Stripe.Event | undefined {
+    getSignedEvent(options: { request: RawBodyRequest, webhookSigningKey?: string }): Stripe.Event | undefined {
         try {
             const {request, webhookSigningKey = this.config.stripe.webhook_signing_secrets.main} = options;
             const sig = request.header('stripe-signature') || "";
@@ -108,7 +116,7 @@ export default class StripeWebhookService {
             return {statusCode: 200, body: "No metadata was present. Can not process request"};
         }
 
-        const setupIntent = await AdminSubscriptionService.getSharedInstance().fetchStripeSetupIntent(setupIntentId);
+        const setupIntent = await StripeService.getSharedInstance().fetchStripeSetupIntent(setupIntentId);
         if (!setupIntentId) {
             return {
                 statusCode: 200,
@@ -127,10 +135,10 @@ export default class StripeWebhookService {
         try {
             const attachedPaymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, {customer: customerId});
             logger.info(`Attached payment method to customer ${customerId}: ${stringifyJSON(attachedPaymentMethod)}`);
-            const updatedCustomer = await AdminSubscriptionService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethodId}})
+            const updatedCustomer = await StripeService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethodId}})
             logger.info(`Updated customer ${updatedCustomer?.id} with invoice settings ${stringifyJSON(updatedCustomer?.invoice_settings)}`);
             if (subscriptionId) {
-                await AdminSubscriptionService.getSharedInstance().updateStripeSubscriptionDefaultPaymentMethod(subscriptionId, paymentMethodId);
+                await StripeService.getSharedInstance().updateStripeSubscriptionDefaultPaymentMethod(subscriptionId, paymentMethodId);
             }
         } catch (error) {
             logger.error(`Failed to attach payment method to customerId ${customerId}`, error);
@@ -190,12 +198,12 @@ export default class StripeWebhookService {
         });
         const customerId = getCustomerId(session.customer);
         const stripeSubscriptionId = getStripeId(session.subscription);
-        const stripeSubscription = await AdminSubscriptionService.getSharedInstance().getStripeSubscription(stripeSubscriptionId);
+        const stripeSubscription = await StripeService.getSharedInstance().getStripeSubscription(stripeSubscriptionId);
         if (isStripeSubscription(stripeSubscription) && customerId) {
             const paymentMethod = getStripeId(stripeSubscription.default_payment_method);
             if (paymentMethod) {
                 logger.info("Update default payment method on customer");
-                await AdminSubscriptionService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethod}})
+                await StripeService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethod}})
             }
         }
 
