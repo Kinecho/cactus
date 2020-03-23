@@ -285,6 +285,11 @@
             margin: 0 1.6rem;
             padding: 0 2.4rem 3.2rem;
 
+            &:only-child {
+                flex-basis: 100%;
+                margin: 0;
+            }
+
             &:first-child:before {
                 bottom: -6rem;
             }

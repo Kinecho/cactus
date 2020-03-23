@@ -237,7 +237,7 @@
         @include r(768) {
             background: transparent none;
             max-width: none;
-            min-width: 80rem;
+            // min-width: 80rem;
         }
     }
 
@@ -401,6 +401,7 @@
         }
         @include r(768) {
             display: flex;
+            padding: 0;
         }
     }
 
