@@ -54,7 +54,7 @@
                     <img class="" src="assets/images/coreValues.svg" alt="core values graphic" />
                 </div>
                 <div class="textContainer">
-                    <h4>Coming Soon</h4>
+                    <h4>New</h4>
                     <h3>Core Values Assessment</h3>
                     <p>Is loyalty or honesty more important to you? Knowing your core values is critical in making decisions for your happiness. Cactus will use your core values to provide a personalized mindfulness&nbsp;journey.</p>
                 </div>
