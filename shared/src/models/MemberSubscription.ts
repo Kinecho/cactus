@@ -44,6 +44,7 @@ export interface MemberSubscription {
     tier: SubscriptionTier,
     trial?: SubscriptionTrial,
     activated?: boolean,
+    firstPaymentAt?: Date,
     /**
      * The ID of the Cactus Subscription Product the member is subscribed to
      */
