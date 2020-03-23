@@ -14,7 +14,6 @@ import AdminPendingUserService from "@admin/services/AdminPendingUserService";
 import GoogleSheetsService from "@admin/services/GoogleSheetsService";
 import GoogleLanguageService from "@admin/services/GoogleLanguageService";
 import * as Sentry from "@sentry/node";
-import chalk from "chalk";
 import AdminFlamelinkService from "@admin/services/AdminFlamelinkService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
@@ -34,11 +33,12 @@ import {PubSubService} from "@admin/pubsub/PubSubService";
 import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import AppleService from "@admin/services/AppleService";
 import GooglePlayService from "@admin/services/GooglePlayService";
+import StripeService from "@admin/services/StripeService";
 
 const logger = new Logger("AdminServiceConfig");
 
 export function initializeServices(config: CactusConfig, app: admin.app.App, timestampClass: any, functionName: string | undefined) {
-    logger.log(chalk.green("initializing all services"));
+    logger.log("initializing all services");
     setTimestamp(timestampClass || admin.firestore.Timestamp);
 
     //Firestore
@@ -46,6 +46,9 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //PubSub
     PubSubService.initialize(config);
+
+    //Stripe
+    StripeService.initialize(config);
 
     //model services
     AdminSendgridService.initialize(config);

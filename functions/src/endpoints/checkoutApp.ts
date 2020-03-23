@@ -1,6 +1,5 @@
 import * as express from "express";
 import * as cors from "cors";
-import * as functions from "firebase-functions";
 import Stripe from "stripe";
 import {getConfig, getHostname} from "@admin/config/configService";
 import {
@@ -20,7 +19,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import CheckoutSession from "@shared/models/CheckoutSession";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
-import StripeWebhookService from "@admin/services/StripeWebhookService";
+import StripeWebhookService, {isRawBodyRequest} from "@admin/services/StripeWebhookService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
@@ -29,10 +28,12 @@ import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService"
 import {appendQueryParams} from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import {PageRoute} from "@shared/PageRoutes";
+import StripeService from "@admin/services/StripeService";
 
 const bodyParser = require('body-parser');
 const logger = new Logger("checkoutApp");
 const config = getConfig();
+
 
 const stripe = new Stripe(config.stripe.secret_key, {
     apiVersion: '2019-12-03',
@@ -41,10 +42,6 @@ const app = express();
 
 // Automatically allow cross-origin requests
 app.use(cors({origin: config.allowedOrigins}));
-
-function isFirebaseRequest(_req: any): _req is functions.https.Request {
-    return !!_req.rawBody;
-}
 
 app.get("/", async (req: express.Request, res: express.Response) => {
     const index = 8;
@@ -56,7 +53,7 @@ app.get("/", async (req: express.Request, res: express.Response) => {
  * and the StripeWebhookService will handle (or not) the given event type.
  */
 app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), async (req: express.Request, res: express.Response) => {
-    if (!isFirebaseRequest(req)) {
+    if (!isRawBodyRequest(req)) {
         logger.error("Incoming stripe webhook was not of type firebase.https.Request. Can not process request", req.body);
         res.sendStatus(204);
         return
@@ -66,6 +63,7 @@ app.post("/stripe/webhooks/main", bodyParser.raw({type: 'application/json'}), as
         request: req,
         webhookSigningKey: config.stripe.webhook_signing_secrets.main
     });
+
     if (!event) {
         const stripeType = req.body?.type || "unknown";
         const slackPayload = {body: req.body, headers: req.headers};
@@ -250,7 +248,7 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         return {error: "No plan ID was found on the subscription Product"};
     }
 
-    const plan = await AdminSubscriptionService.getSharedInstance().fetchStripePlan(planId);
+    const plan = await StripeService.getSharedInstance().fetchStripePlan(planId);
     if (!plan) {
         logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
         return {error: `Unable to find plan '${planId}' in stripe. Can not complete checkout.`};
