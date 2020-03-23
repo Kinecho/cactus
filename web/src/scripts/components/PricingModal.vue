@@ -64,7 +64,10 @@
   @import "~styles/pages/pricing";
 
   .miniModal {
-      background: $beige url(assets/images/beigeBlob.svg) center top -65vw/124vw no-repeat;
+      background: $beige no-repeat;
+      background-image: url(assets/images/beigeBlob.svg), url(assets/images/blob-outline-beige.svg);
+      background-position: right -185px top -65px, right -55px top -175px;
+      background-size: 394px;
       margin: 0 auto;
       min-height: 100vh;
       text-align: center;
@@ -72,8 +75,6 @@
       @include r(600) {
           @include shadowbox;
           background-color: $beige;
-          background-position: center top -92rem;
-          background-size: 111rem;
           max-width: 64rem;
           min-height: 0;
       }
