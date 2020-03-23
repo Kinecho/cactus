@@ -25,9 +25,9 @@
             </div>
         </div>
 
-        <div class="comfort" v-if="startTrial">
+        <!-- <div class="comfort" v-if="startTrial">
             First 7 days free! Cancel anytime.
-        </div>
+        </div> -->
 
         <div class="actions">
             <div class="error" v-if="checkoutError">{{checkoutError}}</div>
@@ -253,13 +253,13 @@
     @import "variables";
 
     .tab-content {
-        background: $dolphin url(assets/images/grainy.png) repeat;
-        box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
-        0 24px 38px 3px rgba(0, 0, 0, .1),
-        0 9px 46px 8px rgba(0, 0, 0, .08);
+        // background: $dolphin url(assets/images/grainy.png) repeat;
+        // box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
+        // 0 24px 38px 3px rgba(0, 0, 0, .1),
+        // 0 9px 46px 8px rgba(0, 0, 0, .08);
         color: $white;
         border-radius: 0 0 1.6rem 1.6rem;
-        padding: 2.4rem 1.6rem 3.2rem;
+        // padding: 2.4rem 1.6rem 3.2rem;
         position: relative;
         text-align: left;
 
@@ -277,13 +277,18 @@
         }
 
         @include r(374) {
-            padding: 2.4rem 2.4rem 3.2rem;
+            // padding: 2.4rem 2.4rem 3.2rem;
         }
         @include r(768) {
             border-radius: 0 0 1.6rem 1.6rem;
             flex-basis: 50%;
             margin: 0 1.6rem;
             padding: 0 2.4rem 3.2rem;
+
+            &:only-child {
+                flex-basis: 100%;
+                margin: 0;
+            }
 
             &:first-child:before {
                 bottom: -6rem;
@@ -323,6 +328,12 @@
             max-width: none;
             white-space: nowrap;
             width: 100%;
+        }
+
+        .comfort {
+            display: block;
+            text-align: center;
+            margin: 0 0 3rem;
         }
     }
 

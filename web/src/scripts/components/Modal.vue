@@ -148,10 +148,7 @@
     @import "mixins";
 
     .modal-mask {
-        align-items: center;
-        display: flex;
         height: 100%;
-        justify-content: center;
         left: 0;
         overflow-y: auto;
         position: fixed;
@@ -159,6 +156,12 @@
         transition: opacity .3s ease;
         width: 100%;
         z-index: 9998;
+
+        @include h(768) {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
 
         &.light {
             background-color: rgba(255, 255, 255, .6);

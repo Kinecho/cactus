@@ -94,6 +94,9 @@
                 </button>
             </section>
         </transition>
+        <PricingModal
+            :showModal="pricingModalVisible"
+            @close="pricingModalVisible = false"/>
     </div>
 </template>
 
@@ -113,6 +116,7 @@
     import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
+    import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
@@ -140,7 +144,8 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            FourOhFour
+            FourOhFour,
+            PricingModal
         },
         props: {
             initialIndex: Number,
@@ -329,6 +334,7 @@
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
             show404: boolean,
+            pricingModalVisible: boolean,
             hasSeenPricing: boolean
         } {
             return {
@@ -359,6 +365,7 @@
                 pendingActiveIndex: undefined,
                 usePromptId: false,
                 show404: false,
+                pricingModalVisible: false,
                 hasSeenPricing: false
             };
         },
@@ -768,7 +775,8 @@
                 });
                 if (this.promptContent?.documentId === Config.firstPromptId && 
                     !this.hasSeenPricing) {
-                    window.location.href = PageRoute.PRICING + `?${QueryParam.ABBREVIATED}=true`;
+                    this.pricingModalVisible = true;
+                    this.hasSeenPricing = true;
                 } else {
                     this.onClose();
                 }

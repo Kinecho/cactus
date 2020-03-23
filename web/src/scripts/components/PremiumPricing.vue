@@ -22,7 +22,7 @@
 
                 </div>
                 <div id="tabs" class="tabset" v-if="loaded && tabsOnMobile">
-                    <div class="tabs">
+                    <div class="tabs" v-if="!startTrial">
                         <template v-for="(productGroup, i) in groupEntries">
                             <a class="tab-label"
                                     @click.prevent="activetab = i"
@@ -55,8 +55,8 @@
             </transition>
         </div>
         <div class="restore-container" :class="{noTabs: !tabsOnMobile}" v-if="isAndroidApp">
-            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">Restore
-                Purchases
+            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">
+                Restore Purchases
             </a>
         </div>
     </div>
@@ -229,12 +229,15 @@
     }
 
     .tabset {
+        background: $dolphin url(assets/images/grainy.png) repeat;
+        border-radius: 1.2rem;
         margin: 0 auto;
         max-width: 48rem;
 
         @include r(768) {
+            background: transparent none;
             max-width: none;
-            min-width: 80rem;
+            // min-width: 80rem;
         }
     }
 
@@ -391,9 +394,14 @@
 
     .tabPanels {
         justify-content: center;
+        padding: 2.4rem 1.6rem 3.2rem;
 
+        @include r(374) {
+            padding: 2.4rem 2.4rem 3.2rem;
+        }
         @include r(768) {
             display: flex;
+            padding: 0;
         }
     }
 
