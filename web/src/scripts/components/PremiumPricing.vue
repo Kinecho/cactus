@@ -17,6 +17,7 @@
                                 :member="member"
                                 :class="[`tabPanel`, {active: activetab === i}]"
                                 :learnMoreLinks="learnMoreLinks || startTrial"
+                                :showFooter="showFooter"
                                 :startTrial="startTrial" />
                     </div>
 
@@ -47,6 +48,7 @@
                                     :learnMoreLinks="learnMoreLinks || startTrial"
                                     :is-restoring-purchases="isRestoringPurchases"
                                     :class="{active: activetab === i}"
+                                    :showFooter="showFooter"
                                     :startTrial="startTrial" />
                         </template>
 
@@ -90,6 +92,7 @@
         props: {
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
+            showFooter: {type: Boolean, default: true},
             startTrial: {type: Boolean, default: false}
         },
         data(): {
@@ -236,8 +239,8 @@
 
         @include r(768) {
             background: transparent none;
-            max-width: none;
-            // min-width: 80rem;
+            max-width: 80rem;
+            width: 100%;
         }
     }
 

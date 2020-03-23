@@ -157,7 +157,7 @@
         width: 100%;
         z-index: 9998;
 
-        @include h(768) {
+        @include h(960) {
             align-items: center;
             display: flex;
             justify-content: center;
