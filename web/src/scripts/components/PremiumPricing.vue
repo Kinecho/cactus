@@ -55,8 +55,8 @@
             </transition>
         </div>
         <div class="restore-container" :class="{noTabs: !tabsOnMobile}" v-if="isAndroidApp">
-            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">Restore
-                Purchases
+            <a class="fancyLink" @click.prevent="restorePurchases" :disabled="isRestoringPurchases">
+                Restore Purchases
             </a>
         </div>
     </div>

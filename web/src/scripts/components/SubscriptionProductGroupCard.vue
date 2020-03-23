@@ -324,6 +324,12 @@
             white-space: nowrap;
             width: 100%;
         }
+
+        .comfort {
+            display: block;
+            text-align: center;
+            margin: 0 0 3rem;
+        }
     }
 
     button:disabled {
