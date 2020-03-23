@@ -29,7 +29,6 @@ import { appendQueryParams } from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import { PageRoute } from "@shared/PageRoutes";
 import StripeService from "@admin/services/StripeService";
-import SubscriptionData = module
 
 const bodyParser = require('body-parser');
 const logger = new Logger("checkoutApp");
@@ -262,7 +261,7 @@ async function buildStripeSubscriptionCheckoutSessionOptions(options: {
         [QueryParam.SUBSCRIPTION_PRODUCT_ID]: `${ subscriptionProductId }`,
     });
 
-    const stripeSubscriptionData: SubscriptionData = { items: [{ plan: planId }] };
+    const stripeSubscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = { items: [{ plan: planId }] };
     if (trialDays > 0) {
         stripeSubscriptionData.trial_period_days = trialDays
     }

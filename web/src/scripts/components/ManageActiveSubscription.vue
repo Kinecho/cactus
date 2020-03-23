@@ -14,7 +14,10 @@
             </div>
             <template v-if="!error">
                 <template v-if="!subscriptionDetailsLoading">
-                    <p v-if="isExpired">
+                    <p v-if="isInOptOutTrial">
+                        Your free trial ends on {{ optOutTrialEndsAt | formatDate }} and you will be billed <strong>{{nextBillAmount}}</strong>/{{ billingPeriodSingular | lowerCase}}.
+                    </p>
+                    <p v-else-if="isExpired">
                         Your subscription ended on <strong>{{nextBillingDate}}</strong>.
                     </p>
                     <p v-else-if="isAutoRenewable">
@@ -65,17 +68,17 @@
 <script lang="ts">
     import Vue from "vue";
     import CactusMember from "@shared/models/CactusMember";
-    import {BillingPlatform, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import { BillingPlatform, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
     import Modal from "@components/Modal.vue";
     import DowngradeSubscriptionForm from "@components/DowngradeSubscriptionForm.vue";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import {
         getSubscriptionDetails,
         getUpdatePaymentMethodSession,
         startStripeCheckoutSession
     } from "@web/checkoutService";
-    import {formatDate} from "@shared/util/DateUtil";
-    import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
+    import { formatDate } from "@shared/util/DateUtil";
+    import { InvoiceStatus, SubscriptionDetails, SubscriptionStatus } from "@shared/models/SubscriptionTypes";
     import CopyService from "@shared/copy/CopyService";
     import {
         DigitalWalletDetails,
@@ -83,9 +86,9 @@
         getDigitalWalletDetails
     } from "@shared/util/SubscriptionProductUtil";
     import Spinner from "@components/Spinner.vue";
-    import {SnackbarMessage} from "@components/SnackbarContent.vue";
-    import {appendQueryParams} from "@shared/util/StringUtil";
-    import {isNull} from "@shared/util/ObjectUtil";
+    import { SnackbarMessage } from "@components/SnackbarContent.vue";
+    import { appendQueryParams } from "@shared/util/StringUtil";
+    import { isNull } from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -96,7 +99,7 @@
             Spinner,
         },
         props: {
-            member: {type: Object as () => CactusMember, required: true}
+            member: { type: Object as () => CactusMember, required: true }
         },
         data(): {
             showDowngradeModal: boolean,
@@ -116,9 +119,27 @@
         beforeMount(): void {
             this.fetchSubscriptionDetails();
         },
+        filters: {
+            formatDate(date: Date | undefined): string | undefined {
+                return formatDate(date, copy.settings.dates.shortFormat);
+            },
+            lowerCase(value?: string|undefined) {
+                return value?.toLowerCase()
+            }
+        },
         computed: {
             isExpired(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.isExpired ?? false
+            },
+            isInOptOutTrial(): boolean {
+                return this.subscriptionDetails?.upcomingInvoice?.subscriptionStatus === SubscriptionStatus.in_trial;
+            },
+            optOutTrialEndsAt(): Date | undefined {
+                const seconds = this.subscriptionDetails?.upcomingInvoice?.optOutTrialEndsAt_epoch_seconds;
+                if (!seconds) {
+                    return
+                }
+                return new Date(seconds * 1000);
             },
             isAutoRenewable(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.isAutoRenew ?? false
@@ -137,7 +158,7 @@
                 const sku = upcomingInvoice.androidProductId;
                 const packageName = upcomingInvoice.androidPackageName;
                 const basUrl = "https://play.google.com/store/account/subscriptions";
-                return appendQueryParams(basUrl, {sku, package: packageName});
+                return appendQueryParams(basUrl, { sku, package: packageName });
                 // return `https://play.google.com/store/account/subscriptions?sku=cactus_plus_monthly_499&package=app.cactus.stage`
             },
             showCardInfo(): boolean {
@@ -156,9 +177,9 @@
                     return;
                 }
                 if (amount % 100 === 0) {
-                    return `$${amount / 100}`;
+                    return `$${ amount / 100 }`;
                 }
-                return `$${(amount / 100).toFixed(2)}`
+                return `$${ (amount / 100).toFixed(2) }`
             },
             cardBrandName(): string | undefined {
                 return getBrandDisplayName(this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card?.brand);
@@ -178,7 +199,7 @@
                     return;
                 }
 
-                return `${month < 10 ? "0" : ""}${month}/${year}`;
+                return `${ month < 10 ? "0" : "" }${ month }/${ year }`;
             },
             digitalWallet(): DigitalWalletDetails | undefined {
                 return getDigitalWalletDetails(this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card?.walletType);
@@ -195,6 +216,13 @@
                     return
                 }
                 return copy.checkout.BILLING_PERIOD[period];
+            },
+            billingPeriodSingular(): string| undefined {
+                const period = this.subscriptionDetails?.subscriptionProduct?.billingPeriod;
+                if (!period) {
+                    return
+                }
+                return copy.checkout.BILLING_PERIOD_PER[period]
             }
         }, methods: {
             async downgrade() {
@@ -251,7 +279,7 @@
     @import "variables";
 
     h3 {
-        margin-bottom: .8rem;
+        margin-bottom: 0.8rem;
     }
 
     button.changePlan:hover {
@@ -260,7 +288,7 @@
 
     p {
         margin-bottom: 1.6rem;
-        opacity: .8;
+        opacity: 0.8;
     }
 
     .loading-container {
@@ -274,15 +302,17 @@
         padding: 1.6rem;
     }
 
-    .brand, .last4 {
+    .brand,
+    .last4 {
         display: inline-block;
         font-weight: bold;
     }
 
-    .wallet, .expires {
+    .wallet,
+    .expires {
         font-size: 1.6rem;
         margin-bottom: 0;
-        opacity: .8;
+        opacity: 0.8;
     }
 
     button.updateBtn {
@@ -329,8 +359,7 @@
 
     .penIcon {
         height: 1.6rem;
-        margin-right: .8rem;
+        margin-right: 0.8rem;
         width: 1.6rem;
     }
-
 </style>
