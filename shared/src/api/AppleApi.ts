@@ -46,7 +46,9 @@ export interface AppleTransactionInfo {
     cancellation_date_pst?: string;
 
     /**
-     * The reason for a refunded transaction. When a customer cancels a transaction, the App Store gives them a refund and provides a value for this key. A value of “1” indicates that the customer canceled their transaction due to an actual or perceived issue within your app. A value of “0” indicates that the transaction was canceled for another reason; for example, if the customer made the purchase accidentally.
+     * The reason for a refunded transaction. When a customer cancels a transaction, the App Store gives them a refund and provides a value for this key.
+     * A value of “1” indicates that the customer canceled their transaction due to an actual or perceived issue within your app.
+     * A value of “0” indicates that the transaction was canceled for another reason; for example, if the customer made the purchase accidentally.
      Possible values: 1, 0
      */
     cancellation_reason?: "0" | "1";

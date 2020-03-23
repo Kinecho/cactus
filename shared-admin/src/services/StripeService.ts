@@ -1,4 +1,4 @@
-import {CactusConfig} from "@shared/CactusConfig";
+import { CactusConfig } from "@shared/CactusConfig";
 import Stripe from "stripe";
 import Logger from "@shared/Logger";
 
@@ -6,28 +6,29 @@ import {
     convertPaymentMethod,
     getInvoiceStatusFromStripeStatus,
     getStripeId,
-    isStripePaymentMethod
+    isStripePaymentMethod,
+    subscriptionStatusFromStripeInvoice
 } from "@admin/util/AdminStripeUtils";
-import {isString, stringifyJSON} from "@shared/util/ObjectUtil";
-import {PaymentMethod, SubscriptionInvoice} from "@shared/models/SubscriptionTypes";
-import {BillingPlatform} from "@shared/models/MemberSubscription";
+import { isString, stringifyJSON } from "@shared/util/ObjectUtil";
+import { PaymentMethod, SubscriptionInvoice } from "@shared/models/SubscriptionTypes";
+import { BillingPlatform } from "@shared/models/MemberSubscription";
 import CactusMember from "@shared/models/CactusMember";
 
 export default class StripeService {
-    protected static sharedInstance:StripeService;
+    protected static sharedInstance: StripeService;
 
     config: CactusConfig;
     logger = new Logger("StripeService");
     stripe: Stripe;
 
-    static getSharedInstance():StripeService {
-        if (!StripeService.sharedInstance){
+    static getSharedInstance(): StripeService {
+        if (!StripeService.sharedInstance) {
             throw new Error("No shared instance available. Ensure you initialize StripeService before using it");
         }
         return StripeService.sharedInstance;
     }
 
-    static initialize(config: CactusConfig){
+    static initialize(config: CactusConfig) {
         StripeService.sharedInstance = new StripeService(config);
     }
 
@@ -47,7 +48,7 @@ export default class StripeService {
         try {
             return await this.stripe.setupIntents.retrieve(setupIntentId);
         } catch (error) {
-            this.logger.error(`Failed to fetch setup intent with id ${setupIntentId}`);
+            this.logger.error(`Failed to fetch setup intent with id ${ setupIntentId }`);
             return;
         }
     }
@@ -59,7 +60,7 @@ export default class StripeService {
         try {
             return await this.stripe.plans.retrieve(planId);
         } catch (error) {
-            this.logger.error(`failed to retrieve the plan from stripe with Id: ${planId}`);
+            this.logger.error(`failed to retrieve the plan from stripe with Id: ${ planId }`);
             return;
         }
     }
@@ -74,19 +75,19 @@ export default class StripeService {
                 "userId": member.userId ?? "",
             }
         });
-        this.logger.info(`Successfully created stripe customer ${customer.id} for cactus member ${member.email}`);
+        this.logger.info(`Successfully created stripe customer ${ customer.id } for cactus member ${ member.email }`);
         return customer
     }
 
     async getStripeCustomer(customerId: string, expand?: string[]): Promise<Stripe.Customer | undefined> {
         try {
-            const customer = await this.stripe.customers.retrieve(customerId, {expand});
+            const customer = await this.stripe.customers.retrieve(customerId, { expand });
             if ((customer as Stripe.DeletedCustomer).deleted) {
                 return undefined;
             }
             return customer as Stripe.Customer;
         } catch (error) {
-            this.logger.error(`Failed to get the stripe customer for customerId = ${customerId}`, error);
+            this.logger.error(`Failed to get the stripe customer for customerId = ${ customerId }`, error);
             return undefined;
         }
     }
@@ -95,7 +96,7 @@ export default class StripeService {
         try {
             return await this.stripe.customers.update(customerId, settings);
         } catch (error) {
-            this.logger.error(`Failed to update stripe customer ${customerId}`, error);
+            this.logger.error(`Failed to update stripe customer ${ customerId }`, error);
             return;
         }
     }
@@ -106,7 +107,7 @@ export default class StripeService {
                 default_payment_method: paymentMethodId,
             })
         } catch (error) {
-            this.logger.error(`Failed to update the default payment method in subscription ${subscriptionId}`, error);
+            this.logger.error(`Failed to update the default payment method in subscription ${ subscriptionId }`, error);
             return;
         }
     }
@@ -131,7 +132,7 @@ export default class StripeService {
         if (isStripePaymentMethod(paymentMethod)) {
             return convertPaymentMethod(paymentMethod);
         } else {
-            this.logger.warn(`Unable to build payment method from invoice_settings.default_payment_method ${JSON.stringify(paymentMethod, null, 2)}`);
+            this.logger.warn(`Unable to build payment method from invoice_settings.default_payment_method ${ JSON.stringify(paymentMethod, null, 2) }`);
         }
         return;
     }
@@ -154,7 +155,7 @@ export default class StripeService {
         }
 
         try {
-            const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {expand: ["default_payment_method"]});
+            const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, { expand: ["default_payment_method"] });
             this.logger.info("retrieved striped subscription", stringifyJSON(subscription, 2));
             return subscription
         } catch (error) {
@@ -189,7 +190,7 @@ export default class StripeService {
     }
 
     async getUpcomingStripeInvoice(options: { customerId?: string, subscriptionId?: string }): Promise<SubscriptionInvoice | undefined> {
-        const {customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId} = options;
+        const { customerId: stripeCustomerId, subscriptionId: stripeSubscriptionId } = options;
         if (!stripeCustomerId && !stripeSubscriptionId) {
             this.logger.warn("No stripeCustomerId or stripeSubscriptionId found on the member. Can not fetch subscription details.");
             return undefined;
@@ -205,10 +206,11 @@ export default class StripeService {
                 return undefined;
             }
 
-            const stripePaymentMethod = await this.getDefaultPaymentMethodFromStripeInvoice(stripeInvoice);
+            const stripeSubscription = stripeInvoice.subscription as Stripe.Subscription | undefined;
 
+            const stripePaymentMethod = await this.getDefaultPaymentMethodFromStripeInvoice(stripeInvoice);
             const invoice: SubscriptionInvoice = {
-                status: getInvoiceStatusFromStripeStatus(stripeInvoice.status),
+                invoiceStatus: getInvoiceStatusFromStripeStatus(stripeInvoice.status),
                 amountCentsUsd: stripeInvoice.total,
                 defaultPaymentMethod: convertPaymentMethod(stripePaymentMethod),
                 periodStart_epoch_seconds: stripeInvoice.period_start,
@@ -221,12 +223,15 @@ export default class StripeService {
                 isGoogleSubscription: false,
                 isAutoRenew: stripeInvoice.auto_advance ?? true,
                 billingPlatform: BillingPlatform.STRIPE,
+                subscriptionStatus: subscriptionStatusFromStripeInvoice(stripeInvoice),
+                optOutTrialStartsAt_epoch_seconds: stripeSubscription?.trial_start || undefined,
+                optOutTrialEndsAt_epoch_seconds: stripeSubscription?.trial_end || undefined,
             };
             this.logger.info("Built invoice object", stringifyJSON(invoice, 2));
             return invoice;
 
         } catch (error) {
-            this.logger.warn(`No upcoming invoice found for| customerId ${stripeCustomerId} | stripeSubscriptionId ${stripeSubscriptionId}`);
+            this.logger.warn(`No upcoming invoice found for| customerId ${ stripeCustomerId } | stripeSubscriptionId ${ stripeSubscriptionId }`);
             return undefined;
         }
     }

@@ -169,6 +169,7 @@ export default class AppleService {
         }
         trial.activatedAt = trial.activatedAt ?? new Date();
         cactusSubscription.trial = trial;
+        member.subscription = cactusSubscription;
         await AdminCactusMemberService.getSharedInstance().save(member, {setUpdatedAt: false});
         result.success = true;
         return result;
