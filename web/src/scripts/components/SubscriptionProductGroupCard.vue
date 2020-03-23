@@ -323,17 +323,14 @@
         }
 
         .comfort {
-            background-color: #565369;
+            background: url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
             font-size: 1.6rem;
-            margin: -3.2rem -1.6rem 2.4rem;
-            padding: .8rem;
+            margin: -3.2rem -1.6rem 0;
+            padding: 1.6rem;
             text-align: center;
 
-            @include r(374) {
-                margin: -3.2rem -2.4rem 2.4rem;
-            }
-            @include r(600) {
-                margin: -.8rem -4.8rem 2.4rem;
+            @include r(768) {
+                margin: -.8rem -1.6rem 0;
             }
 
             svg {

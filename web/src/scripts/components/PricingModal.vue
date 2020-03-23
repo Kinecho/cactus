@@ -152,22 +152,9 @@
 
   .pricingWrapper {
       background: $dolphin url(assets/images/grainy.png) repeat;
-      padding: 0 0 2.4rem;
 
       @include r(600) {
           border-radius: 0 0 1.2rem 1.2rem;
-          padding: 0 2.4rem;
-      }
-
-      .button {
-          display: block;
-          margin: -4rem 2.4rem 0;
-          position: relative;
-
-          @include r(600) {
-              margin: 0 auto;
-              max-width: 33rem;
-          }
       }
   }
 </style>
