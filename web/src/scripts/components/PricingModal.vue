@@ -5,8 +5,10 @@
     >
     <div slot="body" class="miniModal">
         <div class="upperInfo">
-            <h2>Keep going with Cactus&nbsp;Plus</h2>
-            <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
+            <div class="miniHero">
+                <h2>Keep going with Cactus&nbsp;Plus</h2>
+                <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
+            </div>
             <div class="benefit">
                 <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
                 <div>
@@ -31,7 +33,6 @@
         </div>
         <div class="pricingWrapper">
             <PremiumPricing :startTrial="true" />
-            <a class="button secondary" href="#upgrade">Learn More</a>
         </div>
     </div>
   </modal>
@@ -65,34 +66,47 @@
   @import "~styles/pages/pricing";
 
   .miniModal {
-      @include shadowbox;
-      background-color: $beige;
+      background: $beige url(assets/images/beigeBlob.svg) center top -65vw/124vw no-repeat;
       margin: 0 auto;
       min-height: 100vh;
       text-align: center;
 
       @include r(600) {
+          @include shadowbox;
+          background-color: $beige;
+          background-position: center top -92rem;
+          background-size: 111rem;
           max-width: 64rem;
           min-height: 0;
       }
 
       .subtext {
-          margin: 0 auto 4rem;
+          font-size: 1.6rem;
+          margin: 0 auto;
           max-width: 64rem;
+
+          @include r(600) {
+              font-size: 1.8rem;
+          }
       }
 
       .benefit {
           display: flex;
           margin: 0 0 1.6rem;
           max-width: none;
+          padding: 0 1.6rem;
           text-align: left;
 
+          @include r(374) {
+              padding: 0 2.4rem;
+          }
           @include r(600) {
               align-items: center;
+              padding: 0 3.2rem;
           }
 
           &:last-of-type {
-              margin-bottom: 4rem;
+              margin-bottom: 3.2rem;
           }
 
           p {
@@ -114,6 +128,7 @@
       }
 
       .benefitIcon {
+          background-color: transparent;
           flex-shrink: 0;
           margin: -1.5rem 1.2rem 0 0;
           width: 3rem;
@@ -124,32 +139,30 @@
       }
   }
 
-  .upperInfo {
-      padding: .8rem .8rem 0;
+  .miniHero {
+      padding: 1.6rem 1.6rem 4rem;
 
       @include r(374) {
-          padding: 2.4rem 2.4rem 0;
+          padding: 2.4rem 2.4rem 4rem;
       }
       @include r(600) {
-          padding: 3.2rem 3.2rem 0;
+          padding: 3.2rem 3.2rem 4rem;
       }
   }
 
   .pricingWrapper {
       background: $dolphin url(assets/images/grainy.png) repeat;
-      border-radius: 0 0 1.2rem 1.2rem;
       padding: 0 0 2.4rem;
 
-      @include r(374) {
-          padding: 0 2.4rem 2.4rem;
-      }
       @include r(600) {
-          padding: 0 3.2rem 3.2rem;
+          border-radius: 0 0 1.2rem 1.2rem;
+          padding: 0 2.4rem;
       }
 
       .button {
           display: block;
-          margin: 2.4rem 2.4rem 0;
+          margin: -4rem 2.4rem 0;
+          position: relative;
 
           @include r(600) {
               margin: 0 auto;

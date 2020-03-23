@@ -236,8 +236,8 @@
 
         @include r(768) {
             background: transparent none;
-            max-width: none;
-            // min-width: 80rem;
+            max-width: 80rem;
+            width: 100%;
         }
     }
 
