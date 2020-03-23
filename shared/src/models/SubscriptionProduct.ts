@@ -28,6 +28,7 @@ export default class SubscriptionProduct extends FlamelinkModel {
     availableForSale: boolean = false;
     subscriptionTier: SubscriptionTier = SubscriptionTier.PLUS;
     savingsCopy?: string;
+    trialDays?: number | undefined;
 
     constructor(data?: Partial<SubscriptionProduct>) {
         super(data);
