@@ -134,13 +134,22 @@
   }
 
   .miniHero {
-      padding: 1.6rem 1.6rem 3.2rem;
+      padding: 1.6rem 4rem 3.2rem;
 
       @include r(374) {
-          padding: 2.4rem 2.4rem 3.2rem;
+          padding: 2.4rem 4rem 3.2rem;
       }
       @include r(600) {
           padding: 3.2rem;
+      }
+
+      h2 {
+          line-height: 1.2;
+          margin-bottom: .4rem;
+
+          @include r(600) {
+              font-size: 3.2rem;
+          }
       }
   }
 
