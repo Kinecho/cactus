@@ -44,7 +44,7 @@
 
             <a :href="learnMorePath" v-if="showLearnMore" class="button btn secondary onDark">{{copy.common.LEARN_MORE}}</a>
         </div>
-        <div v-if="footer" class="group-footer" :class="{
+        <div v-if="footer && showFooter" class="group-footer" :class="{
             [`icon`]: footer.icon,
             [footer.icon]: footer.icon
         }">
@@ -87,6 +87,7 @@
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
             isRestoringPurchases: {type: Boolean, default: false},
+            showFooter: {type: Boolean, default: true},
             startTrial: {type: Boolean, default: false}
         },
         data(): {

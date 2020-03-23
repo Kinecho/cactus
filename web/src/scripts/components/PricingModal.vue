@@ -32,7 +32,7 @@
             </div>
         </div>
         <div class="pricingWrapper">
-            <PremiumPricing :startTrial="true" />
+            <PremiumPricing :showFooter="false" :startTrial="true" />
         </div>
     </div>
   </modal>
