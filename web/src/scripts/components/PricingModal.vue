@@ -161,5 +161,8 @@
       @include r(600) {
           border-radius: 0 0 1.2rem 1.2rem;
       }
+      @include r(768) {
+          padding: 0 8rem;
+      }
   }
 </style>
