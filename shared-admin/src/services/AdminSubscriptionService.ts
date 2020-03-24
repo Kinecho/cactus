@@ -428,7 +428,7 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        this.logger.info("latest payment is", stringifyJSON(latestPayment));
+        this.logger.info("latest payment is", stringifyJSON(latestPayment, 2));
 
         const purchase = latestPayment.google?.subscriptionPurchase;
         if (!purchase) {
