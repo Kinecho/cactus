@@ -65,6 +65,7 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
 
 app.post("/subscription-status", async (req: functions.https.Request | any, resp: functions.Response) => {
     const notification = req.body;
+    logger.info("Processing Subscription Status Update notification", JSON.stringify(notification, null, 2));
 
     if (!isAppleServerNotification(notification)) {
         resp.sendStatus(400);
@@ -103,7 +104,7 @@ app.post("/subscription-status", async (req: functions.https.Request | any, resp
     const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : undefined;
 
     //TODO: update the payment object
-    payment.updateFromAppleNotification({memberId, notification, receipt: decodedReceipt});
+    payment.updateFromAppleNotification({ memberId, notification, receipt: decodedReceipt });
     await AdminPaymentService.getSharedInstance().save(payment);
 
     const isInTrial = latestReceiptInfo?.is_trial_period === "true";
