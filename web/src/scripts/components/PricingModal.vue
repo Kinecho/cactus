@@ -100,7 +100,6 @@
               padding: 0 2.4rem;
           }
           @include r(600) {
-              align-items: center;
               padding: 0 3.2rem;
           }
 
@@ -125,12 +124,9 @@
       .benefitIcon {
           background-color: transparent;
           flex-shrink: 0;
-          margin: -1.5rem 1.2rem 0 0;
+          height: 3rem;
+          margin: .3rem 1.2rem 0 0;
           width: 3rem;
-
-          @include r(600) {
-              width: 6.4rem;
-          }
       }
   }
 
