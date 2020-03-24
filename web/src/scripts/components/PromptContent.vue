@@ -96,7 +96,7 @@
         </transition>
         <PricingModal
             :showModal="pricingModalVisible"
-            @close="pricingModalVisible = false"/>
+            @close="closePricingModal"/>
     </div>
 </template>
 
@@ -487,6 +487,10 @@
 
         },
         methods: {
+            closePricingModal(): void {
+                this.onClose();
+                this.pricingModalVisible = false;
+            },
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
                 logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
