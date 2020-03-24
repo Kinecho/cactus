@@ -292,20 +292,18 @@
         }
 
         .plan-container {
-            max-width: 40rem;
-
-            &:not(:only-child):first-child {
-                border: 1px solid rgba($dolphin, .4);
-                border-radius: $cardBorderRadius;
-            }
-
             margin-bottom: 1.6rem;
+            max-width: 40rem;
 
             @include r(768) {
                 display: flex;
                 flex-basis: 49%;
                 flex-direction: column;
                 margin-bottom: 0;
+            }
+
+            &:not(:only-child):first-child {
+                @include shadowbox;
             }
 
             .tab-content {
@@ -388,7 +386,7 @@
                 padding-left: 2.4rem;
             }
             @include r(768) {
-                flex-basis: 50%;
+                max-width: 48rem;
             }
         }
     }
@@ -424,8 +422,13 @@
 
         &:only-child {
             display: block;
-            padding-top: .8rem;
-            flex-basis: 50%;
+            margin-top: -1.6rem;
+            max-width: 48rem;
+
+            @include r(768) {
+                margin-top: 0;
+                padding-top: .8rem;
+            }
         }
 
         @include r(768) {
