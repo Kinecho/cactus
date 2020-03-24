@@ -410,7 +410,7 @@ button:disabled {
 }
 
 .freePrice {
-  height: 11.3rem;
+  height: 14rem;
   margin-bottom: 2.4rem;
 }
 
