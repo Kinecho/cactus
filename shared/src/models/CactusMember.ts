@@ -206,7 +206,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get tier(): SubscriptionTier {
-        return this.subscription?.tier ?? SubscriptionTier.PLUS
+        return this.subscription?.tier ?? SubscriptionTier.BASIC
     }
 
     get tierDisplayName(): string | undefined {
