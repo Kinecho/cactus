@@ -40,8 +40,8 @@ export interface OptInTrial {
 }
 
 export interface OptOutTrial {
-    startedAt: Date,
-    endsAt: Date,
+    startedAt?: Date,
+    endsAt?: Date,
     billingPlatform: BillingPlatform,
 }
 
@@ -63,7 +63,6 @@ export interface MemberSubscription {
     optOutTrial?: OptOutTrial,
     cancellation?: SubscriptionCancellation,
     activated?: boolean,
-    firstPaymentAt?: Date,
     /**
      * The ID of the Cactus Subscription Product the member is subscribed to
      */

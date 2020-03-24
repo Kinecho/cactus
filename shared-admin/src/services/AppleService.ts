@@ -3,8 +3,10 @@ import {
     AppleCompletePurchaseResult,
     AppleFulfillmentResult,
     AppleReceiptResponseRawBody,
+    getCurrentSubscriptionPeriodFromReceipt,
     getOriginalTransactionId,
     isAppleReceiptResponseRawBody,
+    isReceiptInTrial,
     ReceiptStatusCode
 } from "@shared/api/AppleApi";
 import { CactusConfig } from "@shared/CactusConfig";
@@ -16,8 +18,9 @@ import Payment from "@shared/models/Payment";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import { getDefaultSubscription, getDefaultTrial } from "@shared/models/MemberSubscription";
+import { BillingPlatform, getDefaultSubscription, getDefaultTrial } from "@shared/models/MemberSubscription";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import AdminSlackService from "@admin/services/AdminSlackService";
 
 export default class AppleService {
     protected static sharedInstance: AppleService;
@@ -95,7 +98,7 @@ export default class AppleService {
         return appleResponse
     }
 
-    async completePurchase(options: { userId: string, receipt: AppleCompletePurchaseRequest }): Promise<AppleCompletePurchaseResult> {
+    async fulfillApplePurchase(options: { userId: string, receipt: AppleCompletePurchaseRequest }): Promise<AppleCompletePurchaseResult> {
         const { userId, receipt } = options;
         this.logger.info("Verifying receipt for userId", userId);
         const result: AppleCompletePurchaseResult = { success: false, isValid: false };
@@ -109,7 +112,7 @@ export default class AppleService {
         // console.log("verify receipt result", stringifyJSON(result, 2));
 
         if (appleResponse) {
-            const fulfilResult = await this.fulfilReceipt({ receipt: appleResponse, userId });
+            const fulfilResult = await this.fulfillReceipt({ receipt: appleResponse, userId });
             this.logger.info("Fulfillment response", stringifyJSON(fulfilResult, 2));
             result.fulfillmentResult = fulfilResult;
             result.success = fulfilResult.success;
@@ -131,7 +134,7 @@ export default class AppleService {
         return nextRenewal?.product_id ?? lastInfo?.product_id;
     }
 
-    async fulfilReceipt(options: { userId: string, receipt: AppleReceiptResponseRawBody }): Promise<AppleFulfillmentResult> {
+    async fulfillReceipt(options: { userId: string, receipt: AppleReceiptResponseRawBody }): Promise<AppleFulfillmentResult> {
         const { userId, receipt } = options;
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
 
@@ -164,18 +167,36 @@ export default class AppleService {
         });
         await AdminPaymentService.getSharedInstance().save(payment);
         // this.logger.info("Saved payment for apple receipt", stringifyJSON(payment, 2));
-
+        const [latest_receipt_info] = receipt.latest_receipt_info;
         const cactusSubscription = member.subscription ?? getDefaultSubscription();
         cactusSubscription.tier = subscriptionProduct?.subscriptionTier || SubscriptionTier.PLUS;
         cactusSubscription.subscriptionProductId = subscriptionProductId;
         cactusSubscription.appleOriginalTransactionId = getOriginalTransactionId(receipt);
 
-        const trial = (cactusSubscription.trial || getDefaultTrial());
-        if (trial.activatedAt) {
-            this.logger.info(`User's trial was already activated at ${ trial.activatedAt?.toISOString() }, not updating it.`)
+        const isOptOutTrial = isReceiptInTrial(receipt);
+        const currentPeriod = getCurrentSubscriptionPeriodFromReceipt(receipt);
+        if (isOptOutTrial) {
+            if (!currentPeriod) {
+                const errorMessage = `:boom: :ios: Apple Subscription: Unable to create opt out trial for ${ member.email } (${ memberId }) because one or both of start date or end date was not defined. Latest ReceiptInfo: \n${ stringifyJSON(latest_receipt_info, 2) }`
+                this.logger.error(errorMessage);
+                await AdminSlackService.getSharedInstance().sendChaChingMessage(errorMessage);
+            }
+
+            cactusSubscription.optOutTrial = {
+                startedAt: currentPeriod?.startsAt,
+                endsAt: currentPeriod?.expiresAt,
+                billingPlatform: BillingPlatform.APPLE
+            }
+        } else {
+            const trial = (cactusSubscription.trial || getDefaultTrial());
+            if (trial.activatedAt) {
+                this.logger.info(`User's trial was already activated at ${ trial.activatedAt?.toISOString() }, not updating it.`)
+            }
+            trial.activatedAt = trial.activatedAt ?? new Date();
+            cactusSubscription.trial = trial;
         }
-        trial.activatedAt = trial.activatedAt ?? new Date();
-        cactusSubscription.trial = trial;
+
+
         member.subscription = cactusSubscription;
         await AdminCactusMemberService.getSharedInstance().save(member, { setUpdatedAt: false });
         result.success = true;

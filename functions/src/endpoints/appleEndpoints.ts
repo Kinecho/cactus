@@ -48,7 +48,7 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
         return
     }
 
-    const result = await AppleService.getSharedInstance().completePurchase({ receipt: body, userId });
+    const result = await AppleService.getSharedInstance().fulfillApplePurchase({ receipt: body, userId });
 
     const product = result.fulfillmentResult?.subscriptionProduct;
     if (result.success) {

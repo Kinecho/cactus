@@ -1,6 +1,7 @@
-import {isNull} from "@shared/util/ObjectUtil";
-import {ISODate} from "@shared/mailchimp/models/MailchimpTypes";
+import { isNull } from "@shared/util/ObjectUtil";
+import { ISODate } from "@shared/mailchimp/models/MailchimpTypes";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import { fromMillisecondsString } from "@shared/util/DateUtil";
 
 export interface AppleCompletePurchaseRequest {
     /**
@@ -141,7 +142,7 @@ export enum ExpirationIntent {
     /**
      * Unknown Error
      */
-        unknown = "5"
+    unknown = "5"
 }
 
 export function getExpirationIntentDescription(intent?: ExpirationIntent): string | undefined {
@@ -256,6 +257,27 @@ export function getOriginalTransactionId(receipt?: AppleReceiptResponseRawBody):
     const [nextRenewal] = receipt.pending_renewal_info ?? [];
     const [lastInfo] = receipt.latest_receipt_info ?? [];
     return nextRenewal.original_transaction_id ?? lastInfo?.original_transaction_id;
+}
+
+export function isReceiptInTrial(receipt?: AppleReceiptResponseRawBody): boolean {
+    if (!receipt) {
+        return false;
+    }
+
+    const [lastInfo] = receipt.latest_receipt_info ?? [];
+    return lastInfo?.is_trial_period === "true"
+}
+
+export function getCurrentSubscriptionPeriodFromReceipt(receipt?: AppleReceiptResponseRawBody): { startsAt?: Date, expiresAt?: Date } | undefined {
+    if (!receipt) {
+        return undefined;
+    }
+
+    const [lastInfo] = receipt.latest_receipt_info ?? [];
+    return {
+        expiresAt: fromMillisecondsString(lastInfo?.expires_date_ms),
+        startsAt: fromMillisecondsString(lastInfo?.purchase_date_ms),
+    }
 }
 
 /**
