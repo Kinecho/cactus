@@ -18,7 +18,7 @@
                                 :class="[`tabPanel`, {active: activetab === i}]"
                                 :learnMoreLinks="learnMoreLinks || startTrial"
                                 :showFooter="showFooter"
-                                :startTrial="startTrial" />
+                                :startTrial="startTrial"/>
                     </div>
 
                 </div>
@@ -49,7 +49,7 @@
                                     :is-restoring-purchases="isRestoringPurchases"
                                     :class="{active: activetab === i}"
                                     :showFooter="showFooter"
-                                    :startTrial="startTrial" />
+                                    :startTrial="startTrial"/>
                         </template>
 
                     </div>
@@ -66,21 +66,21 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from '@shared/PageRoutes';
+    import { PageRoute } from '@shared/PageRoutes';
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {getQueryParam} from "@web/util";
-    import {QueryParam} from "@shared/util/queryParams";
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
     import Logger from "@shared/Logger";
     import CopyService from "@shared/copy/CopyService";
     import SubscriptionProductGroupCard from "@components/SubscriptionProductGroupCard.vue";
-    import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
+    import { SubscriptionProductGroupEntry } from "@shared/util/SubscriptionProductUtil";
     import SubscriptionProductGroupService from "@web/services/SubscriptionProductGroupService";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {isAndroidApp} from "@web/DeviceUtil";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import { isAndroidApp } from "@web/DeviceUtil";
     import AndroidService from "@web/android/AndroidService";
-    import {restoreAndroidPurchases} from "@web/checkoutService";
+    import { restoreAndroidPurchases } from "@web/checkoutService";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -90,10 +90,10 @@
             ProductGroup: SubscriptionProductGroupCard,
         },
         props: {
-            tabsOnMobile: {type: Boolean, default: true},
-            learnMoreLinks: {type: Boolean, default: false},
-            showFooter: {type: Boolean, default: true},
-            startTrial: {type: Boolean, default: false}
+            tabsOnMobile: { type: Boolean, default: true },
+            learnMoreLinks: { type: Boolean, default: false },
+            showFooter: { type: Boolean, default: true },
+            startTrial: { type: Boolean, default: false }
         },
         data(): {
             isProcessing: boolean,
@@ -133,7 +133,7 @@
         async beforeMount() {
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
                     if (this.member?.email) {
@@ -199,7 +199,7 @@
                         return;
                     }
                     this.isRestoringPurchases = true;
-                    const result = await restoreAndroidPurchases({member: this.member ?? undefined});
+                    const result = await restoreAndroidPurchases({ member: this.member ?? undefined });
                     if (result.success) {
                         AndroidService.shared.showToast("Finished restoring purchases");
                     }
@@ -219,6 +219,8 @@
     @import "mixins";
     @import "variables";
     @import "transitions";
+
+    $cardBorderRadius: 1.6rem;
 
     .centered {
         position: relative;
@@ -252,7 +254,7 @@
     }
 
     .heading {
-        border-radius: 1.6rem 1.6rem 0 0;
+        border-radius: $cardBorderRadius $cardBorderRadius 0 0;
         font-size: 2.4rem;
         font-weight: bold;
         padding: 2.4rem 1.6rem .8rem;
@@ -291,6 +293,11 @@
 
         .plan-container {
             max-width: 40rem;
+
+            &:not(:only-child):first-child {
+                border: 1px solid rgba($dolphin, .4);
+                border-radius: $cardBorderRadius;
+            }
 
             @include r(768) {
                 display: flex;
@@ -347,11 +354,11 @@
         }
 
         &:first-child {
-            border-radius: 1.6rem 0 0 0;
+            border-radius: $cardBorderRadius 0 0 0;
 
             @include r(768) {
                 background-color: $white;
-                border-radius: 1.6rem 1.6rem 0 0;
+                border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $darkestGreen;
             }
         }
@@ -361,14 +368,14 @@
 
             @include r(768) {
                 background: $dolphin url(assets/images/grainy.png) repeat;
-                border-radius: 1.6rem 1.6rem 0 0;
+                border-radius: $cardBorderRadius $cardBorderRadius 0 0;
                 color: $white;
             }
         }
 
         &:only-child {
             background: $dolphin url(assets/images/grainy.png) repeat;
-            border-radius: 1.6rem 1.6rem 0 0;
+            border-radius: $cardBorderRadius $cardBorderRadius 0 0;
             flex-basis: 100%;
             padding-left: 1.6rem;
             padding-bottom: .8rem;
@@ -385,6 +392,7 @@
 
     .restore-container {
         padding: 3rem 0;
+
         &.noTabs {
             margin-left: 1rem;
         }
