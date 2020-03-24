@@ -11,7 +11,7 @@ import {
     subscriptionTierDisplayName,
     needsTrialExpiration
 } from "@shared/models/MemberSubscription";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -206,7 +206,7 @@ export default class CactusMember extends BaseModel {
     }
 
     get tier(): SubscriptionTier {
-        return this.subscription?.tier ?? SubscriptionTier.BASIC
+        return this.subscription?.tier ?? DEFAULT_SUBSCRIPTION_TIER
     }
 
     get tierDisplayName(): string | undefined {

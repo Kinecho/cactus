@@ -1,5 +1,5 @@
 import {DateTime} from "luxon";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CopyService from "@shared/copy/CopyService";
 import {BillingPeriod} from "@shared/models/SubscriptionProduct";
 import {isBlank} from "@shared/util/StringUtil";
@@ -105,7 +105,7 @@ export const DEFAULT_TRIAL_DAYS = 7;
 
 export function getDefaultSubscription(): MemberSubscription {
     return {
-        tier: SubscriptionTier.BASIC,
+        tier: DEFAULT_SUBSCRIPTION_TIER,
         activated: false
     }
 }
