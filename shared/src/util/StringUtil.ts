@@ -3,7 +3,19 @@ import camelcase from "camelcase";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import PromptContent from "@shared/models/PromptContent";
-import {isNumber} from "@shared/util/ObjectUtil";
+import { isNumber, isString } from "@shared/util/ObjectUtil";
+
+const MICRO_TO_CENT = 10000;
+
+export function microDollarsStringToCents(input: string|undefined): number | undefined {
+    if (isString(input)) {
+        const ms = Number(input);
+        if (isNumber(ms)) {
+            return ms / MICRO_TO_CENT
+        }
+    }
+    return undefined;
+}
 
 export function removeSpecialCharacters(input: string, replacement: string): string {
     return input.trim().toLowerCase()

@@ -44,6 +44,7 @@ import { getLatestGooglePayment } from "@shared/util/PaymentUtil";
 import StripeService from "@admin/services/StripeService";
 import { GooglePaymentState, subscriptionStatusFromGooglePaymentState } from "@shared/api/GooglePlayBillingTypes";
 import { formatDateTime, fromMillisecondsString } from "@shared/util/DateUtil";
+import { microDollarsStringToCents } from "@shared/util/StringUtil";
 
 export interface ExpireTrialResult {
     member: CactusMember,
@@ -439,15 +440,15 @@ export default class AdminSubscriptionService {
 
         const expiryDateMs = optionalStringToNumber(purchase.expiryTimeMillis);
         const autoRenewing = purchase.autoRenewing ?? false;
-        const priceMicros = optionalStringToNumber(latestPayment.google?.subscriptionPurchase?.priceAmountMicros);
+        const priceCents = microDollarsStringToCents(latestPayment.google?.subscriptionPurchase?.priceAmountMicros);
         const androidProductId = latestPayment.google?.subscriptionProductId;
 
-        const nextPaymentSeconds = expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined;
-        const hasEnded = nextPaymentSeconds ? (Date.now() / 1000 > nextPaymentSeconds) : false;
+        const nextPaymentSeconds = expiryDateMs ? Math.round(expiryDateMs / 1000) : undefined;
+        const hasEnded = nextPaymentSeconds ? (Date.now() > expiryDateMs) : false;
         const subscriptionStatus = subscriptionStatusFromGooglePaymentState(latestPayment.google?.subscriptionPurchase?.paymentState);
         return {
             nextPaymentDate_epoch_seconds: expiryDateMs ? Math.round((expiryDateMs / 1000)) : undefined,
-            amountCentsUsd: priceMicros ? priceMicros / 100000 : undefined,
+            amountCentsUsd: priceCents,
             isAppleSubscription: false,
             isGoogleSubscription: true,
             billingPlatform: BillingPlatform.GOOGLE,
@@ -743,7 +744,7 @@ export default class AdminSubscriptionService {
             if (isNewPurchase) {
                 await AdminSlackService.getSharedInstance().sendChaChingMessage({
                     text: `:android: ${ member.email } has completed an in-app purchase \`${ subscriptionProduct.displayName } (${ item.subscriptionProductId })\`\n` +
-                    `*In Opt Out Trial*: \`${ isOptOutTrial ? "Yes" : "No" }\`}` +
+                    `*In Opt-Out Trial*: \`${ isOptOutTrial ? "Yes" : "No" }\`\n` +
                     `${ isOptOutTrial ? `*Trial End Date*: ${ formatDateTime(cactusSubscription.optOutTrial?.endsAt) }` : "" }`
                 })
             }
