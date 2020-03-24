@@ -299,10 +299,13 @@
                 border-radius: $cardBorderRadius;
             }
 
+            margin-bottom: 1.6rem;
+
             @include r(768) {
                 display: flex;
                 flex-basis: 49%;
                 flex-direction: column;
+                margin-bottom: 0;
             }
 
             .tab-content {
