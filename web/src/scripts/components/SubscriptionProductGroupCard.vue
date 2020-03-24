@@ -323,21 +323,24 @@
   }
 
   .comfort {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     margin: -3.2rem -1.6rem 0;
     padding: 1.6rem;
     text-align: center;
 
+    @include r(600) {
+        font-size: 1.6rem;
+    }
     @include r(768) {
       margin: -0.8rem -1.6rem 0;
     }
 
     svg {
       display: inline-block;
-      height: 1.6rem;
+      height: 1.4rem;
       margin: 0 0.8rem;
       vertical-align: middle;
-      width: 1.6rem;
+      width: 1.4rem;
     }
   }
 }
