@@ -18,7 +18,7 @@ import { MergeField, UpdateMergeFieldRequest } from "@shared/mailchimp/models/Ma
 import { Collection } from "@shared/FirestoreBaseModels";
 import Logger from "@shared/Logger";
 import { QuerySortDirection } from "@shared/types/FirestoreConstants";
-import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
+import { isNull, optionalStringToNumber, stringifyJSON } from "@shared/util/ObjectUtil";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import { getHostname } from "@admin/config/configService";
 import { PageRoute } from "@shared/PageRoutes";
@@ -437,17 +437,17 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const expiryDateMs = purchase.expiryTimeMillis;
+        const expiryDateMs = optionalStringToNumber(purchase.expiryTimeMillis);
         const autoRenewing = purchase.autoRenewing ?? false;
-        const priceCents = latestPayment.amountCentsUsd;
+        const priceMicros = optionalStringToNumber(latestPayment.google?.subscriptionPurchase?.priceAmountMicros);
         const androidProductId = latestPayment.google?.subscriptionProductId;
 
         const nextPaymentSeconds = expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined;
         const hasEnded = nextPaymentSeconds ? (Date.now() / 1000 > nextPaymentSeconds) : false;
         const subscriptionStatus = subscriptionStatusFromGooglePaymentState(latestPayment.google?.subscriptionPurchase?.paymentState);
         return {
-            nextPaymentDate_epoch_seconds: expiryDateMs ? (Number(expiryDateMs) / 1000) : undefined,
-            amountCentsUsd: priceCents,
+            nextPaymentDate_epoch_seconds: expiryDateMs ? Math.round((expiryDateMs / 1000)) : undefined,
+            amountCentsUsd: priceMicros ? priceMicros / 100000 : undefined,
             isAppleSubscription: false,
             isGoogleSubscription: true,
             billingPlatform: BillingPlatform.GOOGLE,
