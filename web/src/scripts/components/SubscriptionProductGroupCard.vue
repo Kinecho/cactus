@@ -1,7 +1,11 @@
 <template>
     <section class="tab-content" :class="[productGroup.tier.toLowerCase() + '-panel', `display-index-${displayIndex}`, {tabsOnMobile}]">
 
-        <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown"/>
+        <div class="comfort" v-if="startTrial">
+            First 7 days free!<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 15"><path fill="#CC33A1" d="M8.246 1.33a4.54 4.54 0 116.423 6.424l-6.175 6.175a.699.699 0 01-.988 0L1.33 7.754A4.542 4.542 0 017.753 1.33L8 1.577l.246-.246z"/></svg>Cancel anytime.
+        </div>
+
+        <markdown class="group-description" :source="groupDescriptionMarkdown" v-if="groupDescriptionMarkdown && !this.startTrial"/>
 
         <template v-for="(section, index) in sections" v-if="showFeatures">
             <h3 v-if="section.title">{{section.title}}</h3>
@@ -40,7 +44,7 @@
 
             <a :href="learnMorePath" v-if="showLearnMore" class="button btn secondary onDark">{{copy.common.LEARN_MORE}}</a>
         </div>
-        <div v-if="footer" class="group-footer" :class="{
+        <div v-if="footer && showFooter" class="group-footer" :class="{
             [`icon`]: footer.icon,
             [footer.icon]: footer.icon
         }">
@@ -52,7 +56,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {SubscriptionProductGroupEntry} from "@shared/util/SubscriptionProductUtil";
-    import {isInTrial, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import {isOptInTrialing, subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
     import SubscriptionProduct, {BillingPeriod} from "@shared/models/SubscriptionProduct";
     import CopyService from "@shared/copy/CopyService";
     import {LocalizedCopy} from "@shared/copy/CopyTypes";
@@ -82,7 +86,9 @@
             member: {type: Object as () => CactusMember | undefined},
             tabsOnMobile: {type: Boolean, default: true},
             learnMoreLinks: {type: Boolean, default: false},
-            isRestoringPurchases: {type: Boolean, default: false}
+            isRestoringPurchases: {type: Boolean, default: false},
+            showFooter: {type: Boolean, default: true},
+            startTrial: {type: Boolean, default: false}
         },
         data(): {
             selectedProduct: SubscriptionProduct,
@@ -127,13 +133,13 @@
                     return copy.common.LOADING;
                 }
 
-                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isInTrial) {
+                if (this.isNotCurrentTier && this.selectedProduct.isFree && !isOptInTrialing) {
                     return copy.checkout.MANAGE_MY_PLAN;
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE;
                 } else if (this.signedIn) {
-                    return `${copy.checkout.UPGRADE}`;
+                    return `${copy.checkout.TRY_CACTUS_PLUS}`;
                 } else {
                     return `${copy.checkout.PURCHASE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
@@ -147,11 +153,11 @@
             isCurrentTier(): boolean {
                 return this.productGroup.tier === this.member?.tier;
             },
-            isInTrial(): boolean {
-                return this.member?.isInTrial ?? false
+            isOptInTrialing(): boolean {
+                return this.member?.isOptInTrialing ?? false
             },
             isTrialingTier(): boolean {
-                return this.productGroup.tier === this.member?.tier && this.member?.isInTrial;
+                return this.productGroup.tier === this.member?.tier && this.member?.isOptInTrialing;
             },
             signedIn(): boolean {
                 return !!this.member
@@ -202,7 +208,7 @@
 
                 const product = this.selectedProduct;
 
-                if (this.isCurrentTier && !this.isInTrial) {
+                if (this.isCurrentTier && !this.isOptInTrialing) {
                     this.goToAccount()
                 }
 
@@ -241,194 +247,209 @@
 </script>
 
 <style lang="scss" scoped>
-    @import "common";
-    @import "mixins";
-    @import "variables";
+@import "common";
+@import "mixins";
+@import "variables";
 
-    .tab-content {
-        background: $dolphin url(assets/images/grainy.png) repeat;
-        box-shadow: 0 11px 15px -7px rgba(0, 0, 0, .16),
-        0 24px 38px 3px rgba(0, 0, 0, .1),
-        0 9px 46px 8px rgba(0, 0, 0, .08);
-        color: $white;
-        border-radius: 0 0 1.6rem 1.6rem;
-        padding: 2.4rem 1.6rem 3.2rem;
-        position: relative;
-        text-align: left;
+.tab-content {
+  color: $white;
+  border-radius: 0 0 1.6rem 1.6rem;
+  position: relative;
+  text-align: left;
 
-        &:first-child:before {
-            background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
-            bottom: -4rem;
-            content: "";
-            display: block;
-            height: 216px;
-            left: -28%;
-            overflow: hidden;
-            position: absolute;
-            width: 228px;
-            z-index: -1;
-        }
+  &:first-child:before {
+    background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+    bottom: -4rem;
+    content: "";
+    display: block;
+    height: 216px;
+    left: -28%;
+    overflow: hidden;
+    position: absolute;
+    width: 228px;
+    z-index: -1;
+  }
 
-        @include r(374) {
-            padding: 2.4rem 2.4rem 3.2rem;
-        }
-        @include r(768) {
-            border-radius: 0 0 1.6rem 1.6rem;
-            flex-basis: 50%;
-            margin: 0 1.6rem;
-            padding: 0 2.4rem 3.2rem;
+  @include r(768) {
+    border-radius: 0 0 1.6rem 1.6rem;
+    flex-basis: 50%;
+    margin: 0 1.6rem;
+    padding: 0 2.4rem 3.2rem;
 
-            &:first-child:before {
-                bottom: -6rem;
-            }
-
-            &.basic-panel {
-                background: $white none;
-                color: $darkestGreen;
-            }
-
-            &.plus-panel {
-                background: $dolphin url(assets/images/grainy.png) repeat;
-                color: $white;
-            }
-        }
-
-        &.basic-panel {
-            background-color: $white;
-            color: $darkestGreen;
-
-            &.tabsOnMobile {
-                background: $dolphin url(assets/images/grainy.png) repeat;
-                color: $white;
-
-                @include r(768) {
-                    background: $white;
-                    color: $darkestGreen;
-                }
-            }
-        }
-
-        h4 {
-            margin-bottom: 1.6rem;
-        }
-
-        button, .button {
-            max-width: none;
-            white-space: nowrap;
-            width: 100%;
-        }
+    &:only-child {
+      flex-basis: 100%;
+      margin: 0;
     }
 
-    button:disabled {
-        background-color: transparent;
-        color: transparentize($white, .4);
-        @include r(768) {
-            .basic-panel & {
-                color: transparentize($darkestGreen, .4);
-            }
-        }
+    &:first-child:before {
+      bottom: -6rem;
     }
 
-    .flex-plans .basic-panel .actions .button:disabled {
-        color: transparentize($darkestGreen, .4);
+    &.basic-panel {
+      background: $white none;
+      color: $darkestGreen;
     }
+  }
 
-    .actions .button {
-        display: block;
-        margin-bottom: .8rem;
+  &.plus-panel {
+    background: $dolphin url(assets/images/grainy.png) repeat;
+    color: $white;
+  }
 
-        & + .button {
-            margin-bottom: 1.6rem;
-        }
+  &.basic-panel {
+    background-color: $white;
+    color: $darkestGreen;
+
+    &.tabsOnMobile {
+      background: $dolphin url(assets/images/grainy.png) repeat;
+      color: $white;
+
+      @include r(768) {
+        background: $white;
+        color: $darkestGreen;
+      }
     }
+  }
 
-    .actions .error {
-        background: lighten($red, 20%) url(assets/images/sadCactusPatternWhiteTransparent.svg);
-        border-radius: .8rem;
-        color: $dolphin;
-        margin-bottom: 1.6rem;
-        padding: 1.6rem;
-        text-align: center;
-    }
+  h4 {
+    margin-bottom: 1.6rem;
+  }
 
-    .group-description {
-        margin-bottom: 2.4rem;
-    }
+  button,
+  .button {
+    max-width: none;
+    white-space: nowrap;
+    width: 100%;
+  }
 
-    .flexContainer {
-        display: flex;
-        margin-bottom: 2.4rem;
-        justify-content: space-between;
-    }
+  .comfort {
+    font-size: 1.4rem;
+    margin: -2.4rem -1.6rem 0;
+    padding: 1.6rem;
+    text-align: center;
 
-    .planButton {
-        background-color: transparentize($white, .9);
-        border: 2px solid $dolphin;
-        border-radius: .8rem;
-        cursor: pointer;
+    @include r(600) {
         font-size: 1.6rem;
-        padding: .8rem;
-        text-align: center;
-        width: 32%;
-
-        &.selected {
-            border-color: $green;
-            box-shadow: inset 0 0 0 .4rem $dolphin;
-        }
+    }
+    @include r(768) {
+      margin: -0.8rem -1.6rem 0;
     }
 
-    .cadence {
-        font-size: 1.2rem;
-        letter-spacing: 1px;
-        opacity: .8;
-        text-transform: uppercase;
+    svg {
+      display: inline-block;
+      height: 1.4rem;
+      margin: 0 0.8rem;
+      vertical-align: middle;
+      width: 1.4rem;
+    }
+  }
+}
+
+button:disabled {
+  background-color: transparent;
+  color: transparentize($white, 0.4);
+  @include r(768) {
+    .basic-panel & {
+      color: transparentize($darkestGreen, 0.4);
+    }
+  }
+}
+
+.flex-plans .basic-panel .actions .button:disabled {
+  color: transparentize($darkestGreen, 0.4);
+}
+
+.actions .button {
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.actions .error {
+  background: lighten($red, 20%)
+    url(assets/images/sadCactusPatternWhiteTransparent.svg);
+  border-radius: 0.8rem;
+  color: $dolphin;
+  margin-bottom: 1.6rem;
+  padding: 1.6rem;
+  text-align: center;
+}
+
+.group-description {
+  margin-bottom: 2.4rem;
+}
+
+.flexContainer {
+  display: flex;
+  margin-bottom: 2.4rem;
+  justify-content: space-between;
+}
+
+.planButton {
+  background-color: transparentize($white, 0.9);
+  border: 2px solid $dolphin;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  font-size: 1.6rem;
+  padding: 0.8rem;
+  text-align: center;
+  width: 32%;
+
+  &.selected {
+    border-color: $green;
+    box-shadow: inset 0 0 0 0.4rem $dolphin;
+  }
+}
+
+.cadence {
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.planPrice,
+.freePrice {
+  font-size: 2rem;
+}
+
+.freePrice {
+  height: 14rem;
+  margin-bottom: 2.4rem;
+}
+
+.payment-period-per {
+  font-size: 1.4rem;
+  text-transform: lowercase;
+}
+
+.savings {
+  background-color: transparentize($royal, 0.4);
+  border-radius: 0 0 0.8rem 0.8rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 0.8rem -0.8rem -0.8rem;
+  padding: 0.4rem 0.8rem;
+  text-transform: uppercase;
+}
+
+.group-footer {
+  align-items: center;
+  display: flex;
+  font-size: 1.4rem;
+  justify-content: center;
+
+  &.icon {
+    &:before {
+      content: "";
+      margin-right: 0.6rem;
     }
 
-    .planPrice,
-    .freePrice {
-        font-size: 2rem;
+    &.heart:before {
+      background: url(assets/icons/heart.svg) no-repeat;
+      height: 1.4rem;
+      width: 1.6rem;
     }
-
-    .freePrice {
-        height: 11.3rem;
-        margin-bottom: 2.4rem;
-    }
-
-    .payment-period-per {
-        font-size: 1.4rem;
-        text-transform: lowercase;
-    }
-
-    .savings {
-        background-color: transparentize($royal, .4);
-        border-radius: 0 0 .8rem .8rem;
-        font-size: 1.4rem;
-        font-weight: bold;
-        letter-spacing: 1px;
-        margin: .8rem -.8rem -.8rem;
-        padding: .4rem .8rem;
-        text-transform: uppercase;
-    }
-
-    .group-footer {
-        align-items: center;
-        display: flex;
-        font-size: 1.4rem;
-        justify-content: center;
-
-        &.icon {
-            &:before {
-                content: "";
-                margin-right: .6rem;
-            }
-
-            &.heart:before {
-                background: url(assets/icons/heart.svg) no-repeat;
-                height: 1.4rem;
-                width: 1.6rem;
-            }
-        }
-    }
-
-
+  }
+}
 </style>

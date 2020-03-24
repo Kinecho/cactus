@@ -6,6 +6,7 @@ import {PromptSendTime, QuarterHour} from "@shared/models/CactusMember";
 import Logger from "@shared/Logger";
 import {getValidTimezoneName} from "@shared/timezones";
 import {isDate, isNull, isNumber} from "@shared/util/ObjectUtil";
+import { isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("DateUtil.ts");
 
@@ -18,6 +19,17 @@ export const mailchimpTimeZone = "America/Denver";
  */
 export function getMailchimpDateString(date: Date = new Date()): string {
     return DateTime.fromJSDate(date).setZone(mailchimpTimeZone).toISODate();
+}
+
+export function fromMillisecondsString(input: string|undefined): Date|undefined {
+    if (isBlank(input)) {
+        return undefined;
+    }
+    const ms = Number(input);
+    if (!isNumber(ms)){
+        return undefined;
+    }
+    return new Date(ms);
 }
 
 export function getDateObjectForTimezone(date: Date, timeZone: string): DateObject {

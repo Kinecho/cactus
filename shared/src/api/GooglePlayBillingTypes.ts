@@ -1,4 +1,5 @@
-import {isNull} from "@shared/util/ObjectUtil";
+import { isNull } from "@shared/util/ObjectUtil";
+import { SubscriptionStatus } from "@shared/models/SubscriptionTypes";
 
 export interface DeveloperNotification {
     /**
@@ -255,7 +256,7 @@ export function getCancelReasonDescription(code?: SubscriptionCancelReasonCode |
         case SubscriptionCancelReasonCode.DEVELOPER_CANCELED:
             return "Subscription was canceled by the developer";
         default:
-            return `Unknown reason code: ${code}`;
+            return `Unknown reason code: ${ code }`;
     }
 
 }
@@ -273,4 +274,23 @@ export enum GooglePaymentState {
     FREE_TRIAL = 2,
     PENDING_DEFERRED_UPGRADE_OR_DOWNGRADE = 3
 
+}
+
+export function subscriptionStatusFromGooglePaymentState(paymentState?: GooglePaymentState | undefined): SubscriptionStatus {
+    if (!paymentState === undefined) {
+        return SubscriptionStatus.unknown;
+    }
+    switch (paymentState) {
+        case GooglePaymentState.PAYMENT_PENDING:
+            return SubscriptionStatus.pending;
+        case GooglePaymentState.PAYMENT_RECEIVED:
+            return SubscriptionStatus.active;
+        case GooglePaymentState.FREE_TRIAL:
+            return SubscriptionStatus.in_trial;
+        case GooglePaymentState.PENDING_DEFERRED_UPGRADE_OR_DOWNGRADE:
+            return SubscriptionStatus.pending;
+        default:
+            return SubscriptionStatus.unknown;
+
+    }
 }

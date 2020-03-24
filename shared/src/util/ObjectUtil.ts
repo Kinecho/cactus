@@ -28,6 +28,18 @@ export function isNotNull(input: any): boolean {
     return !isNull(input);
 }
 
+export function optionalStringToNumber(input: string|undefined): number|undefined {
+    if (isNull(input)) {
+        return undefined;
+    }
+
+    const num = Number(input);
+    if (isNumber(num)) {
+        return num
+    }
+    return;
+}
+
 export function isDate(input: any): input is Date {
     return isNotNull(input) && input instanceof Date;
 }

@@ -1,5 +1,5 @@
 import {DateTime} from "luxon";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CopyService from "@shared/copy/CopyService";
 import {BillingPeriod} from "@shared/models/SubscriptionProduct";
 import {isBlank} from "@shared/util/StringUtil";
@@ -33,16 +33,35 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
     }
 }
 
-export interface SubscriptionTrial {
+export interface OptInTrial {
     startedAt: Date,
     endsAt: Date,
     activatedAt?: Date | null
 }
 
+export interface OptOutTrial {
+    startedAt?: Date,
+    endsAt?: Date,
+    billingPlatform: BillingPlatform,
+}
+
+export enum CancellationReasonCode {
+    USER_CANCELED = "USER_CANCELED",
+    EXPIRED = "EXPIRED",
+    UNKNOWN = "UNKNOWN"
+}
+
+export interface SubscriptionCancellation {
+    canceledAt: Date;
+    reasonCode: CancellationReasonCode
+}
+
 export interface MemberSubscription {
     legacyConversion?: boolean
     tier: SubscriptionTier,
-    trial?: SubscriptionTrial,
+    trial?: OptInTrial,
+    optOutTrial?: OptOutTrial,
+    cancellation?: SubscriptionCancellation,
     activated?: boolean,
     /**
      * The ID of the Cactus Subscription Product the member is subscribed to
@@ -84,7 +103,14 @@ export function getSubscriptionBillingPlatform(subscription?: MemberSubscription
 
 export const DEFAULT_TRIAL_DAYS = 7;
 
-export function getDefaultSubscription(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
+export function getDefaultSubscription(): MemberSubscription {
+    return {
+        tier: DEFAULT_SUBSCRIPTION_TIER,
+        activated: false
+    }
+}
+
+export function getDefaultSubscriptionWithOptInTrial(trialDays: number = DEFAULT_TRIAL_DAYS): MemberSubscription {
     return {
         tier: SubscriptionTier.PLUS,
         activated: false,
@@ -104,7 +130,7 @@ export function getDefaultSubscriptionWithEndDate(endDate: Date): MemberSubscrip
 }
 
 
-export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): SubscriptionTrial {
+export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): OptInTrial {
     const startDate = new Date();
     const endDate = DateTime.fromJSDate(startDate).plus({days: trialDays}).toJSDate();
     return {
@@ -114,9 +140,9 @@ export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): Subscri
     }
 }
 
-export function isInTrial(subscription?: MemberSubscription): boolean {
+export function isOptInTrialing(subscription?: MemberSubscription): boolean {
     if (!subscription) {
-        return true;
+        return false;
     }
     if (!subscription?.trial?.endsAt) {
         return false

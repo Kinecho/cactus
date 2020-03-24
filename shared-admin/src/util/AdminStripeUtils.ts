@@ -1,6 +1,13 @@
 import Stripe from "stripe";
-import {hasIdField, isNull, isString} from "@shared/util/ObjectUtil";
-import {CardBrand, CardPaymentMethod, InvoiceStatus, PaymentMethod, WalletType} from "@shared/models/SubscriptionTypes";
+import { hasIdField, isNull, isString } from "@shared/util/ObjectUtil";
+import {
+    CardBrand,
+    CardPaymentMethod,
+    InvoiceStatus,
+    PaymentMethod,
+    SubscriptionStatus,
+    WalletType
+} from "@shared/models/SubscriptionTypes";
 
 export function getCustomerId(customer: Stripe.Customer | string | undefined | null): string | undefined {
     if (isString(customer)) {
@@ -10,6 +17,32 @@ export function getCustomerId(customer: Stripe.Customer | string | undefined | n
         return customer.id || undefined;
     }
     return undefined;
+}
+
+export function subscriptionStatusFromStripeInvoice(invoice: Stripe.Invoice): SubscriptionStatus {
+    const subscription = invoice.subscription;
+    if (isString(subscription)) {
+        return SubscriptionStatus.unknown;
+    }
+    if (!subscription) {
+        return SubscriptionStatus.unknown;
+    }
+    switch (subscription.status) {
+        case "active":
+            return SubscriptionStatus.active;
+        case "incomplete_expired":
+        case "incomplete":
+        case "unpaid":
+            return SubscriptionStatus.expired;
+        case "canceled":
+            return SubscriptionStatus.canceled;
+        case "past_due":
+            return SubscriptionStatus.past_due;
+        case "trialing":
+            return SubscriptionStatus.in_trial;
+        default:
+            return SubscriptionStatus.unknown;
+    }
 }
 
 export function getStripeId(input: string | Object | null | undefined): string | undefined {

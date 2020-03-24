@@ -76,7 +76,7 @@ export interface AndroidPurchase {
     /**
      * The package name (bundle ID) of the Android app in which the purchase was completed.
      */
-    packageName: string;
+    packageName?: string;
 
     /**
      * An order ID is a string that represents a financial transaction on Google Play.

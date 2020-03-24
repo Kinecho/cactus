@@ -16,24 +16,26 @@
     <div class="middleSections">
         <section class="benefits">
             <div class="centered">
-                <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
-                <div class="flexContainer">
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-                        <h3>Make it daily</h3>
-                        <p class="text">Become more focused at work, more positive at home with a fresh prompt, every&nbsp;day.</p>
-                    </div>
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                        <h3>Look back</h3>
-                        <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
-                    </div>
-                    <div class="benefit">
-                        <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
-                        <h3>Private + secure</h3>
-                        <p class="text">Your journal entries are yours—encrypted and never read or&nbsp;sold.</p>
-                    </div>
-                </div>
+                <div>
+                  <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
+                  <div class="flexContainer">
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                          <h3>Make it daily</h3>
+                          <p class="text">Become more focused at work, more positive at home with a fresh prompt, every&nbsp;day.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
+                          <h3>Look back</h3>
+                          <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
+                      </div>
+                      <div class="benefit">
+                          <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+                          <h3>Private + secure</h3>
+                          <p class="text">Your journal entries are yours—encrypted and never read or&nbsp;sold.</p>
+                      </div>
+                  </div>
+              </div>
             </div>
         </section>
         <section class="insights feature">
@@ -63,8 +65,8 @@
     </div>
     <section class="upgrade">
         <div class="centered" id="upgrade">
-            <h2 class="sectionHeader">Upgrade to Plus</h2>
-            <PremiumPricing/>
+            <h2 class="sectionHeader">Choose your plan:</h2>
+            <PremiumPricing />
         </div>
     </section>
     <StandardFooter/>

@@ -1,10 +1,15 @@
-import {MemberSubscription, SubscriptionTrial, needsTrialExpiration} from "@shared/models/MemberSubscription";
+import {
+    MemberSubscription,
+    OptInTrial,
+    needsTrialExpiration,
+    isOptInTrialing
+} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
 describe("trialEnded tests", () => {
     test("Trial ended", () => {
-        const trial: SubscriptionTrial = {
+        const trial: OptInTrial = {
             startedAt: DateTime.local().minus({days: 7}).toJSDate(),
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
@@ -13,7 +18,7 @@ describe("trialEnded tests", () => {
     });
 
     test("Trial activated", () => {
-        const trial: SubscriptionTrial = {
+        const trial: OptInTrial = {
             startedAt: DateTime.local().minus({days: 7}).toJSDate(),
             endsAt: DateTime.local().minus({days: 1}).toJSDate(),
             activatedAt: DateTime.local().minus({days: 2}).toJSDate()
@@ -23,7 +28,7 @@ describe("trialEnded tests", () => {
     });
 
     test("Trial not ended", () => {
-        const trial: SubscriptionTrial = {
+        const trial: OptInTrial = {
             startedAt: DateTime.local().minus({days: 7}).toJSDate(),
             endsAt: DateTime.local().plus({days: 1}).toJSDate()
         };
@@ -32,7 +37,7 @@ describe("trialEnded tests", () => {
     });
 
     test("tier is basic, trial has ended", () => {
-        const trial: SubscriptionTrial = {
+        const trial: OptInTrial = {
             startedAt: DateTime.local().minus({days: 7}).toJSDate(),
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
@@ -41,11 +46,15 @@ describe("trialEnded tests", () => {
     });
 
     test("tier is undefined, trial has ended", () => {
-        const trial: SubscriptionTrial = {
+        const trial: OptInTrial = {
             startedAt: DateTime.local().minus({days: 7}).toJSDate(),
             endsAt: DateTime.local().minus({days: 1}).toJSDate()
         };
         const subscription = {trial} as MemberSubscription;
         expect(needsTrialExpiration(subscription)).toBeFalsy();
     });
+
+    test("no trial exists, is NOT opt in trialing", () => {
+        expect(isOptInTrialing(undefined)).toBeFalsy()
+    })
 });

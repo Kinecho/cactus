@@ -163,7 +163,7 @@
                 const links: DropdownMenuLink[] = [{
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
-                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isInTrial)
+                    badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {

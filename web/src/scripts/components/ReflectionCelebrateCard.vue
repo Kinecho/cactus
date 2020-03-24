@@ -12,7 +12,7 @@
                     <MemberInsights
                         :words="wordData"
                         :didWrite="didWriteReflection"
-                        :subscriptionTier="subscriptionTier"
+                        :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
                         :startGated="true"
                         :startBlurred="true"
                         :loggedIn="loggedIn" />
@@ -86,7 +86,7 @@
                         </section>
                     </div>
                     <div class="btnContainer">
-                        <button class="lowerBtn authBtn secondary" v-if="didWriteReflection" @click="tradeNote">
+                        <button class="lowerBtn authBtn secondary" v-if="didWriteReflection && !isOnboardingPrompt" @click="tradeNote">
                             Share Note
                         </button>
                         <!-- <button class="lowerBtn primary authBtn" v-if="authLoaded && !loggedIn" @click="showLogin()">
@@ -94,7 +94,7 @@
                         </button> -->
                         <button class="lowerBtn authBtn secondary"
                                 v-if="authLoaded && loggedIn && !isModal"
-                                @click="goToHome">
+                                @click="close">
                             {{promptCopy.GO_HOME}}
                         </button>
                         <button class="lowerBtn primary authBtn"
@@ -117,7 +117,7 @@
                         </svg>
                         Back
                     </button>
-                    <button class="secondary" @click="goToHome">{{promptCopy.GO_HOME}}</button>
+                    <button class="secondary" @click="close">{{promptCopy.GO_HOME}}</button>
                 </div>
             </div>
         </div>
@@ -136,6 +136,7 @@
 <script lang="ts">
     import Vue from "vue";
     import Spinner from "@components/Spinner.vue";
+    import {Config} from "@web/config";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import {millisecondsToMinutes} from '@shared/util/DateUtil'
     import {ElementAccumulation} from '@shared/models/ElementAccumulation'
@@ -265,6 +266,12 @@
             }
         },
         computed: {
+            isOnboardingPrompt(): boolean {
+                return this.promptContent.documentId === Config.firstPromptId;
+            },
+            plusTier(): SubscriptionTier {
+                return SubscriptionTier.PLUS;
+            },
             subscriptionTier(): SubscriptionTier | undefined {
                 return this.member?.tier;
             },
@@ -347,9 +354,6 @@
                     this.durationLabel = copy.prompts.MINUTES;
                     this.totalDuration = millisecondsToMinutes(totalDuration);
                 }
-            },
-            goToHome() {
-                window.location.href = PageRoute.JOURNAL_HOME;
             },
             back() {
                 this.$emit("back");

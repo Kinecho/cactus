@@ -1,7 +1,7 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
-        <upgrade-card class="journalListItem" v-if="showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <upgrade-card class="journalListItem" v-if="dataHasLoaded && showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
         <snackbar-content
             class="upgrade-confirmation"
             v-if="upgradeConfirmed"
@@ -191,7 +191,7 @@
                             this.todayLoaded = true;
                         }
 
-                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isInTrial) {
+                        if (tier === SubscriptionTier.BASIC || this.cactusMember.isOptInTrialing) {
                             this.showUpgradeCard = true;
                         }
                     }

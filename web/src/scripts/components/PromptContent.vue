@@ -1,6 +1,6 @@
 <template xmlns:v-touch="http://www.w3.org/1999/xhtml">
     <div class="page-wrapper" :class="[slideNumberClass, {isModal}]">
-        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="close" title="Close" class="close tertiary icon">
+        <button aria-label="Close" v-if="showCloseButton && !loading && promptContent && responsesLoaded" @click="seePricingOrGoHome" title="Close" class="close tertiary icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path fill="#29A389" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -64,7 +64,7 @@
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
-                                    v-on:restart="restart" v-on:close="close"
+                                    v-on:restart="restart" v-on:close="seePricingOrGoHome"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
@@ -94,6 +94,9 @@
                 </button>
             </section>
         </transition>
+        <PricingModal
+            :showModal="pricingModalVisible"
+            @close="closePricingModal"/>
     </div>
 </template>
 
@@ -113,6 +116,7 @@
     import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
     import {QueryParam} from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
+    import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
     import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
@@ -140,7 +144,8 @@
             Spinner,
             Celebrate,
             PromptContentSharing,
-            FourOhFour
+            FourOhFour,
+            PricingModal
         },
         props: {
             initialIndex: Number,
@@ -329,6 +334,8 @@
             pendingActiveIndex: number | undefined,
             usePromptId: boolean,
             show404: boolean,
+            pricingModalVisible: boolean,
+            hasSeenPricing: boolean
         } {
             return {
                 error: undefined,
@@ -358,6 +365,8 @@
                 pendingActiveIndex: undefined,
                 usePromptId: false,
                 show404: false,
+                pricingModalVisible: false,
+                hasSeenPricing: false
             };
         },
         computed: {
@@ -478,6 +487,10 @@
 
         },
         methods: {
+            closePricingModal(): void {
+                this.onClose();
+                this.pricingModalVisible = false;
+            },
             async updatePendingActiveIndex(reflection?: ReflectionResponse) {
                 logger.log("Update pending active index");
                 if (reflection && !isBlank(reflection.content.text) && this.pendingActiveIndex !== undefined) {
@@ -759,12 +772,18 @@
                 this.completed = false;
                 await saveTask;
             },
-            close() {
+            seePricingOrGoHome(): void {
                 gtag('event', 'close', {
                     event_category: "prompt_content",
                     event_label: `Slide ${this.activeIndex}`
                 });
-                this.onClose();
+                if (this.promptContent?.documentId === Config.firstPromptId && 
+                    !this.hasSeenPricing) {
+                    this.pricingModalVisible = true;
+                    this.hasSeenPricing = true;
+                } else {
+                    this.onClose();
+                }
             }
         }
     })
