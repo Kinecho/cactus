@@ -324,7 +324,7 @@
 
   .comfort {
     font-size: 1.4rem;
-    margin: -3.2rem -1.6rem 0;
+    margin: -2.4rem -1.6rem 0;
     padding: 1.6rem;
     text-align: center;
 

@@ -386,7 +386,7 @@
                 padding-left: 2.4rem;
             }
             @include r(768) {
-                flex-basis: 50%;
+                max-width: 48rem;
             }
         }
     }
@@ -422,8 +422,13 @@
 
         &:only-child {
             display: block;
-            padding-top: .8rem;
-            // flex-basis: 50%; this made PricingModal on desktop look bad
+            margin-top: -1.6rem;
+            max-width: 48rem;
+
+            @include r(768) {
+                margin-top: 0;
+                padding-top: .8rem;
+            }
         }
 
         @include r(768) {
