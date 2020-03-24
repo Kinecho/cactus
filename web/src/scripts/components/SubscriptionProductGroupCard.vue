@@ -138,7 +138,7 @@
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE;
-                } else if (this.startTrial) {
+                } else if (this.signedIn && this.startTrial) {
                     return `${copy.checkout.TRY_CACTUS_PLUS}`;
                 } else if (this.signedIn) {
                     return `${copy.checkout.UPGRADE}`;

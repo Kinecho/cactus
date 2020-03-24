@@ -65,6 +65,7 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
 
 app.post("/subscription-status", async (req: functions.https.Request | any, resp: functions.Response) => {
     const notification = req.body;
+    logger.info("Processing Subscription Status Update notification", JSON.stringify(notification, null, 2));
 
     if (!isAppleServerNotification(notification)) {
         resp.sendStatus(400);
@@ -87,6 +88,11 @@ app.post("/subscription-status", async (req: functions.https.Request | any, resp
     logger.info("Apple Subscription status", stringifyJSON(notification, 2));
 
     const originalTransactionId = getOriginalTransactionIdFromServerNotification(notification);
+    const encodedReceipt = notification.latest_receipt ?? notification.latest_expired_receipt_info;
+    // const isExpired = notification.expire
+
+    const decodedReceipt = await AppleService.getSharedInstance().decodeAppleReceipt(encodedReceipt);
+
     const [payment] = await AdminPaymentService.getSharedInstance().getByAppleOriginalTransactionId(originalTransactionId);
     const [latestReceiptInfo] = notification.unified_receipt?.latest_receipt_info as (AppleTransactionInfo | undefined)[];
     const productId = latestReceiptInfo?.product_id;
@@ -97,11 +103,15 @@ app.post("/subscription-status", async (req: functions.https.Request | any, resp
     const memberId = payment?.memberId as string | undefined;
     const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : undefined;
 
-    const isInTrial = latestReceiptInfo.is_trial_period === "true";
+    //TODO: update the payment object
+    payment.updateFromAppleNotification({ memberId, notification, receipt: decodedReceipt });
+    await AdminPaymentService.getSharedInstance().save(payment);
+
+    const isInTrial = latestReceiptInfo?.is_trial_period === "true";
     const isAutoRenew = notification.auto_renew_status === "true";
     const expirationIntent = getExpirationIntentFromNotification(notification);
     const expirationDescription = getExpirationIntentDescription(expirationIntent);
-    const expiresDate = latestReceiptInfo.expires_date_ms ? new Date(Number(latestReceiptInfo.expires_date_ms)) : undefined;
+    const expiresDate = latestReceiptInfo?.expires_date_ms !== undefined ? new Date(Number(latestReceiptInfo.expires_date_ms)) : undefined;
     await AdminSlackService.getSharedInstance().uploadTextSnippet({
         channel: ChannelName.subscription_status,
         message: `:ios: ${ member?.email || memberId } Subscription status update from Apple\n` +

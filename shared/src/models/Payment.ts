@@ -1,9 +1,13 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
-import {AppleReceiptResponseRawBody, getOriginalTransactionId} from "@shared/api/AppleApi";
+import {
+    AppleReceiptResponseRawBody,
+    AppleServerNotificationBody, AppleTransactionInfo,
+    getOriginalTransactionId, getOriginalTransactionIdFromServerNotification
+} from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
-import {AndroidPurchase} from "@shared/api/CheckoutTypes";
-import {androidpublisher_v3} from "googleapis";
+import { AndroidPurchase } from "@shared/api/CheckoutTypes";
+import { androidpublisher_v3 } from "googleapis";
 import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
 
 const logger = new Logger("PaymentModel");
@@ -24,39 +28,60 @@ export default class Payment extends BaseModel {
     google?: GooglePayment;
 
     static fromStripeCheckoutSession(options: { session: Stripe.Checkout.Session, subscriptionProductId?: string, memberId: string }): Payment {
-        const {session, memberId, subscriptionProductId} = options;
+        const { session, memberId, subscriptionProductId } = options;
         const payment = new Payment();
-        payment.id = `stripe_${session.id}`;
-        payment.stripe = {checkoutSession: session};
+        payment.id = `stripe_${ session.id }`;
+        payment.stripe = { checkoutSession: session };
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
         return payment;
     }
 
     static fromAppleReceipt(options: { memberId: string, subscriptionProductId: string, receipt: AppleReceiptResponseRawBody }): Payment {
-        const {memberId: memberId, receipt, subscriptionProductId} = options;
+        const { memberId: memberId, receipt, subscriptionProductId } = options;
         const payment = new Payment();
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
 
         const transactionId: string | undefined = getOriginalTransactionId(receipt);
         if (transactionId) {
-            payment.id = `apple_${transactionId}`;
+            payment.id = `apple_${ transactionId }`;
         } else {
             logger.warn("No transaction ID was determined from the receipt");
         }
 
-        payment.apple = {raw: receipt, originalTransactionId: transactionId};
+        const [latestReceiptInfo] = receipt.latest_receipt_info ?? [];
+        payment.apple = {
+            raw: receipt,
+            originalTransactionId: transactionId,
+            latestReceiptInfo,
+        };
 
         return payment;
     }
 
+    updateFromAppleNotification(params: { memberId?: string, notification: AppleServerNotificationBody, receipt?: AppleReceiptResponseRawBody }) {
+        const { memberId: memberId, notification, receipt } = params;
+
+        const transactionId: string | undefined = getOriginalTransactionIdFromServerNotification(notification);
+
+        const appleObject = this.apple ?? {
+            originalTransactionId: transactionId,
+            raw: receipt,
+            latestNotificationRaw: notification,
+            latestReceiptInfo: notification.latest_receipt_info
+        };
+        appleObject.raw = receipt;
+        this.memberId = this.memberId ?? memberId;
+        this.apple = appleObject;
+    }
+
     static fromAndroidPurchase(options: { memberId: string, subscriptionProductId: string, purchase: AndroidPurchase, subscriptionPurchase: Schema$SubscriptionPurchase }): Payment {
-        const {memberId, subscriptionProductId, purchase, subscriptionPurchase} = options;
+        const { memberId, subscriptionProductId, purchase, subscriptionPurchase } = options;
 
         const orderId = purchase.orderId ?? subscriptionPurchase.orderId;
         const payment = new Payment();
-        payment.id = orderId ? `google_${orderId}` : undefined;
+        payment.id = orderId ? `google_${ orderId }` : undefined;
         payment.memberId = memberId;
         payment.subscriptionProductId = subscriptionProductId;
 
@@ -76,7 +101,9 @@ interface StripePayment {
 
 interface ApplePayment {
     raw?: AppleReceiptResponseRawBody;
-    originalTransactionId?: string
+    originalTransactionId?: string;
+    latestNotificationRaw?: AppleServerNotificationBody;
+    latestReceiptInfo?: AppleTransactionInfo;
 }
 
 interface GooglePayment extends AndroidPurchase {
