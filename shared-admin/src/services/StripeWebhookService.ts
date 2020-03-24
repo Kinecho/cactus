@@ -216,8 +216,8 @@ export default class StripeWebhookService {
 
         if (isOptOutTrial) {
             cactusSubscription.optOutTrial = {
-                startedAt: stripeSubscription?.trial_start ? new Date(stripeSubscription.trial_start) : undefined,
-                endsAt: stripeSubscription?.trial_end ? new Date(stripeSubscription.trial_end) : undefined,
+                startedAt: stripeSubscription?.trial_start ? new Date(stripeSubscription.trial_start * 1000) : undefined,
+                endsAt: stripeSubscription?.trial_end ? new Date(stripeSubscription.trial_end * 1000) : undefined,
                 billingPlatform: BillingPlatform.STRIPE,
             }
         } else {
