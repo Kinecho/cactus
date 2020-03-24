@@ -142,7 +142,7 @@ export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): OptInTr
 
 export function isOptInTrialing(subscription?: MemberSubscription): boolean {
     if (!subscription) {
-        return true;
+        return false;
     }
     if (!subscription?.trial?.endsAt) {
         return false

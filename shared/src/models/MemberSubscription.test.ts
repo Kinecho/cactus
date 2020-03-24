@@ -1,4 +1,9 @@
-import {MemberSubscription, OptInTrial, needsTrialExpiration} from "@shared/models/MemberSubscription";
+import {
+    MemberSubscription,
+    OptInTrial,
+    needsTrialExpiration,
+    isOptInTrialing
+} from "@shared/models/MemberSubscription";
 import {DateTime} from "luxon";
 import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 
@@ -48,4 +53,8 @@ describe("trialEnded tests", () => {
         const subscription = {trial} as MemberSubscription;
         expect(needsTrialExpiration(subscription)).toBeFalsy();
     });
+
+    test("no trial exists, is NOT opt in trialing", () => {
+        expect(isOptInTrialing(undefined)).toBeFalsy()
+    })
 });
