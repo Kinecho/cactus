@@ -2,7 +2,9 @@ import Logger from "@shared/Logger";
 import {
     DeveloperNotification,
     getCancelReasonDescription,
-    getSubscriptionNotificationDescription, getSubscriptionNotificationTypeName, GooglePaymentState
+    getSubscriptionNotificationDescription,
+    getSubscriptionNotificationTypeName,
+    GooglePaymentState
 } from "@shared/api/GooglePlayBillingTypes";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
@@ -60,6 +62,25 @@ export default class GooglePlayBillingEventHandler {
     async process(): Promise<void> {
         this.logger.info("Starting GooglePlayBillingEventHandler");
         await this.setupData();
+
+        const subscriptionPurchase = this.subscriptionPurchase;
+        const subscriptionProduct = this.cactusSubscriptionProduct;
+        const memberId = this.memberId;
+        const notification = this.notification.subscriptionNotification;
+
+        if (!memberId || !notification) {
+            return;
+        }
+        // const purchase = this.subscriptionPurchase
+        const payment = Payment.fromAndroidNotification({
+            memberId,
+            subscriptionPurchase,
+            subscriptionProductId: subscriptionProduct?.entryId,
+            notification,
+        });
+        await AdminPaymentService.getSharedInstance().save(payment);
+        console.log("Saved Payment object", stringifyJSON(payment, 2));
+
         await this.sendSlackMessage();
     }
 

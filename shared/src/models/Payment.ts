@@ -2,12 +2,20 @@ import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
 import {
     AppleReceiptResponseRawBody,
-    AppleServerNotificationBody, AppleTransactionInfo,
-    getOriginalTransactionId, getOriginalTransactionIdFromServerNotification
+    AppleServerNotificationBody,
+    AppleTransactionInfo,
+    getOriginalTransactionId,
+    getOriginalTransactionIdFromServerNotification
 } from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
 import { AndroidPurchase } from "@shared/api/CheckoutTypes";
 import { androidpublisher_v3 } from "googleapis";
+import {
+    getSubscriptionNotificationDescription,
+    getSubscriptionNotificationTypeName,
+    SubscriptionNotification,
+    SubscriptionNotificationType
+} from "@shared/api/GooglePlayBillingTypes";
 import Schema$SubscriptionPurchase = androidpublisher_v3.Schema$SubscriptionPurchase;
 
 const logger = new Logger("PaymentModel");
@@ -92,6 +100,30 @@ export default class Payment extends BaseModel {
 
         return payment;
     }
+
+    static fromAndroidNotification(options: {
+        memberId: string,
+        subscriptionProductId?: string,
+        subscriptionPurchase?: Schema$SubscriptionPurchase,
+        notification: SubscriptionNotification
+    }): Payment {
+        const { memberId, subscriptionPurchase, subscriptionProductId, notification } = options;
+        const payment = new Payment();
+        payment.memberId = memberId;
+        payment.subscriptionProductId = subscriptionProductId;
+        const orderId = subscriptionPurchase?.orderId;
+        payment.id = orderId ? `google_${ orderId }` : undefined;
+        payment.google = {
+            orderId,
+            subscriptionProductId: notification.subscriptionId,
+            token: notification.purchaseToken,
+            notificationType: notification.notificationType,
+            notificationTypeName: getSubscriptionNotificationTypeName(notification.notificationType),
+            notificationTypeDescription: getSubscriptionNotificationDescription(notification.notificationType),
+            subscriptionPurchase,
+        };
+        return payment;
+    }
 }
 
 interface StripePayment {
@@ -108,6 +140,9 @@ interface ApplePayment {
 
 interface GooglePayment extends AndroidPurchase {
     subscriptionPurchase?: Schema$SubscriptionPurchase;
+    notificationType?: SubscriptionNotificationType;
+    notificationTypeName?: string;
+    notificationTypeDescription?: string;
     purchaseTime?: number
 }
 

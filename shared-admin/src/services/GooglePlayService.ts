@@ -9,14 +9,14 @@ export import GoogleSubscriptionPurchase = androidpublisher_v3.Schema$Subscripti
 interface GetSubscriptionParams {
     subscriptionId: string;
     token: string;
-    packageName: string;
+    packageName?: string;
 }
 
 export default class GooglePlayService {
     protected static sharedInstance: GooglePlayService;
     logger = new Logger("GooglePlayService");
     config: CactusConfig;
-    publisherClient: Androidpublisher
+    publisherClient: Androidpublisher;
 
     static getSharedInstance(): GooglePlayService {
         if (!GooglePlayService.sharedInstance) {
