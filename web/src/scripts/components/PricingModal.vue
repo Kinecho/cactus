@@ -64,7 +64,10 @@
   @import "~styles/pages/pricing";
 
   .miniModal {
-      background: $beige url(assets/images/beigeBlob.svg) center top -65vw/124vw no-repeat;
+      background: $beige no-repeat;
+      background-image: url(assets/images/beigeBlob.svg), url(assets/images/blob-outline-beige.svg);
+      background-position: right -185px top -65px, right -55px top -175px;
+      background-size: 394px;
       margin: 0 auto;
       min-height: 100vh;
       text-align: center;
@@ -72,8 +75,6 @@
       @include r(600) {
           @include shadowbox;
           background-color: $beige;
-          background-position: center top -92rem;
-          background-size: 111rem;
           max-width: 64rem;
           min-height: 0;
       }
@@ -101,10 +102,6 @@
           @include r(600) {
               align-items: center;
               padding: 0 3.2rem;
-          }
-
-          &:last-of-type {
-              margin-bottom: 3.2rem;
           }
 
           p {
@@ -138,21 +135,34 @@
   }
 
   .miniHero {
-      padding: 1.6rem 1.6rem 4rem;
+      padding: 1.6rem 4rem 3.2rem;
 
       @include r(374) {
-          padding: 2.4rem 2.4rem 4rem;
+          padding: 2.4rem 4rem 3.2rem;
       }
       @include r(600) {
-          padding: 3.2rem 3.2rem 4rem;
+          padding: 3.2rem;
+      }
+
+      h2 {
+          line-height: 1.2;
+          margin-bottom: .4rem;
+
+          @include r(600) {
+              font-size: 3.2rem;
+          }
       }
   }
 
   .pricingWrapper {
       background: $dolphin url(assets/images/grainy.png) repeat;
+      margin-top: 3.2rem;
 
       @include r(600) {
           border-radius: 0 0 1.2rem 1.2rem;
+      }
+      @include r(768) {
+          padding: 0 8rem;
       }
   }
 </style>

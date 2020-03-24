@@ -324,7 +324,6 @@
         }
 
         .comfort {
-            background: url(assets/images/darkGreenNeedles.svg) 0 0/31rem;
             font-size: 1.6rem;
             margin: -3.2rem -1.6rem 0;
             padding: 1.6rem;
@@ -361,10 +360,6 @@
     .actions .button {
         display: block;
         margin-bottom: .8rem;
-
-        & + .button {
-            margin-bottom: 1.6rem;
-        }
     }
 
     .actions .error {
