@@ -33,16 +33,35 @@ export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: bo
     }
 }
 
-export interface SubscriptionTrial {
+export interface OptInTrial {
     startedAt: Date,
     endsAt: Date,
     activatedAt?: Date | null
 }
 
+export interface OptOutTrial {
+    startedAt: Date,
+    endsAt: Date,
+    billingPlatform: BillingPlatform,
+}
+
+export enum CancellationReasonCode {
+    USER_CANCELED = "USER_CANCELED",
+    EXPIRED = "EXPIRED",
+    UNKNOWN = "UNKNOWN"
+}
+
+export interface SubscriptionCancellation {
+    canceledAt: Date;
+    reasonCode: CancellationReasonCode
+}
+
 export interface MemberSubscription {
     legacyConversion?: boolean
     tier: SubscriptionTier,
-    trial?: SubscriptionTrial,
+    trial?: OptInTrial,
+    optOutTrial?: OptOutTrial,
+    cancellation?: SubscriptionCancellation,
     activated?: boolean,
     firstPaymentAt?: Date,
     /**
@@ -112,7 +131,7 @@ export function getDefaultSubscriptionWithEndDate(endDate: Date): MemberSubscrip
 }
 
 
-export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): SubscriptionTrial {
+export function getDefaultTrial(trialDays: number = DEFAULT_TRIAL_DAYS): OptInTrial {
     const startDate = new Date();
     const endDate = DateTime.fromJSDate(startDate).plus({days: trialDays}).toJSDate();
     return {
