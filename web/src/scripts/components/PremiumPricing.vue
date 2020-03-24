@@ -414,6 +414,7 @@
         &:only-child {
             display: block;
             padding-top: .8rem;
+            flex-basis: 50%;
         }
 
         @include r(768) {

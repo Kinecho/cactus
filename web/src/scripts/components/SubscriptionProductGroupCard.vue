@@ -249,206 +249,206 @@
 </script>
 
 <style lang="scss" scoped>
-    @import "common";
-    @import "mixins";
-    @import "variables";
+@import "common";
+@import "mixins";
+@import "variables";
 
-    .tab-content {
-        color: $white;
-        border-radius: 0 0 1.6rem 1.6rem;
-        position: relative;
-        text-align: left;
+.tab-content {
+  color: $white;
+  border-radius: 0 0 1.6rem 1.6rem;
+  position: relative;
+  text-align: left;
 
-        &:first-child:before {
-            background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
-            bottom: -4rem;
-            content: "";
-            display: block;
-            height: 216px;
-            left: -28%;
-            overflow: hidden;
-            position: absolute;
-            width: 228px;
-            z-index: -1;
-        }
+  &:first-child:before {
+    background: url(assets/images/crosses.svg) 0 0/228px 216px no-repeat;
+    bottom: -4rem;
+    content: "";
+    display: block;
+    height: 216px;
+    left: -28%;
+    overflow: hidden;
+    position: absolute;
+    width: 228px;
+    z-index: -1;
+  }
 
-        @include r(768) {
-            border-radius: 0 0 1.6rem 1.6rem;
-            flex-basis: 50%;
-            margin: 0 1.6rem;
-            padding: 0 2.4rem 3.2rem;
+  @include r(768) {
+    border-radius: 0 0 1.6rem 1.6rem;
+    flex-basis: 50%;
+    margin: 0 1.6rem;
+    padding: 0 2.4rem 3.2rem;
 
-            &:only-child {
-                flex-basis: 100%;
-                margin: 0;
-            }
-
-            &:first-child:before {
-                bottom: -6rem;
-            }
-
-            &.basic-panel {
-                background: $white none;
-                color: $darkestGreen;
-            }
-
-            &.plus-panel {
-                background: $dolphin url(assets/images/grainy.png) repeat;
-                color: $white;
-            }
-        }
-
-        &.basic-panel {
-            background-color: $white;
-            color: $darkestGreen;
-
-            &.tabsOnMobile {
-                background: $dolphin url(assets/images/grainy.png) repeat;
-                color: $white;
-
-                @include r(768) {
-                    background: $white;
-                    color: $darkestGreen;
-                }
-            }
-        }
-
-        h4 {
-            margin-bottom: 1.6rem;
-        }
-
-        button, .button {
-            max-width: none;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        .comfort {
-            font-size: 1.6rem;
-            margin: -3.2rem -1.6rem 0;
-            padding: 1.6rem;
-            text-align: center;
-
-            @include r(768) {
-                margin: -.8rem -1.6rem 0;
-            }
-
-            svg {
-                display: inline-block;
-                height: 1.6rem;
-                margin: 0 .8rem;
-                vertical-align: middle;
-                width: 1.6rem;
-            }
-        }
+    &:only-child {
+      flex-basis: 100%;
+      margin: 0;
     }
 
-    button:disabled {
-        background-color: transparent;
-        color: transparentize($white, .4);
-        @include r(768) {
-            .basic-panel & {
-                color: transparentize($darkestGreen, .4);
-            }
-        }
+    &:first-child:before {
+      bottom: -6rem;
     }
 
-    .flex-plans .basic-panel .actions .button:disabled {
-        color: transparentize($darkestGreen, .4);
+    &.basic-panel {
+      background: $white none;
+      color: $darkestGreen;
+    }
+  }
+
+  &.plus-panel {
+    background: $dolphin url(assets/images/grainy.png) repeat;
+    color: $white;
+  }
+
+  &.basic-panel {
+    background-color: $white;
+    color: $darkestGreen;
+
+    &.tabsOnMobile {
+      background: $dolphin url(assets/images/grainy.png) repeat;
+      color: $white;
+
+      @include r(768) {
+        background: $white;
+        color: $darkestGreen;
+      }
+    }
+  }
+
+  h4 {
+    margin-bottom: 1.6rem;
+  }
+
+  button,
+  .button {
+    max-width: none;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .comfort {
+    font-size: 1.6rem;
+    margin: -3.2rem -1.6rem 0;
+    padding: 1.6rem;
+    text-align: center;
+
+    @include r(768) {
+      margin: -0.8rem -1.6rem 0;
     }
 
-    .actions .button {
-        display: block;
-        margin-bottom: .8rem;
+    svg {
+      display: inline-block;
+      height: 1.6rem;
+      margin: 0 0.8rem;
+      vertical-align: middle;
+      width: 1.6rem;
+    }
+  }
+}
+
+button:disabled {
+  background-color: transparent;
+  color: transparentize($white, 0.4);
+  @include r(768) {
+    .basic-panel & {
+      color: transparentize($darkestGreen, 0.4);
+    }
+  }
+}
+
+.flex-plans .basic-panel .actions .button:disabled {
+  color: transparentize($darkestGreen, 0.4);
+}
+
+.actions .button {
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.actions .error {
+  background: lighten($red, 20%)
+    url(assets/images/sadCactusPatternWhiteTransparent.svg);
+  border-radius: 0.8rem;
+  color: $dolphin;
+  margin-bottom: 1.6rem;
+  padding: 1.6rem;
+  text-align: center;
+}
+
+.group-description {
+  margin-bottom: 2.4rem;
+}
+
+.flexContainer {
+  display: flex;
+  margin-bottom: 2.4rem;
+  justify-content: space-between;
+}
+
+.planButton {
+  background-color: transparentize($white, 0.9);
+  border: 2px solid $dolphin;
+  border-radius: 0.8rem;
+  cursor: pointer;
+  font-size: 1.6rem;
+  padding: 0.8rem;
+  text-align: center;
+  width: 32%;
+
+  &.selected {
+    border-color: $green;
+    box-shadow: inset 0 0 0 0.4rem $dolphin;
+  }
+}
+
+.cadence {
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+.planPrice,
+.freePrice {
+  font-size: 2rem;
+}
+
+.freePrice {
+  height: 11.3rem;
+  margin-bottom: 2.4rem;
+}
+
+.payment-period-per {
+  font-size: 1.4rem;
+  text-transform: lowercase;
+}
+
+.savings {
+  background-color: transparentize($royal, 0.4);
+  border-radius: 0 0 0.8rem 0.8rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 0.8rem -0.8rem -0.8rem;
+  padding: 0.4rem 0.8rem;
+  text-transform: uppercase;
+}
+
+.group-footer {
+  align-items: center;
+  display: flex;
+  font-size: 1.4rem;
+  justify-content: center;
+
+  &.icon {
+    &:before {
+      content: "";
+      margin-right: 0.6rem;
     }
 
-    .actions .error {
-        background: lighten($red, 20%) url(assets/images/sadCactusPatternWhiteTransparent.svg);
-        border-radius: .8rem;
-        color: $dolphin;
-        margin-bottom: 1.6rem;
-        padding: 1.6rem;
-        text-align: center;
+    &.heart:before {
+      background: url(assets/icons/heart.svg) no-repeat;
+      height: 1.4rem;
+      width: 1.6rem;
     }
-
-    .group-description {
-        margin-bottom: 2.4rem;
-    }
-
-    .flexContainer {
-        display: flex;
-        margin-bottom: 2.4rem;
-        justify-content: space-between;
-    }
-
-    .planButton {
-        background-color: transparentize($white, .9);
-        border: 2px solid $dolphin;
-        border-radius: .8rem;
-        cursor: pointer;
-        font-size: 1.6rem;
-        padding: .8rem;
-        text-align: center;
-        width: 32%;
-
-        &.selected {
-            border-color: $green;
-            box-shadow: inset 0 0 0 .4rem $dolphin;
-        }
-    }
-
-    .cadence {
-        font-size: 1.2rem;
-        letter-spacing: 1px;
-        opacity: .8;
-        text-transform: uppercase;
-    }
-
-    .planPrice,
-    .freePrice {
-        font-size: 2rem;
-    }
-
-    .freePrice {
-        height: 11.3rem;
-        margin-bottom: 2.4rem;
-    }
-
-    .payment-period-per {
-        font-size: 1.4rem;
-        text-transform: lowercase;
-    }
-
-    .savings {
-        background-color: transparentize($royal, .4);
-        border-radius: 0 0 .8rem .8rem;
-        font-size: 1.4rem;
-        font-weight: bold;
-        letter-spacing: 1px;
-        margin: .8rem -.8rem -.8rem;
-        padding: .4rem .8rem;
-        text-transform: uppercase;
-    }
-
-    .group-footer {
-        align-items: center;
-        display: flex;
-        font-size: 1.4rem;
-        justify-content: center;
-
-        &.icon {
-            &:before {
-                content: "";
-                margin-right: .6rem;
-            }
-
-            &.heart:before {
-                background: url(assets/icons/heart.svg) no-repeat;
-                height: 1.4rem;
-                width: 1.6rem;
-            }
-        }
-    }
-
-
+  }
+}
 </style>
