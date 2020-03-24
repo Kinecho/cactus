@@ -138,10 +138,8 @@
                 }
                 if (this.selectedProduct.isFree) {
                     return copy.auth.SIGN_UP_FREE;
-                } else if (this.signedIn && this.startTrial) {
-                    return `${copy.checkout.TRY_CACTUS_PLUS}`;
                 } else if (this.signedIn) {
-                    return `${copy.checkout.UPGRADE}`;
+                    return `${copy.checkout.TRY_CACTUS_PLUS}`;
                 } else {
                     return `${copy.checkout.PURCHASE} — ${this.selectedPrice} / ${copy.checkout.BILLING_PERIOD_PER[this.selectedProduct.billingPeriod]}`
                 }
