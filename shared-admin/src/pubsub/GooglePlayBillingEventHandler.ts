@@ -2,17 +2,17 @@ import Logger from "@shared/Logger";
 import {
     DeveloperNotification,
     getCancelReasonDescription,
-    getSubscriptionNotificationDescription, getSubscriptionNotificationTypeName
+    getSubscriptionNotificationDescription, getSubscriptionNotificationTypeName, GooglePaymentState
 } from "@shared/api/GooglePlayBillingTypes";
-import AdminSlackService, {ChannelName} from "@admin/services/AdminSlackService";
-import {isNull, stringifyJSON} from "@shared/util/ObjectUtil";
-import GooglePlayService, {GoogleSubscriptionPurchase} from "@admin/services/GooglePlayService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
+import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
+import GooglePlayService, { GoogleSubscriptionPurchase } from "@admin/services/GooglePlayService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
-import {formatDateTime} from "@shared/util/DateUtil";
+import { formatDateTime } from "@shared/util/DateUtil";
 import Payment from "@shared/models/Payment";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
-import {isBlank} from "@shared/util/StringUtil";
+import { isBlank } from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 
@@ -69,11 +69,11 @@ export default class GooglePlayBillingEventHandler {
             this.logger.error("No token was found on the notification object");
             return;
         }
-        this.logger.info(`Handling purchase token ${token}`);
+        this.logger.info(`Handling purchase token ${ token }`);
 
         const [subscriptionPurchase, cactusSubscriptionProduct, existingPayments] = await Promise.all([
             GooglePlayService.getSharedInstance().getPurchaseFromNotification(this.notification),
-            AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({androidProductId: this.productId}),
+            AdminSubscriptionProductService.getSharedInstance().getByAndroidProductId({ androidProductId: this.productId }),
             AdminPaymentService.getSharedInstance().getByGooglePurchaseToken(token)
         ]);
 
@@ -100,13 +100,13 @@ export default class GooglePlayBillingEventHandler {
 
         // this.notification?.noti
         if (cactusSubscriptionProduct) {
-            messages.push(`*Product*: ${cactusSubscriptionProduct.subscriptionTier} | ${cactusSubscriptionProduct.displayName} | ${this.productId}`);
+            messages.push(`*Product*: ${ cactusSubscriptionProduct.subscriptionTier } | ${ cactusSubscriptionProduct.displayName } | ${ this.productId }`);
         }
 
         if (!subscriptionPurchase) {
             await AdminSlackService.getSharedInstance().uploadTextSnippet({
                 message: "\`[GooglePlayBillingEventHandler]\` :boom: Unable to get purchase from notification.\n" + messages.join("\n"),
-                data: stringifyJSON({notification: this.notification}, 2),
+                data: stringifyJSON({ notification: this.notification }, 2),
                 fileType: "json",
                 filename: "google-play-billing-listeners-error.json",
                 channel: this.slackChannel
@@ -122,13 +122,13 @@ export default class GooglePlayBillingEventHandler {
                     color: "danger",
                     fields: [{
                         title: "Purchase Token",
-                        value: `\`\`\`${this.purchaseToken}\`\`\``
+                        value: `\`\`\`${ this.purchaseToken }\`\`\``
                     }]
                 }]
             })
         } else {
-            messages.push(`*Cactus Member ID*: ${memberId}`);
-            messages.push(`*Email*: ${this.member?.email ?? "unknown"}`)
+            messages.push(`*Cactus Member ID*: ${ memberId }`);
+            messages.push(`*Email*: ${ this.member?.email ?? "unknown" }`)
         }
 
         const isCancelled = this.isCancelled;
@@ -137,15 +137,15 @@ export default class GooglePlayBillingEventHandler {
         }
         const orderId = subscriptionPurchase.orderId;
         if (orderId) {
-            messages.push(`*OrderID*: ${orderId}`);
+            messages.push(`*OrderID*: ${ orderId }`);
         }
         const purchasePriceCents = subscriptionPurchase.priceAmountMicros ? Number(subscriptionPurchase.priceAmountMicros) / 10000 : undefined;
         if (purchasePriceCents) {
-            messages.push(`*Purchase Price*: ${(purchasePriceCents / 100).toFixed(2)} ${subscriptionPurchase.priceCurrencyCode ?? "USD"}`);
+            messages.push(`*Purchase Price*: ${ (purchasePriceCents / 100).toFixed(2) } ${ subscriptionPurchase.priceCurrencyCode ?? "USD" }`);
         }
 
         if (this.userCancellationTime) {
-            messages.push(`*User Cancelled Date*: ${formatDateTime(this.userCancellationTime, {timezone: "America/Denver"})}`);
+            messages.push(`*User Cancelled Date*: ${ formatDateTime(this.userCancellationTime, { timezone: "America/Denver" }) }`);
         }
 
         const isAcknowledged = subscriptionPurchase.acknowledgementState === 1;
@@ -153,22 +153,24 @@ export default class GooglePlayBillingEventHandler {
             messages.push("*Acknowledgement*: Purchase as not been acknowledged yet");
         }
 
+        const isInTrial = subscriptionPurchase.paymentState === GooglePaymentState.FREE_TRIAL;
+        messages.push(`*In Trial*: \`${ isInTrial ? "Yes" : "No" }\``);
         const isAutoRenewing = subscriptionPurchase.autoRenewing ?? false;
-        messages.push(`*Auto Renewing*: \`${isAutoRenewing ? "Yes" : "No"}\``);
+        messages.push(`*Auto Renewing*: \`${ isAutoRenewing ? "Yes" : "No" }\``);
 
         if (this.startDate) {
-            messages.push(`*Start Date*: ${formatDateTime(this.startDate, {timezone: "America/Denver"})}`);
+            messages.push(`*Start Date*: ${ formatDateTime(this.startDate, { timezone: "America/Denver" }) }`);
         }
 
         if (this.expiryDate) {
-            messages.push(`*Expiry Date*: ${formatDateTime(this.expiryDate, {timezone: "America/Denver"})}`);
+            messages.push(`*Expiry Date*: ${ formatDateTime(this.expiryDate, { timezone: "America/Denver" }) }`);
         }
 
         const notificationType = this.notification.subscriptionNotification?.notificationType;
         const notificationTypeName = getSubscriptionNotificationTypeName(notificationType);
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            message: `:android: *[GooglePlayBillingEventHandler]* \`${notificationTypeName}\`\n_${getSubscriptionNotificationDescription(notificationType)}_\n\n${messages.join("\n")}`,
-            data: stringifyJSON({notification: this.notification, purchase: subscriptionPurchase,}, 2),
+            message: `:android: *[GooglePlayBillingEventHandler]* \`${ notificationTypeName }\`\n_${ getSubscriptionNotificationDescription(notificationType) }_\n\n${ messages.join("\n") }`,
+            data: stringifyJSON({ notification: this.notification, purchase: subscriptionPurchase, }, 2),
             fileType: "json",
             filename: "google-play-billing-listeners-success.json",
             channel: this.slackChannel
