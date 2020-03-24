@@ -443,8 +443,7 @@ export default class AdminSubscriptionService {
         const priceCents = microDollarsStringToCents(latestPayment.google?.subscriptionPurchase?.priceAmountMicros);
         const androidProductId = latestPayment.google?.subscriptionProductId;
 
-        const nextPaymentSeconds = expiryDateMs ? Math.round(expiryDateMs / 1000) : undefined;
-        const hasEnded = nextPaymentSeconds ? (Date.now() > expiryDateMs) : false;
+        const hasEnded = expiryDateMs ? (Date.now() > expiryDateMs) : false;
         const subscriptionStatus = subscriptionStatusFromGooglePaymentState(latestPayment.google?.subscriptionPurchase?.paymentState);
         return {
             nextPaymentDate_epoch_seconds: expiryDateMs ? Math.round((expiryDateMs / 1000)) : undefined,

@@ -1,18 +1,18 @@
-import {CactusConfig} from "@shared/CactusConfig";
-import {Request} from "express";
+import { CactusConfig } from "@shared/CactusConfig";
+import { Request } from "express";
 import Stripe from "stripe";
 import Logger from "@shared/Logger";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {getDefaultSubscription, getDefaultTrial} from "@shared/models/MemberSubscription";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { BillingPlatform, getDefaultSubscription, getDefaultTrial } from "@shared/models/MemberSubscription";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Payment from "@shared/models/Payment";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import {getCustomerId, getStripeId, isStripeSubscription} from "@admin/util/AdminStripeUtils";
-import {destructureDisplayName, isBlank} from "@shared/util/StringUtil";
+import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/AdminStripeUtils";
+import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
 
 const logger = new Logger("StripeWebhookService");
@@ -74,7 +74,7 @@ export default class StripeWebhookService {
 
     getSignedEvent(options: { request: RawBodyRequest, webhookSigningKey?: string }): Stripe.Event | undefined {
         try {
-            const {request, webhookSigningKey = this.config.stripe.webhook_signing_secrets.main} = options;
+            const { request, webhookSigningKey = this.config.stripe.webhook_signing_secrets.main } = options;
             const sig = request.header('stripe-signature') || "";
             return this.stripe.webhooks.constructEvent(request.rawBody, sig, webhookSigningKey);
         } catch (error) {
@@ -87,13 +87,13 @@ export default class StripeWebhookService {
         const session = event.data.object as Stripe.Checkout.Session;
         switch (session.mode) {
             case "payment":
-                return {statusCode: 204, body: "Payment checkout is not supported. Nothing happened."};
+                return { statusCode: 204, body: "Payment checkout is not supported. Nothing happened." };
             case "setup":
                 return this.handleSetupSessionCompleted(session);
             case "subscription":
                 return this.handleSubscriptionCheckoutSessionCompleted(session);
             default:
-                return {statusCode: 204, body: "session mode not supported."};
+                return { statusCode: 204, body: "session mode not supported." };
         }
     }
 
@@ -107,63 +107,63 @@ export default class StripeWebhookService {
         if (session.mode !== "setup") {
             return {
                 statusCode: 400,
-                body: `"Expected session mode to be \"setup\" but instead got \"${session.mode}\""`
+                body: `"Expected session mode to be \"setup\" but instead got \"${ session.mode }\""`
             };
         }
 
         const setupIntentId = getStripeId(session.setup_intent);
         if (!setupIntentId) {
-            return {statusCode: 200, body: "No metadata was present. Can not process request"};
+            return { statusCode: 200, body: "No metadata was present. Can not process request" };
         }
 
         const setupIntent = await StripeService.getSharedInstance().fetchStripeSetupIntent(setupIntentId);
         if (!setupIntentId) {
             return {
                 statusCode: 200,
-                body: `Unable to fetch setupIntent for ID ${setupIntentId}. Can not process request`
+                body: `Unable to fetch setupIntent for ID ${ setupIntentId }. Can not process request`
             };
         }
-        const {subscriptionId, customerId} = setupIntent?.metadata ?? {} as { [key: string]: string | undefined };
+        const { subscriptionId, customerId } = setupIntent?.metadata ?? {} as { [key: string]: string | undefined };
         const paymentMethodId = getStripeId(setupIntent?.payment_method);
         if (!paymentMethodId || !customerId) {
             return {
                 statusCode: 200,
-                body: `Not all required data was found on the setup intent. Can not process request. paymentMethodId = ${paymentMethodId} | subscriptionId = ${subscriptionId} | customerId = ${customerId}`
+                body: `Not all required data was found on the setup intent. Can not process request. paymentMethodId = ${ paymentMethodId } | subscriptionId = ${ subscriptionId } | customerId = ${ customerId }`
             };
         }
 
         try {
-            const attachedPaymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, {customer: customerId});
-            logger.info(`Attached payment method to customer ${customerId}: ${stringifyJSON(attachedPaymentMethod)}`);
-            const updatedCustomer = await StripeService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethodId}})
-            logger.info(`Updated customer ${updatedCustomer?.id} with invoice settings ${stringifyJSON(updatedCustomer?.invoice_settings)}`);
+            const attachedPaymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
+            logger.info(`Attached payment method to customer ${ customerId }: ${ stringifyJSON(attachedPaymentMethod) }`);
+            const updatedCustomer = await StripeService.getSharedInstance().updateStripeCustomer(customerId, { invoice_settings: { default_payment_method: paymentMethodId } })
+            logger.info(`Updated customer ${ updatedCustomer?.id } with invoice settings ${ stringifyJSON(updatedCustomer?.invoice_settings) }`);
             if (subscriptionId) {
                 await StripeService.getSharedInstance().updateStripeSubscriptionDefaultPaymentMethod(subscriptionId, paymentMethodId);
             }
         } catch (error) {
-            logger.error(`Failed to attach payment method to customerId ${customerId}`, error);
+            logger.error(`Failed to attach payment method to customerId ${ customerId }`, error);
         }
 
-        return {statusCode: 200, body: "Updated payment method on subscription and customer"};
+        return { statusCode: 200, body: "Updated payment method on subscription and customer" };
     }
 
     async handleSubscriptionCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<WebhookResponse> {
         if (session.mode !== "subscription") {
             return {
                 statusCode: 400,
-                body: `"Expected session mode to be \"subscription\" but instead got \"${session.mode}\""`
+                body: `"Expected session mode to be \"subscription\" but instead got \"${ session.mode }\""`
             };
         }
         const sessionId = session.id;
         if (!sessionId) {
-            return {statusCode: 400, body: "No session ID was found"};
+            return { statusCode: 400, body: "No session ID was found" };
         }
         logger.info(stringifyJSON(session, 2));
 
         const pendingSession = await AdminCheckoutSessionService.getSharedInstance().getByStripeSessionId(sessionId);
         if (!pendingSession) {
             logger.error("Failed to process payment, no pending session found for sessionID" + sessionId);
-            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:boom: Failed to process payment, no pending session found for sessionID = \`${sessionId}\`\n\n\`\`\`${JSON.stringify(session, null, 2)}\`\`\``);
+            await AdminSlackService.getSharedInstance().sendCustomerSupportMessage(`:boom: Failed to process payment, no pending session found for sessionID = \`${ sessionId }\`\n\n\`\`\`${ JSON.stringify(session, null, 2) }\`\`\``);
             return {
                 statusCode: 204,
                 body: "No `cactus.pendingSession` was found for the given sessionId: " + sessionId + ". Unable to handle processing the payment"
@@ -203,7 +203,7 @@ export default class StripeWebhookService {
             const paymentMethod = getStripeId(stripeSubscription.default_payment_method);
             if (paymentMethod) {
                 logger.info("Update default payment method on customer");
-                await StripeService.getSharedInstance().updateStripeCustomer(customerId, {invoice_settings: {default_payment_method: paymentMethod}})
+                await StripeService.getSharedInstance().updateStripeCustomer(customerId, { invoice_settings: { default_payment_method: paymentMethod } })
             }
         }
 
@@ -212,9 +212,21 @@ export default class StripeWebhookService {
         cactusSubscription.subscriptionProductId = subscriptionProduct?.entryId || session.metadata?.subscriptionProductId;
         cactusSubscription.stripeSubscriptionId = stripeSubscriptionId;
 
-        const trial = (cactusSubscription.trial || getDefaultTrial());
-        trial.activatedAt = new Date();
-        cactusSubscription.trial = trial;
+        const isOptOutTrial = stripeSubscription?.status === "trialing";
+
+        if (isOptOutTrial) {
+            cactusSubscription.optOutTrial = {
+                startedAt: stripeSubscription?.trial_start ? new Date(stripeSubscription.trial_start) : undefined,
+                endsAt: stripeSubscription?.trial_end ? new Date(stripeSubscription.trial_end) : undefined,
+                billingPlatform: BillingPlatform.STRIPE,
+            }
+        } else {
+            const trial = (cactusSubscription.trial || getDefaultTrial());
+            trial.activatedAt = new Date();
+            cactusSubscription.trial = trial;
+        }
+
+
         cactusMember.subscription = cactusSubscription;
         cactusMember.stripeCustomerId = customerId;
         const payment = Payment.fromStripeCheckoutSession({
@@ -224,25 +236,25 @@ export default class StripeWebhookService {
         });
 
         await AdminPaymentService.getSharedInstance().save(payment);
-        await AdminCactusMemberService.getSharedInstance().save(cactusMember, {setUpdatedAt: false});
+        await AdminCactusMemberService.getSharedInstance().save(cactusMember, { setUpdatedAt: false });
 
-        return {statusCode: 200, body: `Member ${cactusMember.email} was upgraded to ${cactusSubscription.tier}`};
+        return { statusCode: 200, body: `Member ${ cactusMember.email } was upgraded to ${ cactusSubscription.tier }` };
     };
 
     async handleCustomerEvent(event: Stripe.Event): Promise<WebhookResponse> {
         const customer = event.data.object as Stripe.Customer;
         const memberId = customer.metadata.memberId;
         if (!memberId) {
-            return {statusCode: 200, body: "No member ID found in the metadata, nothing to sync up"};
+            return { statusCode: 200, body: "No member ID found in the metadata, nothing to sync up" };
         }
 
         const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
         if (!member) {
-            return {statusCode: 200, body: `No cactus member found with ID ${memberId}. Nothing to sync up`};
+            return { statusCode: 200, body: `No cactus member found with ID ${ memberId }. Nothing to sync up` };
         }
 
         let hasChanges = false;
-        const {firstName, lastName} = destructureDisplayName(customer.name);
+        const { firstName, lastName } = destructureDisplayName(customer.name);
         if (isBlank(member.firstName) && !isBlank(firstName)) {
             hasChanges = true;
             member.firstName = firstName;
@@ -259,11 +271,11 @@ export default class StripeWebhookService {
         }
 
         if (hasChanges) {
-            logger.info(`Updating cactus member\n ${stringifyJSON(member, 2)}`);
+            logger.info(`Updating cactus member\n ${ stringifyJSON(member, 2) }`);
             await AdminCactusMemberService.getSharedInstance().save(member)
         }
 
-        return {statusCode: 200, body: `Updated cactus member with new values? ${hasChanges}`};
+        return { statusCode: 200, body: `Updated cactus member with new values? ${ hasChanges }` };
     }
 
     /**
@@ -274,7 +286,7 @@ export default class StripeWebhookService {
      * @return {Promise<WebhookResponse>}
      */
     async handleWebhookEvent(event: Stripe.Event): Promise<WebhookResponse> {
-        let response: WebhookResponse = {statusCode: 400, body: "Event type not handled"};
+        let response: WebhookResponse = { statusCode: 400, body: "Event type not handled" };
         const type = event.type;
         try {
 
@@ -287,12 +299,12 @@ export default class StripeWebhookService {
                     response = await this.handleCustomerEvent(event);
                     break;
                 default:
-                    logger.warn(`Stripe checkout event type ${type} not handled\n`, stringifyJSON(event, 2));
+                    logger.warn(`Stripe checkout event type ${ type } not handled\n`, stringifyJSON(event, 2));
                     break;
             }
         } catch (error) {
             logger.error("Unexpected error occurred while handling stripe event", error);
-            response.body = {error: "Failed to process event. Unexpected error occurred", message: error.message}
+            response.body = { error: "Failed to process event. Unexpected error occurred", message: error.message }
         }
         response.type = type;
         logger.info("Webhook Event Response", JSON.stringify(response, null, 2));
