@@ -94,7 +94,8 @@
     import {QueryParam} from "@shared/util/queryParams";
     import {getQueryParam} from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import {fireStartTrialEvent} from "@web/analytics"
+    import {fireStartTrialEvent} from "@web/analytics";
+    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -134,7 +135,13 @@
             this.scrollHandler();
 
             if (this.upgradeConfirmed) {
-                fireStartTrialEvent();
+                let priceCents = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+
+                if (priceCents) {
+                    priceCents = priceCents / 100;
+                }
+
+                fireStartTrialEvent({ value: priceCents });
             }
         },
         beforeMount() {

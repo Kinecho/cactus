@@ -162,9 +162,11 @@ export async function fireSignupEvent() {
     })
 }
 
-export async function fireStartTrialEvent(value?: number, predicted_ltv?: number) {
+export async function fireStartTrialEvent(options: { value?: number, predicted_ltv?: number }) {
     return new Promise(async resolve => {
         logger.info("Fired 'StartTrial' Event");
+        const { value, predicted_ltv } = options;
+        
         /* Facebook */
         if (window.fbq) {
             logger.debug("Sending StartTrial event to Facebook");
