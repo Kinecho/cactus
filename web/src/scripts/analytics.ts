@@ -162,6 +162,22 @@ export async function fireSignupEvent() {
     })
 }
 
+export async function fireStartTrialEvent(value?: number, predicted_ltv?: number) {
+    return new Promise(async resolve => {
+        logger.info("Fired 'StartTrial' Event");
+        /* Facebook */
+        if (window.fbq) {
+            logger.debug("Sending StartTrial event to Facebook");
+            window.fbq('track', 'StartTrial', {
+                value: (value?.toString() || '0.00'), 
+                currency: 'USD', 
+                predicted_ltv: (predicted_ltv || '0.00')
+            });
+        }
+        resolve();
+    })
+}
+
 export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
     gtag('event', options.type, {
         event_category: "social_share",

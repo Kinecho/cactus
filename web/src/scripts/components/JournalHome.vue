@@ -94,6 +94,7 @@
     import {QueryParam} from "@shared/util/queryParams";
     import {getQueryParam} from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
+    import {fireStartTrialEvent} from "@web/analytics"
 
     const logger = new Logger("JournalHome.vue");
 
@@ -131,6 +132,10 @@
             let handler = debounce(this.scrollHandler, 10);
             window.addEventListener('scroll', handler);
             this.scrollHandler();
+
+            if (this.upgradeConfirmed) {
+                fireStartTrialEvent();
+            }
         },
         beforeMount() {
             logger.log("Journal Home calling Created function");
