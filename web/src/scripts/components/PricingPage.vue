@@ -10,7 +10,7 @@
         <div class="centered" v-if="coreValues">
             <h1>Discover your Core&nbspValues</h1>
             <p class="subtext">Cactus Plus members get core values, daily prompts, and&nbsp;more</p>
-            <a class="button btn primary" href="#upgrade">Upgrade</a>
+            <a class="button btn primary" href="#upgrade">Try Cactus Plus</a>
         </div>
     </section>
     <div class="middleSections">
