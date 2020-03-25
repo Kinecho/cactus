@@ -777,7 +777,7 @@
                     event_category: "prompt_content",
                     event_label: `Slide ${this.activeIndex}`
                 });
-                if (this.promptContent?.documentId === Config.firstPromptId && 
+                if (this.promptContent?.entryId === Config.firstPromptId && 
                     !this.hasSeenPricing) {
                     this.pricingModalVisible = true;
                     this.hasSeenPricing = true;
