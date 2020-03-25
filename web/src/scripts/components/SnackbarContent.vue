@@ -36,7 +36,7 @@
                 required: false,
                 validator: function (value: string) {
                     // The value must match one of these strings
-                    return ['success', 'warning', 'danger', "info", "default"].indexOf(value) !== -1
+                    return ['success', 'warning', 'danger', "info", "default", "successAlt"].indexOf(value) !== -1
                 }
             }
         },
