@@ -481,7 +481,7 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const [latestInfo] = receiptInfo.latest_receipt_info;
+        const [latestInfo] = payment?.apple?.latestReceiptInfo ?? receiptInfo.latest_receipt_info;
         if (!latestInfo) {
             this.logger.info("No latest receipt info found on the apple receipt");
             return undefined;
@@ -500,7 +500,12 @@ export default class AdminSubscriptionService {
         if (latestInfo.cancellation_reason !== undefined) {
             subscriptionStatus = SubscriptionStatus.canceled;
         }
+
+        // receiptInfo.receipt.ex
         // const trialEndsSeconds = latestInfo
+        const isAutoRenew = autoRenewInfo?.auto_renew_status === "1";
+        const expirationIntent = autoRenewInfo?.expiration_intent;
+        const isExpired = !!expirationIntent;
         invoice = {
             nextPaymentDate_epoch_seconds: expiresAtSeconds,
             // status: InvoiceS
@@ -509,8 +514,9 @@ export default class AdminSubscriptionService {
             isAppleSubscription: true,
             isGoogleSubscription: false,
             appleProductId: latestInfo.product_id,
-            isAutoRenew: autoRenewInfo?.auto_renew_status === "1",
+            isAutoRenew,
             subscriptionStatus: subscriptionStatus,
+            isExpired,
             optOutTrialEndsAt_epoch_seconds: subscriptionStatus === SubscriptionStatus.in_trial ? expiresAtSeconds : undefined,
         };
         return invoice;

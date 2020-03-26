@@ -425,6 +425,8 @@ $widthDesktop: $widthXL;
   &.link.fancy {
     background-color: transparent;
     border-radius: 0;
+    border-bottom: 0;
+    box-shadow: none;
     @include fancyLink
   }
 }
