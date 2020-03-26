@@ -1,4 +1,3 @@
-import {ContentAction} from '@shared/models/PromptContent'
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, processedContent.backgroundImage ? processedContent.backgroundImage.position : '', {reflectScreen: isReflectScreen}]">
         <section class="content">
