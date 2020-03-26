@@ -5,8 +5,8 @@
     >
     <div slot="body" class="miniModal">
         <div class="miniHero">
-            <h2>Keep going with Cactus&nbsp;Plus</h2>
-            <p class="subtext">With Cactus Plus, you'll get immediate access to today's prompt, and these popular features:</p>
+            <h2>Try Cactus&nbsp;Plus, free for 7 days</h2>
+            <p class="subtext">You'll get access to these popular features:</p>
         </div>
         <div class="benefit">
             <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
