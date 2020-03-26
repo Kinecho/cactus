@@ -25,6 +25,8 @@ import {isAndroidApp} from "@web/DeviceUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
 import {stringifyJSON} from "@shared/util/ObjectUtil";
 import AndroidService from "@web/android/AndroidService";
+import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+
 
 const logger = new Logger("checkoutService.ts");
 const stripe = Stripe(Config.stripe.apiKey);
@@ -127,6 +129,10 @@ export async function startCheckout(options: {
         isLoggedIn: !!member,
         success: true,
     };
+
+    if (subscriptionProduct) {
+        StorageService.saveNumber(LocalStorageKey.subscriptionPriceCents, subscriptionProduct.priceCentsUsd);
+    }
 
     if (!member && subscriptionProductId) {
         logger.warn("User is not logged in, sending to sign in page with checkout redirect success url");
