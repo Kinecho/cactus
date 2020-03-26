@@ -171,9 +171,9 @@ export async function fireStartTrialEvent(options: { value?: number, predicted_l
         if (window.fbq) {
             logger.debug("Sending StartTrial event to Facebook");
             window.fbq('track', 'StartTrial', {
-                value: (value?.toString() || '0.00'), 
+                value: (value?.toString() ?? '0.00'), 
                 currency: 'USD', 
-                predicted_ltv: (predicted_ltv?.toString() || value?.toString() || '0.00')
+                predicted_ltv: (predicted_ltv?.toString() ?? value?.toString() ?? '0.00')
             });
         }
         resolve();
