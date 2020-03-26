@@ -35,6 +35,8 @@ export enum ContentAction {
     next = "next",
     previous = "previous",
     complete = "complete",
+    showPricing = "showPricing",
+    unknown = "unknown",
 }
 
 enum LinkTarget {
@@ -60,8 +62,9 @@ export interface ContentLink {
 }
 
 export interface ActionButton {
-    action: ContentAction,
-    label: string,
+    action?: ContentAction,
+    label?: string,
+    linkStyle?: LinkStyle,
 }
 
 export interface Quote {

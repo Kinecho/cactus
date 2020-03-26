@@ -94,7 +94,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         return;
     }
 
-    if (member?.tier == SubscriptionTier.PLUS && member?.email) {
+    if (member?.tier === SubscriptionTier.PLUS && member?.email) {
         logger.log('Member is PLUS. Redirecting to Core Values survey...');
         resp.redirect('https://www.surveymonkey.com/r/core-values-v1?email=' + member.email);
 
