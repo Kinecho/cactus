@@ -14,11 +14,11 @@
             </div>
             <template v-if="!error">
                 <template v-if="!subscriptionDetailsLoading">
-                    <p v-if="isInOptOutTrial">
-                        Your free trial ends on {{ optOutTrialEndsAt | formatDate }} and you will be billed <strong>{{nextBillAmount}}</strong>/{{ billingPeriodSingular | lowerCase}}.
-                    </p>
-                    <p v-else-if="isExpired">
+                    <p v-if="isExpired">
                         Your subscription ended on <strong>{{nextBillingDate}}</strong>.
+                    </p>
+                    <p v-else-if="isInOptOutTrial">
+                        Your free trial ends on {{ optOutTrialEndsAt | formatDate }} and you will be billed <strong>{{nextBillAmount}}</strong>/{{ billingPeriodSingular | lowerCase}}.
                     </p>
                     <p v-else-if="isAutoRenewable">
                         Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for
