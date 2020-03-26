@@ -173,7 +173,7 @@ export async function fireStartTrialEvent(options: { value?: number, predicted_l
             window.fbq('track', 'StartTrial', {
                 value: (value?.toString() || '0.00'), 
                 currency: 'USD', 
-                predicted_ltv: (predicted_ltv || '0.00')
+                predicted_ltv: (predicted_ltv?.toString() || value?.toString() || '0.00')
             });
         }
         resolve();
