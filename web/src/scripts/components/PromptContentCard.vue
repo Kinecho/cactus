@@ -1,3 +1,4 @@
+import {ContentAction} from '@shared/models/PromptContent'
 <template>
     <div v-if="processedContent" :class="['content-card', `type-${processedContent.contentType}`, processedContent.backgroundImage ? processedContent.backgroundImage.position : '', {reflectScreen: isReflectScreen}]">
         <section class="content">
@@ -98,6 +99,13 @@
                         :class="linkClasses">{{processedContent.link.linkLabel}}</a>
             </div>
             <!--      END Link      -->
+
+
+            <!--     ADD CONTENT ACTION       -->
+            <div class="link-container" v-if="showActionButton">
+                <button :class="actionButtonClasses" @click="doButtonAction">{{processedContent.actionButton.label}}</button>
+            </div>
+
 
             <!--    START Elements  -->
             <prompt-content-card-elements v-if="processedContent.elements"/>
@@ -257,7 +265,9 @@
             </div>
             <!--    END Reflect-->
         </section>
-
+        <PricingModal
+                :showModal="showPricingModal"
+                @close="showPricingModal = false"/>
         <element-description-modal
                 :cactusElement="cactusModalElement"
                 :showModal="cactusModalVisible"
@@ -281,27 +291,28 @@
     import Spinner from "@components/Spinner.vue";
     import FlamelinkImage from "@components/FlamelinkImage.vue";
     import ReflectionResponse from '@shared/models/ReflectionResponse'
-    import {formatDurationAsTime} from '@shared/util/DateUtil'
-    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil';
+    import { formatDurationAsTime } from '@shared/util/DateUtil'
+    import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil';
     import CopyService from '@shared/copy/CopyService'
-    import {PromptCopy} from '@shared/copy/CopyTypes'
+    import { PromptCopy } from '@shared/copy/CopyTypes'
     // import VueSimpleMarkdown from 'vue-simple-markdown'
     import CopyTextInput from "@components/CopyTextInput.vue";
-    import {QueryParam} from "@shared/util/queryParams"
+    import { QueryParam } from "@shared/util/queryParams"
     import SnackbarContent from "@components/SnackbarContent.vue"
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
     import PromptContentCardElements from "@components/PromptContentCardElements.vue";
     import PromptContentCardInviteFriend from "@components/PromptContentCardInviteFriend.vue";
     import SharedReflectionCard from "@components/SharedReflectionCard.vue";
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {CactusElement} from "@shared/models/CactusElement";
+    import { CactusElement } from "@shared/models/CactusElement";
     import CactusMember from "@shared/models/CactusMember";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import SharingService from '@web/services/SharingService'
     import Logger from "@shared/Logger";
-    import {gtag} from "@web/analytics";
+    import { gtag } from "@web/analytics";
     import MarkdownText from "@components/MarkdownText.vue"
-    import {appendQueryParams} from "@shared/util/StringUtil";
+    import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
+    import PricingModal from "@components/PricingModal.vue";
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -319,6 +330,7 @@
             PromptContentCardInviteFriend,
             ElementDescriptionModal,
             MarkdownText,
+            PricingModal,
         },
         props: {
             content: {
@@ -345,7 +357,8 @@
             cactusModalVisible: boolean,
             cactusModalElement: string | undefined
             nativeShareEnabled: boolean,
-            member: CactusMember | undefined
+            member: CactusMember | undefined,
+            showPricingModal: boolean,
         } {
             return {
                 youtubeVideoLoading: true,
@@ -359,7 +372,8 @@
                 cactusModalVisible: false,
                 cactusModalElement: undefined,
                 nativeShareEnabled: SharingService.canShareNatively(),
-                member: undefined
+                member: undefined,
+                showPricingModal: false,
             }
         },
         beforeMount() {
@@ -418,6 +432,27 @@
             isShareNoteScreen(): boolean {
                 return this.content.contentType === ContentType.share_reflection;
             },
+            actionButtonClasses(): string {
+                let classes = "";
+                switch (this.processedContent?.actionButton?.linkStyle) {
+                    case LinkStyle.buttonPrimary:
+                        classes = "button primary";
+                        break;
+                    case LinkStyle.buttonSecondary:
+                        classes = "button secondary";
+                        break;
+                    case LinkStyle.fancyLink:
+                        classes = "link fancy";
+                        break;
+                    case LinkStyle.link:
+                        classes = "link";
+                        break;
+                    default:
+                        classes = "";
+                        break;
+                }
+                return classes;
+            },
             linkClasses(): string | undefined {
                 if (!this.processedContent || !this.processedContent.link) {
                     return;
@@ -446,10 +481,17 @@
                 let linkUrl = this.content?.link?.destinationHref;
 
                 if (linkUrl && this.content?.link?.appendMemberId && this.member?.id) {
-                    linkUrl = appendQueryParams(this.content.link.destinationHref, {memberId: this.member.id});
+                    linkUrl = appendQueryParams(this.content.link.destinationHref, { memberId: this.member.id });
                 }
 
                 return linkUrl;
+            },
+            showActionButton(): boolean {
+                const button = this.processedContent?.actionButton;
+                if (!button) {
+                    return false
+                }
+                return button.action !== ContentAction.unknown && !isBlank(button.label)
             }
         },
         methods: {
@@ -474,13 +516,16 @@
                 this.shareableLinkUrl = undefined;
                 this.creatingLink = false
             },
+
             async doButtonAction() {
                 if (!this.content.actionButton) {
                     return;
                 }
-
-                const action: ContentAction = this.content.actionButton.action;
+                const action = this.content.actionButton.action ?? ContentAction.unknown;
                 switch (action) {
+                    case ContentAction.showPricing:
+                        this.showPricingModal = true;
+                        break;
                     case ContentAction.next:
                         await this.next();
                         break;

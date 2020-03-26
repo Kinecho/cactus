@@ -421,6 +421,12 @@ $widthDesktop: $widthXL;
   &.small {
     @include smallButton;
   }
+
+  &.link.fancy {
+    background-color: transparent;
+    border-radius: 0;
+    @include fancyLink
+  }
 }
 
 @mixin blueWavyBackground {
