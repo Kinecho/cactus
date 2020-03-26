@@ -29,7 +29,7 @@ import { ApiResponse } from "@shared/api/ApiTypes";
 import { SyncTrialMembersToMailchimpJob } from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
-import { PendingRenewalInfo } from "@shared/api/AppleApi";
+import { ExpirationIntent, PendingRenewalInfo } from "@shared/api/AppleApi";
 import {
     AndroidFulfillRestoredPurchasesParams,
     AndroidFulfillResult,
@@ -481,14 +481,15 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const [latestInfo] = payment?.apple?.latestReceiptInfo ?? receiptInfo.latest_receipt_info;
+        const [latestInfoFromArray] = receiptInfo.latest_receipt_info;
+        const latestInfo = payment?.apple?.latestReceiptInfo ?? latestInfoFromArray;
+
         if (!latestInfo) {
             this.logger.info("No latest receipt info found on the apple receipt");
             return undefined;
         }
 
         const [autoRenewInfo] = receiptInfo?.pending_renewal_info as (PendingRenewalInfo | undefined)[];
-
         const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
             appleProductId: latestInfo.product_id,
             onlyAvailableForSale: false
@@ -497,18 +498,18 @@ export default class AdminSubscriptionService {
         const expiresAtSeconds = latestInfo.expires_date_ms ? Number(latestInfo.expires_date_ms) / 1000 : undefined;
 
         let subscriptionStatus = latestInfo.is_trial_period === "true" ? SubscriptionStatus.in_trial : SubscriptionStatus.active;
-        if (latestInfo.cancellation_reason !== undefined) {
+        if (latestInfo.cancellation_reason !== undefined || autoRenewInfo?.expiration_intent === ExpirationIntent.customer_canceled) {
             subscriptionStatus = SubscriptionStatus.canceled;
+        } else if (autoRenewInfo?.expiration_intent) {
+            subscriptionStatus = SubscriptionStatus.expired
         }
 
-        // receiptInfo.receipt.ex
-        // const trialEndsSeconds = latestInfo
         const isAutoRenew = autoRenewInfo?.auto_renew_status === "1";
         const expirationIntent = autoRenewInfo?.expiration_intent;
-        const isExpired = !!expirationIntent;
+        const isExpired = !!expirationIntent || (expiresAtSeconds !== undefined && expiresAtSeconds * 1000 < Date.now());
+
         invoice = {
             nextPaymentDate_epoch_seconds: expiresAtSeconds,
-            // status: InvoiceS
             billingPlatform: BillingPlatform.APPLE,
             amountCentsUsd: subscriptionProduct?.priceCentsUsd,
             isAppleSubscription: true,
@@ -517,6 +518,8 @@ export default class AdminSubscriptionService {
             isAutoRenew,
             subscriptionStatus: subscriptionStatus,
             isExpired,
+            periodStart_epoch_seconds: optionalStringToNumber(latestInfo.purchase_date_ms),
+            periodEnd_epoch_seconds: expiresAtSeconds,
             optOutTrialEndsAt_epoch_seconds: subscriptionStatus === SubscriptionStatus.in_trial ? expiresAtSeconds : undefined,
         };
         return invoice;
