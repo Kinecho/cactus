@@ -540,8 +540,8 @@ export default class PromptContentScheduler {
             };
 
             try {
-                await MailchimpService.getSharedInstance().updateCampaign(promptContent.mailchimpCampaignId, updateRequest);
-                return {success: true, campaign: campaign};
+                const updatedCampaign = await MailchimpService.getSharedInstance().updateCampaign(promptContent.mailchimpCampaignId, updateRequest);
+                return {success: true, campaign: updatedCampaign};
             } catch (updateError) {
                 logger.error("Update campaign failed.", updateError);
                 return {
