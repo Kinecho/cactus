@@ -52,7 +52,21 @@ export enum CancellationReasonCode {
 }
 
 export interface SubscriptionCancellation {
-    canceledAt: Date;
+    /**
+     * The date the cancellation was initiated but the user or system.
+     */
+    initiatedAt?: Date;
+
+    /**
+     * The date the user loses access to their cactus subscription.
+     * When cancelling in the middle of a period,
+     * the user will maintain access through the rest of the current period
+     */
+    accessEndsAt?: Date;
+
+    /**
+     * The reason the subscription is canceled
+     */
     reasonCode: CancellationReasonCode
 }
 

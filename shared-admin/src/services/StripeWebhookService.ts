@@ -278,6 +278,10 @@ export default class StripeWebhookService {
         return { statusCode: 200, body: `Updated cactus member with new values? ${ hasChanges }` };
     }
 
+    async handleInvoicePaymentSucceeded(event: Stripe.Event) {
+        return;
+    }
+
     /**
      * Main entry point to handle Stripe webhook events.
      * This method will dispatch the event to the handlers responsible for the specific event type.
@@ -291,6 +295,8 @@ export default class StripeWebhookService {
         try {
 
             switch (type) {
+                case 'invoice.payment_succeeded':
+                    response = await this.handleInvoicePaymentSucceeded(event);
                 case 'checkout.session.completed':
                     response = await this.handleCheckoutSessionCompletedEvent(event);
                     break;
