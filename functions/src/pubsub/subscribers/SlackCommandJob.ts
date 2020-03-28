@@ -277,7 +277,10 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
         return `\`${getResponseMediumDisplayName(medium)}\` - ${count}`
     });
 
-    sortedResponseStats.unshift(`\`TOTAL\` - ${allResponses.length}`);
+    const memberIdsReflected = allResponses.map(rr => rr.cactusMemberId);
+    const countMembersReflected = Array.from(new Set(memberIdsReflected)).length;
+
+    sortedResponseStats.unshift(`\`TOTAL\` - ${allResponses.length} from ${countMembersReflected} members`);
 
     todayFields.push({
             title: `Sign Ups`,
