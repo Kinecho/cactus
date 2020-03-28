@@ -297,6 +297,7 @@ export default class StripeWebhookService {
             switch (type) {
                 case 'invoice.payment_succeeded':
                     response = await this.handleInvoicePaymentSucceeded(event);
+                    break;
                 case 'checkout.session.completed':
                     response = await this.handleCheckoutSessionCompletedEvent(event);
                     break;
