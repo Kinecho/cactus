@@ -40,17 +40,18 @@ export const updateSubscriptionDetailsTrigger = functions.firestore
         }
         let needsSave = false;
         const hasActivatedDate = !!subscription.trial?.activatedAt;
+        const optOutTrialIsActive = subscription.cancellation?.accessEndsAt && subscription.cancellation.accessEndsAt > new Date();
         const hasOptOutTrial = !!subscription.optOutTrial?.startedAt;
-        const hasCancelDate = !!subscription.cancellation?.canceledAt;
+
         if (hasActivatedDate && !subscription.activated) {
             logger.info(`setting ${member.email} subscription to activated = true`);
             subscription.activated = true;
             needsSave = true;
-        } else if (hasOptOutTrial && !subscription.activated && !hasCancelDate) {
+        } else if (hasOptOutTrial && optOutTrialIsActive && !subscription.activated) {
             logger.info(`setting ${member.email} subscription to activated = true`);
             subscription.activated = true;
             needsSave = true;
-        } else if (hasOptOutTrial && !subscription.activated && hasCancelDate) {
+        } else if (hasOptOutTrial && !optOutTrialIsActive && subscription.activated) {
             logger.info(`setting ${member.email} subscription to activated = false`);
             subscription.activated = false;
             needsSave = true;
