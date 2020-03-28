@@ -118,7 +118,7 @@ app.post("/subscription-status", async (req: functions.https.Request | any, resp
         `Product = \`${ subscriptionProduct?.displayName } (${ productId })\`\n` +
         `NotificationType = \`${ notification.notification_type }\`\n` +
         `In Trial = \`${ isInTrial ? "Yes" : "No" }\`\n` +
-        `Period End Date = \`${ formatDate(expiresDate) }\`` +
+        `Period End Date = \`${ formatDate(expiresDate) }\`\n` +
         `Is Auto Renew = \`${ isAutoRenew ? "Yes" : "No" }\`\n` +
         `${ expirationDescription ? "Expiration Reason = " + expirationDescription : "" }`.trim(),
         data: JSON.stringify(notification, null, 2),
