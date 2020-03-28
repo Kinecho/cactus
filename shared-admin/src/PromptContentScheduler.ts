@@ -525,9 +525,10 @@ export default class PromptContentScheduler {
 
         const segmentId = this.mailchimpSegmentId();
 
-        if (prompt?.campaign?.id) {
+        if (promptContent?.mailchimpCampaignId) {
             logger.log("The campaign already exists on the ReflectionPrompt so we will update it");
 
+            const campaign = await MailchimpService.getSharedInstance().getCampaign(promptContent.mailchimpCampaignId);
             const updateRequest: UpdateCampaignRequest = {
                 settings: campaignSettings,
                 recipients: {
@@ -539,13 +540,13 @@ export default class PromptContentScheduler {
             };
 
             try {
-                await MailchimpService.getSharedInstance().updateCampaign(prompt.campaign.id, updateRequest);
-                return {success: true, campaign: prompt.campaign};
+                const updatedCampaign = await MailchimpService.getSharedInstance().updateCampaign(promptContent.mailchimpCampaignId, updateRequest);
+                return {success: true, campaign: updatedCampaign};
             } catch (updateError) {
                 logger.error("Update campaign failed.", updateError);
                 return {
                     success: false,
-                    campaign: prompt.campaign,
+                    campaign: campaign,
                     error: `${JSON.stringify(updateError.response?.data || updateError)}`
                 };
             }
