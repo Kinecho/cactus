@@ -481,7 +481,7 @@ export default class AdminSubscriptionService {
             return undefined;
         }
 
-        const [latestInfoFromArray] = receiptInfo.latest_receipt_info;
+        const [latestInfoFromArray] = Array.isArray(receiptInfo.latest_receipt_info) ? receiptInfo.latest_receipt_info : [];
         const latestInfo = payment?.apple?.latestReceiptInfo ?? latestInfoFromArray;
 
         if (!latestInfo) {
@@ -553,24 +553,30 @@ export default class AdminSubscriptionService {
     }
 
     async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
-        const { member } = options;
-        const subscription = member.subscription;
-        if (!subscription) {
-            this.logger.info("No subscription found on the member. Can not process upcoming invoice");
-            return undefined;
-        }
+       try {
+           const { member } = options;
+           const subscription = member.subscription;
+           if (!subscription) {
+               this.logger.info("No subscription found on the member. Can not process upcoming invoice");
+               return undefined;
+           }
 
-        const billingPlatform = getSubscriptionBillingPlatform(subscription);
+           const billingPlatform = getSubscriptionBillingPlatform(subscription);
 
-        switch (billingPlatform) {
-            case BillingPlatform.APPLE:
-                return this.getAppleSubscriptionInvoice({ member });
-            case BillingPlatform.GOOGLE:
-                return this.getGoogleSubscriptionInvoice({ member });
-            default:
-                //For all other types, try to get it via stripe as this method will find subscription info in a few ways
-                return this.getStripeSubscriptionInvoice({ member })
-        }
+           switch (billingPlatform) {
+               case BillingPlatform.APPLE:
+                   return this.getAppleSubscriptionInvoice({ member });
+               case BillingPlatform.GOOGLE:
+                   return this.getGoogleSubscriptionInvoice({ member });
+               default:
+                   //For all other types, try to get it via stripe as this method will find subscription info in a few ways
+                   return this.getStripeSubscriptionInvoice({ member })
+           }
+       } catch (error) {
+           this.logger.error("Unhandled error fetching upcoming invoice", error);
+       }
+       return undefined;
+
     }
 
     /**

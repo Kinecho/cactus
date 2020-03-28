@@ -39,9 +39,11 @@ const stripe = new Stripe(config.stripe.secret_key, {
     apiVersion: '2019-12-03',
 });
 const app = express();
-
+logger.info("allowed origins: ", JSON.stringify(config.allowedOrigins));
 // Automatically allow cross-origin requests
-app.use(cors({ origin: config.allowedOrigins }));
+app.use(cors({
+    origin: config.allowedOrigins,
+}));
 
 app.get("/", async (req: express.Request, res: express.Response) => {
     const index = 8;
