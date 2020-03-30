@@ -11,6 +11,7 @@ export enum PubSubTopic {
     expire_subscription_trials = "expire_subscription_trials",
     sync_trial_members_to_mailchimp = "sync_trial_members_to_mailchimp",
     android_google_play_billing_events = "android_google_play_billing_events",
+    process_cancellations = "process_cancellations",
 
 }
 

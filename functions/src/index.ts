@@ -37,6 +37,7 @@ import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMe
 import {onPublish as syncTrailToMailchimpMembersJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
 import {onPublish as GooglePlayBillingJob} from "@api/pubsub/subscribers/GooglePlayBillingListeners";
 import {transactionalOnCreate} from "@admin/AuthUserCreateJob";
+import {onPublish as CancellationJob} from "@admin/pubsub/ProcessSubscriptionCancellations";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -65,6 +66,8 @@ export const cloudFunctions = {
     expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
     syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
     googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
+    processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
+
 
     //auth triggers
     userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),

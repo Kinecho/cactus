@@ -57,6 +57,10 @@ export interface ExpireMembersJob extends MemberBatchJob {
     lastTrialEndsAt?: number
 }
 
+export interface CancelMembersBatch extends MemberBatchJob {
+    lastAccessEndsAt?: number
+}
+
 export const DEFAULT_JOB_BATCH_SIZE = 500;
 
 export interface MemberBatchJob {
@@ -290,6 +294,28 @@ export default class AdminSubscriptionService {
             where: [
                 [CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers],
                 [CactusMember.Field.subscriptionTrialEndsAt, ">=", AdminFirestoreService.Timestamp.now()]
+            ]
+        };
+
+        return AdminCactusMemberService.getSharedInstance().getMembersBatch(options);
+    }
+
+    /**
+     * Find all members that still have premium access that should be canceled.
+     * The results of this job will be used to remove access for each of them.
+     * @param {CancelMembersBatch} batch
+     * @return {Promise<CactusMember[]>}
+     */
+    async getPremiumMembersWhereCancellationAccessHasEnded(batch: CancelMembersBatch): Promise<CactusMember[]> {
+        const options: GetMembersBatchOptions = {
+            lastMemberId: batch.lastMemberId,
+            lastCursor: batch.lastAccessEndsAt ? Timestamp.fromMillis(batch.lastAccessEndsAt) : undefined,
+            limit: batch.batchSize,
+            orderBy: CactusMember.Field.subscriptionCanceledAccessEndsAt,
+            sortDirection: QuerySortDirection.asc,
+            where: [
+                [CactusMember.Field.subscriptionTier, "in", PremiumSubscriptionTiers],
+                [CactusMember.Field.subscriptionCanceledAccessEndsAt, "<=", AdminFirestoreService.Timestamp.now()],
             ]
         };
 
