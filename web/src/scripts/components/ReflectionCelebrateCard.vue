@@ -7,8 +7,10 @@
                     <h2>{{celebrateText}}</h2>
                 </div>
                 <div class="insightContainer revealed">
-                    <!-- <h4>Today's Insight</h4>
-                    <p>A visualization of words that have come up recently in your reflections.</p> -->
+                    <div v-if="subscriptionTier == plusTier">
+                        <h4>Today's Insight</h4>
+                        <p>A visualization of words that have come up recently in your reflections.</p>
+                    </div>
                     <MemberInsights
                         :words="wordData"
                         :didWrite="didWriteReflection"
@@ -499,7 +501,7 @@
         width: 100%;
         margin: -4rem 0 0;
         h4 {
-            margin-bottom: .8rem;
+            margin: 2rem 0 .8rem;
             opacity: .8;
         }
     }
