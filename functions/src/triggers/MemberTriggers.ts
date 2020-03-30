@@ -40,7 +40,7 @@ export const updateSubscriptionDetailsTrigger = functions.firestore
         }
         let needsSave = false;
         const hasActivatedDate = !!subscription.trial?.activatedAt;
-        const optOutTrialIsActive = !subscription.cancellation || (subscription.cancellation?.accessEndsAt && subscription.cancellation.accessEndsAt > new Date());
+        const optOutTrialIsActive = subscription.cancellation?.accessEndsAt && subscription.cancellation.accessEndsAt > new Date();
         const hasOptOutTrial = !!subscription.optOutTrial?.startedAt;
 
         if (hasActivatedDate && !subscription.activated) {
