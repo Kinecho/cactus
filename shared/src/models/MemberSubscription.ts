@@ -68,6 +68,8 @@ export interface SubscriptionCancellation {
      * The reason the subscription is canceled
      */
     reasonCode: CancellationReasonCode
+
+    processedAt?: Date;
 }
 
 export interface MemberSubscription {

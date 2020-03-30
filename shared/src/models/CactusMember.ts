@@ -71,6 +71,7 @@ export enum Field {
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
     subscriptionActivated = "subscription.activated",
+    subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt"
 }
 
 export interface PromptSendTime {
