@@ -13,8 +13,8 @@
                         :words="wordData"
                         :didWrite="didWriteReflection"
                         :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
-                        :startGated="true"
-                        :startBlurred="true"
+                        :startGated="subscriptionTier === basicTier"
+                        :startBlurred="subscriptionTier === basicTier"
                         :loggedIn="loggedIn" />
                 </div>
                 <div class="lowerContainer">
@@ -271,6 +271,9 @@
             },
             plusTier(): SubscriptionTier {
                 return SubscriptionTier.PLUS;
+            },
+            basicTier(): SubscriptionTier {
+                return SubscriptionTier.BASIC;
             },
             subscriptionTier(): SubscriptionTier | undefined {
                 return this.member?.tier;
