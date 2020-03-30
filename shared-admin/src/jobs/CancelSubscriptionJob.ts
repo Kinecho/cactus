@@ -8,6 +8,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import Logger from "@shared/Logger";
 import { convertDateToTimestamp } from "@shared/util/FirestoreUtil";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 
 export enum CancellationResult {
     REMOVED_ACCESS = "REMOVED_ACCESS",
@@ -26,15 +27,11 @@ export interface MemberCancellationResult {
 }
 
 export interface JobResult {
-    numSuccess: number;
-    numError: number;
     results: MemberCancellationResult[];
 }
 
 export default class CancelSubscriptionJob {
     jobResult: JobResult = {
-        numSuccess: 0,
-        numError: 0,
         results: []
     };
     startTime = new Date();
@@ -137,5 +134,15 @@ export default class CancelSubscriptionJob {
         };
         this.logger.info("Created next batch object", stringifyJSON(nextBatch, 2));
         return nextBatch;
+    }
+
+    async sendSlackMessage() {
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            data: stringifyJSON(this.jobResult, 2),
+            message: `Processed cancellations`,
+            fileType: "json",
+            filename: `cancellations-${new Date().toISOString()}.json`,
+            channel: ChannelName.cancellation_processing,
+        })
     }
 }

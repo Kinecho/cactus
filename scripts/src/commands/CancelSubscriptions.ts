@@ -23,6 +23,7 @@ export default class CancelSubscriptions extends FirebaseCommand {
         await job.run();
         const result = job.jobResult;
         console.log(stringifyJSON(result, 2));
+        await job.sendSlackMessage();
         return;
     }
 }
