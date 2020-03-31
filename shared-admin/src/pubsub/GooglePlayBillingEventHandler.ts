@@ -139,7 +139,7 @@ export default class GooglePlayBillingEventHandler {
         const member = this.member;
         const subscriptionPurchase = this.subscriptionPurchase;
 
-        if (!member || !subscriptoinPurchase) {
+        if (!member || !subscriptionPurchase) {
             return;
         }
 

@@ -48,6 +48,7 @@ export interface OptOutTrial {
 export enum CancellationReasonCode {
     USER_CANCELED = "USER_CANCELED",
     EXPIRED = "EXPIRED",
+    SYSTEM_CANCELED = "SYSTEM_CANCELED",
     UNKNOWN = "UNKNOWN",
     UNAVAILABLE = "UNAVAILABLE"
 }

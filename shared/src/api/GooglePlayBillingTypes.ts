@@ -274,7 +274,7 @@ export function getCactusCancellationReasonCodeFromGoogleReasonCode(code?: Subsc
         case SubscriptionCancelReasonCode.SUBSCRIPTION_REPLACED:
             return CancellationReasonCode.UNAVAILABLE;
         case SubscriptionCancelReasonCode.DEVELOPER_CANCELED:
-            return SubscriptionCancelReasonCode.SYSTEM_CANCELED;
+            return CancellationReasonCode.SYSTEM_CANCELED;
         default:
             return CancellationReasonCode.UNKNOWN;
     }
