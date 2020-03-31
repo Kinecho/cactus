@@ -295,7 +295,7 @@ export default class StripeWebhookService {
 
         if (event.type !== 'customer.subscription.updated') {
             response.statusCode = 500;
-            response.body = {message: "Unable to process this message type. Expected: customer.subscription.updated"};
+            response.body = { message: "Unable to process this message type. Expected: customer.subscription.updated" };
             logger.error("Invalid message type for handle subscription updated", stringifyJSON(event, 2));
             return response;
         }
@@ -310,7 +310,7 @@ export default class StripeWebhookService {
                 message: "Could not determine the customer"
             });
             response.statusCode = 200;
-            response.body = {message: "Could not determine the customer from the payload"};
+            response.body = { message: "Could not determine the customer from the payload" };
             return response;
         }
 
@@ -323,7 +323,7 @@ export default class StripeWebhookService {
                 message: `Could not find a Cactus Member with stripe customer ID = ${ customerId }`
             });
             response.statusCode = 200;
-            response.body = {message: "Could not find a cactus member for this subscription"};
+            response.body = { message: "Could not find a cactus member for this subscription" };
             return response;
         }
 
@@ -350,7 +350,6 @@ export default class StripeWebhookService {
         }
 
 
-
         const accessEndsAt = subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : new Date();
         const initiatedAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : new Date();
         cactusSubscription.cancellation = {
@@ -364,7 +363,7 @@ export default class StripeWebhookService {
 
         response.statusCode = 200;
         response.body = { message: `Successfully processed subscription update ${ member.email } (${ member.id }) to BASIC` };
-        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: Successfully canceled the subscription for ${ member.email } (${ member.id })`);
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: Member ${ member.email } (${ member.id }) subscription will end on ${accessEndsAt.toLocaleString()}`);
         return response;
     }
 
@@ -375,7 +374,7 @@ export default class StripeWebhookService {
         };
 
         if (event.type !== 'customer.subscription.deleted') {
-            response.body = {message: "Invalid message type send to handleSubscriptionDeleted"};
+            response.body = { message: "Invalid message type send to handleSubscriptionDeleted" };
             response.statusCode = 500;
             logger.error("Invalid message type for handle subscriptoin deleted", stringifyJSON(event, 2));
             return response;
@@ -385,7 +384,7 @@ export default class StripeWebhookService {
         const customerId = getStripeId(stripeSubscription.customer);
         if (!customerId) {
             response.statusCode = 400;
-            response.body = {message: "Could not determine the customer from the subscription object"};
+            response.body = { message: "Could not determine the customer from the subscription object" };
             logger.error("Could not get a customer ID from the event payload", stringifyJSON(event, 2));
             await this.sendSubscriptionErrorSlackMessage({
                 subscription: stripeSubscription,
@@ -404,7 +403,7 @@ export default class StripeWebhookService {
                 message: `Could not find a Cactus Member with stripe customer ID = ${ customerId }`
             });
             response.statusCode = 200;
-            response.body = {message: "Could not determine the cactus member from the customer id"};
+            response.body = { message: "Could not determine the cactus member from the customer id" };
             return response
         }
 
@@ -418,7 +417,7 @@ export default class StripeWebhookService {
                 message: `Member ${ member.email } (${ member.id }) did not have a subscription object`
             });
             response.statusCode = 200;
-            response.body = {message: "Member did not have a subscription."};
+            response.body = { message: "Member did not have a subscription." };
             return response
         }
         const accessEndsAt = stripeSubscription.ended_at ? new Date(stripeSubscription.ended_at * 1000) : new Date();
