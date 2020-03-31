@@ -11,7 +11,7 @@
                 <label for="emailConfirm" class="label">Account Email Address</label>
                 <input v-model="confirmedEmail" type="text" name="emailConfirm">
             </div>
-            <button :disabled="isDeleting" class="delete" v-if="isConfirmed" @click="deleteAccount">Delete my Account</button>
+            <button :disabled="isDeleting" class="red" v-if="isConfirmed" @click="deleteAccount">Delete my Account</button>
         </div>
     </modal>
 </template>
@@ -124,13 +124,8 @@
         width: 100%;
     }
 
-    .delete {
-        background-color: $red;
+    .red {
         display: block;
-
-        &:hover:enabled {
-            background-color: darken($red, 5%);
-        }
     }
 
 </style>
