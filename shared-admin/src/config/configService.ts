@@ -39,6 +39,7 @@ export function buildConfig(configInput: CactusConfig = functions.config() as Ca
         config.web.domain = "localhost:8080";
         config.web.protocol = 'http';
         // config.stripe.webhook_signing_secrets.main = 'whsec_CQrDcQTFgTr01NtFT4vNI5HawMGX9oHs';
+        config.stripe.webhook_signing_secrets.main = 'whsec_skI0PA8KSH2BZWmJEcODQGf6FgEHJEB2';
     } else {
         config.web.protocol = 'https'
     }
