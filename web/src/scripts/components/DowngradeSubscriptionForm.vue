@@ -5,6 +5,7 @@
                 your&nbsp;subscription?</h2>
             <p v-if="!showConfirmCancel && !showCancelSuccess">{{message}}</p>
             <button class="red" @click="cancelStripeSubscription"
+                    :disabled="loading"
                     v-if="!showCancelSuccess && !showConfirmCancel && !showCancelSuccess">
                 Cancel Subscription
             </button>
@@ -21,9 +22,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { PageRoute } from '@shared/PageRoutes';
-    import { formatDate } from "@shared/util/DateUtil";
     import { cancelStripeSubscription } from "@web/checkoutService";
-    import { preventOrphanedWords } from "@shared/util/StringUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 

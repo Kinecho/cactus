@@ -29,7 +29,8 @@
                         Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for
                         <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
                     <p v-else-if="!isAutoRenewable">
-                        Your subscription will end on <strong>{{nextBillingDate}}</strong>. You will not be billed again.
+                        Your subscription will end on <strong>{{nextBillingDate}}</strong>. You will not be billed
+                        again.
                     </p>
                 </template>
 
@@ -62,11 +63,10 @@
                     </button>
                 </div>
             </template>
-
-            <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
-                <downgrade-form slot="body" :member="member" :next-billing-date-string="nextBillingDate" @close="showDowngradeModal=false"/>
-            </modal>
         </div>
+        <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
+            <downgrade-form slot="body" :member="member" :next-billing-date-string="nextBillingDate" @close="showDowngradeModal=false"/>
+        </modal>
     </div>
 </template>
 
@@ -129,6 +129,14 @@
             },
             lowerCase(value?: string | undefined) {
                 return value?.toLowerCase()
+            }
+        },
+        watch: {
+            member(current: CactusMember | undefined, previous: CactusMember | undefined) {
+                if (current?.subscription?.cancellation?.accessEndsAt !== previous?.subscription?.cancellation?.accessEndsAt ||
+                    current?.subscription?.tier !== previous?.subscription?.tier) {
+                    this.fetchSubscriptionDetails();
+                }
             }
         },
         computed: {

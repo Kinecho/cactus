@@ -20,6 +20,8 @@ import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionPr
 import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/AdminStripeUtils";
 import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
+import CactusMember from "@shared/models/CactusMember";
+import { formatDateTime } from "@shared/util/DateUtil";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -364,7 +366,7 @@ export default class StripeWebhookService {
 
         response.statusCode = 200;
         response.body = { message: `Successfully processed subscription update ${ member.email } (${ member.id }) to BASIC` };
-        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ accessEndsAt.toLocaleString() }`);
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.subscription_status, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ formatDateTime(accessEndsAt)}`);
         return response;
     }
 
