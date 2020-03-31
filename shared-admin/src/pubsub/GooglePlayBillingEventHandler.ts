@@ -101,6 +101,8 @@ export default class GooglePlayBillingEventHandler {
         await AdminPaymentService.getSharedInstance().save(payment);
         console.log("Saved Payment object", stringifyJSON(payment, 2));
 
+        await this.updateMember();
+
         await this.sendSlackMessage();
     }
 
@@ -129,7 +131,6 @@ export default class GooglePlayBillingEventHandler {
             this.logger.warn("\n\n****************\nUnable to determine a member ID from existing payments... not sure who to associate this payment to.\n****************\n\n");
         } else {
             this.member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-            await this.updateMember();
         }
 
     }
