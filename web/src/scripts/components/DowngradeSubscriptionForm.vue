@@ -1,13 +1,15 @@
 <template>
     <div class="container">
         <template v-if="isStripeSubscription">
-            <h2 class="areYouSure" v-if="!showCancelSuccess">Are you sure you want to cancel your&nbsp;subscription?</h2>
-            <p v-if="!showConfirmCancel && !showCancelSuccess">Please confirm your wish to cancel. You will continue to have access to Cactus Plus until your current billing period&nbsp;ends.</p>
-            <button class="red" @click="cancelStripeSubscription" v-if="!showCancelSuccess && !showConfirmCancel && !showCancelSuccess">Cancel Subscription</button>
-            <!-- <p class="confirmCancel" v-if="showConfirmCancel && !showCancelSuccess">{{confirmCancelMessage}}</p> -->
-            <!-- <button class="red" @click="cancelStripeSubscription" v-if="!showCancelSuccess && showConfirmCancel">Yes, Cancel Subscription</button> -->
+            <h2 class="areYouSure" v-if="!showCancelSuccess">Are you sure you want to cancel
+                your&nbsp;subscription?</h2>
+            <p v-if="!showConfirmCancel && !showCancelSuccess">{{message}}</p>
+            <button class="red" @click="cancelStripeSubscription"
+                    v-if="!showCancelSuccess && !showConfirmCancel && !showCancelSuccess">
+                Cancel Subscription
+            </button>
             <h2 v-if="showCancelSuccess">Your cancellation has been successfully processed.</h2>
-            <button v-if="showCancelSuccess" @click="$emit('close')">Done</button>
+            <button @click="$emit('close')" v-if="showCancelSuccess" >Done</button>
         </template>
     </div>
 </template>
@@ -21,6 +23,7 @@
     import { PageRoute } from '@shared/PageRoutes';
     import { formatDate } from "@shared/util/DateUtil";
     import { cancelStripeSubscription } from "@web/checkoutService";
+    import { preventOrphanedWords } from "@shared/util/StringUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -30,7 +33,7 @@
         },
         props: {
             member: Object as () => CactusMember,
-            nextBillingDate: { type: Object as () => Date | undefined, required: false },
+            nextBillingDateString: { type: String, required: false },
         },
         data(): {
             pricingRoute: string,
@@ -55,15 +58,14 @@
             isStripeSubscription(): boolean {
                 return !!this.member?.subscription?.stripeSubscriptionId
             },
-            confirmCancelMessage(): string {
-                let message = "Please confirm you would like to cancel your subscription. You will continue to have access until the current billing period ends";
-                if (this.nextBillingDate) {
-                    message += " on " + formatDate(this.nextBillingDate, copy.settings.dates.shortFormat) + ".";
-                } else {
-                    message += ".";
+            message(): string {
+                let message = "Please confirm your wish to cancel. You will continue to" +
+                "have access to Cactus Plus until your current billing\xa0period ends";
+                if (this.nextBillingDateString) {
+                    message += " on " + this.nextBillingDateString
                 }
 
-                return message;
+                return message += ".";
             },
             body(): string {
                 const member = this.member || CactusMemberService.sharedInstance.currentMember;
@@ -72,18 +74,12 @@
         },
         methods: {
             async cancelStripeSubscription() {
-                if (this.showConfirmCancel) {
-                    this.loading = true;
-                    this.showCancelSuccess = false;
-                    const cancelResponse = await cancelStripeSubscription();
-                    this.loading = false;
-                    if (cancelResponse.success) {
-                        this.showCancelSuccess = true;
-                    }
-                } else {
-                    this.showConfirmCancel = true;
-                    this.loading = false;
-                    this.showCancelSuccess = false;
+                this.loading = true;
+                this.showCancelSuccess = false;
+                const cancelResponse = await cancelStripeSubscription();
+                this.loading = false;
+                if (cancelResponse.success) {
+                    this.showCancelSuccess = true;
                 }
 
             }

@@ -8,7 +8,7 @@
             <h3 class="tier">{{tierName}}
                 <button @click="downgrade"
                         class="button tertiary small changePlan red"
-                        v-if="isStripeSubscription"
+                        v-if="isStripeSubscription && isAutoRenewable"
                 >
                     Cancel Subscription
                 </button>
@@ -29,7 +29,7 @@
                         Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for
                         <strong>{{nextBillAmount}}</strong> on <strong>{{nextBillingDate}}</strong>.</p>
                     <p v-else-if="!isAutoRenewable">
-                        Your subscription will end on <strong>{{nextBillingDate}}</strong>.
+                        Your subscription will end on <strong>{{nextBillingDate}}</strong>. You will not be billed again.
                     </p>
                 </template>
 
@@ -64,7 +64,7 @@
             </template>
 
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
-                <downgrade-form slot="body" :member="member" :next-billing-date="billingPeriodEndDate" @close="showDowngradeModal=false"/>
+                <downgrade-form slot="body" :member="member" :next-billing-date-string="nextBillingDate" @close="showDowngradeModal=false"/>
             </modal>
         </div>
     </div>

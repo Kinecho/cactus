@@ -249,7 +249,6 @@ export default class AppleService {
             `Is Auto Renew = \`${ isAutoRenew ? "Yes" : "No" }\`\n` +
             `${ expirationDescription ? "Expiration Reason = " + expirationDescription : "" }`.trim(),
             data: JSON.stringify(notification, null, 2),
-
             filename: `member-${ memberId }-subscription-status-update-${ new Date().toISOString() }.json`,
             fileType: "json"
         });

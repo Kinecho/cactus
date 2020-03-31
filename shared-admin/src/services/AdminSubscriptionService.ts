@@ -501,13 +501,25 @@ export default class AdminSubscriptionService {
             this.logger.info("No payment found for original transaction id = ", originalTransactionId);
             return undefined;
         }
-        const receiptInfo = payment?.apple?.raw;
+        const receiptInfo = payment.apple?.raw;
         if (!receiptInfo) {
             this.logger.info("No receipt info found on payment", payment.id);
             return undefined;
         }
+        const unifiedReceipt = payment.apple?.unifiedReceipt ?? payment.apple?.raw;
+        if (!unifiedReceipt) {
+            this.logger.error("Unable to get unified receipt info from apple payment");
+            await AdminSlackService.getSharedInstance().uploadTextSnippet({
+                message: `:ios: Unable to get a unified apple receipt object from a payment record while building the Cactus SubscriptionInvoice object. \nPaymentID = \`${payment.id}\`\nMember = \`${member.email} (${member.id})\``,
+                data: stringifyJSON(payment, 2),
+                fileType: "json",
+                filename: `apple-subscription-invoice-failed-payment-${payment.id}.json`,
+                channel: ChannelName.engineering,
+            });
+            return undefined;
+        }
 
-        const [latestInfoFromArray] = Array.isArray(receiptInfo.latest_receipt_info) ? receiptInfo.latest_receipt_info : [];
+        const [latestInfoFromArray] = Array.isArray(unifiedReceipt.latest_receipt_info) ? receiptInfo.latest_receipt_info : [];
         const latestInfo = payment?.apple?.latestReceiptInfo ?? latestInfoFromArray;
 
         if (!latestInfo) {
@@ -591,29 +603,29 @@ export default class AdminSubscriptionService {
     }
 
     async getUpcomingInvoice(options: { member: CactusMember }): Promise<SubscriptionInvoice | undefined> {
-       try {
-           const { member } = options;
-           const subscription = member.subscription;
-           if (!subscription) {
-               this.logger.info("No subscription found on the member. Can not process upcoming invoice");
-               return undefined;
-           }
+        try {
+            const { member } = options;
+            const subscription = member.subscription;
+            if (!subscription) {
+                this.logger.info("No subscription found on the member. Can not process upcoming invoice");
+                return undefined;
+            }
 
-           const billingPlatform = getSubscriptionBillingPlatform(subscription);
+            const billingPlatform = getSubscriptionBillingPlatform(subscription);
 
-           switch (billingPlatform) {
-               case BillingPlatform.APPLE:
-                   return this.getAppleSubscriptionInvoice({ member });
-               case BillingPlatform.GOOGLE:
-                   return this.getGoogleSubscriptionInvoice({ member });
-               default:
-                   //For all other types, try to get it via stripe as this method will find subscription info in a few ways
-                   return this.getStripeSubscriptionInvoice({ member })
-           }
-       } catch (error) {
-           this.logger.error("Unhandled error fetching upcoming invoice", error);
-       }
-       return undefined;
+            switch (billingPlatform) {
+                case BillingPlatform.APPLE:
+                    return this.getAppleSubscriptionInvoice({ member });
+                case BillingPlatform.GOOGLE:
+                    return this.getGoogleSubscriptionInvoice({ member });
+                default:
+                    //For all other types, try to get it via stripe as this method will find subscription info in a few ways
+                    return this.getStripeSubscriptionInvoice({ member })
+            }
+        } catch (error) {
+            this.logger.error("Unhandled error fetching upcoming invoice", error);
+        }
+        return undefined;
 
     }
 
