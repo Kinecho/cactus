@@ -8,7 +8,7 @@
         <div v-if="isStripeSubscription">
             <div class="info" v-if="showConfirmCancel && !showCancelSuccess">{{confirmCancelMessage}}</div>
             <div class="info" v-if="showCancelSuccess">Your cancellation has been successfully processed.</div>
-            <button class="btn danger" @click="cancelStripeSubscription">{{
+            <button class="btn danger" @click="cancelStripeSubscription" v-if="!showCancelSuccess">{{
                 showConfirmCancel ? 'Yes, cancel subscription' : 'Cancel Subscription'
                 }}
             </button>
