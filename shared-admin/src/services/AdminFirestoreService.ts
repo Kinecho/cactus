@@ -13,6 +13,7 @@ export import Timestamp = firebaseAdmin.firestore.Timestamp;
 export import Transaction = firebaseAdmin.firestore.Transaction;
 export import Batch = firebaseAdmin.firestore.WriteBatch;
 export import CollectionReference = firebaseAdmin.firestore.CollectionReference;
+export import FieldValue = firebaseAdmin.firestore.FieldValue;
 
 export type QueryCursor = string | number | DocumentSnapshot | Timestamp | any;
 

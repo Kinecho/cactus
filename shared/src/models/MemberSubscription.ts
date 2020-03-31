@@ -48,7 +48,8 @@ export interface OptOutTrial {
 export enum CancellationReasonCode {
     USER_CANCELED = "USER_CANCELED",
     EXPIRED = "EXPIRED",
-    UNKNOWN = "UNKNOWN"
+    UNKNOWN = "UNKNOWN",
+    UNAVAILABLE = "UNAVAILABLE"
 }
 
 export interface SubscriptionCancellation {
@@ -77,7 +78,7 @@ export interface MemberSubscription {
     tier: SubscriptionTier,
     trial?: OptInTrial,
     optOutTrial?: OptOutTrial,
-    cancellation?: SubscriptionCancellation,
+    cancellation?: SubscriptionCancellation | null,
     activated?: boolean,
     /**
      * The ID of the Cactus Subscription Product the member is subscribed to
