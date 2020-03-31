@@ -1,12 +1,12 @@
 <template>
     <div class="container">
-        <h2>Are you sure you want to cancel your&nbsp;subscription?</h2>
         <template v-if="isStripeSubscription">
-            <p v-if="!showConfirmCancel">Please confirm your wish to cancel. You will continue to have access to Cactus Plus until your current billing period&nbsp;ends.</p>
-            <button class="red" @click="cancelStripeSubscription" v-if="!showCancelSuccess && !showConfirmCancel">Cancel Subscription</button>
+            <h2 class="areYouSure" v-if="!showCancelSuccess">Are you sure you want to cancel your&nbsp;subscription?</h2>
+            <p v-if="!showConfirmCancel && !showCancelSuccess">Please confirm your wish to cancel. You will continue to have access to Cactus Plus until your current billing period&nbsp;ends.</p>
+            <button class="red" @click="cancelStripeSubscription" v-if="!showCancelSuccess && !showConfirmCancel && !showCancelSuccess">Cancel Subscription</button>
             <!-- <p class="confirmCancel" v-if="showConfirmCancel && !showCancelSuccess">{{confirmCancelMessage}}</p> -->
             <!-- <button class="red" @click="cancelStripeSubscription" v-if="!showCancelSuccess && showConfirmCancel">Yes, Cancel Subscription</button> -->
-            <p class="cancelSuccess" v-if="showCancelSuccess">Your cancellation has been successfully processed.</p>
+            <h2 v-if="showCancelSuccess">Your cancellation has been successfully processed.</h2>
             <button v-if="showCancelSuccess" @click="$emit('close')">Done</button>
         </template>
     </div>
@@ -112,10 +112,13 @@
 
         h2 {
             border-radius: 1.2rem 1.2rem 0 0;
-            color: $red;
             font-size: 2.4rem;
             line-height: 1.3;
             margin-bottom: .8rem;
+
+            &.areYouSure {
+                color: $red;
+            }
         }
 
         p {
