@@ -78,6 +78,13 @@
 
             window.clearInterval(this.cleanupInterval);
             this.removeModal();
+            try {
+                document.body.classList.remove("no-scroll");
+                this.$root.$el.classList.remove("modal-mask-in");
+            } catch (error) {
+                //unable to remove classes from the body;
+            }
+
         },
         data(): {
             escapeListener: any,

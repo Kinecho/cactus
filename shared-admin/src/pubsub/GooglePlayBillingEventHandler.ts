@@ -1,10 +1,12 @@
 import Logger from "@shared/Logger";
 import {
     DeveloperNotification,
+    getCactusCancellationReasonCodeFromGoogleReasonCode,
     getCancelReasonDescription,
     getSubscriptionNotificationDescription,
     getSubscriptionNotificationTypeName,
-    GooglePaymentState
+    GooglePaymentState,
+    SubscriptionNotificationType
 } from "@shared/api/GooglePlayBillingTypes";
 import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import { isNull, stringifyJSON } from "@shared/util/ObjectUtil";
@@ -17,6 +19,7 @@ import AdminPaymentService from "@admin/services/AdminPaymentService";
 import { isBlank } from "@shared/util/StringUtil";
 import CactusMember from "@shared/models/CactusMember";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
+import { CancellationReasonCode, getDefaultSubscription } from "@shared/models/MemberSubscription";
 
 
 export default class GooglePlayBillingEventHandler {
@@ -50,8 +53,25 @@ export default class GooglePlayBillingEventHandler {
         return !isNull(this.subscriptionPurchase?.cancelReason)
     }
 
+    get shouldCancel(): boolean {
+        const notifType = this.notification.subscriptionNotification?.notificationType;
+        return this.isCancelled ||
+        notifType === SubscriptionNotificationType.SUBSCRIPTION_CANCELED ||
+        notifType === SubscriptionNotificationType.SUBSCRIPTION_EXPIRED ||
+        notifType === SubscriptionNotificationType.SUBSCRIPTION_REVOKED
+    }
+
+    get cancellationReasonCode(): CancellationReasonCode | undefined {
+        const reason = this.subscriptionPurchase?.cancelReason;
+        return getCactusCancellationReasonCodeFromGoogleReasonCode(reason);
+    }
+
     get purchaseToken(): string | undefined {
         return this.notification.subscriptionNotification?.purchaseToken;
+    }
+
+    get isAutoRenewing(): boolean {
+        return this.subscriptionPurchase?.autoRenewing ?? false;
     }
 
     constructor(payload: DeveloperNotification) {
@@ -80,6 +100,8 @@ export default class GooglePlayBillingEventHandler {
         });
         await AdminPaymentService.getSharedInstance().save(payment);
         console.log("Saved Payment object", stringifyJSON(payment, 2));
+
+        await this.updateMember();
 
         await this.sendSlackMessage();
     }
@@ -111,6 +133,28 @@ export default class GooglePlayBillingEventHandler {
             this.member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
         }
 
+    }
+
+    async updateMember(): Promise<void> {
+        const member = this.member;
+        const subscriptionPurchase = this.subscriptionPurchase;
+
+        if (!member || !subscriptionPurchase) {
+            return;
+        }
+
+        const memberSubscription = member.subscription ?? getDefaultSubscription();
+
+        if (this.shouldCancel) {
+            memberSubscription.cancellation = {
+                accessEndsAt: this.expiryDate ?? new Date(),
+                initiatedAt: this.userCancellationTime ?? new Date(),
+                reasonCode: this.cancellationReasonCode ?? CancellationReasonCode.UNKNOWN,
+            };
+            member.subscription = memberSubscription;
+            await AdminCactusMemberService.getSharedInstance().save(member);
+            this.logger.info("Updated the member's cancellation record");
+        }
     }
 
     async sendSlackMessage() {
@@ -176,7 +220,7 @@ export default class GooglePlayBillingEventHandler {
 
         const isInTrial = subscriptionPurchase.paymentState === GooglePaymentState.FREE_TRIAL;
         messages.push(`*In Trial*: \`${ isInTrial ? "Yes" : "No" }\``);
-        const isAutoRenewing = subscriptionPurchase.autoRenewing ?? false;
+        const isAutoRenewing = this.isAutoRenewing;
         messages.push(`*Auto Renewing*: \`${ isAutoRenewing ? "Yes" : "No" }\``);
 
         if (this.startDate) {

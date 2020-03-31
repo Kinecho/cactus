@@ -143,7 +143,7 @@ export default class CancelSubscriptionJob {
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             data: stringifyJSON(this.jobResult, 2),
-            message: `Processed cancellations`,
+            message: `Processed ${this.jobResult.results.length} cancellations`,
             fileType: "json",
             filename: `cancellations-${new Date().toISOString()}.json`,
             channel: ChannelName.cancellation_processing,

@@ -4,9 +4,15 @@ import Stripe from "stripe";
 import Logger from "@shared/Logger";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AdminCheckoutSessionService from "@admin/services/AdminCheckoutSessionService";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import { BillingPlatform, getDefaultSubscription, getDefaultTrial } from "@shared/models/MemberSubscription";
+import {
+    BillingPlatform,
+    CancellationReasonCode,
+    getDefaultSubscription,
+    getDefaultTrial,
+    SubscriptionCancellation
+} from "@shared/models/MemberSubscription";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
 import Payment from "@shared/models/Payment";
@@ -14,6 +20,7 @@ import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionPr
 import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/AdminStripeUtils";
 import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
+import { formatDateTime } from "@shared/util/DateUtil";
 
 const logger = new Logger("StripeWebhookService");
 
@@ -282,6 +289,213 @@ export default class StripeWebhookService {
     //     return;
     // }
 
+    async handleSubscriptionUpdated(event: Stripe.Event): Promise<WebhookResponse> {
+        const response: WebhookResponse = {
+            statusCode: 204,
+            body: { message: "Not actually processed yet" },
+        };
+
+        if (event.type !== 'customer.subscription.updated') {
+            response.statusCode = 500;
+            response.body = { message: "Unable to process this message type. Expected: customer.subscription.updated" };
+            logger.error("Invalid message type for handle subscription updated", stringifyJSON(event, 2));
+            return response;
+        }
+
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId = getStripeId(subscription.customer);
+        if (!customerId) {
+            logger.error("Could not get a customer ID from the event payload", stringifyJSON(event, 2));
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription,
+                eventType: event.type,
+                message: "Could not determine the customer"
+            });
+            response.statusCode = 200;
+            response.body = { message: "Could not determine the customer from the payload" };
+            return response;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getByStripeCustomerId(customerId);
+        if (!member) {
+            logger.error("Unable to find a cactus member with stripe customer id: ", customerId);
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription,
+                eventType: event.type,
+                message: `Could not find a Cactus Member with stripe customer ID = ${ customerId }`
+            });
+            response.statusCode = 200;
+            response.body = { message: "Could not find a cactus member for this subscription" };
+            return response;
+        }
+
+        const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
+
+        if (!subscription.cancel_at_period_end || previousAttributes.cancel_at_period_end !== false) {
+            logger.info("Not processing event - only handle cancellation events");
+            response.statusCode = 200;
+            response.body = { message: "Not processing any events except for cancel at period end. Success." };
+            return response
+        }
+
+        const cactusSubscription = member.subscription;
+        if (!cactusSubscription) {
+            logger.error("Unable to find a cactus member with stripe customer id: ", customerId);
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription,
+                eventType: event.type,
+                message: `Member ${ member.email } (${ member.id }) did not have a subscription object`
+            });
+            response.statusCode = 200;
+            response.body = { message: `Member ${ member.email } (${ member.id }) did not have a subscription object` };
+            return response;
+        }
+
+
+        const accessEndsAt = subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : new Date();
+        const initiatedAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : new Date();
+        cactusSubscription.cancellation = {
+            reasonCode: CancellationReasonCode.USER_CANCELED,
+            accessEndsAt: accessEndsAt,
+            initiatedAt: initiatedAt,
+        };
+
+        member.subscription = cactusSubscription;
+        await AdminCactusMemberService.getSharedInstance().save(member, { setUpdatedAt: false });
+
+        response.statusCode = 200;
+        response.body = { message: `Successfully processed subscription update ${ member.email } (${ member.id }) to BASIC` };
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.subscription_status, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ formatDateTime(accessEndsAt)}`);
+        return response;
+    }
+
+    async handleSubscriptionDeleted(event: Stripe.Event): Promise<WebhookResponse> {
+        const response: WebhookResponse = {
+            statusCode: 204,
+            body: { message: "Not actually processed yet" },
+        };
+
+        if (event.type !== 'customer.subscription.deleted') {
+            response.body = { message: "Invalid message type send to handleSubscriptionDeleted" };
+            response.statusCode = 500;
+            logger.error("Invalid message type for handle subscriptoin deleted", stringifyJSON(event, 2));
+            return response;
+        }
+
+        const stripeSubscription = event.data.object as Stripe.Subscription;
+        const customerId = getStripeId(stripeSubscription.customer);
+        if (!customerId) {
+            response.statusCode = 400;
+            response.body = { message: "Could not determine the customer from the subscription object" };
+            logger.error("Could not get a customer ID from the event payload", stringifyJSON(event, 2));
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription: stripeSubscription,
+                eventType: event.type,
+                message: "Could not determine the customer"
+            });
+            return response;
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getByStripeCustomerId(customerId);
+        if (!member) {
+            logger.error("Unable to find a cactus member with stripe customer id: ", customerId);
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription: stripeSubscription,
+                eventType: event.type,
+                message: `Could not find a Cactus Member with stripe customer ID = ${ customerId }`
+            });
+            response.statusCode = 200;
+            response.body = { message: "Could not determine the cactus member from the customer id" };
+            return response
+        }
+
+
+        const cactusSubscription = member.subscription;
+        if (!cactusSubscription) {
+            logger.error("Unable to find a cactus member with stripe customer id: ", customerId);
+            await this.sendSubscriptionErrorSlackMessage({
+                subscription: stripeSubscription,
+                eventType: event.type,
+                message: `Member ${ member.email } (${ member.id }) did not have a subscription object`
+            });
+            response.statusCode = 200;
+            response.body = { message: "Member did not have a subscription." };
+            return response
+        }
+        const accessEndsAt = stripeSubscription.ended_at ? new Date(stripeSubscription.ended_at * 1000) : new Date();
+        cactusSubscription.tier = SubscriptionTier.BASIC;
+        const cancellation: SubscriptionCancellation = {
+            reasonCode: CancellationReasonCode.USER_CANCELED,
+            accessEndsAt: accessEndsAt,
+            processedAt: new Date(),
+        };
+
+        if (stripeSubscription.canceled_at) {
+            cancellation.initiatedAt = new Date(stripeSubscription.canceled_at * 1000);
+        }
+        cactusSubscription.cancellation = cancellation;
+        member.subscription = cactusSubscription;
+        await AdminCactusMemberService.getSharedInstance().save(member, { setUpdatedAt: false });
+
+        response.statusCode = 200;
+        response.body = { message: `Successfully downgraded ${ member.email } (${ member.id }) to BASIC` };
+
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: Successfully canceled the subscription for ${ member.email } (${ member.id })`);
+
+        return response;
+    }
+
+    async sendSubscriptionErrorSlackMessage(params: { message?: string, subscription: Stripe.Subscription, eventType: string }) {
+        const { subscription, message, eventType } = params;
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            message: `Stripe webhook error on \`${ eventType }\`\n${ message ?? "" }`.trim(),
+            data: stringifyJSON(subscription, 2),
+            fileType: "json",
+            filename: `stripe-webhook-error-${ new Date().toISOString() }.json`,
+            channel: ChannelName.engineering,
+        })
+    }
+
+    async handleInvoicePaymentSucceeded(event: Stripe.Event): Promise<WebhookResponse> {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId = getStripeId(invoice.customer);
+        if (!customerId) {
+            logger.error("Unable to get customer ID from the invoice object", stringifyJSON(event, 2));
+            return { statusCode: 500, body: { message: "Unable to get customer ID from the invoice" } };
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getByStripeCustomerId(customerId);
+        if (!member) {
+            logger.warn("Unable to find a cactus member for stripe customerId " + customerId);
+            return { statusCode: 200, body: { message: "No cactus member was found for customer ID" } };
+        }
+
+        const amount = invoice.amount_paid;
+        const pricePaid = `$${ (amount / 100).toFixed(2) }`;
+        const productDescription = invoice.lines.data.find(d => true)?.description;
+        const subscriptionId = getStripeId(invoice.lines.data.find(d => !!d.subscription)?.subscription);
+
+        const cactusSubscription = member.subscription ?? getDefaultSubscription();
+        if (subscriptionId) {
+            cactusSubscription.stripeSubscriptionId = subscriptionId;
+            cactusSubscription.tier = SubscriptionTier.PLUS;
+            member.stripeCustomerId = customerId;
+            member.subscription = cactusSubscription;
+            logger.info("Saving member subscription", stringifyJSON(member.subscription, 2));
+            await AdminCactusMemberService.getSharedInstance().save(member);
+        }
+
+
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cha_ching, `${ member.email } successfully completed an invoice for ${ productDescription } for ${ pricePaid }. Reason: \`${ invoice.billing_reason }\``);
+
+        return { statusCode: 200,
+            body: {
+                message: "updated member subscription",
+                member: { email: member.email, id: member.id, subscription: member.subscription }
+            }
+        }
+    }
+
     /**
      * Main entry point to handle Stripe webhook events.
      * This method will dispatch the event to the handlers responsible for the specific event type.
@@ -290,20 +504,27 @@ export default class StripeWebhookService {
      * @return {Promise<WebhookResponse>}
      */
     async handleWebhookEvent(event: Stripe.Event): Promise<WebhookResponse> {
-        let response: WebhookResponse = { statusCode: 400, body: "Event type not handled" };
+        let response: WebhookResponse = { statusCode: 200, body: "Event type not handled" };
         const type = event.type;
         try {
-
             switch (type) {
-                // case 'invoice.payment_succeeded':
-                //     response = await this.handleInvoicePaymentSucceeded(event);
-                //     break;
+                case 'customer.subscription.deleted':
+                    //A subscription has ended.
+                    response = await this.handleSubscriptionDeleted(event);
+                    break;
+                case 'customer.subscription.updated':
+                    //this will tell us when a subscription has changed - like if it's no longer auto-renewing
+                    response = await this.handleSubscriptionUpdated(event);
+                    break;
                 case 'checkout.session.completed':
                     response = await this.handleCheckoutSessionCompletedEvent(event);
                     break;
                 case 'customer.updated':
                 case 'customer.created':
                     response = await this.handleCustomerEvent(event);
+                    break;
+                case 'invoice.payment_succeeded':
+                    response = await this.handleInvoicePaymentSucceeded(event);
                     break;
                 default:
                     logger.warn(`Stripe checkout event type ${ type } not handled\n`, stringifyJSON(event, 2));

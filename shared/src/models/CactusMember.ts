@@ -70,8 +70,10 @@ export enum Field {
     subscriptionTier = "subscription.tier",
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
+    subscriptionCancellation = "subscription.cancellation",
     subscriptionActivated = "subscription.activated",
-    subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt"
+    subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    stripeCustomerId = "stripe.customerId",
 }
 
 export interface PromptSendTime {

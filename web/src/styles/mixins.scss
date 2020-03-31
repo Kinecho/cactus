@@ -355,6 +355,14 @@ $widthDesktop: $widthXL;
     max-width: 28rem;
   }
 
+  &.red {
+      background-color: $red;
+
+      &:hover:enabled {
+          background-color: darken($red, 5%);
+      }
+  }
+
   &:hover {
     cursor: pointer;
     background-color: darken($green, 5%);

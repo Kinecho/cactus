@@ -1,11 +1,11 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import Stripe from "stripe";
 import {
-    AppleReceiptResponseRawBody,
+    AppleVerifiedReceipt,
     AppleServerNotificationBody,
     AppleTransactionInfo,
     getOriginalTransactionId,
-    getOriginalTransactionIdFromServerNotification
+    getOriginalTransactionIdFromServerNotification, AppleUnifiedReceipt
 } from "@shared/api/AppleApi";
 import Logger from "@shared/Logger";
 import { AndroidPurchase } from "@shared/api/CheckoutTypes";
@@ -45,7 +45,7 @@ export default class Payment extends BaseModel {
         return payment;
     }
 
-    static fromAppleReceipt(options: { memberId: string, subscriptionProductId: string, receipt: AppleReceiptResponseRawBody }): Payment {
+    static fromAppleReceipt(options: { memberId: string, subscriptionProductId: string, receipt: AppleVerifiedReceipt }): Payment {
         const { memberId: memberId, receipt, subscriptionProductId } = options;
         const payment = new Payment();
         payment.memberId = memberId;
@@ -63,23 +63,23 @@ export default class Payment extends BaseModel {
             raw: receipt,
             originalTransactionId: transactionId,
             latestReceiptInfo,
+            unifiedReceipt: receipt,
         };
 
         return payment;
     }
 
-    updateFromAppleNotification(params: { memberId?: string, notification: AppleServerNotificationBody, receipt?: AppleReceiptResponseRawBody }) {
-        const { memberId: memberId, notification, receipt } = params;
+    updateFromAppleNotification(params: { memberId?: string, notification: AppleServerNotificationBody }) {
+        const { memberId: memberId, notification } = params;
 
         const transactionId: string | undefined = getOriginalTransactionIdFromServerNotification(notification);
 
         const appleObject = this.apple ?? {
             originalTransactionId: transactionId,
-            raw: receipt,
             latestNotificationRaw: notification,
-            latestReceiptInfo: notification.latest_receipt_info
+            latestReceiptInfo: notification.latest_receipt_info,
+            unifiedReceipt: notification.unified_receipt,
         };
-        appleObject.raw = receipt;
         this.memberId = this.memberId ?? memberId;
         this.apple = appleObject;
     }
@@ -132,10 +132,11 @@ interface StripePayment {
 }
 
 interface ApplePayment {
-    raw?: AppleReceiptResponseRawBody;
+    raw?: AppleVerifiedReceipt;
     originalTransactionId?: string;
     latestNotificationRaw?: AppleServerNotificationBody;
     latestReceiptInfo?: AppleTransactionInfo;
+    unifiedReceipt?: AppleUnifiedReceipt;
 }
 
 interface GooglePayment extends AndroidPurchase {
