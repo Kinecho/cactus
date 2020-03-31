@@ -6,7 +6,12 @@
 
         <div v-else>
             <h3 class="tier">{{tierName}}
-                <button @click="downgrade" class="button tertiary small changePlan">Change Plan</button>
+                <button @click="downgrade"
+                        class="button tertiary small changePlan"
+                        v-if="isStripeSubscription"
+                >
+                    Change Plan
+                </button>
             </h3>
             <div v-if="error" class="error">
                 {{error}}
