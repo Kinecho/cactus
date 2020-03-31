@@ -1,5 +1,6 @@
 import { isNull } from "@shared/util/ObjectUtil";
 import { SubscriptionStatus } from "@shared/models/SubscriptionTypes";
+import { CancellationReasonCode } from "@shared/models/MemberSubscription";
 
 export interface DeveloperNotification {
     /**
@@ -258,7 +259,25 @@ export function getCancelReasonDescription(code?: SubscriptionCancelReasonCode |
         default:
             return `Unknown reason code: ${ code }`;
     }
+}
 
+export function getCactusCancellationReasonCodeFromGoogleReasonCode(code?: SubscriptionCancelReasonCode | number | undefined): CancellationReasonCode | undefined {
+    if (isNull(code)) {
+        return undefined;
+    }
+
+    switch (code) {
+        case SubscriptionCancelReasonCode.USER_CANCELED:
+            return CancellationReasonCode.USER_CANCELED;
+        case SubscriptionCancelReasonCode.SYSTEM_CANCELED:
+            return CancellationReasonCode.EXPIRED;
+        case SubscriptionCancelReasonCode.SUBSCRIPTION_REPLACED:
+            return CancellationReasonCode.UNAVAILABLE;
+        case SubscriptionCancelReasonCode.DEVELOPER_CANCELED:
+            return SubscriptionCancelReasonCode.SYSTEM_CANCELED;
+        default:
+            return CancellationReasonCode.UNKNOWN;
+    }
 }
 
 export enum SubscriptionCancelReasonCode {
