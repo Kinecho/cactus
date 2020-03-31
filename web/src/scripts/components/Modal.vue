@@ -1,7 +1,7 @@
 <template>
     <MountingPortal v-if="hasShown || show" :mountTo="target">
         <transition name="modal" v-if="show" appear>
-            <div :class="['modal-mask', {show, opaque, light, dark}]">
+            <div :class="['modal-mask', {show, opaque, light, dark, tall}]">
                 <div class="modal-wrapper">
                     <div class="modal-container" :class="{relative: containerPositionRelative}" role="dialog">
                         <div class="modal-header">
@@ -42,6 +42,10 @@
             dark: Boolean,
             closeStyles: {
                 type: Object as () => { [name: string]: any }
+            },
+            tall: {
+                type: Boolean,
+                default: false,
             },
             containerPositionRelative: {
                 type: Boolean,
@@ -148,7 +152,10 @@
     @import "mixins";
 
     .modal-mask {
+        align-items: center;
+        display: flex;
         height: 100%;
+        justify-content: center;
         left: 0;
         overflow-y: auto;
         position: fixed;
@@ -156,12 +163,6 @@
         transition: opacity .3s ease;
         width: 100%;
         z-index: 9998;
-
-        @include h(960) {
-            align-items: center;
-            display: flex;
-            justify-content: center;
-        }
 
         &.light {
             background-color: rgba(255, 255, 255, .6);
@@ -176,6 +177,16 @@
 
             &.opaque {
                 background-color: rgba(0, 0, 0, 1);
+            }
+        }
+
+        &.tall {
+            display: block;
+
+            @include h(960) {
+                align-items: center;
+                display: flex;
+                justify-content: center;
             }
         }
 

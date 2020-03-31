@@ -137,6 +137,10 @@ export default class CancelSubscriptionJob {
     }
 
     async sendSlackMessage() {
+        if (this.jobResult.results.length === 0) {
+            return;
+        }
+
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
             data: stringifyJSON(this.jobResult, 2),
             message: `Processed ${this.jobResult.results.length} cancellations`,

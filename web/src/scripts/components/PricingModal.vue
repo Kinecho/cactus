@@ -2,6 +2,7 @@
   <modal :show="showModal"
             v-on:close="$emit('close')"
             :showCloseButton="true"
+            :tall="true"
     >
     <div slot="body" class="miniModal">
         <div class="miniHero">
