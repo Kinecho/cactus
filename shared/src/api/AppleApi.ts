@@ -14,7 +14,7 @@ export interface AppleCompletePurchaseRequest {
      * TRUE if this receipt was from a restored transaction.
      * FALSE if this was a new purchase.
      */
-    restored: boolean;
+    restored?: boolean|undefined;
 }
 
 export interface AppleFulfillmentResult {
