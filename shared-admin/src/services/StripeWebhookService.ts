@@ -20,7 +20,6 @@ import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionPr
 import { getCustomerId, getStripeId, isStripeSubscription } from "@admin/util/AdminStripeUtils";
 import { destructureDisplayName, isBlank } from "@shared/util/StringUtil";
 import StripeService from "@admin/services/StripeService";
-import CactusMember from "@shared/models/CactusMember";
 import { formatDateTime } from "@shared/util/DateUtil";
 
 const logger = new Logger("StripeWebhookService");
