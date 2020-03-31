@@ -37,17 +37,17 @@ app.post("/complete-purchase", async (req: functions.https.Request | any, resp: 
         });
         return
     }
-
+    const isRestored = body.restored;
     const result = await AppleService.getSharedInstance().fulfillApplePurchase({ receipt: body, userId });
 
     const product = result.fulfillmentResult?.subscriptionProduct;
-    if (result.success) {
+    if (result.success && result.fulfillmentResult?.didFulfill) {
         await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `:ios: ${ member?.email } has completed an in-app purchase \`${ product?.displayName } (${ product?.appleProductId })\`` });
-    } else {
-        await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `${ member?.email } failed to complete a purchase on iOS\n>${ result.message }` });
+    } else if (result.success){
+        await AdminSlackService.getSharedInstance().sendChaChingMessage({ text: `:ios: ${ member?.email } was unable to fulfill a ${isRestored ? "`restored`" : "`purchased`"} receipt\n>${ result.message }` });
     }
 
-    logger.info("Verify receipt completed");
+    logger.info("Verify receipt completed", stringifyJSON(result));
     resp.status(200).send(result);
     return
 });

@@ -8,11 +8,18 @@ export interface AppleCompletePurchaseRequest {
     /**
      * Base 64 encoded receipt string
      */
-    receiptData: string
+    receiptData: string;
+
+    /**
+     * TRUE if this receipt was from a restored transaction.
+     * FALSE if this was a new purchase.
+     */
+    restored: boolean;
 }
 
 export interface AppleFulfillmentResult {
     success: boolean,
+    didFulfill?: boolean,
     message?: string,
     subscriptionProduct?: SubscriptionProduct
 }
@@ -431,7 +438,7 @@ export interface AppleUnifiedReceipt {
      * to those in responseBody.Pending_renewal_info in the verifyReciept endpoint response for receipt validation.
      */
     pending_renewal_info: PendingRenewalInfo[]
-    
+
     status: ReceiptStatusCode;
 }
 

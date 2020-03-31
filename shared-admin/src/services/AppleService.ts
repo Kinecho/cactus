@@ -19,7 +19,7 @@ import {
 import { CactusConfig } from "@shared/CactusConfig";
 import axios from "axios";
 import Logger from "@shared/Logger";
-import { isNotNull, stringifyJSON } from "@shared/util/ObjectUtil";
+import { isNotNull, optionalStringToNumber, stringifyJSON } from "@shared/util/ObjectUtil";
 import { isAxiosError } from "@shared/api/ApiTypes";
 import Payment from "@shared/models/Payment";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -125,6 +125,7 @@ export default class AppleService {
             this.logger.info("Fulfillment response", stringifyJSON(fulfilResult, 2));
             result.fulfillmentResult = fulfilResult;
             result.success = fulfilResult.success;
+            result.message = fulfilResult.message;
         } else {
             result.success = false;
         }
@@ -154,6 +155,20 @@ export default class AppleService {
         }
         const result: AppleFulfillmentResult = { success: false };
         const appleProductId = this.getAppleProductIdFromReceipt(receipt);
+        const now = Date.now();
+        const validTransaction = receipt.latest_receipt_info.find(txn => {
+            const expires = optionalStringToNumber(txn.expires_date_ms);
+            if (expires) {
+                return expires > now;
+            }
+            return false;
+        });
+
+        if (!validTransaction) {
+            this.logger.info("No active subscription was found in the apple receipt transaction was found, can not fulfill the purchase");
+            return {success: true, didFulfill: false, message: "No active subscription was found on the apple receipt. All transactions on the apple receipt are expired. Not fulfilling this purchase."};
+        }
+
         const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
             appleProductId,
             onlyAvailableForSale: false
@@ -209,6 +224,7 @@ export default class AppleService {
         member.subscription = cactusSubscription;
         await AdminCactusMemberService.getSharedInstance().save(member, { setUpdatedAt: false });
         result.success = true;
+        result.didFulfill = true;
         return result;
     }
 
