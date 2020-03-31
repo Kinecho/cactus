@@ -1,7 +1,7 @@
 import AdminFirestoreService, {
     Batch,
     CollectionReference,
-    DefaultGetOptions,
+    DefaultGetOptions, FieldValue,
     GetBatchOptions,
     GetOptions,
     QueryOptions,
@@ -67,6 +67,18 @@ export default class AdminCactusMemberService {
 
     getCollectionRef(): CollectionReference {
         return AdminFirestoreService.getSharedInstance().getCollectionRef(Collection.members);
+    }
+
+    async deleteField(member: CactusMember, field: Field): Promise<void> {
+        const memberId = member.id;
+        if (!memberId) {
+            return;
+        }
+
+        const docRef = this.getCollectionRef().doc(memberId);
+
+        await docRef.update(field, FieldValue.delete());
+        return;
     }
 
     async save(model: CactusMember, options?: SaveOptions): Promise<CactusMember> {

@@ -2,9 +2,16 @@ import {
     AppleCompletePurchaseRequest,
     AppleCompletePurchaseResult,
     AppleFulfillmentResult,
-    AppleReceiptResponseRawBody,
+    AppleServerNotificationBody,
+    AppleTransactionInfo,
+    AppleVerifiedReceipt,
+    getCancellationReasonCodeFromExpirationIntent,
     getCurrentSubscriptionPeriodFromReceipt,
+    getExpirationIntentDescription,
+    getExpirationIntentFromNotification,
     getOriginalTransactionId,
+    getOriginalTransactionIdFromServerNotification,
+    HandleAppleNotificationResult,
     isAppleReceiptResponseRawBody,
     isReceiptInTrial,
     ReceiptStatusCode
@@ -12,7 +19,7 @@ import {
 import { CactusConfig } from "@shared/CactusConfig";
 import axios from "axios";
 import Logger from "@shared/Logger";
-import { stringifyJSON } from "@shared/util/ObjectUtil";
+import { isNotNull, stringifyJSON } from "@shared/util/ObjectUtil";
 import { isAxiosError } from "@shared/api/ApiTypes";
 import Payment from "@shared/models/Payment";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
@@ -20,7 +27,9 @@ import AdminPaymentService from "@admin/services/AdminPaymentService";
 import AdminSubscriptionProductService from "@admin/services/AdminSubscriptionProductService";
 import { BillingPlatform, getDefaultSubscription, getDefaultTrial } from "@shared/models/MemberSubscription";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
+import { formatDate } from "@shared/util/DateUtil";
+import CactusMember from "@shared/models/CactusMember";
 
 export default class AppleService {
     protected static sharedInstance: AppleService;
@@ -47,7 +56,7 @@ export default class AppleService {
      * @param {{data: string, sandbox: boolean, excludeOldTransactions: boolean}} options
      * @return {Promise<any>}
      */
-    async sendToApple(options: { data: string, sandbox: boolean, excludeOldTransactions: boolean }): Promise<AppleReceiptResponseRawBody | undefined> {
+    async sendToApple(options: { data: string, sandbox: boolean, excludeOldTransactions: boolean }): Promise<AppleVerifiedReceipt | undefined> {
         const { data, sandbox, excludeOldTransactions } = options;
         const url = sandbox ? this.config.ios.verify_receipt_sandbox_url : this.config.ios.verify_receipt_url;
         try {
@@ -76,7 +85,7 @@ export default class AppleService {
         }
     }
 
-    async decodeAppleReceipt(encodedReceipt: string): Promise<AppleReceiptResponseRawBody | undefined> {
+    async decodeAppleReceipt(encodedReceipt: string): Promise<AppleVerifiedReceipt | undefined> {
         //First, try prod
         const prodResponse = await this.sendToApple({
             data: encodedReceipt,
@@ -125,16 +134,16 @@ export default class AppleService {
 
     /**
      * Get the latest purchased Apple Product ID from a receipt
-     * @param {AppleReceiptResponseRawBody} receipt
+     * @param {AppleVerifiedReceipt} receipt
      * @return {Promise<string | undefined>}
      */
-    getAppleProductIdFromReceipt(receipt: AppleReceiptResponseRawBody): string | undefined {
+    getAppleProductIdFromReceipt(receipt: AppleVerifiedReceipt): string | undefined {
         const [nextRenewal] = receipt.pending_renewal_info;
         const [lastInfo] = receipt.latest_receipt_info;
         return nextRenewal?.product_id ?? lastInfo?.product_id;
     }
 
-    async fulfillReceipt(options: { userId: string, receipt: AppleReceiptResponseRawBody }): Promise<AppleFulfillmentResult> {
+    async fulfillReceipt(options: { userId: string, receipt: AppleVerifiedReceipt }): Promise<AppleFulfillmentResult> {
         const { userId, receipt } = options;
         const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
 
@@ -201,5 +210,65 @@ export default class AppleService {
         await AdminCactusMemberService.getSharedInstance().save(member, { setUpdatedAt: false });
         result.success = true;
         return result;
+    }
+
+    async handleSubscriptionNotification(notification: AppleServerNotificationBody): Promise<HandleAppleNotificationResult> {
+        this.logger.info("Apple Subscription Notification event received", stringifyJSON(notification, 2));
+
+        const originalTransactionId = getOriginalTransactionIdFromServerNotification(notification);
+
+        // const encodedReceipt = notification.unified_receipt.latest_receipt;
+        // const decodedReceipt = await AppleService.getSharedInstance().decodeAppleReceipt(encodedReceipt);
+
+        const [payment] = await AdminPaymentService.getSharedInstance().getByAppleOriginalTransactionId(originalTransactionId);
+        const [latestReceiptInfo] = notification.unified_receipt?.latest_receipt_info as (AppleTransactionInfo | undefined)[];
+        const productId = latestReceiptInfo?.product_id;
+        const subscriptionProduct = await AdminSubscriptionProductService.getSharedInstance().getByAppleProductId({
+            appleProductId: productId,
+            onlyAvailableForSale: false
+        });
+        const memberId = payment?.memberId as string | undefined;
+        const member = memberId ? await AdminCactusMemberService.getSharedInstance().getById(memberId) : undefined;
+
+        //TODO: update the payment object
+        payment.updateFromAppleNotification({ memberId, notification });
+        await AdminPaymentService.getSharedInstance().save(payment);
+
+        const isInTrial = latestReceiptInfo?.is_trial_period === "true";
+        const isAutoRenew = notification.auto_renew_status === "true";
+        const expirationIntent = getExpirationIntentFromNotification(notification);
+        const expirationDescription = getExpirationIntentDescription(expirationIntent);
+        const expiresDate = latestReceiptInfo?.expires_date_ms !== undefined ? new Date(Number(latestReceiptInfo.expires_date_ms)) : undefined;
+        await AdminSlackService.getSharedInstance().uploadTextSnippet({
+            channel: ChannelName.subscription_status,
+            message: `:ios: ${ member?.email || memberId } Subscription status update from Apple\n` +
+            `Product = \`${ subscriptionProduct?.displayName } (${ productId })\`\n` +
+            `NotificationType = \`${ notification.notification_type }\`\n` +
+            `In Trial = \`${ isInTrial ? "Yes" : "No" }\`\n` +
+            `Period End Date = \`${ formatDate(expiresDate) }\`\n` +
+            `Is Auto Renew = \`${ isAutoRenew ? "Yes" : "No" }\`\n` +
+            `${ expirationDescription ? "Expiration Reason = " + expirationDescription : "" }`.trim(),
+            data: JSON.stringify(notification, null, 2),
+
+            filename: `member-${ memberId }-subscription-status-update-${ new Date().toISOString() }.json`,
+            fileType: "json"
+        });
+
+        if (!isAutoRenew && member && expiresDate) {
+            const subscription = member.subscription ?? getDefaultSubscription();
+            subscription.cancellation = {
+                initiatedAt: new Date(),
+                accessEndsAt: expiresDate,
+                reasonCode: getCancellationReasonCodeFromExpirationIntent(expirationIntent),
+            };
+            this.logger.info("set up subscription cancellation object as this subscription is no longer auto-renewable");
+            member.subscription = subscription;
+            await AdminCactusMemberService.getSharedInstance().save(member);
+        } else if (isAutoRenew && member && !isNotNull(member.subscription?.cancellation)) {
+            this.logger.info("removing the cancellation object as this subscription is now auto-renewable");
+            await AdminCactusMemberService.getSharedInstance().deleteField(member, CactusMember.Field.subscriptionCancellation);
+        }
+
+        return { success: true };
     }
 }
