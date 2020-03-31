@@ -10,7 +10,8 @@ import {
     BillingPlatform,
     CancellationReasonCode,
     getDefaultSubscription,
-    getDefaultTrial, SubscriptionCancellation
+    getDefaultTrial,
+    SubscriptionCancellation
 } from "@shared/models/MemberSubscription";
 import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import AdminPaymentService from "@admin/services/AdminPaymentService";
@@ -363,7 +364,7 @@ export default class StripeWebhookService {
 
         response.statusCode = 200;
         response.body = { message: `Successfully processed subscription update ${ member.email } (${ member.id }) to BASIC` };
-        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: Member ${ member.email } (${ member.id }) subscription will end on ${accessEndsAt.toLocaleString()}`);
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cancellation_processing, `:stripe: ${ member.email } (${ member.id }) subscription has been canceled and will end on ${ accessEndsAt.toLocaleString() }`);
         return response;
     }
 
@@ -454,6 +455,46 @@ export default class StripeWebhookService {
         })
     }
 
+    async handleInvoicePaymentSucceeded(event: Stripe.Event): Promise<WebhookResponse> {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId = getStripeId(invoice.customer);
+        if (!customerId) {
+            logger.error("Unable to get customer ID from the invoice object", stringifyJSON(event, 2));
+            return { statusCode: 500, body: { message: "Unable to get customer ID from the invoice" } };
+        }
+
+        const member = await AdminCactusMemberService.getSharedInstance().getByStripeCustomerId(customerId);
+        if (!member) {
+            logger.warn("Unable to find a cactus member for stripe customerId " + customerId);
+            return { statusCode: 200, body: { message: "No cactus member was found for customer ID" } };
+        }
+
+        const amount = invoice.amount_paid;
+        const pricePaid = `$${ (amount / 100).toFixed(2) }`;
+        const productDescription = invoice.lines.data.find(d => true)?.description;
+        const subscriptionId = getStripeId(invoice.lines.data.find(d => !!d.subscription)?.subscription);
+
+        const cactusSubscription = member.subscription ?? getDefaultSubscription();
+        if (subscriptionId) {
+            cactusSubscription.stripeSubscriptionId = subscriptionId;
+            cactusSubscription.tier = SubscriptionTier.PLUS;
+            member.stripeCustomerId = customerId;
+            member.subscription = cactusSubscription;
+            logger.info("Saving member subscription", stringifyJSON(member.subscription, 2));
+            await AdminCactusMemberService.getSharedInstance().save(member);
+        }
+
+
+        await AdminSlackService.getSharedInstance().sendMessage(ChannelName.cha_ching, `${ member.email } successfully completed an invoice for ${ productDescription } for ${ pricePaid }. Reason: \`${ invoice.billing_reason }\``);
+
+        return { statusCode: 200,
+            body: {
+                message: "updated member subscription",
+                member: { email: member.email, id: member.id, subscription: member.subscription }
+            }
+        }
+    }
+
     /**
      * Main entry point to handle Stripe webhook events.
      * This method will dispatch the event to the handlers responsible for the specific event type.
@@ -462,7 +503,7 @@ export default class StripeWebhookService {
      * @return {Promise<WebhookResponse>}
      */
     async handleWebhookEvent(event: Stripe.Event): Promise<WebhookResponse> {
-        let response: WebhookResponse = { statusCode: 400, body: "Event type not handled" };
+        let response: WebhookResponse = { statusCode: 200, body: "Event type not handled" };
         const type = event.type;
         try {
             switch (type) {
@@ -480,6 +521,9 @@ export default class StripeWebhookService {
                 case 'customer.updated':
                 case 'customer.created':
                     response = await this.handleCustomerEvent(event);
+                    break;
+                case 'invoice.payment_succeeded':
+                    response = await this.handleInvoicePaymentSucceeded(event);
                     break;
                 default:
                     logger.warn(`Stripe checkout event type ${ type } not handled\n`, stringifyJSON(event, 2));

@@ -236,4 +236,11 @@ export default class StripeService {
         }
     }
 
+    async cancelSubscriptionImmediately(subscriptionId: string): Promise<Stripe.Subscription> {
+        return await this.stripe.subscriptions.del(subscriptionId);
+    }
+
+    async cancelAtPeriodEnd(subscriptionId: string): Promise<Stripe.Subscription> {
+        return await this.stripe.subscriptions.update(subscriptionId, {cancel_at_period_end: true});
+    }
 }

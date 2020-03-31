@@ -1,31 +1,33 @@
-import {Config} from "@web/config";
-import {QueryParam} from "@shared/util/queryParams";
+import { Config } from "@web/config";
+import { QueryParam } from "@shared/util/queryParams";
 import {
     AndroidFulfillParams,
+    AndroidFulfillRestoredPurchasesParams,
+    AndroidFulfillRestorePurchasesResult,
     AndroidFulfillResult,
-    CreateSessionRequest,
     AndroidPurchaseResult,
+    AndroidRestorePurchaseResult,
+    CancelStripeSubscriptionResponse,
+    CreateSessionRequest,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
-    CreateSetupSubscriptionSessionResponse,
-    AndroidPurchaseHistoryRecord,
-    AndroidRestorePurchaseResult,
-    AndroidFulfillRestoredPurchasesParams, AndroidFulfillRestorePurchasesResult
+    CreateSetupSubscriptionSessionResponse
 } from "@shared/api/CheckoutTypes";
-import {Endpoint, getAuthHeaders, isAxiosError, request} from "@web/requestUtils";
-import {gtag} from "@web/analytics";
+import { Endpoint, getAuthHeaders, isAxiosError, request } from "@web/requestUtils";
+import { gtag } from "@web/analytics";
 import Logger from "@shared/Logger";
 import CactusMember from "@shared/models/CactusMember";
 import CactusMemberService from "@web/services/CactusMemberService";
-import {PageRoute} from "@shared/PageRoutes";
+import { PageRoute } from "@shared/PageRoutes";
 import CopyService from "@shared/copy/CopyService";
-import {SubscriptionDetails} from "@shared/models/SubscriptionTypes";
-import {stripQueryParams} from "@shared/util/StringUtil";
-import {isAndroidApp} from "@web/DeviceUtil";
+import { SubscriptionDetails } from "@shared/models/SubscriptionTypes";
+import { stripQueryParams } from "@shared/util/StringUtil";
+import { isAndroidApp } from "@web/DeviceUtil";
 import SubscriptionProduct from "@shared/models/SubscriptionProduct";
-import {stringifyJSON} from "@shared/util/ObjectUtil";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
 import AndroidService from "@web/android/AndroidService";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+import { AxiosResponse } from "axios";
 
 
 const logger = new Logger("checkoutService.ts");
@@ -50,7 +52,7 @@ export async function createStripeSession(options: { subscriptionProductId: stri
         subscriptionProductId,
     };
     try {
-        const response = await request.post(Endpoint.checkoutSessions, sessionRequest, {headers: {...authHeaders}});
+        const response: AxiosResponse<CreateSessionResponse> = await request.post(Endpoint.checkoutSessions, sessionRequest, {headers: {...authHeaders}});
         logger.info("Session response successfully returned", response);
         return response.data;
     } catch (error) {
@@ -309,7 +311,7 @@ export async function restoreAndroidPurchases(options: { member: CactusMember | 
 async function fulfillAndroidRestoredPurchases(params: AndroidFulfillRestoredPurchasesParams): Promise<AndroidFulfillRestorePurchasesResult> {
     try {
         logger.info("Attempting to fulfill restored android purchase", params);
-        const response = await request.post(Endpoint.androidFulfilRestoredPurchases, params, {headers: {...await getAuthHeaders()}});
+        const response: AxiosResponse<AndroidFulfillRestorePurchasesResult> = await request.post(Endpoint.androidFulfilRestoredPurchases, params, {headers: {...await getAuthHeaders()}});
         logger.info("Send fulfil request successfully. Response = ", response.data);
         return response.data;
     } catch (error) {
@@ -325,7 +327,7 @@ async function fulfillAndroidRestoredPurchases(params: AndroidFulfillRestoredPur
 async function fulfilAndroidPurchase(params: AndroidFulfillParams): Promise<AndroidFulfillResult> {
     try {
         logger.info("Attempting to fulfill android purchase", params);
-        const response = await request.post(Endpoint.androidFulfilPurchase, params, {headers: {...await getAuthHeaders()}});
+        const response: AxiosResponse<AndroidFulfillResult> = await request.post(Endpoint.androidFulfilPurchase, params, {headers: {...await getAuthHeaders()}});
         logger.info("Send fulfil request successfully. Response = ", response.data);
         return response.data;
     } catch (error) {
@@ -351,7 +353,7 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetails | un
         if (!CactusMemberService.sharedInstance.currentMember?.hasActiveSubscription) {
             return;
         }
-        return (await request.get(Endpoint.subscriptionDetails, {headers: {...await getAuthHeaders()}})).data;
+        return (await request.get(Endpoint.subscriptionDetails, {headers: {...await getAuthHeaders()}})).data as SubscriptionDetails;
     } catch (error) {
         if (isAxiosError(error)) {
             logger.error(`failed to fetch subscription details: ${error.response?.status}`, error.response?.data);
@@ -364,7 +366,7 @@ export async function getSubscriptionDetails(): Promise<SubscriptionDetails | un
 
 export async function getUpdatePaymentMethodSession(data: CreateSetupSubscriptionSessionRequest): Promise<CreateSetupSubscriptionSessionResponse> {
     try {
-        const response = await request.post(Endpoint.subscriptionSetup, data, {headers: {...await getAuthHeaders()}});
+        const response: AxiosResponse<CreateSetupSubscriptionSessionResponse> = await request.post(Endpoint.subscriptionSetup, data, {headers: {...await getAuthHeaders()}});
         logger.info("Fetched update payment method session response", response.data);
         return response.data;
     } catch (error) {
@@ -374,5 +376,21 @@ export async function getUpdatePaymentMethodSession(data: CreateSetupSubscriptio
             logger.error("Failed to get session", error);
         }
         return {error: "Unable to fetch session", success: false};
+    }
+}
+
+export async function cancelStripeSubscription(): Promise<CancelStripeSubscriptionResponse> {
+    try {
+        const response: AxiosResponse<CancelStripeSubscriptionResponse> = await request.post(Endpoint.cancelStripeSubscription, {}, {headers: {...await getAuthHeaders()}});
+        logger.info("Cancellation response: ", response);
+        return response.data;
+    } catch (error) {
+        if (isAxiosError(error)) {
+            logger.error("Failed to cancel subscription", error.response?.data);
+            return error.response?.data
+        } else {
+            logger.error("Failed to cancel subscription", error);
+            return {success: false, error: error.message ?? "An unexpected error occurred"}
+        }
     }
 }

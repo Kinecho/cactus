@@ -6,7 +6,7 @@ import {
     AndroidFulfillParams,
     AndroidFulfillRestoredPurchasesParams,
     AndroidFulfillRestorePurchasesResult,
-    AndroidFulfillResult,
+    AndroidFulfillResult, CancelStripeSubscriptionResponse,
     CreateSessionRequest,
     CreateSessionResponse,
     CreateSetupSubscriptionSessionRequest,
@@ -48,6 +48,42 @@ app.use(cors({
 app.get("/", async (req: express.Request, res: express.Response) => {
     const index = 8;
     res.send("totally different...." + index);
+});
+
+app.post("/stripe/subscriptions/cancel", async (req: express.Request, res: express.Response) => {
+    const userId = await getAuthUserId(req);
+
+    const response: CancelStripeSubscriptionResponse = { success: false };
+    if (!userId) {
+        logger.info("You must be authenticated to create a checkout session.");
+        response.error = "You must be logged in to create a checkout session";
+        res.status(401).send(response);
+        return;
+    }
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        response.error = "You must have a member associated with your account to create a checkout session";
+        res.status(403).send(response);
+        return;
+    }
+
+
+    // StripeService.
+    const subscriptionId = member.subscription?.stripeSubscriptionId;
+    if (!subscriptionId) {
+        res.status(400).send({ success: false, error: "Member does not have a stripe subscription" });
+        return;
+    }
+    try {
+        //we only need to cancel on Stripe, webhooks will deal with updating the member record as needed.
+        await StripeService.getSharedInstance().cancelAtPeriodEnd(subscriptionId);
+        const subscriptionInvoice = await AdminSubscriptionService.getSharedInstance().getUpcomingInvoice({ member });
+        res.status(200).send({ success: true, subscriptionInvoice });
+        return;
+    } catch (error) {
+
+    }
 });
 
 /**

@@ -573,7 +573,19 @@ export default class AdminSubscriptionService {
                 })
             }
         }
-        //TODO: Handle for fetching invoices from Apple, Google, etc
+
+        if (!invoice && member.subscription?.cancellation) {
+            const subscription = member.subscription;
+            const cancellation = subscription.cancellation;
+            const endsAt = cancellation?.accessEndsAt?.getTime();
+
+            invoice = {
+                periodEnd_epoch_seconds: endsAt ? endsAt / 1000 : undefined,
+                subscriptionStatus: SubscriptionStatus.canceled,
+                billingPlatform: BillingPlatform.STRIPE,
+                isAutoRenew: false,
+            }
+        }
 
         return invoice;
     }

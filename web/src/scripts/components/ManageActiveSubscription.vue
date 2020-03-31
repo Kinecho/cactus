@@ -1,5 +1,4 @@
 <template>
-
     <div v-if="member.hasActiveSubscription">
         <div v-if="subscriptionDetailsLoading" class="loading-container">
             <spinner message="Loading subscription details..."/>
@@ -18,7 +17,8 @@
                         Your subscription ended on <strong>{{nextBillingDate}}</strong>.
                     </p>
                     <p v-else-if="isInOptOutTrial">
-                        Your free trial ends on {{ optOutTrialEndsAt | formatDate }} and you will be billed <strong>{{nextBillAmount}}</strong>/{{ billingPeriodSingular | lowerCase}}.
+                        Your free trial ends on {{ optOutTrialEndsAt | formatDate }} and you will be billed <strong>{{nextBillAmount}}</strong>/{{
+                        billingPeriodSingular | lowerCase}}.
                     </p>
                     <p v-else-if="isAutoRenewable">
                         Your next <span v-if="billingPeriod">{{billingPeriod}}</span> bill is for
@@ -59,7 +59,7 @@
             </template>
 
             <modal :show="showDowngradeModal" :show-close-button="true" @close="showDowngradeModal=false">
-                <downgrade-form slot="body" :member="member"/>
+                <downgrade-form slot="body" :member="member" :next-billing-date="billingPeriodEndDate" @close="showDowngradeModal=false"/>
             </modal>
         </div>
     </div>
@@ -78,7 +78,7 @@
         startStripeCheckoutSession
     } from "@web/checkoutService";
     import { formatDate } from "@shared/util/DateUtil";
-    import { InvoiceStatus, SubscriptionDetails, SubscriptionStatus } from "@shared/models/SubscriptionTypes";
+    import { SubscriptionDetails, SubscriptionStatus } from "@shared/models/SubscriptionTypes";
     import CopyService from "@shared/copy/CopyService";
     import {
         DigitalWalletDetails,
@@ -88,7 +88,6 @@
     import Spinner from "@components/Spinner.vue";
     import { SnackbarMessage } from "@components/SnackbarContent.vue";
     import { appendQueryParams } from "@shared/util/StringUtil";
-    import { isNull } from "@shared/util/ObjectUtil";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -123,7 +122,7 @@
             formatDate(date: Date | undefined): string | undefined {
                 return formatDate(date, copy.settings.dates.shortFormat);
             },
-            lowerCase(value?: string|undefined) {
+            lowerCase(value?: string | undefined) {
                 return value?.toLowerCase()
             }
         },
@@ -133,6 +132,13 @@
             },
             isInOptOutTrial(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.subscriptionStatus === SubscriptionStatus.in_trial;
+            },
+            billingPeriodEndDate(): Date | undefined {
+                const endDate = this.subscriptionDetails?.upcomingInvoice?.nextPaymentDate_epoch_seconds;
+                if (endDate) {
+                    return new Date(endDate * 1000)
+                }
+                return;
             },
             optOutTrialEndsAt(): Date | undefined {
                 const seconds = this.subscriptionDetails?.upcomingInvoice?.optOutTrialEndsAt_epoch_seconds;
@@ -150,6 +156,9 @@
             isGoogleSubscription(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.isGoogleSubscription ?? this.subscriptionDetails?.upcomingInvoice?.billingPlatform === BillingPlatform.GOOGLE ?? false
             },
+            isStripeSubscription(): boolean {
+                return this.subscriptionDetails?.upcomingInvoice?.billingPlatform === BillingPlatform.STRIPE ?? false
+            },
             googleSubscriptionUrl(): string | undefined {
                 const upcomingInvoice = this.subscriptionDetails?.upcomingInvoice;
                 if (!upcomingInvoice || !this.isGoogleSubscription) {
@@ -159,13 +168,12 @@
                 const packageName = upcomingInvoice.androidPackageName;
                 const basUrl = "https://play.google.com/store/account/subscriptions";
                 return appendQueryParams(basUrl, { sku, package: packageName });
-                // return `https://play.google.com/store/account/subscriptions?sku=cactus_plus_monthly_499&package=app.cactus.stage`
             },
             showCardInfo(): boolean {
                 return this.subscriptionDetails?.upcomingInvoice?.defaultPaymentMethod?.card !== undefined
             },
             nextBillingDate(): string | undefined {
-                const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.nextPaymentDate_epoch_seconds;
+                const nextDateSeconds = this.subscriptionDetails?.upcomingInvoice?.nextPaymentDate_epoch_seconds ?? this.subscriptionDetails?.upcomingInvoice?.periodEnd_epoch_seconds;
                 if (nextDateSeconds) {
                     return formatDate(new Date(nextDateSeconds * 1000), copy.settings.dates.shortFormat)
                 }
@@ -217,7 +225,7 @@
                 }
                 return copy.checkout.BILLING_PERIOD[period];
             },
-            billingPeriodSingular(): string| undefined {
+            billingPeriodSingular(): string | undefined {
                 const period = this.subscriptionDetails?.subscriptionProduct?.billingPeriod;
                 if (!period) {
                     return
@@ -227,6 +235,9 @@
         }, methods: {
             async downgrade() {
                 this.showDowngradeModal = true;
+            },
+            async cancelStripeSubscription(): Promise<void> {
+
             },
             async fetchSubscriptionDetails() {
                 if (!this.member || !this.member.hasActiveSubscription) {
@@ -247,7 +258,7 @@
                 //todo: handle error
                 this.$emit("error", error);
             },
-            async updatePaymentMethod() {
+            async updatePaymentMethod(): Promise<void> {
                 this.loadingUpdatePaymentMethod = true;
                 const sessionResponse = await getUpdatePaymentMethodSession({});
                 if (!sessionResponse.success || !sessionResponse.sessionId) {

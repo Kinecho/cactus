@@ -1,3 +1,5 @@
+import { SubscriptionInvoice } from "@shared/models/SubscriptionTypes";
+
 export interface CreateSessionRequest {
     subscriptionProductId: string,
     successUrl?: string,
@@ -22,6 +24,12 @@ export interface CreateSetupSubscriptionSessionResponse {
     success: boolean,
     sessionId?: string,
     error?: string,
+}
+
+export interface CancelStripeSubscriptionResponse {
+    success: boolean,
+    error?: string,
+    upcomingInvoice?: SubscriptionInvoice,
 }
 
 export interface AndroidFulfillParams {

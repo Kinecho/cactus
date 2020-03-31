@@ -24,6 +24,7 @@ export enum Endpoint {
     subscriptionSetup = "checkout/sessions/setup-subscription",
     androidFulfilPurchase = "checkout/android/fulfill-purchase",
     androidFulfilRestoredPurchases = "checkout/android/fulfill-restored-purchases",
+    cancelStripeSubscription = "checkout/stripe/subscriptions/cancel"
 }
 
 export function initializeAxios(): AxiosInstance {
