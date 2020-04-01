@@ -24,7 +24,8 @@ export enum Endpoint {
     subscriptionSetup = "checkout/sessions/setup-subscription",
     androidFulfilPurchase = "checkout/android/fulfill-purchase",
     androidFulfilRestoredPurchases = "checkout/android/fulfill-restored-purchases",
-    cancelStripeSubscription = "checkout/stripe/subscriptions/cancel"
+    cancelStripeSubscription = "checkout/stripe/subscriptions/cancel",
+    downloadUserData = "user/download-data",
 }
 
 export function initializeAxios(): AxiosInstance {
@@ -42,6 +43,13 @@ export function initializeAxios(): AxiosInstance {
     return _request
 }
 
+export async function getUserToken(): Promise<string|undefined> {
+    const user = getAuth().currentUser;
+    if (user) {
+        return await user.getIdToken();
+    }
+    return;
+}
 
 export async function getAuthHeaders(): Promise<{ Authorization: string } | undefined> {
     const user = getAuth().currentUser;

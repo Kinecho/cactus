@@ -98,6 +98,12 @@
                         </div>
                     </div>
 
+                    <div class="settings-group">
+                        <div class="item">
+                            <DataExport />
+                        </div>
+                    </div>
+
                     <div class="settings-group delete">
                         <div class="item">
                             <button class="red tertiary remove" @click="deleteAccountModalVisible = true">
@@ -172,7 +178,7 @@
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
     import {getQueryParam, removeQueryParam} from "@web/util";
     import {QueryParam} from "@shared/util/queryParams";
-
+    import DataExport from "@components/DataExport.vue";
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
@@ -188,6 +194,7 @@
             Footer,
             Spinner,
             CheckBox,
+            DataExport,
             TimezonePicker,
             ProviderIcon,
             SnackbarContent,
