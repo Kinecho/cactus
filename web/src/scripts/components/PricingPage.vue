@@ -26,8 +26,8 @@
                       </div>
                       <div class="benefit">
                           <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                          <h3>Look back</h3>
-                          <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
+                          <h3>Core values</h3>
+                          <p class="text">Cactus will help identify your core values and use them to provide a personalized mindfulness&nbsp;journey.</p>
                       </div>
                       <div class="benefit">
                           <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
