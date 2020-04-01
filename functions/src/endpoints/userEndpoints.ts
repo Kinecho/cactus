@@ -10,7 +10,7 @@ import { QueryParam } from "@shared/util/queryParams";
 import { PageRoute } from "@shared/PageRoutes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import DownloadJournalJob from "@admin/jobs/DownloadJournalJob";
 import DataExport from "@shared/models/DataExport";
@@ -62,6 +62,13 @@ app.post("/email-data", async (req: express.Request, resp: express.Response) => 
         },
     });
 
+    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
+        text: `*${ member.email } has requested a data export.*\n`
+        + `Sent to: \`${ email }\`\n`
+        + `Export ID = \`${ dataExport.id }\`\n`
+        + `Email Send Success = \`${ emailResult.didSend }\``
+    });
+
     let message = undefined;
     if (!emailResult.didSend) {
         message = `We were unable to send the email to ${ email }. Please try again later.`;
@@ -96,6 +103,19 @@ app.get("/data-exports/:id", async (req: express.Request, resp: express.Response
 
     const job = new DownloadJournalJob({ member });
     const journal = await job.fetchData();
+
+    await AdminDataExportService.getSharedInstance().logDownload(dataExportId);
+
+    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
+        text: `*Customer Data Export was downloaded.*\n`
+        + `Member's Data: \`${ member.email } (${member.id})\`\n`
+        + `Export ID = \`${ dataExportId }\`\n`
+        + `Number of Journal Entries = \`${ journal.length }\`\n`
+        + `Download Count = \`${dataExport.downloadCount + 1}\``
+    });
+
+
+
 
     resp.append("Content-Disposition", "attachment; filename=user_data.json");
     resp.status(200).send(journal);
