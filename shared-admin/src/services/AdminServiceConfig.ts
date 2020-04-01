@@ -34,6 +34,7 @@ import AdminEmailLogService from "@admin/services/AdminEmailLogService";
 import AppleService from "@admin/services/AppleService";
 import GooglePlayService from "@admin/services/GooglePlayService";
 import StripeService from "@admin/services/StripeService";
+import AdminDataExportService from "@admin/services/AdminDataExportService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -74,6 +75,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
     AdminPaymentService.initialize();
     StripeWebhookService.initialize(config);
     AdminEmailLogService.initialize(config);
+    AdminDataExportService.initialize(config);
 
     //Flamelink
     AdminFlamelinkService.initialize(config, app);

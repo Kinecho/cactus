@@ -13,6 +13,11 @@ import * as admin from "firebase-admin";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
 import DownloadJournalJob from "@admin/jobs/DownloadJournalJob";
+import DataExport from "@shared/models/DataExport";
+import AdminDataExportService from "@admin/services/AdminDataExportService";
+import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
+import AdminSendgridService, { CactusSender } from "@admin/services/AdminSendgridService";
+import { SendgridTemplate } from "@shared/models/EmailLog";
 
 const logger = new Logger("userEndpoints");
 const app = express();
@@ -20,6 +25,82 @@ const config = getConfig();
 
 // Automatically allow cross-origin requests
 app.use(cors({ origin: config.allowedOrigins }));
+
+app.post("/email-data", async (req: express.Request, resp: express.Response) => {
+    logger.info("Starting email data function");
+    const userId = await getAuthUserId(req);
+
+    if (!userId) {
+        resp.sendStatus(401);
+        return;
+    }
+
+    const payload = req.body as EmailDataParams;
+    const email = payload.email;
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        resp.sendStatus(403);
+        return;
+    }
+
+
+    const dataExport = new DataExport(memberId);
+    await AdminDataExportService.getSharedInstance().save(dataExport);
+
+    // const downloadUrl = `${ getHostname() }/api/user/data-exports/${ dataExport.id }`;
+    const downloadUrl = `http://localhost:5000/cactus-app-stage/us-central1/user/data-exports/${ dataExport.id }`;
+
+    const emailResult = await AdminSendgridService.getSharedInstance().sendTemplateAndLog({
+        email,
+        sender: CactusSender.SUPPORT,
+        oneTime: false,
+        template: SendgridTemplate.data_export,
+        data: {
+            link: downloadUrl
+        },
+    });
+
+    let message = undefined;
+    if (!emailResult.didSend) {
+        message = `We were unable to send the email to ${ email }. Please try again later.`;
+    }
+
+    const response: EmailDataResult = {
+        success: emailResult.didSend,
+        dataExportId: dataExport.id,
+        downloadUrl,
+        message
+    };
+    resp.send(response);
+
+    return;
+});
+
+app.get("/data-exports/:id", async (req: express.Request, resp: express.Response) => {
+    const dataExportId = req.params.id;
+
+    const dataExport = await AdminDataExportService.getSharedInstance().getById(dataExportId);
+    if (!dataExport) {
+        resp.sendStatus(404);
+        return;
+    }
+
+    const memberId = dataExport.memberId;
+    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    if (!member) {
+        resp.sendStatus(404);
+        return;
+    }
+
+    const job = new DownloadJournalJob({ member });
+    const journal = await job.fetchData();
+
+    resp.append("Content-Disposition", "attachment; filename=user_data.json");
+    resp.status(200).send(journal);
+    return;
+});
 
 app.get("/download-data", async (req: functions.https.Request | any, resp: functions.Response) => {
     const userId = await getAuthUserId(req);

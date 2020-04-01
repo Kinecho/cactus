@@ -40,6 +40,7 @@ export enum QueryParam {
     FROM_AUTH = "fromAuth",
     ABBREVIATED = "short",
     AUTH_TOKEN = "token",
+    DOWNLOAD_TOKEN = "download_token",
 
 }
 

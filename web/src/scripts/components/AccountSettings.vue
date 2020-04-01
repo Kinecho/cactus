@@ -100,7 +100,7 @@
 
                     <div class="settings-group">
                         <div class="item">
-                            <DataExport />
+                            <DataExport :member="member"/>
                         </div>
                     </div>
 
