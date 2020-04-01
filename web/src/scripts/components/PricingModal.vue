@@ -23,13 +23,6 @@
                 <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
             </div>
         </div>
-        <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-            <div>
-                <h3>Make it daily</h3>
-                <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
-            </div>
-        </div>
         <div class="pricingWrapper">
             <PremiumPricing :showFooter="false" :startTrial="true" />
         </div>
