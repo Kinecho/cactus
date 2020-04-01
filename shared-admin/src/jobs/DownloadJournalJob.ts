@@ -5,20 +5,29 @@ import SentPrompt from "@shared/models/SentPrompt";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
 import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
+import ReflectionPrompt from "@shared/models/ReflectionPrompt";
+import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
 
 interface JournalEntry {
     date?: Date;
     sentPrompt: SentPrompt;
+    prompt?: ReflectionPrompt | undefined;
     reflectionResponses?: ReflectionResponse[];
     promptContent?: PromptContent;
 }
 
-// interface JournalEntryJson {
-//     date?: string;
-//     sentPrompt: any;
-//     reflectionResponses?: any[];
-//     promptContent?: any;
-// }
+interface JournalEntryJson {
+    date?: string;
+    sentPrompt: any;
+    reflectionResponses?: any[];
+    promptContent?: any;
+}
+
+interface SimpleDataEntry {
+    date?: string,
+    reflectionText?: string,
+    question?: string,
+}
 
 export default class DownloadJournalJob {
     member: CactusMember;
@@ -36,30 +45,28 @@ export default class DownloadJournalJob {
 
     async fetchData(): Promise<JournalEntry[]> {
         const memberId = this.memberId;
-        const responseTask = AdminReflectionResponseService.getSharedInstance().getResponsesForMember(
-        { memberId }
-        );
-        const sentPromptsTask = AdminSentPromptService.getSharedInstance().getAllForCactusMemberId(
-        memberId
-        );
+        const responseTask = AdminReflectionResponseService.getSharedInstance().getResponsesForMember({ memberId });
+        const sentPromptsTask = AdminSentPromptService.getSharedInstance().getAllForCactusMemberId(memberId);
 
         const [responses, sentPrompts] = await Promise.all([
             responseTask,
             sentPromptsTask
         ]);
-        const promptContentTask: Promise<PromptContent | undefined>[] = [];
+        const promptContentTasks: Promise<PromptContent | undefined>[] = [];
+        const reflectionPromptTasks: Promise<ReflectionPrompt | undefined>[] = [];
         sentPrompts.forEach(sp => {
-            if (!sp.promptId) {
-                promptContentTask.push(
-                AdminPromptContentService.getSharedInstance().getByPromptId(
-                sp.promptId
-                )
-                );
+            if (sp.promptId) {
+                promptContentTasks.push(AdminPromptContentService.getSharedInstance().getByPromptId(sp.promptId));
+                reflectionPromptTasks.push(AdminReflectionPromptService.getSharedInstance().get(sp.promptId));
             }
         });
 
-        const promptContents = await Promise.all(promptContentTask);
+        const promptContents = await Promise.all(promptContentTasks);
+        const reflectionPrompts = await Promise.all(reflectionPromptTasks);
+
         const contentByPromptId: { [promptId: string]: PromptContent } = {};
+        const promptsById: { [promptId: string]: ReflectionPrompt } = {};
+
         promptContents.reduce((map, promptContent) => {
             if (!promptContent || !promptContent.promptId) {
                 return map;
@@ -68,10 +75,16 @@ export default class DownloadJournalJob {
             return map;
         }, contentByPromptId);
 
+        reflectionPrompts.reduce((map: {[p:string]:ReflectionPrompt}, prompt: ReflectionPrompt | undefined) => {
+            if (!prompt || !prompt.id) {
+                return map;
+            }
+            map[prompt.id] = prompt;
+            return map;
+        }, promptsById);
+
         const initialResponseMap: { [promptId: string]: ReflectionResponse[] } = {};
-        const responsesByPromptId: {
-            [promptId: string]: ReflectionResponse[];
-        } = responses.reduce((previous, response) => {
+        const responsesByPromptId: { [promptId: string]: ReflectionResponse[] } = responses.reduce((previous, response) => {
             const promptId = response.promptId;
 
             if (!promptId) {
@@ -96,13 +109,13 @@ export default class DownloadJournalJob {
 
         sentPrompts.forEach(sentPrompt => {
             const promptId = sentPrompt.promptId;
-            const journalResponses = promptId
-            ? responsesByPromptId[promptId]
-            : undefined;
+            const journalResponses = promptId ? responsesByPromptId[promptId] : undefined;
             const promptContent = promptId ? contentByPromptId[promptId] : undefined;
+            const prompt = promptId ? promptsById[promptId] : undefined;
             const entry: JournalEntry = {
                 date: sentPrompt.firstSentAt,
                 sentPrompt: sentPrompt,
+                prompt,
                 reflectionResponses: journalResponses,
                 promptContent
             };
@@ -112,5 +125,28 @@ export default class DownloadJournalJob {
         this.journalEntries = feed;
 
         return feed;
+    }
+
+    toSimpleJSON(): SimpleDataEntry[] {
+        return this.journalEntries.map(entry => {
+            const obj: SimpleDataEntry = {
+                date: entry.date && entry.date.toISOString(),
+                reflectionText: (entry.reflectionResponses ?? []).map(r => r.content?.text).join("\n\n"),
+                question: entry.promptContent?.getQuestion() ?? entry.prompt?.question
+            };
+            return obj;
+        })
+    }
+
+    toJSON(): JournalEntryJson[] {
+        return this.journalEntries.map(entry => {
+            const obj: JournalEntryJson = {
+                date: entry.date && entry.date.toISOString(),
+                sentPrompt: entry.sentPrompt.toJSON(),
+                reflectionResponses: (entry.reflectionResponses || []).map(resp => resp.toJSON()),
+                promptContent: (entry.promptContent && entry.promptContent.toJSON()) || undefined
+            };
+            return obj;
+        })
     }
 }

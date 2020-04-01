@@ -102,7 +102,8 @@ app.get("/data-exports/:id", async (req: express.Request, resp: express.Response
     }
 
     const job = new DownloadJournalJob({ member });
-    const journal = await job.fetchData();
+    await job.fetchData();
+    const journal = job.toSimpleJSON();
 
     await AdminDataExportService.getSharedInstance().logDownload(dataExportId);
 
