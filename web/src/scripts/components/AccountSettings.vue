@@ -99,6 +99,8 @@
                     </div>
 
                     <div class="settings-group">
+                        <h2>Reflection Content</h2>
+                        <p class="subtext">Export your reflections to a downloadable file.
                         <div class="item">
                             <DataExport :member="member"/>
                         </div>
@@ -498,6 +500,10 @@
         color: $royal;
         font-size: 2.4rem;
         margin-bottom: 2.4rem;
+    }
+
+    .subtext {
+        margin-bottom: 1.6rem;
     }
 
     .label {

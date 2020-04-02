@@ -7,21 +7,23 @@
             <p>{{successMessage}}</p>
             <button @click="successMessage=null">Start Over</button>
         </div>
-        <button @click="showEmail = true " v-if="!showEmail"> Email me the data</button>
+        <button class="small secondary" v-if="!downloadUrl && !showEmail" :disabled="loading" @click="startDownload">{{buttonText}}</button>
+        <div v-if="downloadUrl">
+            <p class="subtext">Your download should begin automatically. If not, <a :href="downloadUrl" target="_blank" class="fancy">click here</a>.</p>
+        </div>
+        <button class="small secondary" @click="showEmail = true " v-if="!showEmail">Email Me</button>
         <div class="email-input" v-if="showEmail && !successMessage">
-            <p>What email address should we send the data to?</p>
             <label>
-                Your Email Address
-                <input type="email" v-model="emailAddress" placeholder="name@example.com"/>
+                <p class="subtext">What email address should we send the file to?</p>
+                <input class="emailBox" type="email" v-model="emailAddress" placeholder="name@example.com"/>
             </label>
-            <button @click="emailData">Send</button>
+            <div class="btnContainer">
+                <button @click="emailData">Send</button>
+                <button class="secondary" @click="showEmail=false">Cancel</button>
+            </div>
         </div>
 
-        <button v-if="!downloadUrl && !showEmail" :disabled="loading" @click="startDownload">{{buttonText}}</button>
-        <div v-if="downloadUrl">
-            <p>Your download should begin automatically.</p>
-            <p>If not, <a :href="downloadUrl" target="_blank" class="fancy">click here</a>.</p>
-        </div>
+
     </div>
 </template>
 
@@ -55,7 +57,7 @@
         },
         computed: {
             buttonText(): string {
-                return this.loading ? "Preparing Data..." : "Download Data"
+                return this.loading ? "Preparing..." : "Download Now"
             }
         },
         methods: {
@@ -98,7 +100,41 @@
     @import "variables";
     @import "mixins";
 
+    button {
+        display: inline-block;
+        flex-grow: 0;
+        margin-right: .8rem;
+    }
+
     .fancy {
         @include fancyLink;
+    }
+
+    .subtext {
+        margin-bottom: 1.6rem;
+    }
+
+    .email-input {
+        border: 1px solid $lightestGreen;
+        border-radius: 1.2rem;
+        padding: 1.6rem;
+
+        @include r(600) {
+            padding: 2.4rem;
+        }
+    }
+
+    .emailBox {
+        width: 100%;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 1.6rem;
+    }
+
+    .btnContainer {
+        align-items: center;
+        display: flex;
     }
 </style>
