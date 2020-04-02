@@ -4,8 +4,8 @@
             <p>{{error}}</p>
         </div>
         <div v-if="successMessage" class="alert success">
-            <p>{{successMessage}}</p>
-            <button @click="successMessage=null">Start Over</button>
+            <p class="subtext">{{successMessage}}</p>
+            <button @click="successMessage=null, showEmail=false">Close</button>
         </div>
         <button class="small secondary" v-if="!downloadUrl && !showEmail" :disabled="loading" @click="startDownload">{{buttonText}}</button>
         <div v-if="downloadUrl">
@@ -83,7 +83,7 @@
                 this.error = null;
                 const result = await DownloadService.shared.emailData({ email });
                 if (result.success) {
-                    this.successMessage = result.message ?? "Email sent successfully. Please check your email for further instructions.";
+                    this.successMessage = result.message ?? "Email sent! Please check your email for further instructions.";
                     this.error = null;
                 } else {
                     this.successMessage = null;
