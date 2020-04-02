@@ -54,9 +54,9 @@
                 <div class="avatar-container" v-if="quoteAvatar">
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
-                <p class="quote">
-                    "{{processedContent.quote.text}}"
-                </p>
+                <div class="quote">
+                    <MarkdownText :source="processedContent.quote.text"/>
+                </div>
                 <div class="author">
                     <p class="name">{{processedContent.quote.authorName}}</p>
                     <p class="title" v-if="processedContent.quote.authorTitle">
@@ -802,7 +802,12 @@
         }
 
         .name {
-            font-weight: bold;
+            font-size: 1.6rem;
+            opacity: .8;
+
+            @include r(768) {
+                font-size: 1.8rem;
+            }
         }
 
         .title {
@@ -1127,4 +1132,13 @@
         }
     }
 
+</style>
+<style>
+    @import "variables";
+
+    .quote-container .md_wrapper strong {
+        color: $indigo;
+        font-size: 2.8rem;
+        line-height: 1.2;
+    }
 </style>
