@@ -7,6 +7,17 @@ import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import AdminReflectionPromptService from "@admin/services/AdminReflectionPromptService";
+import { formatDate, formatDateTime } from "@shared/util/DateUtil";
+import { CactusConfig } from "@shared/CactusConfig";
+import { stringifyJSON } from "@shared/util/ObjectUtil";
+import Logger from "@shared/Logger";
+import { ArchiverError } from "archiver";
+import { promisify } from "util";
+const jsoncsv = require("json-csv");
+
+const archiver = require("archiver");
+const path = require("path");
+const fs = require("fs-extra");
 
 interface JournalEntry {
     date?: Date;
@@ -33,14 +44,21 @@ export default class DownloadJournalJob {
     member: CactusMember;
     journalEntries: JournalEntry[] = [];
     redactResponses = false;
+    config: CactusConfig;
+    outputDir = "/tmp";
+    logger = new Logger("DownloadJournalJob");
 
     get memberId(): string {
         return this.member.id || "";
     }
 
-    constructor(params: { member: CactusMember }) {
-        const { member } = params;
+    constructor(params: { member: CactusMember, config: CactusConfig }) {
+        const { member, config } = params;
         this.member = member;
+        this.config = config;
+        if (config.isEmulator) {
+            this.outputDir = path.join(__dirname, "output");
+        }
     }
 
     async fetchData(): Promise<JournalEntry[]> {
@@ -75,7 +93,7 @@ export default class DownloadJournalJob {
             return map;
         }, contentByPromptId);
 
-        reflectionPrompts.reduce((map: {[p:string]:ReflectionPrompt}, prompt: ReflectionPrompt | undefined) => {
+        reflectionPrompts.reduce((map: { [p: string]: ReflectionPrompt }, prompt: ReflectionPrompt | undefined) => {
             if (!prompt || !prompt.id) {
                 return map;
             }
@@ -130,7 +148,7 @@ export default class DownloadJournalJob {
     toSimpleJSON(): SimpleDataEntry[] {
         return this.journalEntries.map(entry => {
             const obj: SimpleDataEntry = {
-                date: entry.date && entry.date.toISOString(),
+                date: formatDateTime(entry.date, {timezone: this.member?.timeZone, format: "yyyy-LL-dd h:mm:ss a"}),
                 reflectionText: (entry.reflectionResponses ?? []).map(r => r.content?.text).join("\n\n"),
                 question: entry.promptContent?.getQuestion() ?? entry.prompt?.question
             };
@@ -148,5 +166,105 @@ export default class DownloadJournalJob {
             };
             return obj;
         })
+    }
+
+    async toCsv(): Promise<string> {
+        /*
+            date?: string,
+            reflectionText?: string,
+            question?: string,
+         */
+        const json = this.toSimpleJSON();
+        return await jsoncsv.buffered(json, {
+            fields: [{
+                name: "date",
+                label: "Date",
+                quoted: false,
+            }, {
+                name: "question",
+                label: "Question",
+                quoted: true,
+            }, {
+                name: "reflectionText",
+                label: "Reflection Text",
+                quoted: true,
+            }]
+
+        });
+    }
+
+    /**
+     * Create a zip of various data sources
+     * @return {Promise<string>} the file path
+     */
+    async zip(): Promise<string | undefined> {
+        return new Promise<string | undefined>(async resolve => {
+            try {
+                const dateString = formatDate(new Date());
+                const filePath = path.resolve(this.outputDir, `cactus-member-data-${ this.member.id }-${ dateString }.zip`);
+                this.logger.info("Using file path for the zip file: ", filePath);
+                const folder = this.outputDir;
+                try {
+                    await fs.mkdirp(folder, { recursive: true });
+                    this.logger.info("made directory");
+                } catch (error) {
+                    this.logger.error("Unable to create folder " + folder, error);
+                }
+
+                try {
+                    await promisify(fs.writeFile)(filePath, "");
+                } catch (error) {
+                    this.logger.error("Failed to write to file", filePath, error);
+                    resolve(undefined);
+                    return
+                }
+
+                const output = fs.createWriteStream(filePath);
+
+                const archive = archiver('zip', {
+                    zlib: { level: 9 }
+                });
+
+                output.on('close', () => {
+                    this.logger.info(archive.pointer() + " total bytes");
+                    this.logger.info("Write stream closed");
+                });
+
+                output.on('end', () => {
+                    this.logger.info("Data has been drained");
+                });
+
+                archive.on("warning", (err: ArchiverError) => {
+                    if (err.code === 'ENOENT') {
+                        this.logger.warn("Warning, ENOENT", err);
+                    } else {
+                        this.logger.warn('warning with error', err);
+                        throw err;
+                    }
+                });
+
+                archive.on('error', (err: ArchiverError) => {
+                    this.logger.error("archive error", err);
+                    throw err;
+                });
+
+                archive.pipe(output);
+
+                archive.append(stringifyJSON(this.toSimpleJSON()), { name: "user_data.json" });
+                archive.append(await this.toCsv(), { name: "user_data.csv" });
+
+                await archive.finalize();
+                this.logger.info("Archiver finalized");
+                resolve(filePath);
+                return
+
+            } catch (error) {
+                this.logger.error("Failed to create zip file", error);
+                resolve(undefined);
+                return;
+            }
+
+        });
+
     }
 }

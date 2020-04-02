@@ -101,25 +101,31 @@ app.get("/data-exports/:id", async (req: express.Request, resp: express.Response
         return;
     }
 
-    const job = new DownloadJournalJob({ member });
+    const job = new DownloadJournalJob({ member, config: getConfig() });
     await job.fetchData();
     const journal = job.toSimpleJSON();
 
     await AdminDataExportService.getSharedInstance().logDownload(dataExportId);
 
+    const zipFilePath = await job.zip();
+    logger.info("file path ", zipFilePath);
+
     await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
         text: `*Customer Data Export was downloaded.*\n`
-        + `Member's Data: \`${ member.email } (${member.id})\`\n`
+        + `Member's Data: \`${ member.email } (${ member.id })\`\n`
         + `Export ID = \`${ dataExportId }\`\n`
         + `Number of Journal Entries = \`${ journal.length }\`\n`
-        + `Download Count = \`${dataExport.downloadCount + 1}\``
+        + `Download Count = \`${ dataExport.downloadCount + 1 }\``
     });
 
+    resp.append("Content-Disposition", `attachment; filename=cactus-data-${ memberId }.json`);
 
+    if (zipFilePath) {
+        resp.download(zipFilePath);
+    } else {
+        resp.status(500).send("We were unable to generate your download file. Please try again later or contact help@cactus.app");
+    }
 
-
-    resp.append("Content-Disposition", "attachment; filename=user_data.json");
-    resp.status(200).send(journal);
     return;
 });
 
@@ -138,7 +144,7 @@ app.get("/download-data", async (req: functions.https.Request | any, resp: funct
         return;
     }
 
-    const job = new DownloadJournalJob({ member });
+    const job = new DownloadJournalJob({ member, config: getConfig() });
     const journal = await job.fetchData();
 
     resp.append("Content-Disposition", "attachment; filename=user_data.json");
@@ -244,8 +250,6 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         } catch (e) {
             logger.error(e);
         }
-
-        return;
     }
 
     resp.sendStatus(500);
