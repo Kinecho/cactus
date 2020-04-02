@@ -97,6 +97,7 @@ let webpackConfig = {
         new MiniCssExtractPlugin({
             filename: isProd ? 'style.[contenthash].css' : 'style.[name].css',
             chunkFilename: isProd ? '[id].[hash].css' : '[id].css',
+            ignoreOrder: true,
         }),
         ...Object.keys(pages).map(title => {
             return new HtmlWebpackPlugin({
