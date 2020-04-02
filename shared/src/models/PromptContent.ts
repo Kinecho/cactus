@@ -69,6 +69,7 @@ export interface ActionButton {
 
 export interface Quote {
     text: string,
+    text_md?: string,
     authorName: string
     authorTitle?: string,
     authorAvatar?: Image;
@@ -127,6 +128,9 @@ export function processContent(content: Content): Content {
             break;
         case ContentType.quote:
             processed.quote = content.quote;
+            if (processed.quote) {
+                processed.quote.text = processed.quote.text_md || processed.quote.text;
+            }
             break;
         case ContentType.video:
             processed.text = content.text_md || content.text;
