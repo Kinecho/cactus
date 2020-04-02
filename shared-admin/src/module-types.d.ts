@@ -1,7 +1,8 @@
 declare module 'json-csv' {
-    export default {
-        buffered(options: any): Promise<string> {
-
+    const jsoncsv = {
+        buffered(data: any, options: { fields: { name: string, label: string, quoted?: boolean }[] }): Promise<string> {
+            //no op
         }
-    }
+    };
+    export default jsoncsv;
 }

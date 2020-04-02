@@ -5,11 +5,14 @@
         </div>
         <div v-if="successMessage" class="alert success">
             <p class="subtext">{{successMessage}}</p>
-            <button @click="successMessage=null, showEmail=false">Close</button>
+            <button @click="closeEmailForm">Close</button>
         </div>
-        <button class="small secondary" v-if="!downloadUrl && !showEmail" :disabled="loading" @click="startDownload">{{buttonText}}</button>
+        <button class="small secondary" v-if="!downloadUrl && !showEmail" :disabled="loading" @click="startDownload">
+            {{buttonText}}
+        </button>
         <div v-if="downloadUrl">
-            <p class="subtext">Your download should begin automatically. If not, <a :href="downloadUrl" target="_blank" class="fancy">click here</a>.</p>
+            <p class="subtext">Your download should begin automatically. If not,
+                <a :href="downloadUrl" target="_blank" class="fancy">click here</a>.</p>
         </div>
         <button class="small secondary" @click="showEmail = true " v-if="!showEmail">Email Me</button>
         <div class="email-input" v-if="showEmail && !successMessage">
@@ -18,7 +21,7 @@
                 <input class="emailBox" type="email" v-model="emailAddress" placeholder="name@example.com"/>
             </label>
             <div class="btnContainer">
-                <button @click="emailData">Send</button>
+                <button @click="emailData" :disabled="loading">Send</button>
                 <button class="secondary" @click="showEmail=false">Cancel</button>
             </div>
         </div>
@@ -63,12 +66,17 @@
         methods: {
             async startDownload() {
                 this.loading = true;
-                this.downloadUrl = await DownloadService.shared.getDownloadDataUrl();
-                this.loading = false;
-                if (this.downloadUrl) {
-                    window.location.href = this.downloadUrl;
-                }
+                const result = await DownloadService.shared.exportData({ sendEmail: false });
 
+                if (result.success && result.downloadUrl) {
+                    this.downloadUrl = result.downloadUrl;
+                    window.location.href = result.downloadUrl;
+                }
+                this.loading = false;
+            },
+            closeEmailForm() {
+                this.successMessage = null;
+                this.showEmail = false
             },
             async emailData() {
 
@@ -81,7 +89,7 @@
                 }
                 this.loading = true;
                 this.error = null;
-                const result = await DownloadService.shared.emailData({ email });
+                const result = await DownloadService.shared.exportData({ email, sendEmail: true });
                 if (result.success) {
                     this.successMessage = result.message ?? "Email sent! Please check your email for further instructions.";
                     this.error = null;

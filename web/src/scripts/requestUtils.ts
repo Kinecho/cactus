@@ -26,7 +26,7 @@ export enum Endpoint {
     androidFulfilRestoredPurchases = "checkout/android/fulfill-restored-purchases",
     cancelStripeSubscription = "checkout/stripe/subscriptions/cancel",
     downloadUserData = "user/download-data",
-    emailUserData = "user/email-data",
+    exportData = "user/export-data",
 }
 
 export function initializeAxios(): AxiosInstance {

@@ -16,17 +16,16 @@ import DownloadJournalJob from "@admin/jobs/DownloadJournalJob";
 import DataExport from "@shared/models/DataExport";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
 import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
-import AdminSendgridService, { CactusSender } from "@admin/services/AdminSendgridService";
+import AdminSendgridService, { CactusSender, SendEmailResult } from "@admin/services/AdminSendgridService";
 import { SendgridTemplate } from "@shared/models/EmailLog";
 
 const logger = new Logger("userEndpoints");
 const app = express();
 const config = getConfig();
 
-// Automatically allow cross-origin requests
 app.use(cors({ origin: config.allowedOrigins }));
 
-app.post("/email-data", async (req: express.Request, resp: express.Response) => {
+app.post("/export-data", async (req: express.Request, resp: express.Response) => {
     logger.info("Starting email data function");
     const userId = await getAuthUserId(req);
 
@@ -36,7 +35,7 @@ app.post("/email-data", async (req: express.Request, resp: express.Response) => 
     }
 
     const payload = req.body as EmailDataParams;
-    const email = payload.email;
+    const { email, sendEmail } = payload;
 
     const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
     const memberId = member?.id;
@@ -45,37 +44,50 @@ app.post("/email-data", async (req: express.Request, resp: express.Response) => 
         return;
     }
 
-
     const dataExport = new DataExport(memberId);
+    dataExport.type = sendEmail ? "email" : "direct_download";
+    dataExport.sendToEmail = email;
+
     await AdminDataExportService.getSharedInstance().save(dataExport);
 
-    // const downloadUrl = `${ getHostname() }/api/user/data-exports/${ dataExport.id }`;
-    const downloadUrl = `http://localhost:5000/cactus-app-stage/us-central1/user/data-exports/${ dataExport.id }`;
+    let downloadUrl = `${ getHostname() }/api/user/data-exports/${ dataExport.id }`;
+    if (config.isEmulator) {
+        downloadUrl = `http://localhost:5000/cactus-app-stage/us-central1/user/data-exports/${ dataExport.id }`;
+    }
 
-    const emailResult = await AdminSendgridService.getSharedInstance().sendTemplateAndLog({
-        email,
-        sender: CactusSender.SUPPORT,
-        oneTime: false,
-        template: SendgridTemplate.data_export,
-        data: {
-            link: downloadUrl
-        },
-    });
+    let emailResult: SendEmailResult | undefined;
+    if (sendEmail && email) {
+        emailResult = await AdminSendgridService.getSharedInstance().sendTemplateAndLog({
+            email,
+            sender: CactusSender.SUPPORT,
+            oneTime: false,
+            template: SendgridTemplate.data_export,
+            data: {
+                link: downloadUrl
+            },
+        });
+        if (emailResult?.didSend) {
+            dataExport.emailSent = true;
+            dataExport.emailLogId = emailResult?.emailLog?.id;
+            await AdminDataExportService.getSharedInstance().save(dataExport);
+        }
+    }
+
 
     await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
         text: `*${ member.email } has requested a data export.*\n`
-        + `Sent to: \`${ email }\`\n`
         + `Export ID = \`${ dataExport.id }\`\n`
-        + `Email Send Success = \`${ emailResult.didSend }\``
+        + (sendEmail ? `Sent to: \`${ email }\`\n` : "")
+        + (sendEmail ? `Email Send Success = \`${ emailResult?.didSend === true }\`` : "Direct Download")
     });
 
     let message = undefined;
-    if (!emailResult.didSend) {
+    if (emailResult?.didSend === false) {
         message = `We were unable to send the email to ${ email }. Please try again later.`;
     }
 
     const response: EmailDataResult = {
-        success: emailResult.didSend,
+        success: !sendEmail || (emailResult?.didSend === true),
         dataExportId: dataExport.id,
         downloadUrl,
         message
@@ -115,10 +127,11 @@ app.get("/data-exports/:id", async (req: express.Request, resp: express.Response
         + `Member's Data: \`${ member.email } (${ member.id })\`\n`
         + `Export ID = \`${ dataExportId }\`\n`
         + `Number of Journal Entries = \`${ journal.length }\`\n`
-        + `Download Count = \`${ dataExport.downloadCount + 1 }\``
+        + `Download Count = \`${ dataExport.downloadCount + 1 }\`\n`
+        + `Export Type = \`${ dataExport.type }\``
     });
 
-    resp.append("Content-Disposition", `attachment; filename=cactus-data-${ memberId }.json`);
+    resp.append("Content-Disposition", `attachment; filename=cactus-data-${ memberId }.zip`);
 
     if (zipFilePath) {
         resp.download(zipFilePath);
@@ -126,29 +139,6 @@ app.get("/data-exports/:id", async (req: express.Request, resp: express.Response
         resp.status(500).send("We were unable to generate your download file. Please try again later or contact help@cactus.app");
     }
 
-    return;
-});
-
-app.get("/download-data", async (req: functions.https.Request | any, resp: functions.Response) => {
-    const userId = await getAuthUserId(req);
-
-    if (!userId) {
-        resp.sendStatus(401);
-        return;
-    }
-
-    // const userId = "IwM9B6sefBfMtWHEGMbhZ5BC7C02";
-    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
-    if (!member) {
-        resp.sendStatus(403);
-        return;
-    }
-
-    const job = new DownloadJournalJob({ member, config: getConfig() });
-    const journal = await job.fetchData();
-
-    resp.append("Content-Disposition", "attachment; filename=user_data.json");
-    resp.status(200).send(journal);
     return;
 });
 
