@@ -38,7 +38,9 @@ export enum QueryParam {
     CACTUS_MEMBER_ID = "memberId",
     CORE_VALUES = "coreValues",
     FROM_AUTH = "fromAuth",
-    ABBREVIATED = "short"
+    ABBREVIATED = "short",
+    AUTH_TOKEN = "token",
+    DOWNLOAD_TOKEN = "download_token",
 
 }
 

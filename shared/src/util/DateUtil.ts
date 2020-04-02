@@ -79,7 +79,7 @@ export function formatDate(date?: Date, format = "yyyy-LL-dd"): string | undefin
 }
 
 
-export function formatDateTime(date?: Date, options: { format?: string, timezone?: string } = {}): string | undefined {
+export function formatDateTime(date?: Date, options: { format?: string, timezone?: string | null } = {}): string | undefined {
     const DEFAULT_FORMAT = "yyyy-LL-dd h:mm a ZZZZ";
     const {
         format = DEFAULT_FORMAT,

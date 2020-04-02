@@ -25,6 +25,7 @@ export interface SendEmailResult {
 type SenderAddress = { name: string, email: string };
 export const CactusSender = {
     RYAN: {name: "Ryan at Cactus", email: "ryan@cactus.app"},
+    SUPPORT: {name: "Cactus Support", email: "support@cactus.app"},
 };
 
 interface SendTemplateOptions {

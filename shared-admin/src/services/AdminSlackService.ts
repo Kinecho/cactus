@@ -63,6 +63,7 @@ export enum ChannelName {
     cha_ching = "cha-ching",
     subscription_status = "subscription-status",
     cancellation_processing = "cancellation-processing",
+    customer_data_export = "customer-data-export",
 }
 
 export enum SlackResponseType {

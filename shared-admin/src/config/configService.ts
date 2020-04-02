@@ -182,7 +182,8 @@ const defaultTestConfig: CactusConfig = {
             magic_link_new_user: '1234ra',
             invitation: '1234invite',
             friend_request: '1234fr',
-            trial_ending: '1234te'
+            trial_ending: '1234te',
+            data_export: "1234lj",
         }
     },
     language: {

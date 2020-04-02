@@ -148,6 +148,10 @@
                 "function": "user"
             },
             {
+                "source": "/api/user/**",
+                "function": "user"
+            },
+            {
                 "source": "/unsubscribe-confirmed",
                 "destination": "/unsubscribe_confirmed.html"
             },
