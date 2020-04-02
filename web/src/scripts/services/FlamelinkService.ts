@@ -101,6 +101,40 @@ export default class FlamelinkService {
         });
     }
 
+    observeSingle<T extends FlamelinkModel>(Type: { new(): T }, options: EntryObserverOptions<T>): ListenerUnsubscriber {
+        const type = new Type();
+        const schema = type.schema;
+
+        return this.content.subscribe({
+            schemaKey: schema,
+            populate: options.populate,
+            callback: (error: any, data: {[id: string]: Partial<T>}) => {
+                if (error) {
+                    logger.error("Failed to load data from flamelink", error);
+                    options.onData(undefined, error);
+                    return;
+                }
+                if (!data) {
+                    logger.log(`No data returned for schema ${schema}`);
+                    options.onData(undefined, undefined);
+                    return;
+                }
+
+                // const [firstData] = Object.values(data);
+                // if (!firstData) {
+                //     logger.log(`No results for ${schema}`);
+                //     options.onData(undefined, undefined);
+                //     return;
+                // }
+
+
+                const model = fromFlamelinkData(data, Type);
+                options.onData(model);
+            }
+        });
+    }
+
+
     async getFirstByField<T extends FlamelinkModel>(args: { name: string, value: string, Type: { new(): T } }): Promise<T | undefined> {
         const {name, value, Type} = args;
 
@@ -123,6 +157,7 @@ export default class FlamelinkService {
         }
         return;
     }
+
 
 
     async getAllWhere<T extends FlamelinkModel>(args: { name: string, value: FlamelinkValue, Type: { new(): T } }): Promise<QueryResult<T>> {
