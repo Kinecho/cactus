@@ -20,12 +20,12 @@
                   <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
                   <div class="flexContainer">
                       <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
+                          <span class="benefitIcon"><img src="/assets/images/pie.svg" alt=""/></span>
                           <h3>Daily insights</h3>
                           <p class="text">Cactus will visualize your journey, revealing important insights about you, to&nbsp;you.</p>
                       </div>
                       <div class="benefit">
-                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
+                          <span class="benefitIcon"><img src="assets/images/checkCircle.svg" alt=""/></span>
                           <h3>Core values</h3>
                           <p class="text">Cactus will help identify your core values and use them to provide a personalized mindfulness&nbsp;journey.</p>
                       </div>
