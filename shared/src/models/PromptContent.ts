@@ -128,8 +128,8 @@ export function processContent(content: Content): Content {
             break;
         case ContentType.quote:
             processed.quote = content.quote;
-            if (processed.quote) {
-                processed.quote.text = processed.quote.text_md || processed.quote.text;
+            if (processed.quote?.text_md) {
+                processed.quote.text = processed.quote.text_md;
             }
             break;
         case ContentType.video:
