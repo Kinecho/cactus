@@ -802,7 +802,12 @@
         }
 
         .name {
-            font-weight: bold;
+            font-size: 1.6rem;
+            opacity: .8;
+
+            @include r(768) {
+                font-size: 1.8rem;
+            }
         }
 
         .title {
@@ -1130,7 +1135,10 @@
 </style>
 <style>
     @import "variables";
-    .quote-container .quote .md_wrapper strong {
-        color: $turquoise;
+
+    .quote-container .md_wrapper strong {
+        color: $indigo;
+        font-size: 2.8rem;
+        line-height: 1.2;
     }
 </style>
