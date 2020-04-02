@@ -1,6 +1,6 @@
 
 <template>
-    <vue-simple-markdown :source="source" class="md_wrapper"/>
+    <vue-simple-markdown :source="sourceCopy" class="md_wrapper"/>
 </template>
 
 <script lang="ts">
@@ -10,8 +10,18 @@
     Vue.use(VueSimpleMarkdown);
     export default Vue.extend({
         props: {
-            source: String
+            source: String,
+            treatment: String
         },
+        computed: {
+            sourceCopy(): string {
+                if (this.treatment === 'quote') {
+                    return `"${this.source}"`;
+                }   
+
+                return this.source;
+            }
+        }
     })
 </script>
 
