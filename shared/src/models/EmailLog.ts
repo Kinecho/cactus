@@ -14,6 +14,7 @@ export enum SendgridTemplate {
     invitation = "invitation",
     friend_request = "friend_request",
     trial_ending = "trial_ending",
+    data_export = "data_export"
 }
 
 /**

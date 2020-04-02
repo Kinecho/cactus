@@ -1,28 +1,150 @@
 import * as express from "express";
 import * as cors from "cors";
-import {getConfig, getHostname} from "@admin/config/configService";
+import { getConfig, getHostname } from "@admin/config/configService";
 import AdminUserService from "@admin/services/AdminUserService";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
-import {getAuthUser} from "@api/util/RequestUtil";
-import {DeleteUserRequest, FeatureAuthRequest} from "@shared/api/UserEndpointTypes";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-import {QueryParam} from "@shared/util/queryParams";
-import {PageRoute} from "@shared/PageRoutes";
+import { getAuthUser, getAuthUserId } from "@api/util/RequestUtil";
+import { DeleteUserRequest, FeatureAuthRequest } from "@shared/api/UserEndpointTypes";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { QueryParam } from "@shared/util/queryParams";
+import { PageRoute } from "@shared/PageRoutes";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import AdminSlackService from "@admin/services/AdminSlackService";
+import AdminSlackService, { ChannelName } from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
+import DownloadJournalJob from "@admin/jobs/DownloadJournalJob";
+import DataExport from "@shared/models/DataExport";
+import AdminDataExportService from "@admin/services/AdminDataExportService";
+import { EmailDataParams, EmailDataResult } from "@shared/api/DataExportTypes";
+import AdminSendgridService, { CactusSender, SendEmailResult } from "@admin/services/AdminSendgridService";
+import { SendgridTemplate } from "@shared/models/EmailLog";
 
 const logger = new Logger("userEndpoints");
 const app = express();
 const config = getConfig();
 
-// Automatically allow cross-origin requests
-app.use(cors({origin: config.allowedOrigins}));
+app.use(cors({ origin: config.allowedOrigins }));
+
+app.post("/export-data", async (req: express.Request, resp: express.Response) => {
+    logger.info("Starting email data function");
+    const userId = await getAuthUserId(req);
+
+    if (!userId) {
+        resp.sendStatus(401);
+        return;
+    }
+
+    const payload = req.body as EmailDataParams;
+    const { email, sendEmail } = payload;
+
+    const member = await AdminCactusMemberService.getSharedInstance().getMemberByUserId(userId);
+    const memberId = member?.id;
+    if (!member || !memberId) {
+        resp.sendStatus(403);
+        return;
+    }
+
+    const dataExport = new DataExport(memberId);
+    dataExport.type = sendEmail ? "email" : "direct_download";
+    dataExport.sendToEmail = email;
+
+    await AdminDataExportService.getSharedInstance().save(dataExport);
+
+    let downloadUrl = `${ getHostname() }/api/user/data-exports/${ dataExport.id }`;
+    if (config.isEmulator) {
+        downloadUrl = `http://localhost:5000/cactus-app-stage/us-central1/user/data-exports/${ dataExport.id }`;
+    }
+
+    let emailResult: SendEmailResult | undefined;
+    if (sendEmail && email) {
+        emailResult = await AdminSendgridService.getSharedInstance().sendTemplateAndLog({
+            email,
+            sender: CactusSender.SUPPORT,
+            oneTime: false,
+            template: SendgridTemplate.data_export,
+            data: {
+                link: downloadUrl
+            },
+        });
+        if (emailResult?.didSend) {
+            dataExport.emailSent = true;
+            dataExport.emailLogId = emailResult?.emailLog?.id;
+            await AdminDataExportService.getSharedInstance().save(dataExport);
+        }
+    }
+
+
+    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
+        text: `*${ member.email } has requested a data export.*\n`
+        + `Export ID = \`${ dataExport.id }\`\n`
+        + (sendEmail ? `Sent to: \`${ email }\`\n` : "")
+        + (sendEmail ? `Email Send Success = \`${ emailResult?.didSend === true }\`` : "Direct Download")
+    });
+
+    let message = undefined;
+    if (emailResult?.didSend === false) {
+        message = `We were unable to send the email to ${ email }. Please try again later.`;
+    }
+
+    const response: EmailDataResult = {
+        success: !sendEmail || (emailResult?.didSend === true),
+        dataExportId: dataExport.id,
+        downloadUrl,
+        message
+    };
+    resp.send(response);
+
+    return;
+});
+
+app.get("/data-exports/:id", async (req: express.Request, resp: express.Response) => {
+    const dataExportId = req.params.id;
+
+    const dataExport = await AdminDataExportService.getSharedInstance().getById(dataExportId);
+    if (!dataExport) {
+        resp.sendStatus(404);
+        return;
+    }
+
+    const memberId = dataExport.memberId;
+    const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+    if (!member) {
+        resp.sendStatus(404);
+        return;
+    }
+
+    const job = new DownloadJournalJob({ member, config: getConfig() });
+    await job.fetchData();
+    const journal = job.toSimpleJSON();
+
+    await AdminDataExportService.getSharedInstance().logDownload(dataExportId);
+
+    const zipFilePath = await job.zip();
+    logger.info("file path ", zipFilePath);
+
+    await AdminSlackService.getSharedInstance().sendMessage(ChannelName.customer_data_export, {
+        text: `*Customer Data Export was downloaded.*\n`
+        + `Member's Data: \`${ member.email } (${ member.id })\`\n`
+        + `Export ID = \`${ dataExportId }\`\n`
+        + `Number of Journal Entries = \`${ journal.length }\`\n`
+        + `Download Count = \`${ dataExport.downloadCount + 1 }\`\n`
+        + `Export Type = \`${ dataExport.type }\``
+    });
+
+    resp.append("Content-Disposition", `attachment; filename=cactus-data-${ memberId }.zip`);
+
+    if (zipFilePath) {
+        resp.download(zipFilePath);
+    } else {
+        resp.status(500).send("We were unable to generate your download file. Please try again later or contact help@cactus.app");
+    }
+
+    return;
+});
 
 app.post("/delete-permanently", async (req: functions.https.Request | any, resp: functions.Response) => {
     const requestUser = await getAuthUser(req);
-    
+
     if (!requestUser?.uid) {
         logger.log("No auth user was found on the request");
         resp.sendStatus(401);
@@ -30,7 +152,7 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
     }
 
     const payload = req.body;
-    const {email} = payload as DeleteUserRequest;
+    const { email } = payload as DeleteUserRequest;
 
     const user = await AdminUserService.getSharedInstance().getByEmail(email);
 
@@ -50,14 +172,14 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
     try {
         await admin.auth().deleteUser(user.id);
         logger.log('Deleted!');
-        resp.status(200).send({success: true});
+        resp.status(200).send({ success: true });
         return;
-    } catch(e) {
+    } catch (e) {
         logger.log("Error", e);
         resp.sendStatus(500);
         return
     }
-       
+
     // don't expect to ever get here but just in case
     resp.sendStatus(500);
     return;
@@ -66,9 +188,9 @@ app.post("/delete-permanently", async (req: functions.https.Request | any, resp:
 
 app.get("/feature-auth/core-values", async (req: functions.https.Request | any, resp: functions.Response) => {
     const queryParams = req.query;
-    const {memberId} = queryParams as FeatureAuthRequest;
-    const afterLoginUrl = `${getHostname()}/feature-auth/core-values`;
-    const loginUrl = `${getHostname()}${PageRoute.LOGIN}?${QueryParam.MESSAGE}=${encodeURIComponent("To continue to Core Values, please login.")}&${QueryParam.REDIRECT_URL}=${encodeURIComponent(afterLoginUrl)}`;
+    const { memberId } = queryParams as FeatureAuthRequest;
+    const afterLoginUrl = `${ getHostname() }/feature-auth/core-values`;
+    const loginUrl = `${ getHostname() }${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("To continue to Core Values, please login.") }&${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`;
 
     if (!memberId) {
         // show an error message and instructions to upgrade
@@ -79,7 +201,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
             await AdminSlackService.getSharedInstance().sendActivityMessage({
                 text: `Someone without a memberId tried to auth to Core Values.`
             });
-        } catch(e) {
+        } catch (e) {
             logger.error(e);
         }
 
@@ -100,26 +222,24 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
 
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
-                text: `PLUS member ${member.email} authorized to Core Values`
+                text: `PLUS member ${ member.email } authorized to Core Values`
             });
-        } catch(e) {
+        } catch (e) {
             logger.error(e);
         }
 
         return;
     } else {
-        const pricingUrl = `${getHostname()}${PageRoute.PRICING}?${QueryParam.CORE_VALUES}=true}`;
+        const pricingUrl = `${ getHostname() }${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true}`;
         resp.redirect(pricingUrl);
 
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
-                text: `BASIC member ${member.email} authorized to Core Values. Redirected to Upgrade Page.`
+                text: `BASIC member ${ member.email } authorized to Core Values. Redirected to Upgrade Page.`
             });
-        } catch(e) {
+        } catch (e) {
             logger.error(e);
         }
-
-        return;
     }
 
     resp.sendStatus(500);
