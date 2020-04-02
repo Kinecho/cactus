@@ -10,24 +10,17 @@
             <p class="subtext">You'll get access to these popular features:</p>
         </div>
         <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
+            <span class="benefitIcon"><img src="/assets/images/checkCircle.svg" alt=""/></span>
             <div>
                 <h3>Core Values Assessment</h3>
                 <p class="text">Make better decisions by prioritizing what's important to you.</p>
             </div>
         </div>
         <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/journal.svg" alt=""/></span>
+            <span class="benefitIcon"><img src="/assets/images/pie.svg" alt=""/></span>
             <div>
                 <h3>Personal Insights</h3>
                 <p class="text">Visualizations reveal the people, places, and things that contribute to your&nbsp;satisfaction.</p>
-            </div>
-        </div>
-        <div class="benefit">
-            <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-            <div>
-                <h3>Make it daily</h3>
-                <p class="text">Improve your focus and positivity at work and home with a fresh prompt, every&nbsp;day.</p>
             </div>
         </div>
         <div class="pricingWrapper">

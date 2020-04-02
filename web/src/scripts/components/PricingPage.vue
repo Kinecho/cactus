@@ -4,12 +4,12 @@
     <section class="hero">
         <div class="centered" v-if="!coreValues">
             <h1>Get more with Cactus&nbsp;Plus</h1>
-            <p class="subtext">Daily prompts, insights, core values, and&nbspmore</p>
+            <p class="subtext">Daily insights, core values, and&nbspmore</p>
             <a class="button btn primary" href="#upgrade">Try Cactus Plus</a>
         </div>
         <div class="centered" v-if="coreValues">
             <h1>Discover your Core&nbspValues</h1>
-            <p class="subtext">Cactus Plus members get core values, daily prompts, and&nbsp;more</p>
+            <p class="subtext">Cactus Plus members get core values, daily insights, and&nbsp;more</p>
             <a class="button btn primary" href="#upgrade">Try Cactus Plus</a>
         </div>
     </section>
@@ -20,14 +20,14 @@
                   <h2 class="sectionHeader">Expand your mindfulness&nbsp;journey</h2>
                   <div class="flexContainer">
                       <div class="benefit">
-                          <span class="benefitIcon"><img src="/assets/images/calendar.svg" alt=""/></span>
-                          <h3>Make it daily</h3>
-                          <p class="text">Become more focused at work, more positive at home with a fresh prompt, every&nbsp;day.</p>
+                          <span class="benefitIcon"><img src="/assets/images/pie.svg" alt=""/></span>
+                          <h3>Daily insights</h3>
+                          <p class="text">Cactus will visualize your journey, revealing important insights about you, to&nbsp;you.</p>
                       </div>
                       <div class="benefit">
-                          <span class="benefitIcon"><img src="assets/images/journal.svg" alt=""/></span>
-                          <h3>Look back</h3>
-                          <p class="text">As your journal fills up, celebrate and relive the positive forces in your&nbsp;life.</p>
+                          <span class="benefitIcon"><img src="assets/images/checkCircle.svg" alt=""/></span>
+                          <h3>Core values</h3>
+                          <p class="text">Cactus will help identify your core values and use them to provide a personalized mindfulness&nbsp;journey.</p>
                       </div>
                       <div class="benefit">
                           <span class="benefitIcon"><img src="/assets/images/lock.svg" alt=""/></span>
