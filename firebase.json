@@ -148,7 +148,7 @@
                 "function": "user"
             },
             {
-                "source": "/api/user/**",
+                "source": "/data-exports/**",
                 "function": "user"
             },
             {

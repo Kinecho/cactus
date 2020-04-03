@@ -32,6 +32,7 @@
                         Your subscription will end on <strong>{{nextBillingDate}}</strong>. You will not be billed
                         again.
                     </p>
+
                 </template>
 
 
