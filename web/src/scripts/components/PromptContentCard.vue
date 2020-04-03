@@ -55,7 +55,7 @@
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
                 <div class="quote">
-                    <MarkdownText :source="processedContent.quote.text"/>
+                    <MarkdownText :source="processedContent.quote.text" :treatment="'quote'" />
                 </div>
                 <div class="author">
                     <p class="name">{{processedContent.quote.authorName}}</p>
