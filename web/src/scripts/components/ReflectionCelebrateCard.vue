@@ -7,7 +7,7 @@
                     <h2>{{celebrateText}}</h2>
                 </div>
                 <div class="insightContainer revealed">
-                    <p class="subtext" v-if="subscriptionTier == plusTier">Here are words that have come up recently for&nbsp;you.</p>
+                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that have come up recently for&nbsp;you.</p>
                     <MemberInsights
                         :words="wordData"
                         :didWrite="didWriteReflection"
