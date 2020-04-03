@@ -98,7 +98,7 @@
                         </div>
                     </div>
 
-                    <div class="settings-group">
+                    <div class="settings-group" v-if="showExportData">
                         <h2>Reflection Content</h2>
                         <p class="subtext">Export your reflections to a downloadable file.
                         <div class="item">
@@ -123,8 +123,8 @@
                 </div>
             </transition>
             <delete-account-modal
-                :showModal="deleteAccountModalVisible"
-                @close="deleteAccountModalVisible = false" />
+                    :showModal="deleteAccountModalVisible"
+                    @close="deleteAccountModalVisible = false"/>
             <div class="snackbar-container">
 
                 <transition-group name="snackbar" tag="div" @before-leave="beforeLeave">
@@ -159,28 +159,31 @@
     } from "@shared/models/CactusMember";
     import CheckBox from "@components/CheckBox.vue";
     import CactusMemberService from '@web/services/CactusMemberService';
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {formatDate} from '@shared/util/DateUtil';
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import { formatDate } from '@shared/util/DateUtil';
     import TimezonePicker from "@components/TimezonePicker.vue"
-    import {findByZoneName, ZoneInfo} from '@shared/timezones'
-    import {updateSubscriptionStatus} from '@web/mailchimp'
-    import {PageRoute} from '@shared/PageRoutes'
-    import {FirebaseUser} from '@web/firebase'
-    import {getProviderDisplayName} from "@shared/util/StringUtil"
+    import { findByZoneName, ZoneInfo } from '@shared/timezones'
+    import { updateSubscriptionStatus } from '@web/mailchimp'
+    import { PageRoute } from '@shared/PageRoutes'
+    import { FirebaseUser } from '@web/firebase'
+    import { getProviderDisplayName } from "@shared/util/StringUtil"
     import ProviderIcon from "@components/ProviderIcon.vue";
     import CopyService from "@shared/copy/CopyService";
     import DeleteAccountModal from "@components/DeleteAccountModal.vue";
-    import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import SnackbarContent, {SnackbarMessage} from "@components/SnackbarContent.vue";
+    import { LocalizedCopy } from '@shared/copy/CopyTypes'
+    import SnackbarContent, { SnackbarMessage } from "@components/SnackbarContent.vue";
     import TimePicker from "@components/TimePicker.vue"
     import * as uuid from "uuid/v4";
-    import {getDeviceLocale, getDeviceTimeZone} from '@web/DeviceUtil'
+    import { getDeviceLocale, getDeviceTimeZone } from '@web/DeviceUtil'
     import Logger from "@shared/Logger";
     import PremiumPricing from "@components/PremiumPricing.vue";
     import ManageActiveSubscription from "@components/ManageActiveSubscription.vue";
-    import {getQueryParam, removeQueryParam} from "@web/util";
-    import {QueryParam} from "@shared/util/queryParams";
+    import { getQueryParam, removeQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
     import DataExport from "@components/DataExport.vue";
+    import AppSettings from "@shared/models/AppSettings";
+    import AppSettingsService from "@web/services/AppSettingsService";
+
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
 
@@ -203,23 +206,31 @@
             TimePicker,
             Upgrade: PremiumPricing,
             ManageSubscription: ManageActiveSubscription,
-            DeleteAccountModal
+            DeleteAccountModal,
         },
         mounted(): void {
             const message = getQueryParam(QueryParam.MESSAGE);
             if (message) {
-                this.addSnackbar({message, timeoutMs: 10000, closeable: true});
+                this.addSnackbar({ message, timeoutMs: 10000, closeable: true });
                 removeQueryParam(QueryParam.MESSAGE);
             }
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member, user}) => {
+                onData: ({ member, user }) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
                     if (!member) {
                         window.location.href = PageRoute.HOME;
+                    }
+                }
+            });
+
+            this.settingsObserver = AppSettingsService.sharedInstance.observeAppSettings({
+                onData: (settings) => {
+                    if (settings) {
+                        this.settings = settings;
                     }
                 }
             })
@@ -228,6 +239,7 @@
             if (this.memberUnsubscriber) {
                 this.memberUnsubscriber();
             }
+            this.settingsObserver?.();
         },
         data(): {
             authLoaded: boolean,
@@ -247,8 +259,9 @@
             deviceLocale: string | undefined,
             tzAlertDismissed: boolean,
             upgradeRoute: string,
-
-            deleteAccountModalVisible: boolean
+            deleteAccountModalVisible: boolean,
+            settingsObserver: ListenerUnsubscriber | undefined,
+            settings: AppSettings | null,
         } {
             return {
                 authLoaded: false,
@@ -268,17 +281,26 @@
                 deviceLocale: getDeviceLocale(),
                 tzAlertDismissed: false,
                 upgradeRoute: PageRoute.PRICING,
-                deleteAccountModalVisible: false
+                deleteAccountModalVisible: false,
+                settingsObserver: undefined,
+                settings: AppSettingsService.sharedInstance.currentSettings
             }
         },
         computed: {
+            showExportData(): boolean {
+                const tier = this.member?.tier;
+                if (!tier) {
+                    return false
+                }
+                return this.settings?.dataExportEnabledTiers.includes(tier) ?? false
+            },
             hasActiveSubscription(): boolean {
                 return this.member?.hasActiveSubscription ?? false;
             },
             promptSendTime(): PromptSendTime {
                 return this.member?.promptSendTime ||
-                    this.member?.getLocalPromptSendTimeFromUTC() ||
-                    DEFAULT_PROMPT_SEND_TIME;
+                this.member?.getLocalPromptSendTimeFromUTC() ||
+                DEFAULT_PROMPT_SEND_TIME;
             },
             loading(): boolean {
                 return !this.authLoaded;
@@ -292,7 +314,7 @@
             differentTimezone(): boolean {
                 if (this.member?.timeZone) {
                     const d = new Date();
-                    const localeTimeParts = d.toLocaleTimeString('en-us', {timeZoneName: 'short'}).split(' ');
+                    const localeTimeParts = d.toLocaleTimeString('en-us', { timeZoneName: 'short' }).split(' ');
                     const memberTimeParts = d.toLocaleTimeString('en-us', {
                         timeZoneName: 'short',
                         timeZone: this.member.timeZone
@@ -310,7 +332,7 @@
                         return zoneInfo.displayName;
                     } else {
                         const locale = this.deviceLocale;
-                        return new Date().toLocaleTimeString(locale, {timeZoneName: 'long'}).split(' ')[2];
+                        return new Date().toLocaleTimeString(locale, { timeZoneName: 'long' }).split(' ')[2];
                     }
                 }
                 return;
@@ -324,8 +346,8 @@
 
 
                 let info = providerData.filter(provider => provider &&
-                    provider.providerId !== "password" &&
-                    !this.removedProviderIds.includes(provider.providerId)).map(provider => {
+                provider.providerId !== "password" &&
+                !this.removedProviderIds.includes(provider.providerId)).map(provider => {
                     if (provider == null) {
                         return null;
                     }
@@ -344,8 +366,8 @@
                 }
 
                 return user.providerData.filter(provider => provider &&
-                    provider.providerId !== "password" &&
-                    !this.removedProviderIds.includes(provider.providerId)).length > 0;
+                provider.providerId !== "password" &&
+                !this.removedProviderIds.includes(provider.providerId)).length > 0;
             }
         },
         methods: {
@@ -353,29 +375,29 @@
                 if (!this.user) {
                     return;
                 }
-                const c = confirm(`Are you sure you want to remove ${getProviderDisplayName(providerId)}?`);
+                const c = confirm(`Are you sure you want to remove ${ getProviderDisplayName(providerId) }?`);
                 if (c) {
                     this.removedProviderIds.push(providerId);
                     await this.user.unlink(providerId);
-                    this.addSnackbar(`${getProviderDisplayName(providerId)} Removed`);
+                    this.addSnackbar(`${ getProviderDisplayName(providerId) } Removed`);
                     this.user.reload();
                 }
                 return;
             },
             beforeLeave(el: any) {
-                const {marginLeft, marginTop, width, height} = window.getComputedStyle(el);
-                el.style.left = `${el.offsetLeft - parseFloat(marginLeft as string)}px`;
+                const { marginLeft, marginTop, width, height } = window.getComputedStyle(el);
+                el.style.left = `${ el.offsetLeft - parseFloat(marginLeft as string) }px`;
                 // el.style.top = `${el.offsetTop - parseFloat(marginTop as string)}px`;
-                el.style.top = `${el.offsetTop}px`;
+                el.style.top = `${ el.offsetTop }px`;
                 el.style.width = width;
                 el.style.height = height;
             },
             addSnackbar(message: SnackbarMessage): string {
                 const id = uuid();
                 if (typeof message === "string") {
-                    this.snackbars.push({id, message: message, autoHide: true});
+                    this.snackbars.push({ id, message: message, autoHide: true });
                 } else {
-                    this.snackbars.push({id, autoHide: true, closeable: true, ...message});
+                    this.snackbars.push({ id, autoHide: true, closeable: true, ...message });
                 }
 
                 return id;
@@ -402,7 +424,7 @@
                 if (this.member) {
                     await CactusMemberService.sharedInstance.save(this.member);
                     logger.log("Save success");
-                    this.addSnackbar({message: "Changes Saved", color: "success"});
+                    this.addSnackbar({ message: "Changes Saved", color: "success" });
                     this.changesToSave = false;
                 }
             },
