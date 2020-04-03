@@ -65,6 +65,10 @@ window.unlockInsights = () => {
     window.fireShowMeAnalyticsEvent()
 };
 
+window.lockInsights = () => {
+    dataSource.blurred = true;
+};
+
 window.setInsightWords = (words: any) => {
     console.log("Setting words ", words);
     if (words && Array.isArray(words)) {
