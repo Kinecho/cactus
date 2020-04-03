@@ -50,7 +50,7 @@ app.post("/export-data", async (req: express.Request, resp: express.Response) =>
 
     await AdminDataExportService.getSharedInstance().save(dataExport);
 
-    let downloadUrl = `${ getHostname() }/api/user/data-exports/${ dataExport.id }`;
+    let downloadUrl = `${ getHostname() }/data-exports/${ dataExport.id }`;
     if (config.isEmulator) {
         downloadUrl = `http://localhost:5000/cactus-app-stage/us-central1/user/data-exports/${ dataExport.id }`;
     }
