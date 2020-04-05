@@ -240,6 +240,8 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
         } catch (e) {
             logger.error(e);
         }
+
+        return;
     }
 
     resp.sendStatus(500);
