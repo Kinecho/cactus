@@ -64,6 +64,7 @@ export function isNonPromptCampaignId(campaignId: string): boolean {
 const defaultTestConfig: CactusConfig = {
     isEmulator: true,
     android_publisher: {
+        default_package_name: "app.cactus.stage",
         service_account: {
             type: "service_account",
             project_id: "cactus-app-stage",

@@ -79,6 +79,13 @@ interface MailchimpSyncSubscriberResult {
     lastMemberId?: string,
 }
 
+export interface UnsubscribeMemberResult {
+    memberId?: string
+    status: "not_attempted" | "no_active_subscription" | "unsubscribe_success" | "unsubscribe_error" | "not_available" | "already_canceled",
+    billingPlatform?: BillingPlatform,
+    message?: string,
+}
+
 export interface SubscriptionMergeFields {
     [MergeField.SUB_TIER]?: string,
     [MergeField.IN_TRIAL]?: string,
@@ -825,6 +832,41 @@ export default class AdminSubscriptionService {
                 }]
             });
             Sentry.captureException(error);
+        }
+
+        return result;
+    }
+
+    async unsubscribeMember(member: CactusMember): Promise<UnsubscribeMemberResult> {
+        const result: UnsubscribeMemberResult = {memberId: member.id, status: "not_attempted"};
+        if (!member.hasActiveSubscription) {
+            result.status = "no_active_subscription";
+            return result;
+        }
+        if (member.hasUpcomingCancellation) {
+            result.status = "already_canceled";
+            return result;
+        }
+
+        const stripeSubscriptionId = member.subscription?.stripeSubscriptionId;
+        const googlePurchaseToken = member.subscription?.googlePurchaseToken;
+        if (stripeSubscriptionId) {
+            result.billingPlatform = BillingPlatform.STRIPE;
+            const subscription = await StripeService.getSharedInstance().cancelSubscriptionImmediately(stripeSubscriptionId);
+            this.logger.info("Canceled stripe subscription", subscription.id);
+            result.status = "unsubscribe_success";
+        } else if (googlePurchaseToken) {
+            const googleResult = await GooglePlayService.getSharedInstance().cancelSubscription(member);
+            result.billingPlatform = BillingPlatform.GOOGLE;
+            if (googleResult.subscriptionFound && googleResult.didCancel) {
+                result.status = "unsubscribe_success";
+            } else if (googleResult.subscriptionFound && !googleResult.didCancel) {
+                result.status = "unsubscribe_error";
+                result.message = "Subscription was found but was unable to cancel it for some reason"
+            } else {
+                result.status = "not_available";
+                result.message = "Unable to cancel the google subscription";
+            }
         }
 
         return result;

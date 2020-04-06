@@ -28,8 +28,9 @@ import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
 import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
-import { QueryWhereClauses } from "@shared/util/FirestoreUtil";
+import { flattenUnique, QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
 import DocumentReference = admin.firestore.DocumentReference;
+import { isBlank } from "@shared/util/StringUtil";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -325,16 +326,31 @@ export default class AdminCactusMemberService {
         return member
     }
 
-    async geAllMemberMatchingEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
-        if (!emailInput) {
+    async findAllMatchingAny(params: { userId?: string | null, email?: string | null }, options: GetOptions = DefaultGetOptions): Promise<CactusMember[]> {
+        let {email} = params;
+        const {userId} = params;
+        if (!email && !userId) {
             return [];
         }
-        const email = emailInput.toLowerCase().trim();
-        const query = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
-        options.queryName = `AdminCactusMemberService.getMemberByEmail(${ email })`;
-        const result = await firestoreService.executeQuery(query, CactusMember, options);
+        email = email?.toLowerCase().trim();
+        const members: CactusMember[] = [];
 
-        return result.results;
+        if (!isBlank(email)) {
+            const emailQuery = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
+            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${ email })`;
+            const result = await firestoreService.executeQuery(emailQuery, CactusMember, options);
+            members.push(result.results);
+        }
+
+
+        if (!isBlank(userId)) {
+            const userIdQuery = firestoreService.getCollectionRef(Collection.members).where(Field.userId, "==", userId);
+            options.queryName = `AdminCactusMemberService.findAllMatchingAny(${userId}`;
+            const result = await firestoreService.executeQuery(userIdQuery);
+            members.push(result.results);
+        }
+
+        return removeDuplicates(members);
     }
 
     async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
