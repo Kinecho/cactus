@@ -1,7 +1,8 @@
 import AdminFirestoreService, {
     Batch,
     CollectionReference,
-    DefaultGetOptions, FieldValue,
+    DefaultGetOptions,
+    FieldValue,
     GetBatchOptions,
     GetOptions,
     QueryOptions,
@@ -28,9 +29,9 @@ import { QuerySortDirection } from "@shared/types/FirestoreConstants";
 import Logger from "@shared/Logger";
 import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
-import { flattenUnique, QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
-import DocumentReference = admin.firestore.DocumentReference;
+import { QueryWhereClauses, removeDuplicates } from "@shared/util/FirestoreUtil";
 import { isBlank } from "@shared/util/StringUtil";
+import DocumentReference = admin.firestore.DocumentReference;
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -339,15 +340,15 @@ export default class AdminCactusMemberService {
             const emailQuery = firestoreService.getCollectionRef(Collection.members).where(Field.email, "==", email);
             options.queryName = `AdminCactusMemberService.findAllMatchingAny(${ email })`;
             const result = await firestoreService.executeQuery(emailQuery, CactusMember, options);
-            members.push(result.results);
+            members.push(...result.results);
         }
 
 
         if (!isBlank(userId)) {
             const userIdQuery = firestoreService.getCollectionRef(Collection.members).where(Field.userId, "==", userId);
             options.queryName = `AdminCactusMemberService.findAllMatchingAny(${userId}`;
-            const result = await firestoreService.executeQuery(userIdQuery);
-            members.push(result.results);
+            const result = await firestoreService.executeQuery(userIdQuery, CactusMember, options);
+            members.push(...result.results);
         }
 
         return removeDuplicates(members);

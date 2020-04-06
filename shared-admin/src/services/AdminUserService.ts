@@ -360,7 +360,7 @@ export default class AdminUserService {
         });
 
         await AdminSlackService.getSharedInstance().uploadTextSnippet({
-            message: `Subscription Cancellations for delted user ${email}`,
+            message: `Subscription Cancellations for deleted user ${email}`,
             data: stringifyJSON(subscriptionUnsubscribeResults, 2),
             fileType: "json",
             filename: `${email}-unsubscribe-results.json`,
