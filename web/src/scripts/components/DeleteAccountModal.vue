@@ -15,7 +15,7 @@
         </div>
         <div slot="body" class="modalContainer" v-else>
             <h2>First, cancel your subscription</h2>
-            <p>To permenantly delete your Cactus account, you need to cancel your paid subscription first. You can find details in your <a :href="accountUrl">Account Settings</a> under Subscription.</p>
+            <p>To permenantly delete your Cactus account, first you need to cancel your paid subscription. You can find details in your <a :href="accountUrl">Account Settings</a> under Subscription.</p>
         </div>
     </modal>
 </template>
@@ -71,7 +71,11 @@
             return (this.member?.email === this.confirmedEmail)
           },
           deleteAllowed(): boolean {
-            return !this.member?.hasActiveSubscription ?? true;
+            if (this.member?.hasActiveSubscription && !this.member.hasUpcomingCancellation) {
+                return false;
+            }
+
+            return true;
           },
           accountUrl(): string {
             return PageRoute.ACCOUNT;
