@@ -82,6 +82,7 @@ const timezones = [
     "Australia/Brisbane",
     "Australia/Hobart",
     "Asia/Vladivostok",
+    "Australia/Lord_Howe",
     "Pacific/Guam",
     "Asia/Magadan",
     "Pacific/Fiji",
