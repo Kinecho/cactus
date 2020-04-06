@@ -236,6 +236,11 @@ export default class CactusMember extends BaseModel {
         return !!this.subscription && !this.isOptInTrialing && this.tier !== SubscriptionTier.BASIC
     }
 
+    get hasUpcomingCancellation(): boolean {
+        return !!this.subscription?.cancellation?.accessEndsAt && 
+            this.subscription.cancellation.accessEndsAt > new Date();
+    }
+
     set stripeCustomerId(customerId: string | undefined) {
         const stripeDetails: MemberStripeDetails = this.stripe || {};
         stripeDetails.customerId = customerId;
