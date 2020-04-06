@@ -778,18 +778,19 @@ export default class AdminSubscriptionService {
             cactusSubscription.googleOriginalOrderId = (item as AndroidPurchase).orderId ?? androidSubscriptionPurchase.orderId;
             cactusSubscription.googlePurchaseToken = item.token;
 
+            const periodStartDate = fromMillisecondsString(androidSubscriptionPurchase.startTimeMillis);
+            const periodEndDate = fromMillisecondsString(androidSubscriptionPurchase.expiryTimeMillis);
             if (isOptOutTrial) {
-                const startDate = fromMillisecondsString(androidSubscriptionPurchase.startTimeMillis);
-                const endDate = fromMillisecondsString(androidSubscriptionPurchase.expiryTimeMillis);
-                if (!startDate || !endDate) {
+
+                if (!periodStartDate || !periodEndDate) {
                     const errorMessage = `:boom: :android: Google Subscription: Unable to create opt out trial for ${ member.email } (${ memberId }) because one or both of start date or end date was not defined. SubscriptionPurchase: ${ stringifyJSON(androidSubscriptionPurchase, 2) }`
                     this.logger.error(errorMessage);
                     await AdminSlackService.getSharedInstance().sendChaChingMessage(errorMessage);
                 }
 
                 cactusSubscription.optOutTrial = {
-                    startedAt: startDate,
-                    endsAt: endDate,
+                    startedAt: periodStartDate,
+                    endsAt: periodEndDate,
                     billingPlatform: BillingPlatform.GOOGLE
                 }
             } else {
@@ -809,7 +810,7 @@ export default class AdminSubscriptionService {
                 await AdminSlackService.getSharedInstance().sendChaChingMessage({
                     text: `:android: ${ member.email } has completed an in-app purchase \`${ subscriptionProduct.displayName } (${ item.subscriptionProductId })\`\n` +
                     `*In Opt-Out Trial*: \`${ isOptOutTrial ? "Yes" : "No" }\`\n` +
-                    `${ isOptOutTrial ? `*Trial End Date*: ${ formatDateTime(cactusSubscription.optOutTrial?.endsAt) }` : "" }`
+                    `${ (isOptOutTrial && !!periodEndDate ) ? `*Trial End Date*: ${ formatDateTime(periodEndDate) ?? "Not Set"}` : "" }`
                 })
             }
 
