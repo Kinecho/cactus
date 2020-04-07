@@ -5,7 +5,7 @@ import "firebase/functions"
 import "firebase/firestore";
 import "firebase/auth";
 import "firebase/storage";
-
+import "firebase/analytics";
 
 import flamelink from "flamelink/app";
 import 'flamelink/content'
@@ -57,7 +57,7 @@ export function initializeFirebase(): FirebaseObject {
             locale: localeCode,
             precache: true // optional, default shown. Currently it only precaches "schemas" for better performance
         });
-
+        firebaseApp.analytics();
         CopyService.initialize({locale: localeCode});
 
         isInitialized = true;
