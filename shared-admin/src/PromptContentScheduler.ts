@@ -350,17 +350,28 @@ export default class PromptContentScheduler {
 
     async checkForExistingScheduledPromptContent(): Promise<PromptContent | undefined> {
         const scheduledDate = DateTime.fromJSDate(this.promptContent.scheduledSendAt!).toObject();
-        const existingPrompt = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({
-            dateObject: scheduledDate,
-            status: ContentStatus.published
+        const existingPromptTasks = this.promptContent.subscriptionTiers.map(tier => {
+            return AdminPromptContentService.getSharedInstance().getPromptContentForDate({
+                dateObject: scheduledDate,
+                status: ContentStatus.published,
+                subscriptionTier: tier
+            });
         });
-        if (existingPrompt && existingPrompt.entryId !== this.promptContent.entryId) {
+
+        const existingPrompts = await Promise.all(existingPromptTasks);
+
+        const existingPrompt = existingPrompts.find(p => {
+            return p && p.entryId !== this.promptContent.entryId
+        });
+
+        if (existingPrompt) {
             logger.warn("A prompt already exists for this date.");
             this.result.existingPromptContentForDay = true;
             this.result.existingPromptContent = existingPrompt;
-            this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this date (${scheduledDate.toLocaleString()})`)
-            return existingPrompt
+            this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this tier on this date (${scheduledDate.toLocaleString()})`)
+            return existingPrompt;
         }
+
         return undefined; //only return the existing if it wasn't the current prompt;
     }
 
