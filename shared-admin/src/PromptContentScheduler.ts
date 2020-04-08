@@ -350,17 +350,27 @@ export default class PromptContentScheduler {
 
     async checkForExistingScheduledPromptContent(): Promise<PromptContent | undefined> {
         const scheduledDate = DateTime.fromJSDate(this.promptContent.scheduledSendAt!).toObject();
-        const existingPrompt = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({
-            dateObject: scheduledDate,
-            status: ContentStatus.published
+        const existingPromptTasks = this.promptContent.subscriptionTiers.map(tier => {
+            return AdminPromptContentService.getSharedInstance().getPromptContentForDate({
+                dateObject: scheduledDate,
+                status: ContentStatus.published,
+                subscriptionTier: tier
+            });
         });
-        if (existingPrompt && existingPrompt.entryId !== this.promptContent.entryId) {
-            logger.warn("A prompt already exists for this date.");
-            this.result.existingPromptContentForDay = true;
-            this.result.existingPromptContent = existingPrompt;
-            this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this date (${scheduledDate.toLocaleString()})`)
-            return existingPrompt
-        }
+
+        const existingPrompts = await Promise.all(existingPromptTasks);
+
+        for(let i = 0 ; i < existingPrompts.length; i++) {
+            const existingPrompt = existingPrompts[i];
+            if (existingPrompt && existingPrompt.entryId !== this.promptContent.entryId) {
+                logger.warn("A prompt already exists for this date.");
+                this.result.existingPromptContentForDay = true;
+                this.result.existingPromptContent = existingPrompt;
+                this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this tier on this date (${scheduledDate.toLocaleString()})`)
+                return existingPrompt;
+            }
+        };
+
         return undefined; //only return the existing if it wasn't the current prompt;
     }
 

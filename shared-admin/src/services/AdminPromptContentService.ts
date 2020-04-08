@@ -6,6 +6,7 @@ import {fromFlamelinkData, getPromptContentForDateQueryOptions} from "@shared/ut
 import {DateObject} from "luxon";
 import AdminSlackService from "@admin/services/AdminSlackService";
 import Logger from "@shared/Logger";
+import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
 import {CactusConfig} from "@shared/CactusConfig";
 
 const logger = new Logger("AdminPromptContentService");
@@ -69,7 +70,11 @@ export default class AdminPromptContentService {
         return results.results;
     }
 
-    async getPromptContentForDate(options: { systemDate?: Date, dateObject?: DateObject, status?: ContentStatus, }): Promise<PromptContent | undefined> {
+    async getPromptContentForDate(options: { 
+        subscriptionTier?: SubscriptionTier,
+        systemDate?: Date, 
+        dateObject?: DateObject, 
+        status?: ContentStatus, }): Promise<PromptContent | undefined> {
         try {
             const getOptions = getPromptContentForDateQueryOptions(options);
             if (!getOptions) {
