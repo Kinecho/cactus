@@ -360,16 +360,17 @@ export default class PromptContentScheduler {
 
         const existingPrompts = await Promise.all(existingPromptTasks);
 
-        for(let i = 0 ; i < existingPrompts.length; i++) {
-            const existingPrompt = existingPrompts[i];
-            if (existingPrompt && existingPrompt.entryId !== this.promptContent.entryId) {
-                logger.warn("A prompt already exists for this date.");
-                this.result.existingPromptContentForDay = true;
-                this.result.existingPromptContent = existingPrompt;
-                this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this tier on this date (${scheduledDate.toLocaleString()})`)
-                return existingPrompt;
-            }
-        };
+        const existingPrompt = existingPrompts.find(p => {
+            return p && p.entryId !== this.promptContent.entryId
+        });
+
+        if (existingPrompt) {
+            logger.warn("A prompt already exists for this date.");
+            this.result.existingPromptContentForDay = true;
+            this.result.existingPromptContent = existingPrompt;
+            this.result.errors.push(`A promptContent entry (${existingPrompt.entryId}) already exists for this tier on this date (${scheduledDate.toLocaleString()})`)
+            return existingPrompt;
+        }
 
         return undefined; //only return the existing if it wasn't the current prompt;
     }
