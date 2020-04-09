@@ -60,7 +60,7 @@
         },
         computed: {
             buttonText(): string {
-                return this.loading ? "Preparing..." : "Download Now"
+                return this.loading ? "Preparing..." : "Create Export"
             }
         },
         methods: {
