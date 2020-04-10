@@ -34,6 +34,7 @@
                     </section>
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
+                    <div>core values sidebar here</div>
                     <section class="journalList">
                         <transition-group
                                 tag="div"
@@ -307,9 +308,9 @@
                 return upgradeQueryParam === 'success';
             },
             showOnboardingPrompt(): boolean {
-                return (this.loggedIn && 
-                    this.loginReady && 
-                    this.dataHasLoaded && 
+                return (this.loggedIn &&
+                    this.loginReady &&
+                    this.dataHasLoaded &&
                     this.journalEntries.length === 0)
             }
         }
@@ -372,6 +373,12 @@
     }
 
     .section-container {
+
+        @include r(768) {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
 
         .journalList {
             display: flex;
