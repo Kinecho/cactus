@@ -18,7 +18,7 @@
 
     const DEFAULT_DURATION_MS = 5000;
 
-    export type SnackbarColor = 'success' | 'successAlt' | 'coreValues' | 'warning' | 'danger' | "info" | "default";
+    export type SnackbarColor = 'success' | 'successAlt' | 'dolphin' | 'warning' | 'danger' | "info" | "default";
     export type SnackbarMessage =
         | string
         | { message: string, timeoutMs?: number, closeable?: boolean, autoHide?: boolean, color?: SnackbarColor }
@@ -38,7 +38,7 @@
                 required: false,
                 validator: function (value: string) {
                     // The value must match one of these strings
-                    return ['success', 'warning', 'danger', "info", "default", "successAlt", "coreValues"].indexOf(value) !== -1
+                    return ['success', 'warning', 'danger', "info", "default", "successAlt", "dolphin"].indexOf(value) !== -1
                 }
             }
         },
@@ -129,11 +129,8 @@
             color: $white;
         }
 
-        &.coreValues {
+        &.dolphin {
             background-color: $dolphin;
-            background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
-            background-position: 0 0, -15rem -27rem, -7rem 120%;
-            background-repeat: repeat, no-repeat, no-repeat;
             color: $white;
         }
 

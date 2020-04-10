@@ -390,23 +390,32 @@
     }
 
     .coreValuesBox {
+        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-position: 0 0, -14rem -15rem, -7rem 120%;
+        background-repeat: repeat, no-repeat, no-repeat;
+        background-size: auto, 28rem, auto;
         border-radius: 0;
         display: block;
-        padding: 3.2rem;
+        padding: 3.2rem 2.4rem;
 
-        @include r(768) {
+        @include r(960) {
             align-self: flex-start;
+            background-position: 0 0, -8.5rem -15rem, -1rem 133%;
             border-radius: 1.2rem;
-            max-width: 30rem;
+            margin: 0 2.4rem;
+            padding: 6.4rem 3.2rem;
+            width: 30rem;
         }
     }
 
     .cvTitle {
+        color: $white;
         font-size: 2.4rem;
         margin-bottom: .4rem;
     }
 
     .cvSubtext {
+        color: $white;
         margin-bottom: 1.6rem;
         opacity: .9;
     }
@@ -415,14 +424,14 @@
         display: block;
         margin: 0 auto;
 
-        @include r(768) {
+        @include r(960) {
             width: 100%;
         }
     }
 
     .section-container {
 
-        @include r(768) {
+        @include r(960) {
             display: flex;
             flex-direction: row-reverse;
             justify-content: center;
