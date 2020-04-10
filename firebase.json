@@ -112,6 +112,10 @@
         ],
         "rewrites": [
             {
+                "source": "/core-values",
+                "destination": "/core_values.html"
+            },
+            {
                 "source": "/insights-embed",
                 "destination": "/insights_embedded.html"
             },
