@@ -21,7 +21,7 @@
                 <input class="emailBox" type="email" v-model="emailAddress" placeholder="name@example.com"/>
             </label>
             <div class="btnContainer">
-                <button @click="emailData" :disabled="loading">Send</button>
+                <button @click="emailData" :disabled="loading">Export & Send</button>
                 <button class="secondary" @click="showEmail=false">Cancel</button>
             </div>
         </div>
@@ -60,7 +60,7 @@
         },
         computed: {
             buttonText(): string {
-                return this.loading ? "Preparing..." : "Create Export"
+                return this.loading ? "Preparing..." : "Export & Download"
             }
         },
         methods: {
