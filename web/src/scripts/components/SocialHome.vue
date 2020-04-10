@@ -201,11 +201,11 @@
             position: relative;
 
             &:after {
-                background: linear-gradient(rgba(255,255,255,0), $white 90%);
+                background: linear-gradient(rgba(255,255,255,0), $white 98%);
                 bottom: 0;
                 content: '';
                 display: block;
-                height: 75%;
+                height: 100%;
                 left: 0;
                 margin: 0 0 0 -2.4rem;
                 position: absolute;
