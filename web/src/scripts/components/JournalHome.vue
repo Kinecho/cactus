@@ -34,7 +34,20 @@
                     </section>
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
-                    <div>core values sidebar here</div>
+                    <!-- TODO: this key isn't right -->
+                    <snackbar-content
+                        class="coreValuesBox"
+                        :closeable="true"
+                        key="upgrade-confirmation"
+                        :autoHide="false"
+                        color="coreValues">
+                        <div slot="text" class="centered">
+                            <h3 class="cvTitle">What's important to you?</h3>
+                            <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our assessment.</p>
+                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included with your Plus membership.</p>
+                        </div>
+                        <button class="cvButton" slot="action">Find My Core Values</button>
+                    </snackbar-content>
                     <section class="journalList">
                         <transition-group
                                 tag="div"
@@ -297,6 +310,10 @@
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },
+            plusUser(): boolean {
+                const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
+                return (tier === SubscriptionTier.PLUS) ? true : false;
+            },
             loggedIn(): boolean {
                 return !!this.cactusMember;
             },
@@ -369,6 +386,37 @@
 
         a {
             @include fancyLinkLight;
+        }
+    }
+
+    .coreValuesBox {
+        border-radius: 0;
+        display: block;
+        padding: 3.2rem;
+
+        @include r(768) {
+            align-self: flex-start;
+            border-radius: 1.2rem;
+            max-width: 30rem;
+        }
+    }
+
+    .cvTitle {
+        font-size: 2.4rem;
+        margin-bottom: .4rem;
+    }
+
+    .cvSubtext {
+        margin-bottom: 1.6rem;
+        opacity: .9;
+    }
+
+    .cvButton {
+        display: block;
+        margin: 0 auto;
+
+        @include r(768) {
+            width: 100%;
         }
     }
 
