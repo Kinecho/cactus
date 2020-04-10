@@ -100,7 +100,7 @@
 
                     <div class="settings-group" v-if="showExportData">
                         <h2>Download Data</h2>
-                        <p class="subtext">You can export and download your data from Cactus, including all your journal prompts and written reflections. Tap the <strong>Export & Download</strong> button below to create an archive to keep for your records or use the data in another service.
+                        <p class="subtext">You can export and download your data from Cactus, including all your journal prompts and written reflections. Tap the <strong>Download</strong> button below to create an archive to keep for your records or use the data in another service.
                         <div class="item">
                             <DataExport :member="member"/>
                         </div>
