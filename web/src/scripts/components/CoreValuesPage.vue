@@ -21,10 +21,12 @@
                 <p>Here are your core values. Through the Cactus prompts, you will come to better understand the origin, purpose, and meaning of your core values. This will help you understand past life decisions and, by prioritizing your values, make better decisions in the future.</p>
                 <figure class="coreValuesCard">
                     <h3>Mike's Core Values</h3>
-                    <p>rando flamelink image</p>
-                    <ul class="valuesList">
-                        <li>Developer</li>
-                    </ul>
+                    <div class="flexContainer">
+                        <p>rando flamelink image</p>
+                        <ul class="valuesList">
+                            <li>Developer</li>
+                        </ul>
+                    </div>
                 </figure>
             </template>
         </div>
@@ -111,6 +113,34 @@
             @include r(600) {
                 width: auto;
             }
+        }
+    }
+
+    .coreValuesCard {
+        background-color: $dolphin;
+        border-radius: 1.2rem;
+        color: white;
+        display: inline-block;
+        margin: 0 0 3.2rem;
+        padding: 2.4rem 0;
+        text-align: center;
+        width: auto;
+
+        .flexContainer {
+            display: flex;
+        }
+
+        ul, li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
     }
 
