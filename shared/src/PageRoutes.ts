@@ -13,4 +13,5 @@ export enum PageRoute {
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     NATIVE_APP_MAGIC_LINK_LOGIN = "/app-login-continue",
     PRICING = "/pricing",
+    CORE_VALUES = "/core-values",
 }

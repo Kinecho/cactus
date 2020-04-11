@@ -161,10 +161,13 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
+                    title: copy.navigation.CORE_VALUES,
+                    href: PageRoute.CORE_VALUES,
+                }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
                     badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
-                }, {
+                },{
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
                         await this.logout()

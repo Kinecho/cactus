@@ -93,6 +93,7 @@ export interface AuthenticationCopy {
 
 export interface NavigationCopy {
     ACCOUNT: string
+    CORE_VALUES: string
     MY_JOURNAL: string,
     SOCIAL: string,
     JOURNAL: string,
