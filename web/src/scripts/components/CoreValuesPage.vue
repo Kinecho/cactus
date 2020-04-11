@@ -19,6 +19,13 @@
             <template v-if="plusUser && hasValues">
                 <h1>Core Values</h1>
                 <p>Here are your core values. Through the Cactus prompts, you will come to better understand the origin, purpose, and meaning of your core values. This will help you understand past life decisions and, by prioritizing your values, make better decisions in the future.</p>
+                <figure class="coreValuesCard">
+                    <h3>Mike's Core Values</h3>
+                    <p>rando flamelink image</p>
+                    <ul class="valuesList">
+                        <li>Developer</li>
+                    </ul>
+                </figure>
             </template>
         </div>
         <Footer/>
