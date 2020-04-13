@@ -20,9 +20,8 @@ export default class PushNotificationService {
         prompt?: ReflectionPrompt,
         member: CactusMember,
     }): Promise<NewPromptNotificationResult | undefined> {
+        const {sentPrompt, prompt, promptContent, member} = options;
         try {
-            const {sentPrompt, prompt, promptContent, member} = options;
-
             if (sentPrompt.completed) {
                 return {attempted: false, alreadyAnswered: true};
             }
