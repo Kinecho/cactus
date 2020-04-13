@@ -30,7 +30,7 @@ export async function getAuthUserId(request: express.Request): Promise<string | 
     if (!bearer && !request.query[QueryParam.AUTH_TOKEN]) {
         return;
     }
-    let token = request.query[QueryParam.AUTH_TOKEN];
+    let token = request.query[QueryParam.AUTH_TOKEN] as string | undefined;
 
     if (!token && bearer) {
         [, token] = bearer.split("Bearer ");
