@@ -40,7 +40,7 @@
                         :closeable="true"
                         key="upgrade-confirmation"
                         :autoHide="false"
-                        color="coreValues">
+                        color="dolphin">
                         <div slot="text" class="centered">
                             <h3 class="cvTitle">What's important to you?</h3>
                             <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our assessment.</p>
