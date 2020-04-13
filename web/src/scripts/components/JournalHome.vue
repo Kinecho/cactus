@@ -46,7 +46,7 @@
                             <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our assessment.</p>
                             <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included with your Plus membership.</p>
                         </div>
-                        <button class="cvButton" slot="action" @click="goToCoreValues">Find My Core Values</button>
+                        <button class="cvButton" slot="action" @click="launchCoreValues">Find My Core Values</button>
                     </snackbar-content>
                     <section class="journalList">
                         <transition-group
@@ -302,8 +302,9 @@
 
                 }
             },
-            goToCoreValues() {
-                window.location.href = PageRoute.CORE_VALUES;
+            launchCoreValues() {
+                // TODO: launch core values assessment
+                // window.location.href = PageRoute.CORE_VALUES;
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
