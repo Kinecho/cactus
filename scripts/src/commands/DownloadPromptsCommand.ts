@@ -4,7 +4,7 @@ import AdminFirestoreService from "@admin/services/AdminFirestoreService";
 import {Collection} from "@shared/FirestoreBaseModels";
 import ReflectionPrompt from "@shared/models/ReflectionPrompt";
 import {stringFromISODate} from "@shared/util/DateUtil";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {exec} from "child_process";

@@ -37,8 +37,8 @@
     "author": "Neil Poulin",
     "license": "ISC",
     "dependencies": {
-        "@sentry/browser": "5.12.4",
-        "@sentry/integrations": "5.11.1",
+        "@sentry/browser": "5.15.4",
+        "@sentry/integrations": "5.15.4",
         "atob": "^2.1.2",
         "axios": "^0.19.2",
         "branch-sdk": "^2.52.4",
@@ -68,8 +68,8 @@
         "vue2-touch-events": "^2.1.0"
     },
     "devDependencies": {
-        "@sentry/cli": "^1.49.0",
-        "@sentry/webpack-plugin": "^1.9.3",
+        "@sentry/cli": "^1.52.1",
+        "@sentry/webpack-plugin": "^1.10.0",
         "@types/d3": "^5.7.2",
         "@types/debounce": "^1.2.0",
         "@types/gsap": "^1.20.2",

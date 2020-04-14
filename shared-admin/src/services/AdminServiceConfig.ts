@@ -35,6 +35,7 @@ import AppleService from "@admin/services/AppleService";
 import GooglePlayService from "@admin/services/GooglePlayService";
 import StripeService from "@admin/services/StripeService";
 import AdminDataExportService from "@admin/services/AdminDataExportService";
+import AppStoreConnectService from "@admin/services/AppStoreConnectService";
 
 const logger = new Logger("AdminServiceConfig");
 
@@ -84,6 +85,7 @@ export function initializeServices(config: CactusConfig, app: admin.app.App, tim
 
     //Apple
     AppleService.initialize(config);
+    AppStoreConnectService.initialize(config);
 
     //Google Play
     GooglePlayService.initialize(config);

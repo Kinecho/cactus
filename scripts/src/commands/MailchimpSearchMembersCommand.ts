@@ -3,7 +3,7 @@ import {chooseEnvironment} from "@scripts/questionUtil";
 import {getCactusConfig, Project} from "@scripts/config";
 import MailchimpService from "@admin/services/MailchimpService";
 import chalk from "chalk";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 import helpers from "@scripts/helpers";
 const prompts = require("prompts");
 const exec = require("child_process").exec;

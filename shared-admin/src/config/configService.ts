@@ -143,7 +143,13 @@ const defaultTestConfig: CactusConfig = {
         custom_scheme: "app.cactus-stage",
         verify_receipt_url: "https://sandbox.itunes.apple/verifyReceipt",
         verify_receipt_sandbox_url: "https://sandbox.itunes.apple/verifyReceipt",
-        iap_shared_secret: "test-key"
+        iap_shared_secret: "test-key",
+        appstore_connect: {
+            issuer_id: "some string",
+            api_key_id: "api_key_id",
+            private_key: "my private key",
+            vendor_number: "vendorNumber",
+        }
     },
     bigquery_service_account: {
         "type": "service_account",

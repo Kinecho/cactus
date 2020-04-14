@@ -10,7 +10,7 @@ import AdminSentPromptService from "@admin/services/AdminSentPromptService";
 import SentPrompt from "@shared/models/SentPrompt";
 import ReflectionResponse from "@shared/models/ReflectionResponse";
 import PromptContent from "@shared/models/PromptContent";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 import * as path from "path";
 import helpers from "@scripts/helpers";
 import chalk from "chalk";

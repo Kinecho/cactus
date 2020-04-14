@@ -5,7 +5,7 @@ import {CactusConfig} from "@shared/CactusConfig";
 import {Project} from "@scripts/config";
 import UserRecord = admin.auth.UserRecord;
 import {isBlank} from "@shared/util/StringUtil";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 import {isDate, stringifyJSON} from "@shared/util/ObjectUtil";
 import helpers from "@scripts/helpers";
 import * as path from "path";

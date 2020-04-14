@@ -94,6 +94,12 @@ export interface CactusConfig {
         verify_receipt_url: string,
         verify_receipt_sandbox_url: string,
         iap_shared_secret: string,
+        appstore_connect: {
+            issuer_id: string,
+            api_key_id: string,
+            private_key: string,
+            vendor_number: string,
+        }
     },
     sendgrid: {
         api_key: string,

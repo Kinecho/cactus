@@ -7,7 +7,7 @@ const path = require("path");
 import helpers from "@scripts/helpers";
 import chalk from "chalk";
 import {exec} from "child_process";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 
 export default class DownloadFileByPathCommand extends FirebaseCommand {
     name = "Firebase: Download File";

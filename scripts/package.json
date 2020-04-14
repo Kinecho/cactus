@@ -11,7 +11,7 @@
         "debug": "node -r ts-node/register -r tsconfig-paths/register --inspect src/index.ts",
         "lint": "tslint --project tsconfig.json",
         "lint:ci": "tslint --project tsconfig.json --format junit --out reports/tests/tslint/results.xml",
-        "cmd": "ts-node -r tsconfig-paths/register src/index.ts",
+        "cmd": "IS_EMULATOR=true ts-node -r tsconfig-paths/register src/index.ts",
         "page": "npm run cmd CreateLandingPage",
         "page:delete": "npm run cmd DeletePage",
         "firebase:postdeploy": "ts-node -r tsconfig-paths/register src/postdeploy.ts",
@@ -29,9 +29,11 @@
     "license": "ISC",
     "dependencies": {
         "@google-cloud/pubsub": "^0.30.1",
-        "@sentry/node": "^5.9.0",
+        "@sentry/node": "^5.15.4",
         "@types/luxon": "^1.15.1",
         "@types/md5": "^2.1.33",
+        "@types/yauzl": "^2.9.1",
+        "adm-zip": "^0.4.14",
         "axios": "^0.19.0",
         "camelcase": "^5.3.1",
         "chalk": "^2.4.2",
@@ -43,6 +45,7 @@
         "fs-extra": "^8.1.0",
         "get-urls": "^9.1.0",
         "googleapis": "^42.0.0",
+        "jsonwebtoken": "^8.5.1",
         "lodash.camelcase": "^4.3.0",
         "luxon": "^1.16.0",
         "md5": "^2.2.1",
@@ -50,6 +53,7 @@
         "prompts": "^2.1.0",
         "simple-git": "^1.121.0",
         "stripe": "8.17.0",
+        "yauzl": "^2.10.0",
         "yesno": "^0.2.0"
     },
     "engines": {
@@ -57,6 +61,7 @@
     },
     "devDependencies": {
         "@firebase/testing": "^0.11.6",
+        "@types/adm-zip": "^0.4.33",
         "@types/chalk": "^2.2.0",
         "@types/fs-extra": "^8.0.0",
         "@types/jest": "^24.0.14",

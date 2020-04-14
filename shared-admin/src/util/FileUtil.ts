@@ -1,15 +1,16 @@
 import {promisify} from "util";
+import Logger from "@shared/Logger";
 
 const path = require("path");
 const fs = require("fs-extra");
-
+const logger = new Logger("FileUtil");
 /**
  * write data to a file
  * @param {string} filePath
  * @param {any} data
  * @returns Promise<boolean> - boolean if the operation was successful
  */
-export async function writeToFile(filePath: string, data: any): Promise<string | boolean> {
+export async function writeToFile(filePath: string, data: any): Promise<boolean> {
     try {
         const folder = path.dirname(filePath);
         try {
@@ -22,11 +23,11 @@ export async function writeToFile(filePath: string, data: any): Promise<string |
             await promisify(fs.writeFile)(filePath, data);
             return true;
         } catch (error) {
-            console.error("Failed to write to file", filePath, error);
+            logger.error("Failed to write to file", filePath, error);
             return false
         }
     } catch (e) {
-        console.error("Failed to write to file/storage", e);
+        logger.error("Failed to write to file/storage", e);
         return false;
     }
 

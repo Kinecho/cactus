@@ -12,7 +12,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import {DateTime} from "luxon";
 import {formatDateTime} from "@shared/util/DateUtil";
 import * as fs from "fs";
-import {writeToFile} from "@scripts/util/FileUtil";
+import {writeToFile} from "@admin/util/FileUtil";
 
 const csv = require('csvtojson');
 const prompts = require("prompts");
