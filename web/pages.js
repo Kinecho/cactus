@@ -111,5 +111,10 @@ module.exports = {
         "title": "Insights",
         "path": "/insights-embed",
         "name": "insights_embedded"
+    },
+    "sponsor": {
+        "title": "Sponsor",
+        "path": "/sponsor",
+        "name": "sponsor"
     }
 }

@@ -112,6 +112,10 @@
         ],
         "rewrites": [
             {
+                "source": "/sponsor",
+                "destination": "/sponsor.html"
+            },
+            {
                 "source": "/insights-embed",
                 "destination": "/insights_embedded.html"
             },
