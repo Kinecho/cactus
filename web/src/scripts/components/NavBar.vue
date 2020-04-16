@@ -2,14 +2,21 @@
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
             <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
-            <div v-if="" class="anonLinks ">
+            <div v-if="!loggedIn" class="anonLinks">
+                <a v-if="displayLoginButton"
+                        class="login "
+                        :href="sponsorHref"
+                        type="link"
+                >
+                    <span>Sponsor</span>
+                </a>
                 <a v-if="displayLoginButton"
                         class="login "
                         :href="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >
-                    <span class="">{{copy.common.LOG_IN}}</span>
+                    <span>{{copy.common.LOG_IN}}</span>
                 </a>
                 <a v-if="displaySignupButton"
                         data-test="signup-button"
@@ -201,6 +208,9 @@
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
             },
+            sponsorHref(): string {
+                return PageRoute.SPONSOR;
+            },
             signupHref(): string {
                 return PageRoute.SIGNUP;
             },
@@ -261,43 +271,59 @@
     @import "~styles/mixins";
     @import "~styles/transitions";
 
-    body.error {
-        header {
-            background: $white;
-        }
+    body.error header {
+        background: $white;
     }
 
-    .login {
-        font-size: 1.6rem;
-        text-decoration: none;
-        transition: background-color .2s ease-in-out;
-        margin: 0 1rem;
-        @include r(600) {
-            font-size: 1.8rem;
+    .anonLinks {
+        align-items: center;
+        display: flex;
+        flex-grow: 1;
+        justify-content: flex-end;
+        white-space: nowrap;
 
-            &:last-child {
-                border: 1px solid $lightGreen;
-                border-radius: 3rem;
-                padding: 1rem 1.6rem;
+        .login {
+            display: block;
+            font-size: 1.6rem;
+            margin: 0;
+            padding-left: 3vw;
+            text-decoration: none;
+            transition: background-color .2s ease-in-out;
 
-                &:hover {
-                    background-color: $lightGreen;
+            @include r(600) {
+                font-size: 1.8rem;
+
+                &:last-child {
+                    border: 1px solid $lightGreen;
+                    border-radius: 3rem;
+                    margin-left: 3.2vw;
+                    padding: .8rem 1.6rem;
+
+                    &:hover {
+                        background-color: $lightGreen;
+                    }
                 }
             }
         }
-    }
 
-    a.button.jump-to-form {
-        flex-grow: 0;
-        margin-left: .8rem;
+        a.button.small {
+            background-color: transparent;
+            color: $darkGreen;
+            flex-grow: 0;
+            margin: 0;
+            padding: 0 0 0 3vw;
 
-        @include r(374) {
-            margin-left: 1.6rem;
-        }
-
-        @include r(600) {
-            font-size: 1.8rem;
-            margin-left: 3.2rem;
+            @include r(374) {
+                background-color: $green;
+                color: $white;
+                margin-left: 2.4vw;
+                padding: .6rem 1.2rem;
+            }
+            @include r(600) {
+                font-size: 1.8rem;
+                margin-left: 3.2vw;
+                padding: .8rem 1.6rem;
+            }
         }
     }
 
