@@ -29,7 +29,7 @@ export enum SubscriptionTier {
     PREMIUM = "PREMIUM",
 }
 
-export const DEFAULT_SUBSCRIPTION_TIER = SubscriptionTier.BASIC
+export const DEFAULT_SUBSCRIPTION_TIER = SubscriptionTier.BASIC;
 
 export interface ProductGroupFooter {
     textMarkdown?: string

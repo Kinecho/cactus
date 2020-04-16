@@ -14,6 +14,13 @@ export const BillingPeriodSortOrder: BillingPeriod[] = [BillingPeriod.never, Bil
 
 export const PremiumSubscriptionTiers = [SubscriptionTier.PLUS, SubscriptionTier.PREMIUM];
 
+export function isPremiumTier(tier?: SubscriptionTier): boolean {
+    if (!tier) {
+        return false
+    }
+    return PremiumSubscriptionTiers.includes(tier);
+}
+
 export function subscriptionTierDisplayName(tier?: SubscriptionTier, isTrial: boolean = false): string | undefined {
     const copy = CopyService.getSharedInstance().copy;
     if (isTrial) {

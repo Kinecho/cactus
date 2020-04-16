@@ -24,7 +24,9 @@
                         v-on:[link.event]="link.onClick"
                         :key="`link_${index}`"
                         :class="{static: link.static, nonBreaking: makeTextNonBreaking}"
-                >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span></a>
+                >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span>
+                    <span class="callout-text">{{link.calloutText}}</span>
+                </a>
                 <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
             </nav>
         </transition>
@@ -33,8 +35,8 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {clickOutsideDirective} from '@web/vueDirectives'
-    import {ComputedMenuLink, DropdownMenuLink} from "@components/DropdownMenuTypes"
+    import { clickOutsideDirective } from '@web/vueDirectives'
+    import { ComputedMenuLink, DropdownMenuLink } from "@components/DropdownMenuTypes"
     import Logger from "@shared/Logger";
 
     const logger = new Logger("DropdownMenu.vue");
@@ -91,6 +93,7 @@
                         href: item.href || null,
                         onClick: clickHandler(item.onClick),
                         event: item.onClick ? "click" : null,
+                        calloutText: item.calloutText,
                         static: item.static,
                         badge: item.badge,
                     }
@@ -222,6 +225,10 @@
     .badge-label {
         @include trialBadge;
         margin-left: .4rem;
+    }
+
+    .callout-text {
+        color: $green;
     }
 
     .static {

@@ -48,7 +48,7 @@
 <script lang="ts">
     import Vue from "vue";
     import {FirebaseUser, getAuth} from '@web/firebase'
-    import {getInitials} from '@shared/util/StringUtil'
+    import { getInitials, isBlank } from '@shared/util/StringUtil'
     import {PageRoute} from '@shared/PageRoutes'
     import {gtag} from "@web/analytics"
     import {clickOutsideDirective} from '@web/vueDirectives'
@@ -68,7 +68,7 @@
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
-    import {subscriptionTierDisplayName} from "@shared/models/MemberSubscription";
+    import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -95,7 +95,7 @@
         },
         beforeMount() {
             let NO_NAV = getQueryParam(QueryParam.NO_NAV);
-            if (NO_NAV !== undefined) {
+            if (!isBlank(NO_NAV)) {
                 this.hidden = true;
             }
 
@@ -163,6 +163,7 @@
                 const links: DropdownMenuLink[] = [{
                     title: copy.navigation.CORE_VALUES,
                     href: PageRoute.CORE_VALUES,
+                    calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
                 }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
@@ -203,6 +204,9 @@
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
+            },
+            isPaidTier(): boolean {
+                return isPremiumTier(this.member?.tier);
             },
             signupHref(): string {
                 return PageRoute.SIGNUP;

@@ -5,26 +5,34 @@
             <h1>Core Values</h1>
             <!-- TODO: make booleans plusUser and hasValues work -->
             <template v-if="plusUser && !hasValues">
-                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration of how your values have been at the heart of past decisions and how they will unlock a happier future. Your core values results will guide your Cactus reflections.</p>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
+                    of how your values have been at the heart of past decisions and how they will unlock a happier
+                    future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
                 <!-- TODO: hook up button -->
                 <button class="primaryBtn">Take the Assessment</button>
             </template>
             <template v-if="!plusUser">
-                <p>Different language? Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration of how your values have been at the heart of past decisions and how they will unlock a happier future. Your core values results will guide your Cactus reflections.</p>
+                <p>Different language? Core values are the general expression of what is most important for you, and
+                    they help you understand past decisions and make better decisions in the future.</p>
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
+                    of how your values have been at the heart of past decisions and how they will unlock a happier
+                    future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
             <template v-if="plusUser && hasValues">
-                <p>Here are your core values. Through the Cactus prompts, you will come to better understand the origin, purpose, and meaning of your core values. This will help you understand past life decisions and, by prioritizing your values, make better decisions in the future.</p>
+                <p>Here are your core values. Through the Cactus prompts, you will come to better understand the origin,
+                    purpose, and meaning of your core values. This will help you understand past life decisions and, by
+                    prioritizing your values, make better decisions in the future.</p>
                 <figure class="coreValuesCard">
                     <!-- TODO: hook up displayName -->
                     <h3><span class="cvName" v-if="displayName">{{displayName}}'s</span>Core Values</h3>
                     <div class="flexContainer">
                         <!-- TODO: insert random blob here -->
-                        <img class="cvBlob" src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0" alt="core value blob graphic" />
+                        <img class="cvBlob" src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0" alt="core value blob graphic"/>
                         <!-- TODO: make this list dynamic -->
                         <ul class="valuesList">
                             <li>Developer</li>
@@ -36,7 +44,8 @@
                     </div>
                 </figure>
                 <button class="small">Share My Values</button>
-                <p class="extraPadding">Not sure these are right or feel like they’ve changed? Feel free to <a class="fancyLink" href="">retake the assessment</a>.</p>
+                <p class="extraPadding">Not sure these are right or feel like they’ve changed? Feel free to
+                    <a class="fancyLink" href="">retake the assessment</a>.</p>
             </template>
         </div>
         <Footer/>
@@ -47,13 +56,16 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import Footer from "@components/StandardFooter.vue";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {PageRoute} from '@shared/PageRoutes'
+    import { PageRoute } from '@shared/PageRoutes'
+    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+    import { isBlank } from "@shared/util/StringUtil";
 
-    declare interface CoreValuesData {
-        cactusMember?: CactusMember,
+    interface CoreValuesData {
+        member: CactusMember | null | undefined,
+        memberObserver: ListenerUnsubscriber | null,
         hasValues: boolean,
         displayName: string,
     }
@@ -63,18 +75,27 @@
             NavBar,
             Footer,
         },
-        created(){
+        created() {
 
         },
-        props: {
-
-        },
+        props: {},
         data(): CoreValuesData {
             return {
-                cactusMember: undefined,
+                member: null,
+                memberObserver: null,
                 hasValues: false,
                 displayName: '',
             };
+        },
+        beforeMount() {
+            this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: async ({ member }) => {
+                    this.member = member;
+                }
+            })
+        },
+        beforeDestroy(): void {
+          this.memberObserver?.()
         },
         methods: {
             goToPricing() {
@@ -83,8 +104,11 @@
         },
         computed: {
             plusUser(): boolean {
-                const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
-                return (tier === SubscriptionTier.PLUS) ? true : false;
+                const tier = this.member?.tier ?? SubscriptionTier.PLUS;
+                return tier === SubscriptionTier.PLUS
+            },
+            displayName(): string {
+                return  isBlank(this.member?.firstName)  ? this.member?.firstName ?? "" :  this.member?.getFullName() ?? ""
             }
         }
     })
