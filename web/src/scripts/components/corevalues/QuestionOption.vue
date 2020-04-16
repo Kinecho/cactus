@@ -1,12 +1,13 @@
 <template>
     <div class="question-option">
         <div class="main">
-            <markdown-text :source="option.title" />
-            <button class="expand-toggle icon" @click="expanded = !expanded">{{expanded ? "Close" : "Open"}}</button>
+            <span class="select" @click="clicked">{{selected ? 'Selected' : 'Not selected'}}</span>
+            <markdown-text :source="option.title"/>
+            <button class="expand-toggle icon" @click="expanded = !expanded">{{expanded ? 'Close' : 'Open'}}</button>
         </div>
 
         <div class="expandable" :class="{closed: !expanded}" v-show="expanded">
-            <markdown-text :source="option.description" />
+            <markdown-text :source="option.description"/>
         </div>
 
     </div>
@@ -16,7 +17,9 @@
     import Vue from "vue";
     import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
     import MarkdownText from "@components/MarkdownText.vue";
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("QuestionOption");
     export default Vue.extend({
         name: "QuestionOption",
         components: {
@@ -31,6 +34,16 @@
         } {
             return {
                 expanded: false,
+            }
+        },
+        methods: {
+            clicked() {
+                logger.info("toggling item. settting to", !this.selected);
+                if (this.selected) {
+                    this.$emit("removed")
+                } else {
+                    this.$emit("selected")
+                }
             }
         }
     })

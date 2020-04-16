@@ -4,16 +4,18 @@
         <div class="centered">
             <h1>Core Values</h1>
             <!-- TODO: make booleans plusUser and hasValues work -->
-            <template v-if="plusUser && !hasValues">
-<!--                <p>Core values are the general expression of what is most important for you, and they help you-->
-<!--                    understand past decisions and make better decisions in the future.</p>-->
-<!--                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration-->
-<!--                    of how your values have been at the heart of past decisions and how they will unlock a happier-->
-<!--                    future. Your core values results will guide your Cactus reflections.</p>-->
-<!--                <p>Insert language about how long this will take or how many questions to set expectations...</p>-->
-<!--                &lt;!&ndash; TODO: hook up button &ndash;&gt;-->
-<!--                <button class="primaryBtn">Take the Assessment</button>-->
-                <assessment />
+            <template v-if="plusUser && !hasValues && !assessmentInProgress">
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
+                    of how your values have been at the heart of past decisions and how they will unlock a happier
+                    future. Your core values results will guide your Cactus reflections.</p>
+                <p>Insert language about how long this will take or how many questions to set expectations...</p>
+                <!-- TODO: hook up button -->
+                <button class="primaryBtn" @click="createAssessmentResponse" :disabled="loading">Take the Assessment</button>
+            </template>
+            <template v-if="assessmentInProgress && assessment && assessmentResponse">
+                <assessment :assessment="assessment" :assessmentResponse="assessmentResponse"/>
             </template>
             <template v-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
@@ -64,12 +66,23 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import { isBlank } from "@shared/util/StringUtil";
     import Assessment from "@components/corevalues/Assessment.vue";
+    import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
+    import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+    import AssessmentResponseService from "@web/services/AssessmentResponseService";
+    import Logger from "@shared/Logger";
+
     interface CoreValuesData {
+        loading: boolean,
+        assessmentInProgress: boolean,
         member: CactusMember | null | undefined,
         memberObserver: ListenerUnsubscriber | null,
         hasValues: boolean,
-        displayName: string,
+        assessment: CoreValuesAssessment,
+        assessmentResponse: CoreValuesAssessmentResponse | null
+        assessmentResponseObserver?: ListenerUnsubscriber
     }
+
+    const logger = new Logger("CoreValuesPage");
 
     export default Vue.extend({
         components: {
@@ -82,11 +95,16 @@
         },
         props: {},
         data(): CoreValuesData {
+
             return {
+                loading: false,
+                assessmentInProgress: false,
                 member: null,
                 memberObserver: null,
                 hasValues: false,
-                displayName: '',
+                assessment: CoreValuesAssessment.default(),
+                assessmentResponse: null,
+                assessmentResponseObserver: undefined,
             };
         },
         beforeMount() {
@@ -97,11 +115,35 @@
             })
         },
         beforeDestroy(): void {
-          this.memberObserver?.()
+            this.memberObserver?.()
         },
         methods: {
             goToPricing() {
                 window.location.href = PageRoute.PRICING;
+            },
+            async createAssessmentResponse() {
+                const assessment = this.assessment;
+                this.loading = true;
+                const version = assessment.version;
+                const memberId = this.member?.id;
+                if (!memberId) {
+                    logger.error("No mebmer id was found, can't create assessment");
+                    return;
+                }
+
+                //TODO: fetch existing responsess??
+                const response = CoreValuesAssessmentResponse.create({ version, memberId });
+                const updatedResponse = await AssessmentResponseService.sharedInstance.save(response);
+
+                this.assessmentResponseObserver = AssessmentResponseService.sharedInstance.observeById(updatedResponse!.id!, {
+                    onData: response => {
+                        if (response) {
+                            this.assessmentResponse = response;
+                        }
+                        this.loading = false;
+                        this.assessmentInProgress = true;
+                    }
+                });
             },
         },
         computed: {
@@ -110,7 +152,7 @@
                 return tier === SubscriptionTier.PLUS
             },
             displayName(): string {
-                return  isBlank(this.member?.firstName)  ? this.member?.firstName ?? "" :  this.member?.getFullName() ?? ""
+                return isBlank(this.member?.firstName) ? this.member?.firstName ?? "" : this.member?.getFullName() ?? ""
             }
         }
     })

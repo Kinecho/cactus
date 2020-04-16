@@ -6,7 +6,10 @@
         <div class="question-options">
             <template v-for="(option, index) in question.options">
                 <div class="item" :key="`question_${question.id}_option_${index}`">
-                    <question-option :option="option"/>
+                    <question-option :option="option"
+                            :selected="response.contains(option.value)"
+                            @selected="selectOption(index, option)"
+                            @removed="removeOption(index, option)"/>
                 </div>
             </template>
 
@@ -17,10 +20,13 @@
 <script lang="ts">
     import Vue from "vue";
     import MarkdownText from "@components/MarkdownText.vue";
-    import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
+    import CoreValuesQuestion, { QuestionType } from "@shared/models/CoreValuesQuestion";
     import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
     import QuestionOption from "@components/corevalues/QuestionOption.vue";
+    import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
+    import Logger from "@shared/Logger";
 
+    const logger = new Logger("Question");
 
     export default Vue.extend({
         name: "Question",
@@ -32,6 +38,23 @@
             question: { type: Object as () => CoreValuesQuestion, required: true },
             response: { type: Object as () => CoreValuesQuestionResponse, required: true },
         },
+        methods: {
+            selectOption(index: number, option: CoreValuesQuestionOption) {
+                if (this.question.type === QuestionType.RADIO) {
+                    logger.info("Radio - setting single value", option.value);
+                    this.response.setSingeValue(option.value);
+                } else {
+                    logger.info("Multi select - adding value", option.value);
+                    this.response.addValue(option.value)
+                }
+                this.$emit("updated", this.response);
+                logger.info(`response contains(${ option.value }) = ${ this.response.contains(option.value) }`);
+            },
+            removeOption(index: number, option: CoreValuesQuestionOption) {
+                this.response.removeValue(option.value);
+                this.$emit("updated", this.response)
+            },
+        }
     })
 </script>
 

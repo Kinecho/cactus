@@ -8,7 +8,7 @@ export default class CoreValuesQuestionOption {
      * The value to associate with this answer
      * @type {string}
      */
-    value!: string;
+    value!: CoreValue;
 
     static create(params: { title?: string, description?: string, value: CoreValue }): CoreValuesQuestionOption {
         const { title, description, value } = params;
