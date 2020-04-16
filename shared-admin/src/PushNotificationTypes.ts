@@ -7,7 +7,7 @@ export interface NewPromptNotificationResult {
     attempted: boolean,
     error?: string,
     alreadyAnswered?: boolean,
-    notAvailbleToTier?: boolean
+    notAvailableToTier?: boolean
 }
 
 export interface SendPushResult {

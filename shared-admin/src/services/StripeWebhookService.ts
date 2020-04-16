@@ -82,7 +82,7 @@ export default class StripeWebhookService {
     getSignedEvent(options: { request: RawBodyRequest, webhookSigningKey?: string }): Stripe.Event | undefined {
         try {
             const { request, webhookSigningKey = this.config.stripe.webhook_signing_secrets.main } = options;
-            const sig = request.header('stripe-signature') || "";
+            const sig = (request as Request).header('stripe-signature') || "";
             return this.stripe.webhooks.constructEvent(request.rawBody, sig, webhookSigningKey);
         } catch (error) {
             logger.error("Failed to construct stripe webhook event", error.message);
