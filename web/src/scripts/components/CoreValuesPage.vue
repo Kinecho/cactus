@@ -5,14 +5,15 @@
             <h1>Core Values</h1>
             <!-- TODO: make booleans plusUser and hasValues work -->
             <template v-if="plusUser && !hasValues">
-                <p>Core values are the general expression of what is most important for you, and they help you
-                    understand past decisions and make better decisions in the future.</p>
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
-                    of how your values have been at the heart of past decisions and how they will unlock a happier
-                    future. Your core values results will guide your Cactus reflections.</p>
-                <p>Insert language about how long this will take or how many questions to set expectations...</p>
-                <!-- TODO: hook up button -->
-                <button class="primaryBtn">Take the Assessment</button>
+<!--                <p>Core values are the general expression of what is most important for you, and they help you-->
+<!--                    understand past decisions and make better decisions in the future.</p>-->
+<!--                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration-->
+<!--                    of how your values have been at the heart of past decisions and how they will unlock a happier-->
+<!--                    future. Your core values results will guide your Cactus reflections.</p>-->
+<!--                <p>Insert language about how long this will take or how many questions to set expectations...</p>-->
+<!--                &lt;!&ndash; TODO: hook up button &ndash;&gt;-->
+<!--                <button class="primaryBtn">Take the Assessment</button>-->
+                <assessment />
             </template>
             <template v-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
@@ -62,7 +63,7 @@
     import { PageRoute } from '@shared/PageRoutes'
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import { isBlank } from "@shared/util/StringUtil";
-
+    import Assessment from "@components/corevalues/Assessment.vue";
     interface CoreValuesData {
         member: CactusMember | null | undefined,
         memberObserver: ListenerUnsubscriber | null,
@@ -74,6 +75,7 @@
         components: {
             NavBar,
             Footer,
+            Assessment,
         },
         created() {
 

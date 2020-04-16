@@ -21,6 +21,7 @@ export enum Collection {
     payments = "payments",
     emailLogs = "emailLogs",
     dataExports = "dataExports",
+    coreValuesAssessmentResponses = "coreValuesAssessmentResponses",
 }
 
 export interface FirestoreIdentifiable {
