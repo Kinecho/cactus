@@ -25,7 +25,7 @@ export default class CoreValuesQuestion {
     options: CoreValuesQuestionOption[] = [];
 
     static create(params: {
-        id: string;
+        id?: string;
         type: QuestionType;
         multiSelectMinimum?: number;
         multiSelectLimit?: number;
@@ -43,7 +43,9 @@ export default class CoreValuesQuestion {
             multiSelectLimit
         } = params;
         const q = new CoreValuesQuestion();
-        q.id = id;
+        if (id) {
+            q.id = id;
+        }
         q.type = type;
         q.titleMarkdown = titleMarkdown;
         q.descriptionMarkdown = descriptionMarkdown;
