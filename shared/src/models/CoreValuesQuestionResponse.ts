@@ -28,7 +28,7 @@ export default class CoreValuesQuestionResponse {
      * @return {boolean}  true if the value was removed, false if it was not present
      */
     removeValue(value: CoreValue): boolean {
-        const updatedValues = this.values.filter(v => v === value);
+        const updatedValues = this.values.filter(v => v !== value);
         const removed = updatedValues.length < this.values.length;
         this.values = [...updatedValues];
         return removed

@@ -12,10 +12,11 @@
                     future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
                 <!-- TODO: hook up button -->
-                <button class="primaryBtn" @click="createAssessmentResponse" :disabled="loading">Take the Assessment</button>
+                <button class="primaryBtn" @click="createAssessmentResponse" :disabled="loading">Take the Assessment
+                </button>
             </template>
             <template v-if="assessmentInProgress && assessment && assessmentResponse">
-                <assessment :assessment="assessment" :assessmentResponse="assessmentResponse"/>
+                <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save"/>
             </template>
             <template v-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
@@ -120,6 +121,12 @@
         methods: {
             goToPricing() {
                 window.location.href = PageRoute.PRICING;
+            },
+            async save(assessmentResponse: CoreValuesAssessmentResponse) {
+                const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
+                if (saved) {
+                    this.assessmentResponse = saved;
+                }
             },
             async createAssessmentResponse() {
                 const assessment = this.assessment;

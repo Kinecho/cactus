@@ -116,7 +116,6 @@ export async function transformObjectAsync(input: any, transform: (value: any) =
  * @return {any}
  */
 export function transformObjectSync(input: any, transform: (value: any) => any, depth: number = 0, forKey?: string): any {
-    logger.info(`transforming key, ${ forKey }, input`, input);
     if (depth >= 100) {
         logger.warn(`transformObjectSync method reached a depth greater than 10, Current depth = ${ depth }. Key = ${ forKey || "rootKey" } Returning witihout processing`);
         return input;

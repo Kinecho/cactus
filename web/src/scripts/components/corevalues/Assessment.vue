@@ -9,19 +9,13 @@
         <div v-else-if="currentQuestion && currentResponse">
             <question-card :question="currentQuestion" :response="currentResponse" @updated="updateResponse"/>
         </div>
-<!--        <div v-else>-->
-<!--            <h1>Values Assessment</h1>-->
-<!--            <p>There are {{questions.length}} questions in the survey. </p>-->
+        <div class="actions">
+            <button class="btn btn primary" @click="nextQuestion()" v-if="hasNextQuestion">
+                Next
+            </button>
+            <button @click="finish" v-if="!hasNextQuestion && questionIndex > 0 && !completed">Get My Results</button>
+        </div>
 
-<!--            <p>Core values are the general expression of what is most important for you, and they help you-->
-<!--                understand past decisions and make better decisions in the future.</p>-->
-<!--            <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration-->
-<!--                of how your values have been at the heart of past decisions and how they will unlock a happier-->
-<!--                future. Your core values results will guide your Cactus reflections.</p>-->
-<!--            <p>Insert language about how long this will take or how many questions to set expectations...</p>-->
-<!--            &lt;!&ndash; TODO: hook up button &ndash;&gt;-->
-<!--            <button class="primaryBtn" @click="start">Take the Assessment</button>-->
-<!--        </div>-->
     </div>
 </template>
 
@@ -48,8 +42,8 @@
         },
 
         props: {
-            assessment: {type: Object as () => CoreValuesAssessment, required: true},
-            assessmentResponse: {type: Object as () => CoreValuesAssessmentResponse, required: true},
+            assessment: { type: Object as () => CoreValuesAssessment, required: true },
+            assessmentResponse: { type: Object as () => CoreValuesAssessmentResponse, required: true },
         },
 
         data(): {
@@ -66,6 +60,17 @@
         computed: {
             questions(): CoreValuesQuestion[] {
                 return this.assessment.questions;
+            },
+            hasNextQuestion(): boolean {
+                if (isNumber(this.questionIndex)) {
+                    let nextIndex = this.questionIndex + 1;
+                    if (nextIndex >= this.questions.length) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
             },
             currentQuestion(): CoreValuesQuestion | null {
                 const index = this.questionIndex;
@@ -92,20 +97,17 @@
             },
 
             async save() {
-                if (this.assessmentResponse) {
-                    await AssessmentResponseService.sharedInstance.save(this.assessmentResponse);
-                }
+                this.$emit("save", this.assessmentResponse);
             },
             start() {
                 this.questionIndex = 0;
             },
+            finish() {
+              this.completed = true;
+            },
             async updateResponse(response: CoreValuesQuestionResponse) {
-                logger.info("setting response with value", response.values);
                 this.assessmentResponse?.setResponse(response);
-                logger.info("assessment response", this.assessmentResponse);
                 await this.save()
-                // this.assessmentResponse = this.assessmentResponse.copy();
-                // this.$set(this.assessmentResponse, "questionResponses", this.assessmentResponse.questionResponses);
             },
             nextQuestion() {
                 if (isNull(this.currentQuestion)) {
@@ -129,6 +131,6 @@
     @import "mixins";
 
     .assessment-container {
-        background: $lightestGreen;
+        //background: $lightestGreen;
     }
 </style>
