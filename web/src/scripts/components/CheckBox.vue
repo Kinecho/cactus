@@ -130,7 +130,7 @@
         width: 0;
 
         &:disabled ~ .checkmark {
-            background-color: $lightText;
+            border-color: #ccc;
             cursor: default;
         }
 
@@ -154,7 +154,6 @@
     /* Create a custom checkbox */
     .checkmark {
         border: 1px solid $green;
-
         border-radius: .4rem;
         flex-shrink: 0;
         height: $checkHeight;
@@ -178,7 +177,6 @@
 
     .radio {
         border-radius: 50%;
-
     }
 
 </style>

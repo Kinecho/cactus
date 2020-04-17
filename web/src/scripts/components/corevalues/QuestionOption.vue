@@ -1,12 +1,14 @@
 <template>
-    <div class="question-option">
+    <div class="question-option" :class="{expanded: expanded}">
         <div class="main">
             <!--            <span class="select" @click="clicked">{{selected ? 'Selected' : 'Not selected'}}</span>-->
 
             <check-box :model-value="selected" label="" @change="selectionChanged" :type="this.type" :disabled="disabled"/>
 
-            <markdown-text :source="option.title"/>
-            <button class="expand-toggle icon" @click="expanded = !expanded">{{expanded ? 'Close' : 'Open'}}</button>
+            <span class="valueName"><markdown-text :source="option.title"/></span>
+            <button class="expand-toggle tertiary icon" @click="expanded = !expanded">
+                <svg class="arrowIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 8"><path d="M1.707.293A1 1 0 10.293 1.707l6 6a1 1 0 001.414 0l6-6A1 1 0 1012.293.293L7 5.586 1.707.293z"/></svg>
+            </button>
         </div>
 
         <div class="expandable" :class="{closed: !expanded}" v-show="expanded">
@@ -69,19 +71,44 @@
     @import "mixins";
 
     .question-option {
-        padding: 1rem;
-        border: 1px solid black;
+        border: 1px solid $lightestGreen;
+        border-radius: .4rem;
+        padding: 1.6rem;
+    }
 
-        .main {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
+    .main {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .arrowIcon {
+        fill: $green;
+        height: 1rem;
+        transform: none;
+        transition: .2s transform linear;
+        width: 1.2rem;
+
+        .expanded & {
+            transform: rotate(180deg);
+        }
+
+        .disabled > & {
+            fill: #ccc;
         }
     }
 
     .expandable {
-        .closed {
-            height: 0;
+        font-size: 1.6rem;
+        opacity: .8;
+        padding: .8rem 0 0 0;
+    }
+
+    .valueName {
+        flex-grow: 1;
+
+        .disabled + & {
+            color: lighten($lightText, 20%);
         }
     }
 </style>

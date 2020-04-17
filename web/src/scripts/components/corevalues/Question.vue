@@ -1,7 +1,7 @@
 <template>
     <div class="question">
-        <markdown-text v-if="question.titleMarkdown" :source="question.titleMarkdown"/>
-        <markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/>
+        <div class="titleMarkdown"><markdown-text v-if="question.titleMarkdown" :source="question.titleMarkdown"/></div>
+        <div class="descriptionMarkdown"><markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/></div>
 
         <div class="question-options">
             <template v-for="(option, index) in question.options">
@@ -74,12 +74,19 @@
     @import "variables";
     @import "variables";
 
-    .question-options {
-        display: flex;
-        flex-direction: column;
+    .question {
+        padding-top: 3.2rem;
+    }
 
-        .item {
-            margin-bottom: 2rem;
-        }
+    .titleMarkdown {
+        margin-bottom: 3.2rem;
+    }
+
+    .item {
+        margin-bottom: .8rem;
+    }
+
+    .question-options {
+
     }
 </style>
