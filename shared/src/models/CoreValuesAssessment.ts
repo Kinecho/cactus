@@ -36,7 +36,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
         + "What values motivated those feelings? [select two:]",
         descriptionMarkdown: "",
         multiSelectLimit: 2,
-        multiSelectMinimum: 2,
+        multiSelectMinimum: 1,
         options: [
             Option.create({ value: CoreValue.Adventure }),
             Option.create({ value: CoreValue.Autonomy }),

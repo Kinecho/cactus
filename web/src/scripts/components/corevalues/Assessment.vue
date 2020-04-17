@@ -14,10 +14,12 @@
             <question-card :question="currentQuestion" :response="currentResponse" @updated="updateResponse"/>
         </div>
         <div class="actions">
-            <button class="btn btn primary" @click="nextQuestion()" v-if="hasNextQuestion">
+            <button class="btn btn primary no-loading" @click="nextQuestion()" v-if="hasNextQuestion" :disabled="this.responseValidation && !this.responseValidation.isValid">
                 Next
             </button>
-            <button @click="finish" v-if="!hasNextQuestion && questionIndex > 0 && !completed">Get My Results</button>
+            <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
+                Get My Results
+            </button>
         </div>
 
     </div>
@@ -31,7 +33,7 @@
     import { isNull, isNumber } from "@shared/util/ObjectUtil";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import QuestionCard from "@components/corevalues/Question.vue";
-    import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
+    import CoreValuesQuestionResponse, { ResponseValidation } from "@shared/models/CoreValuesQuestionResponse";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("Assessment");
@@ -69,11 +71,7 @@
             hasNextQuestion(): boolean {
                 if (isNumber(this.questionIndex)) {
                     let nextIndex = this.questionIndex + 1;
-                    if (nextIndex >= this.questions.length) {
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    return nextIndex < this.questions.length;
                 }
                 return false;
             },
@@ -83,6 +81,16 @@
                     return this.questions[index];
                 }
                 return null;
+            },
+            responseValidation(): ResponseValidation | undefined {
+                const question = this.currentQuestion;
+                const response = this.currentResponse;
+
+                if (question && response) {
+                    return response.isValid(question)
+                }
+
+                return undefined;
             },
             currentResponse(): CoreValuesQuestionResponse | null {
                 const questionId = this.currentQuestion?.id;

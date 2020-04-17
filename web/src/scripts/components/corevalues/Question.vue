@@ -64,13 +64,7 @@
                     return false
                 }
 
-                if (question.type === QuestionType.MULTI_SELECT) {
-                    if (question.multiSelectLimit && question.multiSelectLimit <= response.values.length) {
-                        return true;
-                    }
-                }
-
-                return false;
+                return !response.canSelectMore(question);
             }
         }
     })

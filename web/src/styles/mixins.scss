@@ -377,9 +377,10 @@ $widthDesktop: $widthXL;
     box-shadow: none;
     color: $darkText;
     cursor: default;
-    text-indent: 1.2rem;
+
 
     &:not(.no-loading) {
+      text-indent: 1.2rem;
       &:before {
         animation: rotate 1s linear infinite;
         background: url(/assets/images/loading.svg) no-repeat;

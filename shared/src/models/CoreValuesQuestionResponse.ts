@@ -1,4 +1,10 @@
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import CoreValuesQuestion, { QuestionType } from "@shared/models/CoreValuesQuestion";
+
+export interface ResponseValidation {
+    isValid: boolean,
+    message?: string,
+}
 
 export default class CoreValuesQuestionResponse {
     questionId!: string;
@@ -48,6 +54,51 @@ export default class CoreValuesQuestionResponse {
 
     contains(value: CoreValue): boolean {
         return this.values.includes(value);
+    }
+
+    canSelectMore(question: CoreValuesQuestion): boolean {
+        if (question.type !== QuestionType.MULTI_SELECT) {
+            return true;
+        }
+        if (!question.multiSelectLimit) {
+            return true;
+        }
+
+        return question.multiSelectLimit > this.values.length;
+    }
+
+    isValid(question: CoreValuesQuestion): ResponseValidation {
+        const result: ResponseValidation = { isValid: true };
+        const numValues = this.values.length;
+        switch (question.type) {
+            case QuestionType.MULTI_SELECT:
+                if (question.multiSelectLimit && numValues > question.multiSelectLimit) {
+                    result.isValid = false;
+                    const word = question.multiSelectMinimum === 1 ? "value" : "value";
+                    result.message = `You may only select ${ question.multiSelectLimit } ${ word }`;
+                }
+                if (question.multiSelectMinimum && numValues < question.multiSelectMinimum) {
+                    result.isValid = false;
+                    const word = question.multiSelectMinimum === 1 ? "value" : "value";
+                    result.message = `Please select at least ${ question.multiSelectMinimum } ${ word }`
+                }
+
+                break;
+            case QuestionType.RADIO:
+                if (numValues === 0) {
+                    result.isValid = false;
+                    result.message = "Please select a value";
+                }
+
+                if (numValues > 1) {
+                    result.isValid = false;
+                    result.message = "You may only select one value";
+                }
+
+                break;
+        }
+
+        return result;
     }
 
     static create(params: { questionId: string, value?: CoreValue, values?: CoreValue[] }): CoreValuesQuestionResponse {
