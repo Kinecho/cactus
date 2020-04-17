@@ -1,6 +1,7 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
+        <span>{{(questionIndex || 0) + 1}}</span> of <span>{{questions.length}}</span>
         <template v-if="loading">
             <h3>Loading</h3>
         </template>
@@ -11,7 +12,11 @@
             <button class="btn btn primary" @click="previousQuestion()" v-if="hasPreviousQuestion">
                 Back
             </button>
-            <question-card :question="currentQuestion" :response="currentResponse" @updated="updateResponse"/>
+            <question-card :question="currentQuestion"
+                    :response="currentResponse"
+                    :assessment-response="assessmentResponse"
+                    :assessment="assessment"
+                    @updated="updateResponse"/>
         </template>
         <div class="cvActions">
             <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
@@ -45,7 +50,6 @@
             QuestionCard,
             ProgressStepper,
         },
-
         props: {
             assessment: { type: Object as () => CoreValuesAssessment, required: true },
             assessmentResponse: { type: Object as () => CoreValuesAssessmentResponse, required: true },
@@ -64,7 +68,7 @@
         },
         computed: {
             questions(): CoreValuesQuestion[] {
-                return this.assessment.questions;
+                return this.assessment.getQuestions(this.assessmentResponse);
             },
             hasPreviousQuestion(): boolean {
                 return isNumber(this.questionIndex) && this.questionIndex > 0

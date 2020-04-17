@@ -337,7 +337,7 @@ export default class AdminCactusMemberService {
         return result.results;
     }
 
-    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
+    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;
         }
@@ -429,12 +429,13 @@ export default class AdminCactusMemberService {
                     });
                     logger.log(`Fetched ${ results.size } members in batch ${ batchNumber }`);
                     await options.onData(results.results, batchNumber);
-                    if (options.pageDelay && options.pageDelay > 0) {
+                    const delay = options.pageDelay;
+                    if (delay && delay > 0) {
                         await new Promise(resolve => {
                             logger.info(`Waiting ${ options.pageDelay }ms before processing next page`);
                             setTimeout(() => {
                                 resolve()
-                            }, options.pageDelay)
+                            }, delay)
                         })
                     }
                 } catch (batchError) {

@@ -24,12 +24,12 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
     completed: boolean = false;
     questionResponses: { [questionId: string]: CoreValuesQuestionResponse } = {};
 
-    results?:CoreValuesResults;
+    results?: CoreValuesResults;
 
     prepareForFirestore(): any {
         // const data = super.prepareForFirestore();
         // return stringifyJSON(data);
-        let data = toPlainObject({...this});
+        let data = toPlainObject({ ...this });
         data.questionResponses = JSON.parse(JSON.stringify(this.questionResponses));
         return data;
     }
@@ -38,7 +38,7 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
         // const  super.prepareFromFirestore(data);
         Object.keys(data.questionResponses).forEach(key => {
             const input = data.questionResponses[key];
-            const model = Object.assign(new CoreValuesQuestionResponse(), {...input});
+            const model = Object.assign(new CoreValuesQuestionResponse(), { ...input });
 
             data.questionResponses[key] = model;
         });
@@ -67,6 +67,9 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
         return this.questionResponses[questionId] ?? CoreValuesQuestionResponse.create({ questionId });
     }
 
+    getOptionalResponse(questionId: string): CoreValuesQuestionResponse | undefined {
+        return this.questionResponses[questionId];
+    }
 
     copy(): CoreValuesAssessmentResponse {
         const c = new CoreValuesAssessmentResponse();
