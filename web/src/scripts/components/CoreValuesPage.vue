@@ -2,7 +2,7 @@
     <div class="coreValuesPage">
         <NavBar :isSticky="false"/>
         <div class="centered">
-            <h1>Core Values</h1>
+            <h1 v-if="!assessmentInProgress">Core Values</h1>
 
             <div v-if="loading">
                 <h1>Loading</h1>
@@ -38,7 +38,7 @@
                         <ul class="valuesList" v-if="coreValueResults">
                             <li v-for="(value, i) in coreValueResults" :key="`value_${i}`">
                                 <span class="title">{{value.title}}</span>
-                                <p class="description">
+                                <p class="description" v-if="false">
                                     {{value.description}}
                                 </p>
                             </li>
@@ -221,12 +221,12 @@
         .centered {
             flex-grow: 1;
             max-width: 80rem;
-            padding: 6.4rem 2.4rem;
+            padding: 0 2.4rem 6.4rem;
             text-align: left;
         }
 
         h1 {
-            margin-bottom: 1.6rem;
+            margin: 6.4rem 0 1.6rem;
         }
 
         p {
