@@ -1,8 +1,15 @@
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
+import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 
 export enum QuestionType {
     RADIO = "RADIO",
     MULTI_SELECT = "MULTI_SELECT"
+}
+
+export interface DynamicAssessmentParams {
+    assessment?: CoreValuesAssessment
+    assessmentResponse?: CoreValuesAssessmentResponse;
 }
 
 export default class CoreValuesQuestion {
@@ -22,7 +29,31 @@ export default class CoreValuesQuestion {
      */
     multiSelectLimit?: number = 1;
 
-    options: CoreValuesQuestionOption[] = [];
+    protected options: CoreValuesQuestionOption[] = [];
+
+    protected dynamicOptions?: (params?: DynamicAssessmentParams) => CoreValuesQuestionOption[];
+
+    /**
+     *
+     * @param {{assessment?: CoreValuesAssessment, assessmentResponse?: CoreValuesAssessmentResponse}} params
+     * @return {CoreValuesQuestionOption[]}
+     */
+    getOptions = (params?: DynamicAssessmentParams): CoreValuesQuestionOption[] => {
+        if (this.dynamicOptions && params) {
+            return this.dynamicOptions(params)
+        }
+        return this.options;
+    };
+
+    /**
+     * If this question should show up in the list of questions or not, based on the assessment responses
+     * @param  {CoreValuesAssessment} params.assessment
+     * @param  {CoreValuesAssessmentResponse} params.assessmentResponse
+     * @return {boolean}
+     */
+    filter = (params?: DynamicAssessmentParams): boolean => {
+        return true;
+    };
 
     static create(params: {
         id?: string;
@@ -32,6 +63,8 @@ export default class CoreValuesQuestion {
         titleMarkdown?: string;
         descriptionMarkdown?: string;
         options: CoreValuesQuestionOption[],
+        filter?: (params?: DynamicAssessmentParams) => boolean
+        getOptions?: (params?: DynamicAssessmentParams) => CoreValuesQuestionOption[]
     }): CoreValuesQuestion {
         const {
             id,
@@ -40,7 +73,9 @@ export default class CoreValuesQuestion {
             descriptionMarkdown,
             options,
             multiSelectMinimum,
-            multiSelectLimit
+            multiSelectLimit,
+            filter,
+            getOptions,
         } = params;
         const q = new CoreValuesQuestion();
         if (id) {
@@ -52,6 +87,12 @@ export default class CoreValuesQuestion {
         q.options = options;
         q.multiSelectLimit = multiSelectLimit;
         q.multiSelectMinimum = multiSelectMinimum;
+        if (filter) {
+            q.filter = filter;
+        }
+        if (getOptions) {
+            q.dynamicOptions = getOptions;
+        }
         return q;
     }
 }

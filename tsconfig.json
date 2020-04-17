@@ -8,8 +8,10 @@
         "moduleResolution": "node",
         "target": "es5",
         "sourceMap": true,
+        "downlevelIteration": true,
         "lib": [
             "es2015",
+            "es2019",
             "dom"
         ],
         "baseUrl": ".",

@@ -8,9 +8,12 @@
         "sourceMap": true,
         "inlineSources": true,
         "strict": true,
-        "target": "es2015",
+        "target": "es5",
         "baseUrl": ".",
         "rootDirs": ["src"],
+        "downlevelIteration": true,
+
+        "lib": ["es2019"],
         "paths": {
             "@shared/*": ["./src/*"]
         }

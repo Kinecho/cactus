@@ -10,7 +10,11 @@
         "strict": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": false,
-        "target": "es2015",
+        "target": "es5",
+        "downlevelIteration": true,
+        "lib": [
+            "es2019"
+        ],
         "baseUrl": ".",
         "rootDirs": [
             "src",

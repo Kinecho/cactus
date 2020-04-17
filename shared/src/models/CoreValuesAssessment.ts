@@ -1,6 +1,9 @@
 import Question, { QuestionType } from "@shared/models/CoreValuesQuestion";
 import Option from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
+import { isNull } from "@shared/util/ObjectUtil";
 
 export default class CoreValuesAssessment {
     /**
@@ -18,7 +21,28 @@ export default class CoreValuesAssessment {
      * The questions of the assessment.
      * @type {any[]}
      */
-    questions: Question[] = [];
+    protected questions: Question[] = [];
+
+    getQuestions(response?: CoreValuesAssessmentResponse): Question[] {
+        if (!response) {
+            return this.questions;
+        }
+
+        return this.questions.filter(q => q.filter({ assessmentResponse: response, assessment: this }));
+    }
+
+    orderedResponses(response?: CoreValuesAssessmentResponse): CoreValuesQuestionResponse[] {
+        if (!response) {
+            return []
+        }
+
+        return this.getQuestions(response).flatMap(q => response.getOptionalResponse(q.id)).filter(isNull) as CoreValuesQuestionResponse[];
+    }
+
+    previousResponse(response: CoreValuesAssessmentResponse): CoreValuesQuestionResponse|undefined {
+        // return this.getQ
+        return;
+    }
 
     static default(): CoreValuesAssessment {
         const assessment = new CoreValuesAssessment();
@@ -154,13 +178,31 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
             Option.create({ value: CoreValue.MentalHealth }),
             Option.create({ value: CoreValue.Beauty }),
             Option.create({ value: CoreValue.Structure }),
-        ]
+        ],
     }),
     Question.create({
         // id: "8",
         type: QuestionType.RADIO,
         titleMarkdown: "Which **one** of these is the most active value in your life?",
         descriptionMarkdown: "",
+        options: [
+            Option.create({ value: CoreValue.Accountability }),
+            Option.create({ value: CoreValue.HolisticLiving }),
+            Option.create({ value: CoreValue.Integrity }),
+            Option.create({ value: CoreValue.Joy }),
+            Option.create({ value: CoreValue.Respect }),
+        ]
+    }),
+    Question.create({
+        // id: "9",
+        type: QuestionType.MULTI_SELECT,
+        titleMarkdown: "Reflecting on your selected values, which do you value as the result of positive, strengthening experiences or decisions:",
+        descriptionMarkdown: "",
+        multiSelectMinimum: 2,
+        multiSelectLimit: 8,
+        filter: (response) => {
+            return true;
+        },
         options: [
             Option.create({ value: CoreValue.Accountability }),
             Option.create({ value: CoreValue.HolisticLiving }),

@@ -26,6 +26,8 @@
     import QuestionOption from "@components/corevalues/QuestionOption.vue";
     import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
     import Logger from "@shared/Logger";
+    import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+    import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 
     const logger = new Logger("Question");
 
@@ -38,6 +40,13 @@
         props: {
             question: { type: Object as () => CoreValuesQuestion, required: true },
             response: { type: Object as () => CoreValuesQuestionResponse, required: true },
+            assessment: {type: Object as () => CoreValuesAssessment, required: true},
+            assessmentResponse: {type: Object as () => CoreValuesAssessmentResponse, required: true},
+        },
+        computed: {
+            options(): CoreValuesQuestionOption[] {
+                return this.question.getOptions({assessmentResponse: this.assessmentResponse, assessment: this.assessment})
+            }
         },
         methods: {
             selectOption(index: number, option: CoreValuesQuestionOption) {
