@@ -149,6 +149,21 @@
                 display: block;
             }
         }
+
+        &:checked ~ .checkmark.radio {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+
+            &:after {
+                background-color: $green;
+                border: .5rem solid $white;
+                border-radius: 50%;
+                content: '';
+                height: 1.3rem;
+                width: 1.3rem;
+            }
+        }
     }
 
     /* Create a custom checkbox */
@@ -173,10 +188,10 @@
             transform: rotate(45deg);
             width: 5px;
         }
-    }
 
-    .radio {
-        border-radius: 50%;
+        &.radio {
+            border-radius: 50%;
+        }
     }
 
 </style>
