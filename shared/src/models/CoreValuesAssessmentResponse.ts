@@ -26,6 +26,15 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
 
     results?: CoreValuesResults;
 
+    /**
+     * All of the response values, deduplicated
+     * @return {CoreValue[]}
+     */
+    get allResponseValues(): CoreValue[] {
+         const coreValues = Object.values(this.questionResponses).flatMap(r => r.values);
+         return [...new Set(coreValues)]
+    }
+
     prepareForFirestore(): any {
         // const data = super.prepareForFirestore();
         // return stringifyJSON(data);

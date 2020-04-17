@@ -74,13 +74,19 @@ export default class CoreValuesQuestionResponse {
             case QuestionType.MULTI_SELECT:
                 if (question.multiSelectLimit && numValues > question.multiSelectLimit) {
                     result.isValid = false;
-                    const word = question.multiSelectMinimum === 1 ? "value" : "value";
+                    const word = question.multiSelectMinimum === 1 ? "value" : "values";
                     result.message = `You may only select ${ question.multiSelectLimit } ${ word }`;
                 }
                 if (question.multiSelectMinimum && numValues < question.multiSelectMinimum) {
                     result.isValid = false;
-                    const word = question.multiSelectMinimum === 1 ? "value" : "value";
+                    const word = question.multiSelectMinimum === 1 ? "value" : "values";
                     result.message = `Please select at least ${ question.multiSelectMinimum } ${ word }`
+                }
+
+                if (question.multiSelectLimit && question.multiSelectMinimum && question.multiSelectLimit === question.multiSelectMinimum && numValues !== question.multiSelectMinimum) {
+                    result.isValid = false;
+                    const word = question.multiSelectMinimum === 1 ? "value" : "values";
+                    result.message = `Please select ${question.multiSelectMinimum} ${word}`;
                 }
 
                 break;

@@ -1,9 +1,12 @@
-import Question, { QuestionType } from "@shared/models/CoreValuesQuestion";
+import Question, { DynamicAssessmentParams, QuestionType } from "@shared/models/CoreValuesQuestion";
 import Option from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
-import { isNull } from "@shared/util/ObjectUtil";
+import { isNotNull } from "@shared/util/ObjectUtil";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("CoreValuesAssessment");
 
 export default class CoreValuesAssessment {
     /**
@@ -31,18 +34,52 @@ export default class CoreValuesAssessment {
         return this.questions.filter(q => q.filter({ assessmentResponse: response, assessment: this }));
     }
 
-    orderedResponses(response?: CoreValuesAssessmentResponse): CoreValuesQuestionResponse[] {
-        if (!response) {
+    orderedResponses(assessmentResponse?: CoreValuesAssessmentResponse): CoreValuesQuestionResponse[] {
+        if (!assessmentResponse) {
             return []
         }
 
-        return this.getQuestions(response).flatMap(q => response.getOptionalResponse(q.id)).filter(isNull) as CoreValuesQuestionResponse[];
+        return this.questions.flatMap(q => assessmentResponse.getOptionalResponse(q.id)).filter(isNotNull) as CoreValuesQuestionResponse[];
     }
 
-    previousResponse(response: CoreValuesAssessmentResponse): CoreValuesQuestionResponse|undefined {
-        // return this.getQ
-        return;
+    questionIndex(questionId: string): number {
+        return this.questions.findIndex(question => question.id === questionId);
     }
+
+    /**
+     * Given a question, fetch the previous response
+     * @param {CoreValuesAssessmentResponse} assessmentResponse
+     * @param {CoreValuesQuestion} question
+     * @return {CoreValuesQuestionResponse | undefined}
+     */
+    previousResponse(assessmentResponse: CoreValuesAssessmentResponse, question: Question): CoreValuesQuestionResponse | undefined {
+        // return this.getQ
+        const responses = this.orderedResponses(assessmentResponse);
+        if (responses.length < 2) {
+            return;
+        }
+
+        const currentQuestion = this.questionIndex(question.id);
+        if (currentQuestion < 1) {
+            return;
+        }
+        const previousQuestion = this.questions[currentQuestion - 1];
+        return assessmentResponse.getOptionalResponse(previousQuestion.id);
+    }
+
+    lastResponse(assessmentResponse: CoreValuesAssessmentResponse): CoreValuesQuestionResponse | undefined {
+        const responses = this.orderedResponses(assessmentResponse);
+        if (responses.length === 0) {
+            return undefined;
+        }
+        return responses[responses.length - 1];
+    }
+
+    // previousQuestion(assessmentResponse: CoreValuesAssessmentResponse): CoreValuesQuestion|undefined {
+    //     // return this.getQ
+    //     const previousResponse =
+    //     const respon
+    // }
 
     static default(): CoreValuesAssessment {
         const assessment = new CoreValuesAssessment();
@@ -50,6 +87,20 @@ export default class CoreValuesAssessment {
         return assessment;
     }
 
+}
+
+function getAllPreviousValues(params: DynamicAssessmentParams, question: Question): Option[] {
+    const { assessmentResponse } = params;
+    return assessmentResponse.allResponseValues.map(value => Option.create({ value }));
+}
+
+function getPreviousResultOptions(params: DynamicAssessmentParams, question: Question) {
+    const { assessment, assessmentResponse } = params;
+    const previousResponse = assessment.previousResponse(assessmentResponse, question);
+    if (!previousResponse) {
+        return
+    }
+    return previousResponse.values.map(value => Option.create({ value }));
 }
 
 export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
@@ -85,7 +136,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
             Option.create({ value: CoreValue.Appearance }),
             Option.create({ value: CoreValue.Personal }),
             Option.create({ value: CoreValue.Humor }),
-        ]
+        ],
     }),
     Question.create({
         // id: "2",
@@ -203,13 +254,26 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
         filter: (response) => {
             return true;
         },
-        options: [
-            Option.create({ value: CoreValue.Accountability }),
-            Option.create({ value: CoreValue.HolisticLiving }),
-            Option.create({ value: CoreValue.Integrity }),
-            Option.create({ value: CoreValue.Joy }),
-            Option.create({ value: CoreValue.Respect }),
-        ]
+        options: [],
+        getOptions: (params, question) => {
+            return getAllPreviousValues(params, question);
+        }
+    }),
+    Question.create({
+        // id: "10",
+        type: QuestionType.MULTI_SELECT,
+        titleMarkdown: "Reflect on important life decisions you’ve made, then select which of the values were at the heart of those decisions:",
+        descriptionMarkdown: "",
+        multiSelectMinimum: 2,
+        multiSelectLimit: 4,
+        filter: (params, question) => {
+            const results = getPreviousResultOptions(params, question);
+            return (results?.length ?? 0) > 2;
+        },
+        options: [],
+        getOptions: (params, question) => {
+            return getPreviousResultOptions(params, question);
+        }
     }),
 ].map((q, index) => {
     q.id = q.id ?? `${ index }`;
