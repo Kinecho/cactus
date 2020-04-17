@@ -1,13 +1,13 @@
 import FirestoreService, { ListenerUnsubscriber, Query } from "@web/services/FirestoreService";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
-import {Collection} from "@shared/FirestoreBaseModels";
+import { BaseModelField, Collection } from "@shared/FirestoreBaseModels";
 import { DocObserverOptions } from "@shared/types/FirestoreTypes";
 
 export default class AssessmentResponseService {
     public static sharedInstance = new AssessmentResponseService();
     firestoreService = FirestoreService.sharedInstance;
 
-    getCollectionRef(){
+    getCollectionRef() {
         return this.firestoreService.getCollectionRef(Collection.coreValuesAssessmentResponses)
     }
 
@@ -19,12 +19,19 @@ export default class AssessmentResponseService {
         return this.firestoreService.getFirst(query, CoreValuesAssessmentResponse);
     }
 
-    async save(model:CoreValuesAssessmentResponse):Promise<CoreValuesAssessmentResponse|undefined> {
+    async save(model: CoreValuesAssessmentResponse): Promise<CoreValuesAssessmentResponse | undefined> {
         return this.firestoreService.save(model);
     }
 
-    async getById(id:string):Promise<CoreValuesAssessmentResponse|undefined>{
+    async getById(id: string): Promise<CoreValuesAssessmentResponse | undefined> {
         return await this.firestoreService.getById(id, CoreValuesAssessmentResponse);
+    }
+
+    async getLatestForUser(memberId: string): Promise<CoreValuesAssessmentResponse | undefined> {
+        const query = this.getCollectionRef().where(CoreValuesAssessmentResponse.Fields.memberId, "==", memberId)
+        .where(CoreValuesAssessmentResponse.Fields.completed, "==", true)
+        .orderBy(BaseModelField.createdAt, "desc");
+        return this.getFirst(query);
     }
 
     observeById(id: string, options: DocObserverOptions<CoreValuesAssessmentResponse>): ListenerUnsubscriber {

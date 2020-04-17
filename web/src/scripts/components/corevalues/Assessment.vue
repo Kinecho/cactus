@@ -102,8 +102,11 @@
             start() {
                 this.questionIndex = 0;
             },
-            finish() {
+            async finish() {
               this.completed = true;
+              this.assessmentResponse.completed = true;
+              // await this.save();
+              this.$emit("completed");
             },
             async updateResponse(response: CoreValuesQuestionResponse) {
                 this.assessmentResponse?.setResponse(response);

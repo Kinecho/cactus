@@ -1,17 +1,30 @@
 import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 import { toPlainObject } from "@shared/util/ObjectUtil";
+import { CoreValue } from "@shared/models/CoreValueTypes";
+
+
+enum Field {
+    memberId = "memberId",
+    completed = "completed",
+}
+
+export interface CoreValuesResults {
+    values: CoreValue[];
+}
 
 export default class CoreValuesAssessmentResponse extends BaseModel {
     readonly collection = Collection.coreValuesAssessmentResponses;
-
+    static Fields = Field;
     /**
      * The version of the assessment that was taken.
      */
     assessmentVersion!: string;
     memberId!: string;
-
+    completed: boolean = false;
     questionResponses: { [questionId: string]: CoreValuesQuestionResponse } = {};
+
+    results?:CoreValuesResults;
 
     prepareForFirestore(): any {
         // const data = super.prepareForFirestore();
