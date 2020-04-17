@@ -1,6 +1,7 @@
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
+import Logger from "@shared/Logger";
 
 export enum QuestionType {
     RADIO = "RADIO",
@@ -8,14 +9,15 @@ export enum QuestionType {
 }
 
 export interface DynamicAssessmentParams {
-    assessment?: CoreValuesAssessment
-    assessmentResponse?: CoreValuesAssessmentResponse;
+    assessment: CoreValuesAssessment
+    assessmentResponse: CoreValuesAssessmentResponse
 }
 
 export default class CoreValuesQuestion {
     id!: string;
     titleMarkdown?: string;
     descriptionMarkdown?: string;
+    logger = new Logger("CoreValuesQuestion");
     type: QuestionType = QuestionType.MULTI_SELECT;
 
     /**
@@ -29,21 +31,24 @@ export default class CoreValuesQuestion {
      */
     multiSelectLimit?: number = 1;
 
-    protected options: CoreValuesQuestionOption[] = [];
+    protected _options: CoreValuesQuestionOption[] = [];
 
-    protected dynamicOptions?: (params?: DynamicAssessmentParams) => CoreValuesQuestionOption[];
+    protected dynamicOptions?: (params: DynamicAssessmentParams, question: CoreValuesQuestion) => CoreValuesQuestionOption[] | undefined;
 
     /**
      *
      * @param {{assessment?: CoreValuesAssessment, assessmentResponse?: CoreValuesAssessmentResponse}} params
      * @return {CoreValuesQuestionOption[]}
      */
-    getOptions = (params?: DynamicAssessmentParams): CoreValuesQuestionOption[] => {
-        if (this.dynamicOptions && params) {
-            return this.dynamicOptions(params)
+    options = (params: DynamicAssessmentParams): CoreValuesQuestionOption[] => {
+        if (this.dynamicOptions) {
+            this.logger.info("Getting dynamic options");
+            return this.dynamicOptions(params, this) ?? this._options;
         }
-        return this.options;
+        return this._options;
     };
+
+    protected _filter?: (params: DynamicAssessmentParams, question: CoreValuesQuestion) => boolean;
 
     /**
      * If this question should show up in the list of questions or not, based on the assessment responses
@@ -51,8 +56,8 @@ export default class CoreValuesQuestion {
      * @param  {CoreValuesAssessmentResponse} params.assessmentResponse
      * @return {boolean}
      */
-    filter = (params?: DynamicAssessmentParams): boolean => {
-        return true;
+    filter = (params: DynamicAssessmentParams): boolean => {
+        return this._filter?.(params, this) ?? true
     };
 
     static create(params: {
@@ -63,8 +68,8 @@ export default class CoreValuesQuestion {
         titleMarkdown?: string;
         descriptionMarkdown?: string;
         options: CoreValuesQuestionOption[],
-        filter?: (params?: DynamicAssessmentParams) => boolean
-        getOptions?: (params?: DynamicAssessmentParams) => CoreValuesQuestionOption[]
+        filter?: (params: DynamicAssessmentParams, question: CoreValuesQuestion) => boolean
+        getOptions?: (params: DynamicAssessmentParams, question: CoreValuesQuestion) => CoreValuesQuestionOption[] | undefined
     }): CoreValuesQuestion {
         const {
             id,
@@ -84,11 +89,11 @@ export default class CoreValuesQuestion {
         q.type = type;
         q.titleMarkdown = titleMarkdown;
         q.descriptionMarkdown = descriptionMarkdown;
-        q.options = options;
+        q._options = options;
         q.multiSelectLimit = multiSelectLimit;
         q.multiSelectMinimum = multiSelectMinimum;
         if (filter) {
-            q.filter = filter;
+            q._filter = filter;
         }
         if (getOptions) {
             q.dynamicOptions = getOptions;

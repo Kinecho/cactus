@@ -26,7 +26,7 @@
                     :class="{disabled: this.responseValidation && !this.responseValidation.isValid}">
                 Next
             </button>
-            <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
+            <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
                 Get My Results
             </button>
         </div>
@@ -62,27 +62,27 @@
             questionIndex: number | null,
             completed: boolean,
             showValidation: boolean,
+            questions: CoreValuesQuestion[]
         } {
             return {
                 loading: false,
                 questionIndex: 0,
                 completed: false,
                 showValidation: false,
+                questions: this.assessment.getQuestions(this.assessmentResponse),
             }
         },
         computed: {
-            questions(): CoreValuesQuestion[] {
-                return this.assessment.getQuestions(this.assessmentResponse);
-            },
             hasPreviousQuestion(): boolean {
                 return isNumber(this.questionIndex) && this.questionIndex > 0
             },
             hasNextQuestion(): boolean {
-                if (isNumber(this.questionIndex)) {
-                    let nextIndex = this.questionIndex + 1;
-                    return nextIndex < this.questions.length;
-                }
-                return false;
+                return !this.completed
+                // if (isNumber(this.questionIndex)) {
+                //     let nextIndex = this.questionIndex + 1;
+                //     return nextIndex < this.questions.length;
+                // }
+                // return false;
             },
             currentQuestion(): CoreValuesQuestion | null {
                 const index = this.questionIndex;
@@ -120,6 +120,7 @@
 
             async save() {
                 this.$emit("save", this.assessmentResponse);
+                this.questions = this.assessment.getQuestions(this.assessmentResponse);
             },
             start() {
                 this.questionIndex = 0;
@@ -144,6 +145,8 @@
                 }
             },
             nextQuestion() {
+
+                this.questions = this.assessment.getQuestions(this.assessmentResponse);
                 if (this.responseValidation?.isValid === false) {
                     this.showValidation = true
                     return;

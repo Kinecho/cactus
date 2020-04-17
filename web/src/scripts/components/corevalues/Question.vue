@@ -4,7 +4,7 @@
         <div class="descriptionMarkdown"><markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/></div>
 
         <div class="question-options">
-            <template v-for="(option, index) in question.options">
+            <template v-for="(option, index) in options">
                 <div class="item" :key="`question_${question.id}_option_${index}`">
                     <question-option :option="option"
                             :selected="response.contains(option.value)"
@@ -45,7 +45,7 @@
         },
         computed: {
             options(): CoreValuesQuestionOption[] {
-                return this.question.getOptions({assessmentResponse: this.assessmentResponse, assessment: this.assessment})
+                return this.question.options({assessmentResponse: this.assessmentResponse, assessment: this.assessment})
             }
         },
         methods: {
