@@ -81,7 +81,7 @@
 
 <style scoped lang="scss">
     @import "variables";
-    @import "variables";
+    @import "mixins";
 
     .cvQuestion {
         padding-top: 3.2rem;
@@ -93,9 +93,19 @@
 
     .question-options {
         padding-bottom: 6.4rem;
+
+        @include r(768) {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-between;
+        }
     }
 
     .item {
         margin-bottom: .8rem;
+
+        @include r(768) {
+            width: 49%;
+        }
     }
 </style>

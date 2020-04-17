@@ -46,19 +46,18 @@
     .progress {
         display: flex;
         flex-direction: row;
-        background: $darkestGreen;
-
+        background-color: $darkestGreen;
         height: .5rem;
 
         .step {
             flex: 1;
 
             &.completed {
-                background: $green;
+                background-color: $green;
             }
 
             &.current {
-                background: $yellow;
+                background-color: $green;
             }
         }
 
