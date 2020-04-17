@@ -1,5 +1,5 @@
 <template>
-    <div class="coreValuesPage">
+    <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
         <NavBar :isSticky="false" v-if="!assessmentInProgress"/>
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
@@ -224,8 +224,10 @@
         overflow: hidden;
         position: relative;
 
-        @include r(768) {
-            background-color: $beige;
+        &.inProgress {
+            @include r(768) {
+                background-color: $beige;
+            }
         }
 
         header, .centered {
