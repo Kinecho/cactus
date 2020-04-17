@@ -272,9 +272,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
         },
         options: [],
         getOptions: (params, question) => {
-            const previousOptions = getPreviousResultOptions(params, question);
-            logger.info("Last question: previous options are:", previousOptions);
-            return previousOptions;
+            return getPreviousResultOptions(params, question);
         }
     }),
 ].map((q, index) => {
