@@ -8,11 +8,12 @@
                 <div class="item" :key="`question_${question.id}_option_${index}`">
                     <question-option :option="option"
                             :selected="response.contains(option.value)"
+                            :type="question.type"
+                            :disabled="optionDisabled(option)"
                             @selected="selectOption(index, option)"
                             @removed="removeOption(index, option)"/>
                 </div>
             </template>
-
         </div>
     </div>
 </template>
@@ -54,6 +55,23 @@
                 this.response.removeValue(option.value);
                 this.$emit("updated", this.response)
             },
+            optionDisabled(option: CoreValuesQuestionOption): boolean {
+                const response = this.response;
+                const question = this.question;
+
+                //Always let the user de-select an option
+                if (response.contains(option.value)) {
+                    return false
+                }
+
+                if (question.type === QuestionType.MULTI_SELECT) {
+                    if (question.multiSelectLimit && question.multiSelectLimit <= response.values.length) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
     })
 </script>

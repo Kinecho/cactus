@@ -1,12 +1,13 @@
 <template>
-    <label :class="['checkbox-container', {disabled}]">
+    <label :class="['checkbox-container', this.classNames]">
         <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
-        <span class="checkmark"></span>
+        <span class="checkmark" :class="selectTypeClass"></span>
         <span class="checkbox-label">{{ label }}</span>
     </label>
 </template>
 <script lang="ts">
     import Vue from 'vue'
+    import { QuestionType } from "@shared/models/CoreValuesQuestion";
 
     export default Vue.extend({
         model: {
@@ -16,6 +17,10 @@
         props: {
             value: {
                 type: [String, Boolean],
+            },
+            type: {
+                type: String as () => QuestionType,
+                default: QuestionType.MULTI_SELECT,
             },
             disabled: {
                 type: Boolean,
@@ -28,8 +33,7 @@
             label: {
                 type: String,
                 required: true,
-            }
-            ,
+            },
             // We set `true-value` and `false-value` to the default true and false so
             // we can always use them instead of checking whether or not they are set.
             // Also can use camelCase here, but hyphen-separating the attribute name
@@ -47,6 +51,21 @@
             return {}
         },
         computed: {
+            classNames(): { [name: string]: boolean } {
+                return {
+                    disabled: this.disabled,
+                    radio: this.type === QuestionType.RADIO,
+                    checkbox: this.type === QuestionType.MULTI_SELECT
+                }
+            },
+            selectTypeClass(): string {
+                switch (this.type) {
+                    case QuestionType.RADIO:
+                        return "radio";
+                    case QuestionType.MULTI_SELECT:
+                        return "checkmark";
+                }
+            },
             shouldBeChecked() {
                 if (Array.isArray(this.modelValue)) {
                     return this.modelValue.includes(this.value)
@@ -117,6 +136,7 @@
 
         &:disabled:checked ~ .checkmark {
             background-color: $lightText;
+
             &:after {
                 display: block;
             }
@@ -124,6 +144,7 @@
 
         &:checked ~ .checkmark {
             background-color: $green;
+
             &:after {
                 display: block;
             }
@@ -133,6 +154,7 @@
     /* Create a custom checkbox */
     .checkmark {
         border: 1px solid $green;
+
         border-radius: .4rem;
         flex-shrink: 0;
         height: $checkHeight;
@@ -140,7 +162,7 @@
         width: $checkHeight;
 
         /* Create the checkmark/indicator (hidden when not checked) */
-        &:after {
+        &:not(.radio):after {
             border: solid white;
             border-width: 0 3px 3px 0;
             content: "";
@@ -152,6 +174,11 @@
             transform: rotate(45deg);
             width: 5px;
         }
+    }
+
+    .radio {
+        border-radius: 50%;
+
     }
 
 </style>
