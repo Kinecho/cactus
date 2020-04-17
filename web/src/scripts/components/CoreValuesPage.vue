@@ -48,10 +48,12 @@
                 <button class="small">Share My Values</button>
 
                 <p class="extraPadding" v-if="newAssessmentAvailable">
-                    A new assessment is available. <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">Take
-                    the assessment</a>.
+                    A new assessment is available.
+                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">Take
+                        the assessment</a>.
                 </p>
-                <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve changed? Feel free to
+                <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
+                    changed? Feel free to
                     <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake
                         the assessment</a>.</p>
             </template>
@@ -149,13 +151,16 @@
             goToPricing() {
                 window.location.href = PageRoute.PRICING;
             },
-            async complete() {
-                let response = this.assessmentResponse;
-                if (response) {
-                    response.completed = true;
-                    response.results = { values: [CoreValue.Power, CoreValue.Nature, CoreValue.Humor] };
-                    await this.save(response);
-                }
+            async complete(assessmentResponse: CoreValuesAssessmentResponse) {
+
+                assessmentResponse.completed = true;
+                // const assessmentResponse = this.assessmentResponse;
+                // assessmentResponse.completed = true;
+                assessmentResponse.results = this.assessment.getResults(assessmentResponse);
+                // response.results = { values: [CoreValue.Power, CoreValue.Nature, CoreValue.Humor] };
+                this.assessmentResponse = assessmentResponse
+                await this.save(assessmentResponse);
+                assessmentResponse.completed = true;
                 this.assessmentInProgress = false
             },
             async save(assessmentResponse: CoreValuesAssessmentResponse) {
@@ -174,7 +179,7 @@
                     return;
                 }
 
-                //TODO: fetch existing responsess??
+                //TODO: fetch existing responses??
                 const response = CoreValuesAssessmentResponse.create({ version, memberId });
                 const updatedResponse = await AssessmentResponseService.sharedInstance.save(response);
 

@@ -1,12 +1,9 @@
 import Question, { DynamicAssessmentParams, QuestionType } from "@shared/models/CoreValuesQuestion";
 import Option from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
+import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 import { isNotNull } from "@shared/util/ObjectUtil";
-import Logger from "@shared/Logger";
-
-const logger = new Logger("CoreValuesAssessment");
 
 export default class CoreValuesAssessment {
     /**
@@ -75,11 +72,16 @@ export default class CoreValuesAssessment {
         return responses[responses.length - 1];
     }
 
-    // previousQuestion(assessmentResponse: CoreValuesAssessmentResponse): CoreValuesQuestion|undefined {
-    //     // return this.getQ
-    //     const previousResponse =
-    //     const respon
-    // }
+    getResults(assessmentResponse: CoreValuesAssessmentResponse): CoreValuesResults | undefined {
+        const response = this.lastResponse(assessmentResponse);
+        if (!response) {
+            return undefined;
+        }
+
+        return {
+            values: response.values
+        };
+    }
 
     static default(): CoreValuesAssessment {
         const assessment = new CoreValuesAssessment();
