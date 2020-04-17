@@ -20,6 +20,7 @@
             <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
                 Get My Results
             </button>
+            <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
         </div>
 
     </div>
