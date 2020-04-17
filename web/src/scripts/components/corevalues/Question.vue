@@ -1,5 +1,5 @@
 <template>
-    <div class="question">
+    <div class="cvQuestion">
         <div class="titleMarkdown"><markdown-text v-if="question.titleMarkdown" :source="question.titleMarkdown"/></div>
         <div class="descriptionMarkdown"><markdown-text v-if="question.descriptionMarkdown" :source="question.descriptionMarkdown"/></div>
 
@@ -74,7 +74,7 @@
     @import "variables";
     @import "variables";
 
-    .question {
+    .cvQuestion {
         padding-top: 3.2rem;
     }
 
@@ -82,11 +82,11 @@
         margin-bottom: 3.2rem;
     }
 
-    .item {
-        margin-bottom: .8rem;
+    .question-options {
+        padding-bottom: 6.4rem;
     }
 
-    .question-options {
-
+    .item {
+        margin-bottom: .8rem;
     }
 </style>

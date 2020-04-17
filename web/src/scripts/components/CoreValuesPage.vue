@@ -60,7 +60,7 @@
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
         </div>
-        <Footer/>
+        <Footer v-if="!assessmentInProgress"/>
     </div>
 </template>
 
@@ -212,6 +212,7 @@
         min-height: 100vh;
         justify-content: space-between;
         overflow: hidden;
+        position: relative;
 
         header, .centered {
             width: 100%;

@@ -1,26 +1,26 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
-        <div v-if="loading">
+        <template v-if="loading">
             <h3>Loading</h3>
-        </div>
-        <div v-if="completed">
+        </template>
+        <template v-if="completed">
             <h3>The survey is completed.</h3>
-        </div>
-        <div v-else-if="currentQuestion && currentResponse">
+        </template>
+        <template v-else-if="currentQuestion && currentResponse">
             <button class="btn btn primary" @click="previousQuestion()" v-if="hasPreviousQuestion">
                 Back
             </button>
             <question-card :question="currentQuestion" :response="currentResponse" @updated="updateResponse"/>
-        </div>
-        <div class="actions">
+        </template>
+        <div class="cvActions">
+            <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
             <button class="btn btn primary no-loading" @click="nextQuestion()" v-if="hasNextQuestion" :disabled="this.responseValidation && !this.responseValidation.isValid">
                 Next
             </button>
             <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
                 Get My Results
             </button>
-            <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
         </div>
 
     </div>
@@ -156,7 +156,21 @@
     @import "variables";
     @import "mixins";
 
-    .assessment-container {
-        //background: $lightestGreen;
+    .cvActions {
+        background-color: transparentize($white, .15);
+        bottom: 0;
+        left: 0;
+        padding: 1.6rem;
+        position: fixed;
+        right: 0;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .validation {
+        padding-bottom: .8rem;
+        text-align: center;
     }
 </style>
