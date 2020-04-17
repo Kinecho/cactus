@@ -1,5 +1,6 @@
 <template>
     <div class="assessment-container">
+        <progress-stepper :current="questionIndex" :total="questions.length"/>
         <div v-if="loading">
             <h3>Loading</h3>
         </div>
@@ -7,6 +8,9 @@
             <h3>The survey is completed.</h3>
         </div>
         <div v-else-if="currentQuestion && currentResponse">
+            <button class="btn btn primary" @click="previousQuestion()" v-if="hasPreviousQuestion">
+                Back
+            </button>
             <question-card :question="currentQuestion" :response="currentResponse" @updated="updateResponse"/>
         </div>
         <div class="actions">
@@ -25,13 +29,10 @@
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
     import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
     import { isNull, isNumber } from "@shared/util/ObjectUtil";
-
+    import ProgressStepper from "@components/ProgressStepper.vue";
     import QuestionCard from "@components/corevalues/Question.vue";
     import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
     import Logger from "@shared/Logger";
-    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import AssessmentResponseService from "@web/services/AssessmentResponseService";
-    import CactusMemberService from "@web/services/CactusMemberService";
 
     const logger = new Logger("Assessment");
 
@@ -39,6 +40,7 @@
         name: "Assessment",
         components: {
             QuestionCard,
+            ProgressStepper,
         },
 
         props: {
@@ -60,6 +62,9 @@
         computed: {
             questions(): CoreValuesQuestion[] {
                 return this.assessment.questions;
+            },
+            hasPreviousQuestion(): boolean {
+                return isNumber(this.questionIndex) && this.questionIndex > 0
             },
             hasNextQuestion(): boolean {
                 if (isNumber(this.questionIndex)) {
@@ -103,14 +108,23 @@
                 this.questionIndex = 0;
             },
             async finish() {
-              this.completed = true;
-              this.assessmentResponse.completed = true;
-              // await this.save();
-              this.$emit("completed");
+                this.completed = true;
+                this.assessmentResponse.completed = true;
+                // await this.save();
+                this.$emit("completed");
             },
             async updateResponse(response: CoreValuesQuestionResponse) {
                 this.assessmentResponse?.setResponse(response);
                 await this.save()
+            },
+            previousQuestion() {
+                if (isNull(this.currentQuestion)) {
+                    this.questionIndex = 0;
+                    return;
+                } else if (isNumber(this.questionIndex)) {
+                    this.questionIndex = Math.max(0, this.questionIndex - 1);
+                    this.completed = false
+                }
             },
             nextQuestion() {
                 if (isNull(this.currentQuestion)) {
