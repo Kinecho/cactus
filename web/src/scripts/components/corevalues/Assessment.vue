@@ -1,33 +1,34 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="questionIndex" :total="questions.length"/>
-        <span>{{(questionIndex || 0) + 1}}</span> of <span>{{questions.length}}</span>
-        <template v-if="loading">
-            <h3>Loading</h3>
-        </template>
-        <template v-if="completed">
-            <h3>The survey is completed.</h3>
-        </template>
-        <template v-else-if="currentQuestion && currentResponse">
-            <button class="btn btn primary" @click="previousQuestion()" v-if="hasPreviousQuestion">
-                Back
-            </button>
-            <question-card :question="currentQuestion"
-                    :response="currentResponse"
-                    :assessment-response="assessmentResponse"
-                    :assessment="assessment"
-                    @updated="updateResponse"/>
-        </template>
-        <div class="cvActions">
-            <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
-            <button class="btn btn primary no-loading" @click="nextQuestion()" v-if="hasNextQuestion" :disabled="this.responseValidation && !this.responseValidation.isValid">
-                Next
-            </button>
-            <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
-                Get My Results
-            </button>
+        <div class="paddingContainer">
+            <h4>{{(questionIndex || 0) + 1}} of {{questions.length}}</h4>
+            <template v-if="loading">
+                <h3>Loading</h3>
+            </template>
+            <template v-if="completed">
+                <h3>The survey is completed.</h3>
+            </template>
+            <template v-else-if="currentQuestion && currentResponse">
+                <button class="btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
+                    <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                </button>
+                <question-card :question="currentQuestion"
+                        :response="currentResponse"
+                        :assessment-response="assessmentResponse"
+                        :assessment="assessment"
+                        @updated="updateResponse"/>
+            </template>
+            <div class="cvActions">
+                <p class="validation" v-if="responseValidation && responseValidation.message">{{responseValidation.message}}</p>
+                <button class="btn btn primary no-loading" @click="nextQuestion()" v-if="hasNextQuestion" :disabled="this.responseValidation && !this.responseValidation.isValid">
+                    Next
+                </button>
+                <button @click="finish" class="btn btn primary no-loading" v-if="!hasNextQuestion && questionIndex > 0 && !completed" :disabled="this.responseValidation && !this.responseValidation.isValid">
+                    Get My Results
+                </button>
+            </div>
         </div>
-
     </div>
 </template>
 
@@ -160,6 +161,22 @@
     @import "variables";
     @import "mixins";
 
+    .assessment-container {
+        @include r(768) {
+            @include shadowbox;
+            margin: 6.4rem auto;
+            overflow: hidden;
+        }
+    }
+
+    .paddingContainer {
+        padding: 2.4rem;
+
+        @include r(768) {
+            padding: 3.2rem;
+        }
+    }
+
     .cvActions {
         background-color: transparentize($white, .15);
         bottom: 0;
@@ -167,6 +184,12 @@
         padding: 1.6rem;
         position: fixed;
         right: 0;
+
+        @include r(768) {
+            background-color: transparent;
+            padding: 0;
+            position: static;
+        }
 
         button {
             width: 100%;
@@ -176,5 +199,16 @@
     .validation {
         padding-bottom: .8rem;
         text-align: center;
+
+        @include r(768) {
+            text-align: left;
+        }
+    }
+
+    .backArrow {
+        fill: $green;
+        height: 1.4rem;
+        transform: rotate(180deg);
+        width: 1.4rem;
     }
 </style>

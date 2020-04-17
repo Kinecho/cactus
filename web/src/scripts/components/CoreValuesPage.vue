@@ -1,6 +1,6 @@
 <template>
     <div class="coreValuesPage">
-        <NavBar :isSticky="false"/>
+        <NavBar :isSticky="false" v-if="!assessmentInProgress"/>
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
 
@@ -214,6 +214,10 @@
         overflow: hidden;
         position: relative;
 
+        @include r(768) {
+            background-color: $beige;
+        }
+
         header, .centered {
             width: 100%;
         }
@@ -221,7 +225,6 @@
         .centered {
             flex-grow: 1;
             max-width: 80rem;
-            padding: 0 2.4rem 6.4rem;
             text-align: left;
         }
 

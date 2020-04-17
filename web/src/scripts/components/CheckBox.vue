@@ -118,6 +118,10 @@
         &.disabled {
             color: $lightText;
             cursor: default;
+
+            &:hover input:not(:checked) ~ .checkmark {
+                border-color: #ccc;
+            }
         }
     }
 
