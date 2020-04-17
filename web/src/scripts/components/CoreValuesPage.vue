@@ -46,7 +46,12 @@
                     </div>
                 </figure>
                 <button class="small">Share My Values</button>
-                <p class="extraPadding">Not sure these are right or feel like they’ve changed? Feel free to
+
+                <p class="extraPadding" v-if="newAssessmentAvailable">
+                    A new assessment is available. <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">Take
+                    the assessment</a>.
+                </p>
+                <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve changed? Feel free to
                     <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake
                         the assessment</a>.</p>
             </template>
@@ -89,7 +94,8 @@
         memberObserver: ListenerUnsubscriber | null,
         assessment: CoreValuesAssessment,
         assessmentResponse: CoreValuesAssessmentResponse | null
-        assessmentResponseObserver?: ListenerUnsubscriber
+        assessmentResponseObserver?: ListenerUnsubscriber,
+        newAssessmentAvailable: boolean
     }
 
     const logger = new Logger("CoreValuesPage");
@@ -114,6 +120,7 @@
                 assessment: CoreValuesAssessment.default(),
                 assessmentResponse: null,
                 assessmentResponseObserver: undefined,
+                newAssessmentAvailable: false,
             };
         },
         beforeMount() {
@@ -126,6 +133,9 @@
                         const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
                         if (currentResults) {
                             this.assessmentResponse = currentResults;
+                            if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
+                                this.newAssessmentAvailable = true;
+                            }
                         }
                     }
                     this.loading = false;
