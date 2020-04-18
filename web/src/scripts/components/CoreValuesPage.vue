@@ -228,6 +228,10 @@
             @include r(768) {
                 background-color: $beige;
             }
+
+            .centered {
+                padding: 0;
+            }
         }
 
         header, .centered {
@@ -236,12 +240,17 @@
 
         .centered {
             flex-grow: 1;
-            max-width: 80rem;
+            max-width: 768px;
+            padding: 0 2.4rem 6.4rem;
             text-align: left;
         }
 
         h1 {
-            margin: 6.4rem 0 1.6rem;
+            margin: 3.2rem 0 1.6rem;
+
+            @include r(768) {
+                margin: 6.4rem 0 1.6rem;
+            }
         }
 
         p {
