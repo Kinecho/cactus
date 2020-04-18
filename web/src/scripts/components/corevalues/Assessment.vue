@@ -20,7 +20,9 @@
                         @updated="updateResponse"/>
             </template>
             <div class="cvActions">
-                <p class="validation" v-if="showValidation && responseValidation && responseValidation.message">{{responseValidation.message}}</p>
+                <transition name="fade-in-fast" appear>
+                    <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">{{responseValidation.message}}</p>
+                </transition>
                 <button class="btn btn primary no-loading"
                         @click="nextQuestion()"
                         v-if="hasNextQuestion"
@@ -206,7 +208,7 @@
         @include r(768) {
             background-color: transparent;
             padding: 0;
-            position: static;
+            position: relative;
         }
 
         button {
@@ -215,7 +217,16 @@
     }
 
     .validation {
+        color: $red;
+        font-size: 1.6rem;
         padding-bottom: .8rem;
+
+        @include r(768) {
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: -2.8rem;
+        }
     }
 
     .backArrowbtn {
