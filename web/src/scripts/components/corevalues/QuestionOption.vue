@@ -105,6 +105,7 @@
         font-size: 1.6rem;
         opacity: .8;
         padding: 0 1.6rem 2rem 1.8rem;
+        text-align: left;
     }
 
 </style>
