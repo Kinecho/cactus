@@ -130,8 +130,7 @@
             async finish() {
                 this.completed = true;
                 this.assessmentResponse.completed = true;
-                // await this.save();
-                this.$emit("completed");
+                this.$emit("completed", this.assessmentResponse);
             },
             async updateResponse(response: CoreValuesQuestionResponse) {
                 this.assessmentResponse?.setResponse(response);
