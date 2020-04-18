@@ -88,7 +88,8 @@
     }
 
     .titleMarkdown {
-        margin-bottom: 3.2rem;
+        margin: 0 auto 4rem;
+        max-width: 60rem;
     }
 
     .question-options {

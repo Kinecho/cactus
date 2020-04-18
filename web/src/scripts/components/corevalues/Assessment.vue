@@ -10,7 +10,7 @@
                 <h3>The survey is completed.</h3>
             </template>
             <template v-else-if="currentQuestion && currentResponse">
-                <button class="btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
+                <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
                     <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
                 </button>
                 <question-card :question="currentQuestion"
@@ -177,6 +177,9 @@
     @import "mixins";
 
     .assessment-container {
+        position: relative;
+        text-align: center;
+
         @include r(768) {
             @include shadowbox;
             margin: 6.4rem auto;
@@ -213,10 +216,16 @@
 
     .validation {
         padding-bottom: .8rem;
-        text-align: center;
+    }
+
+    .backArrowbtn {
+        left: 1.2rem;
+        position: absolute;
+        top: 2rem;
 
         @include r(768) {
-            text-align: left;
+            left: 1.9rem;
+            top: 3.1rem;
         }
     }
 
