@@ -50,8 +50,7 @@
                 </p>
                 <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
                     changed? Feel free to
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake
-                        the assessment</a>.</p>
+                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.</p>
             </template>
             <template v-else-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
