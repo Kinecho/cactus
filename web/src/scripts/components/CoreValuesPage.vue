@@ -210,7 +210,7 @@
                 return tier === SubscriptionTier.PLUS
             },
             displayName(): string {
-                return isBlank(this.member?.firstName) ? this.member?.firstName ?? "" : this.member?.getFullName() ?? ""
+                return !isBlank(this.member?.firstName) ? this.member?.firstName ?? "" : this.member?.getFullName() ?? "My"
             }
         }
     })
