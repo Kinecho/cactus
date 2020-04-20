@@ -26,6 +26,10 @@
                 type: Boolean,
                 default: false,
             },
+            extraPadding: {
+                type: Boolean,
+                default: false,
+            },
             modelValue: {
                 default: false,
                 type: [Boolean, String, Array],
@@ -54,6 +58,7 @@
             classNames(): { [name: string]: boolean } {
                 return {
                     disabled: this.disabled,
+                    extraPadding: this.extraPadding,
                     radio: this.type === QuestionType.RADIO,
                     checkbox: this.type === QuestionType.MULTI_SELECT
                 }
@@ -123,6 +128,10 @@
                 border-color: #ccc;
             }
         }
+
+        &.extraPadding {
+            padding: 1.6rem;
+        }
     }
 
     /* Hide the browser's default checkbox */
@@ -186,11 +195,16 @@
             content: "";
             display: none;
             height: 10px;
-            left: 9px;
+            left: .9rem;
             position: absolute;
-            top: 5px;
+            top: .5rem;
             transform: rotate(45deg);
             width: 5px;
+
+            .extraPadding & {
+                left: 2.5rem;
+                top: 2.1rem;
+            }
         }
 
         &.radio {

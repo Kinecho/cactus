@@ -1,7 +1,7 @@
 @import "variables";
 
 @mixin fancyLink {
-  background-image: linear-gradient($pinky, $pinky);
+  background-image: linear-gradient(lighten($pinky, 10%), lighten($pinky, 10%));
   background-position: 0 100%;
   background-repeat: no-repeat;
   background-size: 100% .8rem;

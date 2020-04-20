@@ -8,7 +8,6 @@
                 <h1>Loading</h1>
             </div>
 
-            <!-- TODO: make booleans plusUser and hasValues work -->
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
             </template>
@@ -19,7 +18,6 @@
                     of how your values have been at the heart of past decisions and how they will unlock a happier
                     future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
-                <!-- TODO: hook up button -->
                 <button class="primaryBtn" @click="createAssessmentResponse" :disabled="creatingAssessment">Take the
                     Assessment
                 </button>
@@ -29,12 +27,10 @@
                     purpose, and meaning of your core values. This will help you understand past life decisions and, by
                     prioritizing your values, make better decisions in the future.</p>
                 <figure class="coreValuesCard">
-                    <!-- TODO: hook up displayName -->
                     <h3><span class="cvName" v-if="displayName">{{displayName}}'s</span>Core Values</h3>
                     <div class="flexContainer">
                         <!-- TODO: insert random blob here -->
                         <img class="cvBlob" src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0" alt="core value blob graphic"/>
-                        <!-- TODO: make this list dynamic -->
                         <ul class="valuesList" v-if="coreValueResults">
                             <li v-for="(value, i) in coreValueResults" :key="`value_${i}`">
                                 <span class="title">{{value.title}}</span>
@@ -54,8 +50,7 @@
                 </p>
                 <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
                     changed? Feel free to
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake
-                        the assessment</a>.</p>
+                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.</p>
             </template>
             <template v-else-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
@@ -233,6 +228,10 @@
             @include r(768) {
                 background-color: $beige;
             }
+
+            .centered {
+                padding: 0;
+            }
         }
 
         header, .centered {
@@ -241,12 +240,17 @@
 
         .centered {
             flex-grow: 1;
-            max-width: 80rem;
+            max-width: 768px;
+            padding: 0 2.4rem 6.4rem;
             text-align: left;
         }
 
         h1 {
-            margin: 6.4rem 0 1.6rem;
+            margin: 3.2rem 0 1.6rem;
+
+            @include r(768) {
+                margin: 6.4rem 0 1.6rem;
+            }
         }
 
         p {

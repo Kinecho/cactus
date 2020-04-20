@@ -116,5 +116,10 @@ module.exports = {
         "title": "Core Values",
         "path": "/core-values",
         "name": "core_values"
+    },
+    "sponsor": {
+        "title": "Sponsor",
+        "path": "/sponsor",
+        "name": "sponsor"
     }
 }

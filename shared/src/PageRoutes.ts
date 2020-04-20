@@ -9,6 +9,7 @@ export enum PageRoute {
     FRIENDS = "/friends",
     SHARED_REFLECTION = "/reflection",
     SOCIAL = "/activity",
+    SPONSOR = "/sponsor",
     ACCOUNT = "/account",
     UNSUBSCRIBE_SUCCESS = "/unsubscribe-confirmed",
     NATIVE_APP_MAGIC_LINK_LOGIN = "/app-login-continue",
