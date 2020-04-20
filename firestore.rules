@@ -143,8 +143,9 @@ service cloud.firestore {
     }
 
     match /coreValuesAssessmentResponses/{document=**} {
-        allow create: if getMemberId() == request.resource.data.memberId;
-        allow read,update: if getMemberId() == resource.data.memberId;
+        //allow create: if getMemberId() == request.resource.data.memberId;
+        //allow read,update: if getMemberId() == resource.data.memberId;
+        allow read,update,create: if true;
     }
 
 	  match /socialConnections/{document=**} {

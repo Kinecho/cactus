@@ -41,6 +41,7 @@ export enum QueryParam {
     ABBREVIATED = "short",
     AUTH_TOKEN = "token",
     DOWNLOAD_TOKEN = "download_token",
+    EMBED="embed"
 
 }
 

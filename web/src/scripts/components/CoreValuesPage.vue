@@ -1,10 +1,12 @@
 <template>
     <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
-        <NavBar :isSticky="false" v-if="!assessmentInProgress"/>
+        <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
-
-            <div v-if="loading">
+            <div v-if="errorMessage" class="alert">
+                {{errorMessage}}
+            </div>
+            <div v-if="loading || (embed && !appRegistered)">
                 <h1>Loading</h1>
             </div>
 
@@ -50,7 +52,8 @@
                 </p>
                 <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
                     changed? Feel free to
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.</p>
+                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.
+                </p>
             </template>
             <template v-else-if="!plusUser">
                 <p>Different language? Core values are the general expression of what is most important for you, and
@@ -62,7 +65,7 @@
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
         </div>
-        <Footer v-if="!assessmentInProgress"/>
+        <Footer v-if="!assessmentInProgress && !embed"/>
     </div>
 </template>
 
@@ -78,10 +81,10 @@
     import { isBlank } from "@shared/util/StringUtil";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
-    import CoreValuesAssessmentResponse, { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+    import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import Logger from "@shared/Logger";
-    import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
 
     interface CoreValuesData {
         loading: boolean,
@@ -92,7 +95,12 @@
         assessment: CoreValuesAssessment,
         assessmentResponse: CoreValuesAssessmentResponse | null
         assessmentResponseObserver?: ListenerUnsubscriber,
-        newAssessmentAvailable: boolean
+        newAssessmentAvailable: boolean,
+        appRegistered: boolean,
+        appDisplayName: string | undefined,
+        errorMessage: string | null,
+        appMemberId: string | undefined,
+        appSubscriptionTier: SubscriptionTier | undefined,
     }
 
     const logger = new Logger("CoreValuesPage");
@@ -106,7 +114,9 @@
         created() {
 
         },
-        props: {},
+        props: {
+            embed: { type: Boolean, default: false },
+        },
         data(): CoreValuesData {
             return {
                 loading: true,
@@ -118,9 +128,36 @@
                 assessmentResponse: null,
                 assessmentResponseObserver: undefined,
                 newAssessmentAvailable: false,
+                appRegistered: false,
+                appMemberId: undefined,
+                appDisplayName: undefined,
+                errorMessage: null,
+                appSubscriptionTier: undefined,
             };
         },
         beforeMount() {
+            if (this.embed) {
+                this.loading = true;
+                window.CactusIosDelegate = {
+                    register: async (id: string, displayName: string, tier: SubscriptionTier) => {
+                        this.appMemberId = id;
+                        this.appDisplayName = displayName;
+                        this.appSubscriptionTier = tier;
+                        this.appRegistered = true;
+
+                        const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
+                        if (currentResults) {
+                            this.assessmentResponse = currentResults;
+                            if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
+                                this.newAssessmentAvailable = true;
+                            }
+                        }
+                        this.loading = false
+                    }
+                }
+                return
+            }
+
             this.loading = true;
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
@@ -144,7 +181,18 @@
         },
         methods: {
             goToPricing() {
-                window.location.href = PageRoute.PRICING;
+                this.errorMessage = null
+                if (this.embed) {
+                    try {
+                        window.webkit.messageHandlers.showPricing.postMessage(true);
+                    } catch (error) {
+                        this.errorMessage = error.message ?? "Unable to open the pricing page."
+                        logger.error("Failed to post message to webkit");
+                    }
+
+                } else {
+                    window.location.href = PageRoute.PRICING;
+                }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
 
@@ -168,7 +216,7 @@
                 const assessment = this.assessment;
                 this.loading = true;
                 const version = assessment.version;
-                const memberId = this.member?.id;
+                const memberId = this.member?.id ?? this.appMemberId;
                 if (!memberId) {
                     logger.error("No member id was found, can't create assessment");
                     return;
@@ -201,11 +249,15 @@
                 return values.map(v => CoreValuesService.shared.getMeta(v));
             },
             plusUser(): boolean {
-                const tier = this.member?.tier ?? SubscriptionTier.PLUS;
+                const tier = this.member?.tier ?? this.appSubscriptionTier ?? SubscriptionTier.BASIC;
                 return tier === SubscriptionTier.PLUS
             },
             displayName(): string {
-                return !isBlank(this.member?.firstName) ? this.member?.firstName ?? "" : this.member?.getFullName() ?? "My"
+                if (this.embed && this.appDisplayName) {
+                    return this.appDisplayName;
+                }
+
+                return !isBlank(this.member?.firstName) ? this.member?.firstName ?? "" : this.member?.getFullName() ?? ""
             }
         }
     })
