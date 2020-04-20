@@ -31,8 +31,9 @@
                 <figure class="coreValuesCard">
                     <h3><span class="cvName" v-if="displayName">{{displayName}}'s</span>Core Values</h3>
                     <div class="flexContainer">
-                        <!-- TODO: insert random blob here -->
-                        <img class="cvBlob" src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0" alt="core value blob graphic"/>
+                        <div class="cvBlobContainer">
+                            <img class="cvBlob" v-if="blobImageUrl" :src="blobImageUrl" alt="core value blob graphic"/>
+                        </div>
                         <ul class="valuesList" v-if="coreValueResults">
                             <li v-for="(value, i) in coreValueResults" :key="`value_${i}`">
                                 <span class="title">{{value.title}}</span>
@@ -78,7 +79,7 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import { PageRoute } from '@shared/PageRoutes'
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
-    import { isBlank } from "@shared/util/StringUtil";
+    import { getIntegerFromStringBetween, isBlank } from "@shared/util/StringUtil";
     import Assessment from "@components/corevalues/Assessment.vue";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
@@ -104,6 +105,13 @@
     }
 
     const logger = new Logger("CoreValuesPage");
+
+    const blobUrls: string[] = [
+        "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0",
+        "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200425.png?alt=media&token=ed9a3600-eb1a-493b-ab41-49ac3ae19233",
+        "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2004212.png?alt=media&token=b678702d-46b2-44b3-8bd9-1c62e08a27c3",
+        "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200416.png?alt=media&token=32a014e0-10f3-4d07-bf01-9aa813b0a5e6"
+    ]
 
     export default Vue.extend({
         components: {
@@ -250,6 +258,16 @@
             hasValues(): boolean {
                 return (this.assessmentResponse?.completed ?? false) && (this.assessmentResponse?.results?.values ?? []).length > 0;
             },
+            blobImageUrl(): string | null {
+                let results = this.coreValueResults
+                if (!this.hasValues || !results) {
+                    return null
+                }
+                let valueString = results.map(r => r.title).join("");
+                const index = getIntegerFromStringBetween(valueString, blobUrls.length)
+                return blobUrls[index];
+
+            },
             coreValueResults(): CoreValueMeta[] | undefined {
                 let values = this.assessmentResponse?.results?.values;
                 if (!values) {
@@ -376,14 +394,20 @@
         }
     }
 
-    .cvBlob {
+    .cvBlobContainer {
         align-self: flex-start;
         height: auto;
         margin-bottom: -3.2rem;
         max-width: 20rem;
         transform: translate(-.8rem);
         width: 50%;
+
+        .cvBlob {
+            width: 100%;
+            height: 100%;
+        }
     }
+
 
     button.small {
         display: flex;
