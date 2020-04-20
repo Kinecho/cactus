@@ -859,6 +859,10 @@
         }
     }
 
+    .quote-container ~ .link-container {
+        margin: 2.4rem 0 6.4rem;
+    }
+
     .link-container {
         margin: -1.6rem 0 6.4rem;
 
