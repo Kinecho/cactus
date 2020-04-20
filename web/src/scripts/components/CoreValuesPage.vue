@@ -3,7 +3,7 @@
         <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
-            <div v-if="errorMessage" class="alert">
+            <div v-if="errorMessage" class="alert error">
                 {{errorMessage}}
             </div>
             <div v-if="loading || (embed && !appRegistered)">
@@ -135,6 +135,15 @@
                 appSubscriptionTier: undefined,
             };
         },
+        mounted(): void {
+            if (this.embed) {
+                try {
+                    window.webkit.messageHandlers.appMounted.postMessage(true);
+                } catch (error) {
+                    logger.error("Failed to post message to webkit");
+                }
+            }
+        },
         beforeMount() {
             if (this.embed) {
                 this.loading = true;
@@ -144,7 +153,6 @@
                         this.appDisplayName = displayName;
                         this.appSubscriptionTier = tier;
                         this.appRegistered = true;
-
                         const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
                         if (currentResults) {
                             this.assessmentResponse = currentResults;
@@ -153,9 +161,10 @@
                             }
                         }
                         this.loading = false
+                        return "success"
                     }
                 }
-                return
+                return;
             }
 
             this.loading = true;
