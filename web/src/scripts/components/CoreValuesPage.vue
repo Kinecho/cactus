@@ -11,7 +11,7 @@
                 <spinner message="Loading..."/>
             </div>
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
-                <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
+                <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @close="closeAssessment" @save="save" @completed="complete"/>
             </template>
             <template v-else-if="plusUser && !hasValues">
                 <p>Core values are the general expression of what is most important for you, and they help you
@@ -175,14 +175,15 @@
                         this.appDisplayName = displayName;
                         this.appSubscriptionTier = tier;
                         this.appRegistered = true;
-                        const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
-                        if (currentResults) {
-                            this.assessmentResponse = currentResults;
-                            if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
-                                this.newAssessmentAvailable = true;
-                            }
-                        }
-                        this.loading = false
+                        this.loadCurrentResults();
+                        // const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
+                        // if (currentResults) {
+                        //     this.assessmentResponse = currentResults;
+                        //     if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
+                        //         this.newAssessmentAvailable = true;
+                        //     }
+                        // }
+                        // this.loading = false
                         return "success"
                     }
                 }
@@ -201,13 +202,7 @@
                             return;
                         }
 
-                        const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
-                        if (currentResults) {
-                            this.assessmentResponse = currentResults;
-                            if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
-                                this.newAssessmentAvailable = true;
-                            }
-                        }
+                        await this.loadCurrentResults()
                     }
                     this.loading = false;
                 }
@@ -217,6 +212,26 @@
             this.memberObserver?.()
         },
         methods: {
+            async closeAssessment() {
+              this.assessmentInProgress = false;
+              await this.loadCurrentResults();
+              this.loading = false
+            },
+            async loadCurrentResults() {
+                this.loading = true;
+                const memberId = this.member?.id ?? this.appMemberId;
+                if (!memberId) {
+                    this.loading = false;
+                    return
+                }
+                const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
+                if (currentResults) {
+                    this.assessmentResponse = currentResults;
+                    if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
+                        this.newAssessmentAvailable = true;
+                    }
+                }
+            },
             goToPricing() {
                 this.errorMessage = null
                 if (this.embed) {

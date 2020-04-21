@@ -6,12 +6,21 @@
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
+            <button class="close" v-if="!showCloseConfirm" @click="close">Close</button>
+            <div class="alert warn" v-if="showCloseConfirm">
+                Are you sure you want to close the assessment? Your progress will not be saved.
+                <button @click="showCloseConfirm = false">No, continue with the survey</button>
+                <button @click="close">Yes, close</button>
+            </div>
             <template v-if="completed">
                 <p class="titleMarkdown">The survey is completed.</p>
             </template>
+
             <template v-else-if="currentQuestion && currentResponse">
                 <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
-                    <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/></svg>
+                    <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                        <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                    </svg>
                 </button>
                 <question-card :question="currentQuestion"
                         :response="currentResponse"
@@ -21,7 +30,8 @@
             </template>
             <div class="cvActions">
                 <transition name="fade-in-fast" appear>
-                    <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">{{responseValidation.message}}</p>
+                    <p class="validation" v-show="showValidation && responseValidation && responseValidation.message">
+                        {{responseValidation.message}}</p>
                 </transition>
                 <button class="btn btn primary no-loading"
                         @click="nextQuestion()"
@@ -66,7 +76,8 @@
             questionIndex: number | null,
             completed: boolean,
             showValidation: boolean,
-            questions: CoreValuesQuestion[]
+            questions: CoreValuesQuestion[],
+            showCloseConfirm: boolean,
         } {
             return {
                 loading: false,
@@ -74,6 +85,7 @@
                 completed: false,
                 showValidation: false,
                 questions: this.assessment.getQuestions(this.assessmentResponse),
+                showCloseConfirm: false,
             }
         },
         computed: {
@@ -114,14 +126,14 @@
             }
         },
         methods: {
-            /**
-             * Save the answers to the DB or send back to the app
-             * @return {Promise<void>}
-             */
-            async submit() {
-
+            close() {
+                if (!this.showCloseConfirm) {
+                    this.showCloseConfirm = true;
+                    return;
+                }
+                this.showCloseConfirm = false;
+                this.$emit("close");
             },
-
             async save() {
                 this.$emit("save", this.assessmentResponse);
                 this.questions = this.assessment.getQuestions(this.assessmentResponse);
