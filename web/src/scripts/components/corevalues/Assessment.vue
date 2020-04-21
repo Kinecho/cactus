@@ -7,7 +7,7 @@
                 <h3>Loading</h3>
             </template>
             <template v-if="completed">
-                <h3>The survey is completed.</h3>
+                <p class="titleMarkdown">The survey is completed.</p>
             </template>
             <template v-else-if="currentQuestion && currentResponse">
                 <button class="backArrowbtn btn tertiary icon" @click="previousQuestion()" v-if="hasPreviousQuestion">
@@ -245,5 +245,9 @@
         height: 1.4rem;
         transform: rotate(180deg);
         width: 1.4rem;
+    }
+
+    .titleMarkdown {
+        margin: 3.2rem auto 4rem;
     }
 </style>
