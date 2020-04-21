@@ -42,9 +42,9 @@
                         :autoHide="false"
                         color="dolphin">
                         <div slot="text" class="centered">
-                            <h3 class="cvTitle">What's important to you?</h3>
+                            <h3 class="cvTitle">What's important to&nbsp;you?</h3>
                             <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our assessment.</p>
-                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included with your Plus membership.</p>
+                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included with your Plus&nbsp;membership.</p>
                         </div>
                         <button class="cvButton" slot="action" @click="launchCoreValues">Find My Core Values</button>
                     </snackbar-content>
@@ -400,7 +400,12 @@
         background-size: auto, 28rem, auto;
         border-radius: 0;
         display: block;
+        margin-top: -2.4rem;
         padding: 3.2rem 2.4rem;
+
+        @include r(768) {
+            margin-top: -6.4rem;
+        }
 
         @include r(960) {
             align-self: flex-start;
@@ -408,6 +413,8 @@
             border-radius: 1.2rem;
             margin: 0 2.4rem;
             padding: 6.4rem 3.2rem;
+            position: sticky;
+            top: 3.2rem;
             width: 30rem;
         }
     }
@@ -420,7 +427,8 @@
 
     .cvSubtext {
         color: $white;
-        margin-bottom: 1.6rem;
+        margin: 0 auto 1.6rem;
+        max-width: 60rem;
         opacity: .9;
     }
 

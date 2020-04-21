@@ -370,13 +370,21 @@
             padding-right: .4rem;
         }
 
-        ul {
-            align-self: center;
-            list-style: none;
-            margin: 0 0 0 1.6rem;
-            padding: 0 1.6rem 0 0;
-            text-align: center;
-            width: 100%;
+        h3 {
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    .valuesList {
+        align-self: center;
+        list-style: none;
+        margin: 0 0 0 1.6rem;
+        padding: 0 1.6rem 0 0;
+        text-align: center;
+        width: 100%;
+
+        @include r(768) {
+            width: 50%;
         }
 
         li {
@@ -387,10 +395,10 @@
             margin: 0 0 .8rem;
             padding: 0;
             text-transform: uppercase;
-        }
 
-        h3 {
-            margin-bottom: 1.6rem;
+            &:last-child {
+                margin-bottom: 0;
+            }
         }
     }
 
