@@ -21,8 +21,6 @@
             running(run, previous) {
                 if (run && !previous) {
                     this.run();
-                } else {
-                    confetti.reset();
                 }
             }
         },
