@@ -1,17 +1,18 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
-        <upgrade-card class="journalListItem" v-if="dataHasLoaded && showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <upgrade-card class="journalListItem" v-if="dataHasLoaded && showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
-            class="upgrade-confirmation"
-            v-if="upgradeConfirmed"
-            :closeable="true"
-            key="upgrade-confirmation"
-            :autoHide="false"
-            color="successAlt">
+                class="upgrade-confirmation"
+                v-if="upgradeConfirmed"
+                :closeable="true"
+                key="upgrade-confirmation"
+                :autoHide="false"
+                color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
+                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -36,15 +37,18 @@
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
                     <snackbar-content
-                        class="coreValuesBox"
-                        :closeable="true"
-                        key="upgrade-confirmation"
-                        :autoHide="false"
-                        color="dolphin">
+                            v-if="!hasCoreValues"
+                            class="coreValuesBox"
+                            :closeable="true"
+                            key="upgrade-confirmation"
+                            :autoHide="false"
+                            color="dolphin">
                         <div slot="text" class="centered">
                             <h3 class="cvTitle">What's important to&nbsp;you?</h3>
-                            <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our assessment.</p>
-                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included with your Plus&nbsp;membership.</p>
+                            <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our
+                                assessment.</p>
+                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included
+                                with your Plus&nbsp;membership.</p>
                         </div>
                         <button class="cvButton" slot="action" @click="launchCoreValues">Find My Core Values</button>
                     </snackbar-content>
@@ -85,31 +89,31 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import {Config} from "@web/config";
-    import {FirebaseUser} from '@web/firebase';
+    import { Config } from "@web/config";
+    import { FirebaseUser } from '@web/firebase';
     import JournalEntryCard from "@components/JournalEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
-    import {PageRoute} from '@shared/PageRoutes'
+    import { PageRoute } from '@shared/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
     import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
     import JournalEntry from '@web/datasource/models/JournalEntry'
-    import {debounce} from "debounce"
+    import { debounce } from "debounce"
     import Spinner from "@components/Spinner.vue"
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {QueryParam} from "@shared/util/queryParams";
-    import {getQueryParam} from "@web/util";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import { QueryParam } from "@shared/util/queryParams";
+    import { getQueryParam } from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import {fireStartTrialEvent} from "@web/analytics";
-    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import { fireStartTrialEvent } from "@web/analytics";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -140,8 +144,8 @@
             SnackbarContent
         },
         props: {
-            loginPath: {type: String, default: PageRoute.SIGNUP},
-            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
+            loginPath: { type: String, default: PageRoute.SIGNUP },
+            firstPromptPath: { type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId }
         },
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
@@ -162,7 +166,7 @@
             logger.log("Journal Home calling Created function");
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member, user}) => {
+                onData: async ({ member, user }) => {
                     if (!user) {
                         logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         window.location.href = PageRoute.HOME;
@@ -224,7 +228,7 @@
 
                     if (isFreshLogin) {
                         logger.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
+                        this.dataSource = new JournalFeedDataSource(member!, { onlyCompleted: true });
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 logger.log("[JournalHome] didLoad called. Has Data = ", hasData);
@@ -236,7 +240,7 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                logger.log(`entry updated at index ${index}`, entry);
+                                logger.log(`entry updated at index ${ index }`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -304,7 +308,7 @@
             },
             launchCoreValues() {
                 // TODO: launch core values assessment
-                // window.location.href = PageRoute.CORE_VALUES;
+                window.location.href = PageRoute.CORE_VALUES;
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
@@ -324,15 +328,18 @@
             isSticky(): boolean {
                 return false;
             },
+            hasCoreValues(): boolean {
+                return (this.cactusMember?.coreValues ?? []).length > 0
+            },
             upgradeConfirmed(): boolean {
                 const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
                 return upgradeQueryParam === 'success';
             },
             showOnboardingPrompt(): boolean {
                 return (this.loggedIn &&
-                    this.loginReady &&
-                    this.dataHasLoaded &&
-                    this.journalEntries.length === 0)
+                this.loginReady &&
+                this.dataHasLoaded &&
+                this.journalEntries.length === 0)
             }
         }
     })
