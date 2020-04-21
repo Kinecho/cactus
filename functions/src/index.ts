@@ -30,7 +30,7 @@ import appleEndpoints from "@api/endpoints/appleEndpoints"
 import {
     updateMemberProfileTrigger,
     updatePromptSendTimeTrigger,
-    updateSubscriptionDetailsTrigger
+    updateSubscriptionDetailsTrigger,
 } from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import { onPublish as expireMembershipJob } from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
