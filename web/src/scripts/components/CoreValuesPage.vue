@@ -2,7 +2,7 @@
     <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
         <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
         <confetti :running="showConfetti"/>
-
+        <button @click="showConfetti = !showConfetti">{{showConfetti ? "Show" : "Restart"}} Confetti</button>
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
             <div v-if="errorMessage" class="alert error">
