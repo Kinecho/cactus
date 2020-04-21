@@ -345,7 +345,6 @@
                 left: 70%;
                 top: -26rem;
                 width: 40rem;
-                z-index: 10;
             }
 
             &:before {
@@ -372,6 +371,8 @@
 
             .centered {
                 padding: 0;
+                position: relative;
+                z-index: 1;
             }
         }
 
@@ -451,11 +452,7 @@
         margin: 0 0 0 1.6rem;
         padding: 0 1.6rem 0 0;
         text-align: center;
-        width: 100%;
-
-        @include r(768) {
-            width: 50%;
-        }
+        width: 50%;
 
         li {
             font-size: 1.4rem;
