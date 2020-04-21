@@ -114,6 +114,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue";
     import { fireStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { appendQueryParams } from "@shared/util/StringUtil";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -308,7 +309,7 @@
             },
             launchCoreValues() {
                 // TODO: launch core values assessment
-                window.location.href = PageRoute.CORE_VALUES;
+                window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)

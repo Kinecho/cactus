@@ -20,7 +20,7 @@
                     of how your values have been at the heart of past decisions and how they will unlock a happier
                     future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
-                <button class="primaryBtn" @click="createAssessmentResponse" :disabled="creatingAssessment">Take the
+                <button class="primaryBtn" @click="startNewAssessment" :disabled="creatingAssessment">Take the
                     Assessment
                 </button>
             </template>
@@ -48,12 +48,12 @@
 
                 <p class="extraPadding" v-if="newAssessmentAvailable">
                     A new assessment is available.
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">Take
+                    <a class="fancyLink" href="" @click.prevent="startNewAssessment" :disabled="creatingAssessment">Take
                         the assessment</a>.
                 </p>
                 <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
                     changed? Feel free to
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.
+                    <a class="fancyLink" href="" @click.prevent="startNewAssessment" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.
                 </p>
             </template>
             <template v-else-if="!plusUser">
@@ -86,6 +86,8 @@
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import Logger from "@shared/Logger";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
 
     interface CoreValuesData {
         loading: boolean,
@@ -181,6 +183,11 @@
                     this.member = member;
                     const memberId = member?.id;
                     if (memberId) {
+                        if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH))) {
+                            this.startNewAssessment()
+                            return;
+                        }
+
                         const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
                         if (currentResults) {
                             this.assessmentResponse = currentResults;
@@ -229,7 +236,7 @@
                     this.assessmentResponse = saved;
                 }
             },
-            async createAssessmentResponse() {
+            async startNewAssessment() {
                 const assessment = this.assessment;
                 this.loading = true;
                 const version = assessment.version;
