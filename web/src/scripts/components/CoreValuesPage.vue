@@ -8,7 +8,7 @@
                 {{errorMessage}}
             </div>
             <div v-if="loading || (embed && !appRegistered)">
-                <h1>Loading</h1>
+                <spinner message="Loading..."/>
             </div>
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
@@ -89,6 +89,7 @@
     import { getQueryParam, removeQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import Spinner from "@components/Spinner.vue";
 
     interface CoreValuesData {
         loading: boolean,
@@ -127,6 +128,7 @@
             Footer,
             Assessment,
             Confetti: () => import("@components/CactusConfetti.vue"),
+            Spinner,
         },
         created() {
 
