@@ -5,7 +5,7 @@ import checkoutApp from "@api/endpoints/checkoutApp";
 import manageNotificationApp from "@api/endpoints/manageNotificationsEndpoints";
 import testApp from "@api/endpoints/testApp";
 import * as EmailRecipientsJob from "@api/pubsub/subscribers/ProcessMailchimpCampaignRecipientsJob";
-import {backupFirestore, exportFirestoreToBigQuery} from "@api/endpoints/DataExportJob";
+import { backupFirestore, exportFirestoreToBigQuery } from "@api/endpoints/DataExportJob";
 import * as BridgeToMondayJob from "@api/pubsub/subscribers/BridgeToMondayJob";
 import * as UnsubscriberReportSyncJob from "@api/pubsub/subscribers/UnsubscriberReportSyncJob";
 import {
@@ -19,8 +19,8 @@ import * as DailySentPromptJob from "@api/pubsub/subscribers/DailySentPromptJob"
 import * as MemberStatsJob from "@api/pubsub/subscribers/MemberStatsJob";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import * as SentPromptTriggers from "@api/triggers/SentPromptTriggers";
-import {onDelete} from "@api/triggers/UserTriggers";
-import {PubSubTopic} from "@shared/types/PubSubTypes";
+import { onDelete } from "@api/triggers/UserTriggers";
+import { PubSubTopic } from "@shared/types/PubSubTypes";
 import slackEndpoints from "@api/endpoints/slackEndpoints";
 import signupEndpoints from "@api/endpoints/signupEndpoints";
 import flamelinkEndpoints from "@api/endpoints/flamelinkEndpoints";
@@ -30,14 +30,15 @@ import appleEndpoints from "@api/endpoints/appleEndpoints"
 import {
     updateMemberProfileTrigger,
     updatePromptSendTimeTrigger,
-    updateSubscriptionDetailsTrigger
+    updateSubscriptionDetailsTrigger,
 } from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
-import {onPublish as expireMembershipJob} from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
-import {onPublish as syncTrailToMailchimpMembersJob} from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
-import {onPublish as GooglePlayBillingJob} from "@api/pubsub/subscribers/GooglePlayBillingListeners";
-import {transactionalOnCreate} from "@admin/AuthUserCreateJob";
-import {onPublish as CancellationJob} from "@admin/pubsub/ProcessSubscriptionCancellations";
+import { onPublish as expireMembershipJob } from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
+import { onPublish as syncTrailToMailchimpMembersJob } from "@admin/pubsub/SyncTrialMembersToMailchimpJob";
+import { onPublish as GooglePlayBillingJob } from "@api/pubsub/subscribers/GooglePlayBillingListeners";
+import { transactionalOnCreate } from "@admin/AuthUserCreateJob";
+import { onPublish as CancellationJob } from "@admin/pubsub/ProcessSubscriptionCancellations";
+import { updateMemberCoreValueFromAssessment } from "@api/triggers/CoreValuesAssessessmentResponseTriggers";
 
 export const cloudFunctions = {
     //API Endpoints
@@ -82,5 +83,6 @@ export const cloudFunctions = {
     updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
     publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
     updateSubscriptionDetailsTrigger,
-    updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite
+    updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite,
+    updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
 };

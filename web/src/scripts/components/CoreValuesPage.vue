@@ -1,6 +1,8 @@
 <template>
     <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
         <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
+        <confetti :running="showConfetti"/>
+
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
             <div v-if="errorMessage" class="alert error">
@@ -9,7 +11,6 @@
             <div v-if="loading || (embed && !appRegistered)">
                 <h1>Loading</h1>
             </div>
-
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
             </template>
@@ -20,7 +21,7 @@
                     of how your values have been at the heart of past decisions and how they will unlock a happier
                     future. Your core values results will guide your Cactus reflections.</p>
                 <p>Insert language about how long this will take or how many questions to set expectations...</p>
-                <button class="primaryBtn" @click="createAssessmentResponse" :disabled="creatingAssessment">Take the
+                <button class="primaryBtn" @click="startNewAssessment" :disabled="creatingAssessment">Take the
                     Assessment
                 </button>
             </template>
@@ -48,12 +49,12 @@
 
                 <p class="extraPadding" v-if="newAssessmentAvailable">
                     A new assessment is available.
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">Take
+                    <a class="fancyLink" href="" @click.prevent="startNewAssessment" :disabled="creatingAssessment">Take
                         the assessment</a>.
                 </p>
                 <p class="extraPadding" v-if="!newAssessmentAvailable">Not sure these are right or feel like they’ve
                     changed? Feel free to
-                    <a class="fancyLink" href="" @click.prevent="createAssessmentResponse" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.
+                    <a class="fancyLink" href="" @click.prevent="startNewAssessment" :disabled="creatingAssessment">retake&nbsp;the&nbsp;assessment</a>.
                 </p>
             </template>
             <template v-else-if="!plusUser">
@@ -86,10 +87,14 @@
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import Logger from "@shared/Logger";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { getQueryParam, removeQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     interface CoreValuesData {
         loading: boolean,
         creatingAssessment: boolean,
+        showConfetti: boolean,
         assessmentInProgress: boolean,
         member: CactusMember | null | undefined,
         memberObserver: ListenerUnsubscriber | null,
@@ -122,6 +127,7 @@
             NavBar,
             Footer,
             Assessment,
+            Confetti: () => import("@components/CactusConfetti.vue"),
         },
         created() {
 
@@ -135,6 +141,7 @@
                 creatingAssessment: false,
                 assessmentInProgress: false,
                 member: null,
+                showConfetti: false,
                 memberObserver: null,
                 assessment: CoreValuesAssessment.default(),
                 assessmentResponse: null,
@@ -185,6 +192,12 @@
                     this.member = member;
                     const memberId = member?.id;
                     if (memberId) {
+                        if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH)) && isPremiumTier(member?.tier)) {
+                            this.startNewAssessment()
+                            removeQueryParam(QueryParam.CV_LAUNCH);
+                            return;
+                        }
+
                         const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(memberId);
                         if (currentResults) {
                             this.assessmentResponse = currentResults;
@@ -216,7 +229,7 @@
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
-
+                this.showConfetti = true
                 assessmentResponse.completed = true;
                 // const assessmentResponse = this.assessmentResponse;
                 // assessmentResponse.completed = true;
@@ -233,7 +246,7 @@
                     this.assessmentResponse = saved;
                 }
             },
-            async createAssessmentResponse() {
+            async startNewAssessment() {
                 const assessment = this.assessment;
                 this.loading = true;
                 const version = assessment.version;
