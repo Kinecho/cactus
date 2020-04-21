@@ -2,14 +2,13 @@
     <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
         <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
         <confetti :running="showConfetti"/>
-        <button @click="showConfetti = !showConfetti">{{showConfetti ? "Show" : "Restart"}} Confetti</button>
         <div class="centered">
             <h1>Core Values</h1>
             <div v-if="errorMessage" class="alert error">
                 {{errorMessage}}
             </div>
             <div v-if="loading || (embed && !appRegistered)">
-                <h1>Loading</h1>
+                <spinner message="Loading..."/>
             </div>
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
@@ -90,6 +89,7 @@
     import { getQueryParam, removeQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import Spinner from "@components/Spinner.vue";
 
     interface CoreValuesData {
         loading: boolean,
@@ -130,6 +130,7 @@
             Footer,
             Assessment,
             Confetti: () => import("@components/CactusConfetti.vue"),
+            Spinner,
         },
         created() {
 
