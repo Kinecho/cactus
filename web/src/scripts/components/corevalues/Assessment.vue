@@ -7,8 +7,8 @@
                 <h3>Loading</h3>
             </template>
             <button class="close" @click="close">Close</button>
-            <modal :show="showCloseConfirm">
-                <div class="warn"  slot="body">
+            <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
+                <div class="close-confirm-modal"  slot="body">
                     Are you sure you want to close the assessment? Your progress will not be saved.
                     <button @click="showCloseConfirm = false">No, continue with the survey</button>
                     <button @click="close">Yes, close</button>
