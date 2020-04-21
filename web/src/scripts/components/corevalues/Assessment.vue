@@ -6,12 +6,19 @@
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
-            <button class="close" @click="close">Close</button>
+            <button aria-label="Close" @click="close" title="Close" class="close tertiary icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                </svg>
+            </button>
             <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
-                <div class="close-confirm-modal"  slot="body">
-                    Are you sure you want to close the assessment? Your progress will not be saved.
-                    <button @click="showCloseConfirm = false">No, continue with the survey</button>
-                    <button @click="close">Yes, close</button>
+                <div class="close-confirm-modal paddingContainer"  slot="body">
+                    <h3>Close assessment?</h3>
+                    <p class="subtext">Are you sure you want to close the assessment? Your progress will not be saved.</p>
+                    <div class="btnContainer">
+                        <button @click="showCloseConfirm = false">Continue assessment</button>
+                        <button class="secondary" @click="close">Close &amp; discard</button>
+                    </div>
                 </div>
             </modal>
 
@@ -262,6 +269,61 @@
         height: 1.4rem;
         transform: rotate(180deg);
         width: 1.4rem;
+    }
+
+    button.close {
+        background-color: $white;
+        position: absolute;
+        right: .8rem;
+        top: 1.8rem;
+        z-index: 20;
+
+        @include r(600) {
+            right: 1.6rem;
+            top: 2.8rem;
+        }
+
+        svg {
+            height: 1.8rem;
+            width: 1.8rem;
+        }
+    }
+
+    .close-confirm-modal {
+        @include shadowbox;
+        max-width: 48rem;
+        padding: 2.4rem;
+
+        @include r(600) {
+            max-width: 60rem;
+            padding: 3.2rem;
+        }
+
+        h3 {
+            font-size: 2.8rem;
+        }
+
+        .subtext {
+            margin-bottom: 1.6rem;
+        }
+    }
+
+    .btnContainer {
+        button {
+            margin-bottom: .8rem;
+            white-space: nowrap;
+            width: 100%;
+
+            @include r(600) {
+                flex-grow: 0;
+                margin: 0 .8rem 0 0;
+                width: auto;
+            }
+        }
+
+        @include r(600) {
+            display: flex;
+        }
     }
 
     .titleMarkdown {
