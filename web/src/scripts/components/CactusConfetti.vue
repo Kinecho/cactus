@@ -10,6 +10,7 @@
     const defaults = {
         origin: { y: 0.7 }
     };
+    const colors = ['#0DADB1', '#6590ED', '#9C1AA3', '#294FA3', '#47445E'];
 
     export default Vue.extend({
         name: "CactusConfetti",
@@ -29,7 +30,8 @@
             run() {
                 function fire(particleRatio: number, opts: any) {
                     confetti.default(Object.assign({}, defaults, opts, {
-                        particleCount: Math.floor(count * particleRatio)
+                        particleCount: Math.floor(count * particleRatio),
+                        colors: colors
                     }));
                 }
 
