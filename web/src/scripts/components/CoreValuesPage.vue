@@ -88,6 +88,7 @@
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { getQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     interface CoreValuesData {
         loading: boolean,
@@ -183,7 +184,7 @@
                     this.member = member;
                     const memberId = member?.id;
                     if (memberId) {
-                        if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH))) {
+                        if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH)) && isPremiumTier(member?.tier)) {
                             this.startNewAssessment()
                             return;
                         }

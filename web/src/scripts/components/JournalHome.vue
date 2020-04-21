@@ -1,13 +1,14 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
-        <upgrade-card class="journalListItem" v-if="dataHasLoaded && showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
                 class="upgrade-confirmation"
                 v-if="upgradeConfirmed"
                 :closeable="true"
                 key="upgrade-confirmation"
                 :autoHide="false"
+                @close="upgradeConfirmed = false"
                 color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
@@ -37,11 +38,12 @@
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
                     <!-- TODO: this key isn't right -->
                     <snackbar-content
-                            v-if="!hasCoreValues"
+                            v-if="showCoreValuesBanner"
                             class="coreValuesBox"
                             :closeable="true"
-                            key="upgrade-confirmation"
+                            key="core-values-banner"
                             :autoHide="false"
+                            @close="coreValuesClosed = true"
                             color="dolphin">
                         <div slot="text" class="centered">
                             <h3 class="cvTitle">What's important to&nbsp;you?</h3>
@@ -110,11 +112,10 @@
     import Logger from "@shared/Logger";
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import { QueryParam } from "@shared/util/queryParams";
-    import { getQueryParam } from "@web/util";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
     import { fireStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
-    import { appendQueryParams } from "@shared/util/StringUtil";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -131,7 +132,8 @@
         todayUnsubscriber?: ListenerUnsubscriber,
         todayEntry?: JournalEntry,
         todayLoaded: boolean,
-        showUpgradeCard: boolean,
+        coreValuesClosed: boolean,
+        upgradeConfirmed: boolean,
     }
 
     export default Vue.extend({
@@ -165,6 +167,10 @@
         },
         beforeMount() {
             logger.log("Journal Home calling Created function");
+
+            const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+            this.upgradeConfirmed = upgradeQueryParam === 'success';
+            removeQueryParam(QueryParam.UPGRADE_SUCCESS)
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member, user }) => {
@@ -222,9 +228,9 @@
                             this.todayLoaded = true;
                         }
 
-                        if (tier === SubscriptionTier.BASIC) {
-                            this.showUpgradeCard = true;
-                        }
+                        // if (tier === SubscriptionTier.BASIC) {
+                        //     this.showUpgradeCard = true;
+                        // }
                     }
 
                     if (isFreshLogin) {
@@ -271,7 +277,8 @@
                 todayUnsubscriber: undefined,
                 todayEntry: undefined,
                 todayLoaded: false,
-                showUpgradeCard: false,
+                coreValuesClosed: false,
+                upgradeConfirmed: false,
             };
         },
         destroyed() {
@@ -332,9 +339,11 @@
             hasCoreValues(): boolean {
                 return (this.cactusMember?.coreValues ?? []).length > 0
             },
-            upgradeConfirmed(): boolean {
-                const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
-                return upgradeQueryParam === 'success';
+            showCoreValuesBanner(): boolean {
+                return !this.hasCoreValues && !this.upgradeConfirmed && !this.coreValuesClosed
+            },
+            showUpgradeCard(): boolean {
+                return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded && !this.upgradeConfirmed
             },
             showOnboardingPrompt(): boolean {
                 return (this.loggedIn &&
