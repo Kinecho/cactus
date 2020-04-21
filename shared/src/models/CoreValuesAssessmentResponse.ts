@@ -7,6 +7,7 @@ import { CoreValue } from "@shared/models/CoreValueTypes";
 enum Field {
     memberId = "memberId",
     completed = "completed",
+    results = "results",
 }
 
 export interface CoreValuesResults {

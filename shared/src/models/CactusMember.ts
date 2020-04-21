@@ -12,6 +12,8 @@ import {
     needsTrialExpiration
 } from "@shared/models/MemberSubscription";
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+import { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export enum JournalStatus {
     PREMIUM = "PREMIUM",
@@ -74,6 +76,7 @@ export enum Field {
     subscriptionActivated = "subscription.activated",
     subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt",
     stripeCustomerId = "stripe.customerId",
+    coreValues = "coreValues",
 }
 
 export interface PromptSendTime {
@@ -139,6 +142,7 @@ export default class CactusMember extends BaseModel {
     stripe?: MemberStripeDetails = {};
 
     wordCloud?: InsightWord[];
+    coreValues?: CoreValue[];
 
     prepareForFirestore(): any {
         super.prepareForFirestore();

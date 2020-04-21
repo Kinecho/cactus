@@ -30,6 +30,7 @@ import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
 import { QueryWhereClauses } from "@shared/util/FirestoreUtil";
 import DocumentReference = admin.firestore.DocumentReference;
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -620,4 +621,12 @@ export default class AdminCactusMemberService {
         return result.results;
     }
 
+    async setCoreValues(memberId: string, values: CoreValue[]): Promise<void> {
+        try {
+            await this.getCollectionRef().doc(memberId).set({ [CactusMember.Field.coreValues]: values }, { merge: true });
+        } catch (error) {
+            logger.error(`Failed to update member's core values: memberId = ${ memberId }`)
+        }
+        return
+    }
 }
