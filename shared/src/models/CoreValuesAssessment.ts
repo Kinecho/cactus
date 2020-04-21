@@ -110,7 +110,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
         // id: "0",
         type: QuestionType.MULTI_SELECT,
         titleMarkdown: "Think of a time when you felt like you had choices and were in control of how to act. "
-        + "What values motivated those feelings? [select two:]",
+        + "What values motivated those feelings? **Select two:**",
         descriptionMarkdown: "",
         multiSelectLimit: 2,
         multiSelectMinimum: 2,
@@ -156,7 +156,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
     Question.create({
         // id: "3",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt challenged, but effective, prepared, and adequately resourced. What values helped you feel that way? [select two:]",
+        titleMarkdown: "Think of a time when you felt challenged, but effective, prepared, and adequately resourced. What values helped you feel that way? **Select two:**",
         descriptionMarkdown: "",
         multiSelectMinimum: 2,
         multiSelectLimit: 2,
@@ -202,7 +202,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
     Question.create({
         // id: "6",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Think of a time when you felt you cared for others, or a time when you felt cared for by others, free of ulterior motives. What values made this possible? [select two:]",
+        titleMarkdown: "Think of a time when you felt you cared for others, or a time when you felt cared for by others, free of ulterior motives. What values made this possible? **Select two:**",
         descriptionMarkdown: "",
         multiSelectMinimum: 2,
         multiSelectLimit: 2,
@@ -249,7 +249,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
     Question.create({
         // id: "9",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Reflecting on your selected values, which do you value as the result of positive, strengthening experiences or decisions:",
+        titleMarkdown: "Reflecting on your selected values, which do you value as the result of positive, strengthening experiences or decisions? **Select 2-8:**",
         descriptionMarkdown: "",
         multiSelectMinimum: 2,
         multiSelectLimit: 8,
@@ -264,7 +264,7 @@ export const DEFAULT_QUESTIONS_V1 = (): Question[] => [
     Question.create({
         // id: "10",
         type: QuestionType.MULTI_SELECT,
-        titleMarkdown: "Reflect on important life decisions you’ve made, then select which of the values were at the heart of those decisions:",
+        titleMarkdown: "Reflect on important life decisions you’ve made, then select which of the values were at the heart of those decisions. **Select 2-4:**",
         descriptionMarkdown: "",
         multiSelectMinimum: 2,
         multiSelectLimit: 4,
