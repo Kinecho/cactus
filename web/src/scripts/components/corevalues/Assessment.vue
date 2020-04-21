@@ -6,12 +6,15 @@
             <template v-if="loading">
                 <h3>Loading</h3>
             </template>
-            <button class="close" v-if="!showCloseConfirm" @click="close">Close</button>
-            <div class="alert warn" v-if="showCloseConfirm">
-                Are you sure you want to close the assessment? Your progress will not be saved.
-                <button @click="showCloseConfirm = false">No, continue with the survey</button>
-                <button @click="close">Yes, close</button>
-            </div>
+            <button class="close" @click="close">Close</button>
+            <modal :show="showCloseConfirm">
+                <div class="warn"  slot="body">
+                    Are you sure you want to close the assessment? Your progress will not be saved.
+                    <button @click="showCloseConfirm = false">No, continue with the survey</button>
+                    <button @click="close">Yes, close</button>
+                </div>
+            </modal>
+
             <template v-if="completed">
                 <p class="titleMarkdown">The survey is completed.</p>
             </template>
@@ -56,6 +59,7 @@
     import ProgressStepper from "@components/ProgressStepper.vue";
     import QuestionCard from "@components/corevalues/Question.vue";
     import CoreValuesQuestionResponse, { ResponseValidation } from "@shared/models/CoreValuesQuestionResponse";
+    import Modal from "@components/Modal.vue";
     import Logger from "@shared/Logger";
 
     const logger = new Logger("Assessment");
@@ -65,6 +69,7 @@
         components: {
             QuestionCard,
             ProgressStepper,
+            Modal,
         },
         props: {
             assessment: { type: Object as () => CoreValuesAssessment, required: true },
