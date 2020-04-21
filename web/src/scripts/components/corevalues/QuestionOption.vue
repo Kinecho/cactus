@@ -70,6 +70,7 @@
     @import "mixins";
 
     .question-option {
+        background-color: $white;
         border: 1px solid $lightestGreen;
         border-radius: .4rem;
         padding-right: .8rem;

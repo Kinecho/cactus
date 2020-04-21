@@ -4,7 +4,7 @@
         <confetti :running="showConfetti"/>
         <button @click="showConfetti = !showConfetti">{{showConfetti ? "Show" : "Restart"}} Confetti</button>
         <div class="centered">
-            <h1 v-if="!assessmentInProgress">Core Values</h1>
+            <h1>Core Values</h1>
             <div v-if="errorMessage" class="alert error">
                 {{errorMessage}}
             </div>
@@ -321,8 +321,39 @@
         position: relative;
 
         &.inProgress {
+            &:after {
+                background: url(assets/images/cvBlob.png) no-repeat;
+                content: "";
+                display: block;
+                height: 35rem;
+                overflow: hidden;
+                position: absolute;
+                left: 70%;
+                top: -26rem;
+                width: 40rem;
+                z-index: 10;
+            }
+
+            &:before {
+                background: url(assets/images/pinkVs.svg) no-repeat;
+                background-size: cover;
+                content: "";
+                display: block;
+                height: 17rem;
+                overflow: hidden;
+                position: absolute;
+                right: 70%;
+                top: 70%;
+                width: 18rem;
+            }
+
             @include r(768) {
                 background-color: $beige;
+
+                &:after {
+                    top: -22rem;
+                    z-index: 0;
+                }
             }
 
             .centered {
@@ -352,6 +383,14 @@
         p {
             margin-bottom: 1.6rem;
             max-width: 64rem;
+        }
+    }
+
+    .inProgress h1 {
+        display: none;
+
+        @include r(768) {
+            display: block;
         }
     }
 
