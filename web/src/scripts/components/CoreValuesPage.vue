@@ -213,9 +213,9 @@
         },
         methods: {
             async closeAssessment() {
-              this.assessmentInProgress = false;
-              await this.loadCurrentResults();
-              this.loading = false
+                this.assessmentInProgress = false;
+                await this.loadCurrentResults();
+                this.loading = false
             },
             async loadCurrentResults() {
                 this.loading = true;
@@ -247,7 +247,7 @@
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
-                this.showConfetti = true
+
                 assessmentResponse.completed = true;
                 // const assessmentResponse = this.assessmentResponse;
                 // assessmentResponse.completed = true;
@@ -256,7 +256,10 @@
                 this.assessmentResponse = assessmentResponse
                 await this.save(assessmentResponse);
                 assessmentResponse.completed = true;
-                this.assessmentInProgress = false
+                this.assessmentInProgress = false;
+                setTimeout(() => {
+                    this.showConfetti = true
+                }, 100);
             },
             async save(assessmentResponse: CoreValuesAssessmentResponse) {
                 const saved = await AssessmentResponseService.sharedInstance.save(assessmentResponse);
