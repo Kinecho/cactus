@@ -29,7 +29,7 @@
                 <p>Here are your core values. Through the Cactus prompts, you will come to better understand the origin,
                     purpose, and meaning of your core values. This will help you understand past life decisions and, by
                     prioritizing your values, make better decisions in the future.</p>
-                <figure class="coreValuesCard">
+                <figure class="coreValuesCard" v-bind:style="cardBgColor">
                     <h3><span class="cvName" v-if="displayName">{{displayName}}'s</span>Core Values</h3>
                     <div class="flexContainer">
                         <div class="cvBlobContainer">
@@ -121,6 +121,8 @@
         "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F2003253.png?alt=media&token=3b7d1d4a-487b-40d4-a8b0-a454c408555c",
         "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200327.png?alt=media&token=ead11877-2088-492d-8b72-da5147c5b9b9"
     ]
+
+    const cardColors: string[] = ['#0DADB1', '#6590ED', '#294FA3', '#47445E'];
 
     export default Vue.extend({
         components: {
@@ -284,6 +286,17 @@
                 const index = getIntegerFromStringBetween(valueString, blobUrls.length)
                 return blobUrls[index];
 
+            },
+            cardBgColor(): any {
+                let results = this.coreValueResults
+                if (!this.hasValues || !results) {
+                    return null
+                }
+                let valueString = results.map(r => r.title).join("");
+                const index = getIntegerFromStringBetween(valueString, cardColors.length)
+                return {
+                    backgroundColor: cardColors[index],
+                };
             },
             coreValueResults(): CoreValueMeta[] | undefined {
                 let values = this.assessmentResponse?.results?.values;
@@ -449,6 +462,7 @@
             letter-spacing: 1px;
             list-style: none;
             margin: 0 0 .8rem;
+            opacity: .8;
             padding: 0;
             text-transform: uppercase;
 
