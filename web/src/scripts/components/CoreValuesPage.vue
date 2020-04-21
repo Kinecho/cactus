@@ -1,6 +1,8 @@
 <template>
     <div class="coreValuesPage" :class="{inProgress: assessmentInProgress}">
         <NavBar :isSticky="false" v-if="!assessmentInProgress && !embed"/>
+        <confetti :running="showConfetti"/>
+
         <div class="centered">
             <h1 v-if="!assessmentInProgress">Core Values</h1>
             <div v-if="errorMessage" class="alert error">
@@ -9,7 +11,6 @@
             <div v-if="loading || (embed && !appRegistered)">
                 <h1>Loading</h1>
             </div>
-
             <template v-else-if="assessmentInProgress && assessment && assessmentResponse">
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @save="save" @completed="complete"/>
             </template>
@@ -86,13 +87,14 @@
     import AssessmentResponseService from "@web/services/AssessmentResponseService";
     import Logger from "@shared/Logger";
     import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
-    import { getQueryParam } from "@web/util";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import { QueryParam } from "@shared/util/queryParams";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     interface CoreValuesData {
         loading: boolean,
         creatingAssessment: boolean,
+        showConfetti: boolean,
         assessmentInProgress: boolean,
         member: CactusMember | null | undefined,
         memberObserver: ListenerUnsubscriber | null,
@@ -121,6 +123,7 @@
             NavBar,
             Footer,
             Assessment,
+            Confetti: () => import("@components/CactusConfetti.vue"),
         },
         created() {
 
@@ -134,6 +137,7 @@
                 creatingAssessment: false,
                 assessmentInProgress: false,
                 member: null,
+                showConfetti: false,
                 memberObserver: null,
                 assessment: CoreValuesAssessment.default(),
                 assessmentResponse: null,
@@ -186,6 +190,7 @@
                     if (memberId) {
                         if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH)) && isPremiumTier(member?.tier)) {
                             this.startNewAssessment()
+                            removeQueryParam(QueryParam.CV_LAUNCH);
                             return;
                         }
 
@@ -220,7 +225,7 @@
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
-
+                this.showConfetti = true
                 assessmentResponse.completed = true;
                 // const assessmentResponse = this.assessmentResponse;
                 // assessmentResponse.completed = true;

@@ -4,13 +4,13 @@ declare module '*.vue' {
 }
 
 declare module 'vue-social-sharing' {
-    import {PluginObject} from 'vue';
+    import { PluginObject } from 'vue';
     const SocialSharing: PluginObject<any>;
     export default SocialSharing;
 }
 
 declare module 'vue-simple-markdown' {
-    import {PluginObject} from "vue";
+    import { PluginObject } from "vue";
     const VueSimpleMarkdown: PluginObject<any>;
     export default VueSimpleMarkdown;
 }
