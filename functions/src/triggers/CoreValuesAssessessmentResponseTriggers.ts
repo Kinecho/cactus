@@ -19,8 +19,8 @@ export const updateMemberCoreValueFromAssessment = functions.firestore
         return;
     }
 
-    const results = data.get(CoreValuesAssessmentResponse.Field.results) as CoreValuesResults || undefined;
-    const memberId = data.get(CoreValuesAssessmentResponse.Field.memberId);
+    const results = data.get(CoreValuesAssessmentResponse.Fields.results) as CoreValuesResults || undefined;
+    const memberId = data.get(CoreValuesAssessmentResponse.Fields.memberId);
     if (!results || !memberId) {
         logger.info("CoreValues Assessment Response does not have a member ID or a results object")
         return;
