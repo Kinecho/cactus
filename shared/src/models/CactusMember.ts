@@ -1,18 +1,17 @@
-import {BaseModel, Collection} from "@shared/FirestoreBaseModels";
-import {ListMember} from "@shared/mailchimp/models/MailchimpTypes";
-import {InsightWord} from "@shared/models/ReflectionResponse";
-import {ElementAccumulation} from "@shared/models/ElementAccumulation";
-import {DateObject, DateTime} from "luxon";
+import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
+import { ListMember } from "@shared/mailchimp/models/MailchimpTypes";
+import { InsightWord } from "@shared/models/ReflectionResponse";
+import { ElementAccumulation } from "@shared/models/ElementAccumulation";
+import { DateObject, DateTime } from "luxon";
 import * as DateUtil from "@shared/util/DateUtil";
-import {getValidTimezoneName} from "@shared/timezones";
+import { getValidTimezoneName } from "@shared/timezones";
 import {
     isOptInTrialing,
     MemberSubscription,
-    subscriptionTierDisplayName,
-    needsTrialExpiration
+    needsTrialExpiration,
+    subscriptionTierDisplayName
 } from "@shared/models/MemberSubscription";
 import { DEFAULT_SUBSCRIPTION_TIER, SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
-import { CoreValuesResults } from "@shared/models/CoreValuesAssessmentResponse";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export enum JournalStatus {
