@@ -84,3 +84,7 @@ export function getFirebase() {
     initializeFirebase();
     return firebaseApp;
 }
+
+export function firebaseAnalytics(): firebase.analytics.Analytics {
+    return getFirebase().analytics();
+}

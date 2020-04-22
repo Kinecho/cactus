@@ -112,7 +112,7 @@
     import {Config} from "@web/config";
     import {generateReferralLink} from '@shared/util/SocialInviteUtil';
     import SocialFriendList from "@components/SocialFriendList.vue";
-    import {socialSharingEvent} from '@web/analytics'
+    import {findFriendsSocialSharingEvent} from '@web/analytics'
     import SocialFriendNotifications from "@components/SocialFriendNotifications.vue";
     import SocialConnectionService from '@web/services/SocialConnectionService';
     import SocialConnection from "@shared/models/SocialConnection";
@@ -212,13 +212,13 @@
                 }
             },
             socialSharingOpen(network: any, url: string) {
-                socialSharingEvent({type: "open", network, url});
+                findFriendsSocialSharingEvent({type: "open", network, url});
             },
             socialSharingClose(network: any, url: string) {
-                socialSharingEvent({type: "close", network, url});
+                findFriendsSocialSharingEvent({type: "close", network, url});
             },
             socialSharingChange(network: any, url: string) {
-                socialSharingEvent({type: "change", network, url});
+                findFriendsSocialSharingEvent({type: "change", network, url});
             }
 
         },
