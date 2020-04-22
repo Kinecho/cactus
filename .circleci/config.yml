@@ -22,7 +22,7 @@ aliases:
   - &func-pubsub "functions:pubsub"
   - &func-auth "functions:authTriggers"
   - &func-firestoreTriggers "functions:firestoreTriggers"
-  - &func-apis "functions:checkout,functions:flamelink,functions:inbound,functions:mailchimp,functions:slack,functions:signup,functions:social,functions:user,functions:test,functions:notificationPreferences,functions:apple,# Slack Configs"
+  - &func-apis "functions:checkout,functions:flamelink,functions:inbound,functions:mailchimp,functions:slack,functions:signup,functions:social,functions:user,functions:test,functions:notificationPreferences,functions:apple"
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
 
