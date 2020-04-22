@@ -43,6 +43,7 @@ export enum QueryParam {
     DOWNLOAD_TOKEN = "download_token",
     EMBED="embed",
     CV_LAUNCH = "cvlaunch",
+    BG_INDEX = "bg",
 
 }
 
