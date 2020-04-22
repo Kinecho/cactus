@@ -44,8 +44,6 @@
                         </ul>
                     </div>
                 </figure>
-                <button class="small">Share My Values</button>
-
                 <p class="extraPadding" v-if="newAssessmentAvailable">
                     A new assessment is available.
                     <a class="fancyLink" href="" @click.prevent="startNewAssessment" :disabled="creatingAssessment">Take
