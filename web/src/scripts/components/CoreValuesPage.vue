@@ -175,14 +175,6 @@
                         this.appRegistered = true;
                         await this.loadCurrentResults();
                         this.loading = false
-                        // const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
-                        // if (currentResults) {
-                        //     this.assessmentResponse = currentResults;
-                        //     if (currentResults.assessmentVersion.localeCompare(this.assessment.version) < 0) {
-                        //         this.newAssessmentAvailable = true;
-                        //     }
-                        // }
-                        // this.loading = false
                         return "success"
                     }
                 }
