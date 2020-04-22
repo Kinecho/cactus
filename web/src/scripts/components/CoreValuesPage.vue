@@ -44,7 +44,7 @@
                         </ul>
                     </div>
                 </figure>
-                <button class="small">Share My Values</button>
+                <button v-if="false" class="small">Share My Values</button>
 
                 <p class="extraPadding" v-if="newAssessmentAvailable">
                     A new assessment is available.

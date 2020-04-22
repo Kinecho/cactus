@@ -36,6 +36,7 @@ export enum ContentAction {
     previous = "previous",
     complete = "complete",
     showPricing = "showPricing",
+    coreValues = "coreValues",
     unknown = "unknown",
 }
 
