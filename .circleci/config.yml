@@ -47,32 +47,30 @@ commands:
             echo $SLACK_GIT_LINK >> .slack_git_url.txt
             echo 'export SLACK_GIT_LINK="$SLACK_GIT_LINK"' >> $BASH_ENV
 
-  firebase-deploy-some:
+  firebase-deploy-only:
     description: "Deploy some modules to firebase"
-      parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
-        project:
-          type: enum
-          description: The project alias to deploy. Either "stage" or "prod"
-          default: "stage"
-          enum: ["stage", "prod"]
-        modules:
-          type: string
-          default: "error"
-          description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
-      executor: cactus-web
-      resource_class: large
-      steps:
-        - checkout
-        - restore-all
-        - run:
-            no_output_timeout: 10m
-            name: Deploy API to Firebase
-            command: |
-              git config --global user.name CircleCI
-              echo "Setting default project to be << parameters.project >>"
-              npx firebase use << parameters.project >>
-              echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-              npx firebase deploy --only << parameters.modules >> --debug -P << parameters.project >> -f
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+    steps:
+      - checkout
+      - restore-all
+      - run:
+          no_output_timeout: 10m
+          name: Deploy some to Firebase (<< parameters.modules >>)
+          command: |
+            git config --global user.name CircleCI
+            echo "Setting default project to be << parameters.project >>"
+            npx firebase use << parameters.project >>
+            echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+            npx firebase deploy --only << parameters.modules >> --debug -P << parameters.project >> -f
   restore-module:
     parameters:
       module:
@@ -374,19 +372,13 @@ jobs:
         description: The project alias to deploy. Either "stage" or "prod"
         default: "stage"
         enum: ["stage", "prod"]
-      modules:
-        type: string
-        default: "error"
-        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
     executor: cactus-web
     resource_class: large
     steps:
-      - firebase-deploy-some:
-          name: "Deploy API"
+      - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-apis
-      - firebase-deploy-some:
-          name: "Deploy Triggers"
+      - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-firestoreTriggers
 
@@ -616,7 +608,6 @@ workflows:
       - firebase-deploy-functions:
           name: &branch_deploy_functions_name "Deploy Functions to Stage"
           project: "stage"
-          modules: "functions,firestore:rules,firestore:indexes"
           requires:
             - *stage_functions_approval_name
             - *notify_functions_started
