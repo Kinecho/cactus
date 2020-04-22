@@ -229,6 +229,8 @@
 
     .callout-text {
         color: $green;
+        font-size: 1.4rem;
+        margin-left: .8rem;
     }
 
     .static {
