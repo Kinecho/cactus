@@ -109,7 +109,7 @@
 
     const logger = new Logger("CoreValuesPage");
 
-    const blobUrls: { imageUrl: string, backgroundColor: string }[] = [
+    const blobs: { imageUrl: string, backgroundColor: string }[] = [
         {
             backgroundColor: "#47445E",
             imageUrl: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2Fsized%2F375_9999_99%2F200411.png?alt=media&token=6f2c2d46-d282-4c1a-87de-9259136c79a0"
@@ -315,14 +315,14 @@
                     return null
                 }
                 let valueString = results.map(r => r.title).join("");
-                let index = getIntegerFromStringBetween(valueString, blobUrls.length)
+                let index = getIntegerFromStringBetween(valueString, blobs.length)
 
                 const forceIndex = getQueryParam(QueryParam.BG_INDEX);
                 if (forceIndex) {
                     index = Number(forceIndex);
                 }
 
-                return blobUrls[index];
+                return blobs[index];
 
             },
             blobImageUrl(): string | null {
