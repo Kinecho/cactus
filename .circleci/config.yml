@@ -19,8 +19,10 @@ aliases:
   - &shared-module "shared"
   - &scripts-module "scripts"
   - &admin-module "shared-admin"
-
-  ## Slack Configs
+  - &func-pubsub "functions:pubsub"
+  - &func-auth "functions:authTriggers"
+  - &func-firestoreTriggers "functions:firestoreTriggers"
+  - &func-apis "functions:checkout,functions:flamelink,functions:inbound,functions:mailchimp,functions:slack,functions:signup,functions:social,functions:user,functions:test,functions:notificationPreferences,functions:apple,# Slack Configs"
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
 
@@ -44,6 +46,33 @@ commands:
             export SLACK_GIT_LINK
             echo $SLACK_GIT_LINK >> .slack_git_url.txt
             echo 'export SLACK_GIT_LINK="$SLACK_GIT_LINK"' >> $BASH_ENV
+
+  firebase-deploy-some:
+    description: "Deploy some modules to firebase"
+      parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+        project:
+          type: enum
+          description: The project alias to deploy. Either "stage" or "prod"
+          default: "stage"
+          enum: ["stage", "prod"]
+        modules:
+          type: string
+          default: "error"
+          description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+      executor: cactus-web
+      resource_class: large
+      steps:
+        - checkout
+        - restore-all
+        - run:
+            no_output_timeout: 10m
+            name: Deploy API to Firebase
+            command: |
+              git config --global user.name CircleCI
+              echo "Setting default project to be << parameters.project >>"
+              npx firebase use << parameters.project >>
+              echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+              npx firebase deploy --only << parameters.modules >> --debug -P << parameters.project >> -f
   restore-module:
     parameters:
       module:
@@ -336,6 +365,32 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: "`$CIRCLE_BRANCH` has been deployed to stage.\n<https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow> | $(cat .slack_git_url.txt)"
+
+  firebase-deploy-functions:
+    description: "Deploy all functions (in groups) to firebase"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+    executor: cactus-web
+    resource_class: large
+    steps:
+      - firebase-deploy-some:
+          name: "Deploy API"
+          project: << parameters.project >>
+          modules: *func-apis
+      - firebase-deploy-some:
+          name: "Deploy Triggers"
+          project: << parameters.project >>
+          modules: *func-firestoreTriggers
+
+
   firebase-deploy-some:
     description: "Deploy selected modules to the selected project"
     parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
@@ -558,7 +613,7 @@ workflows:
           requires:
             - *stage_hosting_approval_name
             - *notify_hosting_started
-      - firebase-deploy-some:
+      - firebase-deploy-functions:
           name: &branch_deploy_functions_name "Deploy Functions to Stage"
           project: "stage"
           modules: "functions,firestore:rules,firestore:indexes"
