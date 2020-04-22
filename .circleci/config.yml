@@ -540,9 +540,17 @@ workflows:
           requires:
             - *all_tests_finished
       - branch-deploy-started:
-          name: "Notify Branch Deploy Started"
+          name: "Notify Branch All Deploy Started"
           requires:
             - *stage_all_approval_name
+      - branch-deploy-started:
+          name: "Notify Branch Functions Deploy Started"
+          requires:
+            - *stage_hosting_approval_name
+      - branch-deploy-started:
+          name: "Notify Branch Hosting Deploy Started"
+          requires:
+            - *stage_functions_approval_name
       - firebase-deploy-some:
           name: &branch_deploy_hosting_name "Deploy Branch Hosting to Stage"
           project: "stage"
