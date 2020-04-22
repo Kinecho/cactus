@@ -165,7 +165,7 @@ export async function fireSignupEvent() {
 }
 
 /**
- * Value is in price_cents_usd
+ * Value is in price in dollars
  * @param {{value?: number, predicted_ltv?: number}} options
  * @return {Promise<unknown>}
  */
@@ -188,11 +188,24 @@ export async function fireOptInStartTrialEvent(options: { value?: number, predic
         if (!isAndroidApp()) {
             const dollar = (options.value ?? 0);
             //@ts-ignore
-            firebaseAnalytics().logEvent("purchase", {value: dollar, currency: 'USD'})
+            firebaseAnalytics().logEvent("purchase", { value: dollar, currency: 'USD' })
         }
 
         resolve();
     })
+}
+
+export function logCoreValuesAssessmentStarted() {
+    firebaseAnalytics().logEvent("core_values_started");
+}
+
+export function logCoreValuesAssessmentProgress(page: number) {
+    firebaseAnalytics().logEvent("core_values_progress", {page: page});
+}
+
+
+export function logCoreValuesAssessmentCompleted() {
+    firebaseAnalytics().logEvent("core_values_completed");
 }
 
 export function findFriendsSocialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {

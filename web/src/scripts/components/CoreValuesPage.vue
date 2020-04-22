@@ -88,6 +88,7 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Spinner from "@components/Spinner.vue";
+    import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted } from "@web/analytics";
 
     interface CoreValuesData {
         loading: boolean,
@@ -260,7 +261,7 @@
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {
-
+                logCoreValuesAssessmentCompleted();
                 assessmentResponse.completed = true;
                 // const assessmentResponse = this.assessmentResponse;
                 // assessmentResponse.completed = true;
@@ -281,6 +282,7 @@
                 }
             },
             async startNewAssessment() {
+
                 const assessment = this.assessment;
                 this.loading = true;
                 const version = assessment.version;
@@ -290,10 +292,9 @@
                     return;
                 }
 
-                //TODO: fetch existing responses??
                 const response = CoreValuesAssessmentResponse.create({ version, memberId });
                 const updatedResponse = await AssessmentResponseService.sharedInstance.save(response);
-
+                // logCoreValuesAssessmentStarted();
                 this.assessmentResponseObserver = AssessmentResponseService.sharedInstance.observeById(updatedResponse!.id!, {
                     onData: response => {
                         if (response) {

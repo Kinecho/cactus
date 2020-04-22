@@ -12,9 +12,10 @@
                 </svg>
             </button>
             <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
-                <div class="close-confirm-modal paddingContainer"  slot="body">
+                <div class="close-confirm-modal paddingContainer" slot="body">
                     <h3>Close assessment?</h3>
-                    <p class="subtext">Are you sure you want to close the assessment? Your progress will not be saved.</p>
+                    <p class="subtext">Are you sure you want to close the assessment? Your progress will not be
+                        saved.</p>
                     <div class="btnContainer">
                         <button @click="showCloseConfirm = false">Continue assessment</button>
                         <button class="secondary" @click="close">Close &amp; discard</button>
@@ -68,6 +69,7 @@
     import CoreValuesQuestionResponse, { ResponseValidation } from "@shared/models/CoreValuesQuestionResponse";
     import Modal from "@components/Modal.vue";
     import Logger from "@shared/Logger";
+    import { logCoreValuesAssessmentProgress } from "@web/analytics";
 
     const logger = new Logger("Assessment");
 
@@ -190,6 +192,7 @@
                     if (nextIndex >= this.questions.length) {
                         this.completed = true;
                     } else {
+                        logCoreValuesAssessmentProgress(nextIndex);
                         this.questionIndex = nextIndex;
                     }
                 }

@@ -156,13 +156,13 @@
             this.scrollHandler();
 
             if (this.upgradeConfirmed) {
-                let priceCents = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
 
-                if (priceCents) {
-                    priceCents = priceCents / 100;
+                if (priceDollars) {
+                    priceDollars = priceDollars / 100;
                 }
 
-                fireOptInStartTrialEvent({ value: priceCents });
+                fireOptInStartTrialEvent({ value: priceDollars });
             }
         },
         beforeMount() {
