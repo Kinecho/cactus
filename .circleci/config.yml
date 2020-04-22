@@ -336,9 +336,35 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: "`$CIRCLE_BRANCH` has been deployed to stage.\n<https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow> | $(cat .slack_git_url.txt)"
+  firebase-deploy-some:
+    description: "Deploy selected modules to the selected project"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+    executor: cactus-web
+    resource_class: large
+    steps:
+      - checkout
+      - restore-all
+      - run:
+          no_output_timeout: 20m
+          name: Deploy to Firebase
+          command: |
+            git config --global user.name CircleCI
+            echo "Setting default project to be << parameters.project >>"
+            npx firebase use << parameters.project >>
+            echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+            npx firebase deploy --only << parameters.modules >> --debug -P << parameters.project >> -f
+      - notify-on-failure
 
-
-  firebase-deploy:
+  firebase-deploy-all:
     description: "Deploy selected modules to the selected project"
     parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
       project:
@@ -497,25 +523,48 @@ workflows:
           filters:
             branches:
               ignore: master
-      - branch_deploy_approval:
+#      Approvals for different features
+      - branch_deploy_all_approval:
           type: approval
-          name: &stage_approval_name "Deploy To Stage Approval"
+          name: &stage_all_approval_name "Deploy All To Stage Approval"
+          requires:
+            - *all_tests_finished
+      - branch_deploy_hosting_approval:
+          type: approval
+          name: &stage_hosting_approval_name "Deploy Hosting To Stage Approval"
+          requires:
+            - *all_tests_finished
+      - branch_deploy_functions_approval:
+          type: approval
+          name: &stage_functions_approval_name "Deploy Functions To Stage Approval"
           requires:
             - *all_tests_finished
       - branch-deploy-started:
           name: "Notify Branch Deploy Started"
           requires:
-            - *stage_approval_name
-      - firebase-deploy:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_name "Deploy Branch to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_hosting_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_name "Deploy Branch to Stage"
+          project: "stage"
+          modules: "functions,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_functions_approval_name
+      - firebase-deploy-all:
           name: &branch_deploy_name "Deploy Branch to Stage"
           project: "stage"
           requires:
-            - *stage_approval_name
+            - *stage_all_approval_name
       - branch-deploy-finished:
             name: "Notify Branch Deploy Finished"
             requires:
               - *branch_deploy_name
-              - *stage_approval_name
+              - *stage_all_approval_name
 
 
   cactus_release_pipeline:
@@ -550,7 +599,7 @@ workflows:
           name: &test_functions_name "API Tests"
           requires:
             - *install_all_name
-      - firebase-deploy:
+      - firebase-deploy-all:
           name: &deploy_stage_name "Stage: Deploy All"
           modules: "functions,hosting"
           project: "stage"
@@ -573,7 +622,7 @@ workflows:
           name: "Notify Promotion"
           requires:
               - *prod_approval_name
-      - firebase-deploy:
+      - firebase-deploy-all:
           name: "Prod: Deploy All"
           project: "prod"
           requires:
