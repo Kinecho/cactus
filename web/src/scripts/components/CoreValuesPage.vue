@@ -88,7 +88,7 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Spinner from "@components/Spinner.vue";
-    import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted } from "@web/analytics";
+    import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted, setUserId } from "@web/analytics";
 
     interface CoreValuesData {
         loading: boolean,
@@ -196,6 +196,7 @@
                         this.appDisplayName = displayName;
                         this.appSubscriptionTier = tier;
                         this.appRegistered = true;
+                        setUserId(id)
                         await this.loadCurrentResults();
                         this.loading = false
                         return "success"
@@ -294,7 +295,7 @@
 
                 const response = CoreValuesAssessmentResponse.create({ version, memberId });
                 const updatedResponse = await AssessmentResponseService.sharedInstance.save(response);
-                // logCoreValuesAssessmentStarted();
+                logCoreValuesAssessmentStarted();
                 this.assessmentResponseObserver = AssessmentResponseService.sharedInstance.observeById(updatedResponse!.id!, {
                     onData: response => {
                         if (response) {
