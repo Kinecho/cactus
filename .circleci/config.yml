@@ -524,11 +524,6 @@ workflows:
             branches:
               ignore: master
 #      Approvals for different features
-      - branch_deploy_all_approval:
-          type: approval
-          name: &stage_all_approval_name "Approve All To Stage Approval"
-          requires:
-            - *all_tests_finished
       - branch_deploy_hosting_approval:
           type: approval
           name: &stage_hosting_approval_name "Approve Hosting To Stage Approval"
@@ -537,6 +532,11 @@ workflows:
       - branch_deploy_functions_approval:
           type: approval
           name: &stage_functions_approval_name "Approve Functions To Stage Approval"
+          requires:
+            - *all_tests_finished
+      - branch_deploy_all_approval:
+          type: approval
+          name: &stage_all_approval_name "Approve All To Stage Approval"
           requires:
             - *all_tests_finished
       - branch-deploy-started:
