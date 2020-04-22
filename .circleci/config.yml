@@ -544,27 +544,37 @@ workflows:
           requires:
             - *stage_all_approval_name
       - firebase-deploy-some:
-          name: &branch_deploy_name "Deploy Branch to Stage"
+          name: &branch_deploy_hosting_name "Deploy Branch Hosting to Stage"
           project: "stage"
           modules: "hosting,firestore:rules,firestore:indexes"
           requires:
             - *stage_hosting_approval_name
       - firebase-deploy-some:
-          name: &branch_deploy_name "Deploy Branch to Stage"
+          name: &branch_deploy_functions_name "Deploy Branch Functions to Stage"
           project: "stage"
           modules: "functions,firestore:rules,firestore:indexes"
           requires:
             - *stage_functions_approval_name
       - firebase-deploy-all:
-          name: &branch_deploy_name "Deploy Branch to Stage"
+          name: &branch_deploy_all_name "Deploy Branch All to Stage"
           project: "stage"
           requires:
             - *stage_all_approval_name
       - branch-deploy-finished:
-            name: "Notify Branch Deploy Finished"
+            name: "Notify Branch Deploy All Finished"
             requires:
-              - *branch_deploy_name
+              - *branch_deploy_all_name
               - *stage_all_approval_name
+      - branch-deploy-finished:
+          name: "Notify Branch Deploy Hosting Finished"
+          requires:
+            - *branch_deploy_hosting_name
+            - *stage_hosting_approval_name
+      - branch-deploy-finished:
+          name: "Notify Branch Deploy Functions Finished"
+          requires:
+            - *branch_deploy_functions_name
+            - *stage_functions_approval_name
 
 
   cactus_release_pipeline:
