@@ -50,17 +50,17 @@ const git = simplegit();
     const message: ChatMessage = {
         text: "",
         attachments: [{
-            title: `Finished deploying ${resourceName} to ${envName} :tada:`,
-            text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Release>: \`${hash}\`\n_started by ${byLine}_`,
+            text: `Finished deploying ${resourceName} to ${envName}`,
+            // text: `<https://sentry.io/organizations/kinecho/releases/${hash}|Sentry Release>: \`${hash}\`\n_started by ${byLine}_`,
             color: "good",
             ts: `${(new Date()).getTime() / 1000}`
         }],
     };
 
 
-    if (isProd && resource === "hosting") {
-        await AdminSlackService.getSharedInstance().sendGeneralMessage({text: `A new version of the website has been released! See it <https://cactus.app|here>`});
-    }
-    await AdminSlackService.getSharedInstance().sendCIMessage(message);
+    // if (isProd && resource === "hosting") {
+    //     await AdminSlackService.getSharedInstance().sendGeneralMessage({text: `A new version of the website has been released! See it <https://cactus.app|here>`});
+    // }
+    // await AdminSlackService.getSharedInstance().sendCIMessage(message);
 
 })().then(() => console.log("Done")).catch(e => console.error("Failed to execute slack command", e));
