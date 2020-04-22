@@ -70,8 +70,8 @@ export const cloudFunctions = {
         processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
     },
 
+    //auth triggers
     authTriggers: {
-        //auth triggers
         userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),
         userDeletedTrigger: functions.auth.user().onDelete(onDelete),
     },
