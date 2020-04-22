@@ -19,10 +19,15 @@ aliases:
   - &shared-module "shared"
   - &scripts-module "scripts"
   - &admin-module "shared-admin"
+
+  ## Function Modules
   - &func-pubsub "functions:pubsub"
   - &func-auth "functions:authTriggers"
   - &func-firestoreTriggers "functions:firestoreTriggers"
-  - &func-apis "functions:checkout,functions:flamelink,functions:inbound,functions:mailchimp,functions:slack,functions:signup,functions:social,functions:user,functions:test,functions:notificationPreferences,functions:apple"
+  - &func-apis1 "functions:mailchimp,functions:slack,functions:flamelink,functions:inbound,functions:test"
+  - &func-apis2 "functions:checkout,functions:signup,functions:social,functions:user,functions:notificationPreferences,functions:apple"
+
+  ## Slack Configs
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
 
@@ -59,10 +64,14 @@ commands:
         type: string
         default: "error"
         description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+      group_name:
+        type: string
+        description: The name of the step being run
+        default: << parameters.modules >>
     steps:
       - run:
           no_output_timeout: 10m
-          name: Deploy some to Firebase (<< parameters.modules >>)
+          name: Deploy << parameters.group_name >> to Firebase
           command: |
             git config --global user.name CircleCI
             echo "Setting default project to be << parameters.project >>"
@@ -377,18 +386,29 @@ jobs:
       - restore-all
       - firebase-deploy-only:
           project: << parameters.project >>
-          modules: *func-apis
+          modules: "firestore:indexes"
+          group_name: "Firestore Indexes"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis1
+          group_name: "Api Group 1"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis2
+          group_name: "Api Group 2"
       - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-firestoreTriggers
+          group_name: "Firestore Triggers"
       - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-auth
+          group_name: "Auth Triggers"
       - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-pubsub
-      - firebase-deploy-only:
-          project: << parameters.project >>
+          group_name: "PubSub triggers"
+      - notify-on-failure
   firebase-deploy-some:
     description: "Deploy selected modules to the selected project"
     parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
@@ -597,12 +617,6 @@ workflows:
           requires:
             - *branch_deploy_functions_name
             - *stage_all_approval_name
-#      - firebase-deploy-all:
-#          name: &branch_deploy_all_name "Deploy All to Stage"
-#          project: "stage"
-#          requires:
-#            - *stage_all_approval_name
-#            - *notify_all_started
       - branch-deploy-finished:
           name: "Notify Hosting Finished"
           requires:
@@ -650,11 +664,21 @@ workflows:
           name: &test_functions_name "API Tests"
           requires:
             - *install_all_name
-      - firebase-deploy-all:
-          name: &deploy_stage_name "Stage: Deploy All"
-          modules: "functions,hosting"
+      - firebase-deploy-functions:
+          name: &stage_deploy_functions_name "Deploy Functions to Stage"
           project: "stage"
           requires:
+            - *install_all_name
+            - *test_web_name
+            - *test_shared_name
+            - *test_functions_name
+            - *test_scripts_name
+      - firebase-deploy-some:
+          name: &stage_deploy_hosting_name "Deploy Hosting to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_deploy_functions_name
             - *install_all_name
             - *test_web_name
             - *test_shared_name
@@ -663,18 +687,37 @@ workflows:
       - ready-for-deploy:
           name: "Notify Promotion Ready"
           requires:
-            - *deploy_stage_name
+            - *stage_deploy_functions_name
+            - *stage_deploy_hosting_name
+            - *install_all_name
+            - *test_web_name
+            - *test_shared_name
+            - *test_functions_name
+            - *test_scripts_name
       - prod_deploy_approval:
           type: approval
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
-            - *deploy_stage_name
+            - *stage_deploy_functions_name
+            - *stage_deploy_hosting_name
+            - *install_all_name
+            - *test_web_name
+            - *test_shared_name
+            - *test_functions_name
+            - *test_scripts_name
       - prod-deploy-started:
           name: "Notify Promotion"
           requires:
-              - *prod_approval_name
-      - firebase-deploy-all:
-          name: "Prod: Deploy All"
+            - *prod_approval_name
+      - firebase-deploy-functions:
+          name: &prod_deploy_functions_name "Deploy Functions to Prod"
           project: "prod"
           requires:
+            - *prod_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_hosting_name "Deploy Hosting to Prod"
+          project: "prod"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *prod_deploy_functions_name
             - *prod_approval_name
