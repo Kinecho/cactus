@@ -173,7 +173,8 @@
                         this.appDisplayName = displayName;
                         this.appSubscriptionTier = tier;
                         this.appRegistered = true;
-                        this.loadCurrentResults();
+                        await this.loadCurrentResults();
+                        this.loading = false
                         // const currentResults = await AssessmentResponseService.sharedInstance.getLatestForUser(id);
                         // if (currentResults) {
                         //     this.assessmentResponse = currentResults;
