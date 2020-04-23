@@ -23,7 +23,6 @@ import * as path from "path";
 
     const config = await getCactusConfig(isProd ? Project.PROD : Project.STAGE);
 
-
     createAppAppSiteAssociationFile(config);
     createAppleDeveloperDomainAssociationFile(config);
 

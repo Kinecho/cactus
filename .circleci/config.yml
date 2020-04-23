@@ -24,8 +24,9 @@ aliases:
   - &func-pubsub "functions:pubsub"
   - &func-auth "functions:authTriggers"
   - &func-firestoreTriggers "functions:firestoreTriggers"
-  - &func-apis1 "functions:mailchimp,functions:slack,functions:flamelink,functions:inbound,functions:test"
-  - &func-apis2 "functions:checkout,functions:signup,functions:social,functions:user,functions:notificationPreferences,functions:apple"
+  - &func-apis1 "functions:test"
+  - &func-apis2 "functions:mailchimp,functions:slack,functions:flamelink,functions:inbound"
+  - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user,functions:notificationPreferences,functions:apple"
 
   ## Slack Configs
   - &webhook-engineering-ci
@@ -396,6 +397,10 @@ jobs:
           project: << parameters.project >>
           modules: *func-apis2
           group_name: "Api Group 2"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis3
+          group_name: "Api Group 3"
       - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-firestoreTriggers
