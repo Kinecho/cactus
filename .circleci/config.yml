@@ -21,12 +21,15 @@ aliases:
   - &admin-module "shared-admin"
 
   ## Function Modules
-  - &func-pubsub "functions:pubsub"
+  - &func-pubsub1 "functions:pubsub1"
+  - &func-pubsub2 "functions:pubsub1"
+  - &func-pubsub3 "functions:pubsub3"
   - &func-auth "functions:authTriggers"
-  - &func-firestoreTriggers "functions:firestoreTriggers"
-  - &func-apis1 "functions:test"
-  - &func-apis2 "functions:mailchimp,functions:slack,functions:flamelink,functions:inbound"
-  - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user,functions:notificationPreferences,functions:apple"
+  - &func-db1 "functions:db1"
+  - &func-db2 "functions:db2"
+  - &func-apis1 "functions:test,functions:mailchimp,functions:notificationPreferences"
+  - &func-apis2 "functions:slack,functions:flamelink,functions:inbound,functions:apple"
+  - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user"
 
   ## Slack Configs
   - &webhook-engineering-ci
@@ -403,16 +406,28 @@ jobs:
           group_name: "Api Group 3"
       - firebase-deploy-only:
           project: << parameters.project >>
-          modules: *func-firestoreTriggers
-          group_name: "Firestore Triggers"
+          modules: *func-db1
+          group_name: "Firestore DB 1 Triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-db2
+          group_name: "Firestore DB 2 Triggers"
       - firebase-deploy-only:
           project: << parameters.project >>
           modules: *func-auth
           group_name: "Auth Triggers"
       - firebase-deploy-only:
           project: << parameters.project >>
-          modules: *func-pubsub
-          group_name: "PubSub triggers"
+          modules: *func-pubsub1
+          group_name: "PubSub 1 triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-pubsub2
+          group_name: "PubSub 2 triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-pubsub3
+          group_name: "PubSub 3 triggers"
       - notify-on-failure
   firebase-deploy-some:
     description: "Deploy selected modules to the selected project"

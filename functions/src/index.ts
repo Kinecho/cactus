@@ -54,17 +54,21 @@ export const cloudFunctions = {
     apple: functions.https.onRequest(appleEndpoints),
 
     //PubSub topics
-    pubsub: {
+    pubsub1: {
         bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
         dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
         backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
         exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
         processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
+    },
+    pubsub2: {
         slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
         unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
         memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
         customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
         expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
+    },
+    pubsub3: {
         syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
         googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
         processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
@@ -77,12 +81,14 @@ export const cloudFunctions = {
     },
 
     //firestore triggers
-    firestoreTriggers: {
+    db1: {
         reflectionResponseCreatedTrigger: onReflectionResponseCreated,
         sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
         updateReflectionStatsTrigger: updateReflectionStatsTrigger,
         updateMemberProfileTrigger: updateMemberProfileTrigger,
         updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
+    },
+    db2: {
         updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
         publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
         updateSubscriptionDetailsTrigger,
