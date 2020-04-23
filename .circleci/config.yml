@@ -621,7 +621,7 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All tests passed successfully.\n$(cat .slack_git_url.txt)"
+          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All tests passed successfully."
   notify-master-functions-deployed:
     description: "Notify slack that a functions on master deployed successfully"
     parameters:
