@@ -706,14 +706,20 @@ workflows:
       - branch-deploy-finished:
           name: "Notify Functions Finished"
           requires:
-            - *branch_deploy_functions_name
+            - *api-1
+            - *api-2
+            - *api-3
+            - *auth-1
+            - *db-1
+            - *db-2
+            - *pubsub-1
+            - *pubsub-2
+            - *pubsub-3
       - branch-deploy-finished:
           name: "Notify All Finished"
           requires:
             - *branch_deploy_hosting_name
-            - *branch_deploy_functions_name
             - *stage_all_approval_name
-            - *branch_deploy_functions_name
   cactus_release_pipeline:
     jobs:
       - notify-workflow-started:
