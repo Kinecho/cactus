@@ -53,29 +53,6 @@ aliases:
   - &pubsub-2-prod "Funcs: PubSub 2 Prod"
   - &pubsub-3-prod "Funcs: PubSub 3 Prod"
 
-
-  - &all-func-stage
-    - *api-1-stage
-    - *api-2-stage
-    - *api-3-stage
-    - *auth-1-stage
-    - *db-1-stage
-    - *db-2-stage
-    - *pubsub-1-stage
-    - *pubsub-2-stage
-    - *pubsub-3-stage
-
-  - &all-func-prod
-    - *api-1-prod
-    - *api-2-prod
-    - *api-3-prod
-    - *auth-1-prod
-    - *db-1-prod
-    - *db-2-prod
-    - *pubsub-1-prod
-    - *pubsub-2-prod
-    - *pubsub-3-prod
-
   ## Slack Configs
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
@@ -704,13 +681,24 @@ workflows:
           name: &stage_fe_approval_name "Approve Hosting Only To Stage"
           requires:
             - *all_tests_finished
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_fe_approval_name
+      - branch-deploy-finished:
+          name: "Notify Hosting Finished"
+          requires:
+            - *branch_deploy_only_hosting_name
+            - *stage_fe_approval_name
       - branch_deploy_all_approval:
           type: approval
           name: &stage_all_approval_name "Approve All To Stage"
           requires:
             - *all_tests_finished
       - branch-deploy-started:
-          name: "Notify Branch All Deploy Started"
+          name: &notify-all-started "Notify Branch All Deploy Started"
           requires:
             - *stage_all_approval_name
       - firebase-deploy-some:
@@ -718,55 +706,55 @@ workflows:
           project: "stage"
           modules: *func-apis1
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &api-2 "Funcs - Api 2"
           project: "stage"
           modules: *func-apis2
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &api-3 "Funcs - Api 3"
           project: "stage"
           modules: *func-apis3
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &auth-1 "Funcs - Auth 3"
           project: "stage"
           modules: *func-auth
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &db-1 "Funcs - DB 1"
           project: "stage"
           modules: *func-db1
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &db-2 "Funcs - DB 2"
           project: "stage"
           modules: *func-db2
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &pubsub-1 "Funcs - PubSub 1"
           project: "stage"
           modules: *func-pubsub1
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &pubsub-2 "Funcs - PubSub 2"
           project: "stage"
           modules: *func-pubsub2
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &pubsub-3 "Funcs - PubSub 3"
           project: "stage"
           modules: *func-pubsub3
           requires:
-            - *stage_all_approval_name
+            - *notify-all-started
       - firebase-deploy-some:
           name: &branch_deploy_hosting_name "Deploy Hosting to Stage"
           project: "stage"
@@ -781,33 +769,10 @@ workflows:
             - *pubsub-1
             - *pubsub-2
             - *pubsub-3
-            - *stage_all_approval_name
       - branch-deploy-finished:
           name: "Notify Finished"
           requires:
-            - *api-1
-            - *api-2
-            - *api-3
-            - *auth-1
-            - *db-1
-            - *db-2
-            - *pubsub-1
-            - *pubsub-2
-            - *pubsub-3
             - *branch_deploy_hosting_name
-            - *stage_all_approval_name
-      - firebase-deploy-some:
-          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
-          project: "stage"
-          modules: "hosting,firestore:rules,firestore:indexes"
-          requires:
-            - *stage_fe_approval_name
-      - branch-deploy-finished:
-          name: "Notify Hosting Finished"
-          requires:
-            - *branch_deploy_only_hosting_name
-            - *stage_fe_approval_name
-
 
   cactus_release_pipeline:
     jobs:
