@@ -915,14 +915,13 @@ workflows:
           project: "prod"
           modules: *func-apis1
           requires:
-            - *prod_approval_name
             - *notify_promoted
       - firebase-deploy-some:
           name: *api-2-prod
           project: "prod"
           modules: *func-apis2
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *api-3-prod
           project: "prod"
