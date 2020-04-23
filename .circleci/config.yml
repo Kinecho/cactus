@@ -802,14 +802,12 @@ workflows:
             branches:
               only:
                 - master
-                - deployment-updates
       - install-all:
           name: &install_all_name "Install Dependencies"
           filters:
             branches:
               only:
                 - master
-                - deployment-updates
       - test-shared:
           name: &test_shared_name "Shared Tests"
           requires:
