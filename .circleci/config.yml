@@ -796,7 +796,7 @@ workflows:
   cactus_release_pipeline:
     jobs:
       - notify-workflow-started:
-          name: &workflow_name Cactus Release Pipeline
+          name: &workflow_name Notify Cactus Release Pipeline Started
           workflow_name: *workflow_name
           filters:
             branches:
@@ -812,11 +812,6 @@ workflows:
                 - deployment-updates
       - test-shared:
           name: &test_shared_name "Shared Tests"
-          filters:
-            branches:
-              only:
-                - master
-                - deployment-updates
           requires:
             - *install_all_name
       - test-scripts:
@@ -926,12 +921,12 @@ workflows:
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
             - *stage_deploy_hosting_name
-            - *functions-deployed-notification-stage
-            - *install_all_name
-            - *test_web_name
-            - *test_shared_name
-            - *test_functions_name
-            - *test_scripts_name
+#            - *functions-deployed-notification-stage
+#            - *install_all_name
+#            - *test_web_name
+#            - *test_shared_name
+#            - *test_functions_name
+#            - *test_scripts_name
       - prod-deploy-started:
           name: "Notify Promotion"
           requires:
