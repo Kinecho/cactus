@@ -14,13 +14,13 @@ export const updateMemberCoreValueFromAssessment = functions.firestore
         logger.info("no \"after\" was found on the change. not doing anything");
         return;
     }
-    const completed = data.get(CoreValuesAssessmentResponse.Fields.completed);
+    const completed = change.after?.get(CoreValuesAssessmentResponse.Fields.completed) as boolean | undefined;
     if (!completed) {
         return;
     }
 
-    const results = data.get(CoreValuesAssessmentResponse.Fields.results) as CoreValuesResults || undefined;
-    const memberId = data.get(CoreValuesAssessmentResponse.Fields.memberId);
+    const results = change.after?.get(CoreValuesAssessmentResponse.Fields.results) as CoreValuesResults | undefined;
+    const memberId = change.after?.get(CoreValuesAssessmentResponse.Fields.memberId) as string | undefined;
     if (!results || !memberId) {
         logger.info("CoreValues Assessment Response does not have a member ID or a results object")
         return;
