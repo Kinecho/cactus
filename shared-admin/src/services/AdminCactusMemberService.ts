@@ -30,6 +30,7 @@ import { getValidTimezoneName } from "@shared/timezones";
 import * as admin from "firebase-admin";
 import { QueryWhereClauses } from "@shared/util/FirestoreUtil";
 import DocumentReference = admin.firestore.DocumentReference;
+import { CoreValue } from "@shared/models/CoreValueTypes";
 
 const logger = new Logger("AdminCactusMemberService");
 let firestoreService: AdminFirestoreService;
@@ -337,7 +338,7 @@ export default class AdminCactusMemberService {
         return result.results;
     }
 
-    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> | never {
+    async getMemberByEmail(emailInput?: string | null, options: GetOptions = DefaultGetOptions): Promise<CactusMember | undefined> {
         if (!emailInput) {
             return undefined;
         }
@@ -429,12 +430,13 @@ export default class AdminCactusMemberService {
                     });
                     logger.log(`Fetched ${ results.size } members in batch ${ batchNumber }`);
                     await options.onData(results.results, batchNumber);
-                    if (options.pageDelay && options.pageDelay > 0) {
+                    const delay = options.pageDelay;
+                    if (delay && delay > 0) {
                         await new Promise(resolve => {
                             logger.info(`Waiting ${ options.pageDelay }ms before processing next page`);
                             setTimeout(() => {
                                 resolve()
-                            }, options.pageDelay)
+                            }, delay)
                         })
                     }
                 } catch (batchError) {
@@ -619,4 +621,12 @@ export default class AdminCactusMemberService {
         return result.results;
     }
 
+    async setCoreValues(memberId: string, values: CoreValue[]): Promise<void> {
+        try {
+            await this.getCollectionRef().doc(memberId).set({ [CactusMember.Field.coreValues]: values }, { merge: true });
+        } catch (error) {
+            logger.error(`Failed to update member's core values: memberId = ${ memberId }`)
+        }
+        return
+    }
 }

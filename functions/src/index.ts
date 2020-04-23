@@ -30,7 +30,7 @@ import appleEndpoints from "@api/endpoints/appleEndpoints"
 import {
     updateMemberProfileTrigger,
     updatePromptSendTimeTrigger,
-    updateSubscriptionDetailsTrigger
+    updateSubscriptionDetailsTrigger,
 } from "@api/triggers/MemberTriggers";
 import * as PromptContentTriggers from "@api/triggers/PromptContentTriggers";
 import { onPublish as expireMembershipJob } from "@api/pubsub/subscribers/ExpireMembershipTrialJob";
@@ -38,7 +38,7 @@ import { onPublish as syncTrailToMailchimpMembersJob } from "@admin/pubsub/SyncT
 import { onPublish as GooglePlayBillingJob } from "@api/pubsub/subscribers/GooglePlayBillingListeners";
 import { transactionalOnCreate } from "@admin/AuthUserCreateJob";
 import { onPublish as CancellationJob } from "@admin/pubsub/ProcessSubscriptionCancellations";
-
+import { updateMemberCoreValueFromAssessment } from "@api/triggers/CoreValuesAssessessmentResponseTriggers";
 export const cloudFunctions = {
     //API Endpoints
     checkout: functions.https.onRequest(checkoutApp),
@@ -92,6 +92,7 @@ export const cloudFunctions = {
         updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
         publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
         updateSubscriptionDetailsTrigger,
-        updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite
+        updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite,
+        updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
     }
 };

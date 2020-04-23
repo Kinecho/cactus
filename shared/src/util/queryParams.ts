@@ -41,6 +41,9 @@ export enum QueryParam {
     ABBREVIATED = "short",
     AUTH_TOKEN = "token",
     DOWNLOAD_TOKEN = "download_token",
+    EMBED="embed",
+    CV_LAUNCH = "cvlaunch",
+    BG_INDEX = "bg",
 
 }
 

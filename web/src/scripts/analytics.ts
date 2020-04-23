@@ -1,14 +1,15 @@
-import {Config} from './config'
-import {QueryParam} from "@shared/util/queryParams";
-import {getQueryParam} from "@web/util";
+import { Config } from './config'
+import { QueryParam } from "@shared/util/queryParams";
+import { getQueryParam } from "@web/util";
 import Vue from 'vue'
 import * as Integrations from '@sentry/integrations';
 import * as Sentry from '@sentry/browser';
-import {User} from "firebase/app"
-import {getAuth} from "@web/firebase";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import { User } from "firebase/app"
+import { firebaseAnalytics, getAuth } from "@web/firebase";
+import { LocalStorageKey } from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
+import { isAndroidApp } from "@web/DeviceUtil";
 
 const logger = new Logger("Analytics.ts");
 declare global {
@@ -61,7 +62,7 @@ export function init() {
 
     const sentryIntegrations: any[] = []; //using any because it doesn't look like sentry's Integration interface is exported
     if (!Config.isDev) {
-        sentryIntegrations.push(new Integrations.Vue({Vue, attachProps: true}));
+        sentryIntegrations.push(new Integrations.Vue({ Vue, attachProps: true }));
         Sentry.init({
             dsn: Config.sentry.dsn,
             release: Config.version,
@@ -87,11 +88,11 @@ export function init() {
 
     createGTag();
     gtag('js', new Date());
-    gtag('config', Config.googleAnalyticsID, {'optimize_id': Config.googleOptimizeID});
+    gtag('config', Config.googleAnalyticsID, { 'optimize_id': Config.googleOptimizeID });
 
     const mailchimpUserId = getQueryParam(QueryParam.MAILCHIMP_EMAIL_ID);
     if (mailchimpUserId) {
-        setUserId(`mcuid_${mailchimpUserId}`);
+        setUserId(`mcuid_${ mailchimpUserId }`);
     }
 
     hasInit = true;
@@ -110,11 +111,12 @@ export function clearTrackingData() {
 }
 
 export function setUserId(userId?: string) {
-    gtag('set', {'user_id': userId}); // Set the user ID using signed-in user_id.}
+    gtag('set', { 'user_id': userId }); // Set the user ID using signed-in user_id.}
     gtag('config', Config.googleAnalyticsID, {
         'user_id': userId,
-        'custom_map': {'dimension1': userId}
+        'custom_map': { 'dimension1': userId }
     });
+    firebaseAnalytics().setUserId(userId ?? '');
 }
 
 export function setUser(user?: User | null) {
@@ -162,29 +164,59 @@ export async function fireSignupEvent() {
     })
 }
 
-export async function fireStartTrialEvent(options: { value?: number, predicted_ltv?: number }) {
+/**
+ * Value is in price in dollars
+ * @param {{value?: number, predicted_ltv?: number}} options
+ * @return {Promise<unknown>}
+ */
+export async function fireOptInStartTrialEvent(options: { value?: number, predicted_ltv?: number }) {
     return new Promise(async resolve => {
         logger.info("Fired 'StartTrial' Event");
         const { value, predicted_ltv } = options;
-        
+
         /* Facebook */
         if (window.fbq) {
             logger.debug("Sending StartTrial event to Facebook");
             window.fbq('track', 'StartTrial', {
-                value: (value?.toString() ?? '0.00'), 
-                currency: 'USD', 
+                value: (value?.toString() ?? '0.00'),
+                currency: 'USD',
                 predicted_ltv: (predicted_ltv?.toString() ?? value?.toString() ?? '0.00')
             });
         }
+
+        //if web, it means we checked out via stripe.
+        if (!isAndroidApp()) {
+            const dollar = (options.value ?? 0);
+            //@ts-ignore
+            firebaseAnalytics().logEvent("purchase", { value: dollar, currency: 'USD' })
+        }
+
         resolve();
     })
 }
 
-export function socialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
+export function logCoreValuesAssessmentStarted() {
+    firebaseAnalytics().logEvent("core_values_started");
+}
+
+export function logCoreValuesAssessmentProgress(page: number) {
+    firebaseAnalytics().logEvent("core_values_progress", {page: page});
+}
+
+
+export function logCoreValuesAssessmentCompleted() {
+    firebaseAnalytics().logEvent("core_values_completed");
+}
+
+export function findFriendsSocialSharingEvent(options: { type: "open" | "close" | "change", network?: string, url?: string }) {
     gtag('event', options.type, {
         event_category: "social_share",
         event_label: options.network
     });
+    if (options.type === "open") {
+        firebaseAnalytics().logEvent("share", { content_type: "find_friends", content_id: options.network })
+    }
+
 }
 
 function createGTag() {

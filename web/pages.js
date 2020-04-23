@@ -112,6 +112,11 @@ module.exports = {
         "path": "/insights-embed",
         "name": "insights_embedded"
     },
+    "core_values": {
+        "title": "Core Values",
+        "path": "/core-values",
+        "name": "core_values"
+    },
     "sponsor": {
         "title": "Sponsor",
         "path": "/sponsor",

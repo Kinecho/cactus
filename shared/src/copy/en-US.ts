@@ -101,6 +101,7 @@ export default class EnglishCopy extends LocalizedCopy {
     };
     navigation: NavigationCopy = {
         ACCOUNT: "Account",
+        CORE_VALUES: "Core Values",
         SOCIAL: "Friends",
         MY_JOURNAL: "My Journal",
         JOURNAL: "Journal",

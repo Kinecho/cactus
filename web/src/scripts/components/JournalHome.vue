@@ -1,17 +1,19 @@
 <template>
     <div>
         <NavBar :show-signup="false" :isSticky="false"/>
-        <upgrade-card class="journalListItem" v-if="dataHasLoaded && showUpgradeCard && !showOnboardingPrompt" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)" />
+        <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
-            class="upgrade-confirmation"
-            v-if="upgradeConfirmed"
-            :closeable="true"
-            key="upgrade-confirmation"
-            :autoHide="false"
-            color="successAlt">
+                class="upgrade-confirmation"
+                v-if="upgradeConfirmed"
+                :closeable="true"
+                key="upgrade-confirmation"
+                :autoHide="false"
+                @close="upgradeConfirmed = false"
+                color="successAlt">
             <div slot="text" class="centered">
                 <h3>Welcome to Cactus Plus!</h3>
-                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
+                <p>You just upgraded and it made our day. If you ever have questions or feedback, please reach out to us
+                    at <a href="mailto:help@cactus.app">help@cactus.app</a>.</p>
             </div>
         </snackbar-content>
         <div class="container centered">
@@ -34,6 +36,24 @@
                     </section>
                 </div>
                 <div class="section-container" v-if="loggedIn && loginReady && journalEntries.length > 0">
+                    <!-- TODO: this key isn't right -->
+                    <snackbar-content
+                            v-if="showCoreValuesBanner"
+                            class="coreValuesBox"
+                            :closeable="true"
+                            key="core-values-banner"
+                            :autoHide="false"
+                            @close="coreValuesClosed = true"
+                            color="dolphin">
+                        <div slot="text" class="centered">
+                            <h3 class="cvTitle">What's important to&nbsp;you?</h3>
+                            <p class="cvSubtext" v-if="!plusUser">Discover your core values by taking our
+                                assessment.</p>
+                            <p class="cvSubtext" v-else>Discover your core values by taking our assessment, included
+                                with your Plus&nbsp;membership.</p>
+                        </div>
+                        <button class="cvButton" slot="action" @click="launchCoreValues">Find My Core Values</button>
+                    </snackbar-content>
                     <section class="journalList">
                         <transition-group
                                 tag="div"
@@ -71,31 +91,31 @@
 
 <script lang="ts">
     import Vue from 'vue'
-    import {Config} from "@web/config";
-    import {FirebaseUser} from '@web/firebase';
+    import { Config } from "@web/config";
+    import { FirebaseUser } from '@web/firebase';
     import JournalEntryCard from "@components/JournalEntryCard.vue";
     import NavBar from '@components/NavBar.vue';
-    import {PageRoute} from '@shared/PageRoutes'
+    import { PageRoute } from '@shared/PageRoutes'
     import CactusMember from '@shared/models/CactusMember'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import AutoPromptContentModal from "@components/AutoPromptContentModal.vue";
     import SkeletonCard from "@components/JournalEntrySkeleton.vue";
     import JournalFeedDataSource from '@web/datasource/JournalFeedDataSource'
     import JournalEntry from '@web/datasource/models/JournalEntry'
-    import {debounce} from "debounce"
+    import { debounce } from "debounce"
     import Spinner from "@components/Spinner.vue"
     import PromptContentService from "@web/services/PromptContentService";
     import SentPromptService from "@web/services/SentPromptService";
     import SentPrompt from "@shared/models/SentPrompt";
     import UpgradeSubscriptionJournalEntryCard from "@components/UpgradeSubscriptionJournalEntryCard.vue";
     import Logger from "@shared/Logger";
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
-    import {QueryParam} from "@shared/util/queryParams";
-    import {getQueryParam} from "@web/util";
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
+    import { QueryParam } from "@shared/util/queryParams";
+    import { getQueryParam, removeQueryParam } from "@web/util";
     import SnackbarContent from "@components/SnackbarContent.vue";
-    import {fireStartTrialEvent} from "@web/analytics";
-    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import { fireOptInStartTrialEvent } from "@web/analytics";
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -112,7 +132,8 @@
         todayUnsubscriber?: ListenerUnsubscriber,
         todayEntry?: JournalEntry,
         todayLoaded: boolean,
-        showUpgradeCard: boolean,
+        coreValuesClosed: boolean,
+        upgradeConfirmed: boolean,
     }
 
     export default Vue.extend({
@@ -126,8 +147,8 @@
             SnackbarContent
         },
         props: {
-            loginPath: {type: String, default: PageRoute.SIGNUP},
-            firstPromptPath: {type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId}
+            loginPath: { type: String, default: PageRoute.SIGNUP },
+            firstPromptPath: { type: String, default: PageRoute.PROMPTS_ROOT + '/' + Config.firstPromptId }
         },
         mounted() {
             let handler = debounce(this.scrollHandler, 10);
@@ -135,20 +156,24 @@
             this.scrollHandler();
 
             if (this.upgradeConfirmed) {
-                let priceCents = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
+                let priceDollars = StorageService.getNumber(LocalStorageKey.subscriptionPriceCents);
 
-                if (priceCents) {
-                    priceCents = priceCents / 100;
+                if (priceDollars) {
+                    priceDollars = priceDollars / 100;
                 }
 
-                fireStartTrialEvent({ value: priceCents });
+                fireOptInStartTrialEvent({ value: priceDollars });
             }
         },
         beforeMount() {
             logger.log("Journal Home calling Created function");
 
+            const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
+            this.upgradeConfirmed = upgradeQueryParam === 'success';
+            removeQueryParam(QueryParam.UPGRADE_SUCCESS)
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member, user}) => {
+                onData: async ({ member, user }) => {
                     if (!user) {
                         logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         window.location.href = PageRoute.HOME;
@@ -203,14 +228,14 @@
                             this.todayLoaded = true;
                         }
 
-                        if (tier === SubscriptionTier.BASIC) {
-                            this.showUpgradeCard = true;
-                        }
+                        // if (tier === SubscriptionTier.BASIC) {
+                        //     this.showUpgradeCard = true;
+                        // }
                     }
 
                     if (isFreshLogin) {
                         logger.log("[JournalHome] fresh login. Setting up data source");
-                        this.dataSource = new JournalFeedDataSource(member!, {onlyCompleted: true});
+                        this.dataSource = new JournalFeedDataSource(member!, { onlyCompleted: true });
                         this.dataSource.delegate = {
                             didLoad: (hasData) => {
                                 logger.log("[JournalHome] didLoad called. Has Data = ", hasData);
@@ -222,7 +247,7 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                logger.log(`entry updated at index ${index}`, entry);
+                                logger.log(`entry updated at index ${ index }`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -252,7 +277,8 @@
                 todayUnsubscriber: undefined,
                 todayEntry: undefined,
                 todayLoaded: false,
-                showUpgradeCard: false,
+                coreValuesClosed: false,
+                upgradeConfirmed: false,
             };
         },
         destroyed() {
@@ -288,6 +314,10 @@
 
                 }
             },
+            launchCoreValues() {
+                // TODO: launch core values assessment
+                window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+            },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
             }
@@ -296,21 +326,30 @@
             email(): string | undefined | null {
                 return this.user ? this.user.email : null;
             },
+            plusUser(): boolean {
+                const tier = this.cactusMember?.tier ?? SubscriptionTier.PLUS;
+                return (tier === SubscriptionTier.PLUS) ? true : false;
+            },
             loggedIn(): boolean {
                 return !!this.cactusMember;
             },
             isSticky(): boolean {
                 return false;
             },
-            upgradeConfirmed(): boolean {
-                const upgradeQueryParam = getQueryParam(QueryParam.UPGRADE_SUCCESS);
-                return upgradeQueryParam === 'success';
+            hasCoreValues(): boolean {
+                return (this.cactusMember?.coreValues ?? []).length > 0
+            },
+            showCoreValuesBanner(): boolean {
+                return !this.hasCoreValues && !this.upgradeConfirmed && !this.coreValuesClosed
+            },
+            showUpgradeCard(): boolean {
+                return !this.plusUser && !this.showCoreValuesBanner && !this.showOnboardingPrompt && this.dataHasLoaded && !this.upgradeConfirmed
             },
             showOnboardingPrompt(): boolean {
-                return (this.loggedIn && 
-                    this.loginReady && 
-                    this.dataHasLoaded && 
-                    this.journalEntries.length === 0)
+                return (this.loggedIn &&
+                this.loginReady &&
+                this.dataHasLoaded &&
+                this.journalEntries.length === 0)
             }
         }
     })
@@ -371,7 +410,61 @@
         }
     }
 
+    .coreValuesBox {
+        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-position: 0 0, -14rem -15rem, -7rem 120%;
+        background-repeat: repeat, no-repeat, no-repeat;
+        background-size: auto, 28rem, auto;
+        border-radius: 0;
+        display: block;
+        margin-top: -2.4rem;
+        padding: 3.2rem 2.4rem;
+
+        @include r(768) {
+            margin-top: -6.4rem;
+        }
+
+        @include r(960) {
+            align-self: flex-start;
+            background-position: 0 0, -8.5rem -15rem, -1rem 133%;
+            border-radius: 1.2rem;
+            margin: 0 2.4rem;
+            padding: 6.4rem 3.2rem;
+            position: sticky;
+            top: 3.2rem;
+            width: 30rem;
+        }
+    }
+
+    .cvTitle {
+        color: $white;
+        font-size: 2.4rem;
+        margin-bottom: .4rem;
+    }
+
+    .cvSubtext {
+        color: $white;
+        margin: 0 auto 1.6rem;
+        max-width: 60rem;
+        opacity: .9;
+    }
+
+    .cvButton {
+        display: block;
+        margin: 0 auto;
+
+        @include r(960) {
+            width: 100%;
+        }
+    }
+
     .section-container {
+
+        @include r(960) {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
 
         .journalList {
             display: flex;
