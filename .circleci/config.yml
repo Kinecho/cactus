@@ -20,6 +20,62 @@ aliases:
   - &scripts-module "scripts"
   - &admin-module "shared-admin"
 
+  ## Function Modules
+  - &func-pubsub1 "functions:pubsub1"
+  - &func-pubsub2 "functions:pubsub1"
+  - &func-pubsub3 "functions:pubsub3"
+  - &func-auth "functions:authTriggers"
+  - &func-db1 "functions:db1"
+  - &func-db2 "functions:db2"
+  - &func-apis1 "functions:test,functions:mailchimp,functions:notificationPreferences"
+  - &func-apis2 "functions:slack,functions:flamelink,functions:inbound,functions:apple"
+  - &func-apis3 "functions:checkout,functions:signup,functions:social,functions:user"
+
+
+
+  - &api-1-stage "Funcs: Api 1 Stage"
+  - &api-2-stage "Funcs: Api 2 Stage"
+  - &api-3-stage "Funcs: Api 3 Stage"
+  - &auth-1-stage "Funcs: Auth 1 Stage"
+  - &db-1-stage "Funcs: Firestore Triggers 1 Stage"
+  - &db-2-stage "Funcs: Firestore Triggers 2 Stage"
+  - &pubsub-1-stage "Funcs: PubSub 1 Stage"
+  - &pubsub-2-stage "Funcs: PubSub 2 Stage"
+  - &pubsub-3-stage "Funcs: PubSub 3 Stage"
+
+  - &api-1-prod "Funcs: Api 1 Prod"
+  - &api-2-prod "Funcs: Api 2 Prod"
+  - &api-3-prod "Funcs: Api 3 Prod"
+  - &auth-1-prod "Funcs: Auth 1 Prod"
+  - &db-1-prod "Funcs: Firestore Triggers 1 Prod"
+  - &db-2-prod "Funcs: Firestore Triggers 2 Prod"
+  - &pubsub-1-prod "Funcs: PubSub 1 Prod"
+  - &pubsub-2-prod "Funcs: PubSub 2 Prod"
+  - &pubsub-3-prod "Funcs: PubSub 3 Prod"
+
+
+  - &all-func-stage
+    - *api-1-stage
+    - *api-2-stage
+    - *api-3-stage
+    - *auth-1-stage
+    - *db-1-stage
+    - *db-2-stage
+    - *pubsub-1-stage
+    - *pubsub-2-stage
+    - *pubsub-3-stage
+
+  - &all-func-prod
+    - *api-1-prod
+    - *api-2-prod
+    - *api-3-prod
+    - *auth-1-prod
+    - *db-1-prod
+    - *db-2-prod
+    - *pubsub-1-prod
+    - *pubsub-2-prod
+    - *pubsub-3-prod
+
   ## Slack Configs
   - &webhook-engineering-ci
     webhook: "https://hooks.slack.com/services/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"
@@ -44,6 +100,33 @@ commands:
             export SLACK_GIT_LINK
             echo $SLACK_GIT_LINK >> .slack_git_url.txt
             echo 'export SLACK_GIT_LINK="$SLACK_GIT_LINK"' >> $BASH_ENV
+
+  firebase-deploy-only:
+    description: "Deploy some modules to firebase"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+      group_name:
+        type: string
+        description: The name of the step being run
+        default: << parameters.modules >>
+    steps:
+      - run:
+          no_output_timeout: 10m
+          name: Deploy << parameters.group_name >> to Firebase
+          command: |
+            git config --global user.name CircleCI
+            echo "Setting default project to be << parameters.project >>"
+            npx firebase use << parameters.project >>
+            echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+            npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
   restore-module:
     parameters:
       module:
@@ -167,7 +250,7 @@ jobs:
               exit 0
             else
               echo "Starting firebase deploy for --only ${MODULES}"
-              firebase deploy --debug --only $MODULES -P stage
+              firebase deploy --only $MODULES -P stage
             fi
       - notify-on-failure
   install-all:
@@ -335,10 +418,63 @@ jobs:
           include_visit_job_action: false
           include_project_field: false
           ts: "$(date +%s)"
-          message: "`$CIRCLE_BRANCH` has been deployed to stage.\n<https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow> | $(cat .slack_git_url.txt)"
+          message: "A branch has has been deployed to stage.\n<https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID|View Workflow>"
 
-
-  firebase-deploy:
+  firebase-deploy-functions:
+    description: "Deploy all functions (in groups) to firebase"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+    executor: cactus-web
+    resource_class: large
+    steps:
+      - checkout
+      - restore-all
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: "firestore:indexes"
+          group_name: "Firestore Indexes"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis1
+          group_name: "Api Group 1"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis2
+          group_name: "Api Group 2"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-apis3
+          group_name: "Api Group 3"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-db1
+          group_name: "Firestore DB 1 Triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-db2
+          group_name: "Firestore DB 2 Triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-auth
+          group_name: "Auth Triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-pubsub1
+          group_name: "PubSub 1 triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-pubsub2
+          group_name: "PubSub 2 triggers"
+      - firebase-deploy-only:
+          project: << parameters.project >>
+          modules: *func-pubsub3
+          group_name: "PubSub 3 triggers"
+      - notify-on-failure
+  firebase-deploy-some:
     description: "Deploy selected modules to the selected project"
     parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
       project:
@@ -363,7 +499,35 @@ jobs:
             echo "Setting default project to be << parameters.project >>"
             npx firebase use << parameters.project >>
             echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
-            npx firebase deploy --debug -P << parameters.project >> -f
+            npx firebase deploy --only << parameters.modules >> -P << parameters.project >> -f
+      - notify-on-failure
+
+  firebase-deploy-all:
+    description: "Deploy selected modules to the selected project"
+    parameters: # see https://circleci.com/docs/2.0/reusing-config/#parameter-types
+      project:
+        type: enum
+        description: The project alias to deploy. Either "stage" or "prod"
+        default: "stage"
+        enum: ["stage", "prod"]
+      modules:
+        type: string
+        default: "error"
+        description: The firebase modules to deploy. Example "hosting" or "functions" or "functions:test,functions:slack"
+    executor: cactus-web
+    resource_class: large
+    steps:
+      - checkout
+      - restore-all
+      - run:
+          no_output_timeout: 20m
+          name: Deploy to Firebase
+          command: |
+            git config --global user.name CircleCI
+            echo "Setting default project to be << parameters.project >>"
+            npx firebase use << parameters.project >>
+            echo "Starting firebase deploy for << parameters.modules >> on project << parameters.project >>"
+            npx firebase deploy -P << parameters.project >> -f
       - notify-on-failure
   notify-workflow-finished:
     description: "Notify slack that a workflow has finished and provide a link"
@@ -439,6 +603,44 @@ jobs:
           include_project_field: false
           ts: "$(date +%s)"
           message: ":white_check_mark: \\`${CIRCLE_BRANCH}\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > completed successfully.\n$(cat .slack_git_url.txt)"
+  notify-master-tests-passed:
+    description: "Notify slack that a tests on master passed"
+    parameters:
+      workflow_name:
+        type: string
+        default: "Release Pipeline"
+        description: "The message to send to slack"
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - get-repo-link
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: "good"
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All tests passed successfully."
+  notify-master-functions-deployed:
+    description: "Notify slack that a functions on master deployed successfully"
+    parameters:
+      workflow_name:
+        type: string
+        default: "Release Pipeline"
+        description: "The message to send to slack"
+    executor: cactus-web
+    resource_class: small
+    steps:
+      - get-repo-link
+      - slack/notify:
+          <<: *webhook-engineering-ci
+          color: "good"
+          include_job_number_field: false
+          include_visit_job_action: false
+          include_project_field: false
+          ts: "$(date +%s)"
+          message: ":white_check_mark: \\`master\\` <https://circleci.com/workflow-run/$CIRCLE_WORKFLOW_ID| << parameters.workflow_name >> > All functions were deployed successfully."
 
 workflows:
   version: 2.1
@@ -497,45 +699,133 @@ workflows:
           filters:
             branches:
               ignore: master
-      - branch_deploy_approval:
+      - branch_deploy_fe_approval:
           type: approval
-          name: &stage_approval_name "Deploy To Stage Approval"
+          name: &stage_fe_approval_name "Approve Hosting Only To Stage"
+          requires:
+            - *all_tests_finished
+      - branch_deploy_all_approval:
+          type: approval
+          name: &stage_all_approval_name "Approve All To Stage"
           requires:
             - *all_tests_finished
       - branch-deploy-started:
-          name: "Notify Branch Deploy Started"
+          name: "Notify Branch All Deploy Started"
           requires:
-            - *stage_approval_name
-      - firebase-deploy:
-          name: &branch_deploy_name "Deploy Branch to Stage"
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-1 "Funcs - Api 1"
           project: "stage"
+          modules: *func-apis1
           requires:
-            - *stage_approval_name
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-2 "Funcs - Api 2"
+          project: "stage"
+          modules: *func-apis2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-3 "Funcs - Api 3"
+          project: "stage"
+          modules: *func-apis3
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &auth-1 "Funcs - Auth 3"
+          project: "stage"
+          modules: *func-auth
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &db-1 "Funcs - DB 1"
+          project: "stage"
+          modules: *func-db1
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &db-2 "Funcs - DB 2"
+          project: "stage"
+          modules: *func-db2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-1 "Funcs - PubSub 1"
+          project: "stage"
+          modules: *func-pubsub1
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-2 "Funcs - PubSub 2"
+          project: "stage"
+          modules: *func-pubsub2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-3 "Funcs - PubSub 3"
+          project: "stage"
+          modules: *func-pubsub3
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_hosting_name "Deploy Hosting to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *api-1
+            - *api-2
+            - *api-3
+            - *auth-1
+            - *db-1
+            - *db-2
+            - *pubsub-1
+            - *pubsub-2
+            - *pubsub-3
+            - *stage_all_approval_name
       - branch-deploy-finished:
-            name: "Notify Branch Deploy Finished"
-            requires:
-              - *branch_deploy_name
-              - *stage_approval_name
+          name: "Notify Finished"
+          requires:
+            - *api-1
+            - *api-2
+            - *api-3
+            - *auth-1
+            - *db-1
+            - *db-2
+            - *pubsub-1
+            - *pubsub-2
+            - *pubsub-3
+            - *branch_deploy_hosting_name
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_fe_approval_name
+      - branch-deploy-finished:
+          name: "Notify Hosting Finished"
+          requires:
+            - *branch_deploy_only_hosting_name
+            - *stage_fe_approval_name
 
 
   cactus_release_pipeline:
     jobs:
       - notify-workflow-started:
-          name: &workflow_name Cactus Release Pipeline
+          name: &workflow_name Notify Cactus Release Pipeline Started
           workflow_name: *workflow_name
           filters:
             branches:
-              only: master
+              only:
+                - master
       - install-all:
           name: &install_all_name "Install Dependencies"
           filters:
             branches:
-              only: master
+              only:
+                - master
       - test-shared:
           name: &test_shared_name "Shared Tests"
-          filters:
-            branches:
-              only: master
           requires:
             - *install_all_name
       - test-scripts:
@@ -550,31 +840,189 @@ workflows:
           name: &test_functions_name "API Tests"
           requires:
             - *install_all_name
-      - firebase-deploy:
-          name: &deploy_stage_name "Stage: Deploy All"
-          modules: "functions,hosting"
-          project: "stage"
+      #      RELEASE DEPLOY FUNCTIONS TO STAGE START
+      - notify-master-tests-passed:
+          name: &unit_tests_passed_notification "Notify Unit tests passed"
           requires:
             - *install_all_name
-            - *test_web_name
-            - *test_shared_name
             - *test_functions_name
             - *test_scripts_name
+            - *test_shared_name
+            - *test_web_name
+      - firebase-deploy-some:
+          name: *api-1-stage
+          project: "stage"
+          modules: *func-apis1
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *api-2-stage
+          project: "stage"
+          modules: *func-apis2
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *api-3-stage
+          project: "stage"
+          modules: *func-apis3
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *auth-1-stage
+          project: "stage"
+          modules: *func-auth
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *db-1-stage
+          project: "stage"
+          modules: *func-db1
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *db-2-stage
+          project: "stage"
+          modules: *func-db2
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *pubsub-1-stage
+          project: "stage"
+          modules: *func-pubsub1
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *pubsub-2-stage
+          project: "stage"
+          modules: *func-pubsub2
+          requires:
+            - *unit_tests_passed_notification
+      - firebase-deploy-some:
+          name: *pubsub-3-stage
+          project: "stage"
+          modules: *func-pubsub3
+          requires:
+            - *unit_tests_passed_notification
+      #      Deploy hosting once all functions are deployed
+      #       Notify functions deployed, and use as a group for future steps
+      - notify-master-functions-deployed:
+          name: &functions-deployed-notification-stage "Notify Functions Deployed - Stage"
+          requires:
+            - *api-1-stage
+            - *api-2-stage
+            - *api-3-stage
+            - *auth-1-stage
+            - *db-1-stage
+            - *db-2-stage
+            - *pubsub-1-stage
+            - *pubsub-2-stage
+            - *pubsub-3-stage
+      #     Deploy the frontend, requires notification to be sent as a grouping function
+      - firebase-deploy-some:
+          name: &stage_deploy_hosting_name "Deploy Hosting to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *functions-deployed-notification-stage
+
       - ready-for-deploy:
           name: "Notify Promotion Ready"
           requires:
-            - *deploy_stage_name
+            - *stage_deploy_hosting_name
       - prod_deploy_approval:
           type: approval
           name: &prod_approval_name "Deploy To Prod Approval"
           requires:
-            - *deploy_stage_name
+            - *stage_deploy_hosting_name
+#            - *functions-deployed-notification-stage
+#            - *install_all_name
+#            - *test_web_name
+#            - *test_shared_name
+#            - *test_functions_name
+#            - *test_scripts_name
       - prod-deploy-started:
-          name: "Notify Promotion"
-          requires:
-              - *prod_approval_name
-      - firebase-deploy:
-          name: "Prod: Deploy All"
-          project: "prod"
+          name: &notify_promoted "Notify Promotion"
           requires:
             - *prod_approval_name
+      #      DEPLOY FUNCTIONS TO STAGE START
+      - firebase-deploy-some:
+          name: *api-1-prod
+          project: "prod"
+          modules: *func-apis1
+          requires:
+            - *prod_approval_name
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *api-2-prod
+          project: "prod"
+          modules: *func-apis2
+          requires:
+            - *prod_approval_name
+      - firebase-deploy-some:
+          name: *api-3-prod
+          project: "prod"
+          modules: *func-apis3
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *auth-1-prod
+          project: "prod"
+          modules: *func-auth
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *db-1-prod
+          project: "prod"
+          modules: *func-db1
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *db-2-prod
+          project: "prod"
+          modules: *func-db2
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *pubsub-1-prod
+          project: "prod"
+          modules: *func-pubsub1
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *pubsub-2-prod
+          project: "prod"
+          modules: *func-pubsub2
+          requires:
+            - *notify_promoted
+      - firebase-deploy-some:
+          name: *pubsub-3-prod
+          project: "prod"
+          modules: *func-pubsub3
+          requires:
+            - *notify_promoted
+      #      Deploy hosting once all functions are deployed
+      #       Notify functions deployed, and use as a group for future steps
+      - notify-master-functions-deployed:
+          name: &functions-deployed-notification-prod "Notify Functions Deployed - Prod"
+          requires:
+            - *api-1-prod
+            - *api-2-prod
+            - *api-3-prod
+            - *auth-1-prod
+            - *db-1-prod
+            - *db-2-prod
+            - *pubsub-1-prod
+            - *pubsub-2-prod
+            - *pubsub-3-prod
+
+      - firebase-deploy-some:
+          name: &release_deploy_hosting_name "Deploy Hosting to Prod"
+          project: "prod"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *functions-deployed-notification-prod
+      - notify-workflow-finished:
+          name: "Release Finished Notification"
+          workflow_name: "Release Pipeline - Prod"
+          requires:
+            - *release_deploy_hosting_name

@@ -39,7 +39,6 @@ import { onPublish as GooglePlayBillingJob } from "@api/pubsub/subscribers/Googl
 import { transactionalOnCreate } from "@admin/AuthUserCreateJob";
 import { onPublish as CancellationJob } from "@admin/pubsub/ProcessSubscriptionCancellations";
 import { updateMemberCoreValueFromAssessment } from "@api/triggers/CoreValuesAssessessmentResponseTriggers";
-
 export const cloudFunctions = {
     //API Endpoints
     checkout: functions.https.onRequest(checkoutApp),
@@ -55,34 +54,45 @@ export const cloudFunctions = {
     apple: functions.https.onRequest(appleEndpoints),
 
     //PubSub topics
-    bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
-    dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
-    backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
-    exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
-    processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
-    slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
-    unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
-    memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
-    customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
-    expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
-    syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
-    googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
-    processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
-
+    pubsub1: {
+        bridgeToMondayJob: functions.pubsub.topic(PubSubTopic.bridge_to_monday_prune).onPublish(BridgeToMondayJob.onPublish),
+        dailySentPromptJob: functions.pubsub.topic(PubSubTopic.create_daily_sent_prompts).onPublish(DailySentPromptJob.onPublish),
+        backupFirestore: functions.pubsub.topic(PubSubTopic.firestore_backup).onPublish(backupFirestore),
+        exportToBigQuery: functions.pubsub.topic(PubSubTopic.firestore_export_bigquery).onPublish(exportFirestoreToBigQuery),
+        processMailchimpEmailRecipients: functions.pubsub.topic(PubSubTopic.process_mailchimp_email_recipients).onPublish(EmailRecipientsJob.onPublish),
+    },
+    pubsub2: {
+        slackCommandJob: functions.pubsub.topic(PubSubTopic.slack_command).onPublish(SlackCommandJob.onPublish),
+        unsubscriberSyncJob: functions.pubsub.topic(PubSubTopic.unsubscriber_sync).onPublish(UnsubscriberReportSyncJob.onPublish),
+        memberStatsJob: functions.pubsub.topic(PubSubTopic.member_stats_sync).onPublish(MemberStatsJob.onPublish),
+        customSentPromptNotifications: functions.pubsub.topic(PubSubTopic.custom_sent_prompt_notifications).onPublish(CustomSentPromptNotificationsJob.onPublish),
+        expireTrials: functions.pubsub.topic(PubSubTopic.expire_subscription_trials).onPublish(expireMembershipJob),
+    },
+    pubsub3: {
+        syncTrailMembersToMailchimp: functions.pubsub.topic(PubSubTopic.sync_trial_members_to_mailchimp).onPublish(syncTrailToMailchimpMembersJob),
+        googlePlayBillingEvents: functions.pubsub.topic(PubSubTopic.android_google_play_billing_events).onPublish(GooglePlayBillingJob),
+        processCancellations: functions.pubsub.topic(PubSubTopic.process_cancellations).onPublish(CancellationJob),
+    },
 
     //auth triggers
-    userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),
-    userDeletedTrigger: functions.auth.user().onDelete(onDelete),
+    authTriggers: {
+        userCreatedTrigger: functions.auth.user().onCreate(user => transactionalOnCreate(user, false)),
+        userDeletedTrigger: functions.auth.user().onDelete(onDelete),
+    },
 
     //firestore triggers
-    reflectionResponseCreatedTrigger: onReflectionResponseCreated,
-    sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
-    updateReflectionStatsTrigger: updateReflectionStatsTrigger,
-    updateMemberProfileTrigger: updateMemberProfileTrigger,
-    updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
-    updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
-    publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
-    updateSubscriptionDetailsTrigger,
-    updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite,
-    updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
+    db1: {
+        reflectionResponseCreatedTrigger: onReflectionResponseCreated,
+        sentPromptPushNotificationTrigger: SentPromptTriggers.sentPromptPushNotificationTrigger,
+        updateReflectionStatsTrigger: updateReflectionStatsTrigger,
+        updateMemberProfileTrigger: updateMemberProfileTrigger,
+        updateSentPromptOnReflectionWrite: updateSentPromptOnReflectionWrite,
+    },
+    db2: {
+        updatePromptSendTimeTrigger: updatePromptSendTimeTrigger,
+        publishPromptContentTrigger: PromptContentTriggers.onContentPublished,
+        updateSubscriptionDetailsTrigger,
+        updateInsightWordsOnReflectionWrite: updateInsightWordsOnReflectionWrite,
+        updateMemberCoreValueFromAssessment: updateMemberCoreValueFromAssessment,
+    }
 };
