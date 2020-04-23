@@ -699,9 +699,14 @@ workflows:
           filters:
             branches:
               ignore: master
+      - branch_deploy_fe_approval:
+          type: approval
+          name: &stage_fe_approval_name "Approve Hosting Only To Stage"
+          requires:
+            - *all_tests_finished
       - branch_deploy_all_approval:
           type: approval
-          name: &stage_all_approval_name "Approve All To Stage Approval"
+          name: &stage_all_approval_name "Approve All To Stage"
           requires:
             - *all_tests_finished
       - branch-deploy-started:
@@ -791,6 +796,17 @@ workflows:
             - *pubsub-3
             - *branch_deploy_hosting_name
             - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &branch_deploy_only_hosting_name "Deploy Hosting Only to Stage"
+          project: "stage"
+          modules: "hosting,firestore:rules,firestore:indexes"
+          requires:
+            - *stage_fe_approval_name
+      - branch-deploy-finished:
+          name: "Notify Hosting Finished"
+          requires:
+            - *branch_deploy_only_hosting_name
+            - *stage_fe_approval_name
 
 
   cactus_release_pipeline:
