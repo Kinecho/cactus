@@ -903,7 +903,6 @@ workflows:
             - *pubsub-1-stage
             - *pubsub-2-stage
             - *pubsub-3-stage
-            - *unit_tests_passed_notification
       #     Deploy the frontend, requires notification to be sent as a grouping function
       - firebase-deploy-some:
           name: &stage_deploy_hosting_name "Deploy Hosting to Stage"
