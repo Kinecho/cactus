@@ -941,7 +941,7 @@ workflows:
 #            - *test_functions_name
 #            - *test_scripts_name
       - prod-deploy-started:
-          name: "Notify Promotion"
+          name: &notify_promoted "Notify Promotion"
           requires:
             - *prod_approval_name
       #      DEPLOY FUNCTIONS TO STAGE START
@@ -951,6 +951,7 @@ workflows:
           modules: *func-apis1
           requires:
             - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *api-2-prod
           project: "prod"
@@ -962,43 +963,43 @@ workflows:
           project: "prod"
           modules: *func-apis3
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *auth-1-prod
           project: "prod"
           modules: *func-auth
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *db-1-prod
           project: "prod"
           modules: *func-db1
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *db-2-prod
           project: "prod"
           modules: *func-db2
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *pubsub-1-prod
           project: "prod"
           modules: *func-pubsub1
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *pubsub-2-prod
           project: "prod"
           modules: *func-pubsub2
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       - firebase-deploy-some:
           name: *pubsub-3-prod
           project: "prod"
           modules: *func-pubsub3
           requires:
-            - *prod_approval_name
+            - *notify_promoted
       #      Deploy hosting once all functions are deployed
       #       Notify functions deployed, and use as a group for future steps
       - notify-master-functions-deployed:
