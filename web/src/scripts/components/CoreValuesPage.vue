@@ -14,12 +14,10 @@
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @close="closeAssessment" @save="save" @completed="complete"/>
             </template>
             <template v-else-if="plusUser && !hasValues">
-                <p>Core values are the general expression of what is most important for you, and they help you
-                    understand past decisions and make better decisions in the future.</p>
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
-                    of how your values have been at the heart of past decisions and how they will unlock a happier
-                    future. Your core values results will guide your Cactus reflections.</p>
-                <p>Insert language about how long this will take or how many questions to set expectations...</p>
+                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration of how your values have been at the heart of past decisions and how they will unlock a happier future. Your core values results will guide your Cactus reflections.</p>
+                
                 <button class="primaryBtn" @click="startNewAssessment" :disabled="creatingAssessment">Take the
                     Assessment
                 </button>
