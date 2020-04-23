@@ -33,25 +33,25 @@ aliases:
 
 
 
-  - &api-1-stage "Api 1 Stage"
-  - &api-2-stage "Api 2 Stage"
-  - &api-3-stage "Api 3 Stage"
-  - &auth-1-stage "Auth 1 Stage"
-  - &db-1-stage "Firestore Triggers 1 Stage"
-  - &db-2-stage "Firestore Triggers 2 Stage"
-  - &pubsub-1-stage "PubSub 1 Stage"
-  - &pubsub-2-stage "PubSub 2 Stage"
-  - &pubsub-3-stage "PubSub 3 Stage"
+  - &api-1-stage "Funcs: Api 1 Stage"
+  - &api-2-stage "Funcs: Api 2 Stage"
+  - &api-3-stage "Funcs: Api 3 Stage"
+  - &auth-1-stage "Funcs: Auth 1 Stage"
+  - &db-1-stage "Funcs: Firestore Triggers 1 Stage"
+  - &db-2-stage "Funcs: Firestore Triggers 2 Stage"
+  - &pubsub-1-stage "Funcs: PubSub 1 Stage"
+  - &pubsub-2-stage "Funcs: PubSub 2 Stage"
+  - &pubsub-3-stage "Funcs: PubSub 3 Stage"
 
-  - &api-1-prod "Api 1 Prod"
-  - &api-2-prod "Api 2 Prod"
-  - &api-3-prod "Api 3 Prod"
-  - &auth-1-prod "Auth 1 Prod"
-  - &db-1-prod "Firestore Triggers 1 Prod"
-  - &db-2-prod "Firestore Triggers 2 Prod"
-  - &pubsub-1-prod "PubSub 1 Prod"
-  - &pubsub-2-prod "PubSub 2 Prod"
-  - &pubsub-3-prod "PubSub 3 Prod"
+  - &api-1-prod "Funcs: Api 1 Prod"
+  - &api-2-prod "Funcs: Api 2 Prod"
+  - &api-3-prod "Funcs: Api 3 Prod"
+  - &auth-1-prod "Funcs: Auth 1 Prod"
+  - &db-1-prod "Funcs: Firestore Triggers 1 Prod"
+  - &db-2-prod "Funcs: Firestore Triggers 2 Prod"
+  - &pubsub-1-prod "Funcs: PubSub 1 Prod"
+  - &pubsub-2-prod "Funcs: PubSub 2 Prod"
+  - &pubsub-3-prod "Funcs: PubSub 3 Prod"
 
 
   - &all-func-stage
@@ -833,7 +833,7 @@ workflows:
             - *install_all_name
       #      RELEASE DEPLOY FUNCTIONS TO STAGE START
       - notify-master-tests-passed:
-          name: &unit_tests_passed_notification "Unit tests passed"
+          name: &unit_tests_passed_notification "Notify Unit tests passed"
           requires:
             - *install_all_name
             - *test_functions_name
@@ -1013,4 +1013,7 @@ workflows:
           requires:
             - *functions-deployed-notification-prod
       - notify-workflow-finished:
+          name: "Release Finished Notification"
           workflow_name: "Release Pipeline - Prod"
+          requires:
+            - *release_deploy_hosting_name
