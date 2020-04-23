@@ -625,9 +625,63 @@ workflows:
           name: "Notify Branch All Deploy Started"
           requires:
             - *stage_all_approval_name
-      - firebase-deploy-functions:
-          name: &branch_deploy_functions_name "Deploy Functions to Stage"
+      #      - firebase-deploy-functions:
+      #          name: &branch_deploy_functions_name "Deploy Functions to Stage"
+      #          project: "stage"
+      #          requires:
+      #            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-1 "Api 1"
           project: "stage"
+          modules: *func-apis1
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-2 "Funcs - Api 2"
+          project: "stage"
+          modules: *func-apis2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &api-3 "Funcs - Api 3"
+          project: "stage"
+          modules: *func-apis3
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &auth-1 "Funcs - Auth 3"
+          project: "stage"
+          modules: *func-auth
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &db-1 "Funcs - DB 1"
+          project: "stage"
+          modules: *func-db1
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &db-2 "Funcs - DB 2"
+          project: "stage"
+          modules: *func-db2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-1 "Funcs - PubSub 1"
+          project: "stage"
+          modules: *func-pubsub1
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-2 "Funcs - PubSub 2"
+          project: "stage"
+          modules: *func-pubsub2
+          requires:
+            - *stage_all_approval_name
+      - firebase-deploy-some:
+          name: &pubsub-3 "Funcs - PubSub 3"
+          project: "stage"
+          modules: *func-pubsub3
           requires:
             - *stage_all_approval_name
       - firebase-deploy-some:
@@ -635,7 +689,15 @@ workflows:
           project: "stage"
           modules: "hosting,firestore:rules,firestore:indexes"
           requires:
-            - *branch_deploy_functions_name
+            - *api-1
+            - *api-2
+            - *api-3
+            - *auth-1
+            - *db-1
+            - *db-2
+            - *pubsub-1
+            - *pubsub-2
+            - *pubsub-3
             - *stage_all_approval_name
       - branch-deploy-finished:
           name: "Notify Hosting Finished"
