@@ -834,6 +834,12 @@ workflows:
       #      RELEASE DEPLOY FUNCTIONS TO STAGE START
       - notify-master-tests-passed:
           name: &unit_tests_passed_notification "Unit tests passed"
+          requires:
+            - *install_all_name
+            - *test_functions_name
+            - *test_scripts_name
+            - *test_shared_name
+            - *test_web_name
       - firebase-deploy-some:
           name: *api-1-stage
           project: "stage"
@@ -915,11 +921,6 @@ workflows:
           name: "Notify Promotion Ready"
           requires:
             - *stage_deploy_hosting_name
-      #            - *install_all_name
-      #            - *test_web_name
-      #            - *test_shared_name
-      #            - *test_functions_name
-      #            - *test_scripts_name
       - prod_deploy_approval:
           type: approval
           name: &prod_approval_name "Deploy To Prod Approval"
@@ -935,7 +936,6 @@ workflows:
           name: "Notify Promotion"
           requires:
             - *prod_approval_name
-
       #      DEPLOY FUNCTIONS TO STAGE START
       - firebase-deploy-some:
           name: *api-1-prod
@@ -1012,4 +1012,5 @@ workflows:
           modules: "hosting,firestore:rules,firestore:indexes"
           requires:
             - *functions-deployed-notification-prod
-            - *prod_approval_name
+      - notify-workflow-finished:
+          workflow_name: "Release Pipeline - Prod"
