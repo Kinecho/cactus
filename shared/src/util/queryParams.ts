@@ -44,7 +44,8 @@ export enum QueryParam {
     EMBED="embed",
     CV_LAUNCH = "cvlaunch",
     BG_INDEX = "bg",
-
+    TIER = "tier",
+    DISPLAY_NAME = "displayName",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {
