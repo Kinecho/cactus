@@ -22,7 +22,7 @@ aliases:
 
   ## Function Modules
   - &func-pubsub1 "functions:pubsub1"
-  - &func-pubsub2 "functions:pubsub1"
+  - &func-pubsub2 "functions:pubsub2"
   - &func-pubsub3 "functions:pubsub3"
   - &func-auth "functions:authTriggers"
   - &func-db1 "functions:db1"
