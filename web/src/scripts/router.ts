@@ -1,10 +1,17 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import { PageRoute } from "@shared/PageRoutes";
+import { routeChanged } from "@web/analytics";
 
 Vue.use(VueRouter);
 
 const routes: RouteConfig[] = [
+    {
+        component: () => import ("@web/vi" +
+        "ews/HomePage.vue"),
+        path: "/h",
+        name: "Cactus",
+    },
     {
         component: () => import("@components/JournalHome.vue"),
         path: PageRoute.JOURNAL_HOME,
@@ -100,11 +107,15 @@ const router = new VueRouter({
     mode: "history",
     // base: process.env.BASE_URL,
     routes,
-    scrollBehavior (to, from, savedPosition) {
+    scrollBehavior(to, from, savedPosition) {
         return { x: 0, y: 0 }
-    }
-
+    },
 });
+
+router.afterEach((to, from) => {
+    document.title = to.name || "Cactus";
+    routeChanged(to);
+})
 
 
 export default router;

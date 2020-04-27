@@ -10,8 +10,12 @@ import { LocalStorageKey } from "@web/services/StorageService";
 import CactusMemberService from "@web/services/CactusMemberService";
 import Logger from "@shared/Logger";
 import { isAndroidApp } from "@web/DeviceUtil";
+import { Route } from "vue-router";
 
 const logger = new Logger("Analytics.ts");
+
+let firstRouteFired = false;
+
 declare global {
     interface Window {
         dataLayer: Array<any>;
@@ -234,4 +238,17 @@ export function fireRevealInsightEvent() {
         event_category: "prompt_content",
         event_label: "word_chart"
     });
+}
+
+export function routeChanged(to: Route): void {
+    //Only want to fire subsequent page view events as standard analytics will fire the initial page load.
+    if (firstRouteFired) {
+        firebaseAnalytics().logEvent("page_view" as never, {
+            page_path: to.path,
+            page_title: to.name,
+            page_location: window.location.href,
+            name: to.name
+        });
+    }
+    firstRouteFired = true;
 }

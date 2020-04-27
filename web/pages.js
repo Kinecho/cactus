@@ -3,11 +3,11 @@ module.exports = {
     //     "title": "Page Not Found",
     //     "name": "404"
     // },
-    "index": {
-        "title": "Welcome to Cactus",
-        "path": "/",
-        "name": "index"
-    },
+    // "index": {
+    //     "title": "Welcome to Cactus",
+    //     "path": "/",
+    //     "name": "index"
+    // },
     // "sign_up": {
     //     "title": "Sign In",
     //     "path": "/signup",
@@ -123,7 +123,7 @@ module.exports = {
     //     "name": "sponsor"
     // },
     "single_page_index": {
-        "title": "Single Page Index",
+        "title": "Cactus",
         "path": "/single-page-index",
         "name": "single_page_index"
     }

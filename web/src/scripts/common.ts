@@ -1,9 +1,9 @@
-import {init as initAnalytics} from '@web/analytics';
-import {startFacebookPixel} from '@web/facebook.js';
-import {initializeFirebase} from "@web/firebase";
-import {getAllQueryParams, getQueryParam} from "@web/util";
-import {includesLandingQueryParams, QueryParam} from "@shared/util/queryParams";
-import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+import { init as initAnalytics } from '@web/analytics';
+import { startFacebookPixel } from '@web/facebook.js';
+import { initializeFirebase } from "@web/firebase";
+import { getAllQueryParams, getQueryParam } from "@web/util";
+import { includesLandingQueryParams, QueryParam } from "@shared/util/queryParams";
+import StorageService, { LocalStorageKey } from "@web/services/StorageService";
 import Logger from "@shared/Logger";
 import CactusMemberService from "@web/services/CactusMemberService";
 
@@ -61,7 +61,7 @@ export function commonInit() {
 
         // merge new and old together if both exist
         if (newParams && existingParams) {
-            params = {...existingParams, ...newParams};
+            params = { ...existingParams, ...newParams };
         }
 
         if (params && includesLandingQueryParams(params)) {
