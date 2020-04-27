@@ -116,32 +116,8 @@
                 "destination": "/single_page_index.html"
             },
             {
-                "source": "/core-values",
-                "destination": "/core_values.html"
-            },
-            {
-                "source": "/sponsor",
-                "destination": "/sponsor.html"
-            },
-            {
                 "source": "/insights-embed",
                 "destination": "/insights_embedded.html"
-            },
-            {
-                "source": "/welcome",
-                "destination": "/android_welcome.html"
-            },
-            {
-                "source": "/activity",
-                "destination": "/social_home.html"
-            },
-            {
-                "source": "/app-login-continue",
-                "destination": "/native_app_login_continue.html"
-            },
-            {
-                "source": "/pricing",
-                "destination": "/pricing.html"
             },
             {
                 "source": "/apple-app-site-association",
@@ -168,36 +144,8 @@
                 "destination": "/unsubscribe_confirmed.html"
             },
             {
-                "source": "/reflection/**",
-                "destination": "/shared_reflection.html"
-            },
-            {
-                "source": "/privacy-policy",
-                "destination": "/privacy_policy.html"
-            },
-            {
-                "source": "/terms-of-service",
-                "destination": "/terms_of_service.html"
-            },
-            {
-                "source": "/prompts/**",
-                "destination": "/prompt.html"
-            },
-            {
-                "source": "/auth-actions",
-                "destination": "/email_action.html"
-            },
-            {
                 "source": "/authenticate-actions",
                 "destination": "/email_action.html"
-            },
-            {
-                "source": "/values",
-                "destination": "/values_home.html"
-            },
-            {
-                "source": "/invite",
-                "destination": "/social_invite.html"
             },
             {
                 "source": "/solo-proxy-auth",
@@ -230,10 +178,6 @@
             {
                 "source": "/checkout",
                 "destination": "/checkout_redirect.html"
-            },
-            {
-                "source": "/",
-                "destination": "/index.html"
             },
             {
                 "source": "**",
