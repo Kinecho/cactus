@@ -1,7 +1,7 @@
 // @ts-ignore
 import MagicLinkAppContinue from "@components/MagicLinkAppContinue.vue"
 import Vue from "vue";
-import {commonInit} from "@web/common";
+import { commonInit } from "@web/common";
 import Logger from "@shared/Logger";
 
 const logger = new Logger("native_app_login_continue.ts");
@@ -9,7 +9,8 @@ commonInit();
 
 new Vue({
     el: "#app",
-    template: `<MagicLinkAppContinue :link="link"/>`,
+    template: `
+        <MagicLinkAppContinue/>`,
     components: {
         MagicLinkAppContinue,
     },

@@ -14,7 +14,7 @@ commonInit();
 new Vue({
     el: "#app",
     template: `
-        <CoreValuesPage :embed="embed"/>`,
+        <CoreValuesPage/>`,
     components: {
         CoreValuesPage,
     },

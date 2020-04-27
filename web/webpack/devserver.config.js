@@ -8,11 +8,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HTMLWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin')
 
 module.exports = function (config) {
-    pages.login = {
-        'title': 'Log In',
-        'path': '/login',
-        'name': 'sign_up',
-    }
+    // pages.login = {
+    //     'title': 'Log In',
+    //     'path': '/login',
+    //     'name': 'sign_up',
+    // }
 
     const indexPath = path.join(helpers.srcDir, 'pages-index.html')
     createDevIndexPage(indexPath)
@@ -28,7 +28,7 @@ module.exports = function (config) {
                 rewrites: [
                     {from: new RegExp('^/index$'), to: '/pages-index.html'},
                     ...createPageRewrites(),
-                    {from: /./, to: '/404.html'},
+                    {from: /./, to: '/single_page_index.html'},
                 ],
             },
         },

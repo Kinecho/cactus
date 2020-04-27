@@ -7,7 +7,7 @@
                     <p class="copyright">&copy; 2020 Cactus. All rights reserved.<br>
                         Have questions?&nbsp;&nbsp;<a class="contact" href="mailto:help@cactus.app">Send an
                             email.</a><br>
-                        <a class="legal" href="/pricing">Pricing</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/sponsor">Sponsor</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/privacy-policy">Privacy</a>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<a class="legal" href="/terms-of-service">Terms</a>
+                        <router-link class="legal" to="/pricing">Pricing</router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/sponsor">Sponsor</router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/privacy-policy">Privacy</router-link>&nbsp;&nbsp;&middot;&nbsp;&nbsp;<router-link class="legal" to="/terms-of-service">Terms</router-link>
                     </p>
                     <nav class="socialLinks">
                         <a class="link" rel="noreferrer" href="https://www.facebook.com/itscalledcactus" target="_blank"><img class="icon" src="/assets/images/facebook.svg" alt="facebook"/></a>

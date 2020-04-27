@@ -53,6 +53,12 @@
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
+    import VueClipboard from "vue-clipboard2";
+    import SocialSharing from "vue-social-sharing";
+
+    Vue.use(VueClipboard);
+    Vue.use(SocialSharing);
+
 
     export default Vue.extend({
         components: {

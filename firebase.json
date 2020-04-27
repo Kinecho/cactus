@@ -112,6 +112,10 @@
         ],
         "rewrites": [
             {
+                "source": "/single-page-index",
+                "destination": "/single_page_index.html"
+            },
+            {
                 "source": "/core-values",
                 "destination": "/core_values.html"
             },
@@ -180,10 +184,6 @@
                 "destination": "/prompt.html"
             },
             {
-                "source": "/account",
-                "destination": "/account_settings.html"
-            },
-            {
                 "source": "/auth-actions",
                 "destination": "/email_action.html"
             },
@@ -208,24 +208,12 @@
                 "destination": "/social_invite.html"
             },
             {
-                "source": "/home",
-                "destination": "/journal_home.html"
-            },
-            {
                 "source": "/p/**",
                 "dynamicLinks": true
             },
             {
                 "source": "/s/**",
                 "dynamicLinks": true
-            },
-            {
-                "source": "/signup",
-                "destination": "/sign_up.html"
-            },
-            {
-                "source": "/login",
-                "destination": "/sign_up.html"
             },
             {
                 "source": "/success",
@@ -249,7 +237,7 @@
             },
             {
                 "source": "**",
-                "destination": "/404.html"
+                "destination": "/single_page_index.html"
             }
         ]
     },
