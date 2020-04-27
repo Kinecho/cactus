@@ -1,4 +1,3 @@
-import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">

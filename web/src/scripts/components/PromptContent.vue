@@ -64,7 +64,8 @@
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
-                                    v-on:restart="restart" v-on:close="seePricingOrGoHome"
+                                    v-on:restart="restart"
+                                    v-on:close="seePricingOrGoHome"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"

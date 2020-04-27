@@ -306,7 +306,7 @@
                     margin-left: 3.2vw;
                     padding: .8rem 1.6rem;
 
-                    &:hover {
+                    &:hover, &.router-link-active {
                         background-color: $lightGreen;
                     }
                 }
@@ -387,7 +387,7 @@
                 width: 100%;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
             }
         }
@@ -458,7 +458,7 @@
                 width: 5.6rem;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
             }
         }
