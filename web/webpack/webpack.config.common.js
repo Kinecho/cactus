@@ -46,9 +46,9 @@ module.exports = (config) => {
             }, {})
 
             //add the little dev pages index
-            if (isDev) {
-                jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
-            }
+            // if (isDev) {
+                // jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
+            // }
 
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 

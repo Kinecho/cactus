@@ -1,10 +1,17 @@
 <template>
     <div class="page-wrapper">
         <div class="signin-wrapper">
-            <NavBar :showLinks="false" v-bind:showSignup="false" :showLogin="false" v-bind:redirectOnSignOut="false" :isSticky="false" :forceTransparent="true" :largeLogoOnDesktop="true" :whiteLogo="true"/>
+            <NavBar :showLinks="false"
+                    :showSignup="false"
+                    :showLogin="false"
+                    :redirectOnSignOut="false"
+                    :isSticky="false"
+                    :forceTransparent="true"
+                    :largeLogoOnDesktop="true"
+                    :whiteLogo="true"/>
             <SignIn :message="message" :title="title"/>
         </div>
-        <Footer :isTransparent="true"/>
+        <StandardFooter :isTransparent="true"/>
     </div>
 </template>
 
@@ -12,28 +19,52 @@
     import Vue from "vue";
     import NavBar from "@components/NavBar.vue";
     import SignIn from "@components/SignIn.vue";
+    import { PageRoute } from "@shared/PageRoutes";
+    import CopyService from "@shared/copy/CopyService";
+    import { LocalizedCopy } from "@shared/copy/CopyTypes";
+    import StandardFooter from "@components/StandardFooter.vue";
+    import { getQueryParam } from "@web/util";
+    import { QueryParam } from "@shared/util/queryParams";
+
+    const copy = CopyService.getSharedInstance().copy;
 
     export default Vue.extend({
         components: {
             NavBar,
             SignIn,
+            StandardFooter,
+        },
+        beforeMount(): void {
+            document.body.classList.add("sign-up-body");
+        },
+        beforeDestroy(): void {
+            document.body.classList.remove("sign-up-body");
+        },
+        data(): { title: string, copy: LocalizedCopy, message: string | null } {
+            return {
+                copy,
+                message: getQueryParam(QueryParam.MESSAGE),
+                title: window.location.pathname.startsWith(PageRoute.LOGIN) ? copy.common.LOG_IN : copy.common.SIGN_UP,
+            }
         },
         name: "SignUpView"
     })
 </script>
 
-
 <style lang="scss">
-    @import "~styles/mixins";
-    @import "~styles/variables";
-    @import "~styles/common";
-    @import "~styles/modal";
+    @import "mixins";
 
-    /*body.sign-up-body {*/
-    body {
+    body.sign-up-body {
         @include blueWavyBackground;
         min-height: 100vh;
     }
+</style>
+
+<style lang="scss">
+    @import "common";
+    @import "variables";
+    @import "~styles/modal.scss";
+    @import "~styles/forms.scss";
 
     .page-wrapper {
         position: relative;
@@ -76,10 +107,5 @@
             text-decoration: underline;
         }
     }
-
-</style>
-
-
-<style scoped lang="scss">
 
 </style>

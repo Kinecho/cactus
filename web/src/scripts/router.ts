@@ -105,6 +105,21 @@ const routes: RouteConfig[] = [
         path: PageRoute.PAYMENT_CANCELED,
     },
     {
+        component: () => import("@components/UnsubscribeConfirmedPage.vue"),
+        name: "Unsubscribe Confirmed",
+        path: PageRoute.UNSUBSCRIBE_SUCCESS
+    },
+    {
+        component: () => import("@web/views/StripeCheckoutRedirect.vue"),
+        name: "Checkout",
+        path: PageRoute.CHECKOUT,
+    },
+    {
+        component: () => import("@web/views/SignupConfirmed.vue"),
+        name: "Sign up",
+        path: PageRoute.SIGNUP_CONFIRMED,
+    },
+    {
         component: () => import("@components/404.vue"),
         path: "*",
         name: "Page Not Found",

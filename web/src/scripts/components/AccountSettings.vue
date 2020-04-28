@@ -195,7 +195,7 @@
 
     export default Vue.extend({
         components: {
-            NavBar,
+                NavBar,
             Footer,
             Spinner,
             CheckBox,

@@ -1,16 +1,16 @@
 @import "mixins";
 @import "variables";
 
-body {
-    background: $darkestGreen url(/assets/images/grainy.png);
-    color: $white;
-    min-height: 100vh;
+body, body.simplyCentered {
+  background: $darkestGreen url(/assets/images/grainy.png);
+  color: $white;
+  min-height: 100vh;
 
-    @include h(768) {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-    }
+  @include h(768) {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
 }
 
 header {
@@ -31,14 +31,14 @@ section {
 }
 
 .graphic {
-    margin-bottom: 3.2rem;
-    max-width: 100%;
-    width: 36rem;
+  margin-bottom: 3.2rem;
+  max-width: 100%;
+  width: 36rem;
 }
 
 h1 {
-    line-height: 1.2;
-    margin: 0;
+  line-height: 1.2;
+  margin: 0;
 }
 
 p {
