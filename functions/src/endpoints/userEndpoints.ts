@@ -218,7 +218,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
 
     if (member?.tier === SubscriptionTier.PLUS && member?.email) {
         logger.log('Member is PLUS. Redirecting to Core Values assessment...');
-        resp.redirect(`${ getHostname() }${ PageRoute.CORE_VALUES }?${ QueryParam.CACTUS_MEMBER_ID }=${ memberId }&${ QueryParam.TIER }=${ member.tier }&${ QueryParam.DISPLAY_NAME }=${ encodeURIComponent(member.firstName) }`);
+        resp.redirect(`${ getHostname() }${ PageRoute.CORE_VALUES }?${ QueryParam.CACTUS_MEMBER_ID }=${ memberId }&${ QueryParam.TIER }=${ member.tier }&${ QueryParam.DISPLAY_NAME }=${ encodeURIComponent(member.firstName || '') }`);
 
         try {
             await AdminSlackService.getSharedInstance().sendActivityMessage({
