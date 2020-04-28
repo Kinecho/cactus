@@ -204,20 +204,33 @@
             }
 
             this.loading = true;
+            const memberIdParam = getQueryParam(QueryParam.CACTUS_MEMBER_ID);
+            const tierParam = getQueryParam(QueryParam.TIER);
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
-                    this.member = member;
-                    const memberId = member?.id;
-                    if (memberId) {
-                        if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH)) && isPremiumTier(member?.tier)) {
-                            this.startNewAssessment()
-                            removeQueryParam(QueryParam.CV_LAUNCH);
-                            return;
-                        }
+                    if (this.member) {
+                        this.member = member;
+                        const memberId = member?.id;
+                        if (memberId) {
+                            if (!isBlank(getQueryParam(QueryParam.CV_LAUNCH)) && isPremiumTier(member?.tier)) {
+                                this.startNewAssessment()
+                                removeQueryParam(QueryParam.CV_LAUNCH);
+                                return;
+                            }
 
-                        await this.loadCurrentResults()
+                            await this.loadCurrentResults()
+                        }
+                    } else if (memberIdParam && tierParam) {
+                        const name = getQueryParam(QueryParam.DISPLAY_NAME);
+                        this.appMemberId = memberIdParam as string;
+                        this.appDisplayName = name || undefined;
+                        this.appSubscriptionTier = tierParam as SubscriptionTier;
+                        await this.loadCurrentResults();
+
+                    } else {
+                        window.location.href = `${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`;
                     }
-                    this.loading = false;
+                    this.loading = false
                 }
             })
         },
