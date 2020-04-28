@@ -1,6 +1,5 @@
 // @ts-ignore
 import App from "@components/App.vue"
-import Vue from "vue";
 import { commonInit } from "@web/common";
 import Logger from "@shared/Logger";
 import { start } from "@web/main";
@@ -8,7 +7,7 @@ import { start } from "@web/main";
 const logger = new Logger("App");
 commonInit();
 
-(async () => await start())();
+(async () => await start())().then(() => logger.debug("started the app"));
 
 //enables hot reload
 if (module.hot) {
