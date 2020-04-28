@@ -37,7 +37,13 @@
         beforeMount(): void {
             document.body.classList.add("sign-up-body");
         },
+        mounted(): void {
+            document.body.classList.add("sign-up-body");
+        },
         beforeDestroy(): void {
+            document.body.classList.remove("sign-up-body");
+        },
+        destroyed(): void {
             document.body.classList.remove("sign-up-body");
         },
         data(): { title: string, copy: LocalizedCopy, message: string | null } {
