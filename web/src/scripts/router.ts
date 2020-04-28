@@ -98,6 +98,16 @@ const routes: MetaRouteConfig[] = [
         component: () => import("@components/PricingPage.vue"),
         name: "Pricing",
         path: PageRoute.PRICING,
+        meta: {
+            title: "Cactus Plus",
+            description: "Daily prompts, personal insights, and more",
+            image: {
+                url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-pricing-2020.jpg?alt=media&token=bfc2db3a-dc3d-4e38-8c57-8f58780947bc",
+                height: 630,
+                width: 1200,
+                type: "image/jpeg",
+            }
+        }
     },
     {
         component: () => import("@components/SocialHome.vue"),
