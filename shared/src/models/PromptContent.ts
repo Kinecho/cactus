@@ -270,6 +270,6 @@ export default class PromptContent extends FlamelinkModel {
 
     getOpenGraphImageUrl(): string | null {
         const firstImageCard = (this.content || []).find(c => c.backgroundImage?.storageUrl);
-        return this.openGraphImage?.storageUrl ?? firstImageCard?.backgroundImage?.storageUrl ?? null;
+        return this.openGraphImage?.storageUrl || firstImageCard?.backgroundImage?.storageUrl || null;
     }
 }

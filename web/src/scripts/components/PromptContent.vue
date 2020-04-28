@@ -160,7 +160,7 @@
             }
         },
         async beforeMount(): Promise<void> {
-
+            window.prerenderReady = false;
             this.usePromptId = !!getQueryParam(QueryParam.USE_PROMPT_ID);
 
             this.keyboardListener = (evt: KeyboardEvent) => {
@@ -279,6 +279,7 @@
 
                     this.loading = false;
                     this.updateDocumentMeta();
+                    window.prerenderReady = true;
                 }
             };
 
@@ -505,7 +506,10 @@
 
             },
             updateDocumentMeta() {
+                logger.info("Prompt content updating meta");
+                debugger;
                 let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
+
                 const description = "Reflect on this mindful moment from Cactus.";
                 let pageMeta: RoutePageMeta = {
                     description,
@@ -613,6 +617,12 @@
                     logger.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
                 }
+
+                if (this.authLoaded && !this.member) {
+                    this.responsesLoaded = true;
+                    return
+                }
+
                 let promptId = this.promptContent && this.promptContent.promptId;
                 const promptContent = this.promptContent && this.promptContent.content.find(content => content.contentType === ContentType.reflect);
                 const promptQuestion = promptContent ? promptContent.text : undefined;
