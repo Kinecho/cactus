@@ -1,7 +1,7 @@
 @import "mixins";
 @import "variables";
 
-body, body.simplyCentered {
+body.simplyCentered {
   background: $darkestGreen url(/assets/images/grainy.png);
   color: $white;
   min-height: 100vh;
@@ -11,36 +11,38 @@ body, body.simplyCentered {
     display: flex;
     justify-content: center;
   }
-}
 
-header {
-  background-color: transparent;
-  border-bottom: 0;
-  justify-content: center;
-  margin-bottom: 2.4rem;
-  position: static;
-}
 
-.centered {
-  overflow-x: hidden;
-  width: 100%;
-}
+  header {
+    background-color: transparent;
+    border-bottom: 0;
+    justify-content: center;
+    margin-bottom: 2.4rem;
+    position: static;
+  }
 
-section {
-  padding: 2.4rem;
-}
+  .centered {
+    overflow-x: hidden;
+    width: 100%;
+  }
 
-.graphic {
-  margin-bottom: 3.2rem;
-  max-width: 100%;
-  width: 36rem;
-}
+  section {
+    padding: 2.4rem;
+  }
 
-h1 {
-  line-height: 1.2;
-  margin: 0;
-}
+  .graphic {
+    margin-bottom: 3.2rem;
+    max-width: 100%;
+    width: 36rem;
+  }
 
-p {
-  margin: .8rem auto 4rem;
+  h1 {
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  p {
+    margin: .8rem auto 4rem;
+  }
+
 }
