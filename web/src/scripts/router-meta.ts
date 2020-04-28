@@ -95,9 +95,6 @@ export function updateRouteMeta(to: Route): PageMetaInfo | null {
     // If a route with a title was found, set the document (page) title to that value.
     const title = nearestWithTitle?.meta?.title ?? to.name;
 
-    // Remove any stale meta tags from the document using the key attribute we set below.
-    Array.from(document.querySelectorAll('[data-vue-router-controlled]')).map((el) => el?.parentNode?.removeChild(el));
-
     // Skip rendering meta tags if there are none.
     if (!nearestWithMeta) return null;
 
@@ -110,6 +107,10 @@ export function setPageMeta(routeMeta?: RoutePageMeta | null, title?: string): P
     // Turn the meta tag definitions into actual elements in the head.
     const meta = buildRouteMeta(routeMeta, title);
     if (title) document.title = title;
+
+    // Remove any stale meta tags from the document using the key attribute we set below.
+    Array.from(document.querySelectorAll('[data-vue-router-controlled]')).map((el) => el?.parentNode?.removeChild(el));
+
     meta?.metaTags?.map(tagDef => {
         const tag = document.createElement('meta');
 
