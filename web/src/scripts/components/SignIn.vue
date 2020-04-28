@@ -197,7 +197,7 @@
                         if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
                             this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, {memberId: this.member.id});
                         }
-                        window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
+                        this.$router.push(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME);
                     }
                 }
             }

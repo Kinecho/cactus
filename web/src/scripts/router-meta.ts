@@ -1,4 +1,7 @@
 import { Route, RouteConfig } from "vue-router";
+import Logger from "@shared/Logger";
+
+const logger = new Logger("router-meta");
 
 export interface MetaTagName {
     name: string,
@@ -16,7 +19,8 @@ export interface RoutePageMeta {
     title?: string,
     description?: string,
     image?: MetaImage,
-    metaTags?: MetaTag[]
+    metaTags?: MetaTag[],
+    usePrevious?: boolean,
 }
 
 export interface MetaImage {
@@ -83,22 +87,27 @@ function buildRouteMeta(routeMeta?: RoutePageMeta | null, routeTitle?: string): 
     }
 }
 
-export function updateRouteMeta(to: Route): PageMetaInfo | null {
+export function updateRouteMeta(to: Route, from?: Route): PageMetaInfo | null {
     // This goes through the matched routes from last to first, finding the closest route with a title.
     // eg. if we have /some/deep/nested/route and /some, /deep, and /nested have titles, nested's will be chosen.
     const nearestWithTitle = to.matched.slice().reverse().find(r => r.meta && r.meta.title);
 
     // Find the nearest route element with meta tags.
     // const nearestWithMeta = to.matched.slice().reverse().find(r => r.meta && r.meta.metaTags);
-    const nearestWithMeta = to;
+    // const nearestWithMeta = to;
 
     // If a route with a title was found, set the document (page) title to that value.
     const title = nearestWithTitle?.meta?.title ?? to.name;
 
-    // Skip rendering meta tags if there are none.
-    if (!nearestWithMeta) return null;
+    const routeConfig = to as MetaRouteConfig
+    let routeMeta = routeConfig.meta;
 
-    const routeMeta = (nearestWithMeta as MetaRouteConfig).meta;
+    if (to.meta?.usePrevious === true && from) {
+        logger.info("Using previous meta")
+        const previousWithMeta = from.matched.slice().reverse().find(r => r.meta && !r.meta.usePrevious);
+        routeMeta = previousWithMeta?.meta ?? to.meta;
+    }
+
     return setPageMeta(routeMeta, title);
 
 }

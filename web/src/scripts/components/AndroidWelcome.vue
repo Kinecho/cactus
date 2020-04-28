@@ -30,7 +30,7 @@
             document.body.classList.add("sign-up-body");
             this.authListener = getAuth().onAuthStateChanged(user => {
                 if (user) {
-                    window.location.href = PageRoute.JOURNAL_HOME
+                    this.$router.replace(PageRoute.JOURNAL_HOME);
                 }
                 this.authLoaded = true;
             })

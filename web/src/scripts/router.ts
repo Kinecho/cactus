@@ -48,6 +48,7 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.SIGNUP,
         name: "Sign Up",
         meta: {
+            usePrevious: true,
             title: "Sign Up | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
@@ -56,6 +57,7 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.LOGIN,
         name: "Log In",
         meta: {
+            usePrevious: true,
             title: "Log In | Cactus",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
@@ -183,10 +185,10 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
     try {
-        const meta = updateRouteMeta(to);
+        const meta = updateRouteMeta(to, from);
         logger.info("Setting page meta:", meta);
     } catch (error) {
-        logger.error("Failed to udpate meta", error);
+        logger.error("Failed to update meta", error);
     } finally {
         next();
     }

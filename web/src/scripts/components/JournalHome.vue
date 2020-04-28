@@ -176,7 +176,7 @@
                 onData: async ({ member, user }) => {
                     if (!user) {
                         logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
-                        window.location.href = PageRoute.HOME;
+                        this.$router.push(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;

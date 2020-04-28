@@ -237,10 +237,10 @@
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
-                window.location.href = this.loginHref;
+                this.$router.push(this.loginHref);
             },
             goToSignup() {
-                window.location.href = this.signupHref;
+                this.$router.push(this.signupHref);
             },
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {

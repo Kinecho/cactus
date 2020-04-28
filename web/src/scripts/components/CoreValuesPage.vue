@@ -260,7 +260,7 @@
                     }
 
                 } else {
-                    window.location.href = PageRoute.PRICING;
+                    this.$router.push(PageRoute.PRICING);
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {

@@ -123,7 +123,6 @@
     import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import StorageService, { LocalStorageKey } from '@web/services/StorageService'
     import { getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
     import { gtag } from "@web/analytics"
     import { isBlank } from "@shared/util/StringUtil"
@@ -186,7 +185,7 @@
 
                     if (!this.member) {
                         const afterLoginUrl = window.location.href;
-                        window.location.href = `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`;
+                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
                     }
                 }
             });
@@ -529,6 +528,7 @@
                         type: "image/png",
                     }
                 }
+                logger.info("Prompt Content Meta Image is", pageMeta.image);
                 setPageMeta(pageMeta, title)
             },
             async handleTap(event: TouchEvent) {

@@ -184,7 +184,7 @@
         },
         methods: {
             goToSignup() {
-                window.location.href = PageRoute.SIGNUP;
+                this.$router.push(PageRoute.SIGNUP);
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;
