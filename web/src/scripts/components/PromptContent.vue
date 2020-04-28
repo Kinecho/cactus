@@ -131,6 +131,7 @@
     import PromptContentService from "@web/services/PromptContentService";
     import FourOhFour from "@components/404.vue"
     import Logger from "@shared/Logger";
+    import { RoutePageMeta, setPageMeta } from "@web/router-meta";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
@@ -506,56 +507,29 @@
 
             },
             updateDocumentMeta() {
-                const index = this.activeIndex || 0;
-                let title = this.promptContent && this.promptContent.subjectLine;
-                let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
-                let ogTitleTag = document.querySelector("meta[property='og:title']");
-                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
-                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
-                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
-                let ogImageTag = document.querySelector("meta[property='og:image']");
-                let twitterImageTag = document.querySelector("meta[name='twitter:image']");
-
-                if (!title) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    title = firstContent && firstContent.text;
-                }
-                if (title) {
-                    document.title = `${ title } | ${ index + 1 }`;
-                } else {
-                    document.title = 'Cactus Mindful Moment'
-                }
-                if (ogTitleTag) {
-                    ogTitleTag.setAttribute("content", `${ title }`);
-                    if (twitterTitleTag) {
-                        twitterTitleTag.setAttribute("content", `${ title }`);
-                    }
-                }
-                if (ogDescriptionTag) {
-                    ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    if (twitterDescriptionTag) {
-                        twitterDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    }
+                let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
+                const description = "Reflect on this mindful moment from Cactus.";
+                let pageMeta: RoutePageMeta = {
+                    description,
+                    title,
                 }
 
-                if (!openGraphImage || !openGraphImage.storageUrl) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    openGraphImage = firstContent && firstContent.backgroundImage;
-                }
-
-                if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    logger.log(openGraphImage.storageUrl);
-                    let pngUrl = getCloudinaryUrlFromStorageUrl({
-                        storageUrl: openGraphImage.storageUrl,
+                const imageUrl = this.promptContent?.getOpenGraphImageUrl();
+                let pngUrl: string | null = null;
+                if (imageUrl) {
+                    pngUrl = getCloudinaryUrlFromStorageUrl({
+                        storageUrl: imageUrl,
                         width: 1200,
                         transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
                     });
-                    ogImageTag.setAttribute("content", `${ pngUrl }`);
-
-                    if (twitterImageTag) {
-                        twitterImageTag.setAttribute("content", `${ pngUrl }`);
+                    pageMeta.image = {
+                        url: pngUrl,
+                        height: 630,
+                        width: 1200,
+                        type: "image/png",
                     }
                 }
+                setPageMeta(pageMeta, title)
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];

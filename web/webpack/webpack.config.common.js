@@ -60,7 +60,6 @@ module.exports = (config) => {
 
             })]
 
-
             const cssCacheGroups = {}
             Object.keys(allPages).map(filename => {
                 cssCacheGroups[`${filename}Styles`] = {

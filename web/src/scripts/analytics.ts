@@ -240,7 +240,7 @@ export function fireRevealInsightEvent() {
     });
 }
 
-export function routeChanged(to: Route): void {
+export function logRouteChanged(to: Route): void {
     //Only want to fire subsequent page view events as standard analytics will fire the initial page load.
     if (firstRouteFired) {
         firebaseAnalytics().logEvent("page_view" as never, {
