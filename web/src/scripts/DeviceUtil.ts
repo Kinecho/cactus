@@ -14,6 +14,10 @@ export function getDeviceDimensions(): { height: number, width: number } {
 
 }
 
+export function isPreRender(): boolean {
+    return getUserAgent() === "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/61.0.3159.5 Safari/537.36 Prerender (+https://github.com/prerender/prerender)";
+}
+
 export function getDeviceTimeZone(): string | undefined {
     try {
         const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

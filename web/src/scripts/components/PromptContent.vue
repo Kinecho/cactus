@@ -123,7 +123,7 @@
     import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import { getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
+    import { getAppType, getDeviceDimensions, isPreRender, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
     import { gtag } from "@web/analytics"
     import { isBlank } from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
@@ -183,7 +183,7 @@
                     this.authLoaded = true;
                     this.member = member;
 
-                    if (!this.member) {
+                    if (!this.member && !isPreRender()) {
                         const afterLoginUrl = window.location.href;
                         this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
                     }
