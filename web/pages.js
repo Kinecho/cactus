@@ -13,11 +13,11 @@ module.exports = {
     //     "path": "/signup",
     //     "name": "sign_up"
     // },
-    "payment_cancel": {
-        "title": "Payment Canceled",
-        "path": "/cancel",
-        "name": "payment_cancel"
-    },
+    // "payment_cancel": {
+    //     "title": "Payment Canceled",
+    //     "path": "/cancel",
+    //     "name": "payment_cancel"
+    // },
     "subscription_confirmed": {
         "title": "Subscription Confirmed",
         "path": "/confirmed",
@@ -107,11 +107,11 @@ module.exports = {
     //     "path": "/welcome",
     //     "name": "android_welcome"
     // },
-    "insights_embedded": {
-        "title": "Insights",
-        "path": "/insights-embed",
-        "name": "insights_embedded"
-    },
+    // "insights_embedded": {
+    //     "title": "Insights",
+    //     "path": "/insights-embed",
+    //     "name": "insights_embedded"
+    // },
     // "core_values": {
     //     "title": "Core Values",
     //     "path": "/core-values",

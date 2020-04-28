@@ -18,6 +18,8 @@ export enum PageRoute {
     PRIVACY_POLICY = "/privacy-policy",
     CORE_VALUES = "/core-values",
     AUTHENTICATE_ACTIONS = "/authenticate-actions",
+    PAYMENT_CANCELED = "/cancel",
     VALUES_HOME = "/values",
     WELCOME = "/welcome",
+    INSIGHTS_EMBED = '/insights-embed',
 }

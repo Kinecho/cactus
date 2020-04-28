@@ -1,7 +1,6 @@
 // tslint:disable-next-line:no-implicit-dependencies
 import Vue from "vue";
 import InsightWordChart from "@components/InsightWordChart.vue";
-// import Page from "@components/YOUR_PAGE"
 import {commonInit} from "@web/common";
 import Logger from "@shared/Logger";
 import {InsightWord} from "@shared/models/ReflectionResponse";

@@ -7,10 +7,14 @@ Vue.use(VueRouter);
 
 const routes: RouteConfig[] = [
     {
-        component: () => import ("@web/vi" +
-        "ews/HomePage.vue"),
-        path: "/h",
+        component: () => import ("@web/views/HomePage.vue"),
+        path: "/",
         name: "Cactus",
+    },
+    {
+        component: () => import("@web/views/InsightsEmbedPage.vue"),
+        path: PageRoute.INSIGHTS_EMBED,
+        name: "Insights"
     },
     {
         component: () => import("@components/JournalHome.vue"),
@@ -95,12 +99,17 @@ const routes: RouteConfig[] = [
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
     },
-
+    {
+        component: () => import("@web/views/PaymentCanceled.vue"),
+        name: "Payment Canceled",
+        path: PageRoute.PAYMENT_CANCELED,
+    },
     {
         component: () => import("@components/404.vue"),
         path: "*",
         name: "Page Not Found",
-    }
+    },
+
 ]
 
 const router = new VueRouter({
