@@ -47,14 +47,16 @@ module.exports = (config) => {
 
             //add the little dev pages index
             // if (isDev) {
-                // jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
+            // jsEntries['pages-index'] = `${helpers.scriptDir}/pages/pages-index.ts`
             // }
 
             console.log('JS Entries to use', chalk.cyan(JSON.stringify(jsEntries, null, 2)))
 
             const plugins = [new MiniCssExtractPlugin({
-                filename: isDev ? '[name].css' : '[id].[hash].css',
-                chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+                // filename: isDev ? '[name].css' : '[id].[hash].css',
+                // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+                filename: '[name].css',
+                chunkFilename: '[id].css',
 
             })]
 
@@ -74,7 +76,8 @@ module.exports = (config) => {
                 entry: jsEntries,
                 output: {
                     path: helpers.publicDir,
-                    filename: isDev ? '[name].js' : '[name].[hash].js',
+                    // filename: isDev ? '[name].js' : '[name].[hash].js',
+                    filename: '[name].js',
                     publicPath: '/',
                 },
                 stats: 'errors-warnings',
@@ -118,7 +121,7 @@ module.exports = (config) => {
                             ...cssCacheGroups,
                             defaultVendors: {
                                 test: /[\\/]node_modules[\\/]/,
-                                name: "vendors",
+                                name: 'vendors',
                                 priority: 10,
                                 reuseExistingChunk: true,
                             },
