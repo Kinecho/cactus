@@ -7,7 +7,7 @@ import { start } from "@web/main";
 const logger = new Logger("App");
 commonInit();
 
-(async () => await start())().then(() => logger.debug("started the app"));
+start().then(() => logger.debug("started the app")).catch(error => logger.error("failed to start the app", error));
 
 //enables hot reload
 if (module.hot) {
