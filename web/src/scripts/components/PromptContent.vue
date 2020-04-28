@@ -96,37 +96,37 @@
             </section>
         </transition>
         <PricingModal
-            :showModal="pricingModalVisible"
-            @close="closePricingModal"/>
+                :showModal="pricingModalVisible"
+                @close="closePricingModal"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from "@web/config";
-    import {PageRoute} from '@shared/PageRoutes'
+    import { Config } from "@web/config";
+    import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
-    import {CactusElement} from '@shared/models/CactusElement';
+    import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
+    import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
-    import {getFlamelink} from '@web/firebase'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
-    import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { getFlamelink } from '@web/firebase'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
+    import { getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam } from '@web/util'
+    import { getCloudinaryUrlFromStorageUrl } from '@shared/util/ImageUtil'
+    import { QueryParam } from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
-    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
+    import ReflectionResponse, { getResponseMedium, ResponseMediumType } from '@shared/models/ReflectionResponse'
+    import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
-    import {getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
-    import {gtag} from "@web/analytics"
-    import {isBlank} from "@shared/util/StringUtil"
+    import StorageService, { LocalStorageKey } from '@web/services/StorageService'
+    import { getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
+    import { gtag } from "@web/analytics"
+    import { isBlank } from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
     import PromptContentService from "@web/services/PromptContentService";
     import FourOhFour from "@components/404.vue"
@@ -151,7 +151,7 @@
         props: {
             initialIndex: Number,
             promptContentEntryId: String,
-            isModal: {type: Boolean, default: false},
+            isModal: { type: Boolean, default: false },
             onClose: {
                 type: Function, default: function () {
                     removeQueryParam(QueryParam.CONTENT_INDEX);
@@ -179,13 +179,13 @@
 
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     this.authLoaded = true;
                     this.member = member;
 
                     if (!this.member) {
                         const afterLoginUrl = window.location.href;
-                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(afterLoginUrl)}`;
+                        window.location.href = `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`;
                     }
                 }
             });
@@ -220,7 +220,7 @@
 
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
-                promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
+                promptContentId = window.location.pathname.split(`${ PageRoute.PROMPTS_ROOT }/`)[1];
                 logger.log("using path for promptContentId", promptContentId);
             } else {
                 logger.log("using prop for promptContentId", promptContentId)
@@ -406,7 +406,7 @@
                 return !this.showSharing;
             },
             slideNumberClass(): string {
-                return `slide-${this.activeIndex}`
+                return `slide-${ this.activeIndex }`
             },
             hasNext(): boolean {
                 return this.contentItems && this.contentItems && this.activeIndex < this.contentItems.length - 1 || false
@@ -437,7 +437,7 @@
             reflectionProgressStyles(): any | undefined {
                 if (this.isReflection) {
                     const styles = {
-                        transform: `rotate(${Math.min(this.reflectionProgress, 1) * 360}deg)`,
+                        transform: `rotate(${ Math.min(this.reflectionProgress, 1) * 360 }deg)`,
                     };
                     logger.log("Style object", styles);
                     return styles;
@@ -521,14 +521,14 @@
                     title = firstContent && firstContent.text;
                 }
                 if (title) {
-                    document.title = `${title} | ${index + 1}`;
+                    document.title = `${ title } | ${ index + 1 }`;
                 } else {
                     document.title = 'Cactus Mindful Moment'
                 }
                 if (ogTitleTag) {
-                    ogTitleTag.setAttribute("content", `${title}`);
+                    ogTitleTag.setAttribute("content", `${ title }`);
                     if (twitterTitleTag) {
-                        twitterTitleTag.setAttribute("content", `${title}`);
+                        twitterTitleTag.setAttribute("content", `${ title }`);
                     }
                 }
                 if (ogDescriptionTag) {
@@ -550,10 +550,10 @@
                         width: 1200,
                         transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
                     });
-                    ogImageTag.setAttribute("content", `${pngUrl}`);
+                    ogImageTag.setAttribute("content", `${ pngUrl }`);
 
                     if (twitterImageTag) {
-                        twitterImageTag.setAttribute("content", `${pngUrl}`);
+                        twitterImageTag.setAttribute("content", `${ pngUrl }`);
                     }
                 }
             },
@@ -569,7 +569,7 @@
                     logger.log("tap anywhere is disabled");
                     return;
                 }
-                const {width} = getDeviceDimensions();
+                const { width } = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
@@ -618,7 +618,7 @@
                 const diffX = args.clientX - startX;
                 this.cardStyles = {
                     transition: "all .2s",
-                    transform: `translateX(${diffX}px)`,
+                    transform: `translateX(${ diffX }px)`,
                 };
 
                 logger.log("Move Handler", args);
@@ -654,9 +654,9 @@
                             //TODO: combine if there are multiple?
                             const [first] = responses;
                             const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
-                                    app: getAppType(),
-                                    type: ResponseMediumType.PROMPT
-                                }), promptQuestion);
+                                app: getAppType(),
+                                type: ResponseMediumType.PROMPT
+                            }), promptQuestion);
 
                             const response = first || newResponse;
 
@@ -669,7 +669,7 @@
 
                                 if (this.isFirstCard && !this.saving && !this.saved) {
                                     logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                    const saveTask = this.save({updateReflectionLog: false});
+                                    const saveTask = this.save({ updateReflectionLog: false });
                                     await saveTask;
                                 }
                             }
@@ -680,7 +680,7 @@
                 }
             },
 
-            async save(options: { updateReflectionLog: boolean } = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
+            async save(options: { updateReflectionLog: boolean } = { updateReflectionLog: false }): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
@@ -704,7 +704,7 @@
                 }
 
                 this.transitionName = "slide";
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: true}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: true }) : () => undefined;
                 const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
@@ -719,7 +719,7 @@
 
                     gtag('event', 'next', {
                         event_category: "prompt_content",
-                        event_label: `Slide ${this.activeIndex}`
+                        event_label: `Slide ${ this.activeIndex }`
                     });
                     await saveTask;
                 } else if (this.isLastCard) {
@@ -728,7 +728,7 @@
 
             },
             async previous() {
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: false}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: false }) : () => undefined;
                 this.transitionName = "slide-out";
                 const content = this.contentItems || [];
                 if (this.completed) {
@@ -750,25 +750,25 @@
                 // pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 gtag('event', 'previous', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
 
                 await saveTask;
             },
             async complete() {
-                const saveTask = this.save({updateReflectionLog: true});
+                const saveTask = this.save({ updateReflectionLog: true });
                 this.transitionName = "slide";
                 // this.activeIndex = 0;
                 pushQueryParam(QueryParam.CONTENT_INDEX, "done");
                 this.completed = true;
                 gtag('event', 'complete', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
                 await saveTask;
             },
             async restart() {
-                const saveTask = this.save({updateReflectionLog: false});
+                const saveTask = this.save({ updateReflectionLog: false });
                 this.activeIndex = 0;
                 this.completed = false;
                 await saveTask;
@@ -776,10 +776,10 @@
             seePricingOrGoHome(): void {
                 gtag('event', 'close', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
-                if (this.promptContent?.entryId === Config.firstPromptId && 
-                    !this.hasSeenPricing) {
+                if (this.promptContent?.entryId === Config.firstPromptId &&
+                !this.hasSeenPricing) {
                     this.pricingModalVisible = true;
                     this.hasSeenPricing = true;
                 } else {
@@ -811,7 +811,7 @@
         flex-direction: column;
         position: relative;
         width: 100vw;
-
+        min-height: 100vh;
         @include r(600) {
             background-color: transparent;
             padding: 6.4rem 0;

@@ -14,8 +14,6 @@
         }
     })
     export default class PromptContentPage extends Vue {
-
-
         redirectToJournal() {
             this.$router.push({ path: PageRoute.JOURNAL_HOME });
         }
