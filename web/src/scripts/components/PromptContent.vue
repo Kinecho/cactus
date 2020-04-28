@@ -485,7 +485,6 @@
                     this.subscribeToResponse();
                 }
             },
-
         },
         methods: {
             closePricingModal(): void {
