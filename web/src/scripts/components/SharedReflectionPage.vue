@@ -32,6 +32,8 @@
     import MemberProfile from "@shared/models/MemberProfile";
     import MemberProfileService from '@web/services/MemberProfileService';
     import Logger from "@shared/Logger";
+    import { RoutePageMeta, setPageMeta } from "@web/router-meta";
+    import { getCloudinaryUrlFromStorageUrl } from "@shared/util/ImageUtil";
 
     const logger = new Logger("SharedReflectionPage.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -97,11 +99,6 @@
         },
         methods: {
             updateDocumentMeta() {
-                let ogTitleTag = document.querySelector("meta[property='og:title']");
-                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
-                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
-                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
-
                 if (this.reflectionResponse) {
                     let identifier = this.memberProfile?.getFullName() || this.reflectionResponse.getMemberFullName() || this.reflectionResponse.memberEmail;
                     let question = getPromptQuestion({
@@ -118,16 +115,28 @@
 
                     let description = `This reflection note was shared on ${shareDate}.`;
 
-                    if (ogTitleTag && ogDescriptionTag) {
-                        document.title = title;
-                        ogTitleTag.setAttribute("content", `${title}`);
-                        ogDescriptionTag.setAttribute("content", `${description}`);
 
-                        if (twitterTitleTag && twitterDescriptionTag) {
-                            twitterTitleTag.setAttribute("content", `${title}`);
-                            twitterDescriptionTag.setAttribute("content", `${description}`);
+                    let pageMeta: RoutePageMeta = {
+                        description,
+                        title,
+                    }
+
+                    const imageUrl = this.promptContent?.getOpenGraphImageUrl();
+                    let pngUrl: string | null = null;
+                    if (imageUrl) {
+                        pngUrl = getCloudinaryUrlFromStorageUrl({
+                            storageUrl: imageUrl,
+                            width: 1200,
+                            transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
+                        });
+                        pageMeta.image = {
+                            url: pngUrl,
+                            height: 630,
+                            width: 1200,
+                            type: "image/png",
                         }
                     }
+                    setPageMeta(pageMeta, title)
                 }
             }
         },

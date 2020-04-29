@@ -1,8 +1,9 @@
-import {mount, shallowMount} from "@vue/test-utils";
+import { mount, shallowMount } from "@vue/test-utils";
 import NavBar from "@components/NavBar.vue";
-import {mockauth, mockFirebase} from "@test/jestsetup";
+import { mockauth, mockFirebase } from "@test/jestsetup";
 import CactusMember from "@shared/models/CactusMember";
-import {SocialActivityFeedEvent, SocialActivityFeedResponse, SocialActivityType} from "@shared/types/SocialTypes";
+import { SocialActivityFeedEvent, SocialActivityFeedResponse, SocialActivityType } from "@shared/types/SocialTypes";
+
 
 const jest = require("jest");
 
@@ -35,7 +36,7 @@ jest.mock("@web/social", () => {
                 occurredAt: new Date(),
                 eventId: "123",
             };
-            return {success: true, results: [event1]}
+            return { success: true, results: [event1] }
         }
     }
 });
@@ -67,6 +68,7 @@ describe("NavBar.vue test", () => {
             showSignup: true,
         };
         const wrapper = shallowMount(NavBar, {
+            stubs: ['router-link', 'router-view'],
             propsData: props
         });
 
@@ -77,10 +79,9 @@ describe("NavBar.vue test", () => {
     });
 
 
-
     test.skip("signup button is visible", () => {
 
-        mockFirebase.auth().changeAuthState({uid: "124"});
+        mockFirebase.auth().changeAuthState({ uid: "124" });
         // mockFirebase.auth().onIdTokenChanged()
         // mockFirebase.auth().idTokenC
         mockFirebase.auth().changeAuthState(null);
@@ -107,10 +108,11 @@ describe("NavBar.vue test", () => {
             showSignup: true,
         };
         const wrapper = shallowMount(NavBar, {
+            stubs: ['router-link', 'router-view'],
             propsData: props,
         });
 
-        wrapper.setData({...wrapper.vm.$data, activityBadgeCount: 1});
+        wrapper.setData({ ...wrapper.vm.$data, activityBadgeCount: 1 });
 
         mockFirebase.auth().flush();
 

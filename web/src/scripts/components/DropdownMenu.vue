@@ -19,12 +19,26 @@
                     <div class="displayName" v-if="displayName">{{displayName}}</div>
                     <div class="email" v-if="email">{{email}}</div>
                 </div>
-                <a v-for="(link, index) in links"
-                        :href="link.href"
-                        v-on:[link.event]="link.onClick"
-                        :key="`link_${index}`"
-                        :class="{static: link.static, nonBreaking: makeTextNonBreaking}"
-                >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span></a>
+                <template v-for="(link, index) in links">
+                    <router-link
+                            v-if="link.href"
+                            :to="link.href"
+                            v-on:[link.event]="link.onClick"
+                            :key="`link_${index}`"
+                            :class="{static: link.static, nonBreaking: makeTextNonBreaking}"
+                    >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span>
+                        <span class="callout-text">{{link.calloutText}}</span>
+                    </router-link>
+                    <a v-else
+                            :href="link.href"
+                            v-on:[link.event]="link.onClick"
+                            :key="`link_${index}_alt`"
+                            :class="{static: link.static, nonBreaking: makeTextNonBreaking}"
+                    >{{link.title}} <span v-if="link.badge" class="badge-label">{{link.badge}}</span>
+                        <span class="callout-text">{{link.calloutText}}</span>
+                    </a>
+                </template>
+
                 <!-- <a href="#" v-on:click.prevent="deleteSentPrompt" v-show="prompt">Ignore&nbsp;Question</a> -->
             </nav>
         </transition>
@@ -33,8 +47,8 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {clickOutsideDirective} from '@web/vueDirectives'
-    import {ComputedMenuLink, DropdownMenuLink} from "@components/DropdownMenuTypes"
+    import { clickOutsideDirective } from '@web/vueDirectives'
+    import { ComputedMenuLink, DropdownMenuLink } from "@components/DropdownMenuTypes"
     import Logger from "@shared/Logger";
 
     const logger = new Logger("DropdownMenu.vue");
@@ -91,6 +105,7 @@
                         href: item.href || null,
                         onClick: clickHandler(item.onClick),
                         event: item.onClick ? "click" : null,
+                        calloutText: item.calloutText,
                         static: item.static,
                         badge: item.badge,
                     }
@@ -222,6 +237,12 @@
     .badge-label {
         @include trialBadge;
         margin-left: .4rem;
+    }
+
+    .callout-text {
+        color: $green;
+        font-size: 1.4rem;
+        margin-left: .8rem;
     }
 
     .static {

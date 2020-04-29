@@ -3,6 +3,7 @@ export interface DropdownMenuLink {
     href?: string | null,
     static?: boolean,
     badge?: string,
+    calloutText?: string | undefined | null,
     onClick?: (event: Event | any) => void
 }
 

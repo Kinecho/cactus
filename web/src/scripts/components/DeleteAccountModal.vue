@@ -6,7 +6,7 @@
     >
         <div slot="body" class="modalContainer" v-if="deleteAllowed">
             <h2>Are you sure you want to permanently delete your Cactus account?</h2>
-            <p>This action is <strong>irreversable</strong> and will remove all of your Cactus data, including your journal entries. Enter the email address associated with your account to continue.</p>
+            <p>This action is <strong>irreversible</strong> and will remove all of your Cactus data, including your journal entries. Enter the email address associated with your account to continue.</p>
             <div class="item">
                 <label for="emailConfirm" class="label">Account Email Address</label>
                 <input v-model="confirmedEmail" type="text" name="emailConfirm">

@@ -9,6 +9,7 @@ export enum SchemaName {
     subscriptionProducts = "subscriptionProducts",
     subscriptionProductGroups = "subscriptionProductGroups",
     appSettings = "appSettings_web",
+    // coreValuesAssessment = "coreValuesAssessment",
 }
 
 export interface FlamelinkMeta {

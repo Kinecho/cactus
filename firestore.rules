@@ -142,6 +142,12 @@ service cloud.firestore {
       allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()
     }
 
+    match /coreValuesAssessmentResponses/{document=**} {
+        //allow create: if getMemberId() == request.resource.data.memberId;
+        //allow read,update: if getMemberId() == resource.data.memberId;
+        allow read,update,create: if true;
+    }
+
 	  match /socialConnections/{document=**} {
       allow create: if request.resource.data.memberId == getMemberId() || request.resource.data.friendMemberId == getMemberId()
       allow read,update: if resource.data.memberId == getMemberId() || resource.data.friendMemberId == getMemberId()

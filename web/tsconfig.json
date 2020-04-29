@@ -10,8 +10,12 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": false,
         "sourceMap": true,
+        "experimentalDecorators": true,
+        "downlevelIteration": true,
+
         "lib": [
             "es2015",
+            "es2019",
             "dom"
         ],
         "baseUrl": ".",

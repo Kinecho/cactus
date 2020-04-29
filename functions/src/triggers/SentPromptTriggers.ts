@@ -20,26 +20,30 @@ const logger = new Logger("SendPromptTriggers");
 export const sentPromptPushNotificationTrigger = functions.firestore
     .document(`${Collection.sentPrompts}/{sentPromptId}`)
     .onCreate(async (snapshot: functions.firestore.DocumentSnapshot, context: functions.EventContext) => {
-        const sentPrompt = fromDocumentSnapshot(snapshot, SentPrompt);
-        if (!sentPrompt) {
-            logger.log("No sent prompt was able to be processed. Returning");
-            return
-        }
+        try {
+            const sentPrompt = fromDocumentSnapshot(snapshot, SentPrompt);
+            if (!sentPrompt) {
+                logger.log("No sent prompt was able to be processed. Returning");
+                return
+            }
 
-        const memberId = sentPrompt.cactusMemberId;
-        const promptId = sentPrompt.promptId;
-        if (!memberId || !promptId) {
-            logger.warn("No cactus member Id  or promptId was found on the sentPrompt. Id = " + sentPrompt.id);
-            return
-        }
-        const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
-        const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
+            const memberId = sentPrompt.cactusMemberId;
+            const promptId = sentPrompt.promptId;
+            if (!memberId || !promptId) {
+                logger.warn("No cactus member Id  or promptId was found on the sentPrompt. Id = " + sentPrompt.id);
+                return
+            }
+            const member = await AdminCactusMemberService.getSharedInstance().getById(memberId);
+            const prompt = await AdminReflectionPromptService.getSharedInstance().get(promptId);
 
-        if (!member || !prompt) {
-            logger.warn("No Cactus Member or ReflectionPrompt could be found. Exiting");
-            return;
+            if (!member || !prompt) {
+                logger.warn("No Cactus Member or ReflectionPrompt could be found. Exiting");
+                return;
+            }
+            await sendPush({member, prompt, sentPrompt});
+        } catch (error) {
+            logger.error("Failed to execute sent prompt trigger", error);
         }
-        await sendPush({member, prompt, sentPrompt});
     });
 
 

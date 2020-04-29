@@ -10,8 +10,8 @@
             </section>
             <section class="needsApp" v-if="sourceApp">
                 <h3>Need to install Cactus?</h3>
-                <AppStoreIcon v-if="sourceApp == 'ios'" />
-                <PlayStoreIcon v-if="sourceApp == 'android'" />
+                <AppStoreIcon v-if="sourceApp == 'ios'"/>
+                <PlayStoreIcon v-if="sourceApp == 'android'"/>
             </section>
 
         </div>
@@ -20,14 +20,14 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from '@web/config';
-    import {getAllQueryParams, getQueryParam} from '@web/util';
-    import {QueryParam} from "@shared/util/queryParams";
-    import {appendQueryParams} from '@shared/util/StringUtil';
+    import { Config } from '@web/config';
+    import { getAllQueryParams, getQueryParam } from '@web/util';
+    import { QueryParam } from "@shared/util/queryParams";
+    import { appendQueryParams } from '@shared/util/StringUtil';
     import NavBar from "@components/NavBar.vue";
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
-    import {SourceApp} from "@shared/api/SignupEndpointTypes";
+    import { SourceApp } from "@shared/api/SignupEndpointTypes";
     import Logger from "@shared/Logger";
     import CopyService from "@shared/copy/CopyService";
 
@@ -43,12 +43,20 @@
         created() {
             logger.log("magic link app continue");
         },
-        props: {
-            link: {type: String, required: true}
+        // props: {
+        //     link: {type: String, required: true}
+        // },
+        beforeMount() {
+            this.link = window.location.href;
+        },
+        data(): { link: string | null } {
+            return {
+                link: null,
+            }
         },
         computed: {
             deepLink(): string {
-                const base = `${Config.appCustomScheme}://auth-actions`;
+                const base = `${ Config.appCustomScheme }://auth-actions`;
                 let params = getAllQueryParams(self.link);
                 return appendQueryParams(base, params);
             },

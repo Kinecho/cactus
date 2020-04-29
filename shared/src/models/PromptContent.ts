@@ -1,10 +1,10 @@
-import FlamelinkModel, {FlamelinkData, SchemaName} from "@shared/FlamelinkModel";
-import {CactusElement} from "@shared/models/CactusElement";
-import {preventOrphanedWords} from "@shared/util/StringUtil";
-import {timestampToDate} from "@shared/util/FirestoreUtil";
-import {getFlamelinkDateStringInDenver} from "@shared/util/DateUtil";
+import FlamelinkModel, { FlamelinkData, SchemaName } from "@shared/FlamelinkModel";
+import { CactusElement } from "@shared/models/CactusElement";
+import { preventOrphanedWords } from "@shared/util/StringUtil";
+import { timestampToDate } from "@shared/util/FirestoreUtil";
+import { getFlamelinkDateStringInDenver } from "@shared/util/DateUtil";
 import Logger from "@shared/Logger";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 const logger = new Logger("PromptContent.ts");
 
@@ -36,6 +36,7 @@ export enum ContentAction {
     previous = "previous",
     complete = "complete",
     showPricing = "showPricing",
+    coreValues = "coreValues",
     unknown = "unknown",
 }
 
@@ -265,5 +266,10 @@ export default class PromptContent extends FlamelinkModel {
     getPreviewText(): string | undefined {
         const [first] = (this.content || []);
         return first?.text;
+    }
+
+    getOpenGraphImageUrl(): string | null {
+        const firstImageCard = (this.content || []).find(c => c.backgroundImage?.storageUrl);
+        return this.openGraphImage?.storageUrl || firstImageCard?.backgroundImage?.storageUrl || null;
     }
 }

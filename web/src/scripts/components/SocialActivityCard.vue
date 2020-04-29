@@ -6,7 +6,7 @@
         <div class="info">
             <p class="date" v-if="date">{{date}}</p>
             <p class="description"><span class="bold">{{name}}</span> reflected on
-                <a :href="promptContentPath" v-if="promptContentPath">{{promptQuestion}}</a>
+                <router-link :to="promptContentPath" v-if="promptContentPath">{{promptQuestion}}</router-link>
                 <span class="bold" v-if="!promptContentPath">{{promptQuestion}}</span>
             </p>
         </div>

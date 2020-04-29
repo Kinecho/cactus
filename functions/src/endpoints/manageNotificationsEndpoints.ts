@@ -7,6 +7,7 @@ import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import MailchimpService from "@admin/services/MailchimpService";
 import {ListMember, ListMemberStatus} from "@shared/mailchimp/models/MailchimpTypes";
 import Logger from "@shared/Logger";
+import { isString } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("manageNotificationsEndpoints");
 const app = express();
@@ -19,7 +20,7 @@ const app = express();
 app.use(cors({origin: true}));
 
 app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, res: express.Response) => {
-    const mailchimpUniqueId = req.query.mcuid;
+    const mailchimpUniqueId = req.query.mcuid as string|undefined;
     let email: string | undefined;
     let mailchimpFullId: string | undefined;
     let listMember: ListMember | undefined;
@@ -36,7 +37,7 @@ app.get("/manage-notifications/email/unsubscribe", async (req: express.Request, 
     }
 
     //first, get via our system.
-    if (mailchimpUniqueId) {
+    if (isString(mailchimpUniqueId)) {
         const cactusMember = await AdminCactusMemberService.getSharedInstance().getByMailchimpUniqueEmailId(mailchimpUniqueId);
         email = cactusMember?.email;
         mailchimpFullId = cactusMember?.mailchimpListMember?.id;

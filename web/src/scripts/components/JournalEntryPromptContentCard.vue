@@ -1,4 +1,3 @@
-import {ResponseMediumType} from '@shared/models/ReflectionResponse'
 <template>
     <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
@@ -34,7 +33,7 @@ import {ResponseMediumType} from '@shared/models/ReflectionResponse'
         </div>
 
         <nav v-show="!canReflectInline && !hasNote" class="buttonContainer">
-            <a :href="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</a>
+            <router-link :to="promptContentPath" class="button" v-show="!completed">{{promptCopy.REFLECT}}</router-link>
             <button @click.prevent="canReflectInline = true" class="wiggle secondary" v-show="completed && !hasNote">
                 <img src="assets/images/pen.svg" alt=""/>
                 {{promptCopy.ADD_A_NOTE}}

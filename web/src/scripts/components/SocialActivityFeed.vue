@@ -9,8 +9,8 @@
         <div class="activityContainer">
             <div class="flexContainer">
                 <h2>Activity</h2>
-                <a class="secondary wiggle button add-friends" :href="friendsPath"><img src="assets/images/addUser.svg" alt=""/>Add
-                    Friends</a>
+                <router-link class="secondary wiggle button add-friends" :to="friendsPath"><img src="assets/images/addUser.svg" alt=""/>Add
+                    Friends</router-link>
             </div>
             <template v-for="event in [1,2,3,4,5]" v-if="isLoading">
                 <skeleton-event/>

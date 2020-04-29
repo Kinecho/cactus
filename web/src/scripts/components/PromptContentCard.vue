@@ -55,7 +55,7 @@
                     <flamelink-image v-bind:image="quoteAvatar" v-bind:width="60"/>
                 </div>
                 <div class="quote">
-                    <MarkdownText :source="processedContent.quote.text" :treatment="'quote'" />
+                    <MarkdownText :source="processedContent.quote.text" :treatment="'quote'"/>
                 </div>
                 <div class="author">
                     <p class="name">{{processedContent.quote.authorName}}</p>
@@ -102,7 +102,8 @@
 
             <!--     ADD CONTENT ACTION       -->
             <div class="link-container" v-if="showActionButton">
-                <button :class="actionButtonClasses" @click="doButtonAction">{{processedContent.actionButton.label}}</button>
+                <button :class="actionButtonClasses" @click="doButtonAction">{{processedContent.actionButton.label}}
+                </button>
             </div>
 
 
@@ -312,6 +313,7 @@
     import MarkdownText from "@components/MarkdownText.vue"
     import { appendQueryParams, isBlank } from "@shared/util/StringUtil";
     import PricingModal from "@components/PricingModal.vue";
+    import { PageRoute } from "@shared/PageRoutes";
 
     const logger = new Logger("PromptContentCard.vue");
     const SAVED_INDICATOR_TIMEOUT_DURATION_MS = 2000;
@@ -533,6 +535,9 @@
                         break;
                     case ContentAction.complete:
                         this.complete();
+                        break;
+                    case ContentAction.coreValues:
+                        window.open(`${ PageRoute.CORE_VALUES }`, "_blank");
                         break;
                 }
 
@@ -859,6 +864,10 @@
         }
     }
 
+    .quote-container ~ .link-container {
+        margin: 2.4rem 0 6.4rem;
+    }
+
     .link-container {
         margin: -1.6rem 0 6.4rem;
 
@@ -1133,7 +1142,7 @@
     }
 
 </style>
-<style>
+<style lang="scss">
     @import "variables";
 
     .quote-container .md_wrapper strong {

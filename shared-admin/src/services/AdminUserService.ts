@@ -18,6 +18,7 @@ import AdminSocialConnectionRequestService from "@admin/services/AdminSocialConn
 import MailchimpService from "@admin/services/MailchimpService";
 import Logger from "@shared/Logger";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
+import DeletedUser from "@shared/models/DeletedUser";
 import { stringifyJSON } from "@shared/util/ObjectUtil";
 
 const logger = new Logger("AdminUserService");
@@ -184,6 +185,7 @@ export default class AdminUserService {
         const errors: string[] = [];
         const results: DeleteUserResult = { email, documentsDeleted: {}, success: false };
         const [members, users, firebaseUser] = await Promise.all([
+
             await AdminCactusMemberService.getSharedInstance().findAllMatchingAny({
                 email,
                 userId: userRecord?.uid
@@ -273,6 +275,7 @@ export default class AdminUserService {
         const taskResults = await Promise.all(tasks);
 
         logger.log("AdminUserService.deleteAllData: task results", taskResults);
+
         taskResults.reduce((agg, r) => {
             agg.errors?.concat(r.errors || []);
             agg.documentsDeleted[r.collectionName] = r.numDocuments;
@@ -314,6 +317,19 @@ export default class AdminUserService {
 
         results.errors = errors;
         const createdAt = members.find(m => m.createdAt)?.createdAt;
+
+        const deletedUserRecordTasks = members.map(m => new Promise(async (resolve) => {
+            const deletedUser = DeletedUser.create({
+                member: m,
+                documentsDeleted: results.documentsDeleted,
+                errors: results.errors
+            });
+            await firestoreService.save(deletedUser);
+            resolve(deletedUser);
+        }))
+
+        const deletedUsers = await Promise.all(deletedUserRecordTasks);
+        logger.info("Created deleted user records", stringifyJSON(deletedUsers, 2));
 
         const userIdSet = new Set(users.map(u => u.id).concat(results.userRecord?.uid).filter(Boolean));
         const attachments: SlackAttachment[] = [

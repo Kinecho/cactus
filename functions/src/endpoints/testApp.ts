@@ -1,50 +1,50 @@
 import * as express from "express";
 import * as cors from "cors";
-import {getActiveUserCountForTrailingDays} from "@api/analytics/BigQueryUtil";
-import {getOperation,} from "@api/endpoints/DataExportJob";
+import { getActiveUserCountForTrailingDays } from "@api/analytics/BigQueryUtil";
+import { getOperation, } from "@api/endpoints/DataExportJob";
 import * as Sentry from "@sentry/node";
-import GoogleSheetsService, {DataResult} from "@admin/services/GoogleSheetsService";
+import GoogleSheetsService, { DataResult } from "@admin/services/GoogleSheetsService";
 import GoogleLanguageService from "@admin/services/GoogleLanguageService";
-import {getConfig} from "@admin/config/configService";
+import { getConfig } from "@admin/config/configService";
 import * as uuid from "uuid/v4"
 import * as admin from "firebase-admin"
-import {DateObject, DateTime} from "luxon";
+import { DateObject, DateTime } from "luxon";
 import AdminPromptContentService from "@admin/services/AdminPromptContentService";
 import * as DateUtil from "@shared/util/DateUtil";
-import {runJob as startSentPromptJob} from "@api/pubsub/subscribers/DailySentPromptJob";
+import { runJob as startSentPromptJob } from "@api/pubsub/subscribers/DailySentPromptJob";
 import AdminCactusMemberService from "@admin/services/AdminCactusMemberService";
 import AdminSubscriptionService from "@admin/services/AdminSubscriptionService";
 import AdminReflectionResponseService from "@admin/services/AdminReflectionResponseService";
-import CactusMember, {PromptSendTime} from "@shared/models/CactusMember";
+import CactusMember, { PromptSendTime } from "@shared/models/CactusMember";
 import * as CustomSentPromptNotificationsJob from "@api/pubsub/subscribers/CustomSentPromptNotificationsJob";
 import Logger from "@shared/Logger";
-import {runMemberStatsJob} from "@api/pubsub/subscribers/MemberStatsJob";
+import { runMemberStatsJob } from "@api/pubsub/subscribers/MemberStatsJob";
 
 const logger = new Logger("testApp");
 // const Config = getConfig();
 const app = express();
 // app.use(cors({origin: Config.allowedOrigins}));
-app.use(cors({origin: true}));
+app.use(cors({ origin: true }));
 app.get('/', (req, res) => {
-    res.status(200).json({status: 'ok', queryParams: req.query});
+    res.status(200).json({ status: 'ok', queryParams: req.query });
 });
 
 app.get("/fcm", async (req, res) => {
     try {
         logger.log("Staring the message send process");
-        const title = req.query.title || "Cactus Test Push Message";
-        const body = req.query.body || "This is the body of the request";
+        const title = (req.query.title as string | undefined) || "Cactus Test Push Message";
+        const body = (req.query.body as string | undefined) || "This is the body of the request";
 
-        const token = req.query.token || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
+        const token = (req.query.token as string | undefined) || "f2SB0VUqdaA:APA91bGV1o6f4UzsXOlwX_LYqCIKsH-STA4HCIIbMoUwzUd7zobmaICShlUchVvB2qPYjoZAmnjLl5fI6ntvrxSNfyWvWmkMkCGIGcqps0B-zl0dDci1aP9mEFmX0GvH7GmIflGgHCY6";
 
         const payload: admin.messaging.MessagingPayload = {
             notification: {
                 title: title,
                 body: body,
-                badge: req.query.badge || "1",
+                badge: (req.query.badge as string | undefined) || "1",
             }, data: {
-                promptId: req.query.promptId || "123",
-                promptEntryId: req.query.entryId || "entry123"
+                promptId: (req.query.promptId as string | undefined) || "123",
+                promptEntryId: (req.query.entryId as string | undefined) || "entry123"
             }
         };
         const result = await admin.messaging().sendToDevice(token, payload);
@@ -79,7 +79,11 @@ app.get("/stats", async (req, res) => {
 });
 
 app.get("/operation", async (req, res) => {
-    const name = req.query.name;
+    const name = req.query.name as string | undefined;
+    if (!name) {
+        res.send(400);
+        return;
+    }
     const operation = await getOperation(name);
     return res.send(operation);
 });
@@ -87,7 +91,7 @@ app.get("/operation", async (req, res) => {
 app.get('/bq', async (req, resp) => {
     const results = await getActiveUserCountForTrailingDays(1);
 
-    return resp.send({results: results});
+    return resp.send({ results: results });
 });
 
 app.get("/send-time", async (req, res) => {
@@ -97,13 +101,13 @@ app.get("/send-time", async (req, res) => {
     const day = req.query.date || currentDate.getDate();
     const month = req.query.month || currentDate.getMonth();
     const year = req.query.y || currentDate.getFullYear();
-    logger.log(`found hour=${hour} and minute=${minute}`);
+    logger.log(`found hour=${ hour } and minute=${ minute }`);
     let sendTime: PromptSendTime | undefined = undefined;
 
     const systemDateObject = DateTime.local().setZone("utc").toObject();
 
     if (hour && minute) {
-        sendTime = {hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute))};
+        sendTime = { hour: Number(hour), minute: DateUtil.getQuarterHourFromMinute(Number(minute)) };
 
         systemDateObject.day = Number(day);
         systemDateObject.year = Number(year);
@@ -122,8 +126,8 @@ app.get("/send-time", async (req, res) => {
 });
 
 app.get("/next-prompt", async (req, res) => {
-    let memberId = req.query.memberId;
-    const email = req.query.email;
+    let memberId = req.query.memberId as string | undefined;
+    const email = req.query.email as string | undefined;
     const runJob: boolean = !!req.query.run;
     let member: CactusMember | undefined;
     if (!memberId && email) {
@@ -158,8 +162,8 @@ app.get("/next-prompt", async (req, res) => {
 
     let memberResult: CustomSentPromptNotificationsJob.MemberResult | undefined;
     if (runJob) {
-        const job = {dryRun: false};
-        memberResult = await CustomSentPromptNotificationsJob.processMember({job, member});
+        const job = { dryRun: false };
+        memberResult = await CustomSentPromptNotificationsJob.processMember({ job, member });
     }
 
     res.send({
@@ -178,8 +182,9 @@ app.get("/next-prompt", async (req, res) => {
 });
 
 app.get("/member-send-time", async (req, resp) => {
-    const memberId = req.query.memberId;
-    const email = req.query.email;
+    const memberId = req.query.memberId as string | undefined;
+    const email = req.query.email as string | undefined;
+
     let member: CactusMember | undefined;
     if (!memberId && email) {
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
@@ -199,8 +204,8 @@ app.get("/member-send-time", async (req, resp) => {
 });
 
 app.get("/expire-trial", async (req, resp) => {
-    const memberId = req.query.memberId;
-    const email = req.query.email;
+    const memberId = req.query.memberId as string | undefined;
+    const email = req.query.email as string | undefined;
     let member: CactusMember | undefined;
     if (!memberId && email) {
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
@@ -221,8 +226,8 @@ app.get("/expire-trial", async (req, resp) => {
 });
 
 app.get("/member-stats", async (req, resp) => {
-    const memberId = req.query.memberId;
-    const email = req.query.email;
+    const memberId = req.query.memberId as string | undefined;
+    const email = req.query.email as string | undefined;
     let member: CactusMember | undefined;
     if (!memberId && email) {
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
@@ -238,13 +243,16 @@ app.get("/member-stats", async (req, resp) => {
     logger.log('Found a member:');
     logger.log(member);
 
-    const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({memberId: member.id, timeZone: member?.timeZone ? member.timeZone.toString() : undefined});
+    const result = await AdminReflectionResponseService.getSharedInstance().calculateStatsForMember({
+        memberId: member.id,
+        timeZone: member?.timeZone ? member.timeZone.toString() : undefined
+    });
     return resp.send(result || "none")
 });
 
 app.get("/member-word-cloud", async (req, resp) => {
-    const memberId = req.query.memberId;
-    const email = req.query.email;
+    const memberId = req.query.memberId as string | undefined;
+    const email = req.query.email as string | undefined;
     let member: CactusMember | undefined;
     if (!memberId && email) {
         member = await AdminCactusMemberService.getSharedInstance().getMemberByEmail(email);
@@ -260,13 +268,13 @@ app.get("/member-word-cloud", async (req, resp) => {
     logger.log('Found a member:');
     logger.log(member);
 
-    const result = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({memberId: member.id});
+    const result = await AdminReflectionResponseService.getSharedInstance().aggregateWordInsightsForMember({ memberId: member.id });
     return resp.send(result || "none")
 });
 
 app.get("/content", async (req, resp) => {
     logger.log("Trying to fetch content");
-    const qDate = req.query.d;
+    const qDate = req.query.d as string | undefined;
     let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
         logger.log("date input", qDate);
@@ -274,13 +282,13 @@ app.get("/content", async (req, resp) => {
     }
 
     logger.log("local date ", d);
-    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({systemDate: d});
+    const content = await AdminPromptContentService.getSharedInstance().getPromptContentForDate({ systemDate: d });
     return resp.send((content && content.toJSON()) || "none")
 });
 
 app.get("/contentJob", async (req, resp) => {
     logger.log("Trying to fetch content");
-    const qDate = req.query.d;
+    const qDate = req.query.d as string | undefined;
     let d = DateUtil.getDateAtMidnightDenver();
     if (qDate) {
         d = DateUtil.localDateFromISOString(qDate) || d;
@@ -302,9 +310,9 @@ app.get("/error", async (req, resp) => {
 
 
 app.get("/language-entities", async (req, resp) => {
-    const text = req.query.text;
+    const text = req.query.text as string | undefined;
 
-    if (!text) { 
+    if (!text) {
         resp.status(404);
         resp.send("No text found");
         return;
@@ -317,15 +325,15 @@ app.get("/language-entities", async (req, resp) => {
             data: entities
         });
     } catch (e) {
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
 
 app.get("/language-syntax", async (req, resp) => {
-    const text = req.query.text;
+    const text = req.query.text as string | undefined;
 
-    if (!text) { 
+    if (!text) {
         resp.status(404);
         resp.send("No text found");
         return;
@@ -338,14 +346,14 @@ app.get("/language-syntax", async (req, resp) => {
             data: entities
         });
     } catch (e) {
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
 app.get("/language-words", async (req, resp) => {
-    const text = req.query.text;
+    const text = req.query.text as string | undefined;
 
-    if (!text) { 
+    if (!text) {
         resp.status(404);
         resp.send("No text found");
         return;
@@ -376,7 +384,7 @@ app.get("/sheets", async (req, resp) => {
         });
 
     } catch (e) {
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
@@ -401,7 +409,7 @@ app.get("/sheets/values", async (req, resp) => {
 
     } catch (e) {
         logger.error(e);
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
@@ -411,7 +419,7 @@ app.get("/sheets/process", async (req, resp) => {
     try {
         const spreadsheet = await GoogleSheetsService.getSharedInstance().getSpreadsheet(config.sheets.prompt_content_sheet_id);
         if (!spreadsheet || !spreadsheet.sheets) {
-            resp.send({error: "No spreadsheet or sheets found", spreadsheet,});
+            resp.send({ error: "No spreadsheet or sheets found", spreadsheet, });
             return
         }
 
@@ -420,11 +428,11 @@ app.get("/sheets/process", async (req, resp) => {
         const toSheet = spreadsheet.sheets.find(sheet => sheet && sheet.properties && sheet.properties.sheetId === 77624666 || false);
 
         if (!fromSheet || !toSheet || !fromSheet.properties || !toSheet.properties) {
-            resp.send({error: "Unable to find from and to sheets", fromSheet, toSheet});
+            resp.send({ error: "Unable to find from and to sheets", fromSheet, toSheet });
             return;
         }
 
-        const startRange = `'${fromSheet.properties.title}'!A:Z`;
+        const startRange = `'${ fromSheet.properties.title }'!A:Z`;
 
         const values = await GoogleSheetsService.getSharedInstance().readSpreadsheet(config.sheets.prompt_content_sheet_id, startRange);
 
@@ -468,16 +476,16 @@ app.get("/sheets/process", async (req, resp) => {
 
     } catch (e) {
         logger.error(e);
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
 
 app.get("/sheets/update", async (req, resp) => {
     const config = getConfig();
-    const first = req.query.first;
-    const last = req.query.last;
-    const range = req.query.range;
+    const first = req.query.first as string | undefined ?? "";
+    const last = req.query.last as string | undefined ?? "";
+    const range = req.query.range as string | undefined ?? "";
     try {
         const updateResponse = await GoogleSheetsService.getSharedInstance().updateValues(config.sheets.prompt_content_sheet_id, range, [[first, last]]);
         resp.send({
@@ -487,7 +495,7 @@ app.get("/sheets/update", async (req, resp) => {
 
     } catch (e) {
         logger.error(e);
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 
@@ -504,7 +512,7 @@ app.get("/sheets/add", async (req, resp) => {
 
     } catch (e) {
         logger.error(e);
-        resp.send({error: e});
+        resp.send({ error: e });
     }
 });
 

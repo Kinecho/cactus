@@ -112,26 +112,6 @@
         ],
         "rewrites": [
             {
-                "source": "/insights-embed",
-                "destination": "/insights_embedded.html"
-            },
-            {
-                "source": "/welcome",
-                "destination": "/android_welcome.html"
-            },
-            {
-                "source": "/activity",
-                "destination": "/social_home.html"
-            },
-            {
-                "source": "/app-login-continue",
-                "destination": "/native_app_login_continue.html"
-            },
-            {
-                "source": "/pricing",
-                "destination": "/pricing.html"
-            },
-            {
                 "source": "/apple-app-site-association",
                 "destination": "/.well-known/apple-app-site-association"
             },
@@ -152,56 +132,8 @@
                 "function": "user"
             },
             {
-                "source": "/unsubscribe-confirmed",
-                "destination": "/unsubscribe_confirmed.html"
-            },
-            {
-                "source": "/reflection/**",
-                "destination": "/shared_reflection.html"
-            },
-            {
-                "source": "/privacy-policy",
-                "destination": "/privacy_policy.html"
-            },
-            {
-                "source": "/terms-of-service",
-                "destination": "/terms_of_service.html"
-            },
-            {
-                "source": "/prompts/**",
-                "destination": "/prompt.html"
-            },
-            {
-                "source": "/account",
-                "destination": "/account_settings.html"
-            },
-            {
-                "source": "/auth-actions",
-                "destination": "/email_action.html"
-            },
-            {
-                "source": "/authenticate-actions",
-                "destination": "/email_action.html"
-            },
-            {
-                "source": "/values",
-                "destination": "/values_home.html"
-            },
-            {
-                "source": "/invite",
-                "destination": "/social_invite.html"
-            },
-            {
                 "source": "/solo-proxy-auth",
                 "destination": "/solo_proxy_auth.html"
-            },
-            {
-                "source": "/friends",
-                "destination": "/social_invite.html"
-            },
-            {
-                "source": "/home",
-                "destination": "/journal_home.html"
             },
             {
                 "source": "/p/**",
@@ -212,36 +144,8 @@
                 "dynamicLinks": true
             },
             {
-                "source": "/signup",
-                "destination": "/sign_up.html"
-            },
-            {
-                "source": "/login",
-                "destination": "/sign_up.html"
-            },
-            {
-                "source": "/success",
-                "destination": "/payment_success.html"
-            },
-            {
-                "source": "/cancel",
-                "destination": "/payment_cancel.html"
-            },
-            {
-                "source": "/confirmed",
-                "destination": "/subscription_confirmed.html"
-            },
-            {
-                "source": "/checkout",
-                "destination": "/checkout_redirect.html"
-            },
-            {
-                "source": "/",
-                "destination": "/index.html"
-            },
-            {
                 "source": "**",
-                "destination": "/404.html"
+                "destination": "/single_page_index.html"
             }
         ]
     },
