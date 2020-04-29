@@ -167,6 +167,11 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.SIGNUP_CONFIRMED,
     },
     {
+        component: () => import("@web/views/InsightsPage.vue"),
+        name: "Insights",
+        path: PageRoute.INSIGHTS,
+    },
+    {
         component: () => import("@components/404.vue"),
         path: "*",
         name: "Page Not Found",
@@ -198,6 +203,5 @@ router.afterEach((to, from) => {
     // document.title = to.name || "Cactus";
     logRouteChanged(to);
 })
-
 
 export default router;

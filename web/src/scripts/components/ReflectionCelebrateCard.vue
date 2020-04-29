@@ -158,7 +158,7 @@
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     // import InsightWordChart from "@components/InsightWordChart.vue";
-    import MemberInsights from "@components/MemberInsights.vue";
+    import MemberInsights from "@components/MemberWordCloudInsights.vue";
     import { getElementAccumulationCounts } from "@shared/util/ReflectionResponseUtil"
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
