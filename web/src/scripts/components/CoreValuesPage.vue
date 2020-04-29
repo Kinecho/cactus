@@ -14,9 +14,12 @@
                 <assessment :assessment="assessment" :assessmentResponse="assessmentResponse" @close="closeAssessment" @save="save" @completed="complete"/>
             </template>
             <template v-else-if="plusUser && !hasValues">
-                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
 
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration of how your values have been at the heart of past decisions and how they will unlock a happier future. Your core values results will guide your Cactus reflections.</p>
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
+                    of how your values have been at the heart of past decisions and how they will unlock a happier
+                    future. Your core values results will guide your Cactus reflections.</p>
 
                 <button class="primaryBtn" @click="startNewAssessment" :disabled="creatingAssessment">Take the
                     Assessment
@@ -53,12 +56,15 @@
                 </p>
             </template>
             <template v-else-if="!plusUser">
-                <p>Core values are the general expression of what is most important for you, and they help you understand past decisions and make better decisions in the future.</p>
+                <p>Core values are the general expression of what is most important for you, and they help you
+                    understand past decisions and make better decisions in the future.</p>
 
-                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration of how your values have been at the heart of past decisions and how they will unlock a happier future. Your core values results will guide your Cactus reflections.</p>
+                <p>Knowing your core values is just the beginning. Cactus will help you prioritize a deeper exploration
+                    of how your values have been at the heart of past decisions and how they will unlock a happier
+                    future. Your core values results will guide your Cactus reflections.</p>
 
                 <p>This tool is only available to Cactus Plus members...</p>
-                
+
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
         </div>
@@ -212,7 +218,8 @@
             const tierParam = getQueryParam(QueryParam.TIER);
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member }) => {
-                    if (this.member) {
+                    this.member = member;
+                    if (member) {
                         this.member = member;
                         const memberId = member?.id;
                         if (memberId) {
@@ -232,7 +239,7 @@
                         await this.loadCurrentResults();
 
                     } else {
-                        window.location.href = `${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`;
+                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`);
                     }
                     this.loading = false
                 }
