@@ -197,96 +197,13 @@
                         if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
                             this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, {memberId: this.member.id});
                         }
-                        window.location.href = this.pendingRedirectUrl || PageRoute.JOURNAL_HOME;
+                        this.$router.push(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME);
                     }
                 }
             }
         }
     })
 </script>
-
-<style lang="scss">
-    @import "mixins";
-    @import "variables";
-
-    #signup-app {
-        margin: 0 -24px 0;
-
-        @include r(600) {
-            margin: 0 auto 0;
-        }
-
-        .firebaseui-container {
-            box-shadow: none;
-            max-width: 50rem;
-            background-color: transparent;
-
-            .mdl-progress.firebaseui-busy-indicator {
-                top: 25px;
-            }
-
-            [data-provider-id="password"] {
-                display: none;
-            }
-
-            &.firebaseui-id-page-email-link-sign-in-sent, &.firebaseui-id-page-email-not-received {
-                .firebaseui-id-secondary-link {
-                    display: none;
-                }
-            }
-
-            &.firebaseui-id-page-password-recovery-email-sent {
-                button.firebaseui-id-submit {
-                    display: none;
-                }
-            }
-
-            &.firebaseui-id-page-password-recovery {
-                .firebaseui-id-info-bar, firebaseui-info-bar {
-                    top: -3.2rem;
-                }
-
-                .firebaseui-id-secondary-link {
-                    display: none;
-                }
-            }
-
-            .firebaseui-card-actions {
-                .firebaseui-form-actions {
-
-                    .mdl-button, .firebaseui-button, .firebaseui-button.firebaseui-id-submit.mdl-button.mdl-button--colored.mdl-button--raised.mdl-js-button {
-                        height: unset;
-                        @include button;
-                        text-transform: none;
-
-
-                        &.firebaseui-id-secondary-link {
-                            @include button;
-                            @include secondaryButton;
-                        }
-
-                        &:not(:last-child) {
-                            margin-right: 1rem;
-                        }
-                    }
-                }
-            }
-
-            .firebaseui-card-header {
-                .firebaseui-title {
-                    display: none;
-                }
-            }
-
-            .firebaseui-card-footer {
-                margin: 2.4rem auto;
-                opacity: .8;
-                padding: 0;
-                width: 30rem;
-            }
-        }
-    }
-</style>
 
 <style lang="scss" scoped>
     @import "common";

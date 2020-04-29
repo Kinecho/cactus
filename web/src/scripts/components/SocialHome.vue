@@ -53,6 +53,12 @@
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialActivityCard from "@components/SocialActivityCard.vue"
+    import VueClipboard from "vue-clipboard2";
+    import SocialSharing from "vue-social-sharing";
+
+    Vue.use(VueClipboard);
+    Vue.use(SocialSharing);
+
 
     export default Vue.extend({
         components: {
@@ -82,7 +88,7 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({member}) => {
                     if (!member) {
-                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`;
+                        this.$router.push(`${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.SOCIAL)}`);
                     } else {
                         if (this.member?.id != member.id) { // only update instance if switching users
                             this.member = member;

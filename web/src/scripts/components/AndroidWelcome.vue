@@ -10,7 +10,7 @@
                     :whiteLogo="true"/>
             <div class="flexContainer">
                 <p class="subtext">Your private journal for&nbsp;mindfulness.</p>
-                <a :href="continuePath" class="btn button primary">Continue</a>
+                <router-link :to="continuePath" class="btn button primary">Continue</router-link>
             </div>
         </div>
     </transition>
@@ -18,8 +18,8 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {PageRoute} from "@shared/PageRoutes";
-    import {getAuth, Unsubscribe} from "@web/firebase";
+    import { PageRoute } from "@shared/PageRoutes";
+    import { getAuth, Unsubscribe } from "@web/firebase";
     import NavBar from "@components/NavBar.vue";
 
     export default Vue.extend({
@@ -27,15 +27,20 @@
             NavBar,
         },
         beforeMount(): void {
+            document.body.classList.add("sign-up-body");
             this.authListener = getAuth().onAuthStateChanged(user => {
                 if (user) {
-                    window.location.href = PageRoute.JOURNAL_HOME
+                    this.$router.replace(PageRoute.JOURNAL_HOME);
                 }
                 this.authLoaded = true;
             })
         },
-        destroyed(): void {
+        mounted(): void {
+            document.body.classList.add("sign-up-body");
+        },
+        beforeDestroy(): void {
             this.authListener?.();
+            document.body.classList.remove("sign-up-body");
         },
         data(): {
             authLoaded: boolean,
@@ -56,16 +61,19 @@
     })
 </script>
 
+<style lang="scss">
+    @import "mixins";
+
+    body.sign-up-body {
+        @include blueWavyBackground;
+    }
+</style>
+
 <style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
     @import "transitions";
-
-
-    body.sign-up-body {
-        @include blueWavyBackground;
-    }
 
     .welcome-wrapper {
         align-items: center;

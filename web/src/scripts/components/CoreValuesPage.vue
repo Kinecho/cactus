@@ -89,6 +89,7 @@
     import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted, setUserId } from "@web/analytics";
 
     interface CoreValuesData {
+        embed: boolean,
         loading: boolean,
         creatingAssessment: boolean,
         showConfetti: boolean,
@@ -155,10 +156,11 @@
 
         },
         props: {
-            embed: { type: Boolean, default: false },
+            // embed: { type: Boolean, default: false },
         },
         data(): CoreValuesData {
             return {
+                embed: false,
                 loading: true,
                 creatingAssessment: false,
                 assessmentInProgress: false,
@@ -186,6 +188,8 @@
             }
         },
         beforeMount() {
+            const embed = !isBlank(getQueryParam(QueryParam.EMBED));
+            this.embed = embed;
             if (this.embed) {
                 this.loading = true;
                 window.CactusIosDelegate = {
@@ -269,7 +273,7 @@
                     }
 
                 } else {
-                    window.location.href = PageRoute.PRICING;
+                    this.$router.push(PageRoute.PRICING);
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {

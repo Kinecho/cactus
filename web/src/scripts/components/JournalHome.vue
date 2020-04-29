@@ -176,7 +176,7 @@
                 onData: async ({ member, user }) => {
                     if (!user) {
                         logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
-                        window.location.href = PageRoute.HOME;
+                        this.$router.push(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -316,7 +316,8 @@
             },
             launchCoreValues() {
                 // TODO: launch core values assessment
-                window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+                // window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)

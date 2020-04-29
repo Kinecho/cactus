@@ -1,46 +1,46 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
-            <a :href="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></a>
+            <router-link :to="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></router-link>
             <div v-if="!loggedIn" class="anonLinks">
-                <a v-if="displayLoginButton"
+                <router-link v-if="displayLoginButton"
                         class="login "
-                        :href="sponsorHref"
+                        :to="sponsorHref"
                         type="link"
                 >
                     <span>Sponsor</span>
-                </a>
-                <a v-if="displayLoginButton"
+                </router-link>
+                <router-link v-if="displayLoginButton"
                         class="login "
-                        :href="loginHref"
+                        :to="loginHref"
                         @click.prevent="goToLogin"
                         type="link"
                 >
                     <span>{{copy.common.LOG_IN}}</span>
-                </a>
-                <a v-if="displaySignupButton"
+                </router-link>
+                <router-link v-if="displaySignupButton"
                         data-test="signup-button"
                         class="jump-to-form button small"
-                        :href="signupHref"
+                        :to="signupHref"
                         @click.prevent="goToSignup"
                         type="button"
-                >{{copy.common.TRY_IT_FREE}}</a>
+                >{{copy.common.TRY_IT_FREE}}</router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
-                <a class="navbarLink home" :href="journalHref" v-if="loggedIn">
+                <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Home to My
                         Journal</title>
                         <path fill="#07454C" d="M5 23a3 3 0 01-3-3V9a1 1 0 01.386-.79l9-7a1 1 0 011.228 0l9 7A1 1 0 0122 9v11a3 3 0 01-3 3H5zm7-19.733L4 9.489V20a1 1 0 001 1h3v-9a1 1 0 01.883-.993L9 11h6a1 1 0 011 1v9h3a1 1 0 001-1V9.49l-8-6.223zM14 13h-4v8h4v-8z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
-                </a>
-                <a class="navbarLink" :href="socialHref" v-if="loggedIn">
+                </router-link>
+                <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
-                </a>
+                </router-link>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
                         <div v-if="!profileImageUrl" class="initials">{{initials}}</div>
@@ -237,10 +237,10 @@
                 await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
             },
             goToLogin() {
-                window.location.href = this.loginHref;
+                this.$router.push(this.loginHref);
             },
             goToSignup() {
-                window.location.href = this.signupHref;
+                this.$router.push(this.signupHref);
             },
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {
@@ -306,7 +306,7 @@
                     margin-left: 3.2vw;
                     padding: .8rem 1.6rem;
 
-                    &:hover {
+                    &:hover, &.router-link-active {
                         background-color: $lightGreen;
                     }
                 }
@@ -387,7 +387,7 @@
                 width: 100%;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
             }
         }
@@ -458,7 +458,7 @@
                 width: 5.6rem;
             }
 
-            &:hover:after {
+            &:hover:after, &.router-link-active:after {
                 transform: scaleX(1);
             }
         }

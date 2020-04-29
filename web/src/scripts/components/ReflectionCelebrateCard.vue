@@ -2,19 +2,20 @@
     <div :class="['flip-container', 'celebrate-container', {flipped: flipped}]">
         <div class="flipper">
             <div :class="['front', 'flip-card']">
-                <upgrade-banner :member="member" />
+                <upgrade-banner :member="member"/>
                 <div class="successText">
                     <h2>{{celebrateText}}</h2>
                 </div>
                 <div class="insightContainer revealed">
-                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that have come up recently for&nbsp;you.</p>
+                    <p class="subtext" v-if="subscriptionTier == plusTier && didWriteReflection">Here are words that
+                        have come up recently for&nbsp;you.</p>
                     <MemberInsights
-                        :words="wordData"
-                        :didWrite="didWriteReflection"
-                        :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
-                        :startGated="subscriptionTier === basicTier"
-                        :startBlurred="subscriptionTier === basicTier"
-                        :loggedIn="loggedIn" />
+                            :words="wordData"
+                            :didWrite="didWriteReflection"
+                            :subscriptionTier="isOnboardingPrompt ? plusTier : subscriptionTier"
+                            :startGated="subscriptionTier === basicTier"
+                            :startBlurred="subscriptionTier === basicTier"
+                            :loggedIn="loggedIn"/>
                 </div>
                 <div class="lowerContainer">
                     <div class="cactusGarden">
@@ -135,33 +136,33 @@
 <script lang="ts">
     import Vue from "vue";
     import Spinner from "@components/Spinner.vue";
-    import {Config} from "@web/config";
+    import { Config } from "@web/config";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import {millisecondsToMinutes} from '@shared/util/DateUtil'
-    import {ElementAccumulation} from '@shared/models/ElementAccumulation'
-    import ReflectionResponse, {InsightWord} from '@shared/models/ReflectionResponse'
+    import { millisecondsToMinutes } from '@shared/util/DateUtil'
+    import { ElementAccumulation } from '@shared/models/ElementAccumulation'
+    import ReflectionResponse, { InsightWord } from '@shared/models/ReflectionResponse'
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
-    import {PageRoute} from '@shared/PageRoutes'
+    import { PageRoute } from '@shared/PageRoutes'
     import MagicLink from "@components/MagicLinkInput.vue";
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import StorageService, { LocalStorageKey } from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {ElementCopy, PromptCopy} from '@shared/copy/CopyTypes'
-    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
-    import {isBlank} from "@shared/util/StringUtil"
+    import { ElementCopy, PromptCopy } from '@shared/copy/CopyTypes'
+    import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
+    import { isBlank } from "@shared/util/StringUtil"
     import PromptContentCard from '@components/PromptContentCard.vue'
     import Modal from "@components/Modal.vue";
-    import {CactusElement} from "@shared/models/CactusElement";
+    import { CactusElement } from "@shared/models/CactusElement";
     import ElementDescriptionModal from "@components/ElementDescriptionModal.vue";
     import ReflectionCelebrateUpgradeBanner from "@components/ReflectionCelebrateUpgradeBanner.vue";
     import InputNameModal from "@components/InputNameModal.vue";
     // import InsightWordChart from "@components/InsightWordChart.vue";
     import MemberInsights from "@components/MemberInsights.vue";
-    import {getElementAccumulationCounts} from "@shared/util/ReflectionResponseUtil"
-    import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+    import { getElementAccumulationCounts } from "@shared/util/ReflectionResponseUtil"
+    import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
-    import {gtag} from "@web/analytics"
+    import { gtag } from "@web/analytics"
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -179,7 +180,7 @@
         },
         async beforeMount() {
             CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member}) => {
+                onData: async ({ member }) => {
                     this.member = member;
                     this.authLoaded = true;
                     this.loggedIn = !!member;
@@ -208,7 +209,7 @@
             reflectionResponse: {
                 type: Object as () => ReflectionResponse
             },
-            promptContent: {type: Object as () => PromptContent},
+            promptContent: { type: Object as () => PromptContent },
             isModal: Boolean,
             cactusElement: String as () => CactusElement,
         },
@@ -278,7 +279,7 @@
                 return this.member?.tier;
             },
             loginUrl(): string {
-                const base = `${PageRoute.SIGNUP}`;
+                const base = `${ PageRoute.SIGNUP }`;
                 // const params = {}
                 return base;
             },
@@ -342,7 +343,7 @@
                 this.setDurationMs(totalDuration);
                 this.elementAccumulations = getElementAccumulationCounts(reflections);
                 this.reflectionCount = reflections.length;
-                const {dayStreak, weekStreak, monthStreak} = ReflectionResponseService.getCurrentStreaks(reflections, member);
+                const { dayStreak, weekStreak, monthStreak } = ReflectionResponseService.getCurrentStreaks(reflections, member);
                 this.streakDays = dayStreak;
                 this.streakWeeks = weekStreak;
                 this.streakMonths = monthStreak;
@@ -350,7 +351,7 @@
             },
             setDurationMs(totalDuration: number) {
                 if (totalDuration < (60 * 1000)) {
-                    this.totalDuration = `${Math.round(totalDuration / 1000)}`;
+                    this.totalDuration = `${ Math.round(totalDuration / 1000) }`;
                     this.durationLabel = copy.prompts.SECONDS
                 } else {
                     this.durationLabel = copy.prompts.MINUTES;
@@ -382,8 +383,7 @@
                 logger.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
-                window.location.href = PageRoute.SIGNUP;
-                window.location.href = PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going.")
+                this.$router.push(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going."))
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;

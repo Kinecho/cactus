@@ -64,7 +64,8 @@
                         </transition>
                         <transition name="celebrate" appear mode="out-in" v-if="completed">
                             <celebrate v-on:back="completed = false"
-                                    v-on:restart="restart" v-on:close="seePricingOrGoHome"
+                                    v-on:restart="restart"
+                                    v-on:close="seePricingOrGoHome"
                                     v-bind:reflectionResponse="reflectionResponse"
                                     v-bind:cactusElement="promptContent.cactusElement"
                                     v-bind:isModal="isModal"
@@ -95,41 +96,41 @@
             </section>
         </transition>
         <PricingModal
-            :showModal="pricingModalVisible"
-            @close="closePricingModal"/>
+                :showModal="pricingModalVisible"
+                @close="closePricingModal"/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
-    import {Config} from "@web/config";
-    import {PageRoute} from '@shared/PageRoutes'
+    import { Config } from "@web/config";
+    import { PageRoute } from '@shared/PageRoutes'
     import ContentCard from "@components/PromptContentCard.vue"
     import Celebrate from "@components/ReflectionCelebrateCard.vue";
-    import PromptContent, {Content, ContentType} from '@shared/models/PromptContent'
-    import {CactusElement} from '@shared/models/CactusElement';
+    import PromptContent, { Content, ContentType } from '@shared/models/PromptContent'
+    import { CactusElement } from '@shared/models/CactusElement';
     import Spinner from "@components/Spinner.vue";
     import Vue2TouchEvents from 'vue2-touch-events'
-    import {getFlamelink} from '@web/firebase'
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
-    import {getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam} from '@web/util'
-    import {getCloudinaryUrlFromStorageUrl} from '@shared/util/ImageUtil'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { getFlamelink } from '@web/firebase'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
+    import { getQueryParam, pushQueryParam, removeQueryParam, updateQueryParam } from '@web/util'
+    import { getCloudinaryUrlFromStorageUrl } from '@shared/util/ImageUtil'
+    import { QueryParam } from "@shared/util/queryParams"
     import PromptContentSharing from "@components/PromptContentSharing.vue";
     import PricingModal from "@components/PricingModal.vue";
     import ReflectionResponseService from '@web/services/ReflectionResponseService'
-    import ReflectionResponse, {getResponseMedium, ResponseMediumType} from '@shared/models/ReflectionResponse'
-    import {MINIMUM_REFLECT_DURATION_MS} from '@web/PromptContentUtil'
+    import ReflectionResponse, { getResponseMedium, ResponseMediumType } from '@shared/models/ReflectionResponse'
+    import { MINIMUM_REFLECT_DURATION_MS } from '@web/PromptContentUtil'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from '@shared/models/CactusMember'
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
-    import {getAppType, getDeviceDimensions, MOBILE_BREAKPOINT_PX} from '@web/DeviceUtil'
-    import {gtag} from "@web/analytics"
-    import {isBlank} from "@shared/util/StringUtil"
+    import { getAppType, getDeviceDimensions, isPreRender, MOBILE_BREAKPOINT_PX } from '@web/DeviceUtil'
+    import { gtag } from "@web/analytics"
+    import { isBlank } from "@shared/util/StringUtil"
     import CopyService from "@shared/copy/CopyService";
     import PromptContentService from "@web/services/PromptContentService";
     import FourOhFour from "@components/404.vue"
     import Logger from "@shared/Logger";
+    import { RoutePageMeta, setPageMeta } from "@web/router-meta";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
@@ -150,7 +151,7 @@
         props: {
             initialIndex: Number,
             promptContentEntryId: String,
-            isModal: {type: Boolean, default: false},
+            isModal: { type: Boolean, default: false },
             onClose: {
                 type: Function, default: function () {
                     removeQueryParam(QueryParam.CONTENT_INDEX);
@@ -159,7 +160,7 @@
             }
         },
         async beforeMount(): Promise<void> {
-
+            window.prerenderReady = false;
             this.usePromptId = !!getQueryParam(QueryParam.USE_PROMPT_ID);
 
             this.keyboardListener = (evt: KeyboardEvent) => {
@@ -178,13 +179,13 @@
 
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     this.authLoaded = true;
                     this.member = member;
 
-                    if (!this.member) {
+                    if (!this.member && !isPreRender()) {
                         const afterLoginUrl = window.location.href;
-                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(afterLoginUrl)}`;
+                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
                     }
                 }
             });
@@ -219,7 +220,7 @@
 
             let promptContentId = this.promptContentEntryId;
             if (!this.promptContentEntryId) {
-                promptContentId = window.location.pathname.split(`${PageRoute.PROMPTS_ROOT}/`)[1];
+                promptContentId = window.location.pathname.split(`${ PageRoute.PROMPTS_ROOT }/`)[1];
                 logger.log("using path for promptContentId", promptContentId);
             } else {
                 logger.log("using prop for promptContentId", promptContentId)
@@ -278,6 +279,7 @@
 
                     this.loading = false;
                     this.updateDocumentMeta();
+                    window.prerenderReady = true;
                 }
             };
 
@@ -405,7 +407,7 @@
                 return !this.showSharing;
             },
             slideNumberClass(): string {
-                return `slide-${this.activeIndex}`
+                return `slide-${ this.activeIndex }`
             },
             hasNext(): boolean {
                 return this.contentItems && this.contentItems && this.activeIndex < this.contentItems.length - 1 || false
@@ -436,7 +438,7 @@
             reflectionProgressStyles(): any | undefined {
                 if (this.isReflection) {
                     const styles = {
-                        transform: `rotate(${Math.min(this.reflectionProgress, 1) * 360}deg)`,
+                        transform: `rotate(${ Math.min(this.reflectionProgress, 1) * 360 }deg)`,
                     };
                     logger.log("Style object", styles);
                     return styles;
@@ -484,7 +486,6 @@
                     this.subscribeToResponse();
                 }
             },
-
         },
         methods: {
             closePricingModal(): void {
@@ -505,56 +506,33 @@
 
             },
             updateDocumentMeta() {
-                const index = this.activeIndex || 0;
-                let title = this.promptContent && this.promptContent.subjectLine;
-                let openGraphImage = this.promptContent && this.promptContent.openGraphImage;
-                let ogTitleTag = document.querySelector("meta[property='og:title']");
-                let twitterTitleTag = document.querySelector("meta[name='twitter:title']");
-                let ogDescriptionTag = document.querySelector("meta[property='og:description']");
-                let twitterDescriptionTag = document.querySelector("meta[name='twitter:description']");
-                let ogImageTag = document.querySelector("meta[property='og:image']");
-                let twitterImageTag = document.querySelector("meta[name='twitter:image']");
+                logger.info("Prompt content updating meta");
+                debugger;
+                let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
 
-                if (!title) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    title = firstContent && firstContent.text;
-                }
-                if (title) {
-                    document.title = `${title} | ${index + 1}`;
-                } else {
-                    document.title = 'Cactus Mindful Moment'
-                }
-                if (ogTitleTag) {
-                    ogTitleTag.setAttribute("content", `${title}`);
-                    if (twitterTitleTag) {
-                        twitterTitleTag.setAttribute("content", `${title}`);
-                    }
-                }
-                if (ogDescriptionTag) {
-                    ogDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    if (twitterDescriptionTag) {
-                        twitterDescriptionTag.setAttribute("content", `Reflect on this mindful moment from Cactus.`);
-                    }
+                const description = "Reflect on this mindful moment from Cactus.";
+                let pageMeta: RoutePageMeta = {
+                    description,
+                    title,
                 }
 
-                if (!openGraphImage || !openGraphImage.storageUrl) {
-                    const [firstContent]: Content[] = this.promptContent ? this.promptContent.content : [] || [];
-                    openGraphImage = firstContent && firstContent.backgroundImage;
-                }
-
-                if (ogImageTag && openGraphImage && openGraphImage.storageUrl) {
-                    logger.log(openGraphImage.storageUrl);
-                    let pngUrl = getCloudinaryUrlFromStorageUrl({
-                        storageUrl: openGraphImage.storageUrl,
+                const imageUrl = this.promptContent?.getOpenGraphImageUrl();
+                let pngUrl: string | null = null;
+                if (imageUrl) {
+                    pngUrl = getCloudinaryUrlFromStorageUrl({
+                        storageUrl: imageUrl,
                         width: 1200,
                         transforms: ["w_1200", "h_630", "f_png", "c_lpad"]
                     });
-                    ogImageTag.setAttribute("content", `${pngUrl}`);
-
-                    if (twitterImageTag) {
-                        twitterImageTag.setAttribute("content", `${pngUrl}`);
+                    pageMeta.image = {
+                        url: pngUrl,
+                        height: 630,
+                        width: 1200,
+                        type: "image/png",
                     }
                 }
+                logger.info("Prompt Content Meta Image is", pageMeta.image);
+                setPageMeta(pageMeta, title)
             },
             async handleTap(event: TouchEvent) {
                 const excludedTags = ["INPUT", "BUTTON", "A", "TEXTAREA"];
@@ -568,7 +546,7 @@
                     logger.log("tap anywhere is disabled");
                     return;
                 }
-                const {width} = getDeviceDimensions();
+                const { width } = getDeviceDimensions();
                 if (width < MOBILE_BREAKPOINT_PX) {
                     const path = event.composedPath();
                     const foundExcludedTarget = path.find((t) => {
@@ -617,7 +595,7 @@
                 const diffX = args.clientX - startX;
                 this.cardStyles = {
                     transition: "all .2s",
-                    transform: `translateX(${diffX}px)`,
+                    transform: `translateX(${ diffX }px)`,
                 };
 
                 logger.log("Move Handler", args);
@@ -639,6 +617,12 @@
                     logger.log("Reflection response unsubscriber already exists, resetting in now");
                     this.reflectionResponseUnsubscriber();
                 }
+
+                if (this.authLoaded && !this.member) {
+                    this.responsesLoaded = true;
+                    return
+                }
+
                 let promptId = this.promptContent && this.promptContent.promptId;
                 const promptContent = this.promptContent && this.promptContent.content.find(content => content.contentType === ContentType.reflect);
                 const promptQuestion = promptContent ? promptContent.text : undefined;
@@ -653,9 +637,9 @@
                             //TODO: combine if there are multiple?
                             const [first] = responses;
                             const newResponse = ReflectionResponseService.createReflectionResponse(promptId as string, getResponseMedium({
-                                    app: getAppType(),
-                                    type: ResponseMediumType.PROMPT
-                                }), promptQuestion);
+                                app: getAppType(),
+                                type: ResponseMediumType.PROMPT
+                            }), promptQuestion);
 
                             const response = first || newResponse;
 
@@ -668,7 +652,7 @@
 
                                 if (this.isFirstCard && !this.saving && !this.saved) {
                                     logger.log("Attempting to save ReflectionResponse when the prompt first loaded...");
-                                    const saveTask = this.save({updateReflectionLog: false});
+                                    const saveTask = this.save({ updateReflectionLog: false });
                                     await saveTask;
                                 }
                             }
@@ -679,7 +663,7 @@
                 }
             },
 
-            async save(options: { updateReflectionLog: boolean } = {updateReflectionLog: false}): Promise<ReflectionResponse | undefined> {
+            async save(options: { updateReflectionLog: boolean } = { updateReflectionLog: false }): Promise<ReflectionResponse | undefined> {
                 if (this.reflectionResponse) {
                     this.saving = true;
                     this.saved = false;
@@ -703,7 +687,7 @@
                 }
 
                 this.transitionName = "slide";
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: true}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: true }) : () => undefined;
                 const content = this.contentItems || [];
                 if (this.hasNext && !this.isLastCard) {
                     this.activeIndex = Math.min(this.activeIndex + 1, content.length - 1);
@@ -718,7 +702,7 @@
 
                     gtag('event', 'next', {
                         event_category: "prompt_content",
-                        event_label: `Slide ${this.activeIndex}`
+                        event_label: `Slide ${ this.activeIndex }`
                     });
                     await saveTask;
                 } else if (this.isLastCard) {
@@ -727,7 +711,7 @@
 
             },
             async previous() {
-                const saveTask = this.isReflection ? this.save({updateReflectionLog: false}) : () => undefined;
+                const saveTask = this.isReflection ? this.save({ updateReflectionLog: false }) : () => undefined;
                 this.transitionName = "slide-out";
                 const content = this.contentItems || [];
                 if (this.completed) {
@@ -749,25 +733,25 @@
                 // pushQueryParam(QueryParam.CONTENT_INDEX, this.activeIndex);
                 gtag('event', 'previous', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
 
                 await saveTask;
             },
             async complete() {
-                const saveTask = this.save({updateReflectionLog: true});
+                const saveTask = this.save({ updateReflectionLog: true });
                 this.transitionName = "slide";
                 // this.activeIndex = 0;
                 pushQueryParam(QueryParam.CONTENT_INDEX, "done");
                 this.completed = true;
                 gtag('event', 'complete', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
                 await saveTask;
             },
             async restart() {
-                const saveTask = this.save({updateReflectionLog: false});
+                const saveTask = this.save({ updateReflectionLog: false });
                 this.activeIndex = 0;
                 this.completed = false;
                 await saveTask;
@@ -775,10 +759,10 @@
             seePricingOrGoHome(): void {
                 gtag('event', 'close', {
                     event_category: "prompt_content",
-                    event_label: `Slide ${this.activeIndex}`
+                    event_label: `Slide ${ this.activeIndex }`
                 });
-                if (this.promptContent?.entryId === Config.firstPromptId && 
-                    !this.hasSeenPricing) {
+                if (this.promptContent?.entryId === Config.firstPromptId &&
+                !this.hasSeenPricing) {
                     this.pricingModalVisible = true;
                     this.hasSeenPricing = true;
                 } else {
@@ -810,7 +794,7 @@
         flex-direction: column;
         position: relative;
         width: 100vw;
-
+        min-height: 100vh;
         @include r(600) {
             background-color: transparent;
             padding: 6.4rem 0;

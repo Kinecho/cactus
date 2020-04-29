@@ -39,7 +39,7 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
     prepareForFirestore(): any {
         // const data = super.prepareForFirestore();
         // return stringifyJSON(data);
-        let data = toPlainObject({ ...this });
+        const data = toPlainObject({ ...this });
         data.questionResponses = JSON.parse(JSON.stringify(this.questionResponses));
         return data;
     }

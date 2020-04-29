@@ -1,10 +1,13 @@
 <template>
     <div class="centered">
+        <header>
+            <router-link to="/"><img class="logo" src="/assets/images/logoWhite.svg" alt="Cactus logo" /></router-link>
+        </header>
         <section>
-            <img class="graphic" src="/assets/images/desert.svg" alt=""/>
+            <img class="graphic" src="/assets/images/error.png" alt="Cactus Error Image"/>
             <h1>Looks like something went wrong...</h1>
             <p>Since you're here, think of one person you'd love to get lost with.</p>
-            <a class="button" href="/">Return Home</a>
+            <router-link class="button" to="/">Return Home</router-link>
         </section>
     </div>
 </template>
@@ -17,7 +20,16 @@
 
         },
         beforeMount(): void {
-            document.body.classList.add("error");
+            document.body.classList.add("simplyCentered");
+        },
+        mounted(): void {
+            document.body.classList.add("simplyCentered");
+        },
+        beforeDestroy(): void {
+            document.body.classList.remove("simplyCentered");
+        },
+        destroyed(): void {
+            document.body.classList.remove("simplyCentered");
         },
         props: {},
         data(): {} {
@@ -26,10 +38,13 @@
     })
 </script>
 
+<style lang="scss">
+    @import "simplyCentered";
+</style>
+
 <style lang="scss" scoped>
     @import "mixins";
     @import "variables";
-
     .centered {
         overflow-x: hidden;
         width: 100%;

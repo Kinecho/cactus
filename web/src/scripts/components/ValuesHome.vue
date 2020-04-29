@@ -94,29 +94,23 @@
     import Footer from "@components/StandardFooter.vue"
     import NavBar from "@components/NavBar.vue"
     import AuthButton from "@components/AuthButton.vue"
-    import {getQueryParam} from '@web/util'
-    import {QueryParam} from "@shared/util/queryParams"
+    import { getQueryParam } from '@web/util'
+    import { QueryParam } from "@shared/util/queryParams"
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     // @ts-ignore
     import * as ScrollMagic from "scrollmagic";
-    import {TweenMax, Power1} from "gsap";
+    import { TweenMax, Power1 } from "gsap";
     import 'animation.gsap';
     // @ts-ignore
-    import {ScrollToPlugin} from 'gsap/all';
+    import { ScrollToPlugin } from 'gsap/all';
     import Logger from "@shared/Logger";
 
 
     const logger = new Logger("ValuesHome.vue");
     const plugins = [ScrollToPlugin, TweenMax, Power1];
     logger.debug("Logging so plugins dont get treek-shook :( ", plugins);
-
-    // let emailParam = getQueryParam(QueryParam.EMAIL) || getQueryParam(QueryParam.SENT_TO_EMAIL_ADDRESS);
-
-    // if (!emailParam) {
-    //
-    // }
 
     export default Vue.extend({
         components: {
@@ -125,12 +119,9 @@
             AuthButton: AuthButton,
         },
         created() {
-            // let body = document.getElementsByTagName("body").item(0);
-            // if (body){
-            //     body.style.removeProperty("display");
-            // }
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member, user}) => {
+                onData: ({ member, user }) => {
                     logger.log("Got member");
                     this.authLoaded = true;
                     this.member = member;
@@ -163,7 +154,7 @@
         computed: {
             surveyLink(): string | undefined {
                 if (this.email) {
-                    return `https://www.surveymonkey.com/r/cactus-core-values?email=${this.email}`
+                    return `https://www.surveymonkey.com/r/cactus-core-values?email=${ this.email }`
                 }
                 return undefined;
             },
@@ -181,34 +172,34 @@
                     new ScrollMagic.Scene({
                         offset: 1,
                         duration: '100%',
-                    }).setTween("#pinkBlob", 1, {transform: 'translate(0, 0) rotate(15deg)'})
-                        .addTo(controller);
+                    }).setTween("#pinkBlob", 1, { transform: 'translate(0, 0) rotate(15deg)' })
+                    .addTo(controller);
                 } else if (width < 1140) {
                     new ScrollMagic.Scene({
                         offset: 1,
                         duration: '100%',
-                    }).setTween("#pinkBlob", 1, {transform: 'translate(81vw, 60vh)'})
-                        .addTo(controller);
+                    }).setTween("#pinkBlob", 1, { transform: 'translate(81vw, 60vh)' })
+                    .addTo(controller);
                 }
 
                 new ScrollMagic.Scene({
                     offset: 1,
                     duration: '500%',
-                }).setTween("#yellowBlob1", 1, {transform: 'translate(-7vw, 99vh) rotate(15deg)'})
-                    .addTo(controller);
+                }).setTween("#yellowBlob1", 1, { transform: 'translate(-7vw, 99vh) rotate(15deg)' })
+                .addTo(controller);
 
                 if (width >= 1140) {
                     new ScrollMagic.Scene({
                         offset: 1,
                         duration: '500%',
-                    }).setTween("#greenBlob", 1, {transform: 'translate(13vw, -39vh)'})
-                        .addTo(controller);
+                    }).setTween("#greenBlob", 1, { transform: 'translate(13vw, -39vh)' })
+                    .addTo(controller);
                 } else if (width < 1140) {
                     new ScrollMagic.Scene({
                         offset: 1,
                         duration: '100%',
-                    }).setTween("#greenBlob", 1, {transform: 'translate(-24vw, 65vh)'})
-                        .addTo(controller);
+                    }).setTween("#greenBlob", 1, { transform: 'translate(-24vw, 65vh)' })
+                    .addTo(controller);
                 }
             }
         }

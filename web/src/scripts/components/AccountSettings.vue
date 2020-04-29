@@ -195,7 +195,7 @@
 
     export default Vue.extend({
         components: {
-            NavBar,
+                NavBar,
             Footer,
             Spinner,
             CheckBox,
@@ -222,7 +222,7 @@
                     this.user = user;
                     this.authLoaded = true;
                     if (!member) {
-                        window.location.href = PageRoute.HOME;
+                        this.$router.push(PageRoute.HOME);
                     }
                 }
             });

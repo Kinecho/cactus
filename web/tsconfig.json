@@ -10,6 +10,7 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": false,
         "sourceMap": true,
+        "experimentalDecorators": true,
         "downlevelIteration": true,
 
         "lib": [

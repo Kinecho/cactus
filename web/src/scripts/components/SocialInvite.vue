@@ -17,11 +17,17 @@
     import Footer from "@components/StandardFooter.vue";
     import SocialActivityFeed from "@components/SocialActivityFeed.vue"
     import SocialFindFriends from "@components/SocialFindFriends.vue"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from "@shared/models/CactusMember"
     import CactusMemberService from "@web/services/CactusMemberService"
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from '@shared/util/queryParams'
+    import { PageRoute } from "@shared/PageRoutes"
+    import { QueryParam } from '@shared/util/queryParams'
+    import VueClipboard from "vue-clipboard2";
+    import SocialSharing from "vue-social-sharing";
+
+
+    Vue.use(VueClipboard);
+    Vue.use(SocialSharing);
 
     export default Vue.extend({
         components: {
@@ -32,8 +38,8 @@
         data(): {
             currentChild: string,
             loading: boolean,
-            member: CactusMember|undefined,
-            memberUnsubscriber: ListenerUnsubscriber|undefined,
+            member: CactusMember | undefined,
+            memberUnsubscriber: ListenerUnsubscriber | undefined,
         } {
             return {
                 currentChild: 'findFriends',
@@ -44,9 +50,9 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({member}) => {
+                onData: ({ member }) => {
                     if (!member) {
-                        window.location.href = `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${encodeURIComponent(PageRoute.FRIENDS)}`;
+                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`);
                     }
                     this.member = member;
                     this.loading = false;
