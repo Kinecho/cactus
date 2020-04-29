@@ -16,7 +16,7 @@
 
             <section v-if="hasWordCloud">
                 <p>Words you have used recently</p>
-                <WordCloud v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
             </section>
             <section v-else>
                 <h2>Get the word cloud!</h2>
@@ -35,6 +35,11 @@
             <section v-else>
                 <h3>Get your core values!</h3>
                 <button class="btn primary">Core Values</button>
+            </section>
+
+            <section class="gap-analysis">
+                <h3>Gap Analysis</h3>
+                <p>Coming Soon</p>
             </section>
 
         </template>
@@ -185,5 +190,9 @@
             }
         }
 
+    }
+
+    .graph {
+        max-width: 40rem;
     }
 </style>
