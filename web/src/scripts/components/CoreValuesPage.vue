@@ -239,7 +239,7 @@
                         await this.loadCurrentResults();
 
                     } else {
-                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`);
+                        await this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`);
                     }
                     this.loading = false
                 }
