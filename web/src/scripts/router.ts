@@ -77,9 +77,10 @@ const routes: MetaRouteConfig[] = [
         name: "Terms of Service",
     },
     {
-        component: () => import("@components/ValuesHome.vue"),
-        name: "Values",
+        // component: () => import("@components/ValuesHome.vue"),
+        // name: "Values",
         path: PageRoute.VALUES_HOME,
+        redirect: PageRoute.CORE_VALUES,
     },
     {
         component: () => import("@components/SharedReflectionPage.vue"),
