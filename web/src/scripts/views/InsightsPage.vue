@@ -24,8 +24,11 @@
 
             <section v-if="hasCoreValues">
                 <p>Your core values are</p>
-                <ul>
-                    <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`">{{coreValue}}</li>
+                <ul class="core-values-list">
+                    <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
+                        <span class="title">{{coreValue.value}}</span>
+                        <span class="description">{{coreValue.description}}</span>
+                    </li>
                 </ul>
                 <router-link tag="button" :to="coreValuesHref" class="btn primary">Retake the assessment</router-link>
             </section>
@@ -48,7 +51,7 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { InsightWord } from "@shared/models/ReflectionResponse";
-    import { CoreValue } from "@shared/models/CoreValueTypes";
+    import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import { millisecondsToMinutes } from "@shared/util/DateUtil";
@@ -84,8 +87,8 @@
             return (this.wordCloud.length ?? 0) > 0;
         }
 
-        get coreValues(): CoreValue[] {
-            return this.member?.coreValues ?? []
+        get coreValues(): CoreValueMeta[] {
+            return (this.member?.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
         }
 
         get hasCoreValues(): boolean {
@@ -125,7 +128,7 @@
                 durationValue = millisecondsToMinutes(totalDuration);
             }
 
-            stats.push({value: durationValue, label: durationLabel});
+            stats.push({ value: durationValue, label: durationLabel });
 
             return stats;
         }
@@ -134,6 +137,7 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
 
     section {
         border: 1px solid black;
@@ -165,5 +169,21 @@
                 font-size: 2rem;
             }
         }
+    }
+
+    .core-values-list {
+        .core-value {
+            display: flex;
+            flex-direction: column;
+
+            .title {
+                color: $indigo;
+            }
+
+            .description {
+                color: $lightText;
+            }
+        }
+
     }
 </style>
