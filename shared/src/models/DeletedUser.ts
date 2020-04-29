@@ -15,7 +15,7 @@ export default class DeletedUser extends BaseModel {
     documentsDeleted: Record<string, number> = {};
     deletionErrors: string[] = [];
     subscription?: MemberSubscription;
-    hasCoreValues: boolean;
+    hasCoreValues!: boolean;
 
     static create(result: { member: CactusMember, documentsDeleted?: Record<string, number>, errors?: string[] }): DeletedUser {
         const deletedUser = new DeletedUser();
