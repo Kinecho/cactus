@@ -16,10 +16,10 @@
         computed: {
             sourceCopy(): string {
                 if (this.treatment === 'quote') {
-                    return `"${this.source}"`;
+                    return `"${this.source.trim()}"`;
                 }   
 
-                return this.source;
+                return this.source.trim();
             }
         }
     })
