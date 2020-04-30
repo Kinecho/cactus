@@ -16,7 +16,12 @@ module.exports = {
         '../src/scripts/views/**/*.stories.ts',
         '../src/scripts/components/corevalues/**/*.stories.ts',
     ],
-    addons: ['@storybook/addon-actions', '@storybook/addon-links'],
+    addons: [
+        '@storybook/addon-actions',
+        '@storybook/addon-links',
+        '@storybook/addon-viewport/register',
+        '@storybook/addon-a11y/register',
+    ],
     webpackFinal: async config => {
         config.module.rules.push(
         {
