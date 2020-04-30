@@ -1,7 +1,10 @@
 import {addons} from '@storybook/addons'
-import cactusTheme from './cactusTheme'
+import { themes } from '@storybook/theming';
+//import cactusTheme from './cactusTheme'
 
 addons.setConfig({
     panelPosition: 'right',
-    theme: cactusTheme,
+    // theme: cactusTheme,
+    // theme: dark,
+    theme: themes.dark,
 })
