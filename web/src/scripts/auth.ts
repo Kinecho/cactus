@@ -34,7 +34,7 @@ export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
         await getAuth().signOut();
         StorageService.clear();
         const url = options.redirectUrl ?? DefaultLogoutOptions.redirectUrl;
-        await router.push(url, undefined, () => {logger.info("Router aborted logout action")});
+        await router.push(url);
     } catch (error) {
         logger.error("Exception thrown while logging out", error);
     }
