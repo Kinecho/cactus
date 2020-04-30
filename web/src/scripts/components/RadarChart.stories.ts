@@ -1,6 +1,7 @@
 import RadarChart from "@components/RadarChart.vue";
 import Vue from "vue";
-import { RadarChartDataPoint } from "@shared/charts/RadarChartData";
+import { RadarChartData } from "@shared/charts/RadarChartData";
+import { CactusElement } from "@shared/models/CactusElement";
 
 export default {
     title: "Charts/Radar"
@@ -8,17 +9,36 @@ export default {
 
 export const Simple = () => Vue.extend({
     template: `
-        <radar-chart :data-points="dataPoints"/>`,
+        <div :style="{maxWidth: '300px'}">
+            <radar-chart :chart-data="chartData" chart-id="simple-radar-1" :colors="colors"/>
+        </div>`,
     components: { RadarChart },
     data(): {
-        dataPoints: RadarChartDataPoint[]
+        chartData: RadarChartData[],
+        colors: string[],
     } {
         return {
-            dataPoints: [
-                { value: 0.2, axis: "Home" },
-                { value: 0.3, axis: "Home" },
-                { value: 0.4, axis: "Energy" }
-            ]
+            colors: ["purple", "green"],
+            chartData: [{
+                name: "Importance",
+                axes:
+                [
+                    { value: 2, axis: CactusElement.emotions },
+                    { value: 3, axis: CactusElement.energy },
+                    { value: 4, axis: CactusElement.experience },
+                    { value: 4, axis: CactusElement.meaning },
+                    { value: 4, axis: CactusElement.relationships },
+                ]
+            }, {
+                name: "Satisfaction",
+                axes: [
+                    { value: 5, axis: CactusElement.emotions },
+                    { value: 3, axis: CactusElement.energy },
+                    { value: 3, axis: CactusElement.experience },
+                    { value: 1, axis: CactusElement.meaning },
+                    { value: 4, axis: CactusElement.relationships },
+                ]
+            }]
         }
     }
 })
