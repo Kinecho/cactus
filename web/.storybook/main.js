@@ -21,6 +21,7 @@ module.exports = {
         '@storybook/addon-links',
         '@storybook/addon-viewport/register',
         '@storybook/addon-a11y/register',
+        '@storybook/addon-storysource',
     ],
     webpackFinal: async config => {
         config.module.rules.push(
@@ -63,6 +64,16 @@ module.exports = {
         },
         )
 
+        config.module.rules.push({
+            test: /\.stories\.tsx?$/,
+            loaders: [
+                {
+                    loader: require.resolve('@storybook/source-loader'),
+                    options: {parser: 'typescript'},
+                },
+            ],
+            enforce: 'pre',
+        })
 
         config.resolve.extensions.push('.ts', '.tsx', '.vue', '.scss', '.css')
         config.resolve.modules.push('src', 'styles', 'assets', 'images', 'scripts', 'components', 'vue', 'node_modules')
