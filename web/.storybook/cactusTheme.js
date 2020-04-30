@@ -8,7 +8,7 @@ export default create({
 
     // UI
     appBg: 'white',
-    appContentBg: '#F1EBE7',
+    appContentBg: 'white',
     appBorderColor: '#D6E4E6',
     appBorderRadius: 4,
 
@@ -22,7 +22,7 @@ export default create({
 
     // Toolbar default and active colors
     barTextColor: '#B9EFE9',
-    barSelectedColor: '#FFFFFF',
+    barSelectedColor: '#F9EB91',
     barBg: '#07454C',
 
     // Form colors
