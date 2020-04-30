@@ -185,6 +185,8 @@
 
                     if (!this.member && !isPreRender()) {
                         const afterLoginUrl = window.location.href;
+                        logger.info("redirecting to after login url = ", afterLoginUrl)
+                        logger.info("Pushing to router", `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
                         this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
                     }
                 }
@@ -507,7 +509,6 @@
             },
             updateDocumentMeta() {
                 logger.info("Prompt content updating meta");
-                debugger;
                 let title = this.promptContent?.subjectLine ?? this.promptContent?.getPreviewText() ?? 'Cactus Mindful Moment';
 
                 const description = "Reflect on this mindful moment from Cactus.";

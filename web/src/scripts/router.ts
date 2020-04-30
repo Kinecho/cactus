@@ -4,6 +4,7 @@ import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { MetaRouteConfig, MetaTag, updateRouteMeta } from "@web/router-meta";
+import { isExternalUrl } from "@shared/util/StringUtil";
 
 const logger = new Logger("router.ts");
 Vue.use(VueRouter);
@@ -194,6 +195,23 @@ router.beforeEach((to, from, next) => {
         next();
     }
 });
+
+router.beforeEach((to, from, next) => {
+    try {
+        const extUrl = to.fullPath.startsWith("/") ? to.fullPath.substring(1) : to.fullPath
+        if (isExternalUrl(extUrl)) {
+            window.location.href = extUrl;
+            next();
+            return;
+        } else {
+            next();
+        }
+    } catch (error) {
+        logger.error("Failed to handle before each check for external url. Sending to next", error);
+        next();
+    }
+
+})
 
 router.afterEach((to, from) => {
     // document.title = to.name || "Cactus";

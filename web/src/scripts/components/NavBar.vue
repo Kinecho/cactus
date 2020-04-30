@@ -1,7 +1,9 @@
 <template lang="html">
     <header v-bind:class="{loggedIn: loggedIn, loaded: authLoaded, sticky: isSticky, transparent: forceTransparent, noborder: largeLogoOnDesktop}" v-if="!hidden">
         <div class="centered">
-            <router-link :to="logoHref"><img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/></router-link>
+            <router-link :to="logoHref">
+                <img v-bind:class="['nav-logo', {'large-desktop': largeLogoOnDesktop}]" :src="'/assets/images/' + logoSrc" alt="Cactus logo"/>
+            </router-link>
             <div v-if="!loggedIn" class="anonLinks">
                 <router-link v-if="displayLoginButton"
                         class="login "
@@ -24,7 +26,8 @@
                         :to="signupHref"
                         @click.prevent="goToSignup"
                         type="button"
-                >{{copy.common.TRY_IT_FREE}}</router-link>
+                >{{copy.common.TRY_IT_FREE}}
+                </router-link>
             </div>
             <div class="navContainer" v-if="loggedIn && showLinks">
                 <router-link class="navbarLink home" :to="journalHref" v-if="loggedIn">
@@ -54,24 +57,24 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {FirebaseUser, getAuth} from '@web/firebase'
+    import { FirebaseUser, getAuth } from '@web/firebase'
     import { getInitials, isBlank } from '@shared/util/StringUtil'
-    import {PageRoute} from '@shared/PageRoutes'
-    import {gtag} from "@web/analytics"
-    import {clickOutsideDirective} from '@web/vueDirectives'
-    import {logout} from '@web/auth'
+    import { PageRoute } from '@shared/PageRoutes'
+    import { gtag } from "@web/analytics"
+    import { clickOutsideDirective } from '@web/vueDirectives'
+    import { logout } from '@web/auth'
     import DropdownMenu from "@components/DropdownMenu.vue"
-    import {DropdownMenuLink} from "@components/DropdownMenuTypes"
-    import {QueryParam} from '@shared/util/queryParams'
+    import { DropdownMenuLink } from "@components/DropdownMenuTypes"
+    import { QueryParam } from '@shared/util/queryParams'
     import CopyService from '@shared/copy/CopyService'
-    import {LocalizedCopy} from '@shared/copy/CopyTypes'
-    import {getRandomAvatar} from '@web/AvatarUtil'
-    import {getQueryParam} from '@web/util'
+    import { LocalizedCopy } from '@shared/copy/CopyTypes'
+    import { getRandomAvatar } from '@web/AvatarUtil'
+    import { getQueryParam } from '@web/util'
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService';
-    import {fetchActivityFeedSummary} from '@web/social';
-    import StorageService, {LocalStorageKey} from "@web/services/StorageService";
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService';
+    import { fetchActivityFeedSummary } from '@web/social';
+    import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
@@ -112,7 +115,7 @@
             });
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: async ({member}) => {
+                onData: async ({ member }) => {
                     if (member?.id && member?.id !== this.member?.id) {
                         this.memberProfileUnsubscriber?.();
                         this.memberProfileUnsubscriber = MemberProfileService.sharedInstance.observeByMemberId(member?.id, {
@@ -136,17 +139,17 @@
             this.memberProfileUnsubscriber?.();
         },
         props: {
-            showSignup: {type: Boolean, default: false},
+            showSignup: { type: Boolean, default: false },
             signOutRedirectUrl: String,
             redirectOnSignOut: Boolean,
-            signupFormAnchorId: {type: String, default: "signupAnchor"},
+            signupFormAnchorId: { type: String, default: "signupAnchor" },
             largeLogoOnDesktop: Boolean,
-            isSticky: {type: Boolean, default: true},
-            whiteLogo: {type: Boolean, default: false},
-            showLogin: {type: Boolean, default: true},
-            forceTransparent: {type: Boolean, default: false},
+            isSticky: { type: Boolean, default: true },
+            whiteLogo: { type: Boolean, default: false },
+            showLogin: { type: Boolean, default: true },
+            forceTransparent: { type: Boolean, default: false },
             loginRedirectUrl: String,
-            showLinks: {type: Boolean, default: true},
+            showLinks: { type: Boolean, default: true },
         },
         data(): NavBarData {
             return {
@@ -175,9 +178,10 @@
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
                     badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
-                },{
+                }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
+                        this.$emit("logging-out")
                         await this.logout()
                     }
                 }];
@@ -207,7 +211,7 @@
                 return "";
             },
             loginHref(): string {
-                return `${PageRoute.LOGIN}?${QueryParam.REDIRECT_URL}=${this.loginRedirectUrl || window.location.href}`;
+                return `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ this.loginRedirectUrl || window.location.href }`;
             },
             logoHref(): string {
                 return this.loggedIn ? PageRoute.JOURNAL_HOME : PageRoute.HOME;
@@ -234,7 +238,14 @@
         methods: {
             async logout(): Promise<void> {
                 logger.log('Logging out...');
-                await logout({redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut})
+                try {
+                    await logout({
+                        redirectUrl: this.signOutRedirectUrl || "/",
+                        redirectOnSignOut: this.redirectOnSignOut
+                    })
+                } catch (error) {
+                    logger.error("Log out threw an error", error);
+                }
             },
             goToLogin() {
                 this.$router.push(this.loginHref);
@@ -250,7 +261,7 @@
                 const scrollToId = this.signupFormAnchorId;
 
                 const content = document.getElementById(scrollToId);
-                gtag("event", "scroll_to", {formId: this.signupFormAnchorId});
+                gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
                 if (content) content.scrollIntoView();
             },
             async updateActivityCount() {
