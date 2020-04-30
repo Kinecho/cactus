@@ -14,6 +14,13 @@
           "cactus-storybook-stage"
         ]
       }
+    },
+    "cactus-app-prod": {
+      "hosting": {
+        "storybook": [
+          "cactus-storybook-prod"
+        ]
+      }
     }
   }
 }

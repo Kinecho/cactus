@@ -2,9 +2,10 @@ import { QuestionType } from "@shared/models/CoreValuesQuestion";
 import QuestionOption from "@components/corevalues/QuestionOption.vue";
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
+import { boolean, text } from "@storybook/addon-knobs";
 
 export default {
-    title: "Core Values/Assessment/Question/Option"
+    title: "Core Values/Assessment/Question/Option",
 }
 
 export const RadioEnabled = () => ({
@@ -39,19 +40,40 @@ export const RadioEnabled = () => ({
 // }
 export const RadioDisabled = () => ({
     template: `
-        <question-option :type="questionType" :selected="true" :title="option.title" :disabled="true" :option="option" @removed="selected = false" @selected="selected = true"/>`,
+        <question-option :type="questionType" :selected="selected" :disabled="true" :option="option" @removed="selected = false" @selected="selected = true"/>`,
     components: {
         QuestionOption
     },
-    data(): { questionType: QuestionType, option: CoreValuesQuestionOption, selected: boolean } {
+    props: {
+        selected: {
+            type: Boolean,
+            default: boolean('Selected', true)
+        },
+        title: {
+            type: String,
+            default: text("Title", "This is the option title"),
+        },
+        description: {
+            type: String,
+            default: text("Description", "This is the option description"),
+        }
+    },
+    data(): { questionType: QuestionType, initialOption: CoreValuesQuestionOption } {
         return {
             questionType: QuestionType.RADIO,
-            selected: false,
-            option: CoreValuesQuestionOption.create({
+            initialOption: CoreValuesQuestionOption.create({
                 title: "Option Title Goes Here",
                 value: CoreValue.Abundance,
-                description: ""
+                description: "Sample description",
             })
+        }
+    },
+    computed: {
+        option(): CoreValuesQuestionOption {
+            const option = this.initialOption;
+            option.title = this.title;
+            option.description = this.description;
+            return option;
         }
     }
 })
