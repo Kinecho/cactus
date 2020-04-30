@@ -1,4 +1,5 @@
 // @ts-ignore
+import '@styles/common.scss';
 import App from "@components/App.vue"
 import { commonInit } from "@web/common";
 import Logger from "@shared/Logger";

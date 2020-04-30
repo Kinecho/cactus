@@ -1,9 +1,20 @@
 const helpers = require('../helpers')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+const plugins = [new MiniCssExtractPlugin({
+    // filename: isDev ? '[name].css' : '[id].[hash].css',
+    // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
+    filename: '[name].css',
+    chunkFilename: '[id].css',
+
+})]
 
 module.exports = {
     stories: [
         '../src/stories/*.stories.ts',
         '../src/scripts/components/**/*.stories.ts',
+        '../src/scripts/views/**/*.stories.ts',
+        '../src/scripts/components/corevalues/**/*.stories.ts',
     ],
     addons: ['@storybook/addon-actions', '@storybook/addon-links'],
     webpackFinal: async config => {
@@ -22,6 +33,13 @@ module.exports = {
         {
             test: /\.(css|scss)$/,
             use: [
+                // {
+                //     loader: MiniCssExtractPlugin.loader,
+                //     options: {
+                //         hmr: true,
+                //     },
+                // },
+                'vue-style-loader',
                 {
                     loader: 'css-loader',
                     options: {sourceMap: true, url: false},
@@ -50,6 +68,8 @@ module.exports = {
             '@components': helpers.componentsDir,
             '@styles': helpers.stylesDir,
         }
+
+        // config.plugins.push(...plugins)
 
         return config
     },
