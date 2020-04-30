@@ -1,6 +1,14 @@
 import {create} from '@storybook/theming/create'
 
-export default create({
+export const cactusDark = create({
+    base: 'dark',
+
+    // Typography
+    fontBase: '"Lato", sans-serif',
+    fontCode: 'monospace',
+})
+
+export const cactusLight = create({
     base: 'light',
 
     colorPrimary: '#07454C',
