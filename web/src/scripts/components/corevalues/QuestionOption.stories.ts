@@ -3,7 +3,7 @@ import QuestionOption from "@components/corevalues/QuestionOption.vue";
 import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
 import { CoreValue } from "@shared/models/CoreValueTypes";
 import { boolean, text } from "@storybook/addon-knobs";
-
+import Vue from "vue";
 export default {
     title: "Core Values/Assessment/Question/Option",
 }
@@ -33,12 +33,7 @@ export const RadioEnabled = () => ({
     }
 })
 
-
-// storiesOf("Core Values", module).add("Option - Radio - Enabled", OptionRadioEnabled);
-// OptionRadioDisabled.story = {
-//     name: "Option - Radio - Disabled"
-// }
-export const RadioDisabled = () => ({
+export const RadioDisabled = () => Vue.extend({
     template: `
         <question-option :type="questionType" :selected="selected" :disabled="true" :option="option" @removed="selected = false" @selected="selected = true"/>`,
     components: {
