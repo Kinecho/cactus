@@ -3,5 +3,17 @@
     "default": "cactus-app-stage",
     "stage": "cactus-app-stage",
     "prod": "cactus-app-prod"
+  },
+  "targets": {
+    "cactus-app-stage": {
+      "hosting": {
+        "webapp": [
+          "cactus-app-stage"
+        ],
+        "storybook": [
+          "cactus-storybook-stage"
+        ]
+      }
+    }
   }
 }

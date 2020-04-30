@@ -1,61 +1,14 @@
 import Question from "@components/corevalues/Question.vue";
 import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
 import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
-import CoreValuesQuestion, { QuestionType } from "@shared/models/CoreValuesQuestion";
+import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
-import QuestionOption from "@components/corevalues/QuestionOption.vue";
-import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
-import { CoreValue } from "@shared/models/CoreValueTypes";
 
 export default {
-    title: "Core Values"
+    title: "Core Values/Assessment/Question"
 }
 
-export const OptionRadioEnabled = () => ({
-    template: `
-        <question-option type="RADIO"
-                :selected="true"
-                :title="option.title"
-                :disabled="false"
-                :option="option"
-                @removed="selected = false"
-                @selected="selected = true"/>`,
-    components: {
-        QuestionOption
-    },
-    data(): { option: CoreValuesQuestionOption, questionType: QuestionType, selected: boolean } {
-        return {
-            questionType: QuestionType.RADIO,
-            option: CoreValuesQuestionOption.create({
-                title: "Option Title Goes Here",
-                value: CoreValue.Abundance,
-                description: "This is a custom description that goes along with the option"
-            }),
-            selected: true,
-        }
-    }
-})
-
-export const OptionRadioDisabled = () => ({
-    template: `
-        <question-option :type="questionType" :selected="true" :title="option.title" :disabled="true" :option="option" @removed="selected = false" @selected="selected = true"/>`,
-    components: {
-        QuestionOption
-    },
-    data(): { questionType: QuestionType, option: CoreValuesQuestionOption, selected: boolean } {
-        return {
-            questionType: QuestionType.RADIO,
-            selected: false,
-            option: CoreValuesQuestionOption.create({
-                title: "Option Title Goes Here",
-                value: CoreValue.Abundance,
-                description: ""
-            })
-        }
-    }
-})
-
-export const QuestionMultiSelect = () => ({
+export const MultiSelect = () => ({
     template: `
         <question :assessment="assessment" :assessment-response="assessmentResponse" :response="response" :question="question"/>`,
     components: {
@@ -78,7 +31,7 @@ export const QuestionMultiSelect = () => ({
     }
 })
 
-export const QuestionRadio = () => ({
+export const Radio = () => ({
     template: `
         <question :assessment="assessment" :assessment-response="assessmentResponse" :response="response" :question="question"/>`,
     components: {
