@@ -1,14 +1,15 @@
 <template>
     <div>
         <h1>Assessment</h1>
-        <div>
+        <div v-if="!finished">
             started: {{started}}<br/>
+            finished: {{finished}}<br/>
             currentIndex: {{currentQuestionIndex}} <br/>
             questionID: {{(currentQuestion && currentQuestion.id) !== undefined ? currentQuestion.id : 'not set'}}<br/>
             current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
             nextEnabled = {{nextEnabled}}
         </div>
-        <template v-if="currentQuestion">
+        <template v-if="currentQuestion && !finished">
             <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
             <div class="actions">
                 <button :disabled="!previousEnabled" class="no-loading" @click="previous">Previous</button>
@@ -16,6 +17,10 @@
             </div>
         </template>
         <button class="btn primary" v-if="!currentQuestion" @click="start">Go</button>
+
+        <div v-if="finished && result">
+            <radar-chart :chart-data="result.chartData" chart-id="assessment-1"/>
+        </div>
 
     </div>
 </template>
@@ -28,11 +33,14 @@
     import { Prop } from "vue-property-decorator";
     import GapAnalysisAssessment from "@shared/models/GapAnalysisAssessment";
     import Logger from "@shared/Logger";
+    import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
+    import RadarChart from "@components/RadarChart.vue";
 
     const logger = new Logger("gap/Assessment");
 
     @Component({
         components: {
+            RadarChart,
             Question
         }
     })
@@ -41,6 +49,8 @@
         @Prop({ type: Object as () => GapAnalysisAssessment, required: false })
         assessment!: GapAnalysisAssessment;
         started: boolean = false;
+        finished: boolean = false;
+        result: GapAnalysisAssessmentResult | undefined;
         currentQuestionIndex: number = 0;
 
         /**
@@ -79,6 +89,10 @@
         }
 
         next() {
+            if (this.currentQuestionIndex >= this.assessment.questions.length - 1) {
+                this.finishAssessment();
+                return
+            }
             this.currentQuestionIndex += 1;
         }
 
@@ -97,7 +111,22 @@
             if (questionId === undefined) {
                 return false;
             }
+
+            if (this.currentQuestionIndex >= this.assessment.questions.length) {
+                return false;
+            }
+
             return this.responseValues[questionId] !== undefined;
+        }
+
+        finishAssessment() {
+            const result = GapAnalysisAssessmentResult.create({
+                assessment: this.assessment,
+                responsesByQuestionId: this.responseValues
+            })
+            logger.info("finishing assessment...", result);
+            this.finished = true;
+            this.result = result;
         }
 
         start() {
