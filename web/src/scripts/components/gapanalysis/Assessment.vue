@@ -1,15 +1,6 @@
 <template>
     <div>
-        <h1>Assessment</h1>
-        <div v-if="!finished" class="temp">
-            started: {{started}}<br/>
-            finished: {{finished}}<br/>
-            currentIndex: {{currentQuestionIndex}} <br/>
-            questionID: {{(currentQuestion && currentQuestion.id !== undefined) ? currentQuestion.id : 'not set'}}<br/>
-            current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
-            nextEnabled = {{nextEnabled}}
-        </div>
-
+        <h1>Gap Assessment</h1>
         <template v-if="!started" class="intro">
             <p>Take your gap analysis assessment to find out where you have gaps.</p>
             <button class="btn primary" @click="start">Get Started</button>
@@ -25,7 +16,14 @@
         <div v-else-if="finished && result">
             <Results :show-confetti="true" :results="result"/>
         </div>
-
+        <div v-if="!finished" class="temp">
+            started: {{started}}<br/>
+            finished: {{finished}}<br/>
+            currentIndex: {{currentQuestionIndex}} <br/>
+            questionID: {{(currentQuestion && currentQuestion.id !== undefined) ? currentQuestion.id : 'not set'}}<br/>
+            current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
+            nextEnabled = {{nextEnabled}}
+        </div>
     </div>
 </template>
 
@@ -147,7 +145,7 @@
     .temp {
         font-family: monospace;
         border: 1px solid lightgray;
-        margin-bottom: 2rem;
+        margin: 4rem 0;
 
     }
 
