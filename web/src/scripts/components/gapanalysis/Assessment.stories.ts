@@ -8,7 +8,9 @@ export default {
 
 export const VersionOne = () => Vue.extend({
     template: `
-        <assessment :assessment="assessment"/>`,
+        <div :style="{margin: '4rem'}">
+            <assessment :assessment="assessment"/>
+        </div>`,
     components: {
         Assessment,
     },

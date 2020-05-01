@@ -30,8 +30,8 @@
         @Prop({ type: Number, required: false })
         currentValue?: number;
 
-        setValue(value: number | undefined) {
-            this.$emit("change", value);
+        setValue(selected: boolean, value: number | undefined) {
+            this.$emit("change", selected ? value : undefined);
         }
     }
 </script>

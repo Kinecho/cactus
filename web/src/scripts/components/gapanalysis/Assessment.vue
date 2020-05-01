@@ -1,24 +1,28 @@
 <template>
     <div>
         <h1>Assessment</h1>
-        <div v-if="!finished">
+        <div v-if="!finished" class="temp">
             started: {{started}}<br/>
             finished: {{finished}}<br/>
             currentIndex: {{currentQuestionIndex}} <br/>
-            questionID: {{(currentQuestion && currentQuestion.id) !== undefined ? currentQuestion.id : 'not set'}}<br/>
+            questionID: {{(currentQuestion && currentQuestion.id !== undefined) ? currentQuestion.id : 'not set'}}<br/>
             current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
             nextEnabled = {{nextEnabled}}
         </div>
-        <template v-if="currentQuestion && !finished">
+
+        <template v-if="!started" class="intro">
+            <p>Take your gap analysis assessment to find out where you have gaps.</p>
+            <button class="btn primary" @click="start">Get Started</button>
+        </template>
+
+        <template v-else-if="currentQuestion && !finished && started">
             <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
             <div class="actions">
                 <button :disabled="!previousEnabled" class="no-loading" @click="previous">Previous</button>
                 <button @click="next" :disabled="!nextEnabled" class="no-loading">Next</button>
             </div>
         </template>
-        <button class="btn primary" v-if="!currentQuestion" @click="start">Go</button>
-
-        <div v-if="finished && result">
+        <div v-else-if="finished && result">
             <radar-chart :chart-data="result.chartData" chart-id="assessment-1"/>
         </div>
 
@@ -59,11 +63,11 @@
          */
         responseValues: Record<string, number | undefined> = {};
 
-        get currentQuestion(): GapAnalysisQuestion | undefined {
-            if (!this.currentQuestionIndex && this.started) {
-                return undefined;
+        get currentQuestion(): GapAnalysisQuestion | null {
+            if (!this.started) {
+                return null;
             }
-            return this.assessment.questionByIndex(this.currentQuestionIndex);
+            return this.assessment.questionByIndex(this.currentQuestionIndex) ?? null;
         }
 
         get currentValue(): number | undefined {
@@ -78,7 +82,6 @@
         }
 
         setValue(value: number | undefined) {
-
             const questionId = this.currentQuestion?.id
             logger.info(`set gap value for questionId ${ questionId } to value = `, value);
             if (questionId === undefined) {
@@ -137,5 +140,14 @@
 </script>
 
 <style scoped lang="scss">
+    .temp {
+        font-family: monospace;
+        border: 1px solid lightgray;
+        margin-bottom: 2rem;
 
+    }
+
+    .actions {
+        margin: 2rem 0;
+    }
 </style>

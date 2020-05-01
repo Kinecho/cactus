@@ -1,5 +1,5 @@
 import Vue from "vue";
-import GapAnalysisQuestion from "@shared/models/GapAnalysisQuestion";
+import GapAnalysisQuestion, { GapType } from "@shared/models/GapAnalysisQuestion";
 import { CactusElement } from "@shared/models/CactusElement";
 import Question from "@components/gapanalysis/Question.vue";
 import { text } from "@storybook/addon-knobs";
@@ -12,6 +12,7 @@ const genericQuestion = (title: string) => {
     return GapAnalysisQuestion.create({
         title,
         element: CactusElement.emotions,
+        gapType: GapType.satisfaction,
     }).addOption(1, "Value 1")
     .addOption(2, "Value 2")
     .addOption(3, "Value 3")

@@ -58,6 +58,9 @@ export const Configurable = () => Vue.extend({
         },
         containerHeight: {
             default: number("Height", 400, undefined, "Container"),
+        },
+        fontSize: {
+            default: number("Font Size", 12, undefined, "Chart"),
         }
     },
     computed: {
@@ -74,6 +77,7 @@ export const Configurable = () => Vue.extend({
                 roundStrokes: this.roundedLines,
                 w: this.circleDiameter,
                 h: this.circleDiameter,
+                fontSizePx: this.fontSize,
             };
 
             if (this.showLegend) {

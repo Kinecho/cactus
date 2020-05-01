@@ -1,7 +1,14 @@
 <template>
     <div class="question-option">
         <div class="main">
-            <check-box :model-value="selected" :label="label" @change="selectionChanged" :type="this.type" :disabled="disabled" :extraPadding="true"/>
+            <div class="grow">
+                <check-box :model-value="selected"
+                        :label="label"
+                        @change="selectionChanged"
+                        :type="this.type"
+                        :disabled="disabled"
+                        :extraPadding="true"/>
+            </div>
         </div>
     </div>
 </template>
@@ -32,7 +39,7 @@
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
-            this.$emit('change', selected ? this.option.value : undefined);
+            this.$emit('change', selected, this.option.value);
         }
 
         get label(): string {
@@ -56,6 +63,10 @@
         align-items: center;
         display: flex;
         justify-content: space-between;
+    }
+
+    .grow {
+        flex-grow: 1;
     }
 
 </style>
