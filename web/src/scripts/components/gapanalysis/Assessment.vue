@@ -5,14 +5,14 @@
             started: {{started}}<br/>
             currentIndex: {{currentQuestionIndex}} <br/>
             questionID: {{(currentQuestion && currentQuestion.id) !== undefined ? currentQuestion.id : 'not set'}}<br/>
-            current value: {{currentValue !== undefined ? currentValue : 'not set'}}
-
+            current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
+            nextEnabled = {{nextEnabled}}
         </div>
         <template v-if="currentQuestion">
             <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
             <div class="actions">
                 <button :disabled="!previousEnabled" class="no-loading" @click="previous">Previous</button>
-                <button @click="next">Next</button>
+                <button @click="next" :disabled="!nextEnabled" class="no-loading">Next</button>
             </div>
         </template>
         <button class="btn primary" v-if="!currentQuestion" @click="start">Go</button>
@@ -43,6 +43,10 @@
         started: boolean = false;
         currentQuestionIndex: number = 0;
 
+        /**
+         * Responses by questoin ID
+         * @type {{string: number|undefined}}
+         */
         responseValues: Record<string, number | undefined> = {};
 
         get currentQuestion(): GapAnalysisQuestion | undefined {
@@ -86,6 +90,14 @@
 
         get previousEnabled(): boolean {
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
+        }
+
+        get nextEnabled(): boolean {
+            const questionId = this.currentQuestion?.id
+            if (questionId === undefined) {
+                return false;
+            }
+            return this.responseValues[questionId] !== undefined;
         }
 
         start() {
