@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { scaleOrdinal as d3ScaleOrdinal } from "d3";
 import { RadarChartData } from "@shared/charts/RadarChartData";
 
 const max = Math.max;
@@ -33,9 +32,9 @@ export interface RadarChartConfig {
  * @type {{strokeWidth: number; margin: {top: number; left: number; bottom: number; right: number}; color: ScaleOrdinal<string, string>; maxValue: number; legend: boolean; h: number; format: string; opacityCircles: number; roundStrokes: boolean; opacityArea: number; wrapWidth: number; labelFactor: number; unit: string; w: number; levels: number; dotRadius: number}}
  */
 const DEFAULT_CONFIG = (): RadarChartConfig => ({
-    w: 300,				//Width of the circle
-    h: 300,				//Height of the circle
-    margin: { top: 100, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
+    w: 200,				//Width of the circle
+    h: 200,				//Height of the circle
+    margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
     maxValue: 0, 			//What is the value that the biggest circle will represent
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
@@ -46,16 +45,12 @@ const DEFAULT_CONFIG = (): RadarChartConfig => ({
     strokeWidth: 2, 		//The width of the stroke around each blob
     roundStrokes: false,	//If true the area and stroke will follow a round path (cardinal-closed)
     // color: cactusColors,
-    format: '.2%',
+    format: ',d',
     unit: '',
     legend: false,
     colorValues: [
-        "#364FAC",
-        "#9C1AA3",
-        "#47445E",
-        "#D9D3D0",
-        "#D9D3D0",
-        "#D9D3D0"
+        "#CC33A1",
+        "#6590ED",
     ],
 });
 
@@ -92,7 +87,7 @@ const wrapText = (textInput, width) => {
 export function drawRadarChartD3(parent_selector: string, data: RadarChartData[], options: Partial<RadarChartConfig>) {
     const cfg = Object.assign({}, DEFAULT_CONFIG(), options);
 
-    const color = d3ScaleOrdinal<string>().range(cfg.colorValues ?? DEFAULT_CONFIG().colorValues);
+    const color = d3.scaleOrdinal<string>().range(cfg.colorValues ?? DEFAULT_CONFIG().colorValues);
 
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     // var maxValue = max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));

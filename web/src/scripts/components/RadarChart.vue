@@ -1,6 +1,5 @@
 <template>
     <div class="radar-container">
-        <h3>Radar Chart</h3>
         <div class="radar-chart" :class="chartId"/>
     </div>
 </template>
@@ -12,7 +11,7 @@
     import { RadarChartData } from "@shared/charts/RadarChartData";
     import Logger from "@shared/Logger";
     import * as d3 from "d3";
-    import { drawRadarChartD3 } from "@web/charts/radarChart";
+    import { drawRadarChartD3, RadarChartConfig } from "@web/charts/radarChart";
 
     const logger = new Logger("RadarChart");
 
@@ -57,6 +56,9 @@
 
         isMounted = false;
 
+        @Prop({ type: Object as () => Partial<RadarChartConfig>, default: undefined, required: false })
+        options: Partial<RadarChartConfig> | undefined;
+
         @Prop({ type: Array as () => RadarChartData[], required: true })
         chartData!: RadarChartData[];
 
@@ -73,22 +75,22 @@
 
 
         @Watch("dataPoints")
+        dataPointsChanged() {
+            this.drawChart()
+        }
+
+        @Watch("options")
+        optionsChanged() {
+            this.drawChart();
+        }
+
         drawChart() {
             if (!this.isMounted) {
                 logger.info("Not mounted yet");
                 return;
             }
 
-            drawRadarChartD3(`.${ this.chartId }`, this.chartData, {
-                legend: {
-                    title: "Legend",
-                    translateX: 0,
-                    translateY: 0
-                },
-                roundStrokes: true,
-                format: ',d',
-                colorValues: this.colors,
-            });
+            drawRadarChartD3(`.${ this.chartId }`, this.chartData, this.options ?? {});
         }
     }
 </script>
