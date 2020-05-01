@@ -2,6 +2,7 @@ import Vue from "vue";
 import GapAnalysisQuestion from "@shared/models/GapAnalysisQuestion";
 import { CactusElement } from "@shared/models/CactusElement";
 import Question from "@components/gapanalysis/Question.vue";
+import { text } from "@storybook/addon-knobs";
 
 export default {
     title: "Gap Analysis/Question"
@@ -29,19 +30,25 @@ export const StandardQuestion = () => Vue.extend({
                 Selected Value <span :style="{color: 'red'}">{{selectedValue || '--'}}</span>
             </div>
         </div>`,
+    props: {
+        title: { default: text("Question Text (Markdown)", "What is your **question** about?") }
+    },
     data(): {
-        question: GapAnalysisQuestion,
         selectedValue?: number | undefined
     } {
 
         return {
-            question: genericQuestion("What is something you're excited about regarding **emotions**?"),
             selectedValue: undefined,
         }
     },
     methods: {
         handleChange(value: number | undefined) {
             this.selectedValue = value;
+        }
+    },
+    computed: {
+        question(): GapAnalysisQuestion {
+            return genericQuestion(this.title);
         }
     }
 })
