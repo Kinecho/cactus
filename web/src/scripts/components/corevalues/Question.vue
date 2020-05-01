@@ -21,13 +21,14 @@
 <script lang="ts">
     import Vue from "vue";
     import MarkdownText from "@components/MarkdownText.vue";
-    import CoreValuesQuestion, { QuestionType } from "@shared/models/CoreValuesQuestion";
+    import CoreValuesQuestion from "@shared/models/CoreValuesQuestion";
     import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
     import QuestionOption from "@components/corevalues/QuestionOption.vue";
     import CoreValuesQuestionOption from "@shared/models/CoreValuesQuestionOption";
     import Logger from "@shared/Logger";
     import CoreValuesAssessmentResponse from "@shared/models/CoreValuesAssessmentResponse";
     import CoreValuesAssessment from "@shared/models/CoreValuesAssessment";
+    import { QuestionType } from "@shared/models/Questions";
 
     const logger = new Logger("Question");
 

@@ -7,7 +7,7 @@
 </template>
 <script lang="ts">
     import Vue from 'vue'
-    import { QuestionType } from "@shared/models/CoreValuesQuestion";
+    import { QuestionType } from "@shared/models/Questions";
 
     export default Vue.extend({
         model: {
