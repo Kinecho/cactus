@@ -1,5 +1,6 @@
 import Question from "@shared/models/GapAnalysisQuestion";
 import { CactusElement } from "@shared/models/CactusElement";
+import { isNull } from "@shared/util/ObjectUtil";
 
 export default class GapAnalysisAssessment {
     /**
@@ -15,6 +16,15 @@ export default class GapAnalysisAssessment {
 
     questions: Question[] = [];
 
+    questionByIndex(index?: number): Question | undefined {
+        if (isNull(index) || index === null || index === undefined) {
+            return undefined;
+        }
+        if (index >= this.questions.length) {
+            return undefined;
+        }
+        return this.questions[index]
+    }
 
     static create(): GapAnalysisAssessment {
         const assessment = new GapAnalysisAssessment();
