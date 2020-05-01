@@ -25,6 +25,9 @@ export const StandardQuestion = () => Vue.extend({
     template: `
         <div>
             <question :question="question" @change="handleChange" :current-value="selectedValue"/>
+            <div :style="{padding: '1rem'}">
+                Selected Value <span :style="{color: 'red'}">{{selectedValue || '--'}}</span>
+            </div>
         </div>`,
     data(): {
         question: GapAnalysisQuestion,
