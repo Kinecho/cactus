@@ -19,7 +19,7 @@ module.exports = {
     addons: [
         '@storybook/addon-actions',
         '@storybook/addon-links',
-        '@storybook/addon-viewport/register',
+        // '@storybook/addon-viewport/register',
         '@storybook/addon-a11y/register',
         '@storybook/addon-storysource',
         '@storybook/addon-knobs',

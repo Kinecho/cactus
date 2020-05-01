@@ -1,9 +1,9 @@
-import {getQueryParam} from "@web/util";
-import {QueryParam} from "@shared/util/queryParams";
+import { getQueryParam, RGBToHex } from "@web/util";
+import { QueryParam } from "@shared/util/queryParams";
 
 
 const jest = require("jest");
-import {mockFirebase, mockauth} from "@test/jestsetup";
+import { mockFirebase, mockauth } from "@test/jestsetup";
 
 jest.mock("@web/auth", () => {
     return {
@@ -36,5 +36,9 @@ describe("getQueryParam", () => {
 
 });
 
-
-
+describe('RGBToHex', function () {
+    test("rgb values", () => {
+        expect(RGBToHex("rgb(255,255,255)")).toEqual("#ffffff")
+        expect(RGBToHex("rgba(255,255,255,1)")).toEqual("#ffffff")
+    })
+});

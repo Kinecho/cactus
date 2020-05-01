@@ -2,7 +2,7 @@ import { InsightWord } from "@shared/models/ReflectionResponse";
 import WordChart from "@components/InsightWordChart.vue";
 
 export default {
-    title: "Insights Word Chart",
+    title: "Charts/Word Bubbles",
 }
 
 export const SimpleWordChart = () => ({
