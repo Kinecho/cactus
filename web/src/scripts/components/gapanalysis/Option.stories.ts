@@ -35,8 +35,8 @@ export const SingleWithLabel = () => Vue.extend({
 export const Multiple = () => Vue.extend({
     template: `
         <div>
-            <div :style="{color: 'red'}">
-                Current Value: {{current}}
+            <div :style="{padding: '1rem', background: 'lightgray'}">
+                Current Value: <span :style="{color: 'red'}">{{current}}</span>
             </div>
             <gap-option :option="option0" :selected="selectedValue === 0" @change="handleChange" :disabled="disabled"/>
             <gap-option :option="option1" :selected="selectedValue === 1" @change="handleChange" :disabled="disabled"/>
