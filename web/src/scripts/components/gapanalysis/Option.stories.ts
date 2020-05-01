@@ -1,6 +1,7 @@
 import Vue from "vue";
 import GapOption from "@components/gapanalysis/Option.vue";
 import GapAnalysisQuestionOption from "@shared/models/GapAnalysisQuestionOption";
+import { boolean } from "@storybook/addon-knobs";
 
 export default {
     title: "Gap Analysis/Option"
@@ -8,9 +9,12 @@ export default {
 
 export const SingleWithLabel = () => Vue.extend({
     template: `
-        <gap-option :option="option" :selected="selected" @change="handleChange"/>`,
+        <gap-option :option="option" :selected="selected" @change="handleChange" :disabled="disabled"/>`,
     components: {
         GapOption
+    },
+    props: {
+        disabled: { default: boolean("Disabled", false) }
     },
     data(): {
         option: GapAnalysisQuestionOption,
@@ -31,13 +35,19 @@ export const SingleWithLabel = () => Vue.extend({
 export const Multiple = () => Vue.extend({
     template: `
         <div>
-            <gap-option :option="option0" :selected="selectedValue === 0" @change="handleChange"/>
-            <gap-option :option="option1" :selected="selectedValue === 1" @change="handleChange"/>
-            <gap-option :option="option2" :selected="selectedValue === 2" @change="handleChange"/>
+            <div :style="{color: 'red'}">
+                Current Value: {{current}}
+            </div>
+            <gap-option :option="option0" :selected="selectedValue === 0" @change="handleChange" :disabled="disabled"/>
+            <gap-option :option="option1" :selected="selectedValue === 1" @change="handleChange" :disabled="disabled"/>
+            <gap-option :option="option2" :selected="selectedValue === 2" @change="handleChange" :disabled="disabled"/>
         </div>
     `,
     components: {
         GapOption
+    },
+    props: {
+        disabled: { default: boolean("Disabled", false) }
     },
     data(): {
         option0: GapAnalysisQuestionOption,
@@ -51,6 +61,11 @@ export const Multiple = () => Vue.extend({
             option1: GapAnalysisQuestionOption.create(1),
             option2: GapAnalysisQuestionOption.create(2, "Somewhat important"),
             selectedValue: null,
+        }
+    },
+    computed: {
+        current(): string {
+            return `${ this.selectedValue ?? '--' }`
         }
     },
     methods: {
