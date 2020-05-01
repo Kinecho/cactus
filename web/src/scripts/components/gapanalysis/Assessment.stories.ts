@@ -6,7 +6,7 @@ export default {
     title: "Gap Analysis/Assessment"
 }
 
-export const VersionOne = () => Vue.extend({
+export const FullAssessment = () => Vue.extend({
     template: `
         <div :style="{margin: '4rem'}">
             <assessment :assessment="assessment"/>

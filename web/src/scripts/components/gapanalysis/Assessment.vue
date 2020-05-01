@@ -23,7 +23,7 @@
             </div>
         </template>
         <div v-else-if="finished && result">
-            <radar-chart :chart-data="result.chartData" chart-id="assessment-1"/>
+            <Results :show-confetti="true" :results="result"/>
         </div>
 
     </div>
@@ -39,13 +39,17 @@
     import Logger from "@shared/Logger";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import RadarChart from "@components/RadarChart.vue";
+    import CactusConfetti from "@components/CactusConfetti.vue";
+    import Results from "@components/gapanalysis/Results.vue";
 
     const logger = new Logger("gap/Assessment");
 
     @Component({
         components: {
+            Results,
             RadarChart,
-            Question
+            Question,
+            CactusConfetti,
         }
     })
     export default class Assessment extends Vue {
