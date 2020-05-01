@@ -23,6 +23,9 @@ export const Configurable = () => Vue.extend({
         color2: {
             default: color("Color 2", "#6590ED", "Chart")
         },
+        roundedLines: {
+            default: boolean("Rounded Lines", true, "Chart"),
+        },
         showLegend: {
             default: boolean("Show Legend", true, "Chart"),
         },
@@ -55,7 +58,7 @@ export const Configurable = () => Vue.extend({
         },
         containerHeight: {
             default: number("Height", 400, undefined, "Container"),
-        },
+        }
     },
     computed: {
         options(): Partial<RadarChartConfig> {
@@ -68,6 +71,7 @@ export const Configurable = () => Vue.extend({
                     left: this.chartPaddingLeft,
                     right: this.chartPaddingRight
                 },
+                roundStrokes: this.roundedLines,
                 w: this.circleDiameter,
                 h: this.circleDiameter,
             };
