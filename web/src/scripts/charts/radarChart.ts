@@ -37,7 +37,7 @@ const DEFAULT_CONFIG = (): RadarChartConfig => ({
     h: 200,				//Height of the circle
     margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
-    maxValue: 0, 			//What is the value that the biggest circle will represent
+    maxValue: 5, 			//What is the value that the biggest circle will represent
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
     wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
     opacityArea: 0.35, 	//The opacity of the area of the blob
@@ -95,7 +95,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
 
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     // var maxValue = max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
-    let maxValue = 0;
+    let maxValue = cfg.maxValue;
     for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < data[j].axes.length; i++) {
             data[j].axes[i].id = data[j].name;
