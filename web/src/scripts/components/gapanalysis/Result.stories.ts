@@ -1,10 +1,11 @@
 import Vue from "vue";
 import ResultsPage from "@components/gapanalysis/Results.vue";
-import { boolean, object, text } from "@storybook/addon-knobs";
+import { boolean, object, text, withKnobs, button } from "@storybook/addon-knobs";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
 import { CactusElement } from "@shared/models/CactusElement";
 import { RadarChartData } from "@shared/charts/RadarChartData";
 import { isBlank } from "@shared/util/StringUtil";
+import { addDecorator } from "@storybook/vue";
 
 const defaultChartData = [{
     name: "Importance",
@@ -31,46 +32,35 @@ export default {
     title: "Gap Analysis/Assessment"
 }
 
+window._toggleConfetti = () => {
+    console.log("not implemented")
+};
+
 export const ResultScreen = () => Vue.extend({
     template: `
         <div>
             <results-page :show-confetti="showConfetti" :results="results"/>
-            <div :style="{font: 'monospace'}">
-                <hr/>
-                <button @click="toggleConfetti">Show Confetti</button>
-            </div>
         </div>
     `,
     components: {
         ResultsPage
     },
     props: {
+        showConfetti: {
+            default: boolean("Show Confetti (toggle to show again)", true)
+        },
         errorMessage: {
             default: text("Error Message", ""),
         },
-        chartData: {
-            type: Array as () => RadarChartData[],
-            default: object("Chart Data", defaultChartData)
-        }
     },
-    data(): { showConfetti: boolean } {
-        return {
-            showConfetti: true,
-        }
-    }, methods: {
-        toggleConfetti() {
-            this.showConfetti = false;
-            setTimeout(() => {
-                this.showConfetti = true;
-            }, 50)
-        }
-    },
+
     computed: {
         results(): GapAnalysisAssessmentResult {
             return {
-                chartData: this.chartData,
+                chartData: defaultChartData,
                 errorMessage: isBlank(this.errorMessage) ? undefined : this.errorMessage,
             }
         }
     }
 })
+
