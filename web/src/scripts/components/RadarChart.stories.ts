@@ -10,7 +10,7 @@ export default {
     title: "Charts/Radar"
 }
 
-export const Simple = () => Vue.extend({
+export const Configurable = () => Vue.extend({
     template: `
         <div :style="{width: containerWidth + 'px', height: containerHeight + 'px', border: '1px solid black', display: 'flex', justifyContent: 'center', alignItems: 'center'}">
             <radar-chart :chart-data="chartData" chart-id="simple-radar-1" :options="options"/>
@@ -33,7 +33,7 @@ export const Simple = () => Vue.extend({
             default: number("Legend Offset X", -120, undefined, "Chart")
         },
         legendOffsetY: {
-            default: number("Legend Offset Y", 260, undefined, "Chart")
+            default: number("Legend Offset Y", 300, undefined, "Chart")
         },
         circleDiameter: {
             default: number("Circle Diameter (px)", 200, undefined, "Chart")
