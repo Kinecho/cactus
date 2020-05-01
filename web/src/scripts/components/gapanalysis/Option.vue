@@ -26,13 +26,13 @@
         @Prop({ type: Boolean, default: false, required: true })
         selected!: boolean
 
-        @Prop({type: Boolean, default: false, required: false})
+        @Prop({ type: Boolean, default: false, required: false })
         disabled: boolean = false
 
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
-            this.$emit('change', selected, this.option.value);
+            this.$emit('change', selected ? this.option.value : undefined);
         }
 
         get label(): string {
