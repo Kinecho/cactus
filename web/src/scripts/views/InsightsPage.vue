@@ -1,15 +1,17 @@
 <template>
-    <div>
+    <div class="insightsDash">
         <NavBar/>
-        <template v-if="authLoaded">
-            <h1>Member Insights</h1>
+        <div class="centered" v-if="authLoaded">
+            <h1>Insights</h1>
 
-            <section class="stats">
-                <p>Your stats</p>
-                <div class="stats-wrapper">
-                    <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
-                        <span class="value">{{stat.value}}</span>
-                        <span class="label">{{stat.label}}</span>
+            <section class="statsContainer">
+                <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
+                    <div class="statIcon">
+                        <img src="assets/images/journal.svg" alt="" />
+                    </div>
+                    <div class="textContainer">
+                        <p class="statLabel">{{stat.label}}</p>
+                        <p class="statValue">{{stat.value}}</p>
                     </div>
                 </div>
             </section>
@@ -42,14 +44,15 @@
                 <p>Coming Soon</p>
             </section>
 
-        </template>
-
+        </div>
+        <Footer/>
     </div>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
     import Component from "vue-class-component";
+    import Footer from "@components/StandardFooter.vue";
     import NavBar from "@components/NavBar.vue";
     import WordCloud from "@components/MemberWordCloudInsights.vue";
     import CactusMember from "@shared/models/CactusMember";
@@ -67,6 +70,7 @@
     @Component({
         components: {
             NavBar,
+            Footer,
             WordCloud
         }
     })
@@ -142,39 +146,98 @@
 </script>
 
 <style scoped lang="scss">
+    @import "common";
+    @import "mixins";
     @import "variables";
 
-    section {
-        border: 1px solid black;
-    }
+    .insightsDash {
+        display: flex;
+        flex-flow: column nowrap;
+        min-height: 100vh;
+        justify-content: space-between;
+        overflow: hidden;
 
-    .stats {
-        .stats-wrapper {
-            display: flex;
-            flex-direction: row;
-            overflow: auto;
+        header, .centered {
+            width: 100%;
         }
 
-        .stat {
-            display: flex;
-            flex-direction: column;
-            border: 1px solid green;
-            margin-right: 1rem;
-            min-width: 350px;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+        .centered {
+            flex-grow: 1;
+            padding: 0 2.4rem 6.4rem;
+            text-align: left;
+        }
 
-            .value {
-                font-size: 3rem;
-                font-weight: bold;
-            }
+        h1 {
+            margin: 3.2rem 0 1.6rem;
 
-            .label {
-                font-size: 2rem;
+            @include r(768) {
+                margin: 6.4rem 0 1.6rem;
             }
         }
     }
+
+    .statsContainer {
+        display: flex;
+        margin: 0 -2.4rem 1.6rem 0;
+        overflow: auto;
+        padding-bottom: 1.6rem;
+
+        @include r(768) {
+            overflow: visible;
+        }
+    }
+
+    .stat {
+        align-items: center;
+        border: 1px solid $lightest;
+        border-radius: 1.2rem;
+        display: flex;
+        margin-right: 1.6rem;
+        min-width: 28rem;
+        padding: 2.4rem;
+
+        @include r(768) {
+            @include shadowbox;
+            border: 0;
+            flex-grow: 1;
+            padding: 3.2rem;
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+
+    .statIcon {
+        align-items: center;
+        background-color: lighten($beige, 3%);
+        border-radius: 50%;
+        display: flex;
+        flex-shrink: 0;
+        height: 8rem;
+        justify-content: center;
+        margin-right: 1.6rem;
+        width: 8rem;
+
+        img {
+            height: 3.2rem;
+            width: 3.2rem;
+        }
+    }
+
+    .statLabel {
+        color: $lightText;
+        font-size: 1.6rem;
+        white-space: nowrap;
+    }
+
+    .statValue {
+        color: $green;
+        font-size: 5.6rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
 
     .core-values-list {
         .core-value {
