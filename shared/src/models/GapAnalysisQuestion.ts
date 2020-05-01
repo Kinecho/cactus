@@ -1,6 +1,11 @@
 import Option from "@shared/models/GapAnalysisQuestionOption";
 import { CactusElement } from "@shared/models/CactusElement";
 
+export enum GapType {
+    importance = "importance",
+    satisfaction = "satisfaction",
+}
+
 export default class GapAnalysisQuestion {
     id!: string;
 
@@ -15,17 +20,23 @@ export default class GapAnalysisQuestion {
     element!: CactusElement;
 
     /**
+     * The type of gap in the analysis this question represents
+     */
+    gapType!: GapType;
+
+    /**
      * The options to present to the user.
      * @type {any[]}
      */
     options: Option[] = [];
 
-    static create(params: { options?: Option[], title: string, element: CactusElement }): GapAnalysisQuestion {
+    static create(params: { options?: Option[], title: string, element: CactusElement, gapType: GapType }): GapAnalysisQuestion {
         const question = new GapAnalysisQuestion();
-        const { options, title, element } = params;
+        const { options, title, element, gapType } = params;
         question.options = options ?? [];
         question.title = title;
         question.element = element;
+        question.gapType = gapType;
         return question;
     }
 

@@ -44,7 +44,7 @@
         currentQuestionIndex: number = 0;
 
         /**
-         * Responses by questoin ID
+         * Responses by questionID
          * @type {{string: number|undefined}}
          */
         responseValues: Record<string, number | undefined> = {};
