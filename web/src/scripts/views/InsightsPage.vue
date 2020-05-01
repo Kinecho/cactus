@@ -16,27 +16,32 @@
                 </div>
             </section>
 
-            <section v-if="hasWordCloud">
+            <section class="valuesContainer" v-if="hasCoreValues">
+                <h2>Core Values</h2>
+                <p>What’s most important for you</p>
+                <div class="flexContainer">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f" />
+                    <ul class="core-values-list">
+                        <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
+                            <p class="title">{{coreValue.value}}</p>
+                            <p class="description">{{coreValue.description}}</p>
+                        </li>
+                    </ul>
+                </div>
+                <router-link tag="button" :to="coreValuesHref" class="btn primary">Retake the assessment</router-link>
+            </section>
+            <section class="valuesContainer" v-else>
+                <h2>Core Values</h2>
+                <p>What is most important for you so that you better understand past decisions and make better decisions in the future.</p>
+                <button class="btn primary">Get My Core Values</button>
+            </section>
+
+            <section class="bubblesContainer" v-if="hasWordCloud">
                 <p>Words you have used recently</p>
                 <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
             </section>
-            <section v-else>
+            <section class="bubblesContainer" v-else>
                 <h2>Get the word cloud!</h2>
-            </section>
-
-            <section v-if="hasCoreValues">
-                <p>Your core values are</p>
-                <ul class="core-values-list">
-                    <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
-                        <span class="title">{{coreValue.value}}</span>
-                        <span class="description">{{coreValue.description}}</span>
-                    </li>
-                </ul>
-                <router-link tag="button" :to="coreValuesHref" class="btn primary">Retake the assessment</router-link>
-            </section>
-            <section v-else>
-                <h3>Get your core values!</h3>
-                <button class="btn primary">Core Values</button>
             </section>
 
             <section class="gap-analysis">
@@ -183,6 +188,7 @@
         padding-bottom: 1.6rem;
 
         @include r(768) {
+            margin-right: 0;
             overflow: visible;
         }
     }
@@ -238,21 +244,60 @@
         line-height: 1;
     }
 
+    .valuesContainer {
+        background-color: $lightest;
+        border-radius: 1.6rem;
+        padding: 2.4rem;
 
-    .core-values-list {
-        .core-value {
-            display: flex;
-            flex-direction: column;
-
-            .title {
-                color: $indigo;
-            }
-
-            .description {
-                color: $lightText;
-            }
+        @include r(768) {
+            padding: 3.2rem;
         }
 
+        .description {
+            display: none;
+
+            @include r(768) {
+                display: block;
+            }
+        }
+    }
+
+    .flexContainer {
+        align-items: center;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+
+        @include r(768) {
+            flex-direction: row;
+        }
+
+        img {
+            margin-top: -3.2rem;
+            width: 32rem;
+        }
+    }
+
+    .core-values-list {
+        list-style: none;
+        margin: 0;
+        min-width: 50%;
+        padding: 0;
+    }
+
+    .core-value {
+        list-style: none;
+        margin: 0 0 .8rem;
+        padding: 0;
+
+        .title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            opacity: .8;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
     }
 
     .graph {
