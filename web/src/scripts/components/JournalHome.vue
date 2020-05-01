@@ -1,6 +1,6 @@
 <template>
     <div>
-        <NavBar :show-signup="false" :isSticky="false"/>
+        <NavBar :show-signup="false" :isSticky="false" @logging-out="loggingOut = true"/>
         <upgrade-card class="journalListItem" v-if="showUpgradeCard" :member="cactusMember" :hasPromptToday="(todayEntry && todayLoaded)"/>
         <snackbar-content
                 class="upgrade-confirmation"
@@ -134,6 +134,7 @@
         todayLoaded: boolean,
         coreValuesClosed: boolean,
         upgradeConfirmed: boolean,
+        loggingOut: boolean,
     }
 
     export default Vue.extend({
@@ -175,8 +176,13 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: async ({ member, user }) => {
                     if (!user) {
-                        logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
-                        this.$router.push(PageRoute.HOME);
+                        if (this.loggingOut) {
+                            logger.info("the user is in the process of logging out... not redirecting");
+                            return;
+                        } else {
+                            logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
+                        }
+                        await this.$router.push(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -279,6 +285,7 @@
                 todayLoaded: false,
                 coreValuesClosed: false,
                 upgradeConfirmed: false,
+                loggingOut: false,
             };
         },
         destroyed() {

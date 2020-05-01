@@ -23,6 +23,7 @@ export enum Collection {
     emailLogs = "emailLogs",
     dataExports = "dataExports",
     coreValuesAssessmentResponses = "coreValuesAssessmentResponses",
+    deletedUsers = "deletedUsers",
 }
 
 export interface FirestoreIdentifiable {

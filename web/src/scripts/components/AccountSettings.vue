@@ -99,8 +99,8 @@
                     </div>
 
                     <div class="settings-group" v-if="showExportData">
-                        <h2>Reflection Content</h2>
-                        <p class="subtext">Export your reflections to a downloadable file.
+                        <h2>Download Data<span class="badge-label">Plus</span></h2>
+                        <p class="subtext">You can export and download your data from Cactus, including all your journal prompts and written reflections. Tap the <strong>Download</strong> button below to create an archive to keep for your records or use the data in another service.
                         <div class="item">
                             <DataExport :member="member"/>
                         </div>
@@ -522,6 +522,12 @@
         color: $royal;
         font-size: 2.4rem;
         margin-bottom: 2.4rem;
+
+        .badge-label {
+            @include trialBadge;
+            color: $white;
+            vertical-align: text-bottom;
+        }
     }
 
     .subtext {

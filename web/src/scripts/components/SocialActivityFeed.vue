@@ -129,7 +129,7 @@
     })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @import "common";
     @import "mixins";
     @import "variables";
@@ -148,6 +148,30 @@
             margin: 0;
             max-width: none;
         }
+
+        .flexContainer {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2.4rem;
+            max-width: 64rem;
+
+            a.button.secondary {
+                @include smallButton;
+                display: flex;
+                flex-grow: 0;
+
+                @include r(374) {
+                    @include secondaryButton;
+                }
+
+                img {
+                    height: 2rem;
+                    margin-right: .8rem;
+                    width: 2rem;
+                }
+            }
+        }
     }
 
     .activityContainer {
@@ -165,28 +189,6 @@
         justify-content: center;
     }
 
-    .flexContainer {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 2.4rem;
-        max-width: 64rem;
 
-        a.button.secondary {
-            @include smallButton;
-            display: flex;
-            flex-grow: 0;
-
-            @include r(374) {
-                @include secondaryButton;
-            }
-
-            img {
-                height: 2rem;
-                margin-right: .8rem;
-                width: 2rem;
-            }
-        }
-    }
 
 </style>

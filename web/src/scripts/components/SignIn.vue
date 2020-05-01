@@ -96,8 +96,11 @@
                 this.checkForPendingUIInterval = window.setInterval(() => {
                     this.checkPendingUI()
                 }, 500);
+            } else {
+                ui.reset();
             }
 
+            // ui.reset();
             ui.start('#signup-app', config);
         },
         created() {

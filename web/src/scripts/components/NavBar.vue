@@ -189,6 +189,7 @@
                 }, {
                     title: copy.common.LOG_OUT,
                     onClick: async () => {
+                        this.$emit("logging-out")
                         await this.logout()
                     }
                 }];
@@ -248,7 +249,14 @@
         methods: {
             async logout(): Promise<void> {
                 logger.log('Logging out...');
-                await logout({ redirectUrl: this.signOutRedirectUrl || "/", redirectOnSignOut: this.redirectOnSignOut })
+                try {
+                    await logout({
+                        redirectUrl: this.signOutRedirectUrl || "/",
+                        redirectOnSignOut: this.redirectOnSignOut
+                    })
+                } catch (error) {
+                    logger.error("Log out threw an error", error);
+                }
             },
             goToLogin() {
                 this.$router.push(this.loginHref);

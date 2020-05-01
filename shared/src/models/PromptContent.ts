@@ -130,7 +130,7 @@ export function processContent(content: Content): Content {
         case ContentType.quote:
             processed.quote = content.quote;
             if (processed.quote?.text_md) {
-                processed.quote.text = processed.quote.text_md;
+                processed.quote.text = processed.quote.text_md.trim();
             }
             break;
         case ContentType.video:

@@ -14,7 +14,7 @@
                         <!--Start Survey Button Logic (logged in state)-->
                         <div v-bind:class="['wrapper', {loading: loading}]">
                             <div class="container logged-in" v-show="member && !loading">
-                                <a class="button" v-show="surveyLink" v-bind:href="surveyLink">Begin Activity</a>
+                                <router-link class="button" v-show="surveyLink" :to="surveyLink">Begin Activity</router-link>
                             </div>
                             <div class="container logged-out" v-show="!member && !loading">
                                 <AuthButton linkText="Sign in to Continue" linkUrl="/values" variant="button"></AuthButton>
@@ -106,6 +106,7 @@
     // @ts-ignore
     import { ScrollToPlugin } from 'gsap/all';
     import Logger from "@shared/Logger";
+    import { PageRoute } from "@shared/PageRoutes";
 
 
     const logger = new Logger("ValuesHome.vue");
@@ -153,10 +154,7 @@
         },
         computed: {
             surveyLink(): string | undefined {
-                if (this.email) {
-                    return `https://www.surveymonkey.com/r/cactus-core-values?email=${ this.email }`
-                }
-                return undefined;
+                return `${PageRoute.CORE_VALUES}?${QueryParam.CV_LAUNCH}=true`
             },
             loading(): boolean {
                 return !this.authLoaded
