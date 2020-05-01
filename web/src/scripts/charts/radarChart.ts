@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { RadarChartData } from "@shared/charts/RadarChartData";
+import { RadarChartData, RadarChartDataPoint } from "@shared/charts/RadarChartData";
 
 const max = Math.max;
 const sin = Math.sin;
@@ -24,6 +24,7 @@ export interface RadarChartConfig {
     unit: string,
     legend: boolean | { title: string, translateX: number, translateY: number },
     colorValues: string[],
+    fontSizePx: number,
 }
 
 
@@ -44,7 +45,6 @@ const DEFAULT_CONFIG = (): RadarChartConfig => ({
     opacityCircles: 0.1, 	//The opacity of the circles of each blob
     strokeWidth: 2, 		//The width of the stroke around each blob
     roundStrokes: false,	//If true the area and stroke will follow a round path (cardinal-closed)
-    // color: cactusColors,
     format: ',d',
     unit: '',
     legend: false,
@@ -52,23 +52,23 @@ const DEFAULT_CONFIG = (): RadarChartConfig => ({
         "#CC33A1",
         "#6590ED",
     ],
+    fontSizePx: 12,
 });
 
 //Wraps SVG text - Taken from http://bl.ocks.org/mbostock/7555321
-//@ts-ignore
-const wrapText = (textInput, width) => {
+
+const wrapText = (textInput: d3.Selection<SVGTextElement, any, any, any>, width: number) => {
     textInput.each(function () {
-        //@ts-ignore
-        let text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word: string | undefined,
-        line: any[] = [],
-        lineNumber = 0,
-        lineHeight = 1.4, // ems
-        y = text.attr("y"),
-        x = text.attr("x"),
-        dy = parseFloat(text.attr("dy")),
-        tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+        const text = d3.select(this);
+        const words = text.text().split(/\s+/).reverse();
+        let word: string | undefined;
+        let line: any[] = [];
+        let lineNumber = 0;
+        const lineHeight = 1.4; // ems
+        const y = text.attr("y");
+        const x = text.attr("x");
+        const dy = parseFloat(text.attr("dy"));
+        let tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
         word = words.pop()
         while (word) {
             line.push(word);
@@ -77,12 +77,16 @@ const wrapText = (textInput, width) => {
                 line.pop();
                 tspan.text(line.join(" "));
                 line = [word];
-                tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                tspan = text.append("tspan")
+                .attr("x", x)
+                .attr("y", y)
+                .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                .text(word);
             }
             word = words.pop()
         }
     });
-}//wrap
+}
 
 export function drawRadarChartD3(parent_selector: string, data: RadarChartData[], options: Partial<RadarChartConfig>) {
     const cfg = Object.assign({}, DEFAULT_CONFIG(), options);
@@ -102,8 +106,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     }
     maxValue = max(cfg.maxValue, maxValue);
 
-    const allAxis = data[0].axes.map((i, j) => i.axis),	//Names of each axis
-    total = allAxis.length,					//The number of different axes
+    const allAxisNames = data[0].axes.map((i, j) => i.axis),	//Names of each axis
+    total = allAxisNames.length,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting
     angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
@@ -116,19 +120,19 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
     //////////// Create the container SVG and g /////////////
     /////////////////////////////////////////////////////////
-    const parent = d3.select(parent_selector);
+    const parent = d3.select<d3.BaseType, RadarChartDataPoint>(parent_selector);
 
     //Remove whatever chart with the same id/class was present before
     parent.select("svg").remove();
 
     //Initiate the radar chart SVG
-    let svg = parent.append("svg")
+    const svg = parent.append("svg")
     .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
     .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
     .attr("class", "radar");
 
     //Append a g element
-    let g = svg.append("g")
+    const g = svg.append("g")
     .attr("transform", "translate(" + (cfg.w / 2 + cfg.margin.left) + "," + (cfg.h / 2 + cfg.margin.top) + ")");
 
     /////////////////////////////////////////////////////////
@@ -136,7 +140,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
 
     //Filter for the outside glow
-    let filter = g.append('defs').append('filter').attr('id', 'glow'),
+    const filter = g.append('defs').append('filter').attr('id', 'glow'),
     feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation', '2.5').attr('result', 'coloredBlur'),
     feMerge = filter.append('feMerge'),
     feMergeNode_1 = feMerge.append('feMergeNode').attr('in', 'coloredBlur'),
@@ -147,7 +151,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
 
     //Wrapper for the grid & axes
-    let axisGrid = g.append("g").attr("class", "axisWrapper");
+    const axisGrid = g.append("g").attr("class", "axisWrapper");
 
     //Draw the background circles
     axisGrid.selectAll(".levels")
@@ -178,8 +182,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
 
     //Create the straight lines radiating outward from the center
-    var axis = axisGrid.selectAll(".axis")
-    .data(allAxis)
+    let axis = axisGrid.selectAll(".axis")
+    .data(allAxisNames)
     .enter()
     .append("g")
     .attr("class", "axis");
@@ -196,7 +200,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     //Append the labels at each axis
     axis.append("text")
     .attr("class", "legend")
-    .style("font-size", "11px")
+    .style("font-size", `${ cfg.fontSizePx }px`)
     .attr("text-anchor", "middle")
     .attr("dy", "0.35em")
     .attr("x", (d, i) => rScale(maxValue * cfg.labelFactor) * cos(angleSlice * i - HALF_PI))
@@ -209,9 +213,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
 
     //The radial line function
-    const radarLine = d3.radialLine()
+    const radarLine = d3.lineRadial<RadarChartDataPoint>()
     .curve(d3.curveLinearClosed)
-    //@ts-ignore
     .radius((d) => rScale(d.value))
     .angle((d, i) => i * angleSlice);
 
@@ -230,10 +233,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     blobWrapper
     .append("path")
     .attr("class", "radarArea")
-    //@ts-ignore
     .attr("d", d => radarLine(d.axes))
-    //@ts-ignore
-    .style("fill", (d, i) => color(i))
+    .style("fill", (d, i) => color(`${ i }`))
     .style("fill-opacity", cfg.opacityArea)
     .on('mouseover', function (d, i) {
         //Dim all blobs
@@ -257,12 +258,10 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("class", "radarStroke")
 
     .attr("d", function (d, i) {
-        //@ts-ignore
         return radarLine(d.axes);
     })
     .style("stroke-width", cfg.strokeWidth + "px")
-    //@ts-ignore
-    .style("stroke", (d, i) => color(i))
+    .style("stroke", (d, i) => color(`${ i }`))
     .style("fill", "none")
     .style("filter", "url(#glow)");
 
@@ -275,8 +274,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("r", cfg.dotRadius)
     .attr("cx", (d, i) => rScale(d.value) * cos(angleSlice * i - HALF_PI))
     .attr("cy", (d, i) => rScale(d.value) * sin(angleSlice * i - HALF_PI))
-    //@ts-ignore
-    .style("fill", (d) => color(d.id))
+    .style("fill", (d) => color(`${ d.id }`))
     .style("fill-opacity", 0.8);
 
     /////////////////////////////////////////////////////////
@@ -348,8 +346,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
         .attr("y", (d, i) => i * 20)
         .attr("width", 10)
         .attr("height", 10)
-        //@ts-ignore
-        .style("fill", (d, i) => color(i));
+        .style("fill", (d, i) => color(`${ i }`));
         // Create labels
         legend.selectAll('text')
         .data(names)
