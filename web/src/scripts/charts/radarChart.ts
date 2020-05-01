@@ -1,3 +1,4 @@
+// tslint:disable:prefer-for-of
 import * as d3 from "d3";
 import { RadarChartData, RadarChartDataPoint } from "@shared/charts/RadarChartData";
 
@@ -96,6 +97,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     //If the supplied maxValue is smaller than the actual one, replace by the max in the data
     // var maxValue = max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
     let maxValue = cfg.maxValue;
+
     for (let j = 0; j < data.length; j++) {
         for (let i = 0; i < data[j].axes.length; i++) {
             data[j].axes[i].id = data[j].name;
@@ -182,7 +184,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     /////////////////////////////////////////////////////////
 
     //Create the straight lines radiating outward from the center
-    let axis = axisGrid.selectAll(".axis")
+    const axis = axisGrid.selectAll(".axis")
     .data(allAxisNames)
     .enter()
     .append("g")
@@ -320,10 +322,11 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("dy", "0.35em");
 
     if (cfg.legend !== false && typeof cfg.legend === "object") {
-        let legendZone = svg.append('g');
-        let names = data.map(el => el.name);
+        const legendZone = svg.append('g');
+        const names = data.map(el => el.name);
         if (cfg.legend?.title) {
-            let title = legendZone.append("text")
+            //append title
+            legendZone.append("text")
             .attr("class", "title")
             .attr('transform', `translate(${ cfg.legend.translateX },${ cfg.legend.translateY })`)
             .attr("x", cfg.w - 70)
@@ -332,7 +335,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
             .attr("fill", "#404040")
             .text(cfg.legend.title);
         }
-        let legend = legendZone.append("g")
+        const legend = legendZone.append("g")
         .attr("class", "legend")
         .attr("height", 100)
         .attr("width", 200)

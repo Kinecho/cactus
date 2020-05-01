@@ -1,7 +1,6 @@
 import Question, { GapType } from "@shared/models/GapAnalysisQuestion";
 import { CactusElement } from "@shared/models/CactusElement";
 import { isNull } from "@shared/util/ObjectUtil";
-import GapAnalysisQuestion from "@shared/models/GapAnalysisQuestion";
 
 export default class GapAnalysisAssessment {
     /**
@@ -27,7 +26,7 @@ export default class GapAnalysisAssessment {
         return this.questions[index]
     }
 
-    addQuestion(question: GapAnalysisQuestion): GapAnalysisAssessment {
+    addQuestion(question: Question): GapAnalysisAssessment {
         question.id = `${ this.questions.length }`
         this.questions.push(question);
 
