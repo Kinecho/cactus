@@ -7,11 +7,11 @@
             <section class="statsContainer">
                 <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
                     <div class="statIcon">
-                        <img src="assets/images/journal.svg" alt="" />
+                        <img :src="`assets/images/${stat.icon}.svg`" alt=""/>
                     </div>
                     <div class="textContainer">
                         <p class="statLabel">{{stat.label}}</p>
-                        <p class="statValue">{{stat.value}}</p>
+                        <p class="statValue">{{stat.value}}<span class="unit">{{stat.unit}}</span></p>
                     </div>
                 </div>
             </section>
@@ -122,22 +122,22 @@
             return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
         }
 
-        get stats(): { value: string, label: string }[] {
+        get stats(): { value: string, label: string, unit: string, icon: string }[] {
             const memberStats = this.member?.stats?.reflections;
             if (!memberStats) {
                 return []
             }
 
-            const stats: { value: string, label: string }[] = [];
+            const stats: { value: string, label: string, unit: string, icon: string }[] = [];
 
-            stats.push({ value: `${ memberStats.totalCount }`, label: "Reflections" });
+            stats.push({ value: `${ memberStats.totalCount }`, label: "Reflections", unit: "", icon: "journal" });
 
             if (memberStats.currentStreakDays > 1) {
-                stats.push({ value: `${ memberStats.currentStreakDays }`, label: "Day Streak" })
+                stats.push({ value: `${ memberStats.currentStreakDays }`, label: "Streak", unit: "Days", icon: "flame" })
             } else if (memberStats.currentStreakWeeks > 1) {
-                stats.push({ value: `${ memberStats.currentStreakWeeks }`, label: "Week Streak" })
+                stats.push({ value: `${ memberStats.currentStreakWeeks }`, label: "Streak", unit: "Weeks", icon: "flame" })
             } else if (memberStats.currentStreakMonths > 1) {
-                stats.push({ value: `${ memberStats.currentStreakMonths }`, label: "Month Streak" })
+                stats.push({ value: `${ memberStats.currentStreakMonths }`, label: "Streak", unit: "Months", icon: "flame" })
             }
 
             let totalDuration = memberStats.totalDurationMs ?? 0;
@@ -151,7 +151,7 @@
                 durationValue = millisecondsToMinutes(totalDuration);
             }
 
-            stats.push({ value: durationValue, label: durationLabel });
+            stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
 
             return stats;
         }
@@ -219,7 +219,7 @@
         overflow: auto;
         padding-bottom: 1.6rem;
 
-        @include r(768) {
+        @include r(960) {
             margin: 0 0 2.4rem;
             overflow: visible;
             padding-bottom: 2.4rem;
@@ -235,7 +235,7 @@
         min-width: 28rem;
         padding: 3.2rem;
 
-        @include r(768) {
+        @include r(960) {
             @include shadowbox;
             border: 0;
             flex-grow: 1;
@@ -274,6 +274,15 @@
         font-size: 5.6rem;
         font-weight: bold;
         line-height: 1;
+    }
+
+    .unit {
+        font-size: 1.8rem;
+        padding-left: .8rem;
+
+        &:empty {
+            display: none;
+        }
     }
 
     .novaluesContainer {
@@ -315,7 +324,7 @@
     }
 
     .valuesContainer {
-        background-color: $lightest;
+        background-color: lighten($beige, 3%);
         border-radius: 1.6rem;
         margin-bottom: 4rem;
         padding: 3.2rem;
@@ -395,7 +404,7 @@
         @include r(768) {
             display: flex;
             flex-flow: row wrap;
-            max-width: 50%;
+            max-width: 48.75%;
             min-width: 0;
         }
     }
@@ -412,6 +421,7 @@
         }
 
         .title {
+            color: darken($royal, 11%);
             font-size: 1.4rem;
             font-weight: bold;
             letter-spacing: 1px;
