@@ -58,10 +58,10 @@
                 let colorRange: string[] = [
                     "#47445E",
                     "#364FAC",
-                    "#9C1AA3",
-                    "#D9D3D0",
-                    "#D9D3D0",
-                    "#D9D3D0"
+                    "#CC33A1",
+                    "#ECE7E4",
+                    "#ECE7E4",
+                    "#ECE7E4"
                 ];
 
                 const color = d3ScaleOrdinal()
@@ -70,7 +70,7 @@
 
                 let bubble = d3Pack()
                     .size([maxDiameter, maxDiameter])
-                    .padding(12);
+                    .padding(20);
 
                 d3Select(".bubble-chart svg").remove();
 
@@ -86,10 +86,12 @@
                     const extras: InsightWord[] = [
                         {word: "", frequency: .5, salience: .5},
                         {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .5, salience: .5},
+                        {word: "", frequency: .5, salience: .5},
                         {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .3, salience: .3},
-                        {word: "", frequency: .1, salience: .1},
+                        {word: "", frequency: .3, salience: .3},
                         {word: "", frequency: .1, salience: .1},
                         {word: "", frequency: .1, salience: .1},
                         {word: "", frequency: .1, salience: .1},
