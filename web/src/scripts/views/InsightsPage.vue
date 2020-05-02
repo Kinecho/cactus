@@ -36,22 +36,23 @@
             </section>
             <section class="valuesContainer" v-else>
                 <h2>Core Values</h2>
-                <p>What is most important for you so that you better understand past decisions and make better decisions in the future.</p>
+                <p class="subtext">What is most important for you so that you better understand past decisions and make better decisions in the future.</p>
                 <button class="btn primary">Get My Core Values</button>
             </section>
 
-            <section class="bubblesContainer" v-if="hasWordCloud">
-                <p>Words you have used recently</p>
-                <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
-            </section>
-            <section class="bubblesContainer" v-else>
-                <h2>Get the word cloud!</h2>
-            </section>
-
-            <section class="gap-analysis">
-                <h3>Gap Analysis</h3>
-                <p>Coming Soon</p>
-            </section>
+            <div class="flexSections">
+                <section class="gapContainer">
+                    <h2>Gap Analysis</h2>
+                    <p class="subtext">Find the gap between where you spend your time on and what you're committed to.</p>
+                    <p class="subtext light">Coming Soon</p>
+                    <img src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
+                </section>
+                <section class="bubblesContainer" v-if="hasWordCloud">
+                    <h2>Word Bubbles</h2>
+                    <p>These are the words used most in your daily reflections.</p>
+                    <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                </section>
+            </div>
 
         </div>
         <Footer/>
@@ -159,6 +160,27 @@
     @import "mixins";
     @import "variables";
 
+    .flexSections {
+        @include r(768) {
+            display: flex;
+        }
+    }
+
+    .gapContainer,
+    .bubblesContainer {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin-bottom: 3.2rem;
+        padding: 2.4rem;
+
+        @include r(768) {
+            margin-bottom: 4.8rem;
+            max-width: 50%;
+            padding: 3.2rem;
+            width: 50%;
+        }
+    }
+
     .insightsDash {
         display: flex;
         flex-flow: column nowrap;
@@ -186,6 +208,14 @@
 
         h2 {
             font-size: 3.2rem;
+        }
+
+        .subtext {
+            opacity: .8;
+
+            &.light {
+                opacity: .4;
+            }
         }
     }
 
@@ -256,16 +286,17 @@
     .valuesContainer {
         background-color: $lightest;
         border-radius: 1.6rem;
+        margin-bottom: 3.2rem;
         padding: 2.4rem;
         position: relative;
 
         @include r(768) {
+            margin-bottom: 4.8rem;
             padding: 3.2rem;
         }
 
         .subtext {
             max-width: 16rem;
-            opacity: .8;
         }
     }
 
