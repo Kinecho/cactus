@@ -231,8 +231,8 @@
         border: 1px solid $lightest;
         border-radius: 1.2rem;
         display: flex;
+        flex-basis: 33%;
         margin-right: 1.6rem;
-        min-width: 28rem;
         padding: 3.2rem;
 
         @include r(960) {
@@ -266,7 +266,6 @@
     .statLabel {
         color: $lightText;
         font-size: 1.6rem;
-        white-space: nowrap;
     }
 
     .statValue {
