@@ -16,14 +16,6 @@
         <div v-else-if="finished && result">
             <Results :show-confetti="true" :results="result"/>
         </div>
-        <div v-if="!finished" class="temp">
-            started: {{started}}<br/>
-            finished: {{finished}}<br/>
-            currentIndex: {{currentQuestionIndex}} <br/>
-            questionID: {{(currentQuestion && currentQuestion.id !== undefined) ? currentQuestion.id : 'not set'}}<br/>
-            current value: {{currentValue !== undefined ? currentValue : 'not set'}} <br/>
-            nextEnabled = {{nextEnabled}}
-        </div>
     </div>
 </template>
 
@@ -32,7 +24,7 @@
     import Component from "vue-class-component";
     import Question from "@components/gapanalysis/Question.vue";
     import GapAnalysisQuestion from "@shared/models/GapAnalysisQuestion";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import GapAnalysisAssessment from "@shared/models/GapAnalysisAssessment";
     import Logger from "@shared/Logger";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
@@ -51,9 +43,9 @@
         }
     })
     export default class Assessment extends Vue {
-
         @Prop({ type: Object as () => GapAnalysisAssessment, required: false })
         assessment!: GapAnalysisAssessment;
+
         started: boolean = false;
         finished: boolean = false;
         result: GapAnalysisAssessmentResult | undefined;
@@ -64,6 +56,11 @@
          * @type {{string: number|undefined}}
          */
         responseValues: Record<string, number | undefined> = {};
+
+        @Watch("currentQuestionIndex")
+        emitPageChange(newIndex: number) {
+            this.$emit('questionChanged', newIndex);
+        }
 
         get currentQuestion(): GapAnalysisQuestion | null {
             if (!this.started) {
@@ -131,6 +128,7 @@
             })
             logger.info("finishing assessment...", result);
             this.finished = true;
+            this.$emit('finished', result);
             this.result = result;
         }
 

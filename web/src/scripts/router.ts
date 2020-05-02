@@ -78,10 +78,6 @@ const routes: MetaRouteConfig[] = [
         name: "Terms of Service",
     },
     {
-        path: PageRoute.VALUES_HOME,
-        redirect: PageRoute.CORE_VALUES,
-    },
-    {
         component: () => import("@components/SharedReflectionPage.vue"),
         path: `${ PageRoute.SHARED_REFLECTION }/:reflectionId`,
         name: "Reflection"
@@ -125,6 +121,20 @@ const routes: MetaRouteConfig[] = [
         component: () => import("@components/CoreValuesPage.vue"),
         path: PageRoute.CORE_VALUES,
         name: "Core Values",
+        meta: {
+            title: "Discover your core values",
+            description: "Core values are the general expression of what is most important for you, and they help you " +
+            "understand past decisions and make better decisions in the future."
+        }
+    },
+    {
+        path: PageRoute.VALUES_HOME,
+        redirect: PageRoute.CORE_VALUES,
+    },
+    {
+        path: PageRoute.GAP_ANALYSIS,
+        component: () => import("@web/views/GapAnalysisPage.vue"),
+        name: "GapAnalysisPage",
     },
     {
         component: () => import("@components/EmailActionHandler.vue"),
