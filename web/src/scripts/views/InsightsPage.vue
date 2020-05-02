@@ -18,9 +18,11 @@
 
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
-                <p>What’s most important for you</p>
+                <p class="subtext">What’s most important for you</p>
                 <div class="flexContainer">
-                    <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f" />
+                    <div class="imgContainer">
+                        <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f" />
+                    </div>
                     <ul class="core-values-list">
                         <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
                             <p class="title">{{coreValue.value}}</p>
@@ -178,8 +180,12 @@
             margin: 3.2rem 0 1.6rem;
 
             @include r(768) {
-                margin: 6.4rem 0 1.6rem;
+                margin: 6.4rem 0 2.4rem;
             }
+        }
+
+        h2 {
+            font-size: 3.2rem;
         }
     }
 
@@ -190,8 +196,9 @@
         padding-bottom: 1.6rem;
 
         @include r(768) {
-            margin-right: 0;
+            margin: 0 0 2.4rem;
             overflow: visible;
+            padding-bottom: 2.4rem;
         }
     }
 
@@ -256,12 +263,9 @@
             padding: 3.2rem;
         }
 
-        .description {
-            display: none;
-
-            @include r(768) {
-                display: block;
-            }
+        .subtext {
+            max-width: 16rem;
+            opacity: .8;
         }
     }
 
@@ -272,12 +276,40 @@
         justify-content: flex-end;
 
         @include r(768) {
+            align-items: flex-start;
             flex-direction: row;
+            margin-top: -4.8rem;
+        }
+
+        .imgContainer {
+            margin-top: -3.2rem;
+            position: relative;
+
+            @include r(768) {
+                margin-top: -9.2rem;
+            }
+
+            &:before {
+                background-image: radial-gradient($royal 0%, transparent 60%);
+                bottom: 0;
+                content: '';
+                display: block;
+                height: 37rem;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 37rem;
+            }
         }
 
         img {
-            margin-top: -3.2rem;
+            position: relative;
             width: 32rem;
+
+            @include r(768) {
+                width: 36rem;
+            }
         }
     }
 
@@ -286,12 +318,25 @@
         margin: 0;
         min-width: 50%;
         padding: 0;
+
+        @include r(768) {
+            display: flex;
+            flex-flow: row wrap;
+            max-width: 50%;
+            min-width: 0;
+        }
     }
 
     .core-value {
         list-style: none;
         margin: 0 0 .8rem;
         padding: 0;
+
+        @include r(768) {
+            flex-basis: 50%;
+            margin: 0 0 4rem;
+            padding-left: 3.2rem;
+        }
 
         .title {
             font-size: 1.4rem;
@@ -301,12 +346,27 @@
             text-transform: uppercase;
             white-space: nowrap;
         }
+
+        .description {
+            display: none;
+
+            @include r(768) {
+                display: block;
+                font-size: 1.6rem;
+                opacity: .8;
+            }
+        }
     }
 
     .dotsBtn {
         position: absolute;
         right: 1rem;
         top: .4rem;
+
+        @include r(768) {
+            right: 1.6rem;
+            top: .8rem;
+        }
 
         svg {
             height: 2.4rem;
