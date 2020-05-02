@@ -432,14 +432,6 @@
             }
         }
 
-        &.router-link-active {
-            .navIcon {
-                path {
-                    fill: #CC33A1
-                }
-            }
-        }
-
         .navLabel {
             display: none;
 
