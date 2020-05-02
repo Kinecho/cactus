@@ -42,14 +42,14 @@
 
             <div class="flexSections">
                 <section class="gapContainer">
+                    <p class="subtext light">Coming Soon</p>
                     <h2>Gap Analysis</h2>
                     <p class="subtext">Find the gap between where you spend your time on and what you're committed to.</p>
-                    <p class="subtext light">Coming Soon</p>
-                    <img src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
+                    <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
                 <section class="bubblesContainer" v-if="hasWordCloud">
                     <h2>Word Bubbles</h2>
-                    <p>These are the words used most in your daily reflections.</p>
+                    <p class="subtext">These are the words used most in your daily reflections.</p>
                     <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                 </section>
             </div>
@@ -170,14 +170,22 @@
     .bubblesContainer {
         border: 1px solid $lightest;
         border-radius: 1.6rem;
-        margin-bottom: 3.2rem;
-        padding: 2.4rem;
+        margin-bottom: 4rem;
+        padding: 3.2rem;
 
         @include r(768) {
             margin-bottom: 4.8rem;
             max-width: 50%;
-            padding: 3.2rem;
             width: 50%;
+        }
+    }
+
+    .gapAnalysisImg {
+        margin-top: 2.4rem;
+        width: 100%;
+
+        @include r(768) {
+            width: auto;
         }
     }
 
@@ -199,19 +207,30 @@
         }
 
         h1 {
-            margin: 3.2rem 0 1.6rem;
+            margin: 3.2rem 0;
 
             @include r(768) {
-                margin: 6.4rem 0 2.4rem;
+                margin: 6.4rem 0 4rem;
             }
         }
 
         h2 {
-            font-size: 3.2rem;
+            font-size: 2rem;
+            margin-bottom: .8rem;
+
+            @include r(768) {
+                font-size: 3.2rem;
+            }
         }
 
         .subtext {
+            font-size: 1.6rem;
+            margin-bottom: .8rem;
             opacity: .8;
+
+            @include r(768) {
+                font-size: 1.8rem;
+            }
 
             &.light {
                 opacity: .4;
@@ -221,7 +240,7 @@
 
     .statsContainer {
         display: flex;
-        margin: 0 -2.4rem 1.6rem 0;
+        margin: 0 -2.4rem 2.4rem 0;
         overflow: auto;
         padding-bottom: 1.6rem;
 
@@ -239,13 +258,12 @@
         display: flex;
         margin-right: 1.6rem;
         min-width: 28rem;
-        padding: 2.4rem;
+        padding: 3.2rem;
 
         @include r(768) {
             @include shadowbox;
             border: 0;
             flex-grow: 1;
-            padding: 3.2rem;
 
             &:last-child {
                 margin-right: 0;
@@ -286,13 +304,12 @@
     .valuesContainer {
         background-color: $lightest;
         border-radius: 1.6rem;
-        margin-bottom: 3.2rem;
-        padding: 2.4rem;
+        margin-bottom: 4rem;
+        padding: 3.2rem;
         position: relative;
 
         @include r(768) {
             margin-bottom: 4.8rem;
-            padding: 3.2rem;
         }
 
         .subtext {
