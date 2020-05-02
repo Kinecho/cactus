@@ -315,6 +315,10 @@
         margin-top: -3.2rem;
         position: relative;
 
+        @include r(600) {
+            margin-bottom: -4.8rem;
+            margin-top: -12rem;
+        }
         @include r(768) {
             margin-top: 3.2rem;
         }
@@ -418,15 +422,16 @@
         margin-bottom: 4rem;
         padding: 3.2rem;
 
+        @include r(600) {
+            align-items: flex-start;
+            display: flex;
+        }
         @include r(768) {
+            display: block;
             margin-bottom: 4.8rem;
             width: 49%;
         }
-    }
-
-    .gapContainer {
         @include r(960) {
-            align-items: flex-start;
             display: flex;
         }
     }
@@ -444,30 +449,36 @@
     }
 
     .gapAnalysisImg {
+        display: block;
         margin: 2.4rem auto 0;
         max-width: 40rem;
         width: 100%;
 
+        @include r(600) {
+            margin: 0 0 0 2.4rem;
+        }
+        @include r(768) {
+            margin: 0;
+        }
         @include r(960) {
-            margin-top: 0;
             min-width: 50%;
         }
     }
 
-    .bubblesContainer {
-        @include r(960) {
-            align-items: flex-start;
-            display: flex;
-        }
-    }
-
     .word-cloud {
+        display: block;
         margin: 2.4rem auto 0;
         max-width: 40rem;
         width: 100%;
 
+        @include r(600) {
+            margin: -4.8rem -4.8rem -4.8rem 2.4rem;
+        }
+        @include r(768) {
+            margin: 0;
+        }
         @include r(960) {
-            margin: -4.8rem -4.8rem -4.8rem 0;
+            margin: -4.8rem -4.8rem -4.8rem 2.4rem;
             min-width: 66%;
         }
     }
