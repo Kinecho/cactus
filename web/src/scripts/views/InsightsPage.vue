@@ -41,15 +41,19 @@
             </section>
 
             <div class="flexSections">
-                <section class="gapContainer">
-                    <p class="subtext light">Coming Soon</p>
-                    <h2>Gap Analysis</h2>
-                    <p class="subtext">Find the gap between where you spend your time on and what you're committed to.</p>
+                <section class="gapContainer borderContainer">
+                    <div class="gapText">
+                        <p class="subtext light">Coming Soon</p>
+                        <h2>Gap Analysis</h2>
+                        <p class="subtext">Find the gap between where you spend your time on and what you're committed to.</p>
+                    </div>
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
-                <section class="bubblesContainer" v-if="hasWordCloud">
-                    <h2>Word Bubbles</h2>
-                    <p class="subtext">These are the words used most in your daily reflections.</p>
+                <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
+                    <div class="flexContainer">
+                        <h2>Word Bubbles</h2>
+                        <p class="subtext">These are the words used most in your daily reflections.</p>
+                    </div>
                     <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                 </section>
             </div>
@@ -160,35 +164,6 @@
     @import "mixins";
     @import "variables";
 
-    .flexSections {
-        @include r(768) {
-            display: flex;
-        }
-    }
-
-    .gapContainer,
-    .bubblesContainer {
-        border: 1px solid $lightest;
-        border-radius: 1.6rem;
-        margin-bottom: 4rem;
-        padding: 3.2rem;
-
-        @include r(768) {
-            margin-bottom: 4.8rem;
-            max-width: 50%;
-            width: 50%;
-        }
-    }
-
-    .gapAnalysisImg {
-        margin-top: 2.4rem;
-        width: 100%;
-
-        @include r(768) {
-            width: auto;
-        }
-    }
-
     .insightsDash {
         display: flex;
         flex-flow: column nowrap;
@@ -219,7 +194,7 @@
             margin-bottom: .8rem;
 
             @include r(768) {
-                font-size: 3.2rem;
+                font-size: 2.4rem;
             }
         }
 
@@ -315,49 +290,49 @@
         .subtext {
             max-width: 16rem;
         }
+
+        .flexContainer {
+            align-items: center;
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+
+            @include r(768) {
+                align-items: flex-start;
+                flex-direction: row;
+                margin-top: -4.8rem;
+            }
+
+            img {
+                position: relative;
+                width: 32rem;
+
+                @include r(768) {
+                    width: 36rem;
+                }
+            }
+        }
     }
 
-    .flexContainer {
-        align-items: center;
-        display: flex;
-        flex-direction: row-reverse;
-        justify-content: flex-end;
+    .imgContainer {
+        margin-top: -3.2rem;
+        position: relative;
 
         @include r(768) {
-            align-items: flex-start;
-            flex-direction: row;
-            margin-top: -4.8rem;
+            margin-top: -9.2rem;
         }
 
-        .imgContainer {
-            margin-top: -3.2rem;
-            position: relative;
-
-            @include r(768) {
-                margin-top: -9.2rem;
-            }
-
-            &:before {
-                background-image: radial-gradient($royal 0%, transparent 60%);
-                bottom: 0;
-                content: '';
-                display: block;
-                height: 37rem;
-                left: 0;
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: 37rem;
-            }
-        }
-
-        img {
-            position: relative;
-            width: 32rem;
-
-            @include r(768) {
-                width: 36rem;
-            }
+        &:before {
+            background-image: radial-gradient($royal 0%, transparent 60%);
+            bottom: 0;
+            content: '';
+            display: block;
+            height: 37rem;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 37rem;
         }
     }
 
@@ -422,7 +397,71 @@
         }
     }
 
-    .graph {
-        max-width: 40rem;
+    .flexSections {
+        @include r(768) {
+            display: flex;
+            justify-content: space-between;
+        }
     }
+
+    .borderContainer {
+        border: 1px solid $lightest;
+        border-radius: 1.6rem;
+        margin-bottom: 4rem;
+        padding: 3.2rem;
+
+        @include r(768) {
+            margin-bottom: 4.8rem;
+            width: 49%;
+        }
+    }
+
+    .gapContainer {
+        @include r(960) {
+            align-items: flex-start;
+            display: flex;
+        }
+    }
+
+    .gapText {
+        @include r(960) {
+            display: flex;
+            flex-direction: column;
+            margin-right: 3.2rem;
+
+            .subtext.light {
+                order: 3;
+            }
+        }
+    }
+
+    .gapAnalysisImg {
+        margin: 2.4rem auto 0;
+        max-width: 40rem;
+        width: 100%;
+
+        @include r(960) {
+            margin-top: 0;
+            min-width: 50%;
+        }
+    }
+
+    .bubblesContainer {
+        @include r(960) {
+            align-items: flex-start;
+            display: flex;
+        }
+    }
+
+    .word-cloud {
+        margin: 2.4rem auto 0;
+        max-width: 40rem;
+        width: 100%;
+
+        @include r(960) {
+            margin: -4.8rem -4.8rem -4.8rem 0;
+            min-width: 66%;
+        }
+    }
+
 </style>
