@@ -28,7 +28,9 @@
                         </li>
                     </ul>
                 </div>
-                <router-link tag="button" :to="coreValuesHref" class="btn primary">Retake the assessment</router-link>
+                <router-link tag="button" :to="coreValuesHref" class="btn icon tertiary dotsBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M24 27.059A3.53 3.53 0 1124 20a3.53 3.53 0 010 7.059zm16.47 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059zm-32.94 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059z"/></svg>
+                </router-link>
             </section>
             <section class="valuesContainer" v-else>
                 <h2>Core Values</h2>
@@ -248,6 +250,7 @@
         background-color: $lightest;
         border-radius: 1.6rem;
         padding: 2.4rem;
+        position: relative;
 
         @include r(768) {
             padding: 3.2rem;
@@ -297,6 +300,17 @@
             opacity: .8;
             text-transform: uppercase;
             white-space: nowrap;
+        }
+    }
+
+    .dotsBtn {
+        position: absolute;
+        right: 1rem;
+        top: .4rem;
+
+        svg {
+            height: 2.4rem;
+            width: 2.4rem;
         }
     }
 
