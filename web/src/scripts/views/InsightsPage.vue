@@ -45,7 +45,7 @@
                     <div class="gapText">
                         <p class="subtext light">Coming Soon</p>
                         <h2>Gap Analysis</h2>
-                        <p class="subtext">Find the gap between where you spend your time on and what you're committed to.</p>
+                        <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
                     </div>
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
@@ -288,7 +288,9 @@
         }
 
         .subtext {
-            max-width: 16rem;
+            @include r(960) {
+                max-width: 16rem;
+            }
         }
 
         .flexContainer {
@@ -296,20 +298,15 @@
             display: flex;
             flex-direction: row-reverse;
             justify-content: flex-end;
+            max-width: 48rem;
 
             @include r(768) {
                 align-items: flex-start;
                 flex-direction: row;
-                margin-top: -4.8rem;
+                max-width: none;
             }
-
-            img {
-                position: relative;
-                width: 32rem;
-
-                @include r(768) {
-                    width: 36rem;
-                }
+            @include r(960) {
+                margin-top: -4.8rem;
             }
         }
     }
@@ -319,6 +316,12 @@
         position: relative;
 
         @include r(768) {
+            margin-top: 3.2rem;
+        }
+        @include r(960) {
+            margin-top: 0;
+        }
+        @include r(1024) {
             margin-top: -9.2rem;
         }
 
@@ -333,6 +336,11 @@
             right: 0;
             top: 0;
             width: 37rem;
+        }
+
+        img {
+            position: relative;
+            width: 32rem;
         }
     }
 
@@ -424,7 +432,7 @@
     }
 
     .gapText {
-        @include r(960) {
+        @include r(768) {
             display: flex;
             flex-direction: column;
             margin-right: 3.2rem;
