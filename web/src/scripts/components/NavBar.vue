@@ -38,13 +38,13 @@
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
                 <!--        Activity        -->
-                <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
+                <!-- <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
-                </router-link>
+                </router-link> -->
                 <!-- INSIGHTS      -->
                 <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
@@ -179,10 +179,10 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
-                    title: copy.navigation.CORE_VALUES,
-                    href: PageRoute.CORE_VALUES,
-                    calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
-                }, {
+                //     title: copy.navigation.CORE_VALUES,
+                //     href: PageRoute.CORE_VALUES,
+                //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
+                // }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
                     badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
