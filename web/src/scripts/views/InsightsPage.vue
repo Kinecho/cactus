@@ -283,6 +283,7 @@
         background-position: 0 0, -14rem -15rem, -7rem 120%;
         background-repeat: repeat, no-repeat, no-repeat;
         background-size: auto, 28rem, auto;
+        color: $white;
         margin-bottom: 4rem;
         padding: 3.2rem;
         position: relative;
@@ -292,18 +293,13 @@
             background-size: auto, 40rem, auto;
             margin-bottom: 4.8rem;
         }
-        @include r(960) {
-
-        }
 
         h2 {
-            color: $white;
             font-size: 2.4rem;
             margin-bottom: .4rem;
         }
 
         .subtext {
-            color: $white;
             margin: 0 0 2.4rem;
             max-width: 60rem;
             opacity: .9;
@@ -511,7 +507,6 @@
         display: block;
         margin: 2.4rem auto 0;
         max-width: 40rem;
-        width: 100%;
 
         @include r(600) {
             margin: -4.8rem -4.8rem -4.8rem 2.4rem;
