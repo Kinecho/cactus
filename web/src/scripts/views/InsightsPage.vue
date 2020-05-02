@@ -34,10 +34,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M24 27.059A3.53 3.53 0 1124 20a3.53 3.53 0 010 7.059zm16.47 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059zm-32.94 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059z"/></svg>
                 </router-link>
             </section>
-            <section class="valuesContainer" v-else>
+            <section class="novaluesContainer" v-else>
                 <h2>Core Values</h2>
                 <p class="subtext">What is most important for you so that you better understand past decisions and make better decisions in the future.</p>
-                <button class="btn primary">Get My Core Values</button>
+                <button class="cvButton">Get My Core Values</button>
             </section>
 
             <div class="flexSections">
@@ -274,6 +274,48 @@
         font-size: 5.6rem;
         font-weight: bold;
         line-height: 1;
+    }
+
+    .novaluesContainer {
+        @include shadowbox;
+        background-color: $dolphin;
+        background-image: url(assets/images/grainy.png), url(assets/images/cvBlob.png), url(assets/images/pinkVs.svg);
+        background-position: 0 0, -14rem -15rem, -7rem 120%;
+        background-repeat: repeat, no-repeat, no-repeat;
+        background-size: auto, 28rem, auto;
+        margin-bottom: 4rem;
+        padding: 3.2rem;
+        position: relative;
+
+        @include r(768) {
+            background-position: 0 0, 100% -15rem, 98% 133%;
+            background-size: auto, 40rem, auto;
+            margin-bottom: 4.8rem;
+        }
+        @include r(960) {
+
+        }
+
+        h2 {
+            color: $white;
+            font-size: 2.4rem;
+            margin-bottom: .4rem;
+        }
+
+        .subtext {
+            color: $white;
+            margin: 0 0 2.4rem;
+            max-width: 60rem;
+            opacity: .9;
+        }
+
+        .cvButton {
+            display: block;
+
+            @include r(960) {
+                width: 100%;
+            }
+        }
     }
 
     .valuesContainer {
