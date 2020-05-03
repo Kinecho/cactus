@@ -239,7 +239,12 @@
                         await this.loadCurrentResults();
 
                     } else {
-                        await this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`);
+                        await this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`).catch(error => {
+                            if (error.name !== "NavigationDuplicated") {
+                                logger.error(error)
+                            }
+                        }
+                        );
                     }
                     this.loading = false
                 }
@@ -280,7 +285,11 @@
                     }
 
                 } else {
-                    this.$router.push(PageRoute.PRICING);
+                    this.$router.push(PageRoute.PRICING).catch(error => {
+                        if (error.name !== "NavigationDuplicated") {
+                            logger.error(error)
+                        }
+                    });
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {

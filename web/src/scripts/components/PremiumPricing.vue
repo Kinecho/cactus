@@ -184,7 +184,11 @@
         },
         methods: {
             goToSignup() {
-                this.$router.push(PageRoute.SIGNUP);
+                this.$router.push(PageRoute.SIGNUP).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;

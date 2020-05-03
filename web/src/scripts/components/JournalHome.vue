@@ -182,7 +182,11 @@
                         } else {
                             logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         }
-                        await this.$router.push(PageRoute.HOME);
+                        await this.$router.push(PageRoute.HOME).catch(error => {
+                            if (error.name !== "NavigationDuplicated") {
+                                logger.error(error)
+                            }
+                        });
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -324,7 +328,11 @@
             launchCoreValues() {
                 // TODO: launch core values assessment
                 // window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
-                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
+                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)

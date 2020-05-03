@@ -240,11 +240,19 @@
             },
             goToAccount() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.ACCOUNT);
+                this.$router.push(PageRoute.ACCOUNT).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             goToSignup() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.SIGNUP);
+                this.$router.push(PageRoute.SIGNUP).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
         }
     })

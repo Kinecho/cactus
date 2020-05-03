@@ -1,12 +1,13 @@
 import Vue from "vue";
-import VueRouter, { Route, RouteConfig } from "vue-router";
+import VueRouter from "vue-router";
 import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
-import { MetaRouteConfig, MetaTag, updateRouteMeta } from "@web/router-meta";
+import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
 import { isExternalUrl } from "@shared/util/StringUtil";
 
 const logger = new Logger("router.ts");
+
 Vue.use(VueRouter);
 
 const routes: MetaRouteConfig[] = [
