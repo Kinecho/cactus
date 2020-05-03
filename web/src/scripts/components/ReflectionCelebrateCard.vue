@@ -355,7 +355,7 @@
                     this.durationLabel = copy.prompts.SECONDS
                 } else {
                     this.durationLabel = copy.prompts.MINUTES;
-                    this.totalDuration = millisecondsToMinutes(totalDuration);
+                    this.totalDuration = millisecondsToMinutes(totalDuration, 0);
                 }
             },
             back() {
