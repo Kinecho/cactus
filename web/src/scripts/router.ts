@@ -36,7 +36,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@web/views/InsightsEmbedPage.vue"),
+        component: () => import("@web/views/WordBubbleEmbedPage.vue"),
         path: PageRoute.INSIGHTS_EMBED,
         name: "Insights",
         meta: {
