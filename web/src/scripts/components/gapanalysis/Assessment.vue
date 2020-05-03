@@ -1,5 +1,6 @@
 <template>
     <div>
+        <progress-stepper :current="currentStepperIndex || 0" :total="stepperTotal"/>
         <h1>Gap Assessment</h1>
         <template v-if="!started" class="intro">
             <p>Take your gap analysis assessment to find out where you have gaps.</p>
@@ -31,6 +32,7 @@
     import RadarChart from "@components/RadarChart.vue";
     import CactusConfetti from "@components/CactusConfetti.vue";
     import Results from "@components/gapanalysis/Results.vue";
+    import ProgressStepper from "@components/ProgressStepper.vue";
 
     const logger = new Logger("gap/Assessment");
 
@@ -40,6 +42,7 @@
             RadarChart,
             Question,
             CactusConfetti,
+            ProgressStepper,
         }
     })
     export default class Assessment extends Vue {
@@ -135,6 +138,24 @@
         start() {
             this.currentQuestionIndex = 0;
             this.started = true;
+        }
+
+        get currentStepperIndex(): number {
+            if (!this.started) {
+                return 0;
+            }
+            if (this.result) {
+                return this.stepperTotal - 1;
+            }
+            return (this.currentQuestionIndex ?? 0) + 1;
+        }
+
+        /**
+         * plus 1 because of questins (which is index - 1) + intro and results
+         * @return {number}
+         */
+        get stepperTotal(): number {
+            return this.assessment.questions.length + 1;
         }
     }
 </script>

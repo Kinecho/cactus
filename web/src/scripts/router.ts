@@ -135,6 +135,9 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.GAP_ANALYSIS,
         component: () => import("@web/views/GapAnalysisPage.vue"),
         name: "GapAnalysisPage",
+        meta: {
+            title: "Gap Analysis | Cactus"
+        }
     },
     {
         component: () => import("@components/EmailActionHandler.vue"),

@@ -1,9 +1,6 @@
 <template>
     <div>
-        <progress-stepper :current="currentPage" :total="numSteps"/>
-        <h1>Gap Analysis Page</h1>
         <assessment :assessment="assessment" @questionChanged="setQuestion"/>
-        <results v-if="results" :results="results"/>
     </div>
 </template>
 
