@@ -7,7 +7,7 @@
             <section class="statsContainer">
                 <div class="stat" v-for="(stat, index) in stats" :key="`stat_${index}`">
                     <div class="statIcon">
-                        <img :src="`assets/images/${stat.icon}.svg`" alt=""/>
+                        <img :src="`/assets/images/${stat.icon}.svg`" :alt="`${stat.label} icon`"/>
                     </div>
                     <div class="textContainer">
                         <p class="statLabel">{{stat.label}}</p>
@@ -21,7 +21,7 @@
                 <p class="subtext">What’s most important for you</p>
                 <div class="flexContainer">
                     <div class="imgContainer">
-                        <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f" />
+                        <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f"/>
                     </div>
                     <ul class="core-values-list">
                         <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
@@ -30,13 +30,13 @@
                         </li>
                     </ul>
                 </div>
-                <router-link tag="button" :to="coreValuesHref" class="btn icon tertiary dotsBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path d="M24 27.059A3.53 3.53 0 1124 20a3.53 3.53 0 010 7.059zm16.47 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059zm-32.94 0a3.53 3.53 0 110-7.059 3.53 3.53 0 010 7.059z"/></svg>
-                </router-link>
+
+                <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
             </section>
             <section class="novaluesContainer" v-else>
                 <h2>Core Values</h2>
-                <p class="subtext">What is most important for you so that you better understand past decisions and make better decisions in the future.</p>
+                <p class="subtext">What is most important for you so that you better understand past decisions and make
+                    better decisions in the future.</p>
                 <button class="cvButton">Get My Core Values</button>
             </section>
 
@@ -78,6 +78,8 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { millisecondsToMinutes } from "@shared/util/DateUtil";
     import CopyService from "@shared/copy/CopyService";
+    import { DropdownMenuLink } from "@components/DropdownMenuTypes";
+    import DropdownMenu from "@components/DropdownMenu.vue";
 
     const copy = CopyService.getSharedInstance().copy;
 
@@ -85,7 +87,8 @@
         components: {
             NavBar,
             Footer,
-            WordCloud
+            WordCloud,
+            DropdownMenu,
         }
     })
     export default class InsightsPage extends Vue {
@@ -133,11 +136,26 @@
             stats.push({ value: `${ memberStats.totalCount }`, label: "Reflections", unit: "", icon: "journal" });
 
             if (memberStats.currentStreakDays > 1) {
-                stats.push({ value: `${ memberStats.currentStreakDays }`, label: "Streak", unit: "Days", icon: "flame" })
+                stats.push({
+                    value: `${ memberStats.currentStreakDays }`,
+                    label: "Streak",
+                    unit: "Days",
+                    icon: "flame"
+                })
             } else if (memberStats.currentStreakWeeks > 1) {
-                stats.push({ value: `${ memberStats.currentStreakWeeks }`, label: "Streak", unit: "Weeks", icon: "flame" })
+                stats.push({
+                    value: `${ memberStats.currentStreakWeeks }`,
+                    label: "Streak",
+                    unit: "Weeks",
+                    icon: "flame"
+                })
             } else if (memberStats.currentStreakMonths > 1) {
-                stats.push({ value: `${ memberStats.currentStreakMonths }`, label: "Streak", unit: "Months", icon: "flame" })
+                stats.push({
+                    value: `${ memberStats.currentStreakMonths }`,
+                    label: "Streak",
+                    unit: "Months",
+                    icon: "flame"
+                })
             }
 
             let totalDuration = memberStats.totalDurationMs ?? 0;
@@ -154,6 +172,13 @@
             stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
 
             return stats;
+        }
+
+        get coreValuesDropdownLinks(): DropdownMenuLink[] {
+            return [{
+                title: "Retake Assessment",
+                href: `${ PageRoute.CORE_VALUES }?=${ QueryParam.CV_LAUNCH }=true`,
+            }];
         }
 
     }
