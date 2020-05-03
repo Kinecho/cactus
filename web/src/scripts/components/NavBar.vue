@@ -248,10 +248,18 @@
                 }
             },
             goToLogin() {
-                this.$router.push(this.loginHref);
+                this.$router.push(this.loginHref).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             goToSignup() {
-                this.$router.push(this.signupHref);
+                this.$router.push(this.signupHref).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {

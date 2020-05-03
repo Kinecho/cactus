@@ -90,7 +90,11 @@
                     redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                 }
 
-                await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME);
+                await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             async handleResponse(response: EmailLinkSignupResult) {
                 if (response.credential) {
@@ -112,7 +116,11 @@
                             redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                         }
 
-                        await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME);
+                        await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
+                            if (error.name !== "NavigationDuplicated") {
+                                logger.error(error)
+                            }
+                        });
                     }
 
                     return;

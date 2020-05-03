@@ -383,7 +383,11 @@
                 logger.error("Celebrate component: Failed to send magic link", message);
             },
             showLogin() {
-                this.$router.push(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going."))
+                this.$router.push(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going.")).catch(error => {
+                    if (error.name !== "NavigationDuplicated") {
+                        logger.error(error)
+                    }
+                });
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;

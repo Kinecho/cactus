@@ -24,7 +24,9 @@
     import { QueryParam } from '@shared/util/queryParams'
     import VueClipboard from "vue-clipboard2";
     import SocialSharing from "vue-social-sharing";
+    import Logger from "@shared/Logger"
 
+    const logger = new Logger("SocialInvite");
 
     Vue.use(VueClipboard);
     Vue.use(SocialSharing);
@@ -52,7 +54,11 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({ member }) => {
                     if (!member) {
-                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`);
+                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`).catch(error => {
+                            if (error.name !== "NavigationDuplicated") {
+                                logger.error(error)
+                            }
+                        });
                     }
                     this.member = member;
                     this.loading = false;

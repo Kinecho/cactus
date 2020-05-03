@@ -20,29 +20,29 @@
 
 <script lang="ts">
     import Vue from "vue";
-    import {ListenerUnsubscriber} from '@web/services/FirestoreService'
+    import { ListenerUnsubscriber } from '@web/services/FirestoreService'
     import CactusMember from '@shared/models/CactusMember'
-    import {FirebaseUser} from "@web/firebase"
+    import { FirebaseUser } from "@web/firebase"
     import CactusMemberService from '@web/services/CactusMemberService'
-    import {sendLoginEvent} from "@web/auth";
+    import { sendLoginEvent } from "@web/auth";
     import MagicLink from "@components/MagicLinkInput.vue"
-    import {PageRoute} from "@shared/PageRoutes"
-    import {QueryParam} from "@shared/util/queryParams"
+    import { PageRoute } from "@shared/PageRoutes"
+    import { QueryParam } from "@shared/util/queryParams"
     import Spinner from "@components/Spinner.vue";
-    import {getQueryParam} from "@web/util"
-    import StorageService, {LocalStorageKey} from '@web/services/StorageService'
+    import { getQueryParam } from "@web/util"
+    import StorageService, { LocalStorageKey } from '@web/services/StorageService'
     import CopyService from '@shared/copy/CopyService'
-    import {CommonCopy} from '@shared/copy/CopyTypes'
+    import { CommonCopy } from '@shared/copy/CopyTypes'
     import Logger from "@shared/Logger";
-    import {getAuthUI, getAuthUIConfig} from "@web/authUi";
-    import {appendQueryParams, isFeatureAuthUrl} from "@shared/util/StringUtil";
+    import { getAuthUI, getAuthUIConfig } from "@web/authUi";
+    import { appendQueryParams, isFeatureAuthUrl } from "@shared/util/StringUtil";
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
     logger.log("Redirect url param is ", redirectUrlParam);
     let emailLinkRedirectUrl: string = PageRoute.SIGNUP_CONFIRMED;
     if (redirectUrlParam) {
-        emailLinkRedirectUrl = `${emailLinkRedirectUrl}?${QueryParam.REDIRECT_URL}=${redirectUrlParam}`
+        emailLinkRedirectUrl = `${ emailLinkRedirectUrl }?${ QueryParam.REDIRECT_URL }=${ redirectUrlParam }`
     }
 
     const locale = CopyService.getSharedInstance();
@@ -114,7 +114,7 @@
             this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
 
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: (({member, user}) => {
+                onData: (({ member, user }) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
@@ -198,9 +198,13 @@
                     } finally {
                         // append the memberId to any feature-auth urls
                         if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
-                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, {memberId: this.member.id});
+                            this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
                         }
-                        this.$router.push(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME);
+                        this.$router.push(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
+                            if (error.name !== "NavigationDuplicated") {
+                                logger.error(error)
+                            }
+                        });
                     }
                 }
             }
