@@ -166,7 +166,7 @@
                 durationLabel = copy.prompts.SECONDS
             } else {
                 durationLabel = copy.prompts.MINUTES;
-                durationValue = millisecondsToMinutes(totalDuration);
+                durationValue = millisecondsToMinutes(totalDuration, 0);
             }
 
             stats.push({ value: durationValue, label: "Duration", unit: durationLabel, icon: "clock" });
