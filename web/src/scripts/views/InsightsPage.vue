@@ -365,12 +365,13 @@
         }
 
         .flexIt {
-            align-items: center;
-            display: flex;
-            flex-direction: row-reverse;
-            justify-content: flex-end;
-            max-width: 48rem;
-
+            @include r(600) {
+                align-items: center;
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: flex-end;
+                max-width: 48rem;
+            }
             @include r(768) {
                 align-items: flex-start;
                 flex-direction: row;
@@ -383,12 +384,18 @@
     }
 
     .imgContainer {
-        margin-top: -3.2rem;
+        margin-bottom: 2.4rem;
         position: relative;
 
+        @include r(374) {
+            margin-top: -12rem;
+            transform: translate(60%, 0);
+            position: absolute;
+        }
         @include r(600) {
             margin-bottom: -4.8rem;
-            margin-top: -12rem;
+            position: relative;
+            transform: none;
         }
         @include r(768) {
             margin-top: 3.2rem;
@@ -401,7 +408,7 @@
         }
 
         &:before {
-            background-image: radial-gradient($royal 0%, transparent 60%);
+            background-image: radial-gradient($royal, rgba(101, 144, 237, 0) 60%);
             bottom: 0;
             content: '';
             display: block;
@@ -421,15 +428,18 @@
 
     .core-values-list {
         list-style: none;
-        margin: 0;
+        margin: 2.4rem 0;
         min-width: 50%;
         padding: 0;
 
         @include r(768) {
             display: flex;
             flex-flow: row wrap;
-            max-width: 48.75%;
+            margin: 0;
             min-width: 0;
+        }
+        @include r(960) {
+            max-width: 48.75%;
         }
     }
 
@@ -439,9 +449,10 @@
         padding: 0;
 
         @include r(768) {
-            flex-basis: 50%;
             margin: 0 0 4rem;
+            min-width: 20rem;
             padding-left: 3.2rem;
+            width: 50%;
         }
 
         .title {
@@ -468,16 +479,11 @@
     .dotsBtn {
         position: absolute;
         right: 1rem;
-        top: .4rem;
+        top: 1.6rem;
 
         @include r(768) {
             right: 1.6rem;
             top: .8rem;
-        }
-
-        svg {
-            height: 2.4rem;
-            width: 2.4rem;
         }
     }
 
