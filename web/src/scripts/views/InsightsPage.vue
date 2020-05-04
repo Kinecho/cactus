@@ -480,11 +480,6 @@
         position: absolute;
         right: 1rem;
         top: 1.6rem;
-
-        @include r(768) {
-            right: 1.6rem;
-            top: .8rem;
-        }
     }
 
     .flexSections {
