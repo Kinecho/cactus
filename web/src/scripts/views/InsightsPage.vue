@@ -19,7 +19,7 @@
             <section class="valuesContainer" v-if="hasCoreValues">
                 <h2>Core Values</h2>
                 <p class="subtext">What’s most important for you</p>
-                <div class="flexContainer">
+                <div class="flexIt">
                     <div class="imgContainer">
                         <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f"/>
                     </div>
@@ -50,7 +50,7 @@
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
-                    <div class="flexContainer">
+                    <div class="flexIt">
                         <h2>Word Bubbles</h2>
                         <p class="subtext">These are the words used most in your daily reflections.</p>
                     </div>
@@ -364,7 +364,7 @@
             }
         }
 
-        .flexContainer {
+        .flexIt {
             align-items: center;
             display: flex;
             flex-direction: row-reverse;
