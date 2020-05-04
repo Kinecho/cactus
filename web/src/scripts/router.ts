@@ -214,7 +214,6 @@ router.beforeEach((to, from, next) => {
         logger.error("Failed to handle before each check for external url. Sending to next", error);
         next();
     }
-
 })
 
 router.afterEach((to, from) => {
