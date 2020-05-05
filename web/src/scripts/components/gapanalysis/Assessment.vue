@@ -1,21 +1,27 @@
 <template>
-    <div>
+    <div class="assessment-container">
         <progress-stepper :current="currentStepperIndex || 0" :total="stepperTotal"/>
-        <h1>Gap Assessment</h1>
-        <template v-if="!started" class="intro">
-            <p>Take your gap analysis assessment to find out where you have gaps.</p>
-            <button class="btn primary" @click="start">Get Started</button>
-        </template>
+        <div class="paddingContainer">
+            <button aria-label="Close" title="Close" class="close tertiary icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
+                    <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
+                </svg>
+            </button>
+            <template v-if="!started" class="intro">
+                <p class="titleMarkdown">Take your gap analysis assessment to find out where you have gaps.</p>
+                <button class="btn primary" @click="start">Get Started</button>
+            </template>
 
-        <template v-else-if="currentQuestion && !finished && started">
-            <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
-            <div class="actions">
-                <button :disabled="!previousEnabled" class="no-loading" @click="previous">Previous</button>
-                <button @click="next" :disabled="!nextEnabled" class="no-loading">Next</button>
+            <template v-else-if="currentQuestion && !finished && started">
+                <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
+                <div class="actions">
+                    <button :disabled="!previousEnabled" class="no-loading" @click="previous">Previous</button>
+                    <button @click="next" :disabled="!nextEnabled" class="no-loading">Next</button>
+                </div>
+            </template>
+            <div v-else-if="finished && result">
+                <Results :show-confetti="true" :results="result"/>
             </div>
-        </template>
-        <div v-else-if="finished && result">
-            <Results :show-confetti="true" :results="result"/>
         </div>
     </div>
 </template>
@@ -161,14 +167,18 @@
 </script>
 
 <style scoped lang="scss">
-    .temp {
-        font-family: monospace;
-        border: 1px solid lightgray;
-        margin: 4rem 0;
+    @import "~styles/variables";
+    @import "~styles/mixins";
+    @import "~styles/assessment";
 
-    }
-
-    .actions {
-        margin: 2rem 0;
-    }
+    // .temp {
+    //     font-family: monospace;
+    //     border: 1px solid lightgray;
+    //     margin: 4rem 0;
+    //
+    // }
+    //
+    // .actions {
+    //     margin: 2rem 0;
+    // }
 </style>
