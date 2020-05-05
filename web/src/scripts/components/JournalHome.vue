@@ -178,7 +178,6 @@
                 onData: async ({ member, user }) => {
                     if (!user) {
                         if (this.loggingOut) {
-                            logger.info("the user is in the process of logging out... not redirecting");
                             return;
                         } else {
                             logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
@@ -254,7 +253,6 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                logger.log(`entry updated at index ${ index }`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -315,8 +313,6 @@
                 const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
-                    logger.log("load more! Offset = ", distance);
-
                     const willLoad = this.dataSource?.loadNextPage() || false;
                     this.showPageLoading = this.dataSource?.loadingPage || willLoad
 

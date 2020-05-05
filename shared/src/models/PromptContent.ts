@@ -227,9 +227,7 @@ export default class PromptContent extends FlamelinkModel {
             this.cactusElement = data.cactusElement;
 
             if (data.scheduledSendAt) {
-                logger.log("PromptContent Constructor, setting scheduled send at from value", data.scheduledSendAt);
                 this.scheduledSendAt = timestampToDate(data.scheduledSendAt) || new Date(data.scheduledSendAt);
-                logger.log("PromptContent constructor, sent scheduledSendAt to ", this.scheduledSendAt)
             }
         }
     }
@@ -248,7 +246,6 @@ export default class PromptContent extends FlamelinkModel {
         super.updateFromData(data);
         const scheduledDateField = data[PromptContent.Fields.scheduledSendAt];
         if (scheduledDateField) {
-            logger.log("Setting scheduledSendAt from data value", scheduledDateField);
             this.scheduledSendAt = new Date(scheduledDateField);
         } else {
             this.scheduledSendAt = undefined;

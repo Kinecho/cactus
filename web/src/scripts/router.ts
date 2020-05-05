@@ -69,7 +69,7 @@ const routes: MetaRouteConfig[] = [
     {
         component: () => lazyLoadView(import("@web/views/WordBubbleEmbedPage.vue")),
         path: PageRoute.INSIGHTS_EMBED,
-        name: "Insights",
+        name: "Insights Embed",
         meta: {
             title: "Insights",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy."
