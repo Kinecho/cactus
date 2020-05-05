@@ -50,7 +50,7 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             gapType: GapType.satisfaction,
         }).addOption(1, "mysterious")
         .addOption(2)
-        .addOption(3, "a work in progress")
+        .addOption(3, "a work in progress", true)
         .addOption(4)
         .addOption(5, "well understood"),
         //1

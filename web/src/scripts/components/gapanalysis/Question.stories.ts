@@ -15,7 +15,7 @@ const genericQuestion = (title: string) => {
         gapType: GapType.satisfaction,
     }).addOption(1, "Value 1")
     .addOption(2, "Value 2")
-    .addOption(3, "Value 3")
+    .addOption(3, "Value 3", true)
     .addOption(4, "Value 3")
     .addOption(5, "Value 5")
 }

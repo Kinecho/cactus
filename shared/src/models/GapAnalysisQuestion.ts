@@ -44,10 +44,11 @@ export default class GapAnalysisQuestion {
      * Add an option. Uses the builder pattern.
      * @param {number} value
      * @param {string} label
+     * @param {boolean} selected
      * @return {GapAnalysisQuestion} Returns self
      */
-    addOption(value: number, label?: string): GapAnalysisQuestion {
-        this.options.push(Option.create(value, label));
+    addOption(value: number, label?: string, selected?: boolean): GapAnalysisQuestion {
+        this.options.push(Option.create(value, label, selected));
         return this;
     }
 }
