@@ -4,6 +4,7 @@
 // *       NOT IN THE FIREBASE CONSOLE UI         *
 // *                                              *
 // ************************************************
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function resourceBelongsToUser() {
