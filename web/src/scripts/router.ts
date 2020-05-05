@@ -34,7 +34,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@web/views/InsightsEmbedPage.vue"),
+        component: () => import("@web/views/WordBubbleEmbedPage.vue"),
         path: PageRoute.INSIGHTS_EMBED,
         name: "Insights",
         meta: {
@@ -165,6 +165,11 @@ const routes: MetaRouteConfig[] = [
         path: PageRoute.SIGNUP_CONFIRMED,
     },
     {
+        component: () => import("@web/views/InsightsPage.vue"),
+        name: "Insights",
+        path: PageRoute.INSIGHTS,
+    },
+    {
         component: () => import("@components/404.vue"),
         path: "*",
         name: "Page Not Found",
@@ -206,13 +211,11 @@ router.beforeEach((to, from, next) => {
         logger.error("Failed to handle before each check for external url. Sending to next", error);
         next();
     }
-
 })
 
 router.afterEach((to, from) => {
     // document.title = to.name || "Cactus";
     logRouteChanged(to);
 })
-
 
 export default router;

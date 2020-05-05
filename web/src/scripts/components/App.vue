@@ -1,30 +1,20 @@
 <template>
-    <div>
+    <transition name="component-fade" appear mode="out-in">
         <router-view/>
-    </div>
+    </transition>
 </template>
 
 <script lang="ts">
     import Vue from "vue";
+    import Component from "vue-class-component";
 
-    export default Vue.extend({
-        created(){
+    @Component
+    export default class App extends Vue {
 
-        },
-        props: {
-
-        },
-        data():{
-            field: any|undefined,
-        }{
-            return {
-                field: undefined,
-            }
-        }
-    })
+    }
 </script>
 
-<style lang="scss" >
+<style lang="scss">
     @import "common";
-
+    @import "transitions";
 </style>
