@@ -2,7 +2,7 @@ import { BaseModel, Collection } from "@shared/FirestoreBaseModels";
 import CoreValuesQuestionResponse from "@shared/models/CoreValuesQuestionResponse";
 import { toPlainObject } from "@shared/util/ObjectUtil";
 import { CoreValue } from "@shared/models/CoreValueTypes";
-
+import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
 
 enum Field {
     memberId = "memberId",
@@ -32,8 +32,8 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
      * @return {CoreValue[]}
      */
     get allResponseValues(): CoreValue[] {
-         const coreValues = Object.values(this.questionResponses).flatMap(r => r.values);
-         return [...new Set(coreValues)]
+        const coreValues = Object.values(this.questionResponses).flatMap(r => r.values);
+        return [...new Set(coreValues)]
     }
 
     prepareForFirestore(): any {
@@ -85,5 +85,12 @@ export default class CoreValuesAssessmentResponse extends BaseModel {
         const c = new CoreValuesAssessmentResponse();
         Object.assign(c, this);
         return c;
+    }
+
+    getBlob(forceIndex?: number | null | undefined | string): CoreValuesBlob | undefined {
+        if ((this.results?.values ?? []).length === 0) {
+            return undefined;
+        }
+        return getCoreValuesBlob(this.results?.values, forceIndex)
     }
 }

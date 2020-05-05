@@ -20,8 +20,8 @@
                 <h2>Core Values</h2>
                 <p class="subtext">What’s most important for you</p>
                 <div class="flexIt">
-                    <div class="imgContainer">
-                        <img src="https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/flamelink%2Fmedia%2F200331.png?alt=media&token=a91bc22b-ff78-4ef7-ba73-888484c6710f"/>
+                    <div class="imgContainer" v-if="coreValuesBlob">
+                        <img :src="coreValuesBlob.imageUrl" alt="Core Values Graphic"/>
                     </div>
                     <ul class="core-values-list">
                         <li v-for="(coreValue, index) in coreValues" :key="`value_${index}`" class="core-value">
@@ -73,14 +73,18 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import { InsightWord } from "@shared/models/ReflectionResponse";
-    import { CoreValue, CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
+    import { CoreValueMeta, CoreValuesService } from "@shared/models/CoreValueTypes";
     import { PageRoute } from "@shared/PageRoutes";
     import { QueryParam } from "@shared/util/queryParams";
     import { millisecondsToMinutes } from "@shared/util/DateUtil";
     import CopyService from "@shared/copy/CopyService";
     import { DropdownMenuLink } from "@components/DropdownMenuTypes";
     import DropdownMenu from "@components/DropdownMenu.vue";
+    import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
+    import { getQueryParam } from "@web/util";
+    import Logger from "@shared/Logger"
 
+    const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
@@ -103,6 +107,14 @@
                     this.authLoaded = true;
                 }
             })
+        }
+
+        get coreValuesBlob(): CoreValuesBlob | undefined {
+            const forceIndex = getQueryParam(QueryParam.BG_INDEX)
+            logger.info("Forcing index: ", forceIndex);
+            const blob = getCoreValuesBlob(this.member?.coreValues, forceIndex);
+            logger.info("Blob info:", blob);
+            return blob;
         }
 
         get wordCloud(): InsightWord[] {
