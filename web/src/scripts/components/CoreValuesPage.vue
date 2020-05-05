@@ -250,7 +250,7 @@
                     }
 
                 } else {
-                    this.$router.push(PageRoute.PRICING).catch(error => {
+                    this.$router.push(`${PageRoute.PRICING}?${QueryParam.CORE_VALUES}=true`).catch(error => {
                         if (error.name !== "NavigationDuplicated") {
                             logger.error(error)
                         }
