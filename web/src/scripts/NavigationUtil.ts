@@ -1,5 +1,7 @@
 import NavBar from "@components/NavBar.vue";
 import Logger from "@shared/Logger";
+import { RawLocation } from "vue-router";
+import router from "@web/router";
 
 const logger = new Logger("NavigationUtil");
 
@@ -38,6 +40,16 @@ export function setupNavigation(options: NavigationOptions) {
             isSticky: options.stickyNav,
             loginRedirectUrl: options.signUpRedirectUrl,
         },
-        components: {NavBar: NavBar}
+        components: { NavBar: NavBar }
     });
+}
+
+export async function pushRoute(rawLocation: RawLocation) {
+    try {
+        await router.push(rawLocation);
+    } catch (error) {
+        if (error?.name !== "NavigationDuplicated") {
+            logger.info(`Failed to push to route ${ rawLocation }`, error)
+        }
+    }
 }

@@ -87,6 +87,7 @@
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
     import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -258,19 +259,11 @@
                     logger.error("Log out threw an error", error);
                 }
             },
-            goToLogin() {
-                this.$router.push(this.loginHref).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+            async goToLogin() {
+                await pushRoute(this.loginHref);
             },
-            goToSignup() {
-                this.$router.push(this.signupHref).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+            async goToSignup() {
+                await pushRoute(this.signupHref);
             },
             scrollToSignup() {
                 if (!this.signupFormAnchorId) {

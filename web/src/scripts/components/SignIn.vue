@@ -36,6 +36,7 @@
     import Logger from "@shared/Logger";
     import { getAuthUI, getAuthUIConfig } from "@web/authUi";
     import { appendQueryParams, isFeatureAuthUrl } from "@shared/util/StringUtil";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SignIn.vue");
     const redirectUrlParam = getQueryParam(QueryParam.REDIRECT_URL);
@@ -200,11 +201,7 @@
                         if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
                             this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
                         }
-                        this.$router.push(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        });
+                        await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
                     }
                 }
             }
