@@ -2,6 +2,9 @@ import Logger from "@shared/Logger";
 import Vue from "vue";
 import App from "@components/App.vue";
 import router from "@web/router";
+import VueRouter from "vue-router";
+
+Vue.use(VueRouter);
 
 const logger = new Logger("main.ts");
 

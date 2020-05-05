@@ -286,9 +286,9 @@
 </script>
 
 <style lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
     body.error header {
         background: $white;
