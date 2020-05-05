@@ -180,10 +180,10 @@
             },
             links(): DropdownMenuLink[] {
                 const links: DropdownMenuLink[] = [{
-                //     title: copy.navigation.CORE_VALUES,
-                //     href: PageRoute.CORE_VALUES,
-                //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
-                // }, {
+                    //     title: copy.navigation.CORE_VALUES,
+                    //     href: PageRoute.CORE_VALUES,
+                    //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
+                    // }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
                     badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
