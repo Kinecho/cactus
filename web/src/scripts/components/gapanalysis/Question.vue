@@ -1,6 +1,6 @@
 <template>
     <div>
-        <markdown-text :source="question.title"/>
+        <div class="titleMarkdown"><markdown-text :source="question.title"/></div>
         <div class="options">
             <template v-for="(option, index) in question.options">
                 <gap-option :option="option" :key="`option_${index}`" :selected="currentValue === option.value" @change="setValue"/>
@@ -37,5 +37,10 @@
 </script>
 
 <style scoped lang="scss">
+
+    .titleMarkdown {
+        margin: 0 auto 4rem;
+        max-width: 60rem;
+    }
 
 </style>
