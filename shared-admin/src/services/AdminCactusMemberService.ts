@@ -111,7 +111,6 @@ export default class AdminCactusMemberService {
                 reflections: stats
             }
         }
-        ;
 
         if (wordCloud) {
             data.wordCloud = wordCloud;

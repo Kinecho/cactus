@@ -98,6 +98,7 @@ export interface NavigationCopy {
     SOCIAL: string,
     JOURNAL: string,
     ACTIVITY: string,
+    INSIGHTS: string,
     HOME: string
 }
 

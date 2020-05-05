@@ -28,4 +28,5 @@ export enum PageRoute {
     VALUES_HOME = "/values",
     WELCOME = "/welcome",
     INSIGHTS_EMBED = '/insights-embed',
+    INSIGHTS = "/insights",
 }
