@@ -372,6 +372,8 @@
         }
 
         .subtext {
+            max-width: 17rem;
+
             @include r(960) {
                 max-width: 16rem;
             }
