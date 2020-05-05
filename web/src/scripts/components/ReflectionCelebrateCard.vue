@@ -163,6 +163,7 @@
     import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
     import Logger from "@shared/Logger";
     import { gtag } from "@web/analytics"
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("ReflectionCelebrateCard.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -382,12 +383,8 @@
             magicLinkError(message: string | undefined) {
                 logger.error("Celebrate component: Failed to send magic link", message);
             },
-            showLogin() {
-                this.$router.push(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going.")).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+            async showLogin() {
+                await pushRoute(PageRoute.SIGNUP + "?message=" + encodeURIComponent("Sign up to save your progress and keep your practice going."));
             },
             showCactusModal(element: keyof typeof CactusElement) {
                 this.cactusModalVisible = true;
