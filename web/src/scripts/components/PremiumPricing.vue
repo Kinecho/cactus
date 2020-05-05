@@ -81,6 +81,7 @@
     import { isAndroidApp } from "@web/DeviceUtil";
     import AndroidService from "@web/android/AndroidService";
     import { restoreAndroidPurchases } from "@web/checkoutService";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("PremiumPricing");
@@ -183,12 +184,8 @@
             }
         },
         methods: {
-            goToSignup() {
-                this.$router.push(PageRoute.SIGNUP).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+            async goToSignup() {
+                await pushRoute(PageRoute.SIGNUP);
             },
             getGroupDisplayName(entry: SubscriptionProductGroupEntry): string | undefined {
                 return entry.productGroup?.title ?? entry.tierDisplayName;

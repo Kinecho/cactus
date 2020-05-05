@@ -63,7 +63,7 @@
                     of how your values have been at the heart of past decisions and how they will unlock a happier
                     future. Your core values results will guide your Cactus reflections.</p>
 
-                <p>This tool is only available to Cactus Plus members...</p>
+                <p>Get your Core Values today when you try Cactus Plus.</p>
 
                 <button class="primaryBtn" @click="goToPricing">Upgrade</button>
             </template>
@@ -93,6 +93,7 @@
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import Spinner from "@components/Spinner.vue";
     import { logCoreValuesAssessmentCompleted, logCoreValuesAssessmentStarted, setUserId } from "@web/analytics";
+    import { pushRoute } from "@web/NavigationUtil";
 
     interface CoreValuesData {
         embed: boolean,
@@ -204,12 +205,7 @@
                         await this.loadCurrentResults();
 
                     } else {
-                        await this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        }
-                        );
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please log in to continue to Core Values") }`)
                     }
                     this.loading = false
                 }
@@ -250,11 +246,7 @@
                     }
 
                 } else {
-                    this.$router.push(PageRoute.PRICING).catch(error => {
-                        if (error.name !== "NavigationDuplicated") {
-                            logger.error(error)
-                        }
-                    });
+                    pushRoute(`${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true`);
                 }
             },
             async complete(assessmentResponse: CoreValuesAssessmentResponse) {

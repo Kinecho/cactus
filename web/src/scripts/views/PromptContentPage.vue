@@ -8,6 +8,7 @@
     import Prompt from "@components/PromptContent.vue"
     import Component from "vue-class-component";
     import Logger from "@shared/Logger"
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("PromptContentPage");
 
@@ -17,12 +18,8 @@
         }
     })
     export default class PromptContentPage extends Vue {
-        redirectToJournal() {
-            this.$router.push({ path: PageRoute.JOURNAL_HOME }).catch(error => {
-                if (error.name !== "NavigationDuplicated") {
-                    logger.error(error)
-                }
-            });
+        async redirectToJournal() {
+            await pushRoute({ path: PageRoute.JOURNAL_HOME });
         }
     }
 </script>

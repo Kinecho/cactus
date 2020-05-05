@@ -37,7 +37,7 @@
                 <h2>Core Values</h2>
                 <p class="subtext">What is most important for you so that you better understand past decisions and make
                     better decisions in the future.</p>
-                <button class="cvButton">Get My Core Values</button>
+                <router-link tag="button" class="cvButton" :to="coreValuesHref">Get My Core Values</router-link>
             </section>
 
             <div class="flexSections">
@@ -83,6 +83,7 @@
     import { CoreValuesBlob, getCoreValuesBlob } from "@shared/util/CoreValuesUtil";
     import { getQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -130,7 +131,7 @@
         }
 
         get hasCoreValues(): boolean {
-            return (this.member?.coreValues?.length ?? 0) > 0;
+            return isPremiumTier(this.member?.tier) && (this.member?.coreValues?.length ?? 0) > 0;
         }
 
         get coreValuesHref(): string {

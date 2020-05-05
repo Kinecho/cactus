@@ -185,6 +185,7 @@
     import DataExport from "@components/DataExport.vue";
     import AppSettings from "@shared/models/AppSettings";
     import AppSettingsService from "@web/services/AppSettingsService";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("AccountSettings.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -219,16 +220,12 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member, user }) => {
+                onData: async ({ member, user }) => {
                     this.member = member;
                     this.user = user;
                     this.authLoaded = true;
                     if (!member) {
-                        this.$router.push(PageRoute.HOME).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        });
+                        await pushRoute(PageRoute.HOME)
                     }
                 }
             });

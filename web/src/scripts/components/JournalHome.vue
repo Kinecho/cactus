@@ -116,6 +116,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue";
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -182,11 +183,7 @@
                         } else {
                             logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         }
-                        await this.$router.push(PageRoute.HOME).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        });
+                        await pushRoute(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -325,14 +322,10 @@
 
                 }
             },
-            launchCoreValues() {
+            async launchCoreValues() {
                 // TODO: launch core values assessment
                 // window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
-                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+                await pushRoute(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)

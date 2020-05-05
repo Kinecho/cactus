@@ -25,6 +25,7 @@
     import VueClipboard from "vue-clipboard2";
     import SocialSharing from "vue-social-sharing";
     import Logger from "@shared/Logger"
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SocialInvite");
 
@@ -52,13 +53,9 @@
         },
         beforeMount() {
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: async ({ member }) => {
                     if (!member) {
-                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        });
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(PageRoute.FRIENDS) }`)
                     }
                     this.member = member;
                     this.loading = false;

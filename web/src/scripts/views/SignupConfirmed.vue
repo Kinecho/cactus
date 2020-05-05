@@ -35,6 +35,7 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { appendQueryParams, isFeatureAuthUrl } from "@shared/util/StringUtil";
     import { PageRoute } from "@shared/PageRoutes";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("SignupConfirmed");
     export default Vue.extend({
@@ -90,11 +91,7 @@
                     redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                 }
 
-                await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
-                    if (error.name !== "NavigationDuplicated") {
-                        logger.error(error)
-                    }
-                });
+                await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
             },
             async handleResponse(response: EmailLinkSignupResult) {
                 if (response.credential) {
@@ -116,11 +113,7 @@
                             redirectUrl = appendQueryParams(redirectUrl, { memberId: member.id });
                         }
 
-                        await this.$router.push(redirectUrl || PageRoute.JOURNAL_HOME).catch(error => {
-                            if (error.name !== "NavigationDuplicated") {
-                                logger.error(error)
-                            }
-                        });
+                        await pushRoute(redirectUrl || PageRoute.JOURNAL_HOME);
                     }
 
                     return;
