@@ -1,9 +1,11 @@
 <template>
-    <div>
+    <div class="cvQuestion">
         <div class="titleMarkdown"><markdown-text :source="question.title"/></div>
-        <div class="options">
+        <div class="question-options">
             <template v-for="(option, index) in question.options">
-                <gap-option :option="option" :key="`option_${index}`" :selected="currentValue === option.value" @change="setValue"/>
+                <div class="item" :key="`option_${index}`">
+                    <gap-option :option="option" :selected="currentValue === option.value" @change="setValue"/>
+                </div>
             </template>
         </div>
     </div>
@@ -37,10 +39,24 @@
 </script>
 
 <style scoped lang="scss">
+    @import "variables";
+    @import "mixins";
+
+    .cvQuestion {
+        padding-top: 3.2rem;
+    }
 
     .titleMarkdown {
         margin: 0 auto 4rem;
         max-width: 60rem;
+    }
+
+    .question-options {
+        padding-bottom: 6.4rem;
+    }
+
+    .item {
+        margin-bottom: .8rem;
     }
 
 </style>
