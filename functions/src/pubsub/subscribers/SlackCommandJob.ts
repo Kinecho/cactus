@@ -232,12 +232,27 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
     const todayFields: SlackAttachmentField[] = [];
 
 
-    const [allMembers, unsubscriberes, allResponses, deletedUsers] = await Promise.all([
+    const [allMembers,
+        unsubscriberes,
+        allResponses,
+        deletedUsers,
+        trialStartMembers,
+        cancellationInitiatedMembers,
+    ] = await Promise.all([
         AdminCactusMemberService.getSharedInstance().getMembersCreatedSince(todayDate),
         AdminCactusMemberService.getSharedInstance().getMembersUnsubscribedSince(todayDate),
         AdminReflectionResponseService.getSharedInstance().getResponseSinceDate(todayDate),
         AdminDeletedUserService.getSharedInstance().getAllSince(todayDate),
-    ]) as [CactusMember[], CactusMember[], ReflectionResponse[], DeletedUser[]];
+        AdminCactusMemberService.getSharedInstance().getOptOutTrialStartedSince(todayDate),
+        AdminCactusMemberService.getSharedInstance().getCancellationsInitiatedSince(todayDate),
+    ]) as [
+        CactusMember[],
+        CactusMember[],
+        ReflectionResponse[],
+        DeletedUser[],
+        CactusMember[],
+        CactusMember[],
+    ];
 
 
     logger.log(`All tasks have completed for Today Stats for ${ getISODate(todayDate) }`);
@@ -302,7 +317,15 @@ async function getTodayStatFields(todayDate: Date): Promise<SlackAttachmentField
     },
     {
         title: "Deleted Users",
-        value: `${deletedUsers.length}`
+        value: `${ deletedUsers.length }`
+    },
+    {
+        title: "Trials Started (Opt Out)",
+        value: `${ trialStartMembers.length }`
+    },
+    {
+        title: "Subscription Cancellations Initiated",
+        value: `${ cancellationInitiatedMembers.length }`
     }
     );
     return todayFields;

@@ -759,8 +759,7 @@ export default class AdminSubscriptionService {
                 this.logger.error("Failed to complete android purchase - no cactus product was found", result);
                 return result;
             }
-
-
+            
             const payment = Payment.fromAndroidPurchase({
                 memberId: memberId,
                 subscriptionProductId,
