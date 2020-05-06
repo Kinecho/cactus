@@ -1,7 +1,9 @@
 <template>
     <div>
         <div class="centered">
+            <router-link :to="assessmentHref" tag="button" class="primary">Take The Quiz</router-link>
             <section class="hero">
+
                 <div class="heroText">
                     <h1>Boost your mental&nbsp;fitness</h1>
                     <p class="subtext">Research-backed prompts to increase self-awareness and&nbsp;resilience</p>
@@ -157,34 +159,42 @@
     import AppStoreIcon from "@components/AppStoreIcon.vue";
     import PlayStoreIcon from "@components/PlayStoreIcon.vue";
     import { configureLoginForm } from "@web/mailchimp";
+    import Component from "vue-class-component";
+    import { PageRoute } from "@shared/PageRoutes";
 
-    export default Vue.extend({
-        name: "MarketingHome",
+    @Component({
         components: {
             AppStoreIcon,
             PlayStoreIcon,
-        },
+        }
+    })
+    export default class MarketingHome extends Vue {
+        name = "MarketingHome";
+
         beforeMount() {
             this.isMobileDevice = (isAndroidDevice() || isIosDevice());
             this.isAndroidApp = isAndroidApp();
-        },
+        }
+
         mounted() {
             //Legacy sign up form code.
             configureLoginForm("email-form-bottom");
             configureLoginForm("sign-up-top");
-        },
-        data(): { isMobileDevice: boolean, isAndroidApp: boolean } {
-            return {
-                isMobileDevice: false,
-                isAndroidApp: false,
-            }
-        },
-        computed: {
-            showTryItHeader(): boolean {
-                return this.isMobileDevice && this.isAndroidApp;
-            }
         }
-    })
+
+        isMobileDevice = false;
+        isAndroidApp = false;
+
+
+        get assessmentHref(): string {
+            return PageRoute.GAP_ANALYSIS;
+        }
+
+        get showTryItHeader(): boolean {
+            return this.isMobileDevice && this.isAndroidApp;
+        }
+
+    }
 </script>
 
 <style scoped lang="scss">

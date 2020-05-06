@@ -2,7 +2,7 @@
     <div class="coreValuesPage">
         <div class="centered">
             <h1>Gap Analysis</h1>
-            <assessment :assessment="assessment" @questionChanged="setQuestion"/>
+            <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment"/>
         </div>
     </div>
 </template>
@@ -16,6 +16,11 @@
     import Logger from "@shared/Logger"
     import Results from "@components/gapanalysis/Results.vue";
     import ProgressStepper from "@components/ProgressStepper.vue";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
+    import { ListenerUnsubscriber } from "@web/services/FirestoreService";
+    import CactusMemberService from "@web/services/CactusMemberService";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -30,6 +35,16 @@
         assessment = GapAnalysisAssessment.create();
         latestResults: GapAnalysisAssessmentResult | undefined = undefined;
         currentPage: number = 0;
+        memberUnsubscriber?: ListenerUnsubscriber;
+        member?: CactusMember | undefined;
+
+        beforeMount() {
+            this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
+                onData: ({ member }) => {
+                    this.member = member;
+                }
+            })
+        }
 
         get results(): GapAnalysisAssessmentResult | undefined {
             return this.latestResults;
@@ -46,6 +61,19 @@
 
         setQuestion(questionIndex: number) {
             this.currentPage = questionIndex;
+        }
+
+        async closeAssessment() {
+            try {
+                if (this.member) {
+                    await pushRoute(PageRoute.INSIGHTS)
+                } else {
+                    await pushRoute(PageRoute.HOME);
+                }
+            } catch (error) {
+                logger.error("Failed to go back, navigating home");
+                await pushRoute(PageRoute.HOME);
+            }
         }
     }
 </script>

@@ -46,6 +46,9 @@
                         <p class="subtext light">Coming Soon</p>
                         <h2>Gap Analysis</h2>
                         <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
+                                                <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
+                        <button @click="showGapAssessment = true">Take Modal Quiz</button>
+                        <GapAssessmentModal :show="showGapAssessment" @close="showGapAssessment=false"/>
                     </div>
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
@@ -84,12 +87,15 @@
     import { getQueryParam } from "@web/util";
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
+    import { pushRoute } from "@web/NavigationUtil";
+    import GapAssessmentModal from "@components/gapanalysis/GapAssessmentModal.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
+            GapAssessmentModal,
             NavBar,
             Footer,
             WordCloud,
@@ -100,12 +106,18 @@
         authLoaded = false;
         member?: CactusMember;
         memberObserver?: ListenerUnsubscriber;
+        showGapAssessment = false;
 
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: async ({ member }) => {
                     this.member = member;
-                    this.authLoaded = true;
+
+                    if (!member) {
+                        await pushRoute(PageRoute.HOME);
+                    } else {
+                        this.authLoaded = true;
+                    }
                 }
             })
         }
@@ -136,6 +148,10 @@
 
         get coreValuesHref(): string {
             return `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
+        }
+
+        get gapAssessmentHref(): string {
+            return PageRoute.GAP_ANALYSIS;
         }
 
         get stats(): { value: string, label: string, unit: string, icon: string }[] {
@@ -193,7 +209,6 @@
                 href: `${ PageRoute.CORE_VALUES }?=${ QueryParam.CV_LAUNCH }=true`,
             }];
         }
-
     }
 </script>
 
