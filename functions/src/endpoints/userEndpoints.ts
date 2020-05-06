@@ -230,7 +230,7 @@ app.get("/feature-auth/core-values", async (req: functions.https.Request | any, 
 
         return;
     } else {
-        const pricingUrl = `${ getHostname() }${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true}`;
+        const pricingUrl = `${ getHostname() }${ PageRoute.PRICING }?${ QueryParam.CORE_VALUES }=true`;
         resp.redirect(pricingUrl);
 
         try {

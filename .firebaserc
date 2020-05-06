@@ -19,6 +19,9 @@
       "hosting": {
         "storybook": [
           "cactus-storybook-prod"
+        ],
+        "webapp": [
+          "cactus-app-prod"
         ]
       }
     }

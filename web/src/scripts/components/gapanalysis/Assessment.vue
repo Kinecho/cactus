@@ -1,7 +1,7 @@
 <template>
     <div class="assessment-container">
         <progress-stepper :current="currentStepperIndex || 0" :total="stepperTotal"/>
-        <button aria-label="Close" title="Close" class="close tertiary icon">
+        <button aria-label="Close" title="Close" class="close tertiary icon" @click="showCloseConfirm = true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                 <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
             </svg>
@@ -87,6 +87,8 @@
          * @type {{string: number|undefined}}
          */
         responseValues: Record<string, number | undefined> = {};
+
+        showCloseConfirm = false;
 
         @Watch("currentQuestionIndex")
         emitPageChange(newIndex: number) {
@@ -185,13 +187,22 @@
         get stepperTotal(): number {
             return this.assessment.questions.length + 1;
         }
+
+        async close() {
+            if (this.showCloseConfirm) {
+                this.$emit('close')
+            }
+            this.showCloseConfirm = true;
+            return;
+        }
     }
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/variables";
-    @import "~styles/mixins";
-    @import "~styles/assessment";
+    //noinspection CssUnknownTarget
+    @import "~assessment";
+    @import "variables";
+    @import "mixins";
 
     .intro {
         margin: 3.2rem auto 4rem;
@@ -202,14 +213,4 @@
         }
     }
 
-    // .temp {
-    //     font-family: monospace;
-    //     border: 1px solid lightgray;
-    //     margin: 4rem 0;
-    //
-    // }
-    //
-    // .actions {
-    //     margin: 2rem 0;
-    // }
 </style>

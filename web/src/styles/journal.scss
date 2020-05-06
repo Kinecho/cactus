@@ -10,7 +10,7 @@
   text-align: left;
 
   @include r(600) {
-      max-width: 64rem;
+      // max width is defined by the parent container, see JournalHome.vue
       padding: 3.2rem 2.4rem;
   }
 

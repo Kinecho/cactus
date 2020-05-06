@@ -37,12 +37,20 @@
                     </svg>
                     <span class="navLabel">{{copy.navigation.HOME}}</span>
                 </router-link>
-                <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
+                <!--        Activity        -->
+                <!-- <router-link class="navbarLink" :to="socialHref" v-if="loggedIn">
                     <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Activity</title>
                         <path fill="#07454C" d="M15 17.838L9.949 2.684c-.304-.912-1.594-.912-1.898 0L5.28 11H2a1 1 0 000 2h4a1 1 0 00.949-.684L9 6.162l5.051 15.154c.304.912 1.594.912 1.898 0L18.72 13H22a1 1 0 000-2h-4a1 1 0 00-.949.684L15 17.838z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.ACTIVITY}}</span>
                     <span class="badge" v-if="activityBadgeCount > 0" data-test="badge">{{activityBadgeCount}}</span>
+                </router-link> -->
+                <!-- INSIGHTS      -->
+                <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
+                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                        <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
+                    </svg>
+                    <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
                 </router-link>
                 <dropdown-menu :items="links" v-if="loggedIn" :displayName="displayName" :email="email">
                     <div class="navbar-avatar-container" slot="custom-button">
@@ -60,7 +68,6 @@
     import { FirebaseUser, getAuth } from '@web/firebase'
     import { getInitials, isBlank } from '@shared/util/StringUtil'
     import { PageRoute } from '@shared/PageRoutes'
-    import { gtag } from "@web/analytics"
     import { clickOutsideDirective } from '@web/vueDirectives'
     import { logout } from '@web/auth'
     import DropdownMenu from "@components/DropdownMenu.vue"
@@ -73,12 +80,12 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import { ListenerUnsubscriber } from '@web/services/FirestoreService';
-    import { fetchActivityFeedSummary } from '@web/social';
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
     import Logger from "@shared/Logger";
     import { isPremiumTier, subscriptionTierDisplayName } from "@shared/models/MemberSubscription";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("NavBar.vue");
     const copy = CopyService.getSharedInstance().copy;
@@ -125,11 +132,11 @@
                         })
                     }
 
-                    const oldMember = this.member;
+                    // const oldMember = this.member;
                     this.member = member;
-                    if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
-                        await this.updateActivityCount();
-                    }
+                    // if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
+                    //     await this.updateActivityCount();
+                    // }
                 }
             });
         },
@@ -170,11 +177,11 @@
                 return !!this.user;
             },
             links(): DropdownMenuLink[] {
-                const links: DropdownMenuLink[] = [{
-                    title: copy.navigation.CORE_VALUES,
-                    href: PageRoute.CORE_VALUES,
-                    calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
-                }, {
+                return [{
+                    //     title: copy.navigation.CORE_VALUES,
+                    //     href: PageRoute.CORE_VALUES,
+                    //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
+                    // }, {
                     title: copy.navigation.ACCOUNT,
                     href: PageRoute.ACCOUNT,
                     badge: subscriptionTierDisplayName(this.member?.tier, this.member?.isOptInTrialing)
@@ -185,8 +192,6 @@
                         await this.logout()
                     }
                 }];
-
-                return links;
             },
             displayName(): string | undefined | null {
                 return this.member ? this.member.getFullName() : null;
@@ -228,11 +233,14 @@
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
             },
-            socialHref(): string {
-                return PageRoute.SOCIAL;
-            },
+            // socialHref(): string {
+            //     return PageRoute.SOCIAL;
+            // },
             logoSrc(): string {
                 return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
+            },
+            insightsHref(): string {
+                return PageRoute.INSIGHTS
             }
         },
         methods: {
@@ -247,47 +255,47 @@
                     logger.error("Log out threw an error", error);
                 }
             },
-            goToLogin() {
-                this.$router.push(this.loginHref);
+            async goToLogin() {
+                await pushRoute(this.loginHref);
             },
-            goToSignup() {
-                this.$router.push(this.signupHref);
+            async goToSignup() {
+                await pushRoute(this.signupHref);
             },
-            scrollToSignup() {
-                if (!this.signupFormAnchorId) {
-                    return;
-                }
-
-                const scrollToId = this.signupFormAnchorId;
-
-                const content = document.getElementById(scrollToId);
-                gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
-                if (content) content.scrollIntoView();
-            },
-            async updateActivityCount() {
-                logger.log("Refreshing activity count");
-                const member = this.member;
-                if (!member) {
-                    return;
-                }
-
-                const activitySummary = await fetchActivityFeedSummary();
-                if (!activitySummary) {
-                    logger.error("Failed to fetch activity summary");
-                    this.activityBadgeCount = 0;
-                    return;
-                }
-                this.activityBadgeCount = activitySummary.unseenCount;
-                StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
-            }
+            // scrollToSignup() {
+            //     if (!this.signupFormAnchorId) {
+            //         return;
+            //     }
+            //
+            //     const scrollToId = this.signupFormAnchorId;
+            //
+            //     const content = document.getElementById(scrollToId);
+            //     gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
+            //     if (content) content.scrollIntoView();
+            // },
+            // async updateActivityCount() {
+            //     logger.log("Refreshing activity count");
+            //     const member = this.member;
+            //     if (!member) {
+            //         return;
+            //     }
+            //
+            //     const activitySummary = await fetchActivityFeedSummary();
+            //     if (!activitySummary) {
+            //         logger.error("Failed to fetch activity summary");
+            //         this.activityBadgeCount = 0;
+            //         return;
+            //     }
+            //     this.activityBadgeCount = activitySummary.unseenCount;
+            //     StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
+            // }
         }
     })
 </script>
 
 <style lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
     body.error header {
         background: $white;

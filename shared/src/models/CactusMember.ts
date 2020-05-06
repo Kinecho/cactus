@@ -72,8 +72,12 @@ export enum Field {
     subscriptionTrialEndsAt = "subscription.trial.endsAt",
     subscriptionStripeId = "subscription.stripeSubscriptionId",
     subscriptionCancellation = "subscription.cancellation",
+    subscriptionCancellationAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionCancellationInitiatedAt = "subscription.cancellation.userInitiatedAt",
     subscriptionActivated = "subscription.activated",
     subscriptionCanceledAccessEndsAt = "subscription.cancellation.accessEndsAt",
+    subscriptionOptOutTrialStartedAt = "subscription.optOutTrial.startedAt",
+    subscriptionOptOutTrialEndsAt = "subscription.optOutTrial.endsAt",
     stripeCustomerId = "stripe.customerId",
     coreValues = "coreValues",
 }
