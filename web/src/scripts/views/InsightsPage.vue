@@ -49,12 +49,18 @@
                     </div>
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                 </section>
-                <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
+                <section class="bubblesContainer borderContainer">
                     <div class="flexIt">
+                        <p class="subtext light" v-if="!isPlusMember">Cactus Plus Feature</p>
                         <h2>Word Bubbles</h2>
-                        <p class="subtext">These are the words used most in your daily reflections.</p>
+                        <p class="subtext" v-if="isPlusMember">These are the words used most in your daily
+                            reflections.</p>
+                        <p class="subtext" v-else>Discover the most used words in your daily reflections.</p>
+                        <p class="subtext" v-if="isPlusMember && !hasWordCloud">When you write in your daily
+                            reflections, this chart will come to life. </p>
+                        <router-link :to="pricingRoute" v-if="!isPlusMember">Try Plus for Free</router-link>
                     </div>
-                    <WordCloud class="word-cloud graph" v-if="hasWordCloud" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
+                    <WordCloud class="word-cloud graph" :start-blurred="false" :start-gated="false" :did-write="true" subscription-tier="PLUS" :logged-in="true" :words="wordCloud"/>
                 </section>
             </div>
 
@@ -68,7 +74,7 @@
     import Component from "vue-class-component";
     import Footer from "@components/StandardFooter.vue";
     import NavBar from "@components/NavBar.vue";
-    import WordCloud from "@components/MemberWordCloudInsights.vue";
+    import WordCloud from "@components/InsightWordChart.vue";
     import CactusMember from "@shared/models/CactusMember";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
@@ -110,6 +116,10 @@
             })
         }
 
+        get isPlusMember(): boolean {
+            return isPremiumTier(this.member?.tier);
+        }
+
         get coreValuesBlob(): CoreValuesBlob | undefined {
             const forceIndex = getQueryParam(QueryParam.BG_INDEX)
             logger.info("Forcing index: ", forceIndex);
@@ -118,7 +128,17 @@
             return blob;
         }
 
+        get pricingRoute(): string {
+            return PageRoute.PRICING;
+        }
+
         get wordCloud(): InsightWord[] {
+            if (!this.isPlusMember) {
+                return [{ word: "Believe", frequency: 1 }, { word: "toughness", frequency: 0.6 }, {
+                    word: "love",
+                    frequency: 0.7
+                }]
+            }
             return this.member?.wordCloud ?? [];
         }
 
