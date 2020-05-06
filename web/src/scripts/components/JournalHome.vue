@@ -116,6 +116,7 @@
     import SnackbarContent from "@components/SnackbarContent.vue";
     import { fireOptInStartTrialEvent } from "@web/analytics";
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("JournalHome.vue");
 
@@ -177,12 +178,11 @@
                 onData: async ({ member, user }) => {
                     if (!user) {
                         if (this.loggingOut) {
-                            logger.info("the user is in the process of logging out... not redirecting");
                             return;
                         } else {
                             logger.log("JournalHome - auth state changed and user was not logged in. Sending to journal");
                         }
-                        await this.$router.push(PageRoute.HOME);
+                        await pushRoute(PageRoute.HOME);
                         return;
                     }
                     const isFreshLogin = !this.cactusMember && member;
@@ -253,7 +253,6 @@
                                 this.journalEntries = entries;
                             },
                             onUpdated: (entry: JournalEntry, index?: number) => {
-                                logger.log(`entry updated at index ${ index }`, entry);
                                 if (index && index >= 0) {
                                     this.$set(this.$data.journalEntries, index, entry);
                                 }
@@ -314,17 +313,15 @@
                 const threshold = window.innerHeight / 3;
                 const distance = this.getScrollOffset();
                 if (distance <= threshold) {
-                    logger.log("load more! Offset = ", distance);
-
                     const willLoad = this.dataSource?.loadNextPage() || false;
                     this.showPageLoading = this.dataSource?.loadingPage || willLoad
 
                 }
             },
-            launchCoreValues() {
+            async launchCoreValues() {
                 // TODO: launch core values assessment
                 // window.location.href = `${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`;
-                this.$router.push(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
+                await pushRoute(`${ PageRoute.CORE_VALUES }?${ QueryParam.CV_LAUNCH }=true`)
             },
             getScrollOffset(): number {
                 return -1 * ((window.innerHeight + document.documentElement.scrollTop) - document.body.offsetHeight)
@@ -364,9 +361,9 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
     .container {
         min-height: 100vh;
@@ -477,6 +474,11 @@
         .journalList {
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            margin: 0 auto;
+            @include r(600) {
+                width: 64rem; //setting an explicit width fixes the "jumpy" sizing when the card first loads.
+            }
 
             .skeleton {
                 width: 100%;

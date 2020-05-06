@@ -173,7 +173,6 @@ export default class CactusMemberService {
             if (user) {
                 memberUnsubscriber = this.observeByUserId(user.uid, {
                     onData: (member) => {
-                        logger.log("[observeCurrentMember] member subscription created at typeof = ", typeof (member?.subscription?.trial?.startedAt));
                         options.onData({user: user, member: member})
                     }
                 })

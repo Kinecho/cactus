@@ -18,6 +18,7 @@ import { fireConfirmedSignupEvent, fireSignupEvent } from "@web/analytics";
 import Logger from "@shared/Logger";
 import { getAppType, isAndroidApp } from "@web/DeviceUtil";
 import router from "@web/router";
+import { pushRoute } from "@web/NavigationUtil";
 
 const logger = new Logger("auth.ts");
 const firebase = initializeFirebase();
@@ -34,7 +35,7 @@ export async function logout(options: LogoutOptions = DefaultLogoutOptions) {
         await getAuth().signOut();
         StorageService.clear();
         const url = options.redirectUrl ?? DefaultLogoutOptions.redirectUrl;
-        await router.push(url);
+        await pushRoute(url);
     } catch (error) {
         logger.error("Exception thrown while logging out", error);
     }

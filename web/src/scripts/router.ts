@@ -1,17 +1,48 @@
-import Vue from "vue";
-import VueRouter, { Route, RouteConfig } from "vue-router";
+import VueRouter from "vue-router";
 import { PageRoute } from "@shared/PageRoutes";
 import { logRouteChanged } from "@web/analytics";
 import Logger from "@shared/Logger";
-import { MetaRouteConfig, MetaTag, updateRouteMeta } from "@web/router-meta";
+import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
 import { isExternalUrl } from "@shared/util/StringUtil";
+import LoadingPage from "@web/views/LoadingPage.vue";
+import ErrorPage from "@web/views/ErrorPage.vue";
+import { Component, AsyncComponent } from "vue";
 
 const logger = new Logger("router.ts");
-Vue.use(VueRouter);
+
+function lazyLoadView(AsyncView: any): Promise<Component<any>> {
+    const AsyncHandler = (): any => ({
+        component: AsyncView,
+        // A component to use while the component is loading.
+        loading: LoadingPage,
+        // Delay before showing the loading component.
+        // Default: 200 (milliseconds).
+        delay: 400,
+        // A fallback component in case the timeout is exceeded
+        // when loading the component.
+        error: ErrorPage,
+        // Time before giving up trying to load the component.
+        // Default: Infinity (milliseconds).
+        timeout: 10000,
+    })
+
+    return Promise.resolve<Component<any>>({
+        functional: true,
+        render(h, params) {
+            // Transparently pass any props or children
+            // to the view component.
+            return h(AsyncHandler, params.data, params.children)
+        },
+    })
+}
 
 const routes: MetaRouteConfig[] = [
     {
-        component: () => import ("@web/views/HomePage.vue"),
+        path: "/loading",
+        component: LoadingPage,
+    },
+    {
+        component: () => lazyLoadView(import("@web/views/HomePage.vue")),
         path: "/",
         name: "Cactus",
         meta: {
@@ -27,7 +58,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@components/JournalHome.vue"),
+        component: () => lazyLoadView(import("@components/JournalHome.vue")),
         path: PageRoute.JOURNAL_HOME,
         name: "Home",
         meta: {
@@ -36,16 +67,16 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@web/views/InsightsEmbedPage.vue"),
+        component: () => lazyLoadView(import("@web/views/WordBubbleEmbedPage.vue")),
         path: PageRoute.INSIGHTS_EMBED,
-        name: "Insights",
+        name: "Insights Embed",
         meta: {
             title: "Insights",
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy."
         }
     },
     {
-        component: () => import("@web/views/SignUpView.vue"),
+        component: () => lazyLoadView(import("@web/views/SignUpView.vue")),
         path: PageRoute.SIGNUP,
         name: "Sign Up",
         meta: {
@@ -54,7 +85,7 @@ const routes: MetaRouteConfig[] = [
             description: "See yourself and the world more positively. Questions to help you become more mindful and reflect on what makes you happy.",
         }
     }, {
-        component: () => import("@web/views/SignUpView.vue"),
+        component: () => lazyLoadView(import("@web/views/SignUpView.vue")),
         path: PageRoute.LOGIN,
         name: "Log In",
         meta: {
@@ -64,7 +95,7 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@web/views/PromptContentPage.vue"),
+        component: () => lazyLoadView(import("@web/views/PromptContentPage.vue")),
         path: `${ PageRoute.PROMPTS_ROOT }/:entryId`,
         name: "Prompt",
         meta: {
@@ -73,27 +104,31 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@web/views/TermsOfServicePage.vue"),
+        component: () => lazyLoadView(import("@web/views/TermsOfServicePage.vue")),
         path: PageRoute.TERMS_OF_SERVICE,
         name: "Terms of Service",
     },
     {
-        component: () => import("@components/SharedReflectionPage.vue"),
+        path: PageRoute.VALUES_HOME,
+        redirect: PageRoute.CORE_VALUES,
+    },
+    {
+        component: () => lazyLoadView(import("@components/SharedReflectionPage.vue")),
         path: `${ PageRoute.SHARED_REFLECTION }/:reflectionId`,
         name: "Reflection"
     },
     {
-        component: () => import("@components/AndroidWelcome.vue"),
+        component: () => lazyLoadView(import("@components/AndroidWelcome.vue")),
         path: PageRoute.WELCOME,
         name: "Welcome",
     },
     {
-        component: () => import("@components/MagicLinkAppContinue.vue"),
+        component: () => lazyLoadView(import("@components/MagicLinkAppContinue.vue")),
         path: PageRoute.NATIVE_APP_MAGIC_LINK_LOGIN,
         name: "App Login",
     },
     {
-        component: () => import("@components/PricingPage.vue"),
+        component: () => lazyLoadView(import("@components/PricingPage.vue")),
         name: "Pricing",
         path: PageRoute.PRICING,
         meta: {
@@ -108,17 +143,17 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@components/SocialHome.vue"),
+        component: () => lazyLoadView(import("@components/SocialHome.vue")),
         name: "Friends & Activity | Cactus",
         path: PageRoute.SOCIAL,
     },
     {
-        component: () => import("@components/SocialInvite.vue"),
+        component: () => lazyLoadView(import("@components/SocialInvite.vue")),
         name: "Invite Friends | Cactus",
         path: PageRoute.FRIENDS
     },
     {
-        component: () => import("@components/CoreValuesPage.vue"),
+        component: () => lazyLoadView(import("@components/CoreValuesPage.vue")),
         path: PageRoute.CORE_VALUES,
         name: "Core Values",
         meta: {
@@ -140,47 +175,52 @@ const routes: MetaRouteConfig[] = [
         }
     },
     {
-        component: () => import("@components/EmailActionHandler.vue"),
+        component: () => lazyLoadView(import("@components/EmailActionHandler.vue")),
         path: PageRoute.AUTHENTICATE_ACTIONS,
         name: "Authentication",
     },
     {
-        component: () => import("@components/SponsorPage.vue"),
+        component: () => lazyLoadView(import("@components/SponsorPage.vue")),
         path: PageRoute.SPONSOR,
         name: "Sponsor",
     },
     {
-        component: () => import("@web/views/PrivacyPolicyPage.vue"),
+        component: () => lazyLoadView(import("@web/views/PrivacyPolicyPage.vue")),
         path: PageRoute.PRIVACY_POLICY,
         name: "Privacy Policy",
     },
     {
-        component: () => import("@components/AccountSettings.vue"),
+        component: () => lazyLoadView(import("@components/AccountSettings.vue")),
         path: PageRoute.ACCOUNT,
         name: "Account Settings",
     },
     {
-        component: () => import("@web/views/PaymentCanceled.vue"),
+        component: () => lazyLoadView(import("@web/views/PaymentCanceled.vue")),
         name: "Payment Canceled",
         path: PageRoute.PAYMENT_CANCELED,
     },
     {
-        component: () => import("@components/UnsubscribeConfirmedPage.vue"),
+        component: () => lazyLoadView(import("@components/UnsubscribeConfirmedPage.vue")),
         name: "Unsubscribe Confirmed",
         path: PageRoute.UNSUBSCRIBE_SUCCESS
     },
     {
-        component: () => import("@web/views/StripeCheckoutRedirect.vue"),
+        component: () => lazyLoadView(import("@web/views/StripeCheckoutRedirect.vue")),
         name: "Checkout",
         path: PageRoute.CHECKOUT,
     },
     {
-        component: () => import("@web/views/SignupConfirmed.vue"),
+        component: () => lazyLoadView(import("@web/views/SignupConfirmed.vue")),
         name: "Sign up",
         path: PageRoute.SIGNUP_CONFIRMED,
     },
     {
-        component: () => import("@components/404.vue"),
+        component: () => lazyLoadView(import("@web/views/InsightsPage.vue")),
+        name: "Insights",
+        path: PageRoute.INSIGHTS,
+    },
+    {
+        component: () => lazyLoadView(import("@components/404.vue")),
         path: "*",
         name: "Page Not Found",
     },
@@ -221,13 +261,11 @@ router.beforeEach((to, from, next) => {
         logger.error("Failed to handle before each check for external url. Sending to next", error);
         next();
     }
-
 })
 
 router.afterEach((to, from) => {
     // document.title = to.name || "Cactus";
     logRouteChanged(to);
 })
-
 
 export default router;

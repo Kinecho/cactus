@@ -3,9 +3,13 @@ import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 import CactusMember from "@shared/models/CactusMember";
 import { MemberSubscription } from "@shared/models/MemberSubscription";
 
+enum DeletedUserField {
+    memberDeletedAt = "memberDeletedAt"
+}
+
 export default class DeletedUser extends BaseModel {
     readonly collection = Collection.deletedUsers;
-
+    static Field = DeletedUserField;
     userId: string | undefined;
     memberId!: string;
     memberCreatedAt?: Date;

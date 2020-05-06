@@ -46,6 +46,7 @@ export enum QueryParam {
     BG_INDEX = "bg",
     TIER = "tier",
     DISPLAY_NAME = "displayName",
+    CLEAR_CACHE = "cc",
 }
 
 export function includesLandingQueryParams(params: object | undefined): boolean {

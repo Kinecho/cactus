@@ -15,7 +15,7 @@
     import { QueryParam } from "@shared/util/queryParams";
     import { fireRevealInsightEvent } from "@web/analytics";
 
-    const logger = new Logger("InsightsEmbed");
+    const logger = new Logger("WordBubbleEmbedPage");
 
     /**
      * Set up window functions for app interface

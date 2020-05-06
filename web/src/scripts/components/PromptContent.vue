@@ -131,6 +131,7 @@
     import FourOhFour from "@components/404.vue"
     import Logger from "@shared/Logger";
     import { RoutePageMeta, setPageMeta } from "@web/router-meta";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const logger = new Logger("PromptContent.vue");
     const flamelink = getFlamelink();
@@ -179,7 +180,7 @@
 
 
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: async ({ member }) => {
                     this.authLoaded = true;
                     this.member = member;
 
@@ -187,7 +188,7 @@
                         const afterLoginUrl = window.location.href;
                         logger.info("redirecting to after login url = ", afterLoginUrl)
                         logger.info("Pushing to router", `${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
-                        this.$router.push(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`);
+                        await pushRoute(`${ PageRoute.LOGIN }?${ QueryParam.REDIRECT_URL }=${ encodeURIComponent(afterLoginUrl) }`)
                     }
                 }
             });

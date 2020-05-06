@@ -1,5 +1,5 @@
 <template>
-    <skeleton-card v-if="!allLoaded" :sentPrompt="sentPrompt"/>
+    <skeleton-card v-if="!allLoaded" :sentPrompt="entry.sentPrompt"/>
     <div v-else class="journalEntry" v-bind:class="{new: !completed, isDone: completed, hasNote: hasNote}">
         <p class="date">{{dateLabel}}</p>
         <div class="menuParent">

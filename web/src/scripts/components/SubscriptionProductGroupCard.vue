@@ -74,6 +74,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import Logger from "@shared/Logger";
     import { stringifyJSON } from "@shared/util/ObjectUtil";
+    import { pushRoute } from "@web/NavigationUtil";
 
     const copy = CopyService.getSharedInstance().copy;
     const logger = new Logger("SubscriptionProductGroupCard");
@@ -238,13 +239,13 @@
                     this.checkoutError = undefined;
                 }
             },
-            goToAccount() {
+            async goToAccount() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.ACCOUNT);
+                await pushRoute(PageRoute.ACCOUNT)
             },
-            goToSignup() {
+            async goToSignup() {
                 this.isProcessing = false;
-                this.$router.push(PageRoute.SIGNUP);
+                await pushRoute(PageRoute.SIGNUP);
             },
         }
     })

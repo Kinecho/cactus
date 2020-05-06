@@ -36,7 +36,6 @@
         computed: {
             bodyComponent(): { name: string, props?: any } | undefined {
                 const entry: JournalEntry = this.entry;
-                logger.log("updating body component with journal entry stuffs");
                 if (!entry.allLoaded) {
                     return {name: "skeleton-entry"};
                 } else if (entry.promptContent) {
