@@ -49,10 +49,8 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
         }).addOption(1, "mysterious")
-        .addOption(2)
-        .addOption(3, "a work in progress", true)
-        .addOption(4)
-        .addOption(5, "well understood"),
+        .addOption(2, "a work in progress", true)
+        .addOption(3, "well understood"),
         //1
         Question.create({
             title: "I do something to intentionally improve my mental and emotional fitness...",
@@ -60,10 +58,8 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             gapType: GapType.importance,
         })
         .addOption(1, "rarely, if ever")
-        .addOption(2)
-        .addOption(3, "once a week")
-        .addOption(4)
-        .addOption(5, "every day"),
+        .addOption(2, "once a week")
+        .addOption(3, "every day"),
 
         //2
         Question.create({
@@ -71,11 +67,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.energy,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "completely dissatisfied")
-        .addOption(2)
-        .addOption(3, "somewhat satisfied")
-        .addOption(4)
-        .addOption(5, "completely satisfied"),
+        .addOption(1, "Completely dissatisfied")
+        .addOption(2, "Somewhat dissatisfied")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat satisfied")
+        .addOption(5, "Completely satisfied"),
 
         //3
         Question.create({
@@ -83,11 +79,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.energy,
             gapType: GapType.importance,
         })
-        .addOption(1, "not at all important")
-        .addOption(2)
-        .addOption(3, "somewhat important")
-        .addOption(4)
-        .addOption(5, "extremely important"),
+        .addOption(1, "Not at all important")
+        .addOption(2, "Slightly unimportant")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat important")
+        .addOption(5, "Extremely important"),
 
         //4
         Question.create({
@@ -95,11 +91,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.experience,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "completely dissatisfied")
-        .addOption(2)
-        .addOption(3, "somewhat satisfied")
-        .addOption(4)
-        .addOption(5, "completely satisfied"),
+        .addOption(1, "Completely dissatisfied")
+        .addOption(2, "Somewhat dissatisfied")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat satisfied")
+        .addOption(5, "Completely satisfied"),
 
         //5
         Question.create({
@@ -107,11 +103,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.experience,
             gapType: GapType.importance,
         })
-        .addOption(1, "not at all important")
-        .addOption(2)
-        .addOption(3, "somewhat important")
-        .addOption(4)
-        .addOption(5, "extremely important"),
+        .addOption(1, "Not at all important")
+        .addOption(2, "Slightly unimportant")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat important")
+        .addOption(5, "Extremely important"),
 
         //6
         Question.create({
@@ -119,11 +115,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.relationships,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "completely dissatisfied")
-        .addOption(2)
-        .addOption(3, "somewhat satisfied")
-        .addOption(4)
-        .addOption(5, "completely satisfied"),
+        .addOption(1, "Completely dissatisfied")
+        .addOption(2, "Somewhat dissatisfied")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat satisfied")
+        .addOption(5, "Completely satisfied"),
 
         //7
         Question.create({
@@ -131,11 +127,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.relationships,
             gapType: GapType.importance,
         })
-        .addOption(1, "not at all important")
-        .addOption(2)
-        .addOption(3, "somewhat important")
-        .addOption(4)
-        .addOption(5, "extremely important"),
+        .addOption(1, "Not at all important")
+        .addOption(2, "Slightly unimportant")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat important")
+        .addOption(5, "Extremely important"),
 
         //8
         Question.create({
@@ -143,11 +139,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "completely dissatisfied")
-        .addOption(2)
-        .addOption(3, "somewhat satisfied")
-        .addOption(4)
-        .addOption(5, "completely satisfied"),
+        .addOption(1, "Completely dissatisfied")
+        .addOption(2, "Somewhat dissatisfied")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat satisfied")
+        .addOption(5, "Completely satisfied"),
 
         //9
         Question.create({
@@ -155,11 +151,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.importance,
         })
-        .addOption(1, "not at all important")
-        .addOption(2)
-        .addOption(3, "somewhat important")
-        .addOption(4)
-        .addOption(5, "extremely important"),
+        .addOption(1, "Not at all important")
+        .addOption(2, "Slightly unimportant")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat important")
+        .addOption(5, "Extremely important"),
 
         //10
         Question.create({
@@ -167,11 +163,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.meaning,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "completely dissatisfied")
-        .addOption(2)
-        .addOption(3, "somewhat satisfied")
-        .addOption(4)
-        .addOption(5, "completely satisfied"),
+        .addOption(1, "Completely dissatisfied")
+        .addOption(2, "Somewhat dissatisfied")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat satisfied")
+        .addOption(5, "Completely satisfied"),
 
         //11
         Question.create({
@@ -179,11 +175,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.meaning,
             gapType: GapType.importance,
         })
-        .addOption(1, "not at all important")
-        .addOption(2)
-        .addOption(3, "somewhat important")
-        .addOption(4)
-        .addOption(5, "extremely important"),
+        .addOption(1, "Not at all important")
+        .addOption(2, "Slightly unimportant")
+        .addOption(3, "Neutral")
+        .addOption(4, "Somewhat important")
+        .addOption(5, "Extremely important"),
 
     ].map((q, index) => {
         q.id = `${ index }`
