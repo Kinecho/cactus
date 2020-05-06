@@ -361,9 +361,9 @@
 </script>
 
 <style scoped lang="scss">
-    @import "~styles/common";
-    @import "~styles/mixins";
-    @import "~styles/transitions";
+    @import "common";
+    @import "mixins";
+    @import "transitions";
 
     .container {
         min-height: 100vh;
@@ -474,6 +474,11 @@
         .journalList {
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            margin: 0 auto;
+            @include r(600) {
+                width: 64rem; //setting an explicit width fixes the "jumpy" sizing when the card first loads.
+            }
 
             .skeleton {
                 width: 100%;
