@@ -68,7 +68,6 @@
     import { FirebaseUser, getAuth } from '@web/firebase'
     import { getInitials, isBlank } from '@shared/util/StringUtil'
     import { PageRoute } from '@shared/PageRoutes'
-    import { gtag } from "@web/analytics"
     import { clickOutsideDirective } from '@web/vueDirectives'
     import { logout } from '@web/auth'
     import DropdownMenu from "@components/DropdownMenu.vue"
@@ -81,7 +80,6 @@
     import CactusMemberService from '@web/services/CactusMemberService'
     import CactusMember from "@shared/models/CactusMember"
     import { ListenerUnsubscriber } from '@web/services/FirestoreService';
-    import { fetchActivityFeedSummary } from '@web/social';
     import StorageService, { LocalStorageKey } from "@web/services/StorageService";
     import MemberProfile from "@shared/models/MemberProfile"
     import MemberProfileService from '@web/services/MemberProfileService'
@@ -134,11 +132,11 @@
                         })
                     }
 
-                    const oldMember = this.member;
+                    // const oldMember = this.member;
                     this.member = member;
-                    if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
-                        await this.updateActivityCount();
-                    }
+                    // if (member && member.activityStatus?.lastSeenOccurredAt !== oldMember?.activityStatus?.lastSeenOccurredAt || member?.id !== oldMember?.id) {
+                    //     await this.updateActivityCount();
+                    // }
                 }
             });
         },
@@ -179,7 +177,7 @@
                 return !!this.user;
             },
             links(): DropdownMenuLink[] {
-                const links: DropdownMenuLink[] = [{
+                return [{
                     //     title: copy.navigation.CORE_VALUES,
                     //     href: PageRoute.CORE_VALUES,
                     //     calloutText: !isPremiumTier(this.member?.tier) ? "Plus" : null
@@ -194,8 +192,6 @@
                         await this.logout()
                     }
                 }];
-
-                return links;
             },
             displayName(): string | undefined | null {
                 return this.member ? this.member.getFullName() : null;
@@ -237,9 +233,9 @@
             journalHref(): string {
                 return PageRoute.JOURNAL_HOME;
             },
-            socialHref(): string {
-                return PageRoute.SOCIAL;
-            },
+            // socialHref(): string {
+            //     return PageRoute.SOCIAL;
+            // },
             logoSrc(): string {
                 return this.whiteLogo ? "logoWhite.svg" : "logo.svg";
             },
@@ -265,33 +261,33 @@
             async goToSignup() {
                 await pushRoute(this.signupHref);
             },
-            scrollToSignup() {
-                if (!this.signupFormAnchorId) {
-                    return;
-                }
-
-                const scrollToId = this.signupFormAnchorId;
-
-                const content = document.getElementById(scrollToId);
-                gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
-                if (content) content.scrollIntoView();
-            },
-            async updateActivityCount() {
-                logger.log("Refreshing activity count");
-                const member = this.member;
-                if (!member) {
-                    return;
-                }
-
-                const activitySummary = await fetchActivityFeedSummary();
-                if (!activitySummary) {
-                    logger.error("Failed to fetch activity summary");
-                    this.activityBadgeCount = 0;
-                    return;
-                }
-                this.activityBadgeCount = activitySummary.unseenCount;
-                StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
-            }
+            // scrollToSignup() {
+            //     if (!this.signupFormAnchorId) {
+            //         return;
+            //     }
+            //
+            //     const scrollToId = this.signupFormAnchorId;
+            //
+            //     const content = document.getElementById(scrollToId);
+            //     gtag("event", "scroll_to", { formId: this.signupFormAnchorId });
+            //     if (content) content.scrollIntoView();
+            // },
+            // async updateActivityCount() {
+            //     logger.log("Refreshing activity count");
+            //     const member = this.member;
+            //     if (!member) {
+            //         return;
+            //     }
+            //
+            //     const activitySummary = await fetchActivityFeedSummary();
+            //     if (!activitySummary) {
+            //         logger.error("Failed to fetch activity summary");
+            //         this.activityBadgeCount = 0;
+            //         return;
+            //     }
+            //     this.activityBadgeCount = activitySummary.unseenCount;
+            //     StorageService.saveNumber(LocalStorageKey.activityBadgeCount, activitySummary.unseenCount);
+            // }
         }
     })
 </script>
