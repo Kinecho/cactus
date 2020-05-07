@@ -2,7 +2,7 @@
     <div class="assessment-container">
         <progress-stepper :current="currentStepperIndex || 0" :total="stepperTotal"/>
         <div class="paddingContainer">
-            <h4>1 of 10</h4>
+            <h4>{{currentQuestionIndex + 1}} of {{stepperTotal - 1 }}</h4>
             <button aria-label="Close" title="Close" class="close tertiary icon" @click="showCloseConfirm = true">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14">
                     <path fill="#33CCAB" d="M8.414 7l5.293 5.293a1 1 0 0 1-1.414 1.414L7 8.414l-5.293 5.293a1 1 0 1 1-1.414-1.414L5.586 7 .293 1.707A1 1 0 1 1 1.707.293L7 5.586 12.293.293a1 1 0 0 1 1.414 1.414L8.414 7z"/>
@@ -40,7 +40,7 @@
                 </div>
             </template>
             <div v-else-if="finished && result">
-                <Results :show-confetti="true" :results="result"/>
+                <Results :show-confetti="true" :results="result" @done="exitAssessment"/>
             </div>
         </div>
     </div>
@@ -60,6 +60,7 @@
     import Results from "@components/gapanalysis/Results.vue";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Modal from "@components/Modal.vue";
+    import { PageRoute } from "@shared/PageRoutes";
 
     const logger = new Logger("gap/Assessment");
 
@@ -161,8 +162,11 @@
             })
             logger.info("finishing assessment...", result);
             this.finished = true;
-            this.$emit('finished', result);
             this.result = result;
+        }
+
+        exitAssessment() {
+            this.$emit('finished', this.result);
         }
 
         start() {

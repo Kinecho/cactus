@@ -6,6 +6,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { RadarChartData } from "@shared/charts/RadarChartData";
 import { isBlank } from "@shared/util/StringUtil";
 import { addDecorator } from "@storybook/vue";
+import { RadarChartConfig } from "@web/charts/radarChart";
 
 const defaultChartData = [{
     name: "Importance",
@@ -39,7 +40,7 @@ window._toggleConfetti = () => {
 export const ResultScreen = () => Vue.extend({
     template: `
         <div>
-            <results-page :show-confetti="showConfetti" :results="results"/>
+            <results-page :show-confetti="showConfetti" :results="results" :chart-options="options"/>
         </div>
     `,
     components: {
@@ -52,9 +53,17 @@ export const ResultScreen = () => Vue.extend({
         errorMessage: {
             default: text("Error Message", ""),
         },
+        showRadarLabels: {
+            default: boolean("Show Radar Labels", false),
+        }
     },
 
     computed: {
+        options(): Partial<RadarChartConfig> {
+            return {
+                showLabels: this.showRadarLabels,
+            }
+        },
         results(): GapAnalysisAssessmentResult {
             return {
                 chartData: defaultChartData,

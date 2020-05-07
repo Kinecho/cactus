@@ -61,6 +61,9 @@ export const Configurable = () => Vue.extend({
         },
         fontSize: {
             default: number("Font Size", 12, undefined, "Chart"),
+        },
+        showLabels: {
+            default: boolean("Show Labels", false, "Chart"),
         }
     },
     computed: {
@@ -78,6 +81,7 @@ export const Configurable = () => Vue.extend({
                 w: this.circleDiameter,
                 h: this.circleDiameter,
                 fontSizePx: this.fontSize,
+                showLabels: this.showLabels,
             };
 
             if (this.showLegend) {

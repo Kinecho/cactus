@@ -2,7 +2,7 @@
     <div class="coreValuesPage">
         <div class="centered">
             <h1>Gap Analysis</h1>
-            <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment"/>
+            <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
         </div>
     </div>
 </template>
@@ -73,6 +73,15 @@
             } catch (error) {
                 logger.error("Failed to go back, navigating home");
                 await pushRoute(PageRoute.HOME);
+            }
+        }
+
+        async finishAssessment(results: GapAnalysisAssessmentResult) {
+            logger.info("gap results", results);
+            if (!this.member) {
+                await pushRoute(PageRoute.PRICING);
+            } else {
+                await pushRoute(PageRoute.INSIGHTS);
             }
         }
     }

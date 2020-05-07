@@ -35,7 +35,7 @@ export default class GapAnalysisAssessment {
 
     static create(): GapAnalysisAssessment {
         const assessment = new GapAnalysisAssessment();
-        assessment.questions = DEFAULT_QUESTIONS_V1();
+        assessment.questions = DEFAULT_QUESTIONS_V1().slice(0, 2);
 
         return assessment;
     }
