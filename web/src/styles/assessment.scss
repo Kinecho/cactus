@@ -129,3 +129,23 @@ button.close {
 .titleMarkdown {
     margin: 3.2rem auto 4rem;
 }
+
+.question-option {
+    background-color: $white;
+    border: 1px solid $lightestGreen;
+    margin-bottom: -1px;
+    padding-right: .8rem;
+    transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
+
+    &.selected {
+        background-color: transparentize($lightestGreen, .6);
+        font-weight: bold;
+    }
+
+    &:first-child {
+        border-radius: .4rem .4rem 0 0;
+    }
+    &:last-child {
+        border-radius: 0 0 .4rem .4rem;
+    }
+}
