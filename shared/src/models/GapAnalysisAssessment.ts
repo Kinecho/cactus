@@ -79,11 +79,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.energy,
             gapType: GapType.importance,
         })
-        .addOption(1, "Not at all important")
-        .addOption(2, "Slightly unimportant")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat important")
-        .addOption(5, "Extremely important"),
+        .addOption(1, "Not at all important", "barchart1")
+        .addOption(2, "Slightly unimportant", "barchart2")
+        .addOption(3, "Neutral", "barchart3")
+        .addOption(4, "Somewhat important", "barchart4")
+        .addOption(5, "Extremely important", "barchart5"),
 
         //4
         Question.create({
@@ -103,11 +103,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.experience,
             gapType: GapType.importance,
         })
-        .addOption(1, "Not at all important")
-        .addOption(2, "Slightly unimportant")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat important")
-        .addOption(5, "Extremely important"),
+        .addOption(1, "Not at all important", "barchart1")
+        .addOption(2, "Slightly unimportant", "barchart2")
+        .addOption(3, "Neutral", "barchart3")
+        .addOption(4, "Somewhat important", "barchart4")
+        .addOption(5, "Extremely important", "barchart5"),
 
         //6
         Question.create({
@@ -127,11 +127,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.relationships,
             gapType: GapType.importance,
         })
-        .addOption(1, "Not at all important")
-        .addOption(2, "Slightly unimportant")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat important")
-        .addOption(5, "Extremely important"),
+        .addOption(1, "Not at all important", "barchart1")
+        .addOption(2, "Slightly unimportant", "barchart2")
+        .addOption(3, "Neutral", "barchart3")
+        .addOption(4, "Somewhat important", "barchart4")
+        .addOption(5, "Extremely important", "barchart5"),
 
         //8
         Question.create({
@@ -151,11 +151,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.importance,
         })
-        .addOption(1, "Not at all important")
-        .addOption(2, "Slightly unimportant")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat important")
-        .addOption(5, "Extremely important"),
+        .addOption(1, "Not at all important", "barchart1")
+        .addOption(2, "Slightly unimportant", "barchart2")
+        .addOption(3, "Neutral", "barchart3")
+        .addOption(4, "Somewhat important", "barchart4")
+        .addOption(5, "Extremely important", "barchart5"),
 
         //10
         Question.create({
@@ -175,11 +175,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.meaning,
             gapType: GapType.importance,
         })
-        .addOption(1, "Not at all important")
-        .addOption(2, "Slightly unimportant")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat important")
-        .addOption(5, "Extremely important"),
+        .addOption(1, "Not at all important", "barchart1")
+        .addOption(2, "Slightly unimportant", "barchart2")
+        .addOption(3, "Neutral", "barchart3")
+        .addOption(4, "Somewhat important", "barchart4")
+        .addOption(5, "Extremely important", "barchart5"),
 
     ].map((q, index) => {
         q.id = `${ index }`
