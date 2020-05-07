@@ -50,12 +50,7 @@
         background-color: $darkestGreen;
         height: .5rem;
 
-        &.dots {
-            background-color: transparent;
-            justify-content: center;
-        }
-
-        &.rectangle.step {
+        .step {
             flex: 1;
 
             &.completed {
@@ -67,22 +62,26 @@
             }
         }
 
-        &.dots .step {
-            margin: 1rem;
-            width: .7rem;
-            height: .7rem;
-            border-radius: 50%;
+        &.dots {
+            background-color: transparent;
+            justify-content: center;
 
-            background-color: $darkerGreen;
+            .step {
+                margin: 1rem;
+                width: .7rem;
+                height: .7rem;
+                border-radius: 50%;
 
-            &.completed {
-                background-color: $green;
-            }
+                background-color: $darkerGreen;
 
-            &.current {
-                background-color: $green;
+                &.completed {
+                    background-color: $green;
+                }
+
+                &.current {
+                    background-color: $green;
+                }
             }
         }
-
     }
 </style>
