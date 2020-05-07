@@ -1,7 +1,8 @@
 <template>
     <label :class="['checkbox-container', this.classNames]">
         <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
-        <img class="icon" v-if="icon" :src="`assets/images/${icon}.svg`" />
+<!--        <img class="icon" v-if="icon" :src="`/assets/images/${icon}.svg`" />-->
+        <SvgIcon :icon="icon"/>
         <span class="checkmark" :class="selectTypeClass"></span>
         <span class="checkbox-label">{{ label }}</span>
     </label>
@@ -9,8 +10,11 @@
 <script lang="ts">
     import Vue from 'vue'
     import { QuestionType } from "@shared/models/Questions";
+    import { SvgIconName } from "@shared/types/IconTypes";
+    import SvgIcon from "@components/SvgIcon.vue";
 
     export default Vue.extend({
+        components: { SvgIcon },
         model: {
             prop: 'modelValue',
             event: 'change',
@@ -44,7 +48,7 @@
                 required: true,
             },
             icon: {
-                type: String,
+                type: String as () => SvgIconName,
                 required: false,
             },
             // We set `true-value` and `false-value` to the default true and false so

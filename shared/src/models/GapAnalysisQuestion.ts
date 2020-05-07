@@ -1,5 +1,6 @@
 import Option from "@shared/models/GapAnalysisQuestionOption";
 import { CactusElement } from "@shared/models/CactusElement";
+import { SvgIconName } from "@shared/types/IconTypes";
 
 export enum GapType {
     importance = "importance",
@@ -48,7 +49,7 @@ export default class GapAnalysisQuestion {
      * @param {boolean} selected
      * @return {GapAnalysisQuestion} Returns self
      */
-    addOption(value: number, label?: string, icon?: string, selected?: boolean): GapAnalysisQuestion {
+    addOption(value: number, label?: string, icon?: SvgIconName, selected?: boolean): GapAnalysisQuestion {
         this.options.push(Option.create(value, label, icon, selected));
         return this;
     }

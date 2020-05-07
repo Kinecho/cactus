@@ -15,9 +15,9 @@ const genericQuestion = (title: string) => {
         gapType: GapType.satisfaction,
     }).addOption(1, "Value 1")
     .addOption(2, "Value 2")
-    .addOption(3, "Value 3") 
-    .addOption(4, "Value 3")
-    .addOption(5, "Value 5")
+    .addOption(3, "Value 3", "cone")
+    .addOption(4, "Value 3", "barchart1")
+    .addOption(5, "Value 5", "crystalBall")
 }
 
 export const StandardQuestion = () => Vue.extend({
