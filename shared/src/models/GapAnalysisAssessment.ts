@@ -135,7 +135,7 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
 
         //8
         Question.create({
-            title: "As you strive towards optimism, how satisfied are you with your ability to embrace the spectrum of emotions you go through each day?",
+            title: "How satisfied are you with your ability to deal with the spectrum of different emotions you experience each day?",
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
         })

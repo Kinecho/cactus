@@ -3,9 +3,7 @@
         <div class="titleMarkdown"><markdown-text :source="question.title"/></div>
         <div class="question-options">
             <template v-for="(option, index) in question.options">
-                <div class="item" :key="`option_${index}`">
-                    <gap-option :option="option" :selected="currentValue === option.value" @change="setValue"/>
-                </div>
+                <gap-option :key="`option_${index}`" :option="option" :selected="currentValue === option.value" @change="setValue"/>
             </template>
         </div>
     </div>
@@ -54,10 +52,6 @@
 
     .question-options {
         padding-bottom: 6.4rem;
-    }
-
-    .item {
-        margin-bottom: .8rem;
     }
 
 </style>

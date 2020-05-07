@@ -56,19 +56,7 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
-
-    .question-option {
-        background-color: $white;
-        border: 1px solid $lightestGreen;
-        border-radius: .4rem;
-        padding-right: .8rem;
-        transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
-
-        &.selected {
-            background-color: transparentize($lightestGreen, .6);
-            font-weight: bold;
-        }
-    }
+    @import "styles/assessment";
 
     .main {
         align-items: center;
