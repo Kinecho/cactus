@@ -1,5 +1,5 @@
 <template>
-    <div class="question-option">
+    <div class="question-option" :class="[{'selected':selected}]">
         <div class="main">
             <div class="grow">
                 <check-box :model-value="selected"
@@ -31,8 +31,8 @@
         @Prop({ type: Object as () => GapAnalysisQuestionOption, required: true })
         option!: GapAnalysisQuestionOption;
 
-        @Prop({ type: Boolean, default: false, required: true })
-        selected!: boolean
+        @Prop({ type: Boolean, default: false, required: false })
+        selected: boolean = false
 
         @Prop({ type: Boolean, default: false, required: false })
         disabled: boolean = false
@@ -60,7 +60,14 @@
         background-color: $white;
         border: 1px solid $lightestGreen;
         border-radius: .4rem;
+        font-weight: normal;
         padding-right: .8rem;
+        transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
+
+        &.selected {
+            background-color: lighten($green, 40%);
+            font-weight: bold;
+        }
     }
 
     .main {
