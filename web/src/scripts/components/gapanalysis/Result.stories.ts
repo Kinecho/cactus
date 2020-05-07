@@ -1,11 +1,9 @@
 import Vue from "vue";
 import ResultsPage from "@components/gapanalysis/Results.vue";
-import { boolean, object, text, withKnobs, button } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
 import { CactusElement } from "@shared/models/CactusElement";
-import { RadarChartData } from "@shared/charts/RadarChartData";
 import { isBlank } from "@shared/util/StringUtil";
-import { addDecorator } from "@storybook/vue";
 import { RadarChartConfig } from "@web/charts/radarChart";
 
 const defaultChartData = [{
@@ -40,7 +38,7 @@ window._toggleConfetti = () => {
 export const ResultScreen = () => Vue.extend({
     template: `
         <div>
-            <results-page :show-confetti="showConfetti" :results="results" :chart-options="options"/>
+            <results-page :show-confetti="showConfetti" :results="results" :chart-options="options" :selectable-elements="elementsSelectable"/>
         </div>
     `,
     components: {
@@ -55,6 +53,9 @@ export const ResultScreen = () => Vue.extend({
         },
         showRadarLabels: {
             default: boolean("Show Radar Labels", false),
+        },
+        elementsSelectable: {
+            default: boolean("Selectable Elements", true),
         }
     },
 

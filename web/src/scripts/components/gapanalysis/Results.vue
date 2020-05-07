@@ -2,17 +2,23 @@
     <div>
         <cactus-confetti :running="showConfetti"/>
         <div class="row top">
-            <cactus-element element="emotions" class="element" @selected="elementClicked" :selected="selectedElement === 'emotions'"/>
+            <cactus-element
+                    element="emotions"
+                    class="element"
+                    @selected="elementClicked"
+                    :selectable="selectableElements"
+                    :selected="selectedElement === 'emotions'"
+            />
 
         </div>
         <div class="row middle">
-            <cactus-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'"/>
+            <cactus-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
             <radar-chart :chart-data="results.chartData" chart-id="assessment-1" :options="options"/>
-            <cactus-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'"/>
+            <cactus-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
         </div>
         <div class="row bottom">
-            <cactus-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'"/>
-            <cactus-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'"/>
+            <cactus-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+            <cactus-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
         </div>
 
         <button @click="done">Done</button>
@@ -46,6 +52,9 @@
 
         @Prop({ type: Object as () => Partial<RadarChartConfig>, required: false })
         chartOptions?: Partial<RadarChartConfig>
+
+        @Prop({ type: Boolean, required: false, default: true })
+        selectableElements = true;
 
         selectedElement: CactusElement | string | null = null;
 

@@ -1,5 +1,5 @@
 <template>
-    <div class="element-icon" @click="toggleElement" :class="{selected: selected}">
+    <div class="element-icon" @click="toggleElement" :class="{selected, selectable,}">
         <img :src="imageUrl" :alt="`${element} Icon`"/>
         <h4>{{element}}</h4>
     </div>
@@ -21,8 +21,14 @@
         @Prop({ type: Boolean, required: false, default: false })
         selected: boolean = false;
 
+        @Prop({ type: Boolean, required: false, default: true })
+        selectable = true;
+
         toggleElement() {
-            this.$emit('selected', this.element);
+            if (!this.selectable) {
+                return;
+            }
+            this.$emit('selected', this.selected ? undefined : this.element);
         }
 
         get imageUrl(): string | undefined {
@@ -63,7 +69,7 @@
             border: 2px solid green;
         }
 
-        &:hover {
+        &.selectable:hover {
             background: lightblue;
             cursor: pointer;
         }
