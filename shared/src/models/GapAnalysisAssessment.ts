@@ -48,9 +48,9 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             title: "You would describe your own thoughts and emotions as...",
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
-        }).addOption(1, "mysterious")
-        .addOption(2, "a work in progress")
-        .addOption(3, "well understood"),
+        }).addOption(1, "mysterious", "crystalBall")
+        .addOption(2, "a work in progress", "cone")
+        .addOption(3, "well understood", "donut"),
         //1
         Question.create({
             title: "I do something to intentionally improve my mental and emotional fitness...",
