@@ -33,7 +33,7 @@
     "tsc": "tsc",
     "tslint": "tslint -p tsconfig.json",
     "ngrok": "ngrok http -subdomain=cactus-web --host-header=rewrite 8080 ",
-    "storybook": "start-storybook -p 6006 --ci",
+    "storybook": "start-storybook -p 6006 --ci -s ./src",
     "build-storybook": "build-storybook",
     "deploy-storybook:stage": "firebase deploy --only hosting:storybook -P stage",
     "deploy-storybook:prod": "firebase deploy --only hosting:storybook -P prod"

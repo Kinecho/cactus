@@ -36,15 +36,15 @@
             }
             switch (this.element) {
                 case Element.meaning:
-                    return "https://cactus.app/assets/images/cacti/meaniningGrow.svg";
+                    return "/assets/images/cacti/meaniningGrow.svg";
                 case Element.emotions:
-                    return "https://cactus.app/assets/images/cacti/emotionsGrow.svg";
+                    return "/assets/images/cacti/emotionsGrow.svg";
                 case Element.relationships:
-                    return "https://cactus.app/assets/images/cacti/relationshipsGrow.svg";
+                    return "/assets/images/cacti/relationshipsGrow.svg";
                 case Element.experience:
-                    return "https://cactus.app/assets/images/cacti/experienceGrow.svg";
+                    return "/assets/images/cacti/experienceGrow.svg";
                 case Element.energy:
-                    return "https://cactus.app/assets/images/cacti/energy-3.svg";
+                    return "/assets/images/cacti/energy-3.svg";
             }
         }
     }
