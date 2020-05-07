@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="row top">
-            <cactus-element
+            <result-element
                     element="emotions"
                     class="element"
                     @selected="elementClicked"
@@ -11,13 +11,13 @@
 
         </div>
         <div class="row middle">
-            <cactus-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
+            <result-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
             <radar-chart :chart-data="results.chartData" chart-id="assessment-1" :options="options"/>
-            <cactus-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
+            <result-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
         </div>
         <div class="row bottom">
-            <cactus-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
-            <cactus-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
+            <result-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+            <result-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
         </div>
     </div>
 </template>
@@ -29,7 +29,7 @@
     import RadarChart from "@components/RadarChart.vue";
     import { Prop } from "vue-property-decorator";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-    import CactusElement from "@components/gapanalysis/CactusElement.vue";
+    import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
 
     /**
@@ -42,7 +42,7 @@
      */
     @Component({
         components: {
-            CactusElement,
+            ResultElement,
             CactusConfetti,
             RadarChart,
         }
@@ -58,13 +58,13 @@
         @Prop({ type: Boolean, required: false, default: true })
         selectableElements!: boolean;
 
-        selectedElement: CactusElement | string | null = null;
+        selectedElement: ResultElement | string | null = null;
 
         async done() {
             this.$emit('done')
         }
 
-        elementClicked(element: CactusElement | undefined) {
+        elementClicked(element: ResultElement | undefined) {
             if (this.selectedElement === element) {
                 this.selectedElement = null;
             }

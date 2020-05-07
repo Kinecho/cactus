@@ -47,7 +47,7 @@
                         <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
                         <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
                     </div>
-                    <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
+<!--                    <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>-->
                     <Results :results="fakeGapAnalysisResults" :selectable-elements="false"/>
                 </section>
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
@@ -530,6 +530,7 @@
         @include r(600) {
             align-items: flex-start;
             display: flex;
+            flex-direction: column;
         }
         @include r(768) {
             display: block;

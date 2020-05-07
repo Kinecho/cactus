@@ -13,7 +13,6 @@
 
     @Component
     export default class CactusElement extends Vue {
-        name = "CactusElement";
 
         @Prop({ type: [String as () => Element, String], required: true })
         element?: Element
