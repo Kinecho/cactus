@@ -42,6 +42,9 @@
                 </div>
             </div>
         </template>
+        <div v-else-if="processingResults">
+            <results-processing/>
+        </div>
         <div v-else-if="finished && result">
             <Results :show-confetti="true" :results="result" @done="exitAssessment"/>
         </div>
@@ -63,11 +66,14 @@
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Modal from "@components/Modal.vue";
     import { PageRoute } from "@shared/PageRoutes";
+    import Timeout = NodeJS.Timeout;
+    import ResultsProcessing from "@components/gapanalysis/ResultsProcessing.vue";
 
     const logger = new Logger("gap/Assessment");
 
     @Component({
         components: {
+            ResultsProcessing,
             Results,
             RadarChart,
             Question,
@@ -93,9 +99,17 @@
 
         showCloseConfirm = false;
 
+        processingResults = false;
+
+        processingTimeout?: number;
+
         @Watch("currentQuestionIndex")
         emitPageChange(newIndex: number) {
             this.$emit('questionChanged', newIndex);
+        }
+
+        destroyed() {
+            window.clearTimeout(this.processingTimeout);
         }
 
         get currentQuestion(): GapAnalysisQuestion | null {
@@ -164,6 +178,10 @@
             })
             logger.info("finishing assessment...", result);
             this.finished = true;
+            this.processingResults = true;
+            this.processingTimeout = window.setTimeout(() => {
+                this.processingResults = false;
+            }, 2500);
             this.result = result;
         }
 
