@@ -43,12 +43,13 @@
     @import "mixins";
 
     .cvQuestion {
+        margin: 0 auto;
+        max-width: 60rem;
         padding-top: 3.2rem;
     }
 
     .titleMarkdown {
-        margin: 0 auto 4rem;
-        max-width: 60rem;
+        margin-bottom: 4rem;
     }
 
     .question-options {
