@@ -1,5 +1,6 @@
 <template>
     <div>
+        <img src="https://cactus.app/assets/images/cvBlob.png"/>
         <spinner message="Processing Results"/>
     </div>
 </template>
