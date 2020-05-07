@@ -67,11 +67,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.energy,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "Completely dissatisfied")
-        .addOption(2, "Somewhat dissatisfied")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat satisfied")
-        .addOption(5, "Completely satisfied"),
+        .addOption(1, "Completely dissatisfied", "satisfied1")
+        .addOption(2, "Somewhat dissatisfied", "satisfied2")
+        .addOption(3, "Neutral", "satisfied3")
+        .addOption(4, "Somewhat satisfied", "satisfied4")
+        .addOption(5, "Completely satisfied", "satisfied5"),
 
         //3
         Question.create({
@@ -91,11 +91,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.experience,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "Completely dissatisfied")
-        .addOption(2, "Somewhat dissatisfied")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat satisfied")
-        .addOption(5, "Completely satisfied"),
+        .addOption(1, "Completely dissatisfied", "satisfied1")
+        .addOption(2, "Somewhat dissatisfied", "satisfied2")
+        .addOption(3, "Neutral", "satisfied3")
+        .addOption(4, "Somewhat satisfied", "satisfied4")
+        .addOption(5, "Completely satisfied", "satisfied5"),
 
         //5
         Question.create({
@@ -115,11 +115,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.relationships,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "Completely dissatisfied")
-        .addOption(2, "Somewhat dissatisfied")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat satisfied")
-        .addOption(5, "Completely satisfied"),
+        .addOption(1, "Completely dissatisfied", "satisfied1")
+        .addOption(2, "Somewhat dissatisfied", "satisfied2")
+        .addOption(3, "Neutral", "satisfied3")
+        .addOption(4, "Somewhat satisfied", "satisfied4")
+        .addOption(5, "Completely satisfied", "satisfied5"),
 
         //7
         Question.create({
@@ -139,11 +139,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "Completely dissatisfied")
-        .addOption(2, "Somewhat dissatisfied")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat satisfied")
-        .addOption(5, "Completely satisfied"),
+        .addOption(1, "Completely dissatisfied", "satisfied1")
+        .addOption(2, "Somewhat dissatisfied", "satisfied2")
+        .addOption(3, "Neutral", "satisfied3")
+        .addOption(4, "Somewhat satisfied", "satisfied4")
+        .addOption(5, "Completely satisfied", "satisfied5"),
 
         //9
         Question.create({
@@ -163,11 +163,11 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.meaning,
             gapType: GapType.satisfaction,
         })
-        .addOption(1, "Completely dissatisfied")
-        .addOption(2, "Somewhat dissatisfied")
-        .addOption(3, "Neutral")
-        .addOption(4, "Somewhat satisfied")
-        .addOption(5, "Completely satisfied"),
+        .addOption(1, "Completely dissatisfied", "satisfied1")
+        .addOption(2, "Somewhat dissatisfied", "satisfied2")
+        .addOption(3, "Neutral", "satisfied3")
+        .addOption(4, "Somewhat satisfied", "satisfied4")
+        .addOption(5, "Completely satisfied", "satisfied5"),
 
         //11
         Question.create({

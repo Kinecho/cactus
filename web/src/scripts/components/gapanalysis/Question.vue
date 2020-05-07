@@ -45,11 +45,11 @@
     .cvQuestion {
         margin: 0 auto;
         max-width: 60rem;
-        padding-top: 3.2rem;
     }
 
     .titleMarkdown {
-        margin-bottom: 4rem;
+        font-size: 2.4rem;
+        margin: 4.8rem auto;
     }
 
     .question-options {

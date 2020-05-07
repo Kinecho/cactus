@@ -84,12 +84,9 @@
     @import "variables";
     @import "mixins";
 
-    .cvQuestion {
-        padding-top: 3.2rem;
-    }
-
     .titleMarkdown {
-        margin: 0 auto 4rem;
+        font-size: 2.4rem;
+        margin: 4.8rem auto;
         max-width: 60rem;
     }
 
