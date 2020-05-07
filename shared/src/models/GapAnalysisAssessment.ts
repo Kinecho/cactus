@@ -49,7 +49,7 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.satisfaction,
         }).addOption(1, "mysterious")
-        .addOption(2, "a work in progress", true)
+        .addOption(2, "a work in progress")
         .addOption(3, "well understood"),
         //1
         Question.create({

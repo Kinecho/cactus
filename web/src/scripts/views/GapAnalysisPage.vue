@@ -1,7 +1,7 @@
 <template>
     <div class="coreValuesPage">
         <div class="centered">
-            <h1>Gap Analysis</h1>
+            <h1>Mental Fitness Quiz</h1>
             <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
         </div>
     </div>
