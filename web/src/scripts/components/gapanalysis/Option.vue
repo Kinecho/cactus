@@ -4,6 +4,7 @@
             <div class="grow">
                 <check-box :model-value="selected"
                         :label="label"
+                        :icon="icon"
                         @change="selectionChanged"
                         :type="this.type"
                         :disabled="disabled"
@@ -42,6 +43,9 @@
             this.$emit('change', selected, this.option.value);
         }
 
+        get icon(): string {
+            return this.option.icon ?? "";
+        }
         get label(): string {
             return this.option.label ?? "";
         }
