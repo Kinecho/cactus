@@ -110,7 +110,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     }
     maxValue = max(cfg.maxValue, maxValue);
 
-    const allAxisNames = data[0].axes.map((i, j) => i.axis),	//Names of each axis
+    const allAxisNames = data[0].axes.map((i, j) => i.axis).sort(),	//Names of each axis
     total = allAxisNames.length,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting

@@ -10,19 +10,19 @@ const defaultChartData = [{
     name: "Importance",
     axes:
     [
+        { value: 4, axis: CactusElement.relationships },
         { value: 2, axis: CactusElement.emotions },
+        { value: 4, axis: CactusElement.meaning },
         { value: 3, axis: CactusElement.energy },
         { value: 4, axis: CactusElement.experience },
-        { value: 4, axis: CactusElement.meaning },
-        { value: 4, axis: CactusElement.relationships },
     ]
 }, {
     name: "Satisfaction",
     axes: [
         { value: 5, axis: CactusElement.emotions },
+        { value: 1, axis: CactusElement.meaning },
         { value: 3, axis: CactusElement.energy },
         { value: 3, axis: CactusElement.experience },
-        { value: 1, axis: CactusElement.meaning },
         { value: 4, axis: CactusElement.relationships },
     ]
 }]
