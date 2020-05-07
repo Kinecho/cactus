@@ -78,6 +78,7 @@
                 this.selectedElement = null;
             }
             this.selectedElement = element ?? null;
+            this.$emit('elementSelected', element);
         }
 
         get options(): Partial<RadarChartConfig> {
