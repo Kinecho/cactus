@@ -1,21 +1,22 @@
 <template>
     <div class="main">
         <transition name="component-fade" mode="out-in">
-            <template v-if="currentIndex === 0">
+            <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
+            <div v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
                 <h1>Here are you results</h1>
                 <p>Swipe for more info</p>
-            </template>
+            </div>
 
-            <p class="message" v-else-if="currentIndex === 1">
+            <p class="message" v-else-if="currentIndex === 1" :key="`msg_${currentIndex}`">
                 Each of the five elements represents a core focus of a balanced life.
             </p>
-            <p class="message" v-else-if="currentIndex === 2">
+            <p class="message" v-else-if="currentIndex === 2" :key="`msg_${currentIndex}`">
                 The quiz scores each question to analyze each element on a 1 - 5 scale.
             </p>
-            <p class="message" v-else-if="currentIndex === 3">
+            <p class="message" v-else-if="currentIndex === 3" :key="`msg_${currentIndex}`">
                 The <span class="pink">pink hue</span> represents your commitment to the element.
             </p>
-            <p class="message" v-else-if="currentIndex === 4">
+            <p class="message" v-else-if="currentIndex === 4" :key="`msg_${currentIndex}`">
                 The <span class="blue">blue hue</span> represents your satisfaction to the element.
             </p>
         </transition>

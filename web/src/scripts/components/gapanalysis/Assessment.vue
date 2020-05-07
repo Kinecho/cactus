@@ -46,7 +46,7 @@
             <results-processing/>
         </div>
         <div v-else-if="finished && result">
-            <Results :results="result" @done="exitAssessment"/>
+            <results-onboarding :results="result" @done="exitAssessment"/>
             <button @click="exitAssessment">I AM DONE</button>
             <cactus-confetti :running="true"/>
         </div>
@@ -64,7 +64,7 @@
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
     import RadarChart from "@components/RadarChart.vue";
     import CactusConfetti from "@components/CactusConfetti.vue";
-    import Results from "@components/gapanalysis/Results.vue";
+    import ResultsOnboarding from "@components/gapanalysis/ResultsOnboarding.vue";
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Modal from "@components/Modal.vue";
     import ResultsProcessing from "@components/gapanalysis/ResultsProcessing.vue";
@@ -74,7 +74,7 @@
     @Component({
         components: {
             ResultsProcessing,
-            Results,
+            ResultsOnboarding,
             RadarChart,
             Question,
             CactusConfetti,
