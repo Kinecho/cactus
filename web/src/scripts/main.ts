@@ -14,7 +14,6 @@ logger.info("Starting single page app");
 export async function start() {
     new Vue({
         router,
-
         render: h => h(App),
     }).$mount("#app");
 }

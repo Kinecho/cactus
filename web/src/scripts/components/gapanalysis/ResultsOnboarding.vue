@@ -1,5 +1,6 @@
 <template>
-    <div class="main">
+    <div class="main" v-touch:swipe="swipeHandler">
+        <p class="big">{{swipeMessage}}</p>
         <transition name="component-fade" mode="out-in">
             <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
             <div v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
@@ -22,6 +23,7 @@
         </transition>
         <transition name="component-fade" mode="out-in">
             <result-graph :key="currentIndex"
+                    :v-touch="swipeHandler"
                     :chart-options="chartOptions"
                     :results="chartData(currentIndex)"
                     :selectable-elements="false"
@@ -51,9 +53,10 @@
     import { DEFAULT_CONFIG, RadarChartConfig } from "@web/charts/radarChart";
     import Logger from "@shared/Logger"
     import Results from "@components/gapanalysis/Results.vue";
+    import Vue2TouchEvents from "vue2-touch-events";
 
     const logger = new Logger("ResultsOnboarding");
-
+    Vue.use(Vue2TouchEvents)
 
     @Component({
         components: {
@@ -68,6 +71,7 @@
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         results!: GapAnalysisAssessmentResult;
 
+        swipeMessage = "Nothing yet";
         currentIndex = 0;
 
         get chartOptions(): Partial<RadarChartConfig> {
@@ -92,7 +96,9 @@
 
         chartData(index: number): GapAnalysisAssessmentResult {
             // return this.results;
-            logger.info("Getting chart data for index", index);
+            let data = this.results.chartData ?? [];
+
+            logger.info("Getting chart data for index", index, data);
             if (index === 2) {
                 logger.info("returning empty set");
                 return {
@@ -104,13 +110,16 @@
             }
             if (index === 3) { //only commitment
                 return {
-                    chartData: this.results.chartData?.filter(d => d.name !== "Importance")
+                    // chartData: this.results.chartData?.filter(d => d.name !== "Importance")
+                    // chartData: data.filter(d => d.name !== "Importance")
+                    chartData: [data[0]],
                 }
             }
 
             if (index === 4) { //only commitment
                 return {
-                    chartData: this.results.chartData?.filter(d => d.name !== "Satisfaction")
+                    // chartData: data.filter(d => d.name !== "Satisfaction")
+                    chartData: [data[1]]
                 }
             }
 
@@ -119,6 +128,19 @@
 
         get totalPages(): number {
             return 5;
+        }
+
+        swipeHandler(direction: any) {
+            logger.info("swipe detected:", direction)
+            this.swipeMessage = "swiped " + direction;
+
+            if (direction === "left") {
+                this.next();
+            }
+
+            if (direction === "right") {
+                this.previous();
+            }
         }
 
         previous() {
@@ -166,5 +188,10 @@
                 color: blue;
             }
         }
+    }
+
+    .big {
+        padding: 4rem;
+        background-color: lightblue;
     }
 </style>

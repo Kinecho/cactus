@@ -45,10 +45,16 @@
         <div v-else-if="processingResults">
             <results-processing/>
         </div>
-        <div v-else-if="finished && result">
-            <results-onboarding :results="result" @done="exitAssessment"/>
-            <button @click="exitAssessment">I AM DONE</button>
+        <div v-else-if="finished && result && !selectFocusArea">
+            <results-onboarding :results="result"/>
+            <button @click="selectFocusArea = true">Next</button>
             <cactus-confetti :running="true"/>
+        </div>
+        <div v-else-if="selectFocusArea">
+            <h4>Select an element to focus on.</h4>
+            <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
+            <p>{{selectedElement}}</p>
+            <button>Done (not wired)?</button>
         </div>
     </div>
 </template>
@@ -68,11 +74,14 @@
     import ProgressStepper from "@components/ProgressStepper.vue";
     import Modal from "@components/Modal.vue";
     import ResultsProcessing from "@components/gapanalysis/ResultsProcessing.vue";
+    import Results from "@components/gapanalysis/Results.vue";
+    import { CactusElement } from "@shared/models/CactusElement";
 
     const logger = new Logger("gap/Assessment");
 
     @Component({
         components: {
+            Results,
             ResultsProcessing,
             ResultsOnboarding,
             RadarChart,
@@ -103,6 +112,10 @@
 
         processingTimeout?: number;
 
+        selectFocusArea = false;
+
+        selectedElement: CactusElement | null = null;
+
         @Watch("currentQuestionIndex")
         emitPageChange(newIndex: number) {
             this.$emit('questionChanged', newIndex);
@@ -110,6 +123,10 @@
 
         destroyed() {
             window.clearTimeout(this.processingTimeout);
+        }
+
+        elementSelected(element: CactusElement | undefined) {
+            this.selectedElement = element ?? null;
         }
 
         get currentQuestion(): GapAnalysisQuestion | null {

@@ -9,7 +9,7 @@ export default {
 
 export const ResultsCarousel = () => Vue.extend({
     template: `
-        <div>
+        <div :style="{overflow: 'hidden'}">
             <results-onboarding :results="results" />
         </div>`,
     components: {
