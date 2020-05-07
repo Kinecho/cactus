@@ -31,6 +31,10 @@
                 type: Boolean,
                 default: false,
             },
+            vertCenter: {
+                type: Boolean,
+                default: false,
+            },
             modelValue: {
                 default: false,
                 type: [Boolean, String, Array],
@@ -64,6 +68,7 @@
                 return {
                     disabled: this.disabled,
                     extraPadding: this.extraPadding,
+                    vertCenter: this.vertCenter,
                     radio: this.type === QuestionType.RADIO,
                     checkbox: this.type === QuestionType.MULTI_SELECT
                 }
@@ -136,6 +141,9 @@
 
         &.extraPadding {
             padding: 1.6rem;
+        }
+        &.vertCenter {
+            align-items: center;
         }
     }
 
