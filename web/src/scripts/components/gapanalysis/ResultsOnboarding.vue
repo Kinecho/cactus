@@ -1,7 +1,7 @@
 <template>
     <div class="main" v-touch:swipe="swipeHandler">
         <p class="big">{{swipeMessage}}</p>
-        <transition :name="transitionName" mode="out-in">
+        <transition :name="transitionName" :mode="transitionMode">
             <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
             <div v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
                 <h1>Here are you results</h1>
@@ -54,6 +54,7 @@
     import Logger from "@shared/Logger"
     import Results from "@components/gapanalysis/Results.vue";
     import Vue2TouchEvents from "vue2-touch-events";
+
     const logger = new Logger("ResultsOnboarding");
     Vue.use(Vue2TouchEvents)
 
@@ -73,6 +74,7 @@
         swipeMessage = "Nothing yet";
         currentIndex = 0;
         transitionName = "component-fade";
+        transitionMode = "out-in";
 
         get chartOptions(): Partial<RadarChartConfig> {
             if (this.currentIndex === 2) {
@@ -135,21 +137,21 @@
             this.swipeMessage = "swiped " + direction;
 
             if (direction === "left") {
-                this.transitionName = "fade-out-left";
                 this.next();
             }
 
             if (direction === "right") {
-                this.transitionName = "fade-out-left";
                 this.previous();
             }
         }
 
         previous() {
+            this.transitionName = "slide-right";
             this.currentIndex = Math.max(this.currentIndex - 1, 0);
         }
 
         next() {
+            this.transitionName = "slide-left";
             this.currentIndex = Math.min(this.currentIndex + 1, this.totalPages - 1);
         }
 
