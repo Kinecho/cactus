@@ -46,7 +46,9 @@
             <results-processing/>
         </div>
         <div v-else-if="finished && result">
-            <Results :show-confetti="true" :results="result" @done="exitAssessment"/>
+            <Results :results="result" @done="exitAssessment"/>
+            <button @click="exitAssessment">I AM DONE</button>
+            <cactus-confetti :running="true"/>
         </div>
     </div>
 </template>

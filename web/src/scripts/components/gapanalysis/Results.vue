@@ -1,6 +1,5 @@
 <template>
     <div>
-        <cactus-confetti :running="showConfetti"/>
         <div class="row top">
             <cactus-element
                     element="emotions"
@@ -20,8 +19,6 @@
             <cactus-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
             <cactus-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
         </div>
-
-        <button @click="done">Done</button>
     </div>
 </template>
 
@@ -35,6 +32,14 @@
     import CactusElement from "@components/gapanalysis/CactusElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
 
+    /**
+     * Render the results of a Gap analysis assessment.
+     * This component is only responsible for rendering the chart and the CactusElement views,
+     * which can be selectable or not.
+     *
+     * This component should not contain any "continue" or "done" or "next" buttons.
+     * Those should be provided by the parent, around this component.
+     */
     @Component({
         components: {
             CactusElement,
@@ -44,9 +49,6 @@
     })
     export default class Results extends Vue {
 
-        @Prop({ type: Boolean, default: true })
-        showConfetti: boolean = true;
-
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         results!: GapAnalysisAssessmentResult;
 
@@ -54,7 +56,7 @@
         chartOptions?: Partial<RadarChartConfig>
 
         @Prop({ type: Boolean, required: false, default: true })
-        selectableElements = true;
+        selectableElements!: boolean;
 
         selectedElement: CactusElement | string | null = null;
 

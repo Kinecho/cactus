@@ -2,6 +2,7 @@ import GapAnalysisAssessment from "@shared/models/GapAnalysisAssessment";
 import { RadarChartData } from "@shared/charts/RadarChartData";
 import { isNotNull } from "@shared/util/ObjectUtil";
 import { GapType } from "@shared/models/GapAnalysisQuestion";
+import { CactusElement } from "@shared/models/CactusElement";
 
 export default class GapAnalysisAssessmentResult {
     errorMessage?: string;
@@ -40,5 +41,32 @@ export default class GapAnalysisAssessmentResult {
         result.chartData = Object.values(gapMap);
 
         return result;
+    }
+
+    static mock() {
+        const result = new GapAnalysisAssessmentResult();
+        result.chartData = [{
+            name: "Importance",
+            axes:
+            [
+                { value: 1, axis: CactusElement.relationships },
+                { value: 3, axis: CactusElement.experience },
+                { value: 1, axis: CactusElement.emotions },
+                { value: 5, axis: CactusElement.meaning },
+                { value: 1, axis: CactusElement.energy },
+            ]
+        }, {
+            name: "Satisfaction",
+            axes: [
+                { value: 1, axis: CactusElement.experience },
+                { value: 1, axis: CactusElement.emotions },
+                { value: 1, axis: CactusElement.meaning },
+                { value: 1, axis: CactusElement.energy },
+                { value: 4, axis: CactusElement.relationships },
+            ]
+        }]
+
+        return result;
+
     }
 }

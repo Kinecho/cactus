@@ -43,14 +43,12 @@
             <div class="flexSections">
                 <section class="gapContainer borderContainer">
                     <div class="gapText">
-                        <p class="subtext light">Coming Soon</p>
                         <h2>Gap Analysis</h2>
                         <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
-                                                <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
-                        <button @click="showGapAssessment = true">Take Modal Quiz</button>
-                        <GapAssessmentModal :show="showGapAssessment" @close="showGapAssessment=false"/>
+                        <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
                     </div>
                     <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
+                    <Results :results="fakeGapAnalysisResults" :selectable-elements="false"/>
                 </section>
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
@@ -88,14 +86,15 @@
     import Logger from "@shared/Logger"
     import { isPremiumTier } from "@shared/models/MemberSubscription";
     import { pushRoute } from "@web/NavigationUtil";
-    import GapAssessmentModal from "@components/gapanalysis/GapAssessmentModal.vue";
+    import Results from "@components/gapanalysis/Results.vue";
+    import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
 
     @Component({
         components: {
-            GapAssessmentModal,
+            Results,
             NavBar,
             Footer,
             WordCloud,
@@ -106,7 +105,6 @@
         authLoaded = false;
         member?: CactusMember;
         memberObserver?: ListenerUnsubscriber;
-        showGapAssessment = false;
 
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -208,6 +206,10 @@
                 title: "Retake Assessment",
                 href: `${ PageRoute.CORE_VALUES }?=${ QueryParam.CV_LAUNCH }=true`,
             }];
+        }
+
+        get fakeGapAnalysisResults(): GapAnalysisAssessmentResult {
+            return GapAnalysisAssessmentResult.mock();
         }
     }
 </script>
