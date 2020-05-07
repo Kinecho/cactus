@@ -1,12 +1,14 @@
 <template>
-    <div class="question-option">
+    <div class="question-option" :class="[{'selected':selected}]">
         <div class="main">
             <div class="grow">
                 <check-box :model-value="selected"
                         :label="label"
+                        :icon="icon"
                         @change="selectionChanged"
                         :type="this.type"
                         :disabled="disabled"
+                        :vertCenter="true"
                         :extraPadding="true"/>
             </div>
         </div>
@@ -30,8 +32,8 @@
         @Prop({ type: Object as () => GapAnalysisQuestionOption, required: true })
         option!: GapAnalysisQuestionOption;
 
-        @Prop({ type: Boolean, default: false, required: true })
-        selected!: boolean
+        @Prop({ type: Boolean, default: false, required: false })
+        selected: boolean = false
 
         @Prop({ type: Boolean, default: false, required: false })
         disabled: boolean = false
@@ -42,6 +44,9 @@
             this.$emit('change', selected, this.option.value);
         }
 
+        get icon(): string {
+            return this.option.icon ?? "";
+        }
         get label(): string {
             return this.option.label ?? "";
         }
@@ -57,6 +62,12 @@
         border: 1px solid $lightestGreen;
         border-radius: .4rem;
         padding-right: .8rem;
+        transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
+
+        &.selected {
+            background-color: transparentize($lightestGreen, .6);
+            font-weight: bold;
+        }
     }
 
     .main {
