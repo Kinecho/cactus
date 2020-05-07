@@ -13,16 +13,15 @@
 
     @Component
     export default class CactusElement extends Vue {
-        name = "CactusElement";
 
         @Prop({ type: [String as () => Element, String], required: true })
         element?: Element
 
         @Prop({ type: Boolean, required: false, default: false })
-        selected: boolean = false;
+        selected!: boolean;
 
         @Prop({ type: Boolean, required: false, default: true })
-        selectable = true;
+        selectable!: boolean;
 
         toggleElement() {
             if (!this.selectable) {

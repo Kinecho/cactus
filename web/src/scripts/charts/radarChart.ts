@@ -20,6 +20,9 @@ export interface RadarChartConfig {
     opacityCircles: number,
     strokeWidth: number,
     roundStrokes: boolean,
+    circleFillBaseColor: string,
+    showLevelLabel: boolean,
+    showTooltip: boolean,
     // color: d3.ScaleOrdinal<string, string>,
     format: string,
     unit: string,
@@ -34,9 +37,11 @@ export interface RadarChartConfig {
  * Default config
  * @type {{strokeWidth: number; margin: {top: number; left: number; bottom: number; right: number}; color: ScaleOrdinal<string, string>; maxValue: number; legend: boolean; h: number; format: string; opacityCircles: number; roundStrokes: boolean; opacityArea: number; wrapWidth: number; labelFactor: number; unit: string; w: number; levels: number; dotRadius: number}}
  */
-const DEFAULT_CONFIG = (): RadarChartConfig => ({
+export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     w: 200,				//Width of the circle
     h: 200,				//Height of the circle
+    circleFillBaseColor: "#CDCDCD",
+    showLevelLabel: false,
     margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
     maxValue: 5, 			//What is the value that the biggest circle will represent
@@ -50,6 +55,7 @@ const DEFAULT_CONFIG = (): RadarChartConfig => ({
     format: ',d',
     unit: '',
     legend: false,
+    showTooltip: false,
     colorValues: [
         "#CC33A1",
         "#6590ED",
@@ -114,7 +120,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
         r.axes = r.axes.sort((a, b) => a.axis.localeCompare(b.axis));
     })
 
-    const allAxisNames = data[0].axes.map((i, j) => i.axis).sort(),	//Names of each axis
+    const allAxisNames = data[0]?.axes.map((i, j) => i.axis)?.sort(),	//Names of each axis
     total = allAxisNames.length,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting
@@ -168,22 +174,25 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .append("circle")
     .attr("class", "gridCircle")
     .attr("r", d => radius / cfg.levels * d)
-    .style("fill", "#CDCDCD")
-    .style("stroke", "#CDCDCD")
+    .style("fill", cfg.circleFillBaseColor)
+    .style("stroke", cfg.circleFillBaseColor)
     .style("fill-opacity", cfg.opacityCircles)
     .style("filter", "url(#glow)");
 
-    //Text indicating at what % each level is
-    axisGrid.selectAll(".axisLabel")
-    .data(d3.range(1, (cfg.levels + 1)).reverse())
-    .enter().append("text")
-    .attr("class", "axisLabel")
-    .attr("x", 4)
-    .attr("y", d => -d * radius / cfg.levels)
-    .attr("dy", "0.4em")
-    .style("font-size", "10px")
-    .attr("fill", "#737373")
-    .text(d => Format(maxValue * d / cfg.levels) + cfg.unit);
+    if (cfg.showLevelLabel) {
+        //Text indicating at what % each level is
+        axisGrid.selectAll(".axisLabel")
+        .data(d3.range(1, (cfg.levels + 1)).reverse())
+        .enter().append("text")
+        .attr("class", "axisLabel")
+        .attr("x", 4)
+        .attr("y", d => -d * radius / cfg.levels)
+        .attr("dy", "0.4em")
+        .style("font-size", "10px")
+        .attr("fill", "#737373")
+        .text(d => Format(maxValue * d / cfg.levels) + cfg.unit);
+    }
+
 
     /////////////////////////////////////////////////////////
     //////////////////// Draw the axes //////////////////////
@@ -204,6 +213,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .attr("class", "line")
     .style("stroke", "white")
     .style("stroke-width", "2px");
+
 
     //Append the labels at each axis
     if (cfg.showLabels) {
@@ -292,44 +302,47 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     //////// Append invisible circles for tooltip ///////////
     /////////////////////////////////////////////////////////
 
-    //Wrapper for the invisible circles on top
-    const blobCircleWrapper = g.selectAll(".radarCircleWrapper")
-    .data(data)
-    .enter().append("g")
-    .attr("class", "radarCircleWrapper");
+    if (cfg.showTooltip) {
 
-    //Append a set of invisible circles on top for the mouseover pop-up
-    blobCircleWrapper.selectAll(".radarInvisibleCircle")
-    .data(d => d.axes)
-    .enter().append("circle")
-    .attr("class", "radarInvisibleCircle")
-    .attr("r", cfg.dotRadius * 1.5)
-    .attr("cx", (d, i) => rScale(d.value) * cos(angleSlice * i - HALF_PI))
-    .attr("cy", (d, i) => rScale(d.value) * sin(angleSlice * i - HALF_PI))
-    .style("fill", "none")
-    .style("pointer-events", "all")
-    .on("mouseover", function (d, i) {
-        tooltip
-        .attr('x', this.cx.baseVal.value - 10)
-        .attr('y', this.cy.baseVal.value - 10)
-        .transition()
-        .style('display', 'block')
-        .text(Format(d.value) + cfg.unit);
-    })
-    .on("mouseout", function () {
-        tooltip.transition()
-        .style('display', 'none').text('');
-    });
 
-    const tooltip = g.append("text")
-    .attr("class", "tooltip")
-    .attr('x', 0)
-    .attr('y', 0)
-    .style("font-size", "12px")
-    .style('display', 'none')
-    .attr("text-anchor", "middle")
-    .attr("dy", "0.35em");
+        //Wrapper for the invisible circles on top
+        const blobCircleWrapper = g.selectAll(".radarCircleWrapper")
+        .data(data)
+        .enter().append("g")
+        .attr("class", "radarCircleWrapper");
 
+        //Append a set of invisible circles on top for the mouseover pop-up
+        blobCircleWrapper.selectAll(".radarInvisibleCircle")
+        .data(d => d.axes)
+        .enter().append("circle")
+        .attr("class", "radarInvisibleCircle")
+        .attr("r", cfg.dotRadius * 1.5)
+        .attr("cx", (d, i) => rScale(d.value) * cos(angleSlice * i - HALF_PI))
+        .attr("cy", (d, i) => rScale(d.value) * sin(angleSlice * i - HALF_PI))
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .on("mouseover", function (d, i) {
+            tooltip
+            .attr('x', this.cx.baseVal.value - 10)
+            .attr('y', this.cy.baseVal.value - 10)
+            .transition()
+            .style('display', 'block')
+            .text(Format(d.value) + cfg.unit);
+        })
+        .on("mouseout", function () {
+            tooltip.transition()
+            .style('display', 'none').text('');
+        });
+
+        const tooltip = g.append("text")
+        .attr("class", "tooltip")
+        .attr('x', 0)
+        .attr('y', 0)
+        .style("font-size", "12px")
+        .style('display', 'none')
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em");
+    }
     if (cfg.legend !== false && typeof cfg.legend === "object") {
         const legendZone = svg.append('g');
         const names = data.map(el => el.name);

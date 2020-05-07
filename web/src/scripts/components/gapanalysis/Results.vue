@@ -1,8 +1,7 @@
 <template>
-    <div>
-        <cactus-confetti :running="showConfetti"/>
+    <div :class="{hideChart, hideElements }">
         <div class="row top">
-            <cactus-element
+            <result-element
                     element="emotions"
                     class="element"
                     @selected="elementClicked"
@@ -12,16 +11,14 @@
 
         </div>
         <div class="row middle">
-            <cactus-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
-            <radar-chart :chart-data="results.chartData" chart-id="assessment-1" :options="options"/>
-            <cactus-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
+            <result-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
+            <radar-chart :chart-data="results.chartData" :chart-id="chartId" :options="options" class="chart"/>
+            <result-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
         </div>
         <div class="row bottom">
-            <cactus-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
-            <cactus-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
+            <result-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+            <result-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
         </div>
-
-        <button @click="done">Done</button>
     </div>
 </template>
 
@@ -32,20 +29,25 @@
     import RadarChart from "@components/RadarChart.vue";
     import { Prop } from "vue-property-decorator";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-    import CactusElement from "@components/gapanalysis/CactusElement.vue";
+    import ResultElement from "@components/gapanalysis/ResultElement.vue";
     import { RadarChartConfig } from "@web/charts/radarChart";
 
+    /**
+     * Render the results of a Gap analysis assessment.
+     * This component is only responsible for rendering the chart and the CactusElement views,
+     * which can be selectable or not.
+     *
+     * This component should not contain any "continue" or "done" or "next" buttons.
+     * Those should be provided by the parent, around this component.
+     */
     @Component({
         components: {
-            CactusElement,
+            ResultElement,
             CactusConfetti,
             RadarChart,
         }
     })
     export default class Results extends Vue {
-
-        @Prop({ type: Boolean, default: true })
-        showConfetti: boolean = true;
 
         @Prop({ type: Object as () => GapAnalysisAssessmentResult, required: true })
         results!: GapAnalysisAssessmentResult;
@@ -54,15 +56,24 @@
         chartOptions?: Partial<RadarChartConfig>
 
         @Prop({ type: Boolean, required: false, default: true })
-        selectableElements = true;
+        selectableElements!: boolean;
 
-        selectedElement: CactusElement | string | null = null;
+        @Prop({ type: Boolean, required: false, default: false })
+        hideChart!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: false })
+        hideElements!: boolean;
+
+        @Prop({ type: String, required: false, default: "assessment-1" })
+        chartId!: string;
+
+        selectedElement: ResultElement | string | null = null;
 
         async done() {
             this.$emit('done')
         }
 
-        elementClicked(element: CactusElement | undefined) {
+        elementClicked(element: ResultElement | undefined) {
             if (this.selectedElement === element) {
                 this.selectedElement = null;
             }
@@ -86,6 +97,23 @@
 </script>
 
 <style scoped lang="scss">
+
+    .chart {
+        opacity: 1;
+    }
+
+    .hideChart {
+        .chart {
+            opacity: 0;
+        }
+    }
+
+    .hideElements {
+        .element {
+            opacity: 0;
+        }
+    }
+
     .row {
         display: flex;
         flex-direction: row;

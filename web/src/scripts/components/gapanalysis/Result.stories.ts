@@ -6,26 +6,7 @@ import { CactusElement } from "@shared/models/CactusElement";
 import { isBlank } from "@shared/util/StringUtil";
 import { RadarChartConfig } from "@web/charts/radarChart";
 
-const defaultChartData = [{
-    name: "Importance",
-    axes:
-    [
-        { value: 1, axis: CactusElement.relationships },
-        { value: 3, axis: CactusElement.experience },
-        { value: 1, axis: CactusElement.emotions },
-        { value: 5, axis: CactusElement.meaning },
-        { value: 1, axis: CactusElement.energy },
-    ]
-}, {
-    name: "Satisfaction",
-    axes: [
-        { value: 1, axis: CactusElement.experience },
-        { value: 1, axis: CactusElement.emotions },
-        { value: 1, axis: CactusElement.meaning },
-        { value: 1, axis: CactusElement.energy },
-        { value: 4, axis: CactusElement.relationships },
-    ]
-}]
+const defaultChartData = GapAnalysisAssessmentResult.mock().chartData;
 
 export default {
     title: "Gap Analysis/Assessment"
@@ -38,16 +19,13 @@ window._toggleConfetti = () => {
 export const ResultScreen = () => Vue.extend({
     template: `
         <div>
-            <results-page :show-confetti="showConfetti" :results="results" :chart-options="options" :selectable-elements="elementsSelectable"/>
+            <results-page :results="results" :chart-options="options" :selectable-elements="elementsSelectable"/>
         </div>
     `,
     components: {
         ResultsPage
     },
     props: {
-        showConfetti: {
-            default: boolean("Show Confetti (toggle to show again)", true)
-        },
         errorMessage: {
             default: text("Error Message", ""),
         },
