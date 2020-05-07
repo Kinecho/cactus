@@ -1,5 +1,5 @@
 <template>
-    <div class="progress">
+    <div class="progress" :class="[type]">
         <span v-for="(step, i) in steps" :key="`step_${i}`" class="step" :class="{completed: step.completed, current: step.current}"></span>
     </div>
 </template>
@@ -17,6 +17,7 @@
         props: {
             total: Number,
             current: { type: Number, default: 0 },
+            type: { type: String, default: "rectangle", required: false },
         },
         computed: {
             steps(): Step[] {
@@ -49,8 +50,30 @@
         background-color: $darkestGreen;
         height: .5rem;
 
-        .step {
+        &.dots {
+            background-color: transparent;
+            justify-content: center;
+        }
+
+        &.rectangle.step {
             flex: 1;
+
+            &.completed {
+                background-color: $green;
+            }
+
+            &.current {
+                background-color: $green;
+            }
+        }
+
+        &.dots .step {
+            margin: 1rem;
+            width: .7rem;
+            height: .7rem;
+            border-radius: 50%;
+
+            background-color: $darkerGreen;
 
             &.completed {
                 background-color: $green;
