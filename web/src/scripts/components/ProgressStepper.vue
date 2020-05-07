@@ -65,11 +65,14 @@
         &.dots {
             background-color: transparent;
             justify-content: center;
+            $diameter: 0.7rem;
+
+            height: $diameter;
 
             .step {
-                margin: 1rem;
-                width: .7rem;
-                height: .7rem;
+                margin: 0 1rem;
+                width: $diameter;
+                height: $diameter;
                 border-radius: 50%;
 
                 background-color: $darkerGreen;

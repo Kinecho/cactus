@@ -37,7 +37,7 @@ export interface RadarChartConfig {
  * Default config
  * @type {{strokeWidth: number; margin: {top: number; left: number; bottom: number; right: number}; color: ScaleOrdinal<string, string>; maxValue: number; legend: boolean; h: number; format: string; opacityCircles: number; roundStrokes: boolean; opacityArea: number; wrapWidth: number; labelFactor: number; unit: string; w: number; levels: number; dotRadius: number}}
  */
-const DEFAULT_CONFIG = (): RadarChartConfig => ({
+export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     w: 200,				//Width of the circle
     h: 200,				//Height of the circle
     circleFillBaseColor: "#CDCDCD",
@@ -120,7 +120,7 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
         r.axes = r.axes.sort((a, b) => a.axis.localeCompare(b.axis));
     })
 
-    const allAxisNames = data[0].axes.map((i, j) => i.axis).sort(),	//Names of each axis
+    const allAxisNames = data[0]?.axes.map((i, j) => i.axis)?.sort(),	//Names of each axis
     total = allAxisNames.length,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting

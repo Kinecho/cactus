@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="{hideChart, hideElements }">
         <div class="row top">
             <result-element
                     element="emotions"
@@ -12,7 +12,7 @@
         </div>
         <div class="row middle">
             <result-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
-            <radar-chart :chart-data="results.chartData" chart-id="assessment-1" :options="options"/>
+            <radar-chart :chart-data="results.chartData" :chart-id="chartId" :options="options" class="chart"/>
             <result-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
         </div>
         <div class="row bottom">
@@ -58,6 +58,15 @@
         @Prop({ type: Boolean, required: false, default: true })
         selectableElements!: boolean;
 
+        @Prop({ type: Boolean, required: false, default: false })
+        hideChart!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: false })
+        hideElements!: boolean;
+
+        @Prop({ type: String, required: false, default: "assessment-1" })
+        chartId!: string;
+
         selectedElement: ResultElement | string | null = null;
 
         async done() {
@@ -88,6 +97,23 @@
 </script>
 
 <style scoped lang="scss">
+
+    .chart {
+        opacity: 1;
+    }
+
+    .hideChart {
+        .chart {
+            opacity: 0;
+        }
+    }
+
+    .hideElements {
+        .element {
+            opacity: 0;
+        }
+    }
+
     .row {
         display: flex;
         flex-direction: row;
