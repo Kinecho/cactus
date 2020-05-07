@@ -1,5 +1,5 @@
 <template>
-    <div class="coreValuesPage">
+    <div class="gapAnalysisPage">
         <div class="centered">
             <h1>Mental Fitness Quiz</h1>
             <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
@@ -92,7 +92,7 @@
     @import "mixins";
     @import "variables";
 
-    .coreValuesPage {
+    .gapAnalysisPage {
         display: flex;
         flex-flow: column nowrap;
         min-height: 100vh;
@@ -100,38 +100,8 @@
         overflow: hidden;
         position: relative;
 
-        &:after {
-            background: url(assets/images/cvBlob.png) no-repeat;
-            content: "";
-            display: block;
-            height: 35rem;
-            overflow: hidden;
-            position: absolute;
-            left: 70%;
-            top: -26rem;
-            width: 40rem;
-        }
-
-        &:before {
-            background: url(assets/images/pinkVs.svg) no-repeat;
-            background-size: cover;
-            content: "";
-            display: block;
-            height: 17rem;
-            overflow: hidden;
-            position: absolute;
-            right: 70%;
-            top: 70%;
-            width: 18rem;
-        }
-
         @include r(768) {
             background-color: $beige;
-
-            &:after {
-                top: -22rem;
-                z-index: 0;
-            }
         }
 
         .centered {
