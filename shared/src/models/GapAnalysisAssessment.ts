@@ -57,9 +57,9 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             element: CactusElement.emotions,
             gapType: GapType.importance,
         })
-        .addOption(1, "rarely, if ever")
-        .addOption(2, "once a week")
-        .addOption(3, "every day"),
+        .addOption(1, "rarely, if ever", "frequency1")
+        .addOption(2, "once a week", "frequency2")
+        .addOption(3, "every day", "frequency3"),
 
         //2
         Question.create({
