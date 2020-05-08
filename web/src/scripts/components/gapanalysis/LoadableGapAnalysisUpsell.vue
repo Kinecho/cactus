@@ -1,0 +1,67 @@
+<template>
+    <GapAnalysisUpsell :checkout-loading="loading" :subscription-product="product" :element="element" @checkout="checkout"/>
+</template>
+
+<script lang="ts">
+    import Vue from "vue";
+    import Component from "vue-class-component"
+    import GapAnalysisUpsell from "@components/gapanalysis/GapAnalysisUpsell.vue";
+    import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
+    import { CactusElement } from "@shared/models/CactusElement";
+    import { Prop, Watch } from "vue-property-decorator";
+    import SubscriptionProductService from "@web/services/SubscriptionProductService";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("LoadableGapAnalysisUpsell");
+
+    @Component({
+        components: { GapAnalysisUpsell }
+    })
+    export default class LoadableGapAnalysisUpsell extends Vue {
+        name = "LoadableGapAnalysisUpsell";
+
+        @Prop({ type: String as () => CactusElement, required: true })
+        element!: CactusElement;
+
+        @Prop({ type: String as () => BillingPeriod, required: true, default: BillingPeriod.yearly })
+        billingPeriod!: BillingPeriod;
+
+
+        @Watch("billingPeriod")
+        async billingPeriodChanged(current: BillingPeriod, previous: BillingPeriod | undefined) {
+            if (current !== previous) {
+                await this.fetchProduct()
+            }
+        }
+
+        loaded = false;
+        product: SubscriptionProduct | null = null;
+
+        async beforeMount() {
+            await this.fetchProduct()
+        }
+
+        async fetchProduct() {
+            this.loaded = false;
+            this.product = await SubscriptionProductService.sharedInstance.getByBillingPeriod(this.billingPeriod) ?? null;
+            logger.info("Fetched subscription product for billing period: ", this.billingPeriod, this.product);
+            this.loaded = true;
+        }
+
+        get loading(): boolean {
+            return !this.loaded
+        }
+
+        /**
+         * Just relay it to the calling component
+         * @param {SubscriptionProduct | undefined | null} subscriptionProduct
+         */
+        checkout(subscriptionProduct: SubscriptionProduct | undefined | null) {
+            this.$emit('checkout', subscriptionProduct)
+        }
+    }
+</script>
+
+<style scoped lang="scss">
+
+</style>

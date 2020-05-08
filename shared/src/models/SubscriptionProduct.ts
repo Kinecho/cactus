@@ -1,5 +1,5 @@
-import FlamelinkModel, {SchemaName} from "@shared/FlamelinkModel";
-import {SubscriptionTier} from "@shared/models/SubscriptionProductGroup";
+import FlamelinkModel, { SchemaName } from "@shared/FlamelinkModel";
+import { SubscriptionTier } from "@shared/models/SubscriptionProductGroup";
 
 export enum BillingPeriod {
     weekly = "weekly",
@@ -14,7 +14,7 @@ enum Fields {
     stripePlanId = "stripePlanId",
     appleProductId = "appleProductId",
     androidProductId = "androidProductId",
-    billingPeriod = "billingPeriod,"
+    billingPeriod = "billingPeriod",
 }
 
 export default class SubscriptionProduct extends FlamelinkModel {

@@ -30,12 +30,15 @@ export default class SubscriptionProductService {
     }
 
     async getByBillingPeriod(billingPeriod: BillingPeriod): Promise<SubscriptionProduct | undefined> {
-        return await this.flamelinkService.getWhereFields([{
+        const result = await this.flamelinkService.getWhereFields([{
             name: SubscriptionProduct.Fields.availableForSale,
             value: true,
         }, {
             name: SubscriptionProduct.Fields.billingPeriod,
             value: billingPeriod,
         }], SubscriptionProduct);
+
+        logger.info("SubscriptionProduct by billing period", result);
+        return result;
     }
 }
