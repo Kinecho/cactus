@@ -51,5 +51,6 @@ export async function pushRoute(rawLocation: RawLocation) {
         if (error?.name !== "NavigationDuplicated") {
             logger.error(`Failed to push to route ${ rawLocation }`, error)
         }
+        logger.warn("navigation push error", error);
     }
 }
