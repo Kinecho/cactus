@@ -3,8 +3,8 @@
         <p class="big">{{swipeMessage}}</p>
         <transition :name="transitionName" :mode="transitionMode">
             <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
-            <div v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
-                <h1>Here are you results</h1>
+            <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
+                <h2>Here are your results</h2>
                 <p>Swipe for more info</p>
             </div>
 
@@ -163,39 +163,45 @@
     @import "transitions";
 
     .main {
+        text-align: center;
+
+        h2 {
+            color: $royal;
+        }
+
+        p {
+            font-size: 2rem;
+            margin: 0 auto 3.2rem;
+            max-width: 64rem;
+            opacity: .8;
+        }
+    }
+
+    .message {
+        margin-bottom: 3.2rem;
+    }
+
+    .progress-container {
         display: flex;
-        flex-direction: column;
+        justify-content: center;
+    }
 
-        padding: 3rem;
+    .actions {
+        margin: 3.2rem auto;
+    }
 
-        .progress-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-top: 3rem;
-        }
+    .pink {
+        color: $magenta;
+        font-weight: bold;
+    }
 
-        .actions {
-            display: flex;
-            justify-content: center;
-        }
-
-        .message {
-            .pink {
-                font-weight: bold;
-                color: pink;
-            }
-
-            .blue {
-                font-weight: bold;
-                color: blue;
-            }
-        }
+    .blue {
+        color: $royal;
+        font-weight: bold;
     }
 
     .big {
         padding: 4rem;
-        background-color: lightblue;
+        background: linear-gradient(to right, orange , yellow, green, cyan, blue, violet);
     }
 </style>
