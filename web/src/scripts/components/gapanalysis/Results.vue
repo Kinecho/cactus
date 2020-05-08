@@ -111,6 +111,10 @@
         margin: 0 auto;
         padding: 70px 0 20px; /*offset elements*/
         width: 22rem;
+
+        &.hideElements {
+            padding: 0;
+        }
     }
 
     .energy {
