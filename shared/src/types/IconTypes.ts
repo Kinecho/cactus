@@ -15,3 +15,6 @@ export type SvgIconName = |
 | "crystalBall"
 | "cone"
 | "donut"
+| "heart"
+| "pie"
+| "checkCircle"

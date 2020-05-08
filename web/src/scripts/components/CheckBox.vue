@@ -1,8 +1,8 @@
 <template>
     <label :class="['checkbox-container', this.classNames]">
         <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
-<!--        <img class="icon" v-if="icon" :src="`/assets/images/${icon}.svg`" />-->
-        <SvgIcon :icon="icon"/>
+        <!--        <img class="icon" v-if="icon" :src="`/assets/images/${icon}.svg`" />-->
+        <SvgIcon :icon="icon" v-if="icon"/>
         <span class="checkmark" :class="selectTypeClass"></span>
         <span class="checkbox-label">{{ label }}</span>
     </label>
@@ -146,6 +146,7 @@
         &.extraPadding {
             padding: 1.6rem;
         }
+
         &.vertCenter {
             align-items: center;
         }

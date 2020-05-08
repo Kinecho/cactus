@@ -298,3 +298,7 @@ export const StringTransforms = {
 
     }
 }
+
+export function formatPriceCentsUsd(priceCents: number): string {
+    return `$${ (priceCents / 100).toFixed(2) }`.replace(".00", "")
+}
