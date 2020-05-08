@@ -1,24 +1,17 @@
 <template>
-    <div :class="{hideChart, hideElements }">
-        <div class="row top">
-            <result-element
-                    element="emotions"
-                    class="element"
-                    @selected="elementClicked"
-                    :selectable="selectableElements"
-                    :selected="selectedElement === 'emotions'"
-            />
-
-        </div>
-        <div class="row middle">
-            <result-element element="relationships" class="element" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
-            <radar-chart :chart-data="results.chartData" :chart-id="chartId" :options="options" class="chart"/>
-            <result-element element="energy" class="element" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
-        </div>
-        <div class="row bottom">
-            <result-element element="meaning" class="element" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
-            <result-element element="experience" class="element" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
-        </div>
+    <div class="analysisResults" :class="{hideChart, hideElements}">
+        <radar-chart :chart-data="results.chartData" :chart-id="chartId" :options="options" class="chart"/>
+        <result-element
+                element="emotions"
+                class="element emotions"
+                @selected="elementClicked"
+                :selectable="selectableElements"
+                :selected="selectedElement === 'emotions'"
+        />
+        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
+        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
+        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
+        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
     </div>
 </template>
 
@@ -98,47 +91,50 @@
 </script>
 
 <style scoped lang="scss">
-
     .chart {
         opacity: 1;
     }
 
-    .hideChart {
-        .chart {
-            opacity: 0;
-        }
+    .hideChart .chart,
+    .hideElements .element {
+        opacity: 0;
     }
 
-    .hideElements {
-        .element {
-            opacity: 0;
-        }
+    .analysisResults {
+        display: grid;
+        grid-template-areas:
+            ". . energy . ."
+            "emotions emotions . meaning meaning"
+            "experience experience . relationships relationships";
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr;
+        margin: 0 auto;
+        padding: 70px 0 20px; /*offset elements*/
+        width: 22rem;
     }
 
-    .row {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-
-        .element {
-
-        }
-
-        &.middle {
-            .element {
-                transform: translateY(-4rem);
-                flex-basis: 20%;
-            }
-        }
-
-        &.bottom {
-            justify-content: center;
-            align-items: center;
-
-            .element {
-                flex-basis: 25%;
-            }
-        }
+    .energy {
+        grid-area: energy;
+        transform: translateY(-70px)
     }
+    .emotions {
+        grid-area: emotions;
+        transform: translate(-50px, -30px);
+    }
+    .meaning {
+        grid-area: meaning;
+        transform: translate(50px, -30px);
+    }
+    .experience {
+        grid-area: experience;
+        transform: translate(-20px, 20px);
+    }
+    .relationships {
+        grid-area: relationships;
+        transform: translate(20px, 20px);
+    }
+    .radar-container {
+        grid-area: 1 / 1 / 4 / 6;
+    }
+
 </style>

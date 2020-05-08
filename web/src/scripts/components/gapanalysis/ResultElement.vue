@@ -73,4 +73,8 @@
             cursor: pointer;
         }
     }
+
+    h4 {
+        font-size: 1.4rem;
+    }
 </style>
