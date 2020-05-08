@@ -1,5 +1,5 @@
 <template>
-    <img class="icon" v-if="icon" :src="imageUrl" :alt="icon"/>
+    <img class="icon" v-if="icon" :src="imageUrl" :alt="icon" :class="[size]"/>
 </template>
 
 <script lang="ts">
@@ -15,12 +15,21 @@
         @Prop({ type: String as () => SvgIconName, required: true })
         icon!: SvgIconName;
 
+        @Prop({ type: String, required: false, default: "default" })
+        size!: "default" | "large" | "small" | null;
+
         get imageUrl(): string {
-            return `/assets/images/${ this.icon }.svg`
+            return `/assets/icons/${ this.icon }.svg`
         }
     }
 </script>
 
 <style scoped lang="scss">
+    @import "common";
+    @import "variables";
+    @import "mixins";
 
+    .default {
+        width: 2.4rem;
+    }
 </style>

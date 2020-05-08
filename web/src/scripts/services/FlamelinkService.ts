@@ -226,4 +226,37 @@ export default class FlamelinkService {
             return {error, results: [], size: 0}
         }
     }
+
+    async getWhereFields<T extends FlamelinkModel>(fields: { name: string, value: any }[], Type: { new(): T }): Promise<T | undefined> {
+        const type = new Type();
+        const schema = type.schema;
+        const filters = fields.map(({name, value}) => {
+            return [name, "==", value]
+        });
+
+        // logger.log(`Fetching from ${schema} where ${JSON.stringify(filters, null, 2)}`);
+
+        const results = await this.flamelink.content.get({
+            filters,
+            schemaKey: schema
+        });
+
+        if (!results) {
+            return undefined
+        }
+
+        let content = results;
+
+        const values = Object.values(results);
+        if (Array.isArray(values)) {
+            [content] = values;
+        }
+
+        if (!content) {
+            return undefined
+        }
+
+        // logger.log("content found in flamelink", JSON.stringify(content, null, 2))
+        return fromFlamelinkData(content, Type);
+    }
 }

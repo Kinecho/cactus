@@ -1,7 +1,7 @@
-import {ListenerUnsubscriber} from "@web/services/FirestoreService";
+import { ListenerUnsubscriber } from "@web/services/FirestoreService";
 import Logger from "@shared/Logger";
-import FlamelinkService, {EntryObserverOptions} from "@web/services/FlamelinkService";
-import SubscriptionProduct from "@shared/models/SubscriptionProduct";
+import FlamelinkService, { EntryObserverOptions } from "@web/services/FlamelinkService";
+import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
 
 const logger = new Logger("SubscriptionProductService");
 export default class SubscriptionProductService {
@@ -27,5 +27,15 @@ export default class SubscriptionProductService {
             Type: SubscriptionProduct
         });
         return result.results;
+    }
+
+    async getByBillingPeriod(billingPeriod: BillingPeriod): Promise<SubscriptionProduct | undefined> {
+        return await this.flamelinkService.getWhereFields([{
+            name: SubscriptionProduct.Fields.availableForSale,
+            value: true,
+        }, {
+            name: SubscriptionProduct.Fields.billingPeriod,
+            value: billingPeriod,
+        }], SubscriptionProduct);
     }
 }
