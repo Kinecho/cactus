@@ -35,8 +35,12 @@ module.exports = (config) => {
 
             let parsedConfig = {}
 
+            // Object.keys(config).forEach(key => {
+            //     parsedConfig[key] = JSON.stringify(config[key])
+            // })
+
             Object.keys(config).forEach(key => {
-                parsedConfig[key] = JSON.stringify(config[key])
+                parsedConfig[`process.env.${key}`] = JSON.stringify(config[key])
             })
 
             let jsEntries = Object.keys(allPages).reduce((entries, title) => {

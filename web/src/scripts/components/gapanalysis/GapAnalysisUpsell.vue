@@ -36,10 +36,7 @@
                     <strong>Cancel anytime.</strong>
                 </p>
             </template>
-
         </section>
-
-
     </div>
 </template>
 

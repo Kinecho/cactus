@@ -1,6 +1,7 @@
 const helpers = require('../helpers')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-
+const appConfig = require('../webpack/config.stage')
+const webpack = require('webpack')
 const plugins = [new MiniCssExtractPlugin({
     // filename: isDev ? '[name].css' : '[id].[hash].css',
     // chunkFilename: isDev ? '[id].css' : '[id].[hash].css',
@@ -87,6 +88,17 @@ module.exports = {
         }
 
         // config.plugins.push(...plugins)
+
+
+        let parsedConfig = {}
+        Object.keys(appConfig).forEach(key => {
+            parsedConfig[`process.env.${key}`] = JSON.stringify(appConfig[key])
+        })
+
+        console.log('parseConfig', JSON.stringify(parsedConfig))
+        config.plugins.push(new webpack.DefinePlugin({
+            ...parsedConfig,
+        }))
 
         return config
     },

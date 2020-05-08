@@ -3,11 +3,13 @@ import GapAnalysisUpsell from "@components/gapanalysis/GapAnalysisUpsell.vue";
 import { CactusElement } from "@shared/models/CactusElement";
 import { boolean, number, select } from "@storybook/addon-knobs";
 import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 import Logger from "@shared/Logger"
+import { Config } from "@web/config";
 
 const logger = new Logger("GapAnalysisUpsell.stories");
 
+logger.info("APP SCHEME: " + Config.appCustomScheme);
 
 export default {
     title: "Gap Analysis",
@@ -16,6 +18,7 @@ export default {
 export const Upsell = () => Vue.extend({
     template: `
         <div>
+            <!--            <h1>{{config.apiDomain}}</h1>-->
             <GapAnalysisUpsell :element="element"
                     :subscription-product="product"
                     @checkout="checkout"
@@ -54,6 +57,7 @@ export const Upsell = () => Vue.extend({
     },
     data() {
         return {
+            // config: Config,
             checkoutLoading: false,
         }
     },
