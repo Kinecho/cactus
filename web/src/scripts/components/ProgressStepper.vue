@@ -46,45 +46,37 @@
 
     .progress {
         display: flex;
-        flex-direction: row;
-        background-color: $darkestGreen;
-        height: .5rem;
 
-        .step {
-            flex: 1;
+        &.rectangle {
+            background-color: $darkestGreen;
 
-            &.completed {
-                background-color: $green;
-            }
-
-            &.current {
-                background-color: $green;
+            .step {
+                flex: 1;
+                height: .4rem;
             }
         }
 
         &.dots {
-            background-color: transparent;
-            justify-content: center;
-            $diameter: 0.7rem;
-
+            $diameter: 0.8rem;
             height: $diameter;
+            justify-content: center;
 
             .step {
-                margin: 0 1rem;
-                width: $diameter;
-                height: $diameter;
                 border-radius: 50%;
-
-                background-color: $darkerGreen;
-
-                &.completed {
-                    background-color: $green;
-                }
-
-                &.current {
-                    background-color: $green;
-                }
+                height: $diameter;
+                margin: 0 .4rem;
+                width: $diameter;
             }
         }
     }
+
+    .step {
+        background-color: $darkestGreen;
+
+        &.completed,
+        &.current {
+            background-color: $green;
+        }
+    }
+
 </style>
