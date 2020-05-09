@@ -98,7 +98,7 @@
         }
 
         checkout() {
-            this.$emit('checkout');
+            this.$emit('checkout', this.subscriptionProduct);
         }
     }
 </script>
