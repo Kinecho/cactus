@@ -1,45 +1,46 @@
 <template>
-    <div class="main" v-touch:swipe="swipeHandler">
-        <p class="big">{{swipeMessage}}</p>
-        <transition :name="transitionName" :mode="transitionMode">
-            <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
-            <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
-                <h2>Here are your results</h2>
-                <p>Swipe for more info</p>
-            </div>
-
-            <p class="message" v-else-if="currentIndex === 1" :key="`msg_${currentIndex}`">
-                Each of the five elements represents a core focus of a balanced life.
-            </p>
-            <p class="message" v-else-if="currentIndex === 2" :key="`msg_${currentIndex}`">
-                The quiz scores each question to analyze each element on a 1 - 5 scale.
-            </p>
-            <p class="message" v-else-if="currentIndex === 3" :key="`msg_${currentIndex}`">
-                The <span class="pink">pink hue</span> represents your commitment to the element.
-            </p>
-            <p class="message" v-else-if="currentIndex === 4" :key="`msg_${currentIndex}`">
-                The <span class="blue">blue hue</span> represents your satisfaction to the element.
-            </p>
-        </transition>
-        <transition name="component-fade" mode="out-in">
-            <result-graph :key="currentIndex"
-                    :v-touch="swipeHandler"
-                    :chart-options="chartOptions"
-                    :results="chartData(currentIndex)"
-                    :selectable-elements="false"
-                    :hide-chart="currentIndex === 1"
-                    :hide-elements="currentIndex > 1"
-                    :chartId="`chart_${currentIndex}`"/>
-        </transition>
+    <div class="resultsOnboarding" v-touch:swipe="swipeHandler">
+        <div class="big">{{swipeMessage}}</div>
+        <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
+        <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
+            <h2>Here are your results</h2>
+            <p class="swipeMsg">Swipe for more info</p>
+        </div>
+        <p class="message" v-else-if="currentIndex === 1" :key="`msg_${currentIndex}`">
+            Each of the five elements represents a core focus of a balanced life.
+        </p>
+        <p class="message" v-else-if="currentIndex === 2" :key="`msg_${currentIndex}`">
+            The quiz scores each question to analyze each element on a 1 - 5 scale.
+        </p>
+        <div class="message" v-else-if="currentIndex === 3" :key="`msg_${currentIndex}`">
+            <p>The <span class="pink">pink hue</span> represents your commitment to the element.</p>
+        </div>
+        <div class="message" v-else-if="currentIndex === 4" :key="`msg_${currentIndex}`">
+            <p>The <span class="blue">blue hue</span> represents your satisfaction to the element.</p>
+        </div>
+        <result-graph :key="currentIndex"
+                :v-touch="swipeHandler"
+                :chart-options="chartOptions"
+                :results="chartData(currentIndex)"
+                :selectable-elements="false"
+                :hide-chart="currentIndex === 1"
+                :hide-elements="currentIndex > 1"
+                :chartId="`chart_${currentIndex}`"/>
 
         <div class="actions">
-            <button @click="previous" class="no-loading" :disabled="currentIndex < 1">Previous</button>
-            <button @click="next" class="no-loading" :disabled="currentIndex >= totalPages - 1">Next</button>
+            <button aria-label="Previous" @click="previous" class="tertiary icon left no-loading" :disabled="currentIndex < 1">
+                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                </svg>
+            </button>
+            <button aria-label="Next" @click="next" class="tertiary icon right no-loading" :disabled="currentIndex >= totalPages - 1">
+                <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
+                    <path fill="#29A389" d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
+                </svg>
+            </button>
         </div>
 
-        <div class="progress-container">
-            <progress-stepper type="dots" :total="totalPages" :current="currentIndex"/>
-        </div>
+        <progress-stepper type="dots" :total="totalPages" :current="currentIndex"/>
     </div>
 </template>
 
@@ -161,33 +162,41 @@
 <style scoped lang="scss">
     @import "variables";
     @import "transitions";
+    @import "mixins";
 
-    .main {
+    .resultsOnboarding {
+        padding-bottom: 3.2rem;
+        position: relative;
         text-align: center;
 
         h2 {
             color: $royal;
+            font-size: 3.2rem;
+            line-height: 1.1;
+            margin-top: 2.4rem;
         }
 
         p {
             font-size: 2rem;
-            margin: 0 auto 3.2rem;
-            max-width: 64rem;
             opacity: .8;
         }
     }
 
+    .swipeMsg {
+        @include r(768) {
+            display: none;
+        }
+    }
+
     .message {
-        margin-bottom: 3.2rem;
-    }
-
-    .progress-container {
+        align-items: center;
         display: flex;
+        flex-direction: column;
         justify-content: center;
-    }
-
-    .actions {
-        margin: 3.2rem auto;
+        margin: 0 auto;
+        max-width: 64rem;
+        min-height: 12rem;
+        padding: 0 2.4rem;
     }
 
     .pink {
@@ -198,6 +207,28 @@
     .blue {
         color: $royal;
         font-weight: bold;
+    }
+
+    .actions {
+        display: none;
+
+        @include r(768) {
+            display: flex;
+            justify-content: space-between;
+            margin: 0 auto;
+            max-width: 56rem;
+            transform: translateY(-17rem);
+            width: 98%;
+        }
+    }
+
+    button.left {
+        transform: scale(-1);
+    }
+
+    .arrow {
+        height: 1.8rem;
+        width: 1.8rem;
     }
 
     .big {
