@@ -47,9 +47,9 @@
                     </div>
                 </div>
             </div>
-            <div v-else-if="processingResults">
+            <template v-else-if="processingResults">
                 <results-processing/>
-            </div>
+            </template>
             <div v-else-if="finished && result && !selectFocusArea">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
