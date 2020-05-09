@@ -248,7 +248,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
     .data(data)
     .enter()
     .append("g")
-    .attr("class", "radarWrapper");
+    .attr("class", "radarWrapper")
+    .style("mix-blend-mode", "multiply");
 
     //Append the backgrounds
     blobWrapper

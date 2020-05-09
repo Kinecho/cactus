@@ -34,7 +34,7 @@
                 </button>
                 <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
                 <div class="cvActions">
-                    <button class="btn btn primary no-loading"
+                    <button class="btn primary no-loading"
                             @click="next"
                             :disabled="!nextEnabled">
                         Next
@@ -42,20 +42,22 @@
                 </div>
             </div>
         </template>
-        <div v-else-if="processingResults">
+        <template v-else-if="processingResults">
             <results-processing/>
-        </div>
-        <div v-else-if="finished && result && !selectFocusArea">
+        </template>
+        <template v-else-if="finished && result && !selectFocusArea">
             <results-onboarding :results="result"/>
-            <button @click="selectFocusArea = true">Next</button>
+            <div class="cvActions">
+                <button class="btn primary" @click="selectFocusArea = true">Next</button>
+            </div>
             <cactus-confetti :running="true"/>
-        </div>
-        <div v-else-if="selectFocusArea">
+        </template>
+        <template v-else-if="selectFocusArea">
             <h4>Select an element to focus on.</h4>
             <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
             <p>{{selectedElement}}</p>
             <button>Done (not wired)?</button>
-        </div>
+        </template>
     </div>
 </template>
 

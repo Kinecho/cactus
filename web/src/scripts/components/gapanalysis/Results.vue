@@ -91,6 +91,8 @@
 </script>
 
 <style scoped lang="scss">
+    @import "mixins";
+
     .chart {
         opacity: 1;
     }
@@ -108,18 +110,21 @@
             "experience experience . relationships relationships";
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
-        margin: 0 auto;
+        margin: 0 auto 3.2rem;
         padding: 70px 0 20px; /*offset elements*/
         width: 22rem;
 
-        &.hideElements {
-            padding: 0;
+        @include r(600) {
+            width: 34rem;
+        }
+        @include r(768) {
+            margin-bottom: 0;
         }
     }
 
     .energy {
         grid-area: energy;
-        transform: translateY(-70px)
+        transform: translateY(-70px);
     }
     .emotions {
         grid-area: emotions;
