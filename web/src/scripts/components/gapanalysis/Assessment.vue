@@ -9,8 +9,7 @@
         <modal :show="showCloseConfirm" @close="showCloseConfirm = false">
             <div class="close-confirm-modal paddingContainer" slot="body">
                 <h3>Close assessment?</h3>
-                <p class="subtext">Are you sure you want to close the assessment? Your progress will not be
-                    saved.</p>
+                <p class="subtext">Are you sure you want to close the assessment? Your progress will not be saved.</p>
                 <div class="btnContainer">
                     <button @click="showCloseConfirm = false">Continue assessment</button>
                     <button class="secondary" @click="close">Close &amp; discard</button>
@@ -32,40 +31,34 @@
                             <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
                     </button>
-                    <question :question="currentQuestion" :current-value="currentValue" @change="setValue"/>
+                    <transition name="component-fade" mode="out-in">
+                        <question :question="currentQuestion" :current-value="currentValue" @change="setValue" :key="`question_${currentQuestionIndex}`"/>
+                    </transition>
                     <div class="cvActions">
-                        <button class="btn primary no-loading" @click="next" :disabled="!nextEnabled">
+                        <button class="btn primary no-loading"
+                                @click="next"
+                                :disabled="!nextEnabled">
                             Next
                         </button>
-                        <transition name="component-fade" mode="out-in">
-                            <question :question="currentQuestion" :current-value="currentValue" @change="setValue" :key="`question_${currentQuestionIndex}`"/>
-                        </transition>
-                        <div class="cvActions">
-                            <button class="btn primary no-loading"
-                                    @click="next"
-                                    :disabled="!nextEnabled">
-                                Next
-                            </button>
-                        </div>
                     </div>
                 </div>
-            </template>
-            <template v-else-if="processingResults">
+            </div>
+            <div v-else-if="processingResults">
                 <results-processing/>
-            </template>
-            <template v-else-if="finished && result && !selectFocusArea">
+            </div>
+            <div v-else-if="finished && result && !selectFocusArea">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
                     <button class="btn primary" @click="selectFocusArea = true">Next</button>
                 </div>
                 <cactus-confetti :running="true"/>
-            </template>
-            <template v-else-if="selectFocusArea && !showUpsell">
+            </div>
+            <div v-else-if="selectFocusArea && !showUpsell">
                 <h4>Select an element to focus on.</h4>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <p>{{selectedElement}}</p>
                 <button @click="selectedElementContinue">Done (not wired)?</button>
-            </template>
+            </div>
             <div v-else-if="showUpsell">
                 <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout"/>
             </div>
