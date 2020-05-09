@@ -18,9 +18,13 @@
         </modal>
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="!started" class="intro" key="intro">
+                <h1>Mental Fitness Quiz</h1>
                 <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we will identify areas of your life to improve.</p>
-                <p>All answers are private and confidential and will be used solely to help you understand your mental fitness.</p>
                 <button class="btn primary" @click="start">Let's Go!</button>
+                <div class="private">
+                    <img class="lock" src="assets/images/lock.svg" alt=""/>
+                    All answers are private and confidential and will be used solely to help you understand your mental fitness.
+                </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
             <div v-else-if="currentQuestion && !finished && started" key="question-container">
@@ -272,12 +276,56 @@
     @import "transitions";
 
     .intro {
-        margin: 3.2rem auto 4rem;
+        padding: 8rem 2.4rem;
         text-align: left;
 
+        @include r(768) {
+            padding: 8rem 6.4rem;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: .8rem;
+        }
+
         p {
-            margin-bottom: 2.4rem;
+            font-size: 2rem;
+            margin-bottom: 3.2rem;
+            opacity: .8;
+        }
+
+        button {
+            min-width: 18rem;
         }
     }
 
+    .private {
+        background-color: #EFF4F5;
+        bottom: 0;
+        display: flex;
+        font-size: 1.4rem;
+        left: 0;
+        padding: 1.6rem 2.4rem;
+        position: fixed;
+        right: 0;
+
+        @include r(768) {
+            align-items: center;
+            flex-direction: column;
+            padding: 2.4rem 16rem;
+            position: absolute;
+        }
+    }
+
+    .lock {
+        height: 2.4rem;
+        margin: .4rem 1.6rem 0 0;
+        width: 2.4rem;
+
+        @include r(768) {
+            height: 1.8rem;
+            margin: 0 0 .8rem 0;
+            width: 1.8rem;
+        }
+    }
 </style>

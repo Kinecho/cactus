@@ -8,7 +8,7 @@
     @include r(768) {
         @include shadowbox;
         margin: 6.4rem auto;
-        min-height: 50vh;
+        min-height: 60vh;
         overflow: hidden;
         padding-bottom: 6.4rem;
     }
@@ -25,6 +25,7 @@
 .cvActions {
     background-color: transparentize($white, .15);
     bottom: 0;
+    display: flex;
     left: 0;
     padding: 1.6rem;
     position: fixed;
@@ -32,12 +33,18 @@
 
     @include r(768) {
         background-color: transparent;
+        display: block;
         padding: 0;
         position: relative;
     }
 
     button {
         width: 100%;
+
+        @include r(600) {
+            margin: 0 auto;
+            max-width: 28rem;
+        }
     }
 }
 
@@ -139,7 +146,7 @@ button.close {
     transition: all .2s cubic-bezier(.42, .97, .52, 1.49);
 
     &.selected {
-        background-color: transparentize($lightestGreen, .6);
+        background-color: #EFF4F5;
         font-weight: bold;
     }
 

@@ -1,7 +1,6 @@
 <template>
     <div class="gapAnalysisPage">
         <div class="centered">
-            <h1>Mental Fitness Quiz</h1>
             <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
         </div>
     </div>
@@ -100,8 +99,39 @@
         overflow: hidden;
         position: relative;
 
-        @include r(768) {
-            background-color: $beige;
+        &:after {
+            background-image:
+                url(assets/images/crosses2.svg),
+                url(assets/images/outlineBlob.svg),
+                url(assets/images/royalBlob.svg),
+                url(assets/images/pinkBlob5.svg);
+            background-position: -11rem 38rem, right -11rem top -35rem, -21rem 41rem, 50% -143px;
+            background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+            background-size: 20rem, 48rem, 30rem, 23rem;
+            content: "";
+            display: block;
+            height: 100%;
+            left: 0;
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            width: 100%;
+
+            @include r(768) {
+                background: lighten($dolphin, 16%);
+                background-image: url(assets/images/grainy.png),
+                    url(assets/images/crosses2.svg),
+                    url(assets/images/outlineBlob.svg),
+                    url(assets/images/royalBlob.svg),
+                    url(assets/images/pinkBlob5.svg);
+                background-position: 0 0,
+                    -1rem -1rem,
+                    -59rem -26rem,
+                    -15rem 34rem,
+                    70rem -90rem;
+                background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+                background-size: auto, auto, 110%, 100%, 100%;
+            }
         }
 
         .centered {
@@ -110,35 +140,8 @@
             padding: 0;
             position: relative;
             text-align: left;
-            z-index: 1;
-        }
-
-        header, .centered {
             width: 100%;
-        }
-
-        h1 {
-            display: none;
-
-            @include r(768) {
-                display: block;
-                margin: 6.4rem 0 1.6rem;
-            }
-        }
-
-        p {
-            margin-bottom: 1.6rem;
-            max-width: 64rem;
-        }
-    }
-
-    .primaryBtn {
-        display: block;
-        margin-top: 2.4rem;
-        width: 100%;
-
-        @include r(600) {
-            width: auto;
+            z-index: 1;
         }
     }
 
