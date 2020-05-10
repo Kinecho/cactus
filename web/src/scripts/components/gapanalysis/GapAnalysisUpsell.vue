@@ -1,8 +1,10 @@
 <template>
     <div class="upsellContainer">
-        <ResultElement :element="element" :selectable="false"/>
-        <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus&nbsp;Plus.</p>
-        <p class="small bold">You'll get access to:</p>
+        <template v-if="element">
+            <ResultElement :element="element" :selectable="false" :withCircle="true" />
+            <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus&nbsp;Plus. <strong>You'll get access&nbsp;to:</strong></p>
+        </template>
+        <p class="subtext" v-else>To get started on your mindfulness journey, start a trial of Cactus&nbsp;Plus. <strong>You'll get access&nbsp;to:</strong></p>
         <section class="features">
             <ul>
                 <li>
@@ -10,7 +12,7 @@
                     <span><strong>Tools</strong> to help you identify and strengthen your core values</span>
                 </li>
                 <li>
-                    <svg-icon icon="heart" class="icon"/>
+                    <svg-icon icon="heartOutline" class="icon"/>
                     <span><strong>Daily, personalized</strong> mental fitness exercises</span>
                 </li>
                 <li>
@@ -107,10 +109,10 @@
     @import "mixins";
 
     .upsellContainer {
-        background: $beige;
         padding: 6.4rem 2.4rem;
 
         @include r(768) {
+            background: $beige;
             padding: 6.4rem 0 0;
         }
     }
@@ -121,6 +123,8 @@
 
     .subtext {
         font-size: 2rem;
+        margin: 0 auto 3.2rem;
+        max-width: 48rem;
     }
 
     .bold {
@@ -133,7 +137,7 @@
 
     .features {
         @include shadowbox;
-        margin: -.8rem auto 3.2rem;
+        margin: 0 auto 3.2rem;
         max-width: 40rem;
         padding: 3.2rem 2.4rem;
         text-align: center;
