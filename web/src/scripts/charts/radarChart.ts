@@ -40,7 +40,7 @@ export interface RadarChartConfig {
 export const DEFAULT_CONFIG = (): RadarChartConfig => ({
     w: 200,				//Width of the circle
     h: 200,				//Height of the circle
-    circleFillBaseColor: "#CDCDCD",
+    circleFillBaseColor: "#E1D9D5",
     showLevelLabel: false,
     margin: { top: 60, right: 60, bottom: 60, left: 60 }, //The margins of the SVG
     levels: 5,				//How many levels or inner circles should there be drawn
