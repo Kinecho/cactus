@@ -1,7 +1,9 @@
 <template>
-    <img class="royal" src="assets/images/royalBlob.svg" alt=""/>
-    <img class="pink" src="assets/images/darkGreenBlob.svg" alt=""/>
-    <p class="message">Processing results...</p>
+    <div>
+        <img class="royal" src="assets/images/royalBlob.svg" alt=""/>
+        <img class="pink" src="assets/images/darkGreenBlob.svg" alt=""/>
+        <p class="message">Processing results...</p>
+    </div>
 </template>
 
 <script lang="ts">
@@ -26,14 +28,14 @@
         &.royal {
             animation: rotateInfinite 45s infinite normal;
             height: 28rem;
-            margin: -25rem 0 0 -15rem;
+            margin: -27rem 0 0 -17rem;
             width: 28rem;
         }
 
         &.pink {
             animation: rotateInfinite 30s infinite reverse;
             height: 24rem;
-            margin: -21rem 0 0 -11rem;
+            margin: -19rem 0 0 -9rem;
             width: 24rem;
         }
     }
