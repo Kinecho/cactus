@@ -331,11 +331,11 @@
 
     .whiteBg {
         background-color: $white;
-        height: 100vh;
+        min-height: 100vh;
 
         @include r(768) {
             background-color: transparent;
-            height: auto;
+            min-height: 0;
         }
     }
 </style>
