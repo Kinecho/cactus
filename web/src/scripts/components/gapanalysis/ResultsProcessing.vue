@@ -1,9 +1,7 @@
 <template>
-    <div class="processingContainer">
-        <img class="royal" src="assets/images/royalBlob.svg" alt=""/>
-        <img class="pink" src="assets/images/darkGreenBlob.svg" alt=""/>
-        <p class="message">Processing results...</p>
-    </div>
+    <img class="royal" src="assets/images/royalBlob.svg" alt=""/>
+    <img class="pink" src="assets/images/darkGreenBlob.svg" alt=""/>
+    <p class="message">Processing results...</p>
 </template>
 
 <script lang="ts">
@@ -17,16 +15,6 @@
 
 <style scoped lang="scss">
     @import "mixins";
-
-    .processingContainer {
-        background-color: $white;
-        height: 100vh;
-
-        @include r(768) {
-            background-color: transparent;
-            height: auto;
-        }
-    }
 
     img {
         left: 50%;

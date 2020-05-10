@@ -47,23 +47,23 @@
                     </div>
                 </div>
             </div>
-            <template v-else-if="processingResults">
+            <div class="whiteBg" v-else-if="processingResults">
                 <results-processing/>
-            </template>
-            <div v-else-if="finished && result && !selectFocusArea">
+            </div>
+            <div class="whiteBg" v-else-if="finished && result && !selectFocusArea">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
                     <button class="btn primary" @click="selectFocusArea = true">Next</button>
                 </div>
                 <cactus-confetti :running="true"/>
             </div>
-            <div v-else-if="selectFocusArea && !showUpsell">
+            <div class="whiteBg" v-else-if="selectFocusArea && !showUpsell">
                 <h4>Select an element to focus on.</h4>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <p>{{selectedElement}}</p>
                 <button @click="selectedElementContinue">Done (not wired)?</button>
             </div>
-            <div v-else-if="showUpsell">
+            <div class="whiteBg" v-else-if="showUpsell">
                 <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout"/>
             </div>
         </transition>
@@ -326,6 +326,16 @@
             height: 1.8rem;
             margin: 0 0 .8rem 0;
             width: 1.8rem;
+        }
+    }
+
+    .whiteBg {
+        background-color: $white;
+        height: 100vh;
+
+        @include r(768) {
+            background-color: transparent;
+            height: auto;
         }
     }
 </style>
