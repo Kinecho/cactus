@@ -58,14 +58,18 @@
                 <cactus-confetti :running="true"/>
             </div>
             <div class="whiteBg" v-else-if="selectFocusArea && !showUpsell">
-                <h4>Select an element to focus on.</h4>
+                <h2>Choose your focus</h2>
+                <p class="subtext">You can choose to reflect on an element by tapping a cactus below. You'll then receive daily prompts in that area. You can change this&nbsp;later.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
-                <p>{{selectedElement}}</p>
-                <button @click="selectedElementContinue">Done (not wired)?</button>
+                <p v-if="selectedElement">You selected <strong>{{selectedElement}}</strong>.</p>
+                <div class="cvActions flexActions">
+                    <button class="no-loading" @click="selectedElementContinue" :disabled="!selectedElement">Next</button>
+                    <button class="no-loading tertiary" @click="selectedElementContinue">Do this later</button>
+                </div>
             </div>
-            <div class="whiteBg" v-else-if="showUpsell">
+            <template v-else-if="showUpsell">
                 <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout"/>
-            </div>
+            </template>
         </transition>
     </div>
 </template>
@@ -295,7 +299,12 @@
         }
 
         button {
-            min-width: 18rem;
+            width: 100%;
+
+            @include r(600) {
+                min-width: 18rem;
+                width: auto;
+            }
         }
     }
 
@@ -331,11 +340,33 @@
 
     .whiteBg {
         background-color: $white;
+        font-size: 2rem;
         min-height: 100vh;
+        padding: 6.4rem 2.4rem .8rem;
 
         @include r(768) {
             background-color: transparent;
             min-height: 0;
+        }
+    }
+
+    .subtext {
+        margin: 0 auto 2.4rem;
+        max-width: 48rem;
+        opacity: .8;
+    }
+
+    .flexActions {
+        flex-direction: column;
+
+        @include r(768) {
+            display: flex;
+            margin-top: 6.4rem;
+        }
+
+        button {
+            margin-bottom: .8rem;
+            min-width: 0;
         }
     }
 </style>

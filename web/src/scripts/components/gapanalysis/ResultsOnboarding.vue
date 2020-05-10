@@ -168,8 +168,6 @@
             color: $royal;
             font-size: 3.2rem;
             line-height: 1.1;
-            margin: 6.4rem auto .8rem;
-            padding: 0 2.4rem;
         }
 
         p {

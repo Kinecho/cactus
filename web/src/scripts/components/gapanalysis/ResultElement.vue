@@ -53,25 +53,29 @@
 <style scoped lang="scss">
 
     .element-icon {
+        align-items: center;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
         text-align: center;
-        /*flex: 1;*/
+        transition: all .3s linear;
+
         img {
-            width: 5rem;
-            height: 5rem;
+            width: 4rem;
+            height: 4rem;
         }
 
-        &.selected {
-            border: 2px solid green;
-        }
-
-        &.selectable:hover {
-            background: lightblue;
-            cursor: pointer;
-        }
+        // &.selectable {
+        //     opacity: .5;
+        // }
+        //
+        // &.selected.selectable {
+        //     opacity: 1;
+        // }
+        //
+        // &.selectable:hover {
+        //     opacity: 1;
+        // }
     }
 
     h4 {
