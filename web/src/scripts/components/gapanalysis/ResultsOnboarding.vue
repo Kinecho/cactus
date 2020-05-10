@@ -165,8 +165,6 @@
         text-align: center;
 
         h2 {
-            color: $royal;
-            font-size: 3.2rem;
             line-height: 1.1;
         }
 

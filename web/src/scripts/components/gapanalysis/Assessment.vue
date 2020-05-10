@@ -59,9 +59,9 @@
             </div>
             <div class="whiteBg" v-else-if="selectFocusArea && !showUpsell">
                 <h2>Choose your focus</h2>
-                <p class="subtext">You can choose to reflect on an element by tapping a cactus below. You'll then receive daily prompts in that area. You can change this&nbsp;later.</p>
+                <p class="subtext">You can choose to reflect in one of the areas below by tapping a cactus. You'll then receive daily prompts in the chosen area. You can change this&nbsp;later.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
-                <p v-if="selectedElement">You selected <strong>{{selectedElement}}</strong>.</p>
+                <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <div class="cvActions flexActions">
                     <button class="no-loading" @click="selectedElementContinue" :disabled="!selectedElement">Next</button>
                     <button class="no-loading tertiary" @click="selectedElementContinue">Do this later</button>
@@ -280,11 +280,11 @@
     @import "transitions";
 
     .intro {
-        padding: 8rem 2.4rem;
+        padding: 8rem 2.4rem 19.2rem;
         text-align: left;
 
         @include r(768) {
-            padding: 8rem 6.4rem;
+            padding: 8rem 6.4rem 19.2rem;
             text-align: center;
         }
 
