@@ -110,15 +110,12 @@
             "experience experience . relationships relationships";
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr;
-        margin: 0 auto 3.2rem;
+        margin: 3.2rem auto;
         padding: 70px 0 20px; /*offset elements*/
         width: 22rem;
 
         @include r(600) {
             width: 34rem;
-        }
-        @include r(768) {
-            margin-bottom: 0;
         }
     }
 
