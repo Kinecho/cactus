@@ -1,7 +1,7 @@
 <template>
     <div class="upsellContainer">
         <ResultElement :element="element" :selectable="false"/>
-        <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus Plus.</p>
+        <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus&nbsp;Plus.</p>
         <p class="small bold">You'll get access to:</p>
         <section class="features">
             <ul>
@@ -31,10 +31,11 @@
                 <p class="small" v-else>
                     Cactus Plus is {{pricePerMonth}} /
                     {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
-                    <strong>Cancel anytime.</strong>
+                    <strong>Cancel&nbsp;anytime.</strong>
                 </p>
             </template>
         </section>
+        <button class="tertiary">Skip for now</button>
     </div>
 </template>
 
@@ -108,6 +109,10 @@
     .upsellContainer {
         background: $beige;
         padding: 6.4rem 2.4rem;
+
+        @include r(768) {
+            padding: 6.4rem 0 0;
+        }
     }
 
     .element-icon {
@@ -118,29 +123,39 @@
         font-size: 2rem;
     }
 
-    .small {
-        font-size: 1.6rem;
-    }
-
     .bold {
         font-weight: bold;
     }
 
     p {
-        margin: 0 0 1.6rem;
+        margin: 0 0 3.2rem;
     }
 
     .features {
         @include shadowbox;
-        margin: 0 auto;
+        margin: -.8rem auto 3.2rem;
         max-width: 40rem;
         padding: 3.2rem 2.4rem;
-        text-align: left;
+        text-align: center;
+
+        @include r(768) {
+            border-radius: 0;
+            box-shadow: none;
+            margin-bottom: 0;
+            max-width: none;
+            padding: 3.2rem 3.2rem 8.8rem;
+        }
 
         ul {
             list-style: none;
-            margin: 0;
+            margin: 0 0 3.2rem;
             padding: 0;
+            text-align: left;
+
+            @include r(768) {
+                margin: 0 auto 3.2rem;
+                max-width: 40rem;
+            }
         }
 
         li {
@@ -153,6 +168,34 @@
                 margin: .4rem 1.6rem 0 0;
                 width: 2.8rem;
             }
+        }
+
+        button {
+            margin: 0 auto 2.4rem;
+            max-width: 40rem;
+            width: 100%;
+
+            @include r(768) {
+                margin-bottom: .8rem;
+            }
+        }
+
+        .small {
+            font-size: 1.4rem;
+            margin-bottom: 0;
+            opacity: .8;
+        }
+
+    }
+
+    .tertiary {
+        font-weight: bold;
+
+        @include r(768) {
+            left: 0;
+            margin: -7.2rem auto 0;
+            position: absolute;
+            right: 0;
         }
     }
 </style>
