@@ -1,23 +1,21 @@
 <template>
-    <div class="container">
+    <div class="upsellContainer">
         <ResultElement :element="element" :selectable="false"/>
-        <h1>Subscription Upsell</h1>
-        <p>Great! To focus on <strong>{{element}}</strong> start a trial of Cactus Plus.</p>
-
-        <p>You'll get access to</p>
+        <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus Plus.</p>
+        <p class="small bold">You'll get access to:</p>
         <section class="features">
             <ul>
                 <li>
                     <svg-icon icon="checkCircle" class="icon"/>
-                    <strong>Tools</strong> to help you identify and strengthen your core values
+                    <span><strong>Tools</strong> to help you identify and strengthen your core values</span>
                 </li>
                 <li>
                     <svg-icon icon="heart" class="icon"/>
-                    <strong>Daily, personalized</strong> mental fitness exercises
+                    <span><strong>Daily, personalized</strong> mental fitness exercises</span>
                 </li>
                 <li>
                     <svg-icon icon="pie" class="icon"/>
-                    <strong>Personal insights</strong> dashboard, visualizing your progress
+                    <span><strong>Personal insights</strong> dashboard, visualizing your progress</span>
                 </li>
             </ul>
             <template v-if="loading">
@@ -25,12 +23,12 @@
             </template>
             <template v-else>
                 <button @click="checkout" :disabled="checkoutLoading">Try it Free</button>
-                <p v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
+                <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
                     Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
                     {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
                     <strong>Cancel anytime.</strong>
                 </p>
-                <p v-else>
+                <p class="small" v-else>
                     Cactus Plus is {{pricePerMonth}} /
                     {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
                     <strong>Cancel anytime.</strong>
@@ -107,22 +105,53 @@
     @import "variables";
     @import "mixins";
 
-    .container {
+    .upsellContainer {
         background: $beige;
+        padding: 6.4rem 2.4rem;
+    }
+
+    .element-icon {
+        margin-bottom: 3.2rem;
+    }
+
+    .subtext {
+        font-size: 2rem;
+    }
+
+    .small {
+        font-size: 1.6rem;
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    p {
+        margin: 0 0 1.6rem;
     }
 
     .features {
-        background-color: $white;
-        margin: 1rem;
         @include shadowbox;
+        margin: 0 auto;
+        max-width: 40rem;
+        padding: 3.2rem 2.4rem;
+        text-align: left;
 
         ul {
+            list-style: none;
             margin: 0;
             padding: 0;
-            list-style: none;
+        }
 
-            li {
-                padding: 1rem;
+        li {
+            align-items: flex-start;
+            display: flex;
+            margin-bottom: 2.4rem;
+
+            img {
+                height: 2.8rem;
+                margin: .4rem 1.6rem 0 0;
+                width: 2.8rem;
             }
         }
     }

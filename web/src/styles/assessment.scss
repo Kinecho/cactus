@@ -8,9 +8,9 @@
     @include r(768) {
         @include shadowbox;
         margin: 6.4rem auto;
-        min-height: 50vh;
+        //min-height: 50vh;
         overflow: hidden;
-        padding-bottom: 6.4rem;
+        //padding-bottom: 6.4rem;
     }
 }
 
