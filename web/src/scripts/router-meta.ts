@@ -41,7 +41,7 @@ export interface MetaRouteConfig extends RouteConfig {
     meta?: RoutePageMeta
 }
 
-const META_DESCRIPTION = "Research-backed prompts to increase self-awareness and resilience"
+const META_DESCRIPTION = "Questions designed to improve how you think about your work, life, relationships, and emotions"
 
 const baseMetaTags = (params: RoutePageMeta): MetaTag[] => {
     const { title = "Cactus", description = META_DESCRIPTION, image = DEFAULT_IMAGE_META } = params;
