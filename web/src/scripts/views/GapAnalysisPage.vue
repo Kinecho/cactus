@@ -21,6 +21,7 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import GapAnalysisService from "@web/services/GapAnalysisService";
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -42,6 +43,9 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({ member }) => {
                     this.member = member;
+                    if (!member) {
+                        pushRoute(`${ PageRoute.SIGNUP }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please sign in to take the assessment") }`);
+                    }
                 }
             })
         }
