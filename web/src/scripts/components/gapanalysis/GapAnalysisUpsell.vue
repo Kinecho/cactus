@@ -2,22 +2,22 @@
     <div class="upsellContainer">
         <template v-if="element">
             <ResultElement :element="element" :selectable="false" :withCircle="true" />
-            <p class="subtext">Great! To focus on <strong>{{element}}</strong> start a trial of Cactus&nbsp;Plus. <strong>You'll get access&nbsp;to:</strong></p>
+            <p class="subtext">Great choice! To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:</p>
         </template>
-        <p class="subtext" v-else>To get started on your mindfulness journey, start a trial of Cactus&nbsp;Plus. <strong>You'll get access&nbsp;to:</strong></p>
+        <p class="subtext" v-else>To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:</p>
         <section class="features">
             <ul>
                 <li>
-                    <svg-icon icon="checkCircle" class="icon"/>
-                    <span><strong>Tools</strong> to help you identify and strengthen your core values</span>
-                </li>
-                <li>
                     <svg-icon icon="heartOutline" class="icon"/>
-                    <span><strong>Daily, personalized</strong> mental fitness exercises</span>
+                    <span><strong>Personalized</strong> mental fitness exercises<span v-if="element">, beginning today with <i>{{element}}</i></span></span>
                 </li>
                 <li>
                     <svg-icon icon="pie" class="icon"/>
                     <span><strong>Personal insights</strong> dashboard, visualizing your progress</span>
+                </li>
+                <li>
+                    <svg-icon icon="checkCircle" class="icon"/>
+                    <span><strong>Tools</strong> to help you better know yourself, including your unique core values</span>
                 </li>
             </ul>
             <template v-if="loading">
