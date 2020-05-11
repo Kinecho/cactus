@@ -1,7 +1,11 @@
 <template>
     <div class="gapAnalysisPage">
         <div class="centered">
-            <assessment :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
+            <div class="sign-in" v-if="!member && memberLoaded">
+                <h3>to get started, sign in</h3>
+                <router-link :to="signInRoute" tag="button" class="btn primary">Sign In</router-link>
+            </div>
+            <assessment v-if="member && memberLoaded" :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
         </div>
     </div>
 </template>
@@ -21,6 +25,7 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import GapAnalysisService from "@web/services/GapAnalysisService";
+    import { QueryParam } from "@shared/util/queryParams";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -35,6 +40,7 @@
         assessment = GapAnalysisAssessment.create();
         latestResults: GapAnalysisAssessmentResult | undefined = undefined;
         currentPage: number = 0;
+        memberLoaded = false;
         memberUnsubscriber?: ListenerUnsubscriber;
         member?: CactusMember | undefined;
 
@@ -42,8 +48,16 @@
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
                 onData: ({ member }) => {
                     this.member = member;
+                    this.memberLoaded = true;
+                    // if (!member) {
+                    //     pushRoute(`${ PageRoute.SIGNUP }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please sign in to take the assessment") }`);
+                    // }
                 }
             })
+        }
+
+        get signInRoute() {
+            return `${ PageRoute.SIGNUP }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please sign in to take the assessment") }&${ QueryParam.REDIRECT_URL }=${ window.location.href }`;
         }
 
         get results(): GapAnalysisAssessmentResult | undefined {
@@ -155,6 +169,11 @@
             width: 100%;
             z-index: 1;
         }
+    }
+
+    .sign-in {
+        @include shadowbox;
+        padding: 3rem;
     }
 
 </style>

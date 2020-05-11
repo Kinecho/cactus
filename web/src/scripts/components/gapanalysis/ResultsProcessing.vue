@@ -1,7 +1,7 @@
 <template>
     <div>
-        <img class="royal" src="assets/images/royalBlob.svg" alt=""/>
-        <img class="pink" src="assets/images/darkGreenBlob.svg" alt=""/>
+        <img class="royal" src="/assets/images/royalBlob.svg" alt=""/>
+        <img class="pink" src="/assets/images/darkGreenBlob.svg" alt=""/>
         <p class="message">Processing results...</p>
     </div>
 </template>

@@ -19,11 +19,13 @@
         <transition name="component-fade" mode="out-in" appear>
             <div v-if="!started" class="intro" key="intro">
                 <h1>Mental Fitness Quiz</h1>
-                <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we will identify areas of your life to improve.</p>
+                <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we
+                    will identify areas of your life to improve.</p>
                 <button class="btn primary" @click="start">Let's Go!</button>
                 <div class="private">
                     <img class="lock" src="assets/images/lock.svg" alt=""/>
-                    All answers are private and confidential and will be used solely to help you understand your mental fitness.
+                    All answers are private and confidential and will be used solely to help you understand your mental
+                    fitness.
                 </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
@@ -42,7 +44,7 @@
                         <button class="btn primary no-loading"
                                 @click="next"
                                 :disabled="!nextEnabled">
-                            Next
+                            {{nextButtonText}}
                         </button>
                     </div>
                 </div>
@@ -59,11 +61,13 @@
             </div>
             <div class="whiteBg" v-else-if="selectFocusArea && !showUpsell">
                 <h2>Choose your focus</h2>
-                <p class="subtext">You can choose to reflect in one of the areas below by tapping a cactus. You'll then receive daily prompts in the chosen area. You can change this&nbsp;later.</p>
+                <p class="subtext">You can choose to reflect in one of the areas below by tapping a cactus. You'll then
+                    receive daily prompts in the chosen area. You can change this&nbsp;later.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <div class="cvActions flexActions">
-                    <button class="no-loading" @click="selectedElementContinue" :disabled="!selectedElement">Next</button>
+                    <button class="no-loading" @click="selectedElementContinue" :disabled="!selectedElement">Next
+                    </button>
                     <button class="no-loading tertiary" @click="selectedElementContinue">Do this later</button>
                 </div>
             </div>
@@ -157,6 +161,14 @@
                 return null;
             }
             return this.assessment.questionByIndex(this.currentQuestionIndex) ?? null;
+        }
+
+        get nextButtonText(): string {
+            if (this.currentQuestionIndex === this.assessment.questions.length - 1) {
+                return "Get Results";
+            }
+
+            return "Next";
         }
 
         get currentValue(): number | undefined {
