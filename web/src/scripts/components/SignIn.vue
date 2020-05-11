@@ -1,5 +1,5 @@
 <template>
-    <div class="centered">
+    <div class="centered sign-up-component">
         <div>
             <h1 v-if="showTitle && !isPendingRedirect">{{_title}}</h1>
             <p class="messageSubtext" v-if="message && !isPendingRedirect">{{message}}</p>
@@ -94,7 +94,7 @@
             if (ui.isPendingRedirect()) {
                 this.isPendingRedirect = true;
                 logger.log("Is pending redirect.... need to log the user in");
-
+                debugger;
                 this.checkForPendingUIInterval = window.setInterval(() => {
                     this.checkPendingUI()
                 }, 500);
@@ -140,10 +140,9 @@
             signInPath: { type: String, required: false },
             redirectUrl: { type: String, required: false },
             showMagicLink: { type: Boolean, default: true },
-            twitterEnabled: {type: Boolean, default: true},
+            twitterEnabled: { type: Boolean, default: true },
         },
         data(): {
-            message: string | undefined,
             memberListener: ListenerUnsubscriber | undefined,
             user: FirebaseUser | undefined,
             member: CactusMember | undefined,
@@ -160,7 +159,6 @@
         } {
             return {
                 commonCopy: copy.common,
-                message: undefined,
                 user: undefined,
                 member: undefined,
                 authLoaded: false,
@@ -218,6 +216,17 @@
         }
     })
 </script>
+<style lang="scss">
+
+    .sign-up-component {
+        .firebaseui-container {
+            box-shadow: none;
+            border: none;
+            background: transparent;
+        }
+    }
+
+</style>
 
 <style lang="scss" scoped>
     @import "common";
@@ -254,4 +263,5 @@
         margin: 0 0 2.4rem;
         opacity: .8;
     }
+
 </style>

@@ -1,10 +1,12 @@
 <template>
     <div class="upsellContainer">
         <template v-if="element">
-            <ResultElement :element="element" :selectable="false" :withCircle="true" />
-            <p class="subtext">Great choice! To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:</p>
+            <ResultElement :element="element" :selectable="false" :withCircle="true"/>
+            <p class="subtext">Great choice! To focus on <strong>what makes you happy</strong>, Cactus Plus gives you
+                access to:</p>
         </template>
-        <p class="subtext" v-else>To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:</p>
+        <p class="subtext" v-else>To focus on <strong>what makes you happy</strong>, Cactus Plus gives you access to:
+        </p>
         <section class="features">
             <ul>
                 <li>
@@ -20,22 +22,24 @@
                     <span><strong>Tools</strong> to help you better know yourself, including your unique core values</span>
                 </li>
             </ul>
-            <template v-if="loading">
-                <spinner message="Loading..."/>
-            </template>
-            <template v-else>
-                <button @click="checkout" :disabled="checkoutLoading">Try it Free</button>
-                <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
-                    Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
-                    {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
-                    <strong>Cancel anytime.</strong>
-                </p>
-                <p class="small" v-else>
-                    Cactus Plus is {{pricePerMonth}} /
-                    {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
-                    <strong>Cancel&nbsp;anytime.</strong>
-                </p>
-            </template>
+            <transition name="component-fade" appear mode="out-in">
+                <div v-if="loading" key="loading">
+                    <spinner message="Loading..." :delay="1200"/>
+                </div>
+                <div v-else key="checkout-info">
+                    <button @click="checkout" :disabled="checkoutLoading">Try it Free</button>
+                    <p class="small" v-if="subscriptionProduct.trialDays && subscriptionProduct.trialDays > 0">
+                        Cactus Plus is free for {{subscriptionProduct.trialDays}} days, then {{pricePerMonth}} /
+                        {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
+                        <strong>Cancel anytime.</strong>
+                    </p>
+                    <p class="small" v-else>
+                        Cactus Plus is {{pricePerMonth}} /
+                        {{displayPeriod}}<span v-if="isAnnualBilling">, billed annually</span>.
+                        <strong>Cancel&nbsp;anytime.</strong>
+                    </p>
+                </div>
+            </transition>
         </section>
         <button class="tertiary">Skip for now</button>
     </div>
@@ -107,6 +111,7 @@
 <style scoped lang="scss">
     @import "variables";
     @import "mixins";
+    @import "transitions";
 
     .upsellContainer {
         padding: 6.4rem 2.4rem;
