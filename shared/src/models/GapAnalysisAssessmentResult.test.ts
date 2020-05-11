@@ -38,13 +38,13 @@ test("get results when all questions are answered", () => {
     expect(result.errorMessage).toBeUndefined();
 
     expect(result.chartData?.length).toEqual(2);
-    expect(result.chartData![0].axes.length).toEqual(1);
-    expect(result.chartData![0].name).toEqual(GapType.importance);
-    expect(result.chartData![0].axes[0].value).toEqual(5)
+    expect(result.chartData[0].axes.length).toEqual(1);
+    expect(result.chartData[0].name).toEqual(GapType.importance);
+    expect(result.chartData[0].axes[0].value).toEqual(5)
 
 
-    expect(result.chartData![1].axes.length).toEqual(1);
-    expect(result.chartData![1].name).toEqual(GapType.satisfaction);
-    expect(result.chartData![1].axes[0].value).toEqual(2)
+    expect(result.chartData[1].axes.length).toEqual(1);
+    expect(result.chartData[1].name).toEqual(GapType.satisfaction);
+    expect(result.chartData[1].axes[0].value).toEqual(2)
 
 })
