@@ -50,7 +50,7 @@ const DEFAULT_QUESTIONS_V1 = (): Question[] => {
             gapType: GapType.satisfaction,
         }).addOption(1, "mysterious", "crystalBall")
         .addOption(2, "a work in progress", "cone")
-        .addOption(3, "well understood", "donut"),
+        .addOption(3, "well understood", "bulb"),
         //1
         Question.create({
             title: "I do something to intentionally improve my mental and emotional fitness...",
