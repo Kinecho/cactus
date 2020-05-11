@@ -5,9 +5,9 @@
             <p class="messageSubtext" v-if="message && !isPendingRedirect">{{message}}</p>
         </div>
         <div class="actions-container">
-            <magic-link :initialEmail="email" v-if="!isPendingRedirect"/>
+            <magic-link :initialEmail="email" v-if="!isPendingRedirect && showMagicLink"/>
             <spinner :message="`${commonCopy.SIGNING_IN}...`" slot="body" v-if="isSigningIn" color="light"/>
-            <div class="divider" v-if="!isPendingRedirect">
+            <div class="divider" v-if="!isPendingRedirect && showMagicLink">
                 <p class="message-container">Or choose from one of the following</p>
             </div>
         </div>
@@ -57,7 +57,7 @@
         mounted() {
             this.firebaseUiLoading = true;
             const ui = getAuthUI();
-            let emailLinkSignInPath = redirectUrlParam || PageRoute.JOURNAL_HOME;
+            let emailLinkSignInPath = this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME;
             let includeEmailLink = false;
             if (ui.isPendingRedirect()) {
                 includeEmailLink = true;
@@ -66,7 +66,8 @@
 
             const config = getAuthUIConfig({
                 includeEmailLink,
-                signInSuccessPath: redirectUrlParam || PageRoute.JOURNAL_HOME,
+                includeTwitter: this.twitterEnabled,
+                signInSuccessPath: this.redirectUrl || redirectUrlParam || PageRoute.JOURNAL_HOME,
                 emailLinkSignInPath, //Note: normal magic link is handled in signupEndpoints.ts. This is for the special case of federated login connecting to an existing magic link acct.
                 signInSuccess: (authResult, redirectUrl) => {
                     this.isSigningIn = true;
@@ -111,7 +112,7 @@
                 logger.log("Is pending redirect.... need to log the user in");
             }
 
-            this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
+            // this.message = getQueryParam(QueryParam.MESSAGE) || undefined;
             this.email = StorageService.getItem(LocalStorageKey.emailAutoFill) || getQueryParam(QueryParam.EMAIL) || "";
 
             this.memberListener = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -134,6 +135,12 @@
                 default: true,
             },
             title: String,
+            message: { type: String, default: getQueryParam(QueryParam.MESSAGE), required: false },
+            redirectOnSignIn: { type: Boolean, required: false, default: true },
+            signInPath: { type: String, required: false },
+            redirectUrl: { type: String, required: false },
+            showMagicLink: { type: Boolean, default: true },
+            twitterEnabled: {type: Boolean, default: true},
         },
         data(): {
             message: string | undefined,
@@ -201,7 +208,10 @@
                         if (this.member?.id && this.pendingRedirectUrl && isFeatureAuthUrl(this.pendingRedirectUrl)) {
                             this.pendingRedirectUrl = appendQueryParams(this.pendingRedirectUrl, { memberId: this.member.id });
                         }
-                        await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
+
+                        if (this.redirectOnSignIn) {
+                            await pushRoute(this.pendingRedirectUrl || PageRoute.JOURNAL_HOME)
+                        }
                     }
                 }
             }
