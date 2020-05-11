@@ -47,8 +47,11 @@
                         <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
                         <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
                     </div>
-<!--                    <img class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>-->
-                    <Results :results="fakeGapAnalysisResults" :selectable-elements="false"/>
+
+                    <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
+                    <img v-if="!gapResultsLoading && !gapResults" class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
+
+                    <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                 </section>
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
@@ -88,6 +91,8 @@
     import { pushRoute } from "@web/NavigationUtil";
     import Results from "@components/gapanalysis/Results.vue";
     import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
+    import GapAnalysisService from "@web/services/GapAnalysisService";
+    import Spinner from "@components/Spinner.vue";
 
     const logger = new Logger("InsightsPage");
     const copy = CopyService.getSharedInstance().copy;
@@ -99,12 +104,15 @@
             Footer,
             WordCloud,
             DropdownMenu,
+            Spinner,
         }
     })
     export default class InsightsPage extends Vue {
         authLoaded = false;
         member?: CactusMember;
         memberObserver?: ListenerUnsubscriber;
+        gapResultsLoading = false;
+        gapResults?: GapAnalysisAssessmentResult | null = null;
 
         beforeMount() {
             this.memberObserver = CactusMemberService.sharedInstance.observeCurrentMember({
@@ -115,9 +123,21 @@
                         await pushRoute(PageRoute.HOME);
                     } else {
                         this.authLoaded = true;
+                        await this.fetchGapResults();
                     }
                 }
             })
+        }
+
+        async fetchGapResults() {
+            if (this.gapResultsLoading || !this.member?.id) {
+                return;
+            }
+            this.gapResultsLoading = true;
+
+            const results = await GapAnalysisService.sharedInstance.getLatestForMember(this.member.id)
+            this.gapResults = results ?? null;
+            this.gapResultsLoading = false;
         }
 
         get coreValuesBlob(): CoreValuesBlob | undefined {

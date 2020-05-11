@@ -223,11 +223,9 @@
                 this.processingResults = false;
             }, 2500);
             this.result = result;
-        }
-
-        exitAssessment() {
             this.$emit('finished', this.result);
         }
+
 
         start() {
             this.currentQuestionIndex = 0;

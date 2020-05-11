@@ -20,6 +20,7 @@
     import CactusMember from "@shared/models/CactusMember";
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
+    import GapAnalysisService from "@web/services/GapAnalysisService";
 
     const logger = new Logger("GapAnalysisPage");
 
@@ -63,6 +64,7 @@
         }
 
         async closeAssessment() {
+            logger.info("CLOSE ASSESSMENT");
             try {
                 if (this.member) {
                     await pushRoute(PageRoute.INSIGHTS)
@@ -70,18 +72,29 @@
                     await pushRoute(PageRoute.HOME);
                 }
             } catch (error) {
-                logger.error("Failed to go back, navigating home");
+                logger.error("Failed to navigate to route, navigating home");
                 await pushRoute(PageRoute.HOME);
             }
         }
 
         async finishAssessment(results: GapAnalysisAssessmentResult) {
-            logger.info("gap results", results);
-            if (!this.member) {
-                await pushRoute(PageRoute.PRICING);
-            } else {
-                await pushRoute(PageRoute.INSIGHTS);
+            logger.info("FINISH ASSESSMENT gap results", results);
+            try {
+                results.setCompleted()
+                if (this.member) {
+                    results.memberId = this.member?.id;
+                }
+
+                await GapAnalysisService.sharedInstance.save(results);
+
+            } catch (error) {
+                logger.error(`Failed to save gap results for member ${ this.member?.id }`, error);
             }
+            // if (!this.member) {
+            //     await pushRoute(PageRoute.PRICING);
+            // } else {
+            //     await pushRoute(PageRoute.INSIGHTS);
+            // }
         }
     }
 </script>
@@ -100,11 +113,10 @@
         position: relative;
 
         &:after {
-            background-image:
-                url(assets/images/crosses2.svg),
-                url(assets/images/outlineBlob.svg),
-                url(assets/images/royalBlob.svg),
-                url(assets/images/pinkBlob5.svg);
+            background-image: url(assets/images/crosses2.svg),
+            url(assets/images/outlineBlob.svg),
+            url(assets/images/royalBlob.svg),
+            url(assets/images/pinkBlob5.svg);
             background-position: -11rem 38rem, right -11rem top -35rem, -21rem 41rem, 50% -143px;
             background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
             background-size: 20rem, 48rem, 30rem, 23rem;
@@ -120,15 +132,15 @@
             @include r(768) {
                 background: lighten($dolphin, 16%);
                 background-image: url(assets/images/grainy.png),
-                    url(assets/images/crosses2.svg),
-                    url(assets/images/outlineBlob.svg),
-                    url(assets/images/royalBlob.svg),
-                    url(assets/images/pinkBlob5.svg);
+                url(assets/images/crosses2.svg),
+                url(assets/images/outlineBlob.svg),
+                url(assets/images/royalBlob.svg),
+                url(assets/images/pinkBlob5.svg);
                 background-position: 0 0,
-                    -1rem -1rem,
-                    -59rem -26rem,
-                    -15rem 34rem,
-                    70rem -90rem;
+                -1rem -1rem,
+                -59rem -26rem,
+                -15rem 34rem,
+                70rem -90rem;
                 background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
                 background-size: auto, auto, 110%, 100%, 100%;
             }

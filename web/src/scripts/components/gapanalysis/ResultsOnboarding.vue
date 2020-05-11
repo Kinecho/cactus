@@ -94,31 +94,39 @@
 
         chartData(index: number): GapAnalysisAssessmentResult {
             // return this.results;
+            let result = new GapAnalysisAssessmentResult();
             let data = this.results.chartData ?? [];
 
             logger.info("Getting chart data for index", index, data);
             if (index === 1) {
-                logger.info("returning empty set");
-                return {
-                    chartData: [{
-                        name: "tmp",
-                        axes: [],
-                    }]
-                }
+                logger.info("returning empty set", result);
+                return result;
+                // return {
+                //     chartData: [{
+                //         name: "tmp",
+                //         axes: [],
+                //     }]
+                // }
             }
             if (index === 2) { //only commitment
-                return {
-                    // chartData: this.results.chartData?.filter(d => d.name !== "Importance")
-                    // chartData: data.filter(d => d.name !== "Importance")
-                    chartData: [data[0]],
-                }
+                result.importance = this.results.importance;
+                logger.info("results for importance", result);
+                return result;
+                // return {
+                //     // chartData: this.results.chartData?.filter(d => d.name !== "Importance")
+                //     // chartData: data.filter(d => d.name !== "Importance")
+                //     chartData: [data[0]],
+                // }
             }
 
             if (index === 3) { //only commitment
-                return {
-                    // chartData: data.filter(d => d.name !== "Satisfaction")
-                    chartData: [data[1]]
-                }
+                result.satisfaction = this.results.satisfaction;
+                logger.info("results for satisfaction", result);
+                return result;
+                // return {
+                //     // chartData: data.filter(d => d.name !== "Satisfaction")
+                //     chartData: [data[1]]
+                // }
             }
 
             return this.results;
@@ -219,6 +227,6 @@
     }
 
     .big {
-        background: linear-gradient(to right, orange , yellow, green, cyan, blue, violet);
+        background: linear-gradient(to right, orange, yellow, green, cyan, blue, violet);
     }
 </style>

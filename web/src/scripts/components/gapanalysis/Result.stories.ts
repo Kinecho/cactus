@@ -2,11 +2,7 @@ import Vue from "vue";
 import ResultsPage from "@components/gapanalysis/Results.vue";
 import { boolean, text } from "@storybook/addon-knobs";
 import GapAnalysisAssessmentResult from "@shared/models/GapAnalysisAssessmentResult";
-import { CactusElement } from "@shared/models/CactusElement";
-import { isBlank } from "@shared/util/StringUtil";
 import { RadarChartConfig } from "@web/charts/radarChart";
-
-const defaultChartData = GapAnalysisAssessmentResult.mock().chartData;
 
 export default {
     title: "Gap Analysis/Assessment"
@@ -44,11 +40,10 @@ export const ResultScreen = () => Vue.extend({
             }
         },
         results(): GapAnalysisAssessmentResult {
-            return {
-                chartData: defaultChartData,
-                errorMessage: isBlank(this.errorMessage) ? undefined : this.errorMessage,
-            }
+            const result = GapAnalysisAssessmentResult.mock();
+            result.errorMessage = this.errorMessage;
+
+            return result;
         }
     }
 })
-

@@ -120,8 +120,8 @@ export function drawRadarChartD3(parent_selector: string, data: RadarChartData[]
         r.axes = r.axes.sort((a, b) => a.axis.localeCompare(b.axis));
     })
 
-    const allAxisNames = data[0]?.axes.map((i, j) => i.axis)?.sort(),	//Names of each axis
-    total = allAxisNames.length,					//The number of different axes
+    const allAxisNames = data[0]?.axes.map((i, j) => i.axis)?.sort() ?? [""],	//Names of each axis
+    total = allAxisNames?.length ?? 0,					//The number of different axes
     radius = Math.min(cfg.w / 2, cfg.h / 2), 	//Radius of the outermost circle
     Format = d3.format(cfg.format),			 	//Formatting
     angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
