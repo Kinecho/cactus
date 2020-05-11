@@ -5,7 +5,7 @@
                 <sign-in :show-magic-link="false"
                         :show-title="true"
                         title="Mental Fitness Quiz"
-                        message="Sign in to get started"
+                        message="Sign in to continue to your quiz."
                         :sign-in-success-path="signInSuccessRoute"
                         :redirect-on-sign-in="false"
                         :redirect-url="signInSuccessRoute"
