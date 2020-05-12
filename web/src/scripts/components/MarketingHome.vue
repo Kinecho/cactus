@@ -1,12 +1,11 @@
 <template>
     <div>
         <div class="centered">
-            <router-link :to="assessmentHref" tag="button" class="primary">Take The Quiz</router-link>
             <section class="hero">
-
                 <div class="heroText">
                     <h1>What makes you&nbsp;happy?</h1>
                     <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
+                    <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the Quiz</router-link>
                     <h3 id="tryItHeader" v-if="showTryItHeader">Try it free:</h3>
                     <div class="app-icons">
                         <AppStoreIcon :onlyiOS="true" :onlyMobile="true"/>
@@ -23,16 +22,6 @@
                         <p class="demoText">Today you’ll reflect on your favorite thing to do on a sunny&nbsp;day.</p>
                     </div>
                 </aside>
-                <div id="signupAnchor"></div>
-                <form class="heroForm" id="sign-up-top">
-                    <div class="alert error hidden">Sorry, looks like we have issues.</div>
-                    <input type="email" name="email" placeholder="Enter your email address">
-                    <button type="submit" name="submit" class="email-submit-button">Try It Free</button>
-                    <div class="app-icons">
-                        <AppStoreIcon/>
-                        <PlayStoreIcon/>
-                    </div>
-                </form>
             </section>
         </div>
         <section class="why">
@@ -247,8 +236,16 @@
         .heroText {
             align-self: end;
             grid-area: heroText;
-            margin: 0 auto 4rem;
+            margin: 0 auto 4.8rem;
             max-width: 60rem;
+
+            @include r(768) {
+                margin: 0;
+                text-align: left;
+            }
+            @include r(1140) {
+                padding-top: 8rem;
+            }
 
             .app-icons {
                 display: flex;
@@ -271,28 +268,20 @@
             .play-store-icon {
                 margin-top: 1.6rem;
             }
-
-            @include r(768) {
-                margin: 0;
-                text-align: left;
-            }
-            @include r(1140) {
-                padding-top: 8rem;
-            }
         }
 
         h1 {
             line-height: 1.2;
-            margin: .8rem 2.4rem .4rem;
+            margin: .8rem 2.4rem;
 
             @include r(768) {
-                margin: 0 2.4rem .4rem 0;
+                margin: 0 2.4rem .8rem 0;
                 max-width: 65rem;
             }
         }
 
         .subtext {
-            margin: 0 2.4rem;
+            margin: 0 2.4rem 2.4rem;
 
             @include r(768) {
                 margin: 0 2.4rem 3.2rem 0;
@@ -339,6 +328,10 @@
         left: 0;
         position: absolute;
         top: 32rem;
+    }
+
+    .quizBtn {
+        min-width: 24rem;
     }
 
     .graphicContainer {
