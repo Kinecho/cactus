@@ -4,16 +4,16 @@
         <h2>Here are your results</h2>
         <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
         <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
-            <p>Each of the five elements represents a core focus of a balanced life.</p>
+            <p>Each of the five elements represents a core focus of a balanced&nbsp;life.</p>
         </div>
         <p class="message" v-else-if="currentIndex === 1" :key="`msg_${currentIndex}`">
-            The quiz scores each question to analyze each element on a 1 - 5 scale.
+            Each question is graded on a scale from&nbsp;1&nbsp;-&nbsp;5.
         </p>
         <div class="message" v-else-if="currentIndex === 2" :key="`msg_${currentIndex}`">
-            <p>The <span class="pink">pink hue</span> represents your commitment to the element.</p>
+            <p>The <span class="pink">pink hue</span> represents how important the element is to you in your&nbsp;life.</p>
         </div>
         <div class="message" v-else-if="currentIndex === 3" :key="`msg_${currentIndex}`">
-            <p>The <span class="blue">blue hue</span> represents your satisfaction to the element.</p>
+            <p>The <span class="blue">blue hue</span> represents how satisfied you are regarding the focus of that element in your&nbsp;life.</p>
         </div>
         <result-graph :key="currentIndex"
                 :v-touch="swipeHandler"
@@ -174,6 +174,7 @@
 
         h2 {
             line-height: 1.1;
+            margin-bottom: .8rem;
         }
 
         p {
@@ -193,7 +194,7 @@
 
         @include r(768) {
             margin: 0 auto;
-            max-width: 64rem;
+            max-width: 48rem;
             padding: 0;
         }
     }
@@ -227,6 +228,6 @@
     }
 
     .big {
-        background: linear-gradient(to right, orange, yellow, green, cyan, blue, violet);
+        display: none;
     }
 </style>
