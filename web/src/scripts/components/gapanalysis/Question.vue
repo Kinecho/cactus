@@ -59,7 +59,7 @@
             window.removeEventListener("keyup", this.onKeyUp);
         }
 
-        get currentIndex(): number|null {
+        get currentIndex(): number | null {
             if (this.currentValue) {
                 return this.question.options.findIndex(o => o.value === this.currentValue);
             }
@@ -67,7 +67,9 @@
         }
 
         onKeyUp(event: KeyboardEvent) {
-            if (event.key === "Enter" || event.keyCode === 13) {
+            if (event.key === "Escape" || event.keyCode === 27) {
+                this.focusedIndex = null;
+            } else if (event.key === "Enter" || event.keyCode === 13) {
                 //no op
                 if (this.focusedIndex !== null) {
                     const questionValue = this.question.options[this.focusedIndex].value;
