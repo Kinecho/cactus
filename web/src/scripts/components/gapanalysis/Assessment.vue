@@ -55,7 +55,7 @@
             <div class="whiteBg" v-else-if="finished && result && !selectFocusArea">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="selectFocusArea = true">Next</button>
+                    <button class="btn primary" @click="selectFocusArea = true">Choose Your Focus</button>
                 </div>
                 <cactus-confetti :running="true"/>
             </div>
@@ -352,7 +352,7 @@
         background-color: $white;
         font-size: 2rem;
         min-height: 100vh;
-        padding: 6.4rem 2.4rem .8rem;
+        padding: 6.4rem 2.4rem;
 
         @include r(768) {
             background-color: transparent;
