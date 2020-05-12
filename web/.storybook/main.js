@@ -39,14 +39,9 @@ module.exports = {
             ],
         },
         {
-            test: /\.(css|scss)$/,
+            // test: /\.(css|scss)$/,
+            test: /\.(scss)$/,
             use: [
-                // {
-                //     loader: MiniCssExtractPlugin.loader,
-                //     options: {
-                //         hmr: true,
-                //     },
-                // },
                 'vue-style-loader',
                 {
                     loader: 'css-loader',
@@ -95,7 +90,6 @@ module.exports = {
             parsedConfig[`process.env.${key}`] = JSON.stringify(appConfig[key])
         })
 
-        console.log('parseConfig', JSON.stringify(parsedConfig))
         config.plugins.push(new webpack.DefinePlugin({
             ...parsedConfig,
         }))
