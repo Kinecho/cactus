@@ -10,8 +10,6 @@ const chalk = require('chalk')
 const simplegit = require('simple-git/promise')
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin')
 
-const smp = new SpeedMeasurePlugin()
-
 function getCommitHash() {
     const git = simplegit()
     return git.revparse(['HEAD'])
@@ -167,12 +165,28 @@ module.exports = (config) => {
                         },
                         {
                             test: /\.ts$/,
-                            loader: 'ts-loader',
-                            options: {
-                                transpileOnly: true,
-                                happyPackMode: false,
-                                appendTsSuffixTo: [/\.vue$/],
-                            },
+                            use: [
+                                {
+                                    loader: 'cache-loader',
+                                },
+                                isDev ? null : {
+                                    loader: 'thread-loader',
+                                },
+                                {
+                                    loader: 'babel-loader', options: {
+                                        cacheDirectory: true,
+                                    },
+                                },
+                                {
+                                    loader: 'ts-loader',
+                                    options: {
+                                        transpileOnly: true,
+                                        happyPackMode: !isDev,
+                                        appendTsSuffixTo: [/\.vue$/],
+                                    },
+                                },
+                            ].filter(Boolean),
+
                         },
                         {
                             test: /\.css$/,
@@ -257,8 +271,13 @@ module.exports = (config) => {
                 ],
             }
 
-            return resolve(finalConfig)
-        }).then(config => smp.wrap(config))
+            if (!isDev) {
+                const smp = new SpeedMeasurePlugin()
+                resolve(smp.wrap(finalConfig))
+            } else {
+                return resolve(finalConfig)
+            }
+        })
     })
 
 
