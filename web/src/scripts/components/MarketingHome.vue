@@ -223,6 +223,7 @@
     .hero {
         display: grid;
         grid-template-areas: "heroText" "demo" "target" "form";
+        grid-template-rows: auto;
         margin: 2.4rem auto 0;
         max-width: 50rem;
         position: relative;
