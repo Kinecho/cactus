@@ -17,7 +17,7 @@
             </div>
         </modal>
         <transition name="component-fade" mode="out-in" appear>
-            <div v-if="!started" class="intro" key="intro">
+            <div v-if="currentScreen === Screen.intro" class="intro" key="intro">
                 <h1>Mental Fitness Quiz</h1>
                 <p>The Cactus Mental Fitness Quiz is the first step towards understanding yourself better. Together, we
                     will identify areas of your life to improve.</p>
@@ -29,10 +29,10 @@
                 </div>
             </div>
             <!-- Note: This needs to be a div (not template) so that the fade transitoin works -->
-            <div v-else-if="currentQuestion && !finished && started" key="question-container">
+            <div v-else-if="currentQuestion && currentScreen === Screen.questions" key="question-container">
                 <div class="paddingContainer">
-                    <h4>{{currentQuestionIndex + 1}} of {{stepperTotal - 1 }}</h4>
-                    <button class="backArrowbtn btn tertiary icon no-loading" @click="previous" v-if="previousEnabled">
+                    <h4>{{currentQuestionIndex + 1}} of {{questionsTotal}}</h4>
+                    <button class="backArrowbtn btn tertiary icon no-loading" @click="previousQuestion" v-if="previousQuestionEnabled">
                         <svg class="backArrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
                             <path d="M12.586 7L7.293 1.707A1 1 0 0 1 8.707.293l7 7a1 1 0 0 1 0 1.414l-7 7a1 1 0 1 1-1.414-1.414L12.586 9H1a1 1 0 1 1 0-2h11.586z"/>
                         </svg>
@@ -42,37 +42,37 @@
                     </transition>
                     <div class="cvActions">
                         <button class="btn primary no-loading"
-                                @click="next"
-                                :disabled="!nextEnabled">
+                                @click="nextQuestion"
+                                :disabled="!nextQuestionEnabled">
                             {{nextButtonText}}
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="whiteBg" v-else-if="processingResults">
+            <div class="whiteBg" v-else-if="currentScreen === Screen.pendingResults">
                 <results-processing/>
             </div>
-            <div class="whiteBg" v-else-if="finished && result && !selectFocusArea">
+            <div class="whiteBg" v-else-if="currentScreen === Screen.results">
                 <results-onboarding :results="result"/>
                 <div class="cvActions">
-                    <button class="btn primary" @click="selectFocusArea = true">Choose Your Focus</button>
+                    <button class="btn primary" @click="setScreen(Screen.chooseFocus)">Choose Your Focus</button>
                 </div>
                 <cactus-confetti :running="true"/>
             </div>
-            <div class="whiteBg" v-else-if="selectFocusArea && !showUpsell">
+            <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
                 <p class="subtext">You can choose to reflect in one of the areas below by tapping a cactus. You'll then
                     receive daily prompts in the chosen area. You can change this&nbsp;later.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <div class="cvActions flexActions">
-                    <button class="no-loading" @click="selectedElementContinue" :disabled="!selectedElement">Next
+                    <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
-                    <button class="no-loading tertiary" @click="selectedElementContinue">Do this later</button>
+                    <button class="no-loading tertiary" @click="skipFocus">Do this later</button>
                 </div>
             </div>
-            <template v-else-if="showUpsell">
-                <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout"/>
+            <template v-else-if="currentScreen === Screen.upgrade">
+                <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout" @skip="skipCheckout"/>
             </template>
         </transition>
     </div>
@@ -98,8 +98,37 @@
     import LoadableGapAnalysisUpsell from "@components/gapanalysis/LoadableGapAnalysisUpsell.vue";
     import SubscriptionProduct, { BillingPeriod } from "@shared/models/SubscriptionProduct";
     import { startCheckout } from "@web/checkoutService";
+    import { pushRoute } from "@web/NavigationUtil";
+    import { PageRoute } from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("gap/Assessment");
+
+    /**
+     * Screen Names
+     * @type {{upgrade: string; intro: string; pendingResults: string; questions: string; chooseFocus: string; results: string}}
+     */
+    const Screen = {
+        intro: "intro",
+        questions: "questions",
+        pendingResults: "pendingResults",
+        results: "results",
+        chooseFocus: "choose-focus",
+        upgrade: "upgrade"
+    }
+
+    /**
+     * Screen Order
+     * @type {(string)[]}
+     */
+    const defaultScreens = [
+        Screen.intro,
+        Screen.questions,
+        Screen.pendingResults,
+        Screen.results,
+        Screen.chooseFocus,
+        Screen.upgrade
+    ];
 
     @Component({
         components: {
@@ -118,30 +147,27 @@
         @Prop({ type: Object as () => GapAnalysisAssessment, required: false })
         assessment!: GapAnalysisAssessment;
 
+        @Prop({ type: Boolean, required: false, default: true })
+        includeUpsell!: boolean;
+
         started: boolean = false;
         finished: boolean = false;
         result: GapAnalysisAssessmentResult | undefined;
         currentQuestionIndex: number = 0;
-
+        currentScreenIndex: number = 0;
+        Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
+
 
         /**
          * Responses by questionID
          * @type {{string: number|undefined}}
          */
         responseValues: Record<string, number | undefined> = {};
-
         showCloseConfirm = false;
-
-        processingResults = false;
-
         processingTimeout?: number;
-
-        selectFocusArea = false;
-
         selectedElement: CactusElement | null = null;
-
-        showUpsell = false;
+        currentScreen: string = Screen.intro;
 
         @Watch("currentQuestionIndex")
         emitPageChange(newIndex: number) {
@@ -192,25 +218,36 @@
             this.responseValues = { ...this.responseValues, [questionId]: value };
         }
 
-        next() {
+        nextQuestion() {
             if (this.currentQuestionIndex >= this.assessment.questions.length - 1) {
                 this.finishAssessment();
                 return
             }
             this.currentQuestionIndex += 1;
+            // this.currentScreenIndex += 1;
         }
 
-        previous() {
+        previousQuestion() {
             if (this.currentQuestionIndex > 0) {
                 this.currentQuestionIndex = this.currentQuestionIndex - 1;
+                // this.currentScreenIndex -= 1;
             }
         }
 
-        get previousEnabled(): boolean {
+        get previousQuestionEnabled(): boolean {
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
         }
 
-        get nextEnabled(): boolean {
+        get screens(): string[] {
+            return [...defaultScreens].filter(screen => {
+                if (screen === Screen.upgrade && !this.includeUpsell) {
+                    return false;
+                }
+                return true;
+            })
+        }
+
+        get nextQuestionEnabled(): boolean {
             const questionId = this.currentQuestion?.id
             if (questionId === undefined) {
                 return false;
@@ -230,9 +267,11 @@
             })
             logger.info("finishing assessment...", result);
             this.finished = true;
-            this.processingResults = true;
+            // this.processingResults = true;
+            this.setScreen(Screen.pendingResults);
             this.processingTimeout = window.setTimeout(() => {
-                this.processingResults = false;
+                // this.processingResults = false;
+                this.setScreen(Screen.results);
             }, 2500);
             this.result = result;
             this.$emit('finished', this.result);
@@ -242,16 +281,32 @@
         start() {
             this.currentQuestionIndex = 0;
             this.started = true;
+            this.setScreen("questions");
+        }
+
+        setScreen(name: string) {
+            logger.info("Setting screen...", name);
+            this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
+            this.currentScreen = this.screens[this.currentScreenIndex];
+        }
+
+        focusSelected() {
+            if (this.includeUpsell) {
+                this.setScreen(Screen.upgrade)
+            } else {
+                this.$emit('close')
+            }
         }
 
         get currentStepperIndex(): number {
             if (!this.started) {
                 return 0;
             }
-            if (this.result) {
-                return this.stepperTotal - 1;
-            }
-            return (this.currentQuestionIndex ?? 0) + 1;
+            return this.currentScreenIndex + this.currentQuestionIndex;
+            // if (this.result) {
+            //     return this.stepperTotal - 1;
+            // }
+            // return (this.currentQuestionIndex ?? 0) + 1;
         }
 
         /**
@@ -259,7 +314,11 @@
          * @return {number}
          */
         get stepperTotal(): number {
-            return this.assessment.questions.length + 1;
+            return this.assessment.questions.length + this.screens.length;
+        }
+
+        get questionsTotal(): number {
+            return this.assessment.questions.length;
         }
 
         async close() {
@@ -270,8 +329,20 @@
             return;
         }
 
-        selectedElementContinue() {
-            this.showUpsell = true;
+        async skipFocus() {
+            logger.info("Skipping focus");
+            const c = confirm("Are you sure you want to skip choosing your element?")
+            if (c) {
+                await pushRoute(PageRoute.INSIGHTS);
+            }
+        }
+
+        async skipCheckout() {
+            logger.info("Skipping checkout");
+            const c = confirm("Are you sure you want to skip upgrading?")
+            if (c) {
+                await pushRoute(PageRoute.INSIGHTS);
+            }
         }
 
         async startCheckout(subscriptionProduct: SubscriptionProduct | undefined | null) {

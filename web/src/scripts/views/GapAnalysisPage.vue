@@ -2,10 +2,22 @@
     <div class="gapAnalysisPage">
         <div class="centered">
             <div class="sign-in" v-if="!member && memberLoaded">
-                <h3>to get started, sign in</h3>
-                <router-link :to="signInRoute" tag="button" class="btn primary">Sign In</router-link>
+                <sign-in :show-magic-link="false"
+                        :show-title="true"
+                        title="Mental Fitness Quiz"
+                        message="Sign in to continue to your quiz."
+                        :sign-in-success-path="signInSuccessRoute"
+                        :redirect-on-sign-in="false"
+                        :redirect-url="signInSuccessRoute"
+                        :twitterEnabled="false"
+                />
             </div>
-            <assessment v-if="member && memberLoaded" :assessment="assessment" @questionChanged="setQuestion" @close="closeAssessment" @finished="finishAssessment"/>
+            <assessment v-if="member && memberLoaded"
+                    :assessment="assessment"
+                    @questionChanged="setQuestion"
+                    :include-upsell="includeUpsell"
+                    @close="closeAssessment"
+                    @finished="finishAssessment"/>
         </div>
     </div>
 </template>
@@ -25,28 +37,34 @@
     import { ListenerUnsubscriber } from "@web/services/FirestoreService";
     import CactusMemberService from "@web/services/CactusMemberService";
     import GapAnalysisService from "@web/services/GapAnalysisService";
-    import { QueryParam } from "@shared/util/queryParams";
+    import SignIn from "@components/SignIn.vue";
+    import LoadingPage from "@web/views/LoadingPage.vue";
+    import { isPremiumTier } from "@shared/models/MemberSubscription";
 
     const logger = new Logger("GapAnalysisPage");
 
     @Component({
         components: {
+            LoadingPage,
             Results,
+            SignIn,
             Assessment,
-            ProgressStepper
+            ProgressStepper,
         }
     })
     export default class GapAnalysisPage extends Vue {
+        assessmentId: string | null = null;
         assessment = GapAnalysisAssessment.create();
         latestResults: GapAnalysisAssessmentResult | undefined = undefined;
         currentPage: number = 0;
         memberLoaded = false;
         memberUnsubscriber?: ListenerUnsubscriber;
-        member?: CactusMember | undefined;
+        member: CactusMember | undefined | null = null;
 
-        beforeMount() {
+        async beforeMount() {
+
             this.memberUnsubscriber = CactusMemberService.sharedInstance.observeCurrentMember({
-                onData: ({ member }) => {
+                onData: async ({ member }) => {
                     this.member = member;
                     this.memberLoaded = true;
                     // if (!member) {
@@ -56,8 +74,8 @@
             })
         }
 
-        get signInRoute() {
-            return `${ PageRoute.SIGNUP }?${ QueryParam.MESSAGE }=${ encodeURIComponent("Please sign in to take the assessment") }&${ QueryParam.REDIRECT_URL }=${ window.location.href }`;
+        get signInSuccessRoute() {
+            return PageRoute.GAP_ANALYSIS;
         }
 
         get results(): GapAnalysisAssessmentResult | undefined {
@@ -71,6 +89,10 @@
         async saveResults(results: GapAnalysisAssessmentResult) {
             logger.info("Saving results of assessment...");
             this.latestResults = results;
+        }
+
+        get includeUpsell(): boolean {
+            return !isPremiumTier(this.member?.tier);
         }
 
         setQuestion(questionIndex: number) {

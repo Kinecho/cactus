@@ -1,6 +1,5 @@
 <template>
     <div class="resultsOnboarding" v-touch:swipe="swipeHandler">
-        <div class="big">{{swipeMessage}}</div>
         <h2>Here are your results</h2>
         <!-- Made this a div vs a template because i needed to set a :key on it for the transition to work -->
         <div class="message" v-if="currentIndex === 0" :key="`msg_${currentIndex}`">
@@ -227,7 +226,4 @@
         width: 1.8rem;
     }
 
-    .big {
-        display: none;
-    }
 </style>

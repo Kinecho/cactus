@@ -6,7 +6,7 @@ import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
 import { isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
-import { Component, AsyncComponent } from "vue";
+import { Component } from "vue";
 
 const logger = new Logger("router.ts");
 
@@ -46,8 +46,8 @@ const routes: MetaRouteConfig[] = [
         path: "/",
         name: "Cactus",
         meta: {
-            title: "Cactus | Boost your mental fitness",
-            description: "Research-backed prompts to increase self-awareness and resilience",
+            title: "Cactus | What makes you happy?",
+            description: "Questions designed to improve how you think about your work, life, relationships, and emotions",
             metaTags: [],
             image: {
                 url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574",
