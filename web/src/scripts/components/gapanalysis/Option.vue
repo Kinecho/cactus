@@ -1,9 +1,6 @@
 <template>
     <div class="question-option" :class="[{'selected':selected, focused}]"
-            :tabindex="0"
-            ref="main" @keyup.enter="enterPressed"
-            @focus="hasFocus = true"
-            @blur="hasFocus = false"
+            ref="main"
     >
         <div class="main">
             <div class="grow">
@@ -47,7 +44,6 @@
         @Prop({ type: Boolean, default: false })
         focused!: boolean
 
-        hasFocus: boolean = false;
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
@@ -60,12 +56,6 @@
 
         get label(): string {
             return this.option.label ?? "";
-        }
-
-        enterPressed() {
-            if (this.focused || this.hasFocus) {
-                this.selectionChanged(!this.selected);
-            }
         }
     }
 </script>

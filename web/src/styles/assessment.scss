@@ -157,7 +157,7 @@ button.close {
         border-radius: 0 0 .4rem .4rem;
     }
 
-    &:focus, .focused {
+    &:focus, &.focused {
         outline: 2px solid $green;
         border: 1px solid $lightGray;
         background-color: $lightGray;

@@ -1,9 +1,16 @@
 <template>
     <div class="cvQuestion">
-        <div class="titleMarkdown"><markdown-text :source="question.title"/></div>
+        <div class="titleMarkdown">
+            <markdown-text :source="question.title"/>
+        </div>
         <div class="question-options">
             <template v-for="(option, index) in question.options">
-                <gap-option :key="`option_${index}`" :option="option" :selected="currentValue === option.value" @change="setValue"/>
+                <gap-option :key="`option_${index}`"
+                        :option="option"
+                        :selected="currentValue === option.value"
+                        @change="setValue"
+                        :focused="focusedIndex === index"
+                />
             </template>
         </div>
     </div>
@@ -16,6 +23,9 @@
     import { Prop } from "vue-property-decorator";
     import GapAnalysisQuestion from "@shared/models/GapAnalysisQuestion";
     import MarkdownText from "@components/MarkdownText.vue";
+    import Logger from "@shared/Logger"
+
+    const logger = new Logger("Question");
 
     @Component({
         components: {
@@ -30,8 +40,37 @@
         @Prop({ type: Number, required: false })
         currentValue?: number;
 
+        focusedIndex: number | null = null;
+
+        keyListener: any;
+
         setValue(selected: boolean, value: number | undefined) {
             this.$emit("change", selected ? value : undefined);
+        }
+
+        beforeMount() {
+            window.addEventListener("keyup", this.onKeyUp);
+        }
+
+        destroyed() {
+            logger.info("removing key listener");
+            window.removeEventListener("keyup", this.onKeyUp);
+        }
+
+        onKeyUp(event: KeyboardEvent) {
+            if (event.key === "Enter" || event.keyCode === 13) {
+                //no op
+                if (this.focusedIndex !== null) {
+                    const questionValue = this.question.options[this.focusedIndex].value;
+                    this.setValue(this.currentValue !== questionValue, questionValue);
+                }
+            } else if (event.key === "ArrowDown" || event.keyCode === 40) {
+                //handle arrow down
+                this.focusedIndex = Math.min(this.question.options.length - 1, (this.focusedIndex ?? -1) + 1);
+            } else if (event.key === "ArrowUp" || event.keyCode === 38) {
+                //handle arrow down
+                this.focusedIndex = Math.max(0, (this.focusedIndex ?? 1) - 1);
+            }
         }
     }
 </script>
