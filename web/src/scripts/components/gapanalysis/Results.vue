@@ -7,11 +7,12 @@
                 @selected="elementClicked"
                 :selectable="selectableElements"
                 :selected="selectedElement === 'emotions'"
+                :withAnimation="withAnimation"
         />
-        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements"/>
-        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements"/>
-        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements"/>
-        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements"/>
+        <result-element element="relationships" class="element relationships" @selected="elementClicked" :selected="selectedElement === 'relationships'" :selectable="selectableElements" :withAnimation="withAnimation"/>
+        <result-element element="energy" class="element energy" @selected="elementClicked" :selected="selectedElement === 'energy'" :selectable="selectableElements" :withAnimation="withAnimation"/>
+        <result-element element="meaning" class="element meaning" @selected="elementClicked" :selected="selectedElement === 'meaning'" :selectable="selectableElements" :withAnimation="withAnimation"/>
+        <result-element element="experience" class="element experience" @selected="elementClicked" :selected="selectedElement === 'experience'" :selectable="selectableElements" :withAnimation="withAnimation"/>
     </div>
 </template>
 
@@ -56,6 +57,9 @@
 
         @Prop({ type: Boolean, required: false, default: false })
         hideElements!: boolean;
+
+        @Prop({ type: Boolean, required: false, default: false })
+        withAnimation!: boolean;
 
         @Prop({ type: String, required: false, default: "assessment-1" })
         chartId!: string;
