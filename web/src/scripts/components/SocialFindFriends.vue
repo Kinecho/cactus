@@ -21,7 +21,7 @@
             </div>
             <social-sharing :url="referralLink"
                     title="I'm inviting you to Cactus"
-                    description="Questions designed to improve how you think about your work, life, relationships, and emotions"
+                    description="Questions designed to improve how you think about work, life, relationships, and emotions"
                     quote="Cactus gives you a moment of mindfulness each day by asking you questions designed to help you better understand yourself."
                     twitter-user="itscalledcactus"
                     inline-template

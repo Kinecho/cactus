@@ -47,7 +47,7 @@ const routes: MetaRouteConfig[] = [
         name: "Cactus",
         meta: {
             title: "Cactus | What makes you happy?",
-            description: "Questions designed to improve how you think about your work, life, relationships, and emotions",
+            description: "Questions designed to improve how you think about work, life, relationships, and emotions",
             metaTags: [],
             image: {
                 url: "https://firebasestorage.googleapis.com/v0/b/cactus-app-prod.appspot.com/o/static%2Fog-wall-of-blobs-big.png?alt=media&token=9c2ec0c0-3e76-4603-a5a4-8a79e1373574",

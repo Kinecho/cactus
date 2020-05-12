@@ -4,7 +4,7 @@
             <section class="hero">
                 <div class="heroText">
                     <h1>What makes you&nbsp;happy?</h1>
-                    <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
+                    <p class="subtext">Questions designed to improve how you think about work, life, relationships, and&nbsp;emotions</p>
                     <h3 id="tryItHeader" v-if="showTryItHeader">Try it free:</h3>
                     <div class="app-icons">
                         <AppStoreIcon :onlyiOS="true" :onlyMobile="true"/>
