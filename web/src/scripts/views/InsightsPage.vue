@@ -141,6 +141,9 @@
         }
 
         get coreValuesBlob(): CoreValuesBlob | undefined {
+            if (!this.authLoaded || !this.member) {
+                return undefined;
+            }
             const forceIndex = getQueryParam(QueryParam.BG_INDEX)
             logger.info("Forcing index: ", forceIndex);
             const blob = getCoreValuesBlob(this.member?.coreValues, forceIndex);
@@ -149,7 +152,7 @@
         }
 
         get wordCloud(): InsightWord[] {
-            return this.member?.wordCloud ?? [];
+            return (this.authLoaded && this.member) ? (this.member?.wordCloud ?? []) : [];
         }
 
         get hasWordCloud(): boolean {
@@ -157,11 +160,14 @@
         }
 
         get coreValues(): CoreValueMeta[] {
-            return (this.member?.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
+            if (!this.authLoaded || !this.member) {
+                return [];
+            }
+            return (this.member.coreValues ?? []).map(value => CoreValuesService.shared.getMeta(value))
         }
 
         get hasCoreValues(): boolean {
-            return isPremiumTier(this.member?.tier) && (this.member?.coreValues?.length ?? 0) > 0;
+            return (this.authLoaded && this.member) && isPremiumTier(this.member?.tier) && ((this.member?.coreValues?.length ?? 0) > 0);
         }
 
         get coreValuesHref(): string {
