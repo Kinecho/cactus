@@ -356,7 +356,7 @@ $widthDesktop: $widthXL;
   color: white;
   cursor: pointer;
   flex-grow: 1;
-  font: 1.8rem $font-stack;
+  font: bold 1.8rem $font-stack;
   margin: 0;
   padding: 1.2rem 2.4rem 1.6rem;
   transition: box-shadow .2s ease-in-out, background-color .2s ease-in-out, opacity .3s;
@@ -386,7 +386,7 @@ $widthDesktop: $widthXL;
   &:disabled, &.disabled {
     background-color: #ccc;
     box-shadow: none;
-    color: $darkText;
+    color: lighten($darkText, 20%);
     cursor: default;
 
 
