@@ -6,7 +6,7 @@ import { MetaRouteConfig, updateRouteMeta } from "@web/router-meta";
 import { isExternalUrl } from "@shared/util/StringUtil";
 import LoadingPage from "@web/views/LoadingPage.vue";
 import ErrorPage from "@web/views/ErrorPage.vue";
-import { Component, AsyncComponent } from "vue";
+import { Component } from "vue";
 
 const logger = new Logger("router.ts");
 

@@ -66,13 +66,13 @@
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected"/>
                 <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <div class="cvActions flexActions">
-                    <button class="no-loading" @click="setScreen(Screen.upgrade)" :disabled="!selectedElement">Next
+                    <button class="no-loading" @click="focusSelected" :disabled="!selectedElement">Next
                     </button>
-                    <button class="no-loading tertiary" @click="skipUpgrade">Do this later</button>
+                    <button class="no-loading tertiary" @click="skipFocus">Do this later</button>
                 </div>
             </div>
             <template v-else-if="currentScreen === Screen.upgrade">
-                <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout"/>
+                <LoadableGapAnalysisUpsell :element="selectedElement" :billing-period="upsellBillingPeriod" @checkout="startCheckout" @skip="skipCheckout"/>
             </template>
         </transition>
     </div>
@@ -100,6 +100,7 @@
     import { startCheckout } from "@web/checkoutService";
     import { pushRoute } from "@web/NavigationUtil";
     import { PageRoute } from "@shared/PageRoutes";
+    import CactusMember from "@shared/models/CactusMember";
 
     const logger = new Logger("gap/Assessment");
 
@@ -120,7 +121,7 @@
      * Screen Order
      * @type {(string)[]}
      */
-    const screens = [
+    const defaultScreens = [
         Screen.intro,
         Screen.questions,
         Screen.pendingResults,
@@ -146,6 +147,9 @@
         @Prop({ type: Object as () => GapAnalysisAssessment, required: false })
         assessment!: GapAnalysisAssessment;
 
+        @Prop({ type: Boolean, required: false, default: true })
+        includeUpsell!: boolean;
+
         started: boolean = false;
         finished: boolean = false;
         result: GapAnalysisAssessmentResult | undefined;
@@ -153,6 +157,7 @@
         currentScreenIndex: number = 0;
         Screen = Screen;
         upsellBillingPeriod = BillingPeriod.yearly;
+
 
         /**
          * Responses by questionID
@@ -162,7 +167,6 @@
         showCloseConfirm = false;
         processingTimeout?: number;
         selectedElement: CactusElement | null = null;
-        showUpsell = false;
         currentScreen: string = Screen.intro;
 
         @Watch("currentQuestionIndex")
@@ -234,6 +238,15 @@
             return this.currentQuestionIndex != undefined && this.currentQuestionIndex > 0;
         }
 
+        get screens(): string[] {
+            return [...defaultScreens].filter(screen => {
+                if (screen === Screen.upgrade && !this.includeUpsell) {
+                    return false;
+                }
+                return true;
+            })
+        }
+
         get nextQuestionEnabled(): boolean {
             const questionId = this.currentQuestion?.id
             if (questionId === undefined) {
@@ -273,8 +286,16 @@
 
         setScreen(name: string) {
             logger.info("Setting screen...", name);
-            this.currentScreenIndex = Math.max(0, screens.indexOf(name));
-            this.currentScreen = screens[this.currentScreenIndex];
+            this.currentScreenIndex = Math.max(0, this.screens.indexOf(name));
+            this.currentScreen = this.screens[this.currentScreenIndex];
+        }
+
+        focusSelected() {
+            if (this.includeUpsell) {
+                this.setScreen(Screen.upgrade)
+            } else {
+                this.$emit('close')
+            }
         }
 
         get currentStepperIndex(): number {
@@ -293,7 +314,7 @@
          * @return {number}
          */
         get stepperTotal(): number {
-            return this.assessment.questions.length + screens.length;
+            return this.assessment.questions.length + this.screens.length;
         }
 
         get questionsTotal(): number {
@@ -308,13 +329,17 @@
             return;
         }
 
-        selectedElementContinue() {
-            this.showUpsell = true;
+        async skipFocus() {
+            logger.info("Skipping focus");
+            const c = confirm("Are you sure you want to skip choosing your element?")
+            if (c) {
+                await pushRoute(PageRoute.INSIGHTS);
+            }
         }
 
-        async skipUpgrade() {
-            logger.info("Skipping upgrade");
-            const c = confirm("Are you sure you want to skip?")
+        async skipCheckout() {
+            logger.info("Skipping checkout");
+            const c = confirm("Are you sure you want to skip upgrading?")
             if (c) {
                 await pushRoute(PageRoute.INSIGHTS);
             }

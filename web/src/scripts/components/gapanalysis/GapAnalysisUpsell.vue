@@ -41,7 +41,7 @@
                 </div>
             </transition>
         </section>
-        <button class="tertiary">Skip for now</button>
+        <button class="tertiary" @click="skip">Skip for now</button>
     </div>
 </template>
 
@@ -104,6 +104,10 @@
 
         checkout() {
             this.$emit('checkout', this.subscriptionProduct);
+        }
+
+        skip() {
+            this.$emit('skip');
         }
     }
 </script>
