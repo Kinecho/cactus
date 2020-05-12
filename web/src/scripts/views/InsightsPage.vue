@@ -167,7 +167,7 @@
         }
 
         get hasCoreValues(): boolean {
-            return (this.authLoaded && this.member) && isPremiumTier(this.member?.tier) && ((this.member?.coreValues?.length ?? 0) > 0);
+            return (this.authLoaded && !!this.member) && isPremiumTier(this.member?.tier) && ((this.member?.coreValues?.length ?? 0) > 0);
         }
 
         get coreValuesHref(): string {
