@@ -1,10 +1,16 @@
 <template>
-    <div class="question-option" :class="[{'selected':selected}]">
+    <div class="question-option" :class="[{'selected':selected, focused}]"
+            :tabindex="0"
+            ref="main" @keyup.enter="enterPressed"
+            @focus="hasFocus = true"
+            @blur="hasFocus = false"
+    >
         <div class="main">
             <div class="grow">
                 <check-box :model-value="selected"
                         :label="label"
                         :icon="icon"
+                        :tabindex="-1"
                         @change="selectionChanged"
                         :type="this.type"
                         :disabled="disabled"
@@ -19,7 +25,7 @@
     import Vue from "vue";
     import Component from "vue-class-component";
     import GapAnalysisQuestionOption from "@shared/models/GapAnalysisQuestionOption";
-    import { Prop } from "vue-property-decorator";
+    import { Prop, Watch } from "vue-property-decorator";
     import CheckBox from "@components/CheckBox.vue";
     import { QuestionType } from "@shared/models/Questions";
 
@@ -33,11 +39,15 @@
         option!: GapAnalysisQuestionOption;
 
         @Prop({ type: Boolean, default: false, required: false })
-        selected: boolean = false
+        selected!: boolean;
 
         @Prop({ type: Boolean, default: false, required: false })
-        disabled: boolean = false
+        disabled!: boolean;
 
+        @Prop({ type: Boolean, default: false })
+        focused!: boolean
+
+        hasFocus: boolean = false;
         type = QuestionType.RADIO;
 
         selectionChanged(selected: boolean) {
@@ -47,8 +57,15 @@
         get icon(): string {
             return this.option.icon ?? "";
         }
+
         get label(): string {
             return this.option.label ?? "";
+        }
+
+        enterPressed() {
+            if (this.focused || this.hasFocus) {
+                this.selectionChanged(!this.selected);
+            }
         }
     }
 </script>

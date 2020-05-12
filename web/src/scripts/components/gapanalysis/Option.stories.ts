@@ -9,12 +9,13 @@ export default {
 
 export const SingleWithLabel = () => Vue.extend({
     template: `
-        <gap-option :option="option" :selected="selected" @change="handleChange" :disabled="disabled"/>`,
+        <gap-option :option="option" :selected="selected" @change="handleChange" :disabled="disabled" :focused="focused"/>`,
     components: {
         GapOption
     },
     props: {
-        disabled: { default: boolean("Disabled", false) }
+        disabled: { default: boolean("Disabled", false) },
+        focused: {default: boolean("Focused", false)}
     },
     data(): {
         option: GapAnalysisQuestionOption,

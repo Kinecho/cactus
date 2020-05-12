@@ -1,6 +1,6 @@
 <template>
     <label :class="['checkbox-container', this.classNames]">
-        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled">
+        <input type="checkbox" :checked="shouldBeChecked" :value="value" @change="updateInput" :disabled="disabled" :tabindex="tabindex">
         <!--        <img class="icon" v-if="icon" :src="`/assets/images/${icon}.svg`" />-->
         <SvgIcon :icon="icon" v-if="icon"/>
         <span class="checkmark" :class="selectTypeClass"></span>
@@ -20,6 +20,10 @@
             event: 'change',
         },
         props: {
+            tabindex: {
+                type: Number,
+                default: -1
+            },
             value: {
                 type: [String, Boolean],
             },
@@ -159,6 +163,10 @@
         cursor: pointer;
         height: 0;
         width: 0;
+
+        &:focus {
+            background-color: red;
+        }
 
         &:disabled ~ .checkmark {
             border-color: #ccc;
