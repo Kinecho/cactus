@@ -70,10 +70,12 @@
             if (event.key === "Escape" || event.keyCode === 27) {
                 this.focusedIndex = null;
             } else if (event.key === "Enter" || event.keyCode === 13) {
-                //no op
+                //handle enter
                 if (this.focusedIndex !== null) {
                     const questionValue = this.question.options[this.focusedIndex].value;
                     this.setValue(this.currentValue !== questionValue, questionValue);
+                } else if (this.currentValue !== undefined && this.currentValue !== null) {
+                    this.$emit('submit');
                 }
             } else if (event.key === "ArrowDown" || event.keyCode === 40) {
                 //handle arrow down
