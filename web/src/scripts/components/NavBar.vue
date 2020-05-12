@@ -47,7 +47,7 @@
                 </router-link> -->
                 <!-- INSIGHTS      -->
                 <router-link class="navbarLink" :to="insightsHref" v-if="loggedIn">
-                    <svg class="navIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
+                    <svg class="navIcon pie" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><title>Insights</title>
                         <path fill="#07454C" d="M6.601.913a1 1 0 01.8 1.834A9 9 0 1019.29 14.5a1 1 0 011.842.778A11 11 0 116.601.913zm4.4-.913a11 11 0 0111 11 1 1 0 01-1 1h-10a1 1 0 01-1-1V1a1 1 0 011-1zm1 2.056V10h7.944a9 9 0 00-7.944-7.944z"/>
                     </svg>
                     <span class="navLabel">{{copy.navigation.INSIGHTS}}</span>
@@ -411,18 +411,15 @@
             }
         }
 
-        &.home {
-            display: none;
-
-            @include r(374) {
-                display: block;
-            }
-        }
-
         .navIcon {
             display: block;
             height: 2.4rem;
             width: 2.4rem;
+
+            &.pie {
+                height: 2.2rem;
+                width: 2.2rem;
+            }
 
             @include r(600) {
                 display: none;
