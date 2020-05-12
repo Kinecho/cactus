@@ -36,19 +36,21 @@
                 <h2>Core Values</h2>
                 <p class="subtext">What is most important for you so that you better understand past decisions and make
                     better decisions in the future.</p>
-                <router-link tag="button" class="cvButton" :to="coreValuesHref">Get My Core Values</router-link>
+                <router-link tag="button" class="esButton" :to="coreValuesHref">Get My Core Values</router-link>
             </section>
 
             <div class="flexSections">
-                <section class="gapContainer borderContainer">
-                    <div class="gapText">
-                        <h2>Mental Fitness</h2>
-                        <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
-                    </div>
+                <section v-if="gapResults" class="gapContainer borderContainer">
+                    <h2>Mental Fitness</h2>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
-                    <img v-if="!gapResultsLoading && !gapResults" class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                     <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
+                </section>
+                <section v-else class="nogapContainer borderContainer">
+                    <h2>Mental Fitness</h2>
+                    <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
+                    <router-link tag="button" class="esButton" :to="gapAssessmentHref">Take the <span>Mental Fitness</span> Quiz</router-link>
                 </section>
 
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
@@ -396,14 +398,24 @@
         .subtext {
             margin: 0 0 2.4rem;
             max-width: 60rem;
-            opacity: .9;
+            opacity: .8;
+        }
+    }
+
+    .esButton {
+        display: block;
+        flex-grow: 0;
+        white-space: nowrap;
+
+        @include r(960) {
+            width: 100%;
         }
 
-        .cvButton {
-            display: block;
+        span {
+            display: none;
 
-            @include r(960) {
-                width: 100%;
+            @include r(374) {
+                display: inline;
             }
         }
     }
@@ -582,17 +594,11 @@
         @include r(960) {
             display: flex;
         }
-    }
 
-    .gapText {
-        @include r(768) {
-            display: flex;
-            flex-direction: column;
-            margin-right: 3.2rem;
-
-            .subtext.light {
-                order: 3;
-            }
+        .subtext {
+            margin: 0 3.2rem 2.4rem 0;
+            max-width: 60rem;
+            opacity: .8;
         }
     }
 
@@ -613,20 +619,23 @@
         }
     }
 
-    .word-cloud {
-        display: block;
-        margin: 2.4rem auto 0;
-        max-width: 40rem;
+    .nogapContainer {
+        @include shadowbox;
+        background-color: $dolphin;
+        background-image: url(assets/images/grainy.png);
+        background-position: 0 0;
+        background-repeat: repeat;
+        background-size: auto;
+        color: $white;
+        position: relative;
 
-        @include r(600) {
-            margin: -4.8rem -4.8rem -4.8rem 2.4rem;
-        }
         @include r(768) {
-            margin: 0;
+            background-position: 0 0;
+            background-size: auto;
         }
-        @include r(960) {
-            margin: -4.8rem -4.8rem -4.8rem 2.4rem;
-            min-width: 66%;
+
+        h2 {
+            margin-bottom: .4rem;
         }
     }
 
