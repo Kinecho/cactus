@@ -158,8 +158,7 @@ button.close {
     }
 
     &:focus, .focused {
-        outline: 2px solid $green;
-        border: 1px solid $lightGray;
-        background-color: $lightGray;
+        background-color: #EFF4F5;
+        outline: none;
     }
 }
