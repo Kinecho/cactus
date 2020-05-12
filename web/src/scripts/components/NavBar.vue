@@ -336,6 +336,8 @@
             background-color: transparent;
             color: $darkGreen;
             flex-grow: 0;
+            font-size: 1.6rem;
+            font-weight: bold;
             margin: 0;
             padding: 0 0 0 3vw;
 
@@ -346,7 +348,6 @@
                 padding: .6rem 1.2rem;
             }
             @include r(600) {
-                font-size: 1.8rem;
                 margin-left: 3.2vw;
                 padding: .8rem 1.6rem;
             }
