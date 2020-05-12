@@ -66,8 +66,7 @@
             </div>
             <div class="whiteBg" v-else-if="currentScreen === Screen.chooseFocus">
                 <h2>Choose your focus</h2>
-                <p class="subtext">You can choose to reflect in one of the areas below by tapping a cactus. You'll then
-                    receive daily prompts in the chosen area. You can change this&nbsp;later.</p>
+                <p class="subtext">Tap a cactus to continue. Your choice will be used to personalize questions designed to help you focus on what makes you happy.</p>
                 <results :selectable-elements="true" :results="result" chart-id="select_results_chart" @elementSelected="elementSelected" :withAnimation="true"/>
                 <p v-if="selectedElement">You chose <strong>{{selectedElement}}</strong>.</p>
                 <div class="cvActions flexActions">
