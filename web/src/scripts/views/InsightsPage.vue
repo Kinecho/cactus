@@ -48,7 +48,9 @@
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <img v-if="!gapResultsLoading && !gapResults" class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
+                    <dropdown-menu :items="mentalFitnessDropdownLinks" class="dotsBtn"/>
                 </section>
+
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">
                     <div class="flexIt">
                         <h2>Word Bubbles</h2>
@@ -227,6 +229,13 @@
             return [{
                 title: "Retake Assessment",
                 href: `${ PageRoute.CORE_VALUES }?=${ QueryParam.CV_LAUNCH }=true`,
+            }];
+        }
+
+        get mentalFitnessDropdownLinks(): DropdownMenuLink[] {
+            return [{
+                title: "Retake Quiz",
+                href: PageRoute.GAP_ANALYSIS,
             }];
         }
 
@@ -548,6 +557,7 @@
         border-radius: 1.6rem;
         margin-bottom: 4rem;
         padding: 3.2rem;
+        position: relative;
 
         @include r(600) {
             align-items: flex-start;
