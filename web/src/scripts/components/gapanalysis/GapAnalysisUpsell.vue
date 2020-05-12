@@ -177,6 +177,7 @@
             margin-bottom: 2.4rem;
 
             img {
+                flex-shrink: 0;
                 height: 2.8rem;
                 margin: .4rem 1.6rem 0 0;
                 width: 2.8rem;
