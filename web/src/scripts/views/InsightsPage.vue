@@ -451,12 +451,13 @@
         position: relative;
 
         @include r(374) {
-            margin-top: -12rem;
+            margin-top: -16rem;
             transform: translate(60%, 0);
             position: absolute;
         }
         @include r(600) {
             margin-bottom: -4.8rem;
+            margin-top: -12rem;
             position: relative;
             transform: none;
         }
@@ -475,17 +476,26 @@
             bottom: 0;
             content: '';
             display: block;
-            height: 37rem;
+            height: 34rem;
             left: 0;
             position: absolute;
             right: 0;
             top: 0;
-            width: 37rem;
+            width: 34rem;
+
+            @include r(600) {
+                height: 37rem;
+                width: 37rem;
+            }
         }
 
         img {
             position: relative;
-            width: 32rem;
+            width: 29rem;
+
+            @include r(600) {
+                width: 32rem;
+            }
         }
     }
 
