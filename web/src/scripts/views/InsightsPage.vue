@@ -30,7 +30,6 @@
                         </li>
                     </ul>
                 </div>
-
                 <dropdown-menu :items="coreValuesDropdownLinks" class="dotsBtn"/>
             </section>
             <section class="novaluesContainer" v-else>
@@ -43,14 +42,11 @@
             <div class="flexSections">
                 <section class="gapContainer borderContainer">
                     <div class="gapText">
-                        <h2>Gap Analysis</h2>
-                        <p class="subtext">Find the gap between where you spend your time on and what you're committed&nbsp;to.</p>
-                        <router-link :to="gapAssessmentHref">Take the Page Quiz</router-link>
+                        <h2>Mental Fitness</h2>
+                        <p class="subtext">Find the gap between what is important to you and how satisfied you are regarding that area of your&nbsp;life.</p>
                     </div>
-
                     <spinner v-if="gapResultsLoading" message="Loading Results..." :delay="1200"/>
                     <img v-if="!gapResultsLoading && !gapResults" class="gapAnalysisImg" src="assets/images/gapAnalysis.svg" alt="gap analysis example"/>
-
                     <Results v-if="!gapResultsLoading && gapResults" :results="gapResults" :selectable-elements="false"/>
                 </section>
                 <section class="bubblesContainer borderContainer" v-if="hasWordCloud">

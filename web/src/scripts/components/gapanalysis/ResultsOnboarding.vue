@@ -12,7 +12,7 @@
             <p>The <span class="pink">pink hue</span> represents how important the element is to you in your&nbsp;life.</p>
         </div>
         <div class="message" v-else-if="currentIndex === 3" :key="`msg_${currentIndex}`">
-            <p>The <span class="blue">blue hue</span> represents how satisfied you are regarding the focus of that element in your&nbsp;life.</p>
+            <p>The <span class="blue">blue hue</span> represents how satisfied you are regarding that area of your&nbsp;life.</p>
         </div>
         <result-graph :key="currentIndex"
                 :v-touch="swipeHandler"
