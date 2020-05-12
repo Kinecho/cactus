@@ -70,7 +70,6 @@
                 </div>
             </section>
         </div>
-
         <section class="testimonials list">
             <div class="centered">
                 <h2>What people are saying</h2>
@@ -127,11 +126,7 @@
             <section class="email">
                 <h2 class="emailHeader">A reflection a day…</h2>
                 <p class="subtext">Cactus is a different kind of mindfulness.</p>
-                <form id="email-form-bottom" class="lowerForm">
-                    <div class="alert error hidden">Sorry, looks like we have issues.</div>
-                    <input type="email" name="email" placeholder="Enter your email address">
-                    <button type="submit" name="submit" class="email-submit-button">Try It Free</button>
-                </form>
+                <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the Quiz</router-link>
             </section>
         </div>
     </div>
@@ -706,7 +701,7 @@
 
     section.email {
         background-color: $beige;
-        padding: 5.6rem 0 .8rem;
+        padding: 5.6rem 0;
         position: relative;
         z-index: 1;
 
