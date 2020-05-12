@@ -6,11 +6,6 @@
                     <h1>What makes you&nbsp;happy?</h1>
                     <p class="subtext">Questions designed to improve how you think about your work, life, relationships, and emotions</p>
                     <router-link :to="assessmentHref" tag="button" class="quizBtn primary">Take the Quiz</router-link>
-                    <h3 id="tryItHeader" v-if="showTryItHeader">Try it free:</h3>
-                    <div class="app-icons">
-                        <AppStoreIcon :onlyiOS="true" :onlyMobile="true"/>
-                        <PlayStoreIcon :onlyAndroid="true" :onlyMobile="true"/>
-                    </div>
                 </div>
                 <aside class="graphicContainer">
                     <p class="sampleQuestion">What helps you unwind and recuperate?</p>
